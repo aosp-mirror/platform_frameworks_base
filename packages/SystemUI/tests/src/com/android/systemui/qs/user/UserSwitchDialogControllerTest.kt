@@ -20,12 +20,12 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.provider.Settings
 import android.testing.AndroidTestingRunner
-import android.view.View
 import android.widget.Button
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PseudoGridView
@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -63,7 +64,7 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var userDetailViewAdapter: UserDetailView.Adapter
     @Mock
-    private lateinit var launchView: View
+    private lateinit var launchExpandable: Expandable
     @Mock
     private lateinit var neutralButton: Button
     @Mock
@@ -79,7 +80,6 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(launchView.context).thenReturn(mContext)
         `when`(dialog.context).thenReturn(mContext)
 
         controller = UserSwitchDialogController(
@@ -94,32 +94,34 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
 
     @Test
     fun showDialog_callsDialogShow() {
-        controller.showDialog(launchView)
-        verify(dialogLaunchAnimator).showFromView(eq(dialog), eq(launchView), any(), anyBoolean())
+        val launchController = mock<DialogLaunchAnimator.Controller>()
+        `when`(launchExpandable.dialogLaunchController(any())).thenReturn(launchController)
+        controller.showDialog(context, launchExpandable)
+        verify(dialogLaunchAnimator).show(eq(dialog), eq(launchController), anyBoolean())
         verify(uiEventLogger).log(QSUserSwitcherEvent.QS_USER_DETAIL_OPEN)
     }
 
     @Test
     fun dialog_showForAllUsers() {
-        controller.showDialog(launchView)
+        controller.showDialog(context, launchExpandable)
         verify(dialog).setShowForAllUsers(true)
     }
 
     @Test
     fun dialog_cancelOnTouchOutside() {
-        controller.showDialog(launchView)
+        controller.showDialog(context, launchExpandable)
         verify(dialog).setCanceledOnTouchOutside(true)
     }
 
     @Test
     fun adapterAndGridLinked() {
-        controller.showDialog(launchView)
+        controller.showDialog(context, launchExpandable)
         verify(userDetailViewAdapter).linkToViewGroup(any<PseudoGridView>())
     }
 
     @Test
     fun doneButtonLogsCorrectly() {
-        controller.showDialog(launchView)
+        controller.showDialog(context, launchExpandable)
 
         verify(dialog).setPositiveButton(anyInt(), capture(clickCaptor))
 
@@ -132,7 +134,7 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     fun clickSettingsButton_noFalsing_opensSettings() {
         `when`(falsingManager.isFalseTap(anyInt())).thenReturn(false)
 
-        controller.showDialog(launchView)
+        controller.showDialog(context, launchExpandable)
 
         verify(dialog)
             .setNeutralButton(anyInt(), capture(clickCaptor), eq(false) /* dismissOnClick */)
@@ -153,7 +155,7 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     fun clickSettingsButton_Falsing_notOpensSettings() {
         `when`(falsingManager.isFalseTap(anyInt())).thenReturn(true)
 
-        controller.showDialog(launchView)
+        controller.showDialog(context, launchExpandable)
 
         verify(dialog)
             .setNeutralButton(anyInt(), capture(clickCaptor), eq(false) /* dismissOnClick */)

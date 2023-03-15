@@ -51,7 +51,7 @@ public final class DeviceStateManagerGlobal {
      * connection with the device state service couldn't be established.
      */
     @Nullable
-    static DeviceStateManagerGlobal getInstance() {
+    public static DeviceStateManagerGlobal getInstance() {
         synchronized (DeviceStateManagerGlobal.class) {
             if (sInstance == null) {
                 IBinder b = ServiceManager.getService(Context.DEVICE_STATE_SERVICE);
@@ -256,6 +256,22 @@ public final class DeviceStateManagerGlobal {
             if (indexToRemove != -1) {
                 mCallbacks.remove(indexToRemove);
             }
+        }
+    }
+
+    /**
+     * Provides notification to the system server that a device state feature overlay
+     * was dismissed. This should only be called from the {@link android.app.Activity} that
+     * was showing the overlay corresponding to the feature.
+     *
+     * Validation of there being an overlay visible and pending state request is handled on the
+     * system server.
+     */
+    public void onStateRequestOverlayDismissed(boolean shouldCancelRequest) {
+        try {
+            mDeviceStateManager.onStateRequestOverlayDismissed(shouldCancelRequest);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 

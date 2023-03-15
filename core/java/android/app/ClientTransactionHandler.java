@@ -109,7 +109,8 @@ public abstract class ClientTransactionHandler {
      * @param reason Reason for performing this operation.
      */
     public abstract void handleResumeActivity(@NonNull ActivityClientRecord r,
-            boolean finalStateRequest, boolean isForward, String reason);
+            boolean finalStateRequest, boolean isForward, boolean shouldSendCompatFakeFocus,
+            String reason);
 
     /**
      * Notify the activity about top resumed state change.
@@ -139,6 +140,9 @@ public abstract class ClientTransactionHandler {
 
     /** Restart the activity after it was stopped. */
     public abstract void performRestartActivity(@NonNull ActivityClientRecord r, boolean start);
+
+     /** Report that activity was refreshed to server. */
+    public abstract void reportRefresh(@NonNull ActivityClientRecord r);
 
     /** Set pending activity configuration in case it will be updated by other transaction item. */
     public abstract void updatePendingActivityConfiguration(@NonNull IBinder token,

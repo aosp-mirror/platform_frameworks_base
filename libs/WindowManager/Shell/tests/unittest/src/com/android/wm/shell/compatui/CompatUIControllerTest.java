@@ -51,6 +51,7 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayInsetsController.OnInsetsChangedListener;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
@@ -93,6 +94,7 @@ public class CompatUIControllerTest extends ShellTestCase {
     private @Mock Lazy<Transitions> mMockTransitionsLazy;
     private @Mock CompatUIWindowManager mMockCompatLayout;
     private @Mock LetterboxEduWindowManager mMockLetterboxEduLayout;
+    private @Mock DockStateReader mDockStateReader;
 
     @Captor
     ArgumentCaptor<OnInsetsChangedListener> mOnInsetsChangedListenerCaptor;
@@ -113,7 +115,7 @@ public class CompatUIControllerTest extends ShellTestCase {
         mShellInit = spy(new ShellInit(mMockExecutor));
         mController = new CompatUIController(mContext, mShellInit, mMockShellController,
                 mMockDisplayController, mMockDisplayInsetsController, mMockImeController,
-                mMockSyncQueue, mMockExecutor, mMockTransitionsLazy) {
+                mMockSyncQueue, mMockExecutor, mMockTransitionsLazy, mDockStateReader) {
             @Override
             CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
                     ShellTaskOrganizer.TaskListener taskListener) {

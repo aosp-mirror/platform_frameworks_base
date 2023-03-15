@@ -19,9 +19,11 @@ package com.android.keyguard
 import android.content.Context
 import android.view.ViewGroup
 import com.android.systemui.R
+import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator
-import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.LEFT
-import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.RIGHT
+import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.END
+import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.START
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.ViewIdToTranslate
 import com.android.systemui.unfold.SysUIUnfoldScope
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
@@ -36,26 +38,29 @@ class KeyguardUnfoldTransition
 @Inject
 constructor(
     private val context: Context,
-    unfoldProgressProvider: NaturalRotationUnfoldProgressProvider
+    statusBarStateController: StatusBarStateController,
+    unfoldProgressProvider: NaturalRotationUnfoldProgressProvider,
 ) {
 
     /** Certain views only need to move if they are not currently centered */
     var statusViewCentered = false
 
-    private val filterSplitShadeOnly = { !statusViewCentered }
-    private val filterNever = { true }
+    private val filterKeyguardAndSplitShadeOnly: () -> Boolean = {
+        statusBarStateController.getState() == KEYGUARD && !statusViewCentered }
+    private val filterKeyguard: () -> Boolean = { statusBarStateController.getState() == KEYGUARD }
 
     private val translateAnimator by lazy {
         UnfoldConstantTranslateAnimator(
             viewsIdToTranslate =
                 setOf(
-                    ViewIdToTranslate(R.id.keyguard_status_area, LEFT, filterNever),
-                    ViewIdToTranslate(R.id.lockscreen_clock_view_large, LEFT, filterSplitShadeOnly),
-                    ViewIdToTranslate(R.id.lockscreen_clock_view, LEFT, filterNever),
+                    ViewIdToTranslate(R.id.keyguard_status_area, START, filterKeyguard),
                     ViewIdToTranslate(
-                        R.id.notification_stack_scroller, RIGHT, filterSplitShadeOnly),
-                    ViewIdToTranslate(R.id.start_button, LEFT, filterNever),
-                    ViewIdToTranslate(R.id.end_button, RIGHT, filterNever)),
+                        R.id.lockscreen_clock_view_large, START, filterKeyguardAndSplitShadeOnly),
+                    ViewIdToTranslate(R.id.lockscreen_clock_view, START, filterKeyguard),
+                    ViewIdToTranslate(
+                        R.id.notification_stack_scroller, END, filterKeyguardAndSplitShadeOnly),
+                    ViewIdToTranslate(R.id.start_button, START, filterKeyguard),
+                    ViewIdToTranslate(R.id.end_button, END, filterKeyguard)),
             progressProvider = unfoldProgressProvider)
     }
 

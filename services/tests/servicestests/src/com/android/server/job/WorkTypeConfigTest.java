@@ -36,7 +36,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.job.JobConcurrencyManager.WorkTypeConfig;
 
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -59,30 +58,6 @@ public class WorkTypeConfigTest {
     private static final String KEY_MIN_BGUSER_IMPORTANT = "concurrency_min_bguser_important_test";
     private static final String KEY_MIN_BGUSER = "concurrency_min_bguser_test";
 
-    @After
-    public void tearDown() throws Exception {
-        resetConfig();
-    }
-
-    private void resetConfig() {
-        // DeviceConfig.resetToDefaults() doesn't work here. Need to reset constants manually.
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_TOTAL, null, false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_TOP, null, false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_FGS, null, false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_EJ, null, false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_BG, null, false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
-                KEY_MAX_BGUSER_IMPORTANT, null, false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MAX_BGUSER, null, false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_TOP, null, false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_FGS, null, false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_EJ, null, false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_BG, null, false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
-                KEY_MIN_BGUSER_IMPORTANT, null, false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_JOB_SCHEDULER, KEY_MIN_BGUSER, null, false);
-    }
-
     private void check(@Nullable DeviceConfig.Properties config,
             int defaultTotal,
             @NonNull List<Pair<Integer, Integer>> defaultMin,
@@ -90,10 +65,6 @@ public class WorkTypeConfigTest {
             boolean expectedValid, int expectedTotal,
             @NonNull List<Pair<Integer, Integer>> expectedMinLimits,
             @NonNull List<Pair<Integer, Integer>> expectedMaxLimits) throws Exception {
-        resetConfig();
-        if (config != null) {
-            DeviceConfig.setProperties(config);
-        }
 
         final WorkTypeConfig counts;
         try {
@@ -112,7 +83,9 @@ public class WorkTypeConfigTest {
             }
         }
 
-        counts.update(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER));
+        if (config != null) {
+            counts.update(config);
+        }
 
         assertEquals(expectedTotal, counts.getMaxTotal());
         for (Pair<Integer, Integer> min : expectedMinLimits) {

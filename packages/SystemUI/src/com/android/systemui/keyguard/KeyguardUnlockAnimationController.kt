@@ -23,6 +23,7 @@ import android.content.Context
 import android.graphics.Matrix
 import android.graphics.Rect
 import android.os.Handler
+import android.os.PowerManager
 import android.os.RemoteException
 import android.util.Log
 import android.view.RemoteAnimationTarget
@@ -145,7 +146,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
     private val featureFlags: FeatureFlags,
     private val biometricUnlockControllerLazy: Lazy<BiometricUnlockController>,
     private val statusBarStateController: SysuiStatusBarStateController,
-    private val notificationShadeWindowController: NotificationShadeWindowController
+    private val notificationShadeWindowController: NotificationShadeWindowController,
+    private val powerManager: PowerManager
 ) : KeyguardStateController.Callback, ISysuiUnlockAnimationController.Stub() {
 
     interface KeyguardUnlockAnimationListener {
@@ -321,6 +323,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
                     // and unlock the device as well as hiding the surface.
                     if (surfaceBehindAlpha == 0f) {
                         Log.d(TAG, "surfaceBehindAlphaAnimator#onAnimationEnd")
+                        surfaceBehindRemoteAnimationTargets = null
                         keyguardViewMediator.get().finishSurfaceBehindRemoteAnimation(
                             false /* cancelled */)
                     } else {
@@ -343,7 +346,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 override fun onAnimationEnd(animation: Animator) {
                     Log.d(TAG, "surfaceBehindEntryAnimator#onAnimationEnd")
                     playingCannedUnlockAnimation = false
-                    keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(
+                    keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                         false /* cancelled */
                     )
                 }
@@ -578,7 +581,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
             biometricUnlockControllerLazy.get().isWakeAndUnlock -> {
                 Log.d(TAG, "playCannedUnlockAnimation, isWakeAndUnlock")
                 setSurfaceBehindAppearAmount(1f)
-                keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(
+                keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                     false /* cancelled */)
             }
 
@@ -626,7 +629,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 return@postDelayed
             }
 
-            keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(
+            keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                 false /* cancelled */)
         }, CANNED_UNLOCK_START_DELAY)
     }
@@ -666,7 +669,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
             return
         }
 
-        if (keyguardViewController.isShowing && !playingCannedUnlockAnimation) {
+        if (keyguardStateController.isShowing && !playingCannedUnlockAnimation) {
             showOrHideSurfaceIfDismissAmountThresholdsReached()
 
             // If the surface is visible or it's about to be, start updating its appearance to
@@ -726,7 +729,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
     private fun finishKeyguardExitRemoteAnimationIfReachThreshold() {
         // no-op if keyguard is not showing or animation is not enabled.
         if (!KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation ||
-                !keyguardViewController.isShowing) {
+                !keyguardStateController.isShowing) {
             return
         }
 
@@ -744,7 +747,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
                         !keyguardStateController.isFlingingToDismissKeyguardDuringSwipeGesture &&
                         dismissAmount >= DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD)) {
             setSurfaceBehindAppearAmount(1f)
-            keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(false /* cancelled */)
+            keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
+                    false /* cancelled */)
         }
     }
 
@@ -782,10 +786,15 @@ class KeyguardUnlockAnimationController @Inject constructor(
                     surfaceHeight * SURFACE_BEHIND_SCALE_PIVOT_Y
             )
 
-            // If we're snapping the keyguard back, immediately begin fading it out.
-            val animationAlpha =
-                    if (keyguardStateController.isSnappingKeyguardBackAfterSwipe) amount
-                    else surfaceBehindAlpha
+
+            val animationAlpha = when {
+                // If we're snapping the keyguard back, immediately begin fading it out.
+                keyguardStateController.isSnappingKeyguardBackAfterSwipe -> amount
+                // If the screen has turned back off, the unlock animation is going to be cancelled,
+                // so set the surface alpha to 0f so it's no longer visible.
+                !powerManager.isInteractive -> 0f
+                else -> surfaceBehindAlpha
+            }
 
             // SyncRtSurfaceTransactionApplier cannot apply transaction when the target view is
             // unable to draw
@@ -825,11 +834,15 @@ class KeyguardUnlockAnimationController @Inject constructor(
         // Make sure we made the surface behind fully visible, just in case. It should already be
         // fully visible. The exit animation is finished, and we should not hold the leash anymore,
         // so forcing it to 1f.
-        surfaceBehindAlphaAnimator.cancel()
-        surfaceBehindEntryAnimator.cancel()
         surfaceBehindAlpha = 1f
         setSurfaceBehindAppearAmount(1f)
-        launcherUnlockController?.setUnlockAmount(1f, false /* forceIfAnimating */)
+        surfaceBehindAlphaAnimator.cancel()
+        surfaceBehindEntryAnimator.cancel()
+        try {
+            launcherUnlockController?.setUnlockAmount(1f, false /* forceIfAnimating */)
+        } catch (e: RemoteException) {
+            Log.e(TAG, "Remote exception in notifyFinishedKeyguardExitAnimation", e)
+        }
 
         // That target is no longer valid since the animation finished, null it out.
         surfaceBehindRemoteAnimationTargets = null
@@ -849,7 +862,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * animation.
      */
     fun hideKeyguardViewAfterRemoteAnimation() {
-        if (keyguardViewController.isShowing) {
+        if (keyguardStateController.isShowing) {
             // Hide the keyguard, with no fade out since we animated it away during the unlock.
 
             keyguardViewController.hide(

@@ -777,12 +777,6 @@ public interface WindowManager extends ViewManager {
     int TAKE_SCREENSHOT_FULLSCREEN = 1;
 
     /**
-     * Invoke screenshot flow allowing the user to select a region.
-     * @hide
-     */
-    int TAKE_SCREENSHOT_SELECTED_REGION = 2;
-
-    /**
      * Invoke screenshot flow with an image provided by the caller.
      * @hide
      */
@@ -794,7 +788,6 @@ public interface WindowManager extends ViewManager {
      * @hide
      */
     @IntDef({TAKE_SCREENSHOT_FULLSCREEN,
-            TAKE_SCREENSHOT_SELECTED_REGION,
             TAKE_SCREENSHOT_PROVIDED_IMAGE})
     @interface ScreenshotType {}
 
@@ -819,6 +812,45 @@ public interface WindowManager extends ViewManager {
         int SCREENSHOT_OTHER = 5;
         int SCREENSHOT_VENDOR_GESTURE = 6;
     }
+
+    /**
+     * Activity level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for an app to inform the system that the activity can be opted-in or opted-out
+     * from the compatibility treatment that avoids {@link
+     * android.app.Activity#setRequestedOrientation} loops. The loop can be trigerred by
+     * ignoreRequestedOrientation display setting enabled on the device or by the landscape natural
+     * orientation of the device.
+     *
+     * <p>The treatment is disabled by default but device manufacturers can enable the treatment
+     * using their discretion to improve display compatibility.
+     *
+     * <p>With this property set to {@code true}, the system could ignore {@link
+     * android.app.Activity#setRequestedOrientation} call from an app if one of the following
+     * conditions are true:
+     * <ul>
+     *     <li>Activity is relaunching due to the previous {@link
+     *     android.app.Activity#setRequestedOrientation} call.
+     *     <li>Camera compatibility force rotation treatment is active for the package.
+     * </ul>
+     *
+     * <p>Setting this property to {@code false} informs the system that the activity must be
+     * opted-out from the compatibility treatment even if the device manufacturer has opted the app
+     * into the treatment.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;activity&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION"
+     *     android:value="true|false"/&gt;
+     * &lt;/activity&gt;
+     * </pre>
+     *
+     * @hide
+     */
+    // TODO(b/263984287): Make this public API.
+    String PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION =
+            "android.window.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION";
 
     /**
      * @hide

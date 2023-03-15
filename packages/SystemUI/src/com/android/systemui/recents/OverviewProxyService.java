@@ -25,15 +25,6 @@ import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_RECENT_TASKS;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_BACK_ANIMATION;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_DESKTOP_MODE;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_FLOATING_TASKS;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_ONE_HANDED;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_PIP;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_SPLIT_SCREEN;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_STARTING_WINDOW;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER;
@@ -73,6 +64,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
 
@@ -86,8 +78,8 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.Dumpable;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -98,48 +90,36 @@ import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
-import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.recents.model.Task;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
-import com.android.wm.shell.back.BackAnimation;
-import com.android.wm.shell.desktopmode.DesktopMode;
-import com.android.wm.shell.floating.FloatingTasks;
-import com.android.wm.shell.onehanded.OneHanded;
-import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.pip.PipAnimationController;
-import com.android.wm.shell.recents.RecentTasks;
-import com.android.wm.shell.splitscreen.SplitScreen;
-import com.android.wm.shell.startingsurface.StartingSurface;
-import com.android.wm.shell.transition.ShellTransitions;
+import com.android.wm.shell.sysui.ShellInterface;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiConsumer;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
 import dagger.Lazy;
 
-
 /**
  * Class to send information from overview to launcher with a binder.
  */
 @SysUISingleton
-public class OverviewProxyService extends CurrentUserTracker implements
-        CallbackController<OverviewProxyListener>, NavigationModeController.ModeChangedListener,
-        Dumpable {
+public class OverviewProxyService implements CallbackController<OverviewProxyListener>,
+        NavigationModeController.ModeChangedListener, Dumpable {
 
     private static final String ACTION_QUICKSTEP = "android.intent.action.QUICKSTEP_SERVICE";
 
@@ -151,10 +131,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private static final long MAX_BACKOFF_MILLIS = 10 * 60 * 1000;
 
     private final Context mContext;
-    private final Optional<Pip> mPipOptional;
+    private final Executor mMainExecutor;
+    private final ShellInterface mShellInterface;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
-    private final Optional<SplitScreen> mSplitScreenOptional;
-    private final Optional<FloatingTasks> mFloatingTasksOptional;
     private SysUiState mSysUiState;
     private final Handler mHandler;
     private final Lazy<NavigationBarController> mNavBarControllerLazy;
@@ -164,17 +143,13 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final List<OverviewProxyListener> mConnectionCallbacks = new ArrayList<>();
     private final Intent mQuickStepIntent;
     private final ScreenshotHelper mScreenshotHelper;
-    private final Optional<OneHanded> mOneHandedOptional;
     private final CommandQueue mCommandQueue;
-    private final ShellTransitions mShellTransitions;
-    private final Optional<StartingSurface> mStartingSurface;
+    private final UserTracker mUserTracker;
     private final KeyguardUnlockAnimationController mSysuiUnlockAnimationController;
-    private final Optional<RecentTasks> mRecentTasks;
-    private final Optional<BackAnimation> mBackAnimation;
-    private final Optional<DesktopMode> mDesktopModeOptional;
     private final UiEventLogger mUiEventLogger;
 
     private Region mActiveNavBarRegion;
+    private SurfaceControl mNavigationBarSurface;
 
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
@@ -216,7 +191,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 // TODO move this logic to message queue
                 mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces -> {
                     if (event.getActionMasked() == ACTION_DOWN) {
-                        centralSurfaces.getPanelController().startExpandLatencyTracking();
+                        centralSurfaces.getNotificationPanelViewController()
+                                        .startExpandLatencyTracking();
                     }
                     mHandler.post(() -> {
                         int action = event.getActionMasked();
@@ -243,17 +219,15 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
 
         @Override
-        public void onBackPressed() throws RemoteException {
+        public void onBackPressed() {
             verifyCallerAndClearCallingIdentityPostMain("onBackPressed", () -> {
                 sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
                 sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
-
-                notifyBackAction(true, -1, -1, true, false);
             });
         }
 
         @Override
-        public void onImeSwitcherPressed() throws RemoteException {
+        public void onImeSwitcherPressed() {
             // TODO(b/204901476) We're intentionally using DEFAULT_DISPLAY for now since
             // Launcher/Taskbar isn't display aware.
             mContext.getSystemService(InputMethodManager.class)
@@ -339,20 +313,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
                                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         mContext.startActivityAsUser(intent, UserHandle.CURRENT);
                     });
-        }
-
-        @Override
-        public void notifySwipeToHomeFinished() {
-            verifyCallerAndClearCallingIdentity("notifySwipeToHomeFinished", () ->
-                    mPipOptional.ifPresent(
-                            pip -> pip.setPinnedStackAnimationType(
-                                    PipAnimationController.ANIM_TYPE_ALPHA)));
-        }
-
-        @Override
-        public void notifySwipeUpGestureStarted() {
-            verifyCallerAndClearCallingIdentityPostMain("notifySwipeUpGestureStarted", () ->
-                    notifySwipeUpGestureStartedInternal());
         }
 
         @Override
@@ -457,43 +417,17 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 return;
             }
 
-            mCurrentBoundedUserId = getCurrentUserId();
+            mCurrentBoundedUserId = mUserTracker.getUserId();
             mOverviewProxy = IOverviewProxy.Stub.asInterface(service);
 
             Bundle params = new Bundle();
             params.putBinder(KEY_EXTRA_SYSUI_PROXY, mSysUiProxy.asBinder());
             params.putFloat(KEY_EXTRA_WINDOW_CORNER_RADIUS, mWindowCornerRadius);
             params.putBoolean(KEY_EXTRA_SUPPORTS_WINDOW_CORNERS, mSupportsRoundedCornersOnWindows);
-
-            mPipOptional.ifPresent((pip) -> params.putBinder(
-                    KEY_EXTRA_SHELL_PIP,
-                    pip.createExternalInterface().asBinder()));
-            mSplitScreenOptional.ifPresent((splitscreen) -> params.putBinder(
-                    KEY_EXTRA_SHELL_SPLIT_SCREEN,
-                    splitscreen.createExternalInterface().asBinder()));
-            mFloatingTasksOptional.ifPresent(floatingTasks -> params.putBinder(
-                    KEY_EXTRA_SHELL_FLOATING_TASKS,
-                    floatingTasks.createExternalInterface().asBinder()));
-            mOneHandedOptional.ifPresent((onehanded) -> params.putBinder(
-                    KEY_EXTRA_SHELL_ONE_HANDED,
-                    onehanded.createExternalInterface().asBinder()));
-            params.putBinder(KEY_EXTRA_SHELL_SHELL_TRANSITIONS,
-                    mShellTransitions.createExternalInterface().asBinder());
-            mStartingSurface.ifPresent((startingwindow) -> params.putBinder(
-                    KEY_EXTRA_SHELL_STARTING_WINDOW,
-                    startingwindow.createExternalInterface().asBinder()));
-            params.putBinder(
-                    KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER,
+            params.putBinder(KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER,
                     mSysuiUnlockAnimationController.asBinder());
-            mRecentTasks.ifPresent(recentTasks -> params.putBinder(
-                    KEY_EXTRA_RECENT_TASKS,
-                    recentTasks.createExternalInterface().asBinder()));
-            mBackAnimation.ifPresent((backAnimation) -> params.putBinder(
-                    KEY_EXTRA_SHELL_BACK_ANIMATION,
-                    backAnimation.createExternalInterface().asBinder()));
-            mDesktopModeOptional.ifPresent((desktopMode -> params.putBinder(
-                    KEY_EXTRA_SHELL_DESKTOP_MODE,
-                    desktopMode.createExternalInterface().asBinder())));
+            // Add all the interfaces exposed by the shell
+            mShellInterface.createExternalInterfaces(params);
 
             try {
                 Log.d(TAG_OPS, "OverviewProxyService connected, initializing overview proxy");
@@ -503,6 +437,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 Log.e(TAG_OPS, "Failed to call onInitialize()", e);
             }
             dispatchNavButtonBounds();
+            dispatchNavigationBarSurface();
 
             // Force-update the systemui state flags
             updateSystemUiStateFlags();
@@ -534,8 +469,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
     };
 
     private final StatusBarWindowCallback mStatusBarWindowCallback = this::onStatusBarStateChanged;
-    private final BiConsumer<Rect, Rect> mSplitScreenBoundsChangeListener =
-            this::notifySplitScreenBoundsChanged;
 
     // This is the death handler for the binder from the launcher service
     private final IBinder.DeathRecipient mOverviewServiceDeathRcpt
@@ -565,41 +498,44 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     };
 
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    mConnectionBackoffAttempts = 0;
+                    internalConnectToCurrentUser();
+                }
+            };
+
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
-    public OverviewProxyService(Context context, CommandQueue commandQueue,
+    public OverviewProxyService(Context context,
+            @Main Executor mainExecutor,
+            CommandQueue commandQueue,
+            ShellInterface shellInterface,
             Lazy<NavigationBarController> navBarControllerLazy,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
-            Optional<Pip> pipOptional,
-            Optional<SplitScreen> splitScreenOptional,
-            Optional<FloatingTasks> floatingTasksOptional,
-            Optional<OneHanded> oneHandedOptional,
-            Optional<RecentTasks> recentTasks,
-            Optional<BackAnimation> backAnimation,
-            Optional<StartingSurface> startingSurface,
-            Optional<DesktopMode> desktopModeOptional,
-            BroadcastDispatcher broadcastDispatcher,
-            ShellTransitions shellTransitions,
+            UserTracker userTracker,
             ScreenLifecycle screenLifecycle,
             UiEventLogger uiEventLogger,
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
             AssistUtils assistUtils,
             DumpManager dumpManager) {
-        super(broadcastDispatcher);
-
         // b/241601880: This component shouldn't be running for a non-primary user
         if (!Process.myUserHandle().equals(UserHandle.SYSTEM)) {
             Log.e(TAG_OPS, "Unexpected initialization for non-primary user", new Throwable());
         }
 
         mContext = context;
-        mPipOptional = pipOptional;
+        mMainExecutor = mainExecutor;
+        mShellInterface = shellInterface;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mHandler = new Handler();
         mNavBarControllerLazy = navBarControllerLazy;
         mStatusBarWinController = statusBarWinController;
+        mUserTracker = userTracker;
         mConnectionBackoffAttempts = 0;
         mRecentsComponentName = ComponentName.unflattenFromString(context.getString(
                 com.android.internal.R.string.config_recentsComponentName));
@@ -610,11 +546,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 .supportsRoundedCornersOnWindows(mContext.getResources());
         mSysUiState = sysUiState;
         mSysUiState.addCallback(this::notifySystemUiStateFlags);
-        mOneHandedOptional = oneHandedOptional;
-        mShellTransitions = shellTransitions;
-        mRecentTasks = recentTasks;
-        mBackAnimation = backAnimation;
-        mDesktopModeOptional = desktopModeOptional;
         mUiEventLogger = uiEventLogger;
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
@@ -634,38 +565,40 @@ public class OverviewProxyService extends CurrentUserTracker implements
         statusBarWinController.registerCallback(mStatusBarWindowCallback);
         mScreenshotHelper = new ScreenshotHelper(context);
 
-        // Listen for tracing state changes
         commandQueue.addCallback(new CommandQueue.Callbacks() {
+
+            // Listen for tracing state changes
             @Override
             public void onTracingStateChanged(boolean enabled) {
                 mSysUiState.setFlag(SYSUI_STATE_TRACING_ENABLED, enabled)
                         .commitUpdate(mContext.getDisplayId());
             }
+
+            @Override
+            public void enterStageSplitFromRunningApp(boolean leftOrTop) {
+                if (mOverviewProxy != null) {
+                    try {
+                        mOverviewProxy.enterStageSplitFromRunningApp(leftOrTop);
+                    } catch (RemoteException e) {
+                        Log.w(TAG_OPS, "Unable to enter stage split from the current running app");
+                    }
+                }
+            }
         });
         mCommandQueue = commandQueue;
 
-        mSplitScreenOptional = splitScreenOptional;
-        mFloatingTasksOptional = floatingTasksOptional;
-
         // Listen for user setup
-        startTracking();
+        mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
 
         screenLifecycle.addObserver(mLifecycleObserver);
 
         // Connect to the service
         updateEnabledState();
         startConnectionToCurrentUser();
-        mStartingSurface = startingSurface;
         mSysuiUnlockAnimationController = sysuiUnlockAnimationController;
 
         // Listen for assistant changes
         assistUtils.registerVoiceInteractionSessionListener(mVoiceInteractionSessionListener);
-    }
-
-    @Override
-    public void onUserSwitched(int newUserId) {
-        mConnectionBackoffAttempts = 0;
-        internalConnectToCurrentUser();
     }
 
     public void onVoiceSessionWindowVisibilityChanged(boolean visible) {
@@ -673,11 +606,18 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 .commitUpdate(mContext.getDisplayId());
     }
 
-    public void notifyBackAction(boolean completed, int downX, int downY, boolean isButton,
-            boolean gestureSwipeLeft) {
+    /**
+     * Called when the navigation bar surface is created or changed
+     */
+    public void onNavigationBarSurfaceChanged(SurfaceControl navbarSurface) {
+        mNavigationBarSurface = navbarSurface;
+        dispatchNavigationBarSurface();
+    }
+
+    private void dispatchNavigationBarSurface() {
         try {
             if (mOverviewProxy != null) {
-                mOverviewProxy.onBackAction(completed, downX, downY, isButton, gestureSwipeLeft);
+                mOverviewProxy.onNavigationBarSurface(mNavigationBarSurface);
             }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to notify back action", e);
@@ -690,7 +630,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         final NavigationBarView navBarView =
                 mNavBarControllerLazy.get().getNavigationBarView(mContext.getDisplayId());
         final NotificationPanelViewController panelController =
-                mCentralSurfacesOptionalLazy.get().get().getPanelController();
+                mCentralSurfacesOptionalLazy.get().get().getNotificationPanelViewController();
         if (SysUiState.DEBUG) {
             Log.d(TAG_OPS, "Updating sysui state flags: navBarFragment=" + navBarFragment
                     + " navBarView=" + navBarView + " panelController=" + panelController);
@@ -788,7 +728,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             mBound = mContext.bindServiceAsUser(launcherServiceIntent,
                     mOverviewServiceConnection,
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
-                    UserHandle.of(getCurrentUserId()));
+                    UserHandle.of(mUserTracker.getUserId()));
         } catch (SecurityException e) {
             Log.e(TAG_OPS, "Unable to bind because of security error", e);
         }
@@ -876,21 +816,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
-    public void notifyQuickStepStarted() {
-        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-            mConnectionCallbacks.get(i).onQuickStepStarted();
-        }
-    }
-
     private void notifyPrioritizedRotationInternal(@Surface.Rotation int rotation) {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
             mConnectionCallbacks.get(i).onPrioritizedRotation(rotation);
-        }
-    }
-
-    public void notifyQuickScrubStarted() {
-        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-            mConnectionCallbacks.get(i).onQuickScrubStarted();
         }
     }
 
@@ -912,12 +840,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
-    private void notifySwipeUpGestureStartedInternal() {
-        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-            mConnectionCallbacks.get(i).onSwipeUpGestureStarted();
-        }
-    }
-
     public void notifyAssistantVisibilityChanged(float visibility) {
         try {
             if (mOverviewProxy != null) {
@@ -927,26 +849,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
             }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to call notifyAssistantVisibilityChanged()", e);
-        }
-    }
-
-    /**
-     * Notifies the Launcher of split screen size changes
-     *
-     * @param secondaryWindowBounds Bounds of the secondary window including the insets
-     * @param secondaryWindowInsets stable insets received by the secondary window
-     */
-    public void notifySplitScreenBoundsChanged(
-            Rect secondaryWindowBounds, Rect secondaryWindowInsets) {
-        try {
-            if (mOverviewProxy != null) {
-                mOverviewProxy.onSplitScreenSecondaryBoundsChanged(
-                        secondaryWindowBounds, secondaryWindowInsets);
-            } else {
-                Log.e(TAG_OPS, "Failed to get overview proxy for split screen bounds.");
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG_OPS, "Failed to call onSplitScreenSecondaryBoundsChanged()", e);
         }
     }
 
@@ -987,7 +889,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
          * Notifies the Launcher that screen is starting to turn on.
          */
         @Override
-        public void onScreenTurningOn(@NonNull Runnable ignored) {
+        public void onScreenTurningOn() {
             try {
                 if (mOverviewProxy != null) {
                     mOverviewProxy.onScreenTurningOn();
@@ -1055,7 +957,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     }
 
     private void updateEnabledState() {
-        final int currentUser = ActivityManagerWrapper.getInstance().getCurrentUserId();
+        final int currentUser = mUserTracker.getUserId();
         mIsEnabled = mContext.getPackageManager().resolveServiceAsUser(mQuickStepIntent,
                 MATCH_SYSTEM_ONLY, currentUser) != null;
     }
@@ -1081,23 +983,20 @@ public class OverviewProxyService extends CurrentUserTracker implements
         pw.print("  mWindowCornerRadius="); pw.println(mWindowCornerRadius);
         pw.print("  mSupportsRoundedCornersOnWindows="); pw.println(mSupportsRoundedCornersOnWindows);
         pw.print("  mActiveNavBarRegion="); pw.println(mActiveNavBarRegion);
+        pw.print("  mNavigationBarSurface="); pw.println(mNavigationBarSurface);
         pw.print("  mNavBarMode="); pw.println(mNavBarMode);
         mSysUiState.dump(pw, args);
     }
 
     public interface OverviewProxyListener {
         default void onConnectionChanged(boolean isConnected) {}
-        default void onQuickStepStarted() {}
-        default void onSwipeUpGestureStarted() {}
         default void onPrioritizedRotation(@Surface.Rotation int rotation) {}
         default void onOverviewShown(boolean fromHome) {}
-        default void onQuickScrubStarted() {}
         /** Notify the recents app (overview) is started by 3-button navigation. */
         default void onToggleRecentApps() {}
         default void onHomeRotationEnabled(boolean enabled) {}
         default void onTaskbarStatusUpdated(boolean visible, boolean stashed) {}
         default void onTaskbarAutohideSuspend(boolean suspend) {}
-        default void onSystemUiStateChanged(int sysuiStateFlags) {}
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
         default void onAssistantGestureCompletion(float velocity) {}
         default void startAssistant(Bundle bundle) {}

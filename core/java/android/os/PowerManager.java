@@ -345,6 +345,39 @@ public final class PowerManager {
     public static final int USER_ACTIVITY_EVENT_DEVICE_STATE = 6;
 
     /**
+     * @hide
+     */
+    @IntDef(prefix = { "USER_ACTIVITY_EVENT_" }, value = {
+            USER_ACTIVITY_EVENT_OTHER,
+            USER_ACTIVITY_EVENT_BUTTON,
+            USER_ACTIVITY_EVENT_TOUCH,
+            USER_ACTIVITY_EVENT_ACCESSIBILITY,
+            USER_ACTIVITY_EVENT_ATTENTION,
+            USER_ACTIVITY_EVENT_FACE_DOWN,
+            USER_ACTIVITY_EVENT_DEVICE_STATE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UserActivityEvent{}
+
+    /**
+     *
+     * Convert the user activity event to a string for debugging purposes.
+     * @hide
+     */
+    public static String userActivityEventToString(@UserActivityEvent int userActivityEvent) {
+        switch (userActivityEvent) {
+            case USER_ACTIVITY_EVENT_OTHER: return "other";
+            case USER_ACTIVITY_EVENT_BUTTON: return "button";
+            case USER_ACTIVITY_EVENT_TOUCH: return "touch";
+            case USER_ACTIVITY_EVENT_ACCESSIBILITY: return "accessibility";
+            case USER_ACTIVITY_EVENT_ATTENTION: return "attention";
+            case USER_ACTIVITY_EVENT_FACE_DOWN: return "faceDown";
+            case USER_ACTIVITY_EVENT_DEVICE_STATE: return "deviceState";
+            default: return Integer.toString(userActivityEvent);
+        }
+    }
+
+    /**
      * User activity flag: If already dimmed, extend the dim timeout
      * but do not brighten.  This flag is useful for keeping the screen on
      * a little longer without causing a visible change such as when
@@ -490,6 +523,13 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_FLAG_NO_DOZE = 1 << 0;
 
     /**
+     * Go to sleep flag: Sleep softly, go to sleep only if there's no wakelock explicitly keeping
+     * the device awake.
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_FLAG_SOFT_SLEEP = 1 << 1;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "BRIGHTNESS_CONSTRAINT_TYPE" }, value = {
@@ -568,7 +608,10 @@ public final class PowerManager {
             WAKE_REASON_DISPLAY_GROUP_ADDED,
             WAKE_REASON_DISPLAY_GROUP_TURNED_ON,
             WAKE_REASON_UNFOLD_DEVICE,
-            WAKE_REASON_DREAM_FINISHED
+            WAKE_REASON_DREAM_FINISHED,
+            WAKE_REASON_TAP,
+            WAKE_REASON_LIFT,
+            WAKE_REASON_BIOMETRIC,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface WakeReason{}
@@ -620,8 +663,9 @@ public final class PowerManager {
     public static final int WAKE_REASON_PLUGGED_IN = 3;
 
     /**
-     * Wake up reason code: Waking up due to a user performed gesture (e.g. double tapping on the
-     * screen).
+     * Wake up reason code: Waking up due to a user performed gesture. This includes user
+     * interactions with UI on the screen such as the notification shade. This does not include
+     * {@link WAKE_REASON_TAP} or {@link WAKE_REASON_LIFT}.
      * @hide
      */
     public static final int WAKE_REASON_GESTURE = 4;
@@ -683,6 +727,26 @@ public final class PowerManager {
     public static final int WAKE_REASON_DREAM_FINISHED = 13;
 
     /**
+     * Wake up reason code: Waking up due to the user single or double tapping on the screen. This
+     * wake reason is used when the user is not tapping on a specific UI element; rather, the device
+     * wakes up due to a generic tap on the screen.
+     * @hide
+     */
+    public static final int WAKE_REASON_TAP = 15;
+
+    /**
+     * Wake up reason code: Waking up due to a user performed lift gesture.
+     * @hide
+     */
+    public static final int WAKE_REASON_LIFT = 16;
+
+    /**
+     * Wake up reason code: Waking up due to a user interacting with a biometric.
+     * @hide
+     */
+    public static final int WAKE_REASON_BIOMETRIC = 17;
+
+    /**
      * Convert the wake reason to a string for debugging purposes.
      * @hide
      */
@@ -702,6 +766,9 @@ public final class PowerManager {
             case WAKE_REASON_DISPLAY_GROUP_TURNED_ON: return "WAKE_REASON_DISPLAY_GROUP_TURNED_ON";
             case WAKE_REASON_UNFOLD_DEVICE: return "WAKE_REASON_UNFOLD_DEVICE";
             case WAKE_REASON_DREAM_FINISHED: return "WAKE_REASON_DREAM_FINISHED";
+            case WAKE_REASON_TAP: return "WAKE_REASON_TAP";
+            case WAKE_REASON_LIFT: return "WAKE_REASON_LIFT";
+            case WAKE_REASON_BIOMETRIC: return "WAKE_REASON_BIOMETRIC";
             default: return Integer.toString(wakeReason);
         }
     }

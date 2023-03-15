@@ -19,17 +19,22 @@ package com.android.systemui.media.taptotransfer.common
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import com.android.internal.widget.CachingIconView
-import com.android.settingslib.Utils
+import androidx.annotation.AttrRes
+import androidx.annotation.DrawableRes
 import com.android.systemui.R
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.common.shared.model.TintedIcon
+import com.android.systemui.temporarydisplay.TemporaryViewInfo
 
 /** Utility methods for media tap-to-transfer. */
 class MediaTttUtils {
     companion object {
-        // Used in CTS tests UpdateMediaTapToTransferSenderDisplayTest and
-        // UpdateMediaTapToTransferReceiverDisplayTest
-        const val WINDOW_TITLE = "Media Transfer Chip View"
-        const val WAKE_REASON = "MEDIA_TRANSFER_ACTIVATED"
+        const val WINDOW_TITLE_SENDER = "Media Transfer Chip View (Sender)"
+        const val WINDOW_TITLE_RECEIVER = "Media Transfer Chip View (Receiver)"
+
+        const val WAKE_REASON_SENDER = "MEDIA_TRANSFER_ACTIVATED_SENDER"
+        const val WAKE_REASON_RECEIVER = "MEDIA_TRANSFER_ACTIVATED_RECEIVER"
 
         /**
          * Returns the information needed to display the icon.
@@ -43,21 +48,25 @@ class MediaTttUtils {
         fun getIconInfoFromPackageName(
             context: Context,
             appPackageName: String?,
-            logger: MediaTttLogger
+            logger: MediaTttLogger<out TemporaryViewInfo>
         ): IconInfo {
             if (appPackageName != null) {
+                val packageManager = context.packageManager
                 try {
                     val contentDescription =
-                        context.packageManager
-                            .getApplicationInfo(
-                                appPackageName,
-                                PackageManager.ApplicationInfoFlags.of(0)
-                            )
-                            .loadLabel(context.packageManager)
-                            .toString()
+                        ContentDescription.Loaded(
+                            packageManager
+                                .getApplicationInfo(
+                                    appPackageName,
+                                    PackageManager.ApplicationInfoFlags.of(0)
+                                )
+                                .loadLabel(packageManager)
+                                .toString()
+                        )
                     return IconInfo(
                         contentDescription,
-                        drawable = context.packageManager.getApplicationIcon(appPackageName),
+                        MediaTttIcon.Loaded(packageManager.getApplicationIcon(appPackageName)),
+                        tintAttr = null,
                         isAppIcon = true
                     )
                 } catch (e: PackageManager.NameNotFoundException) {
@@ -65,48 +74,41 @@ class MediaTttUtils {
                 }
             }
             return IconInfo(
-                contentDescription =
-                    context.getString(R.string.media_output_dialog_unknown_launch_app_name),
-                drawable =
-                    context.resources.getDrawable(R.drawable.ic_cast).apply {
-                        this.setTint(
-                            Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
-                        )
-                    },
+                ContentDescription.Resource(R.string.media_output_dialog_unknown_launch_app_name),
+                MediaTttIcon.Resource(R.drawable.ic_cast),
+                tintAttr = android.R.attr.textColorPrimary,
                 isAppIcon = false
             )
-        }
-
-        /**
-         * Sets an icon to be displayed by the given view.
-         *
-         * @param iconSize the size in pixels that the icon should be. If null, the size of
-         * [appIconView] will not be adjusted.
-         */
-        fun setIcon(
-            appIconView: CachingIconView,
-            icon: Drawable,
-            iconContentDescription: CharSequence,
-            iconSize: Int? = null,
-        ) {
-            iconSize?.let { size ->
-                val lp = appIconView.layoutParams
-                lp.width = size
-                lp.height = size
-                appIconView.layoutParams = lp
-            }
-
-            appIconView.contentDescription = iconContentDescription
-            appIconView.setImageDrawable(icon)
         }
     }
 }
 
+/** Stores all the information for an icon shown with media TTT. */
 data class IconInfo(
-    val contentDescription: String,
-    val drawable: Drawable,
+    val contentDescription: ContentDescription,
+    val icon: MediaTttIcon,
+    @AttrRes val tintAttr: Int?,
     /**
      * True if [drawable] is the app's icon, and false if [drawable] is some generic default icon.
      */
     val isAppIcon: Boolean
-)
+) {
+    /** Converts this into a [TintedIcon]. */
+    fun toTintedIcon(): TintedIcon {
+        val iconOutput =
+            when (icon) {
+                is MediaTttIcon.Loaded -> Icon.Loaded(icon.drawable, contentDescription)
+                is MediaTttIcon.Resource -> Icon.Resource(icon.res, contentDescription)
+            }
+        return TintedIcon(iconOutput, tintAttr)
+    }
+}
+
+/**
+ * Mimics [com.android.systemui.common.shared.model.Icon] but without the content description, since
+ * the content description may need to be overridden.
+ */
+sealed interface MediaTttIcon {
+    data class Loaded(val drawable: Drawable) : MediaTttIcon
+    data class Resource(@DrawableRes val res: Int) : MediaTttIcon
+}

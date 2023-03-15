@@ -206,8 +206,6 @@ public final class TelephonyUtils {
                 return "DATA_ON_NON_DEFAULT_DURING_VOICE_CALL";
             case TelephonyManager.MOBILE_DATA_POLICY_MMS_ALWAYS_ALLOWED:
                 return "MMS_ALWAYS_ALLOWED";
-            case TelephonyManager.MOBILE_DATA_POLICY_AUTO_DATA_SWITCH:
-                return "AUTO_DATA_SWITCH";
             default:
                 return "UNKNOWN(" + mobileDataPolicy + ")";
         }

@@ -189,6 +189,8 @@ message PowerManagerServiceDumpProto {
     optional bool is_enhanced_discharge_prediction_personalized = 54;
     optional bool is_low_power_standby_active = 55;
     optional LowPowerStandbyControllerDumpProto low_power_standby_controller = 56;
+    // The battery level drained by the dream.
+    optional int32 battery_level_drained_while_dreaming = 57;
 }
 
 // A com.android.server.power.PowerManagerService.SuspendBlockerImpl object.

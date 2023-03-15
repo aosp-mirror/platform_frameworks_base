@@ -23,11 +23,6 @@
         xmlns:tools="http://schemas.android.com/tools"
         coreApp="true">
 
-    <!-- Using OpenGL ES 2.0 -->
-    <uses-feature
-        android:glEsVersion="0x00020000"
-        android:required="true" />
-
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- Used to read wallpaper -->
@@ -126,6 +121,9 @@
     <uses-permission android:name="android.permission.ALLOW_SLIPPERY_TOUCHES" />
     <uses-permission android:name="android.permission.INPUT_CONSUMER" />
 
+    <!-- DeviceStateManager -->
+    <uses-permission android:name="android.permission.CONTROL_DEVICE_STATE" />
+
     <!-- DreamManager -->
     <uses-permission android:name="android.permission.READ_DREAM_STATE" />
     <uses-permission android:name="android.permission.WRITE_DREAM_STATE" />
@@ -194,6 +192,9 @@
 
     <permission android:name="com.android.systemui.permission.FLAGS"
                 android:protectionLevel="signature" />
+
+    <permission android:name="android.permission.CUSTOMIZE_SYSTEM_UI"
+        android:protectionLevel="signature|privileged" />
 
     <!-- Adding Quick Settings tiles -->
     <uses-permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE" />
@@ -288,6 +289,12 @@
 
     <!-- Query all packages on device on R+ -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.NOTES" />
+        </intent>
+    </queries>
 
     <!-- Permission to register process observer -->
     <uses-permission android:name="android.permission.SET_ACTIVITY_WATCHER"/>
@@ -402,6 +409,10 @@
                  android:permission="com.android.systemui.permission.SELF"
                  android:exported="false" />
 
+        <service android:name=".screenshot.ScreenshotCrossProfileService"
+                 android:permission="com.android.systemui.permission.SELF"
+                 android:process=":screenshot_cross_profile"
+                 android:exported="false" />
 
         <service android:name=".screenrecord.RecordingService" />
 
@@ -875,7 +886,7 @@
                   android:showForAllUsers="true"
                   android:finishOnTaskLaunch="true"
                   android:launchMode="singleInstance"
-                  android:configChanges="screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                   android:visibleToInstantApps="true">
         </activity>
 
@@ -888,6 +899,29 @@
 
         <service android:name=".controls.controller.AuxiliaryPersistenceWrapper$DeletionJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE"/>
+
+        <!-- region Note Task -->
+        <activity
+            android:name=".notetask.shortcut.CreateNoteTaskShortcutActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:label="@string/note_task_button_label"
+            android:icon="@drawable/ic_note_task_button">
+
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".notetask.shortcut.LaunchNoteTaskActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.NoDisplay" />
+        <!-- endregion -->
 
         <!-- started from ControlsRequestReceiver -->
         <activity
@@ -967,5 +1001,12 @@
                 <action android:name="com.android.systemui.action.DISMISS_VOLUME_PANEL_DIALOG" />
             </intent-filter>
         </receiver>
+
+        <provider
+            android:authorities="com.android.systemui.customization"
+            android:name="com.android.systemui.keyguard.CustomizationProvider"
+            android:exported="true"
+            android:permission="android.permission.CUSTOMIZE_SYSTEM_UI"
+            />
     </application>
 </manifest>

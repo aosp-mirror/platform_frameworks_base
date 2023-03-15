@@ -1125,7 +1125,9 @@
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="time">%2$s</xliff:g> left until full</string>
     <!-- [CHAR_LIMIT=80] Label for battery level chart when charge been limited -->
-    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Charging is paused</string>
+    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Charging optimized</string>
+    <!-- [CHAR_LIMIT=80] Label for battery charging future pause -->
+    <string name="power_charging_future_paused"><xliff:g id="level">%1$s</xliff:g> - Charging optimized</string>
 
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_unknown">Unknown</string>

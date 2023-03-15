@@ -80,20 +80,21 @@ public class ActivityOptions {
 
     public static final String SHOW_WHEN_LOCKED_ACTIVITY_LAUNCHER_NAME = "ShowWhenLockedApp";
     public static final ComponentName SHOW_WHEN_LOCKED_ACTIVITY_COMPONENT_NAME =
-            new ComponentName(FLICKER_APP_PACKAGE,
-                    FLICKER_APP_PACKAGE + ".ShowWhenLockedActivity");
+            new ComponentName(FLICKER_APP_PACKAGE, FLICKER_APP_PACKAGE + ".ShowWhenLockedActivity");
 
     public static final String NOTIFICATION_ACTIVITY_LAUNCHER_NAME = "NotificationApp";
     public static final ComponentName NOTIFICATION_ACTIVITY_COMPONENT_NAME =
-            new ComponentName(FLICKER_APP_PACKAGE,
-                    FLICKER_APP_PACKAGE + ".NotificationActivity");
+            new ComponentName(FLICKER_APP_PACKAGE, FLICKER_APP_PACKAGE + ".NotificationActivity");
 
     public static final String MAIL_ACTIVITY_LAUNCHER_NAME = "MailActivity";
-    public static final ComponentName MAIL_ACTIVITY_COMPONENT_NAME = new ComponentName(
-            FLICKER_APP_PACKAGE, FLICKER_APP_PACKAGE + ".MailActivity");
+    public static final ComponentName MAIL_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE, FLICKER_APP_PACKAGE + ".MailActivity");
 
     public static final String GAME_ACTIVITY_LAUNCHER_NAME = "GameApp";
     public static final ComponentName GAME_ACTIVITY_COMPONENT_NAME =
-            new ComponentName(FLICKER_APP_PACKAGE,
-                   FLICKER_APP_PACKAGE + ".GameActivity");
+            new ComponentName(FLICKER_APP_PACKAGE, FLICKER_APP_PACKAGE + ".GameActivity");
+
+    public static final ComponentName ASSISTANT_SERVICE_COMPONENT_NAME =
+            new ComponentName(
+                    FLICKER_APP_PACKAGE, FLICKER_APP_PACKAGE + ".AssistantInteractionService");
 }

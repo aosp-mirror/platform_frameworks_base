@@ -17,9 +17,9 @@
 package com.android.systemui.bluetooth
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.BluetoothLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
 import javax.inject.Inject
 
 /** Helper class for logging bluetooth events. */

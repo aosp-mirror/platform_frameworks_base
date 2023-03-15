@@ -24,6 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
@@ -39,6 +40,8 @@ import com.android.systemui.plugins.qs.QSTile.State;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 
 @RunWith(AndroidTestingRunner.class)
 @UiThreadTest
@@ -134,6 +137,22 @@ public class QSIconViewImplTest extends SysuiTestCase {
         s2.state = Tile.STATE_UNAVAILABLE;
 
         assertEquals(mIconView.getColor(s1), mIconView.getColor(s2));
+    }
+
+    @Test
+    public void testIconStartedAndStoppedWhenAllowAnimationsFalse() {
+        ImageView iv = new ImageView(mContext);
+        AnimatedVectorDrawable d = mock(AnimatedVectorDrawable.class);
+        State s = new State();
+        s.icon = mock(Icon.class);
+        when(s.icon.getDrawable(any())).thenReturn(d);
+        when(s.icon.getInvisibleDrawable(any())).thenReturn(d);
+
+        mIconView.updateIcon(iv, s, false);
+
+        InOrder inOrder = Mockito.inOrder(d);
+        inOrder.verify(d).start();
+        inOrder.verify(d).stop();
     }
 
     private static Drawable.ConstantState fakeConstantState(Drawable otherDrawable) {

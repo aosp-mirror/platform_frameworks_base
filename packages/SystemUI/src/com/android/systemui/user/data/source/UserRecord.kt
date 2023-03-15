@@ -19,6 +19,7 @@ package com.android.systemui.user.data.source
 import android.content.pm.UserInfo
 import android.graphics.Bitmap
 import android.os.UserHandle
+import com.android.settingslib.RestrictedLockUtils
 
 /** Encapsulates raw data for a user or an option item related to managing users on the device. */
 data class UserRecord(
@@ -41,6 +42,14 @@ data class UserRecord(
     @JvmField val isSwitchToEnabled: Boolean = false,
     /** Whether this record represents an option to add another supervised user to the device. */
     @JvmField val isAddSupervisedUser: Boolean = false,
+    /**
+     * An enforcing admin, if the user action represented by this record is disabled by the admin.
+     * If not disabled, this is `null`.
+     */
+    @JvmField val enforcedAdmin: RestrictedLockUtils.EnforcedAdmin? = null,
+
+    /** Whether this record is to go to the Settings page to manage users. */
+    @JvmField val isManageUsers: Boolean = false
 ) {
     /** Returns a new instance of [UserRecord] with its [isCurrent] set to the given value. */
     fun copyWithIsCurrent(isCurrent: Boolean): UserRecord {
@@ -57,6 +66,14 @@ data class UserRecord(
         } else {
             info.id
         }
+    }
+
+    /**
+     * Returns `true` if the user action represented by this record has been disabled by an admin;
+     * `false` otherwise.
+     */
+    fun isDisabledByAdmin(): Boolean {
+        return enforcedAdmin != null
     }
 
     companion object {

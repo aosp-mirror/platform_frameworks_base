@@ -27,9 +27,10 @@ import java.util.function.Consumer;
  */
 public class AcceptOnceConsumer<T> implements Consumer<T> {
     private final Consumer<T> mCallback;
-    private final DataProducer<T> mProducer;
+    private final AcceptOnceProducerCallback<T> mProducer;
 
-    public AcceptOnceConsumer(@NonNull DataProducer<T> producer, @NonNull Consumer<T> callback) {
+    public AcceptOnceConsumer(@NonNull AcceptOnceProducerCallback<T> producer,
+            @NonNull Consumer<T> callback) {
         mProducer = producer;
         mCallback = callback;
     }
@@ -37,6 +38,20 @@ public class AcceptOnceConsumer<T> implements Consumer<T> {
     @Override
     public void accept(@NonNull T t) {
         mCallback.accept(t);
-        mProducer.removeDataChangedCallback(this);
+        mProducer.onConsumerReadyToBeRemoved(this);
+    }
+
+    /**
+     * Interface to allow the {@link AcceptOnceConsumer} to notify the client that created it,
+     * when it is ready to be removed. This allows the client to remove the consumer object
+     * when it deems it is safe to do so.
+     * @param <T> The type of data this callback accepts through {@link #onConsumerReadyToBeRemoved}
+     */
+    public interface AcceptOnceProducerCallback<T> {
+
+        /**
+         * Notifies that the given {@code callback} is ready to be removed
+         */
+        void onConsumerReadyToBeRemoved(Consumer<T> callback);
     }
 }

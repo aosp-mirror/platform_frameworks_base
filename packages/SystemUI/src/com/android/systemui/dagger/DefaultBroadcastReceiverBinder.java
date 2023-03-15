@@ -19,7 +19,6 @@ package com.android.systemui.dagger;
 import android.content.BroadcastReceiver;
 
 import com.android.systemui.GuestResetOrExitSessionReceiver;
-import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.media.dialog.MediaOutputDialogReceiver;
 import com.android.systemui.people.widget.PeopleSpaceWidgetPinnedReceiver;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
@@ -100,15 +99,6 @@ public abstract class DefaultBroadcastReceiverBinder {
     @ClassKey(PeopleSpaceWidgetProvider.class)
     public abstract BroadcastReceiver bindPeopleSpaceWidgetProvider(
             PeopleSpaceWidgetProvider broadcastReceiver);
-
-    /**
-     *
-     */
-    @Binds
-    @IntoMap
-    @ClassKey(GuestResumeSessionReceiver.class)
-    public abstract BroadcastReceiver bindGuestResumeSessionReceiver(
-            GuestResumeSessionReceiver broadcastReceiver);
 
     /**
      *

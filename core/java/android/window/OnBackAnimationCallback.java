@@ -40,10 +40,12 @@ import android.view.View;
  * @hide
  */
 public interface OnBackAnimationCallback extends OnBackInvokedCallback {
-   /**
-    * Called when a back gesture has been started, or back button has been pressed down.
-    */
-    default void onBackStarted() { }
+    /**
+     * Called when a back gesture has been started, or back button has been pressed down.
+     *
+     * @param backEvent An {@link BackEvent} object describing the progress event.
+     */
+    default void onBackStarted(@NonNull BackEvent backEvent) {}
 
     /**
      * Called on back gesture progress.

@@ -41,6 +41,9 @@
     <!-- Minimum bottom margin under the security view -->
     <dimen name="keyguard_security_view_bottom_margin">60dp</dimen>
 
+    <!-- Margin above the ambient indication container -->
+    <dimen name="ambient_indication_container_margin_top">0dp</dimen>
+
     <dimen name="keyguard_eca_top_margin">18dp</dimen>
     <dimen name="keyguard_eca_bottom_margin">12dp</dimen>
 
@@ -119,10 +122,13 @@
     <dimen name="bouncer_user_switcher_width">248dp</dimen>
     <dimen name="bouncer_user_switcher_popup_header_height">12dp</dimen>
     <dimen name="bouncer_user_switcher_popup_divider_height">4dp</dimen>
+    <dimen name="bouncer_user_switcher_popup_items_divider_height">2dp</dimen>
     <dimen name="bouncer_user_switcher_item_padding_vertical">10dp</dimen>
     <dimen name="bouncer_user_switcher_item_padding_horizontal">12dp</dimen>
     <dimen name="bouncer_user_switcher_header_padding_end">44dp</dimen>
     <dimen name="bouncer_user_switcher_y_trans">0dp</dimen>
+    <dimen name="bouncer_user_switcher_view_mode_user_switcher_bottom_margin">0dp</dimen>
+    <dimen name="bouncer_user_switcher_view_mode_view_flipper_bottom_margin">0dp</dimen>
 
     <!-- 2 * the margin + size should equal the plus_margin -->
     <dimen name="user_switcher_icon_large_margin">16dp</dimen>

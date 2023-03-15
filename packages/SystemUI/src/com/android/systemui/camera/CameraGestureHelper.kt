@@ -28,7 +28,6 @@ import android.os.RemoteException
 import android.os.UserHandle
 import android.util.Log
 import android.view.WindowManager
-import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.dagger.qualifiers.Main
@@ -83,7 +82,7 @@ class CameraGestureHelper @Inject constructor(
      */
     fun launchCamera(source: Int) {
         val intent: Intent = getStartCameraIntent()
-        intent.putExtra(EXTRA_CAMERA_LAUNCH_SOURCE, source)
+        intent.putExtra(CameraIntents.EXTRA_LAUNCH_SOURCE, source)
         val wouldLaunchResolverActivity = activityIntentHelper.wouldLaunchResolverActivity(
             intent, KeyguardUpdateMonitor.getCurrentUser()
         )
@@ -148,10 +147,5 @@ class CameraGestureHelper @Inject constructor(
         } else {
             cameraIntents.getInsecureCameraIntent()
         }
-    }
-
-    companion object {
-        @VisibleForTesting
-        const val EXTRA_CAMERA_LAUNCH_SOURCE = "com.android.systemui.camera_launch_source"
     }
 }

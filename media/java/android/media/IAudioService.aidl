@@ -100,7 +100,10 @@ interface IAudioService {
             in String callingPackage, in String attributionTag);
 
     void setDeviceVolume(in VolumeInfo vi, in AudioDeviceAttributes ada,
-            in String callingPackage, in String attributionTag);
+            in String callingPackage);
+
+    VolumeInfo getDeviceVolume(in VolumeInfo vi, in AudioDeviceAttributes ada,
+            in String callingPackage);
 
     oneway void handleVolumeKey(in KeyEvent event, boolean isOnTv,
             String callingPackage, String caller);

@@ -40,6 +40,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import org.junit.Before;
@@ -63,6 +64,7 @@ public class ExpandableNotificationRowDragControllerTest extends SysuiTestCase {
     private NotificationMenuRowPlugin.MenuItem mMenuItem =
             mock(NotificationMenuRowPlugin.MenuItem.class);
     private ShadeController mShadeController = mock(ShadeController.class);
+    private NotificationPanelLogger mNotificationPanelLogger = mock(NotificationPanelLogger.class);
 
     @Before
     public void setUp() throws Exception {
@@ -82,7 +84,7 @@ public class ExpandableNotificationRowDragControllerTest extends SysuiTestCase {
         when(mMenuRow.getLongpressMenuItem(any(Context.class))).thenReturn(mMenuItem);
 
         mController = new ExpandableNotificationRowDragController(mContext, mHeadsUpManager,
-                mShadeController);
+                mShadeController, mNotificationPanelLogger);
     }
 
     @Test
@@ -96,6 +98,7 @@ public class ExpandableNotificationRowDragControllerTest extends SysuiTestCase {
         mRow.doDragCallback(0, 0);
         verify(controller).startDragAndDrop(mRow);
         verify(mHeadsUpManager, times(1)).releaseAllImmediately();
+        verify(mNotificationPanelLogger, times(1)).logNotificationDrag(any());
     }
 
     @Test
@@ -107,6 +110,7 @@ public class ExpandableNotificationRowDragControllerTest extends SysuiTestCase {
         verify(controller).startDragAndDrop(mRow);
         verify(mShadeController).animateCollapsePanels(eq(0), eq(true),
                 eq(false), anyFloat());
+        verify(mNotificationPanelLogger, times(1)).logNotificationDrag(any());
     }
 
     @Test
@@ -124,6 +128,7 @@ public class ExpandableNotificationRowDragControllerTest extends SysuiTestCase {
 
         // Verify that we never start the actual drag since there is no content
         verify(mRow, never()).startDragAndDrop(any(), any(), any(), anyInt());
+        verify(mNotificationPanelLogger, never()).logNotificationDrag(any());
     }
 
     private ExpandableNotificationRowDragController createSpyController() {

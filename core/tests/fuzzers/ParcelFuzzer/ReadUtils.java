@@ -97,7 +97,7 @@ public class ReadUtils {
     public static ReadOperation[] READ_OPERATIONS =
             new ReadOperation[] {
                     (parcel, provider) -> {
-                        parcel.setDataPosition(provider.consumeInt());
+                        parcel.setDataPosition(provider.consumeInt(0, Integer.MAX_VALUE));
                     },
                     (parcel, provider) -> {
                         parcel.setDataCapacity(provider.consumeInt());
@@ -155,6 +155,7 @@ public class ReadUtils {
                         byte[] array;
                         if (provider.consumeBoolean()) {
                             int pos = parcel.dataPosition();
+                            if (pos < 0) return;
                             array = new byte[Math.min(MAX_LEN, parcel.readInt())];
                             parcel.setDataPosition(pos);
                         } else {
@@ -166,6 +167,7 @@ public class ReadUtils {
                         char[] array;
                         if (provider.consumeBoolean()) {
                             int pos = parcel.dataPosition();
+                            if (pos < 0) return;
                             array = new char[Math.min(MAX_LEN, parcel.readInt())];
                             parcel.setDataPosition(pos);
                         } else {
@@ -177,6 +179,7 @@ public class ReadUtils {
                         int[] array;
                         if (provider.consumeBoolean()) {
                             int pos = parcel.dataPosition();
+                            if (pos < 0) return;
                             array = new int[Math.min(MAX_LEN, parcel.readInt())];
                             parcel.setDataPosition(pos);
                         } else {
@@ -188,6 +191,7 @@ public class ReadUtils {
                         double[] array;
                         if (provider.consumeBoolean()) {
                             int pos = parcel.dataPosition();
+                            if (pos < 0) return;
                             array = new double[Math.min(MAX_LEN, parcel.readInt())];
                             parcel.setDataPosition(pos);
                         } else {
@@ -199,6 +203,7 @@ public class ReadUtils {
                         float[] array;
                         if (provider.consumeBoolean()) {
                             int pos = parcel.dataPosition();
+                            if (pos < 0) return;
                             array = new float[Math.min(MAX_LEN, parcel.readInt())];
                             parcel.setDataPosition(pos);
                         } else {
@@ -210,6 +215,7 @@ public class ReadUtils {
                         boolean[] array;
                         if (provider.consumeBoolean()) {
                             int pos = parcel.dataPosition();
+                            if (pos < 0) return;
                             array = new boolean[Math.min(MAX_LEN, parcel.readInt())];
                             parcel.setDataPosition(pos);
                         } else {
@@ -221,6 +227,7 @@ public class ReadUtils {
                         long[] array;
                         if (provider.consumeBoolean()) {
                             int pos = parcel.dataPosition();
+                            if (pos < 0) return;
                             array = new long[Math.min(MAX_LEN, parcel.readInt())];
                             parcel.setDataPosition(pos);
                         } else {
@@ -232,6 +239,7 @@ public class ReadUtils {
                         IBinder[] array;
                         if (provider.consumeBoolean()) {
                             int pos = parcel.dataPosition();
+                            if (pos < 0) return;
                             array = new IBinder[Math.min(MAX_LEN, parcel.readInt())];
                             parcel.setDataPosition(pos);
                         } else {
@@ -274,6 +282,7 @@ public class ReadUtils {
                         SingleDataParcelable[] array;
                         if (provider.consumeBoolean()) {
                             int pos = parcel.dataPosition();
+                            if (pos < 0) return;
                             array = new SingleDataParcelable[Math.min(MAX_LEN, parcel.readInt())];
                             parcel.setDataPosition(pos);
                         } else {
@@ -293,6 +302,7 @@ public class ReadUtils {
                         EmptyParcelable[] array;
                         if (provider.consumeBoolean()) {
                             int pos = parcel.dataPosition();
+                            if (pos < 0) return;
                             array = new EmptyParcelable[Math.min(MAX_LEN, parcel.readInt())];
                             parcel.setDataPosition(pos);
                         } else {
@@ -312,6 +322,7 @@ public class ReadUtils {
                         GenericDataParcelable[] array;
                         if (provider.consumeBoolean()) {
                             int pos = parcel.dataPosition();
+                            if (pos < 0) return;
                             array = new GenericDataParcelable[Math.min(MAX_LEN, parcel.readInt())];
                             parcel.setDataPosition(pos);
                         } else {
@@ -334,6 +345,7 @@ public class ReadUtils {
                         SomeParcelable[] array;
                         if (provider.consumeBoolean()) {
                             int pos = parcel.dataPosition();
+                            if (pos < 0) return;
                             array = new SomeParcelable[Math.min(MAX_LEN, parcel.readInt())];
                             parcel.setDataPosition(pos);
                         } else {
@@ -390,6 +402,7 @@ public class ReadUtils {
                         TestInterface[] array;
                         if (provider.consumeBoolean()) {
                             int pos = parcel.dataPosition();
+                            if (pos < 0) return;
                             array = new TestInterface[Math.min(MAX_LEN, parcel.readInt())];
                             parcel.setDataPosition(pos);
                         } else {

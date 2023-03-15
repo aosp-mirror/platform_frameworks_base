@@ -23,6 +23,8 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.dagger.SysUISingleton;
@@ -30,6 +32,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -133,6 +136,7 @@ class FalsingCollectorImpl implements FalsingCollector {
             ProximitySensor proximitySensor,
             StatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
+            ShadeExpansionStateManager shadeExpansionStateManager,
             BatteryController batteryController,
             DockManager dockManager,
             @Main DelayableExecutor mainExecutor,
@@ -156,6 +160,8 @@ class FalsingCollectorImpl implements FalsingCollector {
         mState = mStatusBarStateController.getState();
 
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateCallback);
+
+        shadeExpansionStateManager.addQsExpansionListener(this::onQsExpansionChanged);
 
         mBatteryController.addCallback(mBatteryListener);
         mDockManager.addListener(mDockEventListener);
@@ -193,8 +199,8 @@ class FalsingCollectorImpl implements FalsingCollector {
     public void onQsDown() {
     }
 
-    @Override
-    public void setQsExpanded(boolean expanded) {
+    @VisibleForTesting
+    void onQsExpansionChanged(Boolean expanded) {
         if (expanded) {
             unregisterSensors();
         } else if (mSessionStarted) {
@@ -367,6 +373,15 @@ class FalsingCollectorImpl implements FalsingCollector {
     @Override
     public void updateFalseConfidence(FalsingClassifier.Result result) {
         mHistoryTracker.addResults(Collections.singleton(result), mSystemClock.uptimeMillis());
+    }
+
+    @Override
+    public void onA11yAction() {
+        if (mPendingDownEvent != null) {
+            mPendingDownEvent.recycle();
+            mPendingDownEvent = null;
+        }
+        mFalsingDataProvider.onA11yAction();
     }
 
     private boolean shouldSessionBeActive() {

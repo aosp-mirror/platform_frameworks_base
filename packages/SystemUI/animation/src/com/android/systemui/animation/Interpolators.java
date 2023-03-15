@@ -27,7 +27,10 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
 
 /**
- * Utility class to receive interpolators from
+ * Utility class to receive interpolators from.
+ *
+ * Make sure that changes made to this class are also reflected in {@link InterpolatorsAndroidX}.
+ * Please consider using the androidx dependencies featuring better testability altogether.
  */
 public class Interpolators {
 

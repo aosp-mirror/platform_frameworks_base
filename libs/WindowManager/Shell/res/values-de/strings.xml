@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Aus Stash entfernen"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Die App funktioniert unter Umständen im Modus für geteilten Bildschirm nicht."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Das Teilen des Bildschirms wird in dieser App nicht unterstützt."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Diese App kann nur in einem einzigen Fenster geöffnet werden."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Die App funktioniert auf einem sekundären Display möglicherweise nicht."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Die App unterstützt den Start auf sekundären Displays nicht."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Bildschirmteiler"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"Maximieren"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimieren"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Schließen"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Zurück"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Ziehpunkt"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Vollbild"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Desktopmodus"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Geteilter Bildschirm"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Mehr"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Frei schwebend"</string>
 </resources>

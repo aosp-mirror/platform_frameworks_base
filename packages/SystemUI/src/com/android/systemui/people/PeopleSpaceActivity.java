@@ -27,10 +27,14 @@ import android.view.ViewGroup;
 import androidx.activity.ComponentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.people.ui.view.PeopleViewBinder;
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel;
 
 import javax.inject.Inject;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 /** People Tile Widget configuration activity that shows the user their conversation tiles. */
 public class PeopleSpaceActivity extends ComponentActivity {
@@ -58,13 +62,18 @@ public class PeopleSpaceActivity extends ComponentActivity {
         int widgetId = getIntent().getIntExtra(EXTRA_APPWIDGET_ID, INVALID_APPWIDGET_ID);
         viewModel.onWidgetIdChanged(widgetId);
 
-        ViewGroup view = PeopleViewBinder.create(this);
-        PeopleViewBinder.bind(view, viewModel, /* lifecycleOwner= */ this,
-                (result) -> {
-                    finishActivity(result);
-                    return null;
-                });
-        setContentView(view);
+        Function1<PeopleViewModel.Result, Unit> onResult = (result) -> {
+            finishActivity(result);
+            return null;
+        };
+
+        if (ComposeFacade.INSTANCE.isComposeAvailable()) {
+            ComposeFacade.INSTANCE.setPeopleSpaceActivityContent(this, viewModel, onResult);
+        } else {
+            ViewGroup view = PeopleViewBinder.create(this);
+            PeopleViewBinder.bind(view, viewModel, /* lifecycleOwner= */ this, onResult);
+            setContentView(view);
+        }
     }
 
     private void finishActivity(PeopleViewModel.Result result) {

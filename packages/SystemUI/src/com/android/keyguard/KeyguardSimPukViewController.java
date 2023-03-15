@@ -121,12 +121,6 @@ public class KeyguardSimPukViewController
     }
 
     @Override
-    public void reloadColors() {
-        super.reloadColors();
-        mView.reloadColors();
-    }
-
-    @Override
     protected void verifyPasswordAndUnlock() {
         mStateMachine.next();
     }

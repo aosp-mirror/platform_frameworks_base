@@ -18,12 +18,21 @@ package com.android.systemui.statusbar.connectivity;
 
 import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN;
 import static android.telephony.NetworkRegistrationInfo.DOMAIN_PS;
+import static android.telephony.TelephonyManager.ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED;
+import static android.telephony.TelephonyManager.EXTRA_CARRIER_ID;
+import static android.telephony.TelephonyManager.EXTRA_SUBSCRIPTION_ID;
 
+import static com.android.settingslib.mobile.TelephonyIcons.NR_5G_PLUS;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.content.Intent;
 import android.net.NetworkCapabilities;
 import android.os.Handler;
 import android.os.Looper;
@@ -35,15 +44,19 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
+import com.android.settingslib.SignalIcon.MobileIconGroup;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.log.LogBuffer;
+import com.android.systemui.plugins.log.LogBuffer;
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.util.CarrierConfigTracker;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.HashMap;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -138,10 +151,12 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 mFakeExecutor,
                 mCallbackHandler,
                 mock(AccessPointControllerImpl.class),
+                mock(StatusBarPipelineFlags.class),
                 mock(DataUsageController.class),
                 mMockSubDefaults,
                 mock(DeviceProvisionedController.class),
                 mMockBd,
+                mUserTracker,
                 mDemoModeController,
                 mock(CarrierConfigTracker.class),
                 mWifiStatusTrackerFactory,
@@ -327,6 +342,57 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         setVoiceRegState(ServiceState.STATE_OUT_OF_SERVICE);
         setDataRegState(ServiceState.STATE_OUT_OF_SERVICE);
         assertFalse(mNetworkController.isMobileDataNetworkInService());
+    }
+
+    @Test
+    public void mobileSignalController_getsCarrierId() {
+        when(mMockTm.getSimCarrierId()).thenReturn(1);
+        setupDefaultSignal();
+
+        assertEquals(1, mMobileSignalController.getState().getCarrierId());
+    }
+
+    @Test
+    public void mobileSignalController_updatesCarrierId_onChange() {
+        when(mMockTm.getSimCarrierId()).thenReturn(1);
+        setupDefaultSignal();
+
+        // Updates are sent down through this broadcast, we can send the intent directly
+        Intent intent = new Intent(ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED);
+        intent.putExtra(EXTRA_SUBSCRIPTION_ID, mSubId);
+        intent.putExtra(EXTRA_CARRIER_ID, 2);
+
+        mMobileSignalController.handleBroadcast(intent);
+
+        assertEquals(2, mMobileSignalController.getState().getCarrierId());
+    }
+
+    @Test
+    public void networkTypeIcon_hasCarrierIdOverride() {
+        int fakeCarrier = 1;
+        int fakeIconOverride = 12345;
+        int testDataNetType = 100;
+        String testDataString = "100";
+        HashMap<String, MobileIconGroup> testMap = new HashMap<>();
+        testMap.put(testDataString, NR_5G_PLUS);
+
+        // Pretend that there is an override for this icon, and this carrier ID
+        NetworkTypeResIdCache mockCache = mock(NetworkTypeResIdCache.class);
+        when(mockCache.get(eq(NR_5G_PLUS), eq(fakeCarrier), any())).thenReturn(fakeIconOverride);
+
+        // Turn off the default mobile mapping, so we can override
+        mMobileMappingsProxy.setUseRealImpl(false);
+        mMobileMappingsProxy.setIconMap(testMap);
+        // Use the mocked cache
+        mMobileSignalController.mCurrentState.setNetworkTypeResIdCache(mockCache);
+        // Rebuild the network map
+        mMobileSignalController.setConfiguration(mConfig);
+        when(mMockTm.getSimCarrierId()).thenReturn(fakeCarrier);
+
+        setupDefaultSignal();
+        updateDataConnectionState(TelephonyManager.DATA_CONNECTED, testDataNetType);
+
+        verifyDataIndicators(fakeIconOverride);
     }
 
     private void testDataActivity(int direction, boolean in, boolean out) {

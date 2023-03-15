@@ -18,15 +18,13 @@
         android:width="32.0dp"
         android:height="32.0dp"
         android:viewportWidth="32.0"
-        android:viewportHeight="32.0"
-        android:tint="@color/decor_button_dark_color"
-        >
+        android:viewportHeight="32.0">
     <group android:scaleX="0.5"
             android:scaleY="0.5"
-            android:translateX="8.0"
-            android:translateY="8.0" >
+            android:translateX="4.0"
+            android:translateY="4.0" >
         <path
-            android:fillColor="@android:color/white"
-            android:pathData="M6.9,4.0l-2.9,2.9 9.1,9.1 -9.1,9.200001 2.9,2.799999 9.1,-9.1 9.1,9.1 2.9,-2.799999 -9.1,-9.200001 9.1,-9.1 -2.9,-2.9 -9.1,9.2z"/>
+            android:fillColor="@android:color/black"
+            android:pathData="M12.45,38.35 L9.65,35.55 21.2,24 9.65,12.45 12.45,9.65 24,21.2 35.55,9.65 38.35,12.45 26.8,24 38.35,35.55 35.55,38.35 24,26.8Z"/>
     </group>
 </vector>

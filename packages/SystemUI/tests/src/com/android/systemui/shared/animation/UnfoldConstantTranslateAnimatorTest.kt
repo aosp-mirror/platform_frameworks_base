@@ -27,8 +27,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -42,8 +42,8 @@ class UnfoldConstantTranslateAnimatorTest : SysuiTestCase() {
 
     private val viewsIdToRegister =
         setOf(
-            ViewIdToTranslate(LEFT_VIEW_ID, Direction.LEFT),
-            ViewIdToTranslate(RIGHT_VIEW_ID, Direction.RIGHT))
+            ViewIdToTranslate(START_VIEW_ID, Direction.START),
+            ViewIdToTranslate(END_VIEW_ID, Direction.END))
 
     @Before
     fun setup() {
@@ -66,41 +66,62 @@ class UnfoldConstantTranslateAnimatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun onTransition_oneMovesLeft() {
+    fun onTransition_oneMovesStartWithLTR() {
         // GIVEN one view with a matching id
         val view = View(context)
-        whenever(parent.findViewById<View>(LEFT_VIEW_ID)).thenReturn(view)
+        whenever(parent.findViewById<View>(START_VIEW_ID)).thenReturn(view)
 
-        moveAndValidate(listOf(view to LEFT))
+        moveAndValidate(listOf(view to START), View.LAYOUT_DIRECTION_LTR)
     }
 
     @Test
-    fun onTransition_oneMovesLeftAndOneMovesRightMultipleTimes() {
+    fun onTransition_oneMovesStartWithRTL() {
+        // GIVEN one view with a matching id
+        val view = View(context)
+        whenever(parent.findViewById<View>(START_VIEW_ID)).thenReturn(view)
+
+        whenever(parent.getLayoutDirection()).thenReturn(View.LAYOUT_DIRECTION_RTL)
+        moveAndValidate(listOf(view to START), View.LAYOUT_DIRECTION_RTL)
+    }
+
+    @Test
+    fun onTransition_oneMovesStartAndOneMovesEndMultipleTimes() {
         // GIVEN two views with a matching id
         val leftView = View(context)
         val rightView = View(context)
-        whenever(parent.findViewById<View>(LEFT_VIEW_ID)).thenReturn(leftView)
-        whenever(parent.findViewById<View>(RIGHT_VIEW_ID)).thenReturn(rightView)
+        whenever(parent.findViewById<View>(START_VIEW_ID)).thenReturn(leftView)
+        whenever(parent.findViewById<View>(END_VIEW_ID)).thenReturn(rightView)
 
-        moveAndValidate(listOf(leftView to LEFT, rightView to RIGHT))
-        moveAndValidate(listOf(leftView to LEFT, rightView to RIGHT))
+        moveAndValidate(listOf(leftView to START, rightView to END), View.LAYOUT_DIRECTION_LTR)
+        moveAndValidate(listOf(leftView to START, rightView to END), View.LAYOUT_DIRECTION_LTR)
     }
 
-    private fun moveAndValidate(list: List<Pair<View, Int>>) {
+    private fun moveAndValidate(list: List<Pair<View, Int>>, layoutDirection: Int) {
         // Compare values as ints because -0f != 0f
 
         // WHEN the transition starts
         progressProvider.onTransitionStarted()
         progressProvider.onTransitionProgress(0f)
 
+        val rtlMultiplier = if (layoutDirection == View.LAYOUT_DIRECTION_LTR) {
+            1
+        } else {
+            -1
+        }
         list.forEach { (view, direction) ->
-            assertEquals((-MAX_TRANSLATION * direction).toInt(), view.translationX.toInt())
+            assertEquals(
+                (-MAX_TRANSLATION * direction * rtlMultiplier).toInt(),
+                view.translationX.toInt()
+            )
         }
 
         // WHEN the transition progresses, translation is updated
         progressProvider.onTransitionProgress(.5f)
         list.forEach { (view, direction) ->
-            assertEquals((-MAX_TRANSLATION / 2f * direction).toInt(), view.translationX.toInt())
+            assertEquals(
+                (-MAX_TRANSLATION / 2f * direction * rtlMultiplier).toInt(),
+                view.translationX.toInt()
+            )
         }
 
         // WHEN the transition ends, translation is completed
@@ -110,12 +131,12 @@ class UnfoldConstantTranslateAnimatorTest : SysuiTestCase() {
     }
 
     companion object {
-        private val LEFT = Direction.LEFT.multiplier.toInt()
-        private val RIGHT = Direction.RIGHT.multiplier.toInt()
+        private val START = Direction.START.multiplier.toInt()
+        private val END = Direction.END.multiplier.toInt()
 
         private const val MAX_TRANSLATION = 42f
 
-        private const val LEFT_VIEW_ID = 1
-        private const val RIGHT_VIEW_ID = 2
+        private const val START_VIEW_ID = 1
+        private const val END_VIEW_ID = 2
     }
 }

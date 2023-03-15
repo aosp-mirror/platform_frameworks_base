@@ -72,21 +72,6 @@ public class RemoteServiceException extends AndroidRuntimeException {
 
     /**
      * Exception used to crash an app process when the system received a RemoteException
-     * while delivering a broadcast to an app process.
-     *
-     * @hide
-     */
-    public static class CannotDeliverBroadcastException extends RemoteServiceException {
-        /** The type ID passed to {@link IApplicationThread#scheduleCrash}. */
-        public static final int TYPE_ID = 2;
-
-        public CannotDeliverBroadcastException(String msg) {
-            super(msg);
-        }
-    }
-
-    /**
-     * Exception used to crash an app process when the system received a RemoteException
      * while posting a notification of a foreground service.
      *
      * @hide
@@ -94,7 +79,7 @@ public class RemoteServiceException extends AndroidRuntimeException {
     public static class CannotPostForegroundServiceNotificationException
             extends RemoteServiceException {
         /** The type ID passed to {@link IApplicationThread#scheduleCrash}. */
-        public static final int TYPE_ID = 3;
+        public static final int TYPE_ID = 2;
 
         public CannotPostForegroundServiceNotificationException(String msg) {
             super(msg);
@@ -109,7 +94,7 @@ public class RemoteServiceException extends AndroidRuntimeException {
      */
     public static class BadForegroundServiceNotificationException extends RemoteServiceException {
         /** The type ID passed to {@link IApplicationThread#scheduleCrash}. */
-        public static final int TYPE_ID = 4;
+        public static final int TYPE_ID = 3;
 
         public BadForegroundServiceNotificationException(String msg) {
             super(msg);
@@ -125,7 +110,7 @@ public class RemoteServiceException extends AndroidRuntimeException {
     public static class MissingRequestPasswordComplexityPermissionException
             extends RemoteServiceException {
         /** The type ID passed to {@link IApplicationThread#scheduleCrash}. */
-        public static final int TYPE_ID = 5;
+        public static final int TYPE_ID = 4;
 
         public MissingRequestPasswordComplexityPermissionException(String msg) {
             super(msg);
@@ -139,7 +124,7 @@ public class RemoteServiceException extends AndroidRuntimeException {
      */
     public static class CrashedByAdbException extends RemoteServiceException {
         /** The type ID passed to {@link IApplicationThread#scheduleCrash}. */
-        public static final int TYPE_ID = 6;
+        public static final int TYPE_ID = 5;
 
         public CrashedByAdbException(String msg) {
             super(msg);

@@ -19,16 +19,20 @@ package com.android.systemui.dreams;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
+import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
 import android.net.ConnectivityManager;
@@ -55,6 +59,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -69,7 +74,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
             "{count, plural, =1 {# notification} other {# notifications}}";
 
     @Mock
-    DreamOverlayStatusBarView mView;
+    MockDreamOverlayStatusBarView mView;
     @Mock
     ConnectivityManager mConnectivityManager;
     @Mock
@@ -105,6 +110,9 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     @Mock
     DreamOverlayStateController mDreamOverlayStateController;
 
+    @Captor
+    private ArgumentCaptor<DreamOverlayStateController.Callback> mCallbackCaptor;
+
     private final Executor mMainExecutor = Runnable::run;
 
     DreamOverlayStatusBarViewController mController;
@@ -115,6 +123,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
 
         when(mResources.getString(R.string.dream_overlay_status_bar_notification_indicator))
                 .thenReturn(NOTIFICATION_INDICATOR_FORMATTER_STRING);
+        doCallRealMethod().when(mView).setVisibility(anyInt());
+        doCallRealMethod().when(mView).getVisibility();
 
         mController = new DreamOverlayStatusBarViewController(
                 mView,
@@ -454,12 +464,10 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     public void testStatusBarHiddenWhenSystemStatusBarShown() {
         mController.onViewAttached();
 
-        final ArgumentCaptor<StatusBarWindowStateListener>
-                callbackCapture = ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
-        verify(mStatusBarWindowStateController).addListener(callbackCapture.capture());
-        callbackCapture.getValue().onStatusBarWindowStateChanged(WINDOW_STATE_SHOWING);
+        updateEntryAnimationsFinished();
+        updateStatusBarWindowState(true);
 
-        verify(mView).setVisibility(View.INVISIBLE);
+        assertThat(mView.getVisibility()).isEqualTo(View.INVISIBLE);
     }
 
     @Test
@@ -467,26 +475,40 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         mController.onViewAttached();
         reset(mView);
 
-        final ArgumentCaptor<StatusBarWindowStateListener>
-                callbackCapture = ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
-        verify(mStatusBarWindowStateController).addListener(callbackCapture.capture());
-        callbackCapture.getValue().onStatusBarWindowStateChanged(WINDOW_STATE_HIDDEN);
+        updateEntryAnimationsFinished();
+        updateStatusBarWindowState(false);
 
-        verify(mView).setVisibility(View.VISIBLE);
+        assertThat(mView.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
     public void testUnattachedStatusBarVisibilityUnchangedWhenSystemStatusBarHidden() {
         mController.onViewAttached();
+        updateEntryAnimationsFinished();
         mController.onViewDetached();
         reset(mView);
 
-        final ArgumentCaptor<StatusBarWindowStateListener>
-                callbackCapture = ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
-        verify(mStatusBarWindowStateController).addListener(callbackCapture.capture());
-        callbackCapture.getValue().onStatusBarWindowStateChanged(WINDOW_STATE_SHOWING);
+        updateStatusBarWindowState(true);
 
         verify(mView, never()).setVisibility(anyInt());
+    }
+
+    @Test
+    public void testNoChangeToVisibilityBeforeDreamStartedWhenStatusBarHidden() {
+        mController.onViewAttached();
+
+        // Trigger status bar window state change.
+        final StatusBarWindowStateListener listener = updateStatusBarWindowState(false);
+
+        // Verify no visibility change because dream not started.
+        verify(mView, never()).setVisibility(anyInt());
+
+        // Dream entry animations finished.
+        updateEntryAnimationsFinished();
+
+        // Trigger another status bar window state change, and verify visibility change.
+        listener.onStatusBarWindowStateChanged(WINDOW_STATE_HIDDEN);
+        assertThat(mView.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -507,16 +529,75 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     public void testLowLightHidesStatusBar() {
         when(mDreamOverlayStateController.isLowLightActive()).thenReturn(true);
         mController.onViewAttached();
+        updateEntryAnimationsFinished();
 
-        verify(mView).setVisibility(View.INVISIBLE);
-        reset(mView);
-
-        when(mDreamOverlayStateController.isLowLightActive()).thenReturn(false);
         final ArgumentCaptor<DreamOverlayStateController.Callback> callbackCapture =
                 ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
         verify(mDreamOverlayStateController).addCallback(callbackCapture.capture());
         callbackCapture.getValue().onStateChanged();
 
-        verify(mView).setVisibility(View.VISIBLE);
+        assertThat(mView.getVisibility()).isEqualTo(View.INVISIBLE);
+        reset(mView);
+
+        when(mDreamOverlayStateController.isLowLightActive()).thenReturn(false);
+        callbackCapture.getValue().onStateChanged();
+
+        assertThat(mView.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void testNoChangeToVisibilityBeforeDreamStartedWhenLowLightStateChange() {
+        when(mDreamOverlayStateController.isLowLightActive()).thenReturn(false);
+        mController.onViewAttached();
+
+        // No change to visibility because dream not fully started.
+        verify(mView, never()).setVisibility(anyInt());
+
+        // Dream entry animations finished.
+        updateEntryAnimationsFinished();
+
+        // Trigger state change and verify visibility changed.
+        final ArgumentCaptor<DreamOverlayStateController.Callback> callbackCapture =
+                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
+        verify(mDreamOverlayStateController).addCallback(callbackCapture.capture());
+        callbackCapture.getValue().onStateChanged();
+
+        assertThat(mView.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    private StatusBarWindowStateListener updateStatusBarWindowState(boolean show) {
+        when(mStatusBarWindowStateController.windowIsShowing()).thenReturn(show);
+        final ArgumentCaptor<StatusBarWindowStateListener>
+                callbackCapture = ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
+        verify(mStatusBarWindowStateController).addListener(callbackCapture.capture());
+        final StatusBarWindowStateListener listener = callbackCapture.getValue();
+        listener.onStatusBarWindowStateChanged(show ? WINDOW_STATE_SHOWING : WINDOW_STATE_HIDDEN);
+        return listener;
+    }
+
+    private void updateEntryAnimationsFinished() {
+        when(mDreamOverlayStateController.areEntryAnimationsFinished()).thenReturn(true);
+
+        verify(mDreamOverlayStateController).addCallback(mCallbackCaptor.capture());
+        final DreamOverlayStateController.Callback callback = mCallbackCaptor.getValue();
+        callback.onStateChanged();
+    }
+
+    private static class MockDreamOverlayStatusBarView extends DreamOverlayStatusBarView {
+        private int mVisibility = View.VISIBLE;
+
+        private MockDreamOverlayStatusBarView(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void setVisibility(int visibility) {
+            mVisibility = visibility;
+        }
+
+        @Override
+        public int getVisibility() {
+            return mVisibility;
+        }
     }
 }

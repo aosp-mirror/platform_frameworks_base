@@ -60,6 +60,8 @@ public class WindowOnBackInvokedDispatcherTest {
     private OnBackAnimationCallback mCallback1;
     @Mock
     private OnBackAnimationCallback mCallback2;
+    @Mock
+    private BackEvent mBackEvent;
 
     @Before
     public void setUp() throws Exception {
@@ -85,14 +87,14 @@ public class WindowOnBackInvokedDispatcherTest {
         verify(mWindowSession, times(2)).setOnBackInvokedCallbackInfo(
                 Mockito.eq(mWindow),
                 captor.capture());
-        captor.getAllValues().get(0).getCallback().onBackStarted();
+        captor.getAllValues().get(0).getCallback().onBackStarted(mBackEvent);
         waitForIdle();
-        verify(mCallback1).onBackStarted();
+        verify(mCallback1).onBackStarted(mBackEvent);
         verifyZeroInteractions(mCallback2);
 
-        captor.getAllValues().get(1).getCallback().onBackStarted();
+        captor.getAllValues().get(1).getCallback().onBackStarted(mBackEvent);
         waitForIdle();
-        verify(mCallback2).onBackStarted();
+        verify(mCallback2).onBackStarted(mBackEvent);
         verifyNoMoreInteractions(mCallback1);
     }
 
@@ -110,9 +112,9 @@ public class WindowOnBackInvokedDispatcherTest {
                 Mockito.eq(mWindow), captor.capture());
         verifyNoMoreInteractions(mWindowSession);
         assertEquals(captor.getValue().getPriority(), OnBackInvokedDispatcher.PRIORITY_OVERLAY);
-        captor.getValue().getCallback().onBackStarted();
+        captor.getValue().getCallback().onBackStarted(mBackEvent);
         waitForIdle();
-        verify(mCallback1).onBackStarted();
+        verify(mCallback1).onBackStarted(mBackEvent);
     }
 
     @Test
@@ -148,8 +150,8 @@ public class WindowOnBackInvokedDispatcherTest {
         mDispatcher.registerOnBackInvokedCallback(
                 OnBackInvokedDispatcher.PRIORITY_OVERLAY, mCallback2);
         verify(mWindowSession).setOnBackInvokedCallbackInfo(Mockito.eq(mWindow), captor.capture());
-        captor.getValue().getCallback().onBackStarted();
+        captor.getValue().getCallback().onBackStarted(mBackEvent);
         waitForIdle();
-        verify(mCallback2).onBackStarted();
+        verify(mCallback2).onBackStarted(mBackEvent);
     }
 }

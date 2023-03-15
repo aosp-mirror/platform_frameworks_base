@@ -71,7 +71,7 @@ import java.util.function.Supplier;
  */
 public class RotationButtonController {
 
-    private static final String TAG = "StatusBar/RotationButtonController";
+    private static final String TAG = "RotationButtonController";
     private static final int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
     private static final int NAVBAR_HIDDEN_PENDING_ICON_TIMEOUT_MS = 20000;
     private static final Interpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
@@ -132,8 +132,11 @@ public class RotationButtonController {
             mMainThreadHandler.postAtFrontOfQueue(() -> {
                 // If the screen rotation changes while locked, potentially update lock to flow with
                 // new screen rotation and hide any showing suggestions.
-                if (isRotationLocked()) {
-                    if (shouldOverrideUserLockPrefs(rotation)) {
+                boolean rotationLocked = isRotationLocked();
+                // The isVisible check makes the rotation button disappear when we are not locked
+                // (e.g. for tabletop auto-rotate).
+                if (rotationLocked || mRotationButton.isVisible()) {
+                    if (shouldOverrideUserLockPrefs(rotation) && rotationLocked) {
                         setRotationLockedAtAngle(rotation);
                     }
                     setRotateSuggestionButtonState(false /* visible */, true /* forced */);
@@ -246,7 +249,8 @@ public class RotationButtonController {
     }
 
     public void setRotationLockedAtAngle(int rotationSuggestion) {
-        RotationPolicy.setRotationLockAtAngle(mContext, true, rotationSuggestion);
+        RotationPolicy.setRotationLockAtAngle(mContext, /* enabled= */ isRotationLocked(),
+                /* rotation= */ rotationSuggestion);
     }
 
     public boolean isRotationLocked() {
@@ -374,6 +378,7 @@ public class RotationButtonController {
         }
 
         // Prepare to show the navbar icon by updating the icon style to change anim params
+        Log.i(TAG, "onRotationProposal(rotation=" + rotation + ")");
         mLastRotationSuggestion = rotation; // Remember rotation for click
         final boolean rotationCCW = Utilities.isRotationAnimationCCW(windowRotation, rotation);
         if (windowRotation == Surface.ROTATION_0 || windowRotation == Surface.ROTATION_180) {
@@ -496,6 +501,7 @@ public class RotationButtonController {
         mUiEventLogger.log(RotationButtonEvent.ROTATION_SUGGESTION_ACCEPTED);
         incrementNumAcceptedRotationSuggestionsIfNeeded();
         setRotationLockedAtAngle(mLastRotationSuggestion);
+        Log.i(TAG, "onRotateSuggestionClick() mLastRotationSuggestion=" + mLastRotationSuggestion);
         v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
     }
 

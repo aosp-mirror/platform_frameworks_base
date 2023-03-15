@@ -374,13 +374,6 @@ class WindowStateAnimator {
     }
 
     void destroySurfaceLocked(SurfaceControl.Transaction t) {
-        final ActivityRecord activity = mWin.mActivityRecord;
-        if (activity != null) {
-            if (mWin == activity.mStartingWindow) {
-                activity.startingDisplayed = false;
-            }
-        }
-
         if (mSurfaceController == null) {
             return;
         }
@@ -602,11 +595,17 @@ class WindowStateAnimator {
             return true;
         }
 
-        final boolean isImeWindow = mWin.mAttrs.type == TYPE_INPUT_METHOD;
-        if (isEntrance && isImeWindow) {
+        if (mWin.mAttrs.type == TYPE_INPUT_METHOD) {
             mWin.getDisplayContent().adjustForImeIfNeeded();
-            mWin.setDisplayLayoutNeeded();
-            mService.mWindowPlacerLocked.requestTraversal();
+            if (isEntrance) {
+                mWin.setDisplayLayoutNeeded();
+                mService.mWindowPlacerLocked.requestTraversal();
+            }
+        }
+
+        if (mWin.mControllableInsetProvider != null) {
+            // All our animations should be driven by the insets control target.
+            return false;
         }
 
         // Only apply an animation if the display isn't frozen.  If it is
@@ -654,12 +653,8 @@ class WindowStateAnimator {
                 Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
                 mAnimationIsEntrance = isEntrance;
             }
-        } else if (!isImeWindow) {
+        } else {
             mWin.cancelAnimation();
-        }
-
-        if (!isEntrance && isImeWindow) {
-            mWin.getDisplayContent().adjustForImeIfNeeded();
         }
 
         return mWin.isAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION);

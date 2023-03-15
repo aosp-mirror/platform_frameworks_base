@@ -35,6 +35,7 @@ import android.media.IAudioService;
 import android.net.IIpConnectivityMetrics;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Looper;
 import android.os.PowerManagerInternal;
 import android.os.UserHandle;
@@ -57,6 +58,7 @@ import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -443,7 +445,7 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         public TransferOwnershipMetadataManager newTransferOwnershipMetadataManager() {
             return new TransferOwnershipMetadataManager(
-                    new TransferOwnershipMetadataManagerTest.MockInjector());
+                    new TransferOwnershipMetadataManagerMockInjector());
         }
 
         @Override
@@ -494,6 +496,14 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         public Context createContextAsUser(UserHandle user) {
             return context;
+        }
+    }
+
+    static class TransferOwnershipMetadataManagerMockInjector extends
+            TransferOwnershipMetadataManager.Injector {
+        @Override
+        public File getOwnerTransferMetadataDir() {
+            return Environment.getExternalStorageDirectory();
         }
     }
 }

@@ -22,14 +22,6 @@ import android.graphics.Color;
  * Interface to engage starting window feature.
  */
 public interface StartingSurface {
-
-    /**
-     * Returns a binder that can be passed to an external process to manipulate starting windows.
-     */
-    default IStartingWindow createExternalInterface() {
-        return null;
-    }
-
     /**
      * Returns the background color for a starting window if existing.
      */

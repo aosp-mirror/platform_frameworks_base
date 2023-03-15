@@ -24,10 +24,7 @@ import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Context;
 import android.graphics.Rect;
-import android.hardware.devicestate.DeviceStateManager;
-import android.os.HandlerExecutor;
 import android.window.DisplayAreaInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
@@ -36,10 +33,7 @@ public class PhysicalDisplaySwitchTransitionLauncher {
 
     private final DisplayContent mDisplayContent;
     private final WindowManagerService mService;
-    private final DeviceStateManager mDeviceStateManager;
     private final TransitionController mTransitionController;
-
-    private DeviceStateListener mDeviceStateListener;
 
     /**
      * If on a foldable device represents whether the device is folded or not
@@ -52,21 +46,15 @@ public class PhysicalDisplaySwitchTransitionLauncher {
         mDisplayContent = displayContent;
         mService = displayContent.mWmService;
         mTransitionController = transitionController;
-
-        mDeviceStateManager = mService.mContext.getSystemService(DeviceStateManager.class);
-
-        if (mDeviceStateManager != null) {
-            mDeviceStateListener = new DeviceStateListener(mService.mContext);
-            mDeviceStateManager
-                    .registerCallback(new HandlerExecutor(mDisplayContent.mWmService.mH),
-                            mDeviceStateListener);
-        }
     }
 
-    public void destroy() {
-        if (mDeviceStateManager != null) {
-            mDeviceStateManager.unregisterCallback(mDeviceStateListener);
-        }
+    /**
+     *   Called by the DeviceStateManager callback when the state changes.
+     */
+    void foldStateChanged(DeviceStateController.FoldState newFoldState) {
+        // Ignore transitions to/from half-folded.
+        if (newFoldState == DeviceStateController.FoldState.HALF_FOLDED) return;
+        mIsFolded = newFoldState == DeviceStateController.FoldState.FOLDED;
     }
 
     /**
@@ -143,10 +131,4 @@ public class PhysicalDisplaySwitchTransitionLauncher {
         mTransition = null;
     }
 
-    class DeviceStateListener extends DeviceStateManager.FoldStateListener {
-
-        DeviceStateListener(Context context) {
-            super(context, newIsFolded -> mIsFolded = newIsFolded);
-        }
-    }
 }

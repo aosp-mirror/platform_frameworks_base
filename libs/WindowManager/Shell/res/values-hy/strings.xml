@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Ցուցադրել"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Հավելվածը չի կարող աշխատել տրոհված էկրանի ռեժիմում։"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Հավելվածը չի աջակցում էկրանի տրոհումը:"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Այս հավելվածը հնարավոր է բացել միայն մեկ պատուհանում։"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Հավելվածը կարող է չաշխատել լրացուցիչ էկրանի վրա"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Հավելվածը չի աջակցում գործարկումը լրացուցիչ էկրանների վրա"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Տրոհված էկրանի բաժանիչ"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"Ծավալել"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Ծալել"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Փակել"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Հետ"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Նշիչ"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Լիաէկրան"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Համակարգչի ռեժիմ"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Տրոհված էկրան"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Ավելին"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Լողացող պատուհան"</string>
 </resources>

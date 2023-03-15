@@ -20,14 +20,17 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.WindowConfiguration.inMultiWindowMode;
 
 import android.app.Activity;
+import android.app.ActivityClient;
 import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.ArraySet;
+import android.util.Log;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentParentInfo;
 import android.window.WindowContainerTransaction;
@@ -41,13 +44,10 @@ import java.util.Set;
 
 /** Represents TaskFragments and split pairs below a Task. */
 class TaskContainer {
+    private static final String TAG = TaskContainer.class.getSimpleName();
 
     /** The unique task id. */
     private final int mTaskId;
-
-    // TODO(b/240219484): consolidate to mConfiguration
-    /** Available window bounds of this Task. */
-    private final Rect mTaskBounds = new Rect();
 
     /** Active TaskFragments in this Task. */
     @NonNull
@@ -86,10 +86,10 @@ class TaskContainer {
             throw new IllegalArgumentException("Invalid Task id");
         }
         mTaskId = taskId;
-        // Make a copy in case the activity's config is updated, and updates the TaskContainer's
-        // config unexpectedly.
-        mConfiguration = new Configuration(activityInTask.getResources().getConfiguration());
-        mDisplayId = activityInTask.getDisplayId();
+        final TaskProperties taskProperties = TaskProperties
+                .getTaskPropertiesFromActivity(activityInTask);
+        mConfiguration = taskProperties.getConfiguration();
+        mDisplayId = taskProperties.getDisplayId();
         // Note that it is always called when there's a new Activity is started, which implies
         // the host task is visible.
         mIsVisible = true;
@@ -108,25 +108,6 @@ class TaskContainer {
     }
 
     @NonNull
-    Rect getTaskBounds() {
-        return mTaskBounds;
-    }
-
-    /** Returns {@code true} if the bounds is changed. */
-    boolean setTaskBounds(@NonNull Rect taskBounds) {
-        if (!taskBounds.isEmpty() && !mTaskBounds.equals(taskBounds)) {
-            mTaskBounds.set(taskBounds);
-            return true;
-        }
-        return false;
-    }
-
-    /** Whether the Task bounds has been initialized. */
-    boolean isTaskBoundsInitialized() {
-        return !mTaskBounds.isEmpty();
-    }
-
-    @NonNull
     Configuration getConfiguration() {
         // Make a copy in case the config is updated unexpectedly.
         return new Configuration(mConfiguration);
@@ -140,7 +121,7 @@ class TaskContainer {
     void updateTaskFragmentParentInfo(@NonNull TaskFragmentParentInfo info) {
         mConfiguration.setTo(info.getConfiguration());
         mDisplayId = info.getDisplayId();
-        mIsVisible = info.isVisibleRequested();
+        mIsVisible = info.isVisible();
     }
 
     /**
@@ -185,16 +166,16 @@ class TaskContainer {
     }
 
     /** Called when the activity is destroyed. */
-    void onActivityDestroyed(@NonNull Activity activity) {
+    void onActivityDestroyed(@NonNull IBinder activityToken) {
         for (TaskFragmentContainer container : mContainers) {
-            container.onActivityDestroyed(activity);
+            container.onActivityDestroyed(activityToken);
         }
     }
 
     /** Removes the pending appeared activity from all TaskFragments in this Task. */
-    void cleanupPendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
+    void cleanupPendingAppearedActivity(@NonNull IBinder activityToken) {
         for (TaskFragmentContainer container : mContainers) {
-            container.removePendingAppearedActivity(pendingAppearedActivity);
+            container.removePendingAppearedActivity(activityToken);
         }
     }
 
@@ -221,6 +202,24 @@ class TaskContainer {
         return mContainers.indexOf(child);
     }
 
+    /** Whether the Task is in an intermediate state waiting for the server update.*/
+    boolean isInIntermediateState() {
+        for (TaskFragmentContainer container : mContainers) {
+            if (container.isInIntermediateState()) {
+                // We are in an intermediate state to wait for server update on this TaskFragment.
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Adds the descriptors of split states in this Task to {@code outSplitStates}. */
+    void getSplitStates(@NonNull List<SplitInfo> outSplitStates) {
+        for (SplitContainer container : mSplitContainers) {
+            outSplitStates.add(container.toSplitInfo());
+        }
+    }
+
     /**
      * A wrapper class which contains the display ID and {@link Configuration} of a
      * {@link TaskContainer}
@@ -242,6 +241,46 @@ class TaskContainer {
         @NonNull
         Configuration getConfiguration() {
             return mConfiguration;
+        }
+
+        /**
+         * Obtains the {@link TaskProperties} for the task that the provided {@link Activity} is
+         * associated with.
+         * <p>
+         * Note that for most case, caller should use
+         * {@link SplitPresenter#getTaskProperties(Activity)} instead. This method is used before
+         * the {@code activity} goes into split.
+         * </p><p>
+         * If the {@link Activity} is in fullscreen, override
+         * {@link WindowConfiguration#getBounds()} with {@link WindowConfiguration#getMaxBounds()}
+         * in case the {@link Activity} is letterboxed. Otherwise, get the Task
+         * {@link Configuration} from the server side or use {@link Activity}'s
+         * {@link Configuration} as a fallback if the Task {@link Configuration} cannot be obtained.
+         */
+        @NonNull
+        static TaskProperties getTaskPropertiesFromActivity(@NonNull Activity activity) {
+            final int displayId = activity.getDisplayId();
+            // Use a copy of configuration because activity's configuration may be updated later,
+            // or we may get unexpected TaskContainer's configuration if Activity's configuration is
+            // updated. An example is Activity is going to be in split.
+            final Configuration activityConfig = new Configuration(
+                    activity.getResources().getConfiguration());
+            final WindowConfiguration windowConfiguration = activityConfig.windowConfiguration;
+            final int windowingMode = windowConfiguration.getWindowingMode();
+            if (!inMultiWindowMode(windowingMode)) {
+                // Use the max bounds in fullscreen in case the Activity is letterboxed.
+                windowConfiguration.setBounds(windowConfiguration.getMaxBounds());
+                return new TaskProperties(displayId, activityConfig);
+            }
+            final Configuration taskConfig = ActivityClient.getInstance()
+                    .getTaskConfiguration(activity.getActivityToken());
+            if (taskConfig == null) {
+                Log.w(TAG, "Could not obtain task configuration for activity:" + activity);
+                // Still report activity config if task config cannot be obtained from the server
+                // side.
+                return new TaskProperties(displayId, activityConfig);
+            }
+            return new TaskProperties(displayId, taskConfig);
         }
     }
 }

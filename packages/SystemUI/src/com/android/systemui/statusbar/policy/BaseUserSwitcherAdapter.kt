@@ -21,7 +21,6 @@ import android.graphics.ColorFilter
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.drawable.Drawable
-import android.os.UserHandle
 import android.widget.BaseAdapter
 import com.android.systemui.qs.user.UserSwitchDialogController.DialogShower
 import com.android.systemui.user.data.source.UserRecord
@@ -35,19 +34,15 @@ protected constructor(
     protected val controller: UserSwitcherController,
 ) : BaseAdapter() {
 
-    protected open val users: ArrayList<UserRecord>
-        get() = controller.users
+    protected open val users: List<UserRecord>
+        get() = controller.users.filter { !controller.isKeyguardShowing || !it.isRestricted }
 
     init {
         controller.addAdapter(WeakReference(this))
     }
 
     override fun getCount(): Int {
-        return if (controller.isKeyguardShowing) {
-            users.count { !it.isRestricted }
-        } else {
-            users.size
-        }
+        return users.size
     }
 
     override fun getItem(position: Int): UserRecord {
@@ -65,7 +60,7 @@ protected constructor(
      * animation to and from the parent dialog.
      */
     @JvmOverloads
-    fun onUserListItemClicked(
+    open fun onUserListItemClicked(
         record: UserRecord,
         dialogShower: DialogShower? = null,
     ) {
@@ -88,7 +83,7 @@ protected constructor(
     }
 
     fun refresh() {
-        controller.refreshUsers(UserHandle.USER_NULL)
+        controller.refreshUsers()
     }
 
     companion object {
@@ -112,6 +107,7 @@ protected constructor(
                     item.isGuest,
                     item.isAddSupervisedUser,
                     isTablet,
+                    item.isManageUsers,
                 )
             return checkNotNull(context.getDrawable(iconRes))
         }

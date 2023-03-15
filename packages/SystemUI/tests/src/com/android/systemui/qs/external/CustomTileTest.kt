@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.external
 
+import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.ApplicationInfo
@@ -30,8 +31,10 @@ import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.IWindowManager
+import android.view.View
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
@@ -39,8 +42,11 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.nullable
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -236,6 +242,10 @@ class CustomTileTest : SysuiTestCase() {
         `when`(tile.qsTile.icon.loadDrawable(any(Context::class.java)))
                 .thenReturn(mock(Drawable::class.java))
 
+        val pi = mock(PendingIntent::class.java)
+        `when`(pi.isActivity).thenReturn(true)
+        tile.qsTile.activityLaunchForClick = pi
+
         tile.refreshState()
 
         testableLooper.processAllMessages()
@@ -288,5 +298,53 @@ class CustomTileTest : SysuiTestCase() {
         testableLooper.processAllMessages()
         assertFalse(tile.isAvailable)
         verify(tileHost).removeTile(tile.tileSpec)
+    }
+
+    @Test
+    fun testInvalidPendingIntentDoesNotStartActivity() {
+        val pi = mock(PendingIntent::class.java)
+        `when`(pi.isActivity).thenReturn(false)
+        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            tile.qsTile.activityLaunchForClick = pi
+        }
+
+        tile.handleClick(mock(View::class.java))
+        testableLooper.processAllMessages()
+
+        verify(activityStarter, never())
+            .startPendingIntentDismissingKeyguard(
+                any(), any(), any(ActivityLaunchAnimator.Controller::class.java))
+    }
+
+    @Test
+    fun testValidPendingIntentWithNoClickDoesNotStartActivity() {
+        val pi = mock(PendingIntent::class.java)
+        `when`(pi.isActivity).thenReturn(true)
+        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        tile.qsTile.activityLaunchForClick = pi
+
+        testableLooper.processAllMessages()
+
+        verify(activityStarter, never())
+            .startPendingIntentDismissingKeyguard(
+                any(), any(), any(ActivityLaunchAnimator.Controller::class.java))
+    }
+
+    @Test
+    fun testValidPendingIntentStartsActivity() {
+        val pi = mock(PendingIntent::class.java)
+        `when`(pi.isActivity).thenReturn(true)
+        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        tile.qsTile.activityLaunchForClick = pi
+
+        tile.handleClick(mock(View::class.java))
+
+        testableLooper.processAllMessages()
+
+        verify(activityStarter)
+            .startPendingIntentDismissingKeyguard(
+                eq(pi), nullable(), nullable<ActivityLaunchAnimator.Controller>())
     }
 }

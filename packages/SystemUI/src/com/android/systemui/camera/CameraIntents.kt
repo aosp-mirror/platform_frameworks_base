@@ -29,6 +29,7 @@ class CameraIntents {
                 MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE
         val DEFAULT_INSECURE_CAMERA_INTENT_ACTION =
                 MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA
+        const val EXTRA_LAUNCH_SOURCE = "com.android.systemui.camera_launch_source"
 
         @JvmStatic
         fun getOverrideCameraPackage(context: Context): String? {

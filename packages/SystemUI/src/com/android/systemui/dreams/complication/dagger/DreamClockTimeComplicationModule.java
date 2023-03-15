@@ -45,11 +45,12 @@ public interface DreamClockTimeComplicationModule {
     @Provides
     @Named(DREAM_CLOCK_TIME_COMPLICATION_VIEW)
     static View provideComplicationView(LayoutInflater layoutInflater) {
-        final TextClock view = Preconditions.checkNotNull((TextClock)
+        final View view = Preconditions.checkNotNull(
                         layoutInflater.inflate(R.layout.dream_overlay_complication_clock_time,
                                 null, false),
                 "R.layout.dream_overlay_complication_clock_time did not properly inflated");
-        view.setFontVariationSettings(TAG_WEIGHT + WEIGHT);
+        ((TextClock) view.findViewById(R.id.time_view)).setFontVariationSettings(
+                TAG_WEIGHT + WEIGHT);
         return view;
     }
 }

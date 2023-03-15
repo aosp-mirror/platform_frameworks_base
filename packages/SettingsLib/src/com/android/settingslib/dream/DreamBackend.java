@@ -92,7 +92,8 @@ public class DreamBackend {
             COMPLICATION_TYPE_AIR_QUALITY,
             COMPLICATION_TYPE_CAST_INFO,
             COMPLICATION_TYPE_HOME_CONTROLS,
-            COMPLICATION_TYPE_SMARTSPACE
+            COMPLICATION_TYPE_SMARTSPACE,
+            COMPLICATION_TYPE_MEDIA_ENTRY
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ComplicationType {
@@ -105,6 +106,7 @@ public class DreamBackend {
     public static final int COMPLICATION_TYPE_CAST_INFO = 5;
     public static final int COMPLICATION_TYPE_HOME_CONTROLS = 6;
     public static final int COMPLICATION_TYPE_SMARTSPACE = 7;
+    public static final int COMPLICATION_TYPE_MEDIA_ENTRY = 8;
 
     private final Context mContext;
     private final IDreamManager mDreamManager;

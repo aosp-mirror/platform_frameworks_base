@@ -57,10 +57,20 @@ public class SafeActivityOptionsTest {
                 .setLaunchTaskDisplayArea(token)
                 .setLaunchDisplayId(launchDisplayId)
                 .setCallerDisplayId(callerDisplayId))
-                .selectiveCloneDisplayOptions();
+                .selectiveCloneLaunchOptions();
 
         assertSame(clone.getOriginalOptions().getLaunchTaskDisplayArea(), token);
         assertEquals(clone.getOriginalOptions().getLaunchDisplayId(), launchDisplayId);
         assertEquals(clone.getOriginalOptions().getCallerDisplayId(), callerDisplayId);
+    }
+
+    @Test
+    public void test_selectiveCloneLunchRootTask() {
+        final WindowContainerToken token = mock(WindowContainerToken.class);
+        final SafeActivityOptions clone = new SafeActivityOptions(ActivityOptions.makeBasic()
+                .setLaunchRootTask(token))
+                .selectiveCloneLaunchOptions();
+
+        assertSame(clone.getOriginalOptions().getLaunchRootTask(), token);
     }
 }

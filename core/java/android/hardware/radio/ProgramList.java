@@ -160,6 +160,7 @@ public final class ProgramList implements AutoCloseable {
      * Disables list updates and releases all resources.
      */
     public void close() {
+        OnCloseListener onCompleteListenersCopied = null;
         synchronized (mLock) {
             if (mIsClosed) return;
             mIsClosed = true;
@@ -167,9 +168,13 @@ public final class ProgramList implements AutoCloseable {
             mListCallbacks.clear();
             mOnCompleteListeners.clear();
             if (mOnCloseListener != null) {
-                mOnCloseListener.onClose();
+                onCompleteListenersCopied = mOnCloseListener;
                 mOnCloseListener = null;
             }
+        }
+
+        if (onCompleteListenersCopied != null) {
+            onCompleteListenersCopied.onClose();
         }
     }
 

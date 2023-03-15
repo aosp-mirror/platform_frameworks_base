@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -53,6 +54,7 @@ import com.android.telephony.Rlog;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -1947,6 +1949,17 @@ public class CarrierConfigManager {
      */
     public static final String KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT =
             "nr_advanced_threshold_bandwidth_khz_int";
+
+    /**
+     * Indicating whether to include LTE cell bandwidths when determining whether the aggregated
+     * cell bandwidth meets the required threshold for NR advanced.
+     *
+     * @see TelephonyDisplayInfo#OVERRIDE_NETWORK_TYPE_NR_ADVANCED
+     *
+     * @hide
+     */
+    public static final String KEY_INCLUDE_LTE_FOR_NR_ADVANCED_THRESHOLD_BANDWIDTH_BOOL =
+            "include_lte_for_nr_advanced_threshold_bandwidth_bool";
 
     /**
      * Boolean indicating if operator name should be shown in the status bar
@@ -9005,6 +9018,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
         sDefaults.putInt(KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT, 0);
+        sDefaults.putBoolean(KEY_INCLUDE_LTE_FOR_NR_ADVANCED_THRESHOLD_BANDWIDTH_BOOL, false);
         sDefaults.putIntArray(KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
                 new int[]{CARRIER_NR_AVAILABILITY_NSA, CARRIER_NR_AVAILABILITY_SA});
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
@@ -9375,7 +9389,8 @@ public class CarrierConfigManager {
      * Gets the configuration values of the specified keys for a particular subscription.
      *
      * <p>If an invalid subId is used, the returned configuration will contain default values for
-     * the specified keys.
+     * the specified keys. If the value for the key can't be found, the returned configuration will
+     * filter the key out.
      *
      * <p>After using this method to get the configuration bundle,
      * {@link #isConfigForIdentifiedCarrier(PersistableBundle)} should be called to confirm whether
@@ -9393,8 +9408,8 @@ public class CarrierConfigManager {
      * @param subId The subscription ID on which the carrier config should be retrieved.
      * @param keys  The carrier config keys to retrieve values.
      * @return A {@link PersistableBundle} with key/value mapping for the specified configuration
-     * on success, or an empty (but never null) bundle on failure (for example, when no value for
-     * the specified key can be found).
+     * on success, or an empty (but never null) bundle on failure (for example, when the calling app
+     * has no permission).
      */
     @RequiresPermission(anyOf = {
             Manifest.permission.READ_PHONE_STATE,
@@ -9511,6 +9526,8 @@ public class CarrierConfigManager {
     /**
      * Gets the configuration values of the specified config keys applied for the default
      * subscription.
+     *
+     * <p>If the value for the key can't be found, the returned bundle will filter the key out.
      *
      * <p>After using this method to get the configuration bundle, {@link
      * #isConfigForIdentifiedCarrier(PersistableBundle)} should be called to confirm whether any
@@ -9725,5 +9742,86 @@ public class CarrierConfigManager {
         } else if (value instanceof PersistableBundle) {
             configs.putPersistableBundle(key, (PersistableBundle) value);
         }
+    }
+
+    /**
+     * Listener interface to get a notification when the carrier configurations have changed.
+     *
+     * Use this listener to receive timely updates when the carrier configuration changes. System
+     * components should prefer this listener over {@link #ACTION_CARRIER_CONFIG_CHANGED}
+     * whenever possible.
+     *
+     * To register the listener, call
+     * {@link #registerCarrierConfigChangeListener(Executor, CarrierConfigChangeListener)}.
+     * To unregister, call
+     * {@link #unregisterCarrierConfigChangeListener(CarrierConfigChangeListener)}.
+     *
+     * Note that on registration, registrants will NOT receive a notification on last carrier config
+     * change. Only carrier configs change AFTER the registration will be sent to registrants. And
+     * unlike {@link #ACTION_CARRIER_CONFIG_CHANGED}, notification wouldn't send when the device is
+     * unlocked. Registrants only receive the notification when there has been real carrier config
+     * changes.
+     *
+     * @see #registerCarrierConfigChangeListener(Executor, CarrierConfigChangeListener)
+     * @see #unregisterCarrierConfigChangeListener(CarrierConfigChangeListener)
+     * @see #ACTION_CARRIER_CONFIG_CHANGED
+     * @see #getConfig(String...)
+     * @see #getConfigForSubId(int, String...)
+     */
+    public interface CarrierConfigChangeListener {
+        /**
+         * Called when carrier configurations have changed.
+         *
+         * @param logicalSlotIndex  The logical SIM slot index on which to monitor and get
+         *                          notification. It is guaranteed to be valid.
+         * @param subscriptionId    The subscription on the SIM slot. May be
+         *                          {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
+         * @param carrierId         The optional carrier Id, may be
+         *                          {@link TelephonyManager#UNKNOWN_CARRIER_ID}.
+         *                          See {@link TelephonyManager#getSimCarrierId()}.
+         * @param specificCarrierId The optional fine-grained carrierId, may be {@link
+         *                          TelephonyManager#UNKNOWN_CARRIER_ID}. A specific carrierId may
+         *                          be different from the carrierId above in a MVNO scenario. See
+         *                          detail in {@link TelephonyManager#getSimSpecificCarrierId()}.
+         */
+        void onCarrierConfigChanged(int logicalSlotIndex, int subscriptionId, int carrierId,
+                int specificCarrierId);
+    }
+
+    /**
+     * Register a {@link CarrierConfigChangeListener} to get a notification when carrier
+     * configurations have changed.
+     *
+     * @param executor The executor on which the listener will be called.
+     * @param listener The CarrierConfigChangeListener called when carrier configs has changed.
+     */
+    public void registerCarrierConfigChangeListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull CarrierConfigChangeListener listener) {
+        Objects.requireNonNull(executor, "Executor should be non-null.");
+        Objects.requireNonNull(listener, "Listener should be non-null.");
+
+        TelephonyRegistryManager trm = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (trm == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        trm.addCarrierConfigChangedListener(executor, listener);
+    }
+
+    /**
+     * Unregister the {@link CarrierConfigChangeListener} to stop notification on carrier
+     * configurations change.
+     *
+     * @param listener The CarrierConfigChangeListener which was registered with method
+     * {@link #registerCarrierConfigChangeListener(Executor, CarrierConfigChangeListener)}.
+     */
+    public void unregisterCarrierConfigChangeListener(
+            @NonNull CarrierConfigChangeListener listener) {
+        Objects.requireNonNull(listener, "Listener should be non-null.");
+
+        TelephonyRegistryManager trm = mContext.getSystemService(TelephonyRegistryManager.class);
+        if (trm == null) {
+            throw new IllegalStateException("Telephony registry service is null");
+        }
+        trm.removeCarrierConfigChangedListener(listener);
     }
 }

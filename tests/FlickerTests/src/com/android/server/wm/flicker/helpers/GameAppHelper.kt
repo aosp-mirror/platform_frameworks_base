@@ -64,7 +64,7 @@ class GameAppHelper @JvmOverloads constructor(
         wmHelper: WindowManagerStateHelper,
         direction: Direction
     ): Boolean {
-        val ratioForScreenBottom = 0.97
+        val ratioForScreenBottom = 0.99
         val fullView = wmHelper.getWindowRegion(component)
         require(!fullView.isEmpty) { "Target $component view not found." }
 

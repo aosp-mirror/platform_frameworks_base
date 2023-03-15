@@ -16,7 +16,7 @@
 
 package com.android.systemui.qs.footer.ui.viewmodel
 
-import android.view.View
+import com.android.systemui.animation.Expandable
 
 /** A ViewModel for the foreground services button. */
 data class FooterActionsForegroundServicesButtonViewModel(
@@ -24,5 +24,5 @@ data class FooterActionsForegroundServicesButtonViewModel(
     val text: String,
     val displayText: Boolean,
     val hasNewChanges: Boolean,
-    val onClick: (View) -> Unit,
+    val onClick: (Expandable) -> Unit,
 )
