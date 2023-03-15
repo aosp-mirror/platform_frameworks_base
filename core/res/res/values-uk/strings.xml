@@ -227,9 +227,9 @@
     <string name="reboot_to_update_title" msgid="2125818841916373708">"Оновлення системи Android"</string>
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"Підготовка до оновлення…"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"Обробка пакета оновлення…"</string>
-    <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Перезавантаження…"</string>
+    <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Перезапуск…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"Скидання налаштувань"</string>
-    <string name="reboot_to_reset_message" msgid="3347690497972074356">"Перезавантаження…"</string>
+    <string name="reboot_to_reset_message" msgid="3347690497972074356">"Перезапуск…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"Вимкнення..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Ваш пристрій буде вимкнено."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Пристрій Android TV буде вимкнено."</string>
