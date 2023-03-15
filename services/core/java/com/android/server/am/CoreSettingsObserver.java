@@ -25,6 +25,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.text.TextFlags;
 import android.widget.WidgetFlags;
 
 import com.android.internal.R;
@@ -162,6 +163,11 @@ final class CoreSettingsObserver extends ContentObserver {
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.MAGNIFIER_ASPECT_RATIO,
                 WidgetFlags.KEY_MAGNIFIER_ASPECT_RATIO, float.class,
                 WidgetFlags.MAGNIFIER_ASPECT_RATIO_DEFAULT));
+
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Boolean>(
+                TextFlags.NAMESPACE, TextFlags.ENABLE_NEW_CONTEXT_MENU,
+                TextFlags.KEY_ENABLE_NEW_CONTEXT_MENU, boolean.class,
+                TextFlags.ENABLE_NEW_CONTEXT_MENU_DEFAULT));
         // add other device configs here...
     }
     private static volatile boolean sDeviceConfigContextEntriesLoaded = false;
