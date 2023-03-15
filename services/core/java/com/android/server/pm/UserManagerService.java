@@ -5850,20 +5850,24 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * @deprecated Use {@link
-     * android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
+     * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * it is possible for there to be multiple managing agents on the device with the ability to set
+     * restrictions, e.g. an Enterprise DPC and a Supervision admin. This API will only to return
+     * the restrictions set by the DPCs. To retrieve restrictions set by all agents, use
+     * {@link android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
      */
-    @Deprecated
     @Override
     public Bundle getApplicationRestrictions(String packageName) {
         return getApplicationRestrictionsForUser(packageName, UserHandle.getCallingUserId());
     }
 
     /**
-     * @deprecated Use {@link
-     * android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
+     * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * it is possible for there to be multiple managing agents on the device with the ability to set
+     * restrictions, e.g. an Enterprise DPC and a Supervision admin. This API will only to return
+     * the restrictions set by the DPCs. To retrieve restrictions set by all agents, use
+     * {@link android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
      */
-    @Deprecated
     @Override
     public Bundle getApplicationRestrictionsForUser(String packageName, @UserIdInt int userId) {
         if (UserHandle.getCallingUserId() != userId

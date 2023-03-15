@@ -427,11 +427,12 @@ public class RestrictionsManager {
      * @return the application restrictions as a Bundle. Returns null if there
      * are no restrictions.
      *
-     * @deprecated Use {@link #getApplicationRestrictionsPerAdmin} instead.
-     * Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, it is
-     * possible for there to be multiple managing agents on the device with the ability to set
-     * restrictions. This API will only to return the restrictions set by device policy controllers
-     * (DPCs)
+     * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * it is possible for there to be multiple managing apps on the device with the ability to set
+     * restrictions, e.g. a Device Policy Controller (DPC) and a Supervision admin.
+     * This API will only return the restrictions set by the DPCs. To retrieve restrictions
+     * set by all managing apps, use
+     * {@link android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
      *
      * @see DevicePolicyManager
      */
@@ -453,8 +454,8 @@ public class RestrictionsManager {
      * stable between multiple calls.
      *
      * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
-     * it is possible for there to be multiple managing agents on the device with the ability to set
-     * restrictions, e.g. an Enterprise DPC and a Supervision admin.
+     * it is possible for there to be multiple managing apps on the device with the ability to set
+     * restrictions, e.g. an Enterprise Device Policy Controller (DPC) and a Supervision admin.
      *
      * <p>Each {@link Bundle} consists of key-value pairs, as defined by the application,
      * where the types of values may be:
@@ -471,6 +472,7 @@ public class RestrictionsManager {
      * package. Returns an empty {@link List} if there are no saved restrictions.
      *
      * @see UserManager#KEY_RESTRICTIONS_PENDING
+     * @see DevicePolicyManager
      */
     @WorkerThread
     @UserHandleAware
