@@ -1354,7 +1354,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"권한 필요 없음"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"비용이 부과될 수 있습니다."</string>
     <string name="dlg_ok" msgid="5103447663504839312">"확인"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"이 기기를 USB로 충전 중"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"이 기기를 USB로 충전 중."</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"USB를 통해 연결된 기기 충전"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB 파일 전송 사용 설정됨"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB를 통해 PTP 사용 설정됨"</string>
@@ -1365,7 +1365,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"연결된 기기를 충전합니다. 옵션을 더 보려면 탭하세요."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"아날로그 오디오 액세서리가 감지됨"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"연결된 기기가 이 휴대전화와 호환되지 않습니다. 자세히 알아보려면 탭하세요."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB 디버깅 연결됨"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB 디버깅 연결됨."</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB 디버깅을 사용 중지하려면 탭하세요."</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB 디버깅을 사용하지 않으려면 선택합니다."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"무선 디버깅 연결됨"</string>
