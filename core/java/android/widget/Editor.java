@@ -74,6 +74,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
 import android.text.StaticLayout;
+import android.text.TextFlags;
 import android.text.TextUtils;
 import android.text.method.InsertModeTransformationMethod;
 import android.text.method.KeyListener;
@@ -168,9 +169,6 @@ import java.util.Objects;
 public class Editor {
     private static final String TAG = "Editor";
     private static final boolean DEBUG_UNDO = false;
-
-    // TODO(nona): Make this configurable.
-    private static final boolean FLAG_USE_NEW_CONTEXT_MENU = false;
 
     // Specifies whether to use the magnifier when pressing the insertion or selection handles.
     private static final boolean FLAG_USE_MAGNIFIER = true;
@@ -470,6 +468,7 @@ public class Editor {
     private static final int LINE_CHANGE_SLOP_MIN_DP = 8;
     private int mLineChangeSlopMax;
     private int mLineChangeSlopMin;
+    private boolean mUseNewContextMenu;
 
     private final AccessibilitySmartActions mA11ySmartActions;
     private InsertModeController mInsertModeController;
@@ -500,6 +499,9 @@ public class Editor {
         mLineSlopRatio = AppGlobals.getFloatCoreSetting(
                 WidgetFlags.KEY_LINE_SLOP_RATIO,
                 WidgetFlags.LINE_SLOP_RATIO_DEFAULT);
+        mUseNewContextMenu = AppGlobals.getIntCoreSetting(
+                TextFlags.KEY_ENABLE_NEW_CONTEXT_MENU,
+                TextFlags.ENABLE_NEW_CONTEXT_MENU_DEFAULT ? 1 : 0) != 0;
         if (TextView.DEBUG_CURSOR) {
             logCursor("Editor", "Cursor drag from anywhere is %s.",
                     mFlagCursorDragFromAnywhereEnabled ? "enabled" : "disabled");
@@ -3171,7 +3173,7 @@ public class Editor {
         final int menuItemOrderSelectAll;
         final int menuItemOrderShare;
         final int menuItemOrderAutofill;
-        if (FLAG_USE_NEW_CONTEXT_MENU) {
+        if (mUseNewContextMenu) {
             menuItemOrderPasteAsPlainText = 7;
             menuItemOrderSelectAll = 8;
             menuItemOrderShare = 9;
