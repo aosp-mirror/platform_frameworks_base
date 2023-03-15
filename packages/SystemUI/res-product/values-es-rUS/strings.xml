@@ -40,9 +40,12 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Intentaste desbloquear el teléfono <xliff:g id="NUMBER">%d</xliff:g> veces de manera incorrecta. Se quitará el perfil de trabajo, lo que borrará todos los datos asociados."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Dibujaste el patrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de manera incorrecta. Después de <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos más, se te solicitará que desbloquees la tablet mediante una cuenta de correo electrónico.\n\n Vuelve a intentarlo en <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Dibujaste el patrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de manera incorrecta. Después de <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos más, se te solicitará que desbloquees el dispositivo mediante una cuenta de correo electrónico.\n\n Vuelve a intentarlo en <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="1242939073723573315">"El sensor de huellas dactilares está en el botón de encendido. Es el botón plano que está junto al botón de volumen en relieve, en el borde de la tablet.\n\nSi presionas el botón de encendido, se apaga la pantalla."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="7305137594359170451">"El sensor de huellas dactilares está en el botón de encendido. Es el botón plano que está junto al botón de volumen en relieve, en el borde del dispositivo.\n\nSi presionas el botón de encendido, se apaga la pantalla."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="3238514774114999081">"El sensor de huellas dactilares está en el botón de encendido. Es el botón plano que está junto al botón de volumen en relieve, en el borde del teléfono.\n\nSi presionas el botón de encendido, se apaga la pantalla."</string>
+    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (3726972508570143945) -->
+    <skip />
+    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (2929467060295094725) -->
+    <skip />
+    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (8582726566542997639) -->
+    <skip />
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Desbloquea el teléfono para ver más opciones"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Desbloquea la tablet para ver más opciones"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Desbloquea el dispositivo para ver más opciones"</string>
