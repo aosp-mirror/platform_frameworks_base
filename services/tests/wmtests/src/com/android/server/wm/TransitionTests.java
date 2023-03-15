@@ -40,6 +40,7 @@ import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 import static android.window.TransitionInfo.isIndependent;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -54,6 +55,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -1400,7 +1402,13 @@ public class TransitionTests extends WindowTestsBase {
         closeTransition.collectExistenceChange(activity1);
         closeTransition.collectExistenceChange(task2);
         closeTransition.collectExistenceChange(activity2);
-        closeTransition.setTransientLaunch(activity2, null /* restoreBelow */);
+        closeTransition.setTransientLaunch(activity2, task1);
+        final Transition.ChangeInfo task1ChangeInfo = closeTransition.mChanges.get(task1);
+        assertNotNull(task1ChangeInfo);
+        assertTrue(task1ChangeInfo.hasChanged());
+        final Transition.ChangeInfo activity1ChangeInfo = closeTransition.mChanges.get(activity1);
+        assertNotNull(activity1ChangeInfo);
+        assertTrue(activity1ChangeInfo.hasChanged());
 
         activity1.setVisibleRequested(false);
         activity2.setVisibleRequested(true);
@@ -1416,6 +1424,8 @@ public class TransitionTests extends WindowTestsBase {
         verify(snapshotController, times(0)).recordSnapshot(eq(task1), eq(false));
 
         enteringAnimReports.clear();
+        doCallRealMethod().when(mWm.mRoot).ensureActivitiesVisible(any(),
+                anyInt(), anyBoolean(), anyBoolean());
         final boolean[] wasInFinishingTransition = { false };
         controller.registerLegacyListener(new WindowManagerInternal.AppTransitionListener() {
             @Override
@@ -1430,7 +1440,11 @@ public class TransitionTests extends WindowTestsBase {
         assertTrue(wasInFinishingTransition[0]);
         assertNull(controller.mFinishingTransition);
 
+        assertTrue(activity2.isVisible());
         assertEquals(ActivityTaskManagerService.APP_SWITCH_DISALLOW, mAtm.getBalAppSwitchesState());
+        // Because task1 is occluded by task2, finishTransition should make activity1 invisible.
+        assertFalse(activity1.isVisibleRequested());
+        assertFalse(activity1.isVisible());
         assertFalse(activity1.app.hasActivityInVisibleTask());
 
         verify(snapshotController, times(1)).recordSnapshot(eq(task1), eq(false));
