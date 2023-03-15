@@ -21,6 +21,7 @@ import android.annotation.UserIdInt;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.BackupProgress;
+import android.app.backup.BackupRestoreEventLogger;
 import android.app.backup.BackupTransport;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
@@ -821,14 +822,22 @@ public class Bmgr {
             doRestorePackage(arg);
         } else {
             try {
+                @Monitor int monitor = Monitor.OFF;
+
                 long token = Long.parseLong(arg, 16);
                 HashSet<String> filter = null;
                 while ((arg = nextArg()) != null) {
-                    if (filter == null) filter = new HashSet<String>();
-                    filter.add(arg);
+                    if (arg.equals("--monitor")) {
+                        monitor = Monitor.NORMAL;
+                    } else if (arg.equals("--monitor-verbose")) {
+                        monitor = Monitor.VERBOSE;
+                    } else {
+                        if (filter == null) filter = new HashSet<String>();
+                        filter.add(arg);
+                    }
                 }
 
-                doRestoreAll(userId, token, filter);
+                doRestoreAll(userId, token, filter, monitor);
             } catch (NumberFormatException e) {
                 showUsage();
                 return;
@@ -841,7 +850,8 @@ public class Bmgr {
         System.err.println("'restore <token> <package>'.");
     }
 
-    private void doRestoreAll(@UserIdInt int userId, long token, HashSet<String> filter) {
+    private void doRestoreAll(@UserIdInt int userId, long token, HashSet<String> filter,
+            @Monitor int monitorState) {
         RestoreObserver observer = new RestoreObserver();
 
         try {
@@ -852,8 +862,11 @@ public class Bmgr {
                 return;
             }
             RestoreSet[] sets = null;
-            // TODO implement monitor here
-            int err = mRestore.getAvailableRestoreSets(observer, null);
+            BackupMonitor monitor =
+                    (monitorState != Monitor.OFF)
+                            ? new BackupMonitor(monitorState == Monitor.VERBOSE)
+                            : null;
+            int err = mRestore.getAvailableRestoreSets(observer, monitor);
             if (err == 0) {
                 observer.waitForCompletion();
                 sets = observer.sets;
@@ -862,12 +875,12 @@ public class Bmgr {
                         if (s.token == token) {
                             System.out.println("Scheduling restore: " + s.name);
                             if (filter == null) {
-                                didRestore = (mRestore.restoreAll(token, observer, null) == 0);
+                                didRestore = (mRestore.restoreAll(token, observer, monitor) == 0);
                             } else {
                                 String[] names = new String[filter.size()];
                                 filter.toArray(names);
                                 didRestore = (mRestore.restorePackages(token, observer, names,
-                                        null) == 0);
+                                        monitor) == 0);
                             }
                             break;
                         }
@@ -958,8 +971,8 @@ public class Bmgr {
         System.err.println("       bmgr list transports [-c]");
         System.err.println("       bmgr list sets");
         System.err.println("       bmgr transport WHICH|-c WHICH_COMPONENT");
-        System.err.println("       bmgr restore TOKEN");
-        System.err.println("       bmgr restore TOKEN PACKAGE...");
+        System.err.println("       bmgr restore TOKEN [--monitor|--monitor-verbose]");
+        System.err.println("       bmgr restore TOKEN PACKAGE... [--monitor|--monitor-verbose]");
         System.err.println("       bmgr run");
         System.err.println("       bmgr wipe TRANSPORT PACKAGE");
         System.err.println("       bmgr fullbackup PACKAGE...");
@@ -1005,12 +1018,18 @@ public class Bmgr {
         System.err.println("restore operation from the currently active transport.  It will deliver");
         System.err.println("the restore set designated by the TOKEN argument to each application");
         System.err.println("that had contributed data to that restore set.");
+        System.err.println("    --monitor flag prints monitor events (important events and errors");
+        System.err.println("              encountered during restore).");
+        System.err.println("    --monitor-verbose flag prints monitor events with all keys.");
         System.err.println("");
         System.err.println("The 'restore' command when given a token and one or more package names");
         System.err.println("initiates a restore operation of just those given packages from the restore");
         System.err.println("set designated by the TOKEN argument.  It is effectively the same as the");
         System.err.println("'restore' operation supplying only a token, but applies a filter to the");
         System.err.println("set of applications to be restored.");
+        System.err.println("    --monitor flag prints monitor events (important events and errors");
+        System.err.println("              encountered during restore).");
+        System.err.println("    --monitor-verbose flag prints monitor events with all keys.");
         System.err.println("");
         System.err.println("The 'run' command causes any scheduled backup operation to be initiated");
         System.err.println("immediately, without the usual waiting period for batching together");
@@ -1026,7 +1045,8 @@ public class Bmgr {
         System.err.println("");
         System.err.println("The 'backupnow' command runs an immediate backup for one or more packages.");
         System.err.println("    --all flag runs backup for all eligible packages.");
-        System.err.println("    --monitor flag prints monitor events.");
+        System.err.println("    --monitor flag prints monitor events (important events and errors");
+        System.err.println("              encountered during backup).");
         System.err.println("    --monitor-verbose flag prints monitor events with all keys.");
         System.err.println("For each package it will run key/value or full data backup ");
         System.err.println("depending on the package's manifest declarations.");
@@ -1076,6 +1096,37 @@ public class Bmgr {
                     out.append("(v").append(version).append(")");
                 }
             }
+            if (event.containsKey(BackupManagerMonitor.EXTRA_LOG_AGENT_LOGGING_RESULTS)) {
+                ArrayList<BackupRestoreEventLogger.DataTypeResult> results =
+                        event.getParcelableArrayList(
+                                BackupManagerMonitor.EXTRA_LOG_AGENT_LOGGING_RESULTS,
+                                BackupRestoreEventLogger.DataTypeResult.class);
+                out.append(", results = [");
+                for (BackupRestoreEventLogger.DataTypeResult result : results) {
+                    out.append("\n{\n\tdataType: ");
+                    out.append(result.getDataType());
+                    out.append("\n\tsuccessCount: ");
+                    out.append(result.getSuccessCount());
+                    out.append("\n\tfailCount: ");
+                    out.append(result.getFailCount());
+                    out.append("\n\tmetadataHash: ");
+                    out.append(Arrays.toString(result.getMetadataHash()));
+
+                    if (!result.getErrors().isEmpty()) {
+                        out.append("\n\terrors: [");
+                        for (String error : result.getErrors().keySet()) {
+                            out.append(error);
+                            out.append(": ");
+                            out.append(result.getErrors().get(error));
+                            out.append(";");
+                        }
+                        out.append("]");
+                    }
+                    out.append("\n}");
+
+                }
+                out.append("]");
+            }
             if (mVerbose) {
                 Set<String> remainingKeys = new ArraySet<>(event.keySet());
                 remainingKeys.remove(BackupManagerMonitor.EXTRA_LOG_EVENT_ID);
@@ -1083,6 +1134,7 @@ public class Bmgr {
                 remainingKeys.remove(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME);
                 remainingKeys.remove(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION);
                 remainingKeys.remove(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION);
+                remainingKeys.remove(BackupManagerMonitor.EXTRA_LOG_AGENT_LOGGING_RESULTS);
                 if (!remainingKeys.isEmpty()) {
                     out.append(", other keys =");
                     for (String key : remainingKeys) {
@@ -1192,6 +1244,8 @@ public class Bmgr {
                 return "NO_PACKAGES";
             case BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_IS_NULL:
                 return "TRANSPORT_IS_NULL";
+            case BackupManagerMonitor.LOG_EVENT_ID_AGENT_LOGGING_RESULTS:
+                return "AGENT_LOGGING_RESULTS";
             default:
                 return "UNKNOWN_ID";
         }
