@@ -30,4 +30,9 @@ void DrawGainmapBitmap(SkCanvas* c, const sk_sp<const SkImage>& image, const SkR
                        SkCanvas::SrcRectConstraint constraint,
                        const sk_sp<const SkImage>& gainmapImage, const SkGainmapInfo& gainmapInfo);
 
+sk_sp<SkShader> MakeGainmapShader(const sk_sp<const SkImage>& image,
+                                  const sk_sp<const SkImage>& gainmapImage,
+                                  const SkGainmapInfo& gainmapInfo, SkTileMode tileModeX,
+                                  SkTileMode tileModeY, const SkSamplingOptions& sampling);
+
 }  // namespace android::uirenderer
