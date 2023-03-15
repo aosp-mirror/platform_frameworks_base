@@ -168,7 +168,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
 
     private void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
         Log.i(TAG, "respondToClientWithErrorAndFinish");
-
+        // TODO add exception bit
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
             Log.i(TAG, "Request has already been completed. This is strange.");
             return;
