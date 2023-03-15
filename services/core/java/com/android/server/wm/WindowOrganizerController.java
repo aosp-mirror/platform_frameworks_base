@@ -391,9 +391,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 // apply the incoming transaction before finish in case it alters the visibility
                 // of the participants.
                 if (t != null) {
+                    // Set the finishing transition before applyTransaction so the visibility
+                    // changes of the transition participants will only set visible-requested
+                    // and still let finishTransition handle the participants.
+                    mTransitionController.mFinishingTransition = transition;
                     applyTransaction(t, syncId, null /*transition*/, caller, transition);
                 }
-                getTransitionController().finishTransition(transitionToken);
+                mTransitionController.finishTransition(transition);
+                mTransitionController.mFinishingTransition = null;
                 if (syncId >= 0) {
                     setSyncReady(syncId);
                 }

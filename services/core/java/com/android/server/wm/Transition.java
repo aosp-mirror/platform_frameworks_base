@@ -814,6 +814,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (mState < STATE_PLAYING) {
             throw new IllegalStateException("Can't finish a non-playing transition " + mSyncId);
         }
+        mController.mFinishingTransition = this;
 
         boolean hasParticipatedDisplay = false;
         boolean hasVisibleTransientLaunch = false;
@@ -995,6 +996,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         // Handle back animation if it's already started.
         mController.mAtm.mBackNavigationController.handleDeferredBackAnimation(mTargets);
+        mController.mFinishingTransition = null;
     }
 
     void abort() {
@@ -1274,7 +1276,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (mFinishTransaction != null) {
             mFinishTransaction.apply();
         }
-        mController.finishTransition(mToken);
+        mController.finishTransition(this);
     }
 
     private void cleanUpInternal() {
