@@ -9163,10 +9163,7 @@ public class Notification implements Parcelable
          *                   {@code null}, in which case the output switcher will be disabled.
          *                   This intent should open an Activity or it will be ignored.
          * @return MediaStyle
-         *
-         * @hide
          */
-        @SystemApi
         @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL)
         @NonNull
         public MediaStyle setRemotePlaybackInfo(@NonNull CharSequence deviceName,
