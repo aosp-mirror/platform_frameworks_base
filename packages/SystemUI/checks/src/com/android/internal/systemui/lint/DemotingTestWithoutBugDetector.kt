@@ -25,10 +25,12 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
+import java.util.EnumSet
 import java.util.regex.Pattern
 import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.UElement
 
+@Suppress("UnstableApiUsage") // For linter api
 class DemotingTestWithoutBugDetector : Detector(), SourceCodeScanner {
     override fun getApplicableUastTypes(): List<Class<out UElement>> {
         return listOf(UAnnotation::class.java)
@@ -39,18 +41,15 @@ class DemotingTestWithoutBugDetector : Detector(), SourceCodeScanner {
             override fun visitAnnotation(node: UAnnotation) {
                 // Annotations having int bugId field
                 if (node.qualifiedName in DEMOTING_ANNOTATION_BUG_ID) {
-                    val bugId = node.findAttributeValue("bugId")!!.evaluate() as Int
-                    if (bugId <= 0) {
+                    if (!containsBugId(node)) {
                         val location = context.getLocation(node)
                         val message = "Please attach a bug id to track demoted test"
                         context.report(ISSUE, node, location, message)
                     }
                 }
-                // @Ignore has a String field for reason
+                // @Ignore has a String field for specifying reasons
                 if (node.qualifiedName == DEMOTING_ANNOTATION_IGNORE) {
-                    val reason = node.findAttributeValue("value")!!.evaluate() as String
-                    val bugPattern = Pattern.compile("b/\\d+")
-                    if (!bugPattern.matcher(reason).find()) {
+                    if (!containsBugString(node)) {
                         val location = context.getLocation(node)
                         val message = "Please attach a bug (e.g. b/123) to track demoted test"
                         context.report(ISSUE, node, location, message)
@@ -58,6 +57,17 @@ class DemotingTestWithoutBugDetector : Detector(), SourceCodeScanner {
                 }
             }
         }
+    }
+
+    private fun containsBugId(node: UAnnotation): Boolean {
+        val bugId = node.findAttributeValue("bugId")?.evaluate() as Int?
+        return bugId != null && bugId > 0
+    }
+
+    private fun containsBugString(node: UAnnotation): Boolean {
+        val reason = node.findAttributeValue("value")?.evaluate() as String?
+        val bugPattern = Pattern.compile("b/\\d+")
+        return reason != null && bugPattern.matcher(reason).find()
     }
 
     companion object {
@@ -87,7 +97,7 @@ class DemotingTestWithoutBugDetector : Detector(), SourceCodeScanner {
                 implementation =
                     Implementation(
                         DemotingTestWithoutBugDetector::class.java,
-                        Scope.JAVA_FILE_SCOPE
+                        EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES)
                     )
             )
     }
