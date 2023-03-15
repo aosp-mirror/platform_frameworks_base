@@ -19,7 +19,6 @@ package com.android.server.credentials;
 import static com.android.server.credentials.MetricUtilities.logApiCalled;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
@@ -85,8 +84,8 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
 
     // TODO(b/271135048) - Group metrics used in a scope together, such as here in RequestSession
     // TODO(b/271135048) - Replace this with a new atom per each browsing emit (V4)
-    @Nullable
-    protected List<CandidateBrowsingPhaseMetric> mCandidateBrowsingPhaseMetric;
+    @NonNull
+    protected List<CandidateBrowsingPhaseMetric> mCandidateBrowsingPhaseMetric = new ArrayList<>();
     // As emits occur in sequential order, increment this counter and utilize
     protected int mSequenceCounter = 0;
     protected final String mHybridService;
