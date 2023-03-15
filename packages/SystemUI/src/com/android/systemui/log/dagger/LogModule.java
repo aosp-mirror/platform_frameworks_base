@@ -136,6 +136,14 @@ public class LogModule {
         return factory.create("NotifSectionLog", 1000 /* maxSize */, false /* systrace */);
     }
 
+    /** Provides a logging buffer for all logs related to remote input controller. */
+    @Provides
+    @SysUISingleton
+    @NotificationRemoteInputLog
+    public static LogBuffer provideNotificationRemoteInputLogBuffer(LogBufferFactory factory) {
+        return factory.create("NotifRemoteInputLog", 50 /* maxSize */, false /* systrace */);
+    }
+
     /** Provides a logging buffer for all logs related to the data layer of notifications. */
     @Provides
     @SysUISingleton
