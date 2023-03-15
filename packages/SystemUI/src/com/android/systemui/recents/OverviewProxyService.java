@@ -21,7 +21,6 @@ import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
-
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
@@ -713,6 +712,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     public void startConnectionToCurrentUser() {
+        Log.v(TAG_OPS, "startConnectionToCurrentUser: connection is restarted");
         if (mHandler.getLooper() != Looper.myLooper()) {
             mHandler.post(mConnectionRunnable);
         } else {
