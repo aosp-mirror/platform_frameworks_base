@@ -20,6 +20,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.RemoteException
 import android.service.dreams.IDreamManager
@@ -57,9 +59,11 @@ class ControlsActivity @Inject constructor(
     private lateinit var parent: ViewGroup
     private lateinit var broadcastReceiver: BroadcastReceiver
     private var mExitToDream: Boolean = false
+    private lateinit var lastConfiguration: Configuration
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        lastConfiguration = resources.configuration
         if (featureFlags.isEnabled(Flags.USE_APP_PANELS)) {
             window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
         }
@@ -90,6 +94,14 @@ class ControlsActivity @Inject constructor(
         }
 
         initBroadcastReceiver()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (lastConfiguration.diff(newConfig) and ActivityInfo.CONFIG_ORIENTATION != 0 ) {
+            uiController.onOrientationChange()
+        }
+        lastConfiguration = newConfig
     }
 
     override fun onStart() {
