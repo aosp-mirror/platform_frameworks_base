@@ -19,6 +19,8 @@ package android.hardware.input;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.BatteryState;
+import android.hardware.input.InputManager.InputDeviceBatteryListener;
 import android.hardware.input.InputManager.InputDeviceListener;
 import android.hardware.input.InputManager.OnTabletModeChangedListener;
 import android.os.Handler;
@@ -36,7 +38,9 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Manages communication with the input manager service on behalf of
@@ -60,6 +64,14 @@ public final class InputManagerGlobal {
     @GuardedBy("mOnTabletModeChangedListeners")
     private final ArrayList<OnTabletModeChangedListenerDelegate> mOnTabletModeChangedListeners =
             new ArrayList<>();
+
+    private final Object mBatteryListenersLock = new Object();
+    // Maps a deviceId whose battery is currently being monitored to an entry containing the
+    // registered listeners for that device.
+    @GuardedBy("mBatteryListenersLock")
+    @Nullable private SparseArray<RegisteredBatteryListeners> mBatteryListeners;
+    @GuardedBy("mBatteryListenersLock")
+    @Nullable private IInputDeviceBatteryListener mInputDeviceBatteryListener;
 
     private static InputManagerGlobal sInstance;
 
@@ -502,5 +514,188 @@ public final class InputManagerGlobal {
             }
         }
         return -1;
+    }
+
+    private static final class RegisteredBatteryListeners {
+        final List<InputDeviceBatteryListenerDelegate> mDelegates = new ArrayList<>();
+        IInputDeviceBatteryState mInputDeviceBatteryState;
+    }
+
+    private static final class InputDeviceBatteryListenerDelegate {
+        final InputDeviceBatteryListener mListener;
+        final Executor mExecutor;
+
+        InputDeviceBatteryListenerDelegate(InputDeviceBatteryListener listener, Executor executor) {
+            mListener = listener;
+            mExecutor = executor;
+        }
+
+        void notifyBatteryStateChanged(IInputDeviceBatteryState state) {
+            mExecutor.execute(() ->
+                    mListener.onBatteryStateChanged(state.deviceId, state.updateTime,
+                            new LocalBatteryState(state.isPresent, state.status, state.capacity)));
+        }
+    }
+
+    /**
+     * @see InputManager#addInputDeviceBatteryListener(int, Executor, InputDeviceBatteryListener)
+     */
+    void addInputDeviceBatteryListener(int deviceId, @NonNull Executor executor,
+            @NonNull InputDeviceBatteryListener listener) {
+        Objects.requireNonNull(executor, "executor should not be null");
+        Objects.requireNonNull(listener, "listener should not be null");
+
+        synchronized (mBatteryListenersLock) {
+            if (mBatteryListeners == null) {
+                mBatteryListeners = new SparseArray<>();
+                mInputDeviceBatteryListener = new LocalInputDeviceBatteryListener();
+            }
+            RegisteredBatteryListeners listenersForDevice = mBatteryListeners.get(deviceId);
+            if (listenersForDevice == null) {
+                // The deviceId is currently not being monitored for battery changes.
+                // Start monitoring the device.
+                listenersForDevice = new RegisteredBatteryListeners();
+                mBatteryListeners.put(deviceId, listenersForDevice);
+                try {
+                    mIm.registerBatteryListener(deviceId, mInputDeviceBatteryListener);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            } else {
+                // The deviceId is already being monitored for battery changes.
+                // Ensure that the listener is not already registered.
+                final int numDelegates = listenersForDevice.mDelegates.size();
+                for (int i = 0; i < numDelegates; i++) {
+                    InputDeviceBatteryListener registeredListener =
+                            listenersForDevice.mDelegates.get(i).mListener;
+                    if (Objects.equals(listener, registeredListener)) {
+                        throw new IllegalArgumentException(
+                                "Attempting to register an InputDeviceBatteryListener that has "
+                                        + "already been registered for deviceId: "
+                                        + deviceId);
+                    }
+                }
+            }
+            final InputDeviceBatteryListenerDelegate delegate =
+                    new InputDeviceBatteryListenerDelegate(listener, executor);
+            listenersForDevice.mDelegates.add(delegate);
+
+            // Notify the listener immediately if we already have the latest battery state.
+            if (listenersForDevice.mInputDeviceBatteryState != null) {
+                delegate.notifyBatteryStateChanged(listenersForDevice.mInputDeviceBatteryState);
+            }
+        }
+    }
+
+    /**
+     * @see InputManager#removeInputDeviceBatteryListener(int, InputDeviceBatteryListener)
+     */
+    void removeInputDeviceBatteryListener(int deviceId,
+            @NonNull InputDeviceBatteryListener listener) {
+        Objects.requireNonNull(listener, "listener should not be null");
+
+        synchronized (mBatteryListenersLock) {
+            if (mBatteryListeners == null) {
+                return;
+            }
+            RegisteredBatteryListeners listenersForDevice = mBatteryListeners.get(deviceId);
+            if (listenersForDevice == null) {
+                // The deviceId is not currently being monitored.
+                return;
+            }
+            final List<InputDeviceBatteryListenerDelegate> delegates =
+                    listenersForDevice.mDelegates;
+            for (int i = 0; i < delegates.size();) {
+                if (Objects.equals(listener, delegates.get(i).mListener)) {
+                    delegates.remove(i);
+                    continue;
+                }
+                i++;
+            }
+            if (!delegates.isEmpty()) {
+                return;
+            }
+
+            // There are no more battery listeners for this deviceId. Stop monitoring this device.
+            mBatteryListeners.remove(deviceId);
+            try {
+                mIm.unregisterBatteryListener(deviceId, mInputDeviceBatteryListener);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            if (mBatteryListeners.size() == 0) {
+                // There are no more devices being monitored, so the registered
+                // IInputDeviceBatteryListener will be automatically dropped by the server.
+                mBatteryListeners = null;
+                mInputDeviceBatteryListener = null;
+            }
+        }
+    }
+
+    private class LocalInputDeviceBatteryListener extends IInputDeviceBatteryListener.Stub {
+        @Override
+        public void onBatteryStateChanged(IInputDeviceBatteryState state) {
+            synchronized (mBatteryListenersLock) {
+                if (mBatteryListeners == null) return;
+                final RegisteredBatteryListeners entry = mBatteryListeners.get(state.deviceId);
+                if (entry == null) return;
+
+                entry.mInputDeviceBatteryState = state;
+                final int numDelegates = entry.mDelegates.size();
+                for (int i = 0; i < numDelegates; i++) {
+                    entry.mDelegates.get(i)
+                            .notifyBatteryStateChanged(entry.mInputDeviceBatteryState);
+                }
+            }
+        }
+    }
+
+    /**
+     * @see InputManager#getInputDeviceBatteryState(int, boolean)
+     */
+    @NonNull
+    BatteryState getInputDeviceBatteryState(int deviceId, boolean hasBattery) {
+        if (!hasBattery) {
+            return new LocalBatteryState();
+        }
+        try {
+            final IInputDeviceBatteryState state = mIm.getBatteryState(deviceId);
+            return new LocalBatteryState(state.isPresent, state.status, state.capacity);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    // Implementation of the android.hardware.BatteryState interface used to report the battery
+    // state via the InputDevice#getBatteryState() and InputDeviceBatteryListener interfaces.
+    private static final class LocalBatteryState extends BatteryState {
+        private final boolean mIsPresent;
+        private final int mStatus;
+        private final float mCapacity;
+
+        LocalBatteryState() {
+            this(false /*isPresent*/, BatteryState.STATUS_UNKNOWN, Float.NaN /*capacity*/);
+        }
+
+        LocalBatteryState(boolean isPresent, int status, float capacity) {
+            mIsPresent = isPresent;
+            mStatus = status;
+            mCapacity = capacity;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return mIsPresent;
+        }
+
+        @Override
+        public int getStatus() {
+            return mStatus;
+        }
+
+        @Override
+        public float getCapacity() {
+            return mCapacity;
+        }
     }
 }
