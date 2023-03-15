@@ -84,8 +84,7 @@ public class VisualQueryDetector {
      * @see HotwordDetector#updateState(PersistableBundle, SharedMemory)
      */
     public void updateState(@Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory) throws
-            HotwordDetector.IllegalDetectorStateException {
+            @Nullable SharedMemory sharedMemory) {
         mInitializationDelegate.updateState(options, sharedMemory);
     }
 
@@ -104,7 +103,7 @@ public class VisualQueryDetector {
      * @see HotwordDetector#startRecognition()
      */
     @RequiresPermission(allOf = {CAMERA, RECORD_AUDIO})
-    public boolean startRecognition() throws HotwordDetector.IllegalDetectorStateException {
+    public boolean startRecognition() {
         if (DEBUG) {
             Slog.i(TAG, "#startRecognition");
         }
@@ -128,7 +127,7 @@ public class VisualQueryDetector {
      * @see HotwordDetector#stopRecognition()
      */
     @RequiresPermission(allOf = {CAMERA, RECORD_AUDIO})
-    public boolean stopRecognition() throws HotwordDetector.IllegalDetectorStateException {
+    public boolean stopRecognition() {
         if (DEBUG) {
             Slog.i(TAG, "#stopRecognition");
         }
@@ -236,13 +235,13 @@ public class VisualQueryDetector {
         }
 
         @Override
-        public boolean stopRecognition() throws IllegalDetectorStateException {
+        public boolean stopRecognition() {
             throwIfDetectorIsNoLongerActive();
             return true;
         }
 
         @Override
-        public boolean startRecognition() throws IllegalDetectorStateException {
+        public boolean startRecognition() {
             throwIfDetectorIsNoLongerActive();
             return true;
         }
@@ -251,7 +250,7 @@ public class VisualQueryDetector {
         public final boolean startRecognition(
                 @NonNull ParcelFileDescriptor audioStream,
                 @NonNull AudioFormat audioFormat,
-                @Nullable PersistableBundle options) throws IllegalDetectorStateException {
+                @Nullable PersistableBundle options) {
             //No-op, not supported by VisualQueryDetector as it should be trusted.
             return false;
         }
