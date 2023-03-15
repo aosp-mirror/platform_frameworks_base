@@ -20,6 +20,8 @@ package com.android.server.policy;
 import static android.content.Context.SENSOR_SERVICE;
 
 import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED;
+import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_DISABLED;
+import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_ENABLED;
 import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_CRITICAL;
 import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_NORMAL;
 import static com.android.server.policy.DeviceStateProviderImpl.DEFAULT_DEVICE_STATE;
@@ -327,7 +329,8 @@ public final class DeviceStateProviderImplTest {
                 + "        <name>THERMAL_TEST</name>\n"
                 + "        <flags>\n"
                 + "            <flag>FLAG_EMULATED_ONLY</flag>\n"
-                + "            <flag>FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL</flag>\n"
+                + "            <flag>FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL</flag>\n"
+                + "            <flag>FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE</flag>\n"
                 + "        </flags>\n"
                 + "    </device-state>\n"
                 + "</device-state-config>\n";
@@ -354,7 +357,8 @@ public final class DeviceStateProviderImplTest {
                         new DeviceState(3, "OPENED", 0 /* flags */),
                         new DeviceState(4, "THERMAL_TEST",
                                 DeviceState.FLAG_EMULATED_ONLY
-                                        | DeviceState.FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL) },
+                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
+                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE) },
                 mDeviceStateArrayCaptor.getValue());
         // onStateChanged() should not be called because the provider has not yet been notified of
         // the initial sensor state.
@@ -419,7 +423,8 @@ public final class DeviceStateProviderImplTest {
                         new DeviceState(3, "OPENED", 0 /* flags */),
                         new DeviceState(4, "THERMAL_TEST",
                                 DeviceState.FLAG_EMULATED_ONLY
-                                        | DeviceState.FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL) },
+                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
+                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE) },
                 mDeviceStateArrayCaptor.getValue());
         Mockito.clearInvocations(listener);
 
@@ -451,7 +456,65 @@ public final class DeviceStateProviderImplTest {
                         new DeviceState(3, "OPENED", 0 /* flags */),
                         new DeviceState(4, "THERMAL_TEST",
                                 DeviceState.FLAG_EMULATED_ONLY
-                                        | DeviceState.FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL) },
+                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
+                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE) },
+                mDeviceStateArrayCaptor.getValue());
+    }
+
+    @Test
+    public void test_flagDisableWhenPowerSaveEnabled() throws Exception {
+        Sensor sensor = newSensor("sensor", Sensor.STRING_TYPE_HINGE_ANGLE);
+        when(mSensorManager.getSensorList(anyInt())).thenReturn(List.of(sensor));
+        DeviceStateProviderImpl provider = create_sensorBasedProvider(sensor);
+
+        provider.onPowerSaveModeChanged(false /* isPowerSaveModeEnabled */);
+        DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
+        provider.setListener(listener);
+
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
+                eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
+        assertArrayEquals(
+                new DeviceState[]{
+                        new DeviceState(1, "CLOSED", 0 /* flags */),
+                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
+                        new DeviceState(3, "OPENED", 0 /* flags */),
+                        new DeviceState(4, "THERMAL_TEST",
+                                DeviceState.FLAG_EMULATED_ONLY
+                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
+                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE) },
+                mDeviceStateArrayCaptor.getValue());
+        Mockito.clearInvocations(listener);
+
+        provider.onPowerSaveModeChanged(false /* isPowerSaveModeEnabled */);
+        verify(listener, never()).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
+                eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
+        Mockito.clearInvocations(listener);
+
+        // The THERMAL_TEST state should be disabled due to power save being enabled.
+        provider.onPowerSaveModeChanged(true /* isPowerSaveModeEnabled */);
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
+                eq(SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_ENABLED));
+        assertArrayEquals(
+                new DeviceState[]{
+                        new DeviceState(1, "CLOSED", 0 /* flags */),
+                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
+                        new DeviceState(3, "OPENED", 0 /* flags */) },
+                mDeviceStateArrayCaptor.getValue());
+        Mockito.clearInvocations(listener);
+
+        // The THERMAL_TEST state should be re-enabled.
+        provider.onPowerSaveModeChanged(false /* isPowerSaveModeEnabled */);
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
+                eq(SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_DISABLED));
+        assertArrayEquals(
+                new DeviceState[]{
+                        new DeviceState(1, "CLOSED", 0 /* flags */),
+                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
+                        new DeviceState(3, "OPENED", 0 /* flags */),
+                        new DeviceState(4, "THERMAL_TEST",
+                                DeviceState.FLAG_EMULATED_ONLY
+                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
+                                        | DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE) },
                 mDeviceStateArrayCaptor.getValue());
     }
 
