@@ -125,6 +125,7 @@ struct MediaEvent : public RefBase {
 };
 
 struct FilterClientCallbackImpl : public FilterClientCallback {
+    FilterClientCallbackImpl();
     ~FilterClientCallbackImpl();
     virtual void onFilterEvent(const vector<DemuxFilterEvent>& events);
     virtual void onFilterStatus(const DemuxFilterStatus status);
@@ -135,6 +136,32 @@ struct FilterClientCallbackImpl : public FilterClientCallback {
 private:
     jweak mFilterObj;
     sp<FilterClient> mFilterClient;
+    jclass mEventClass;
+    jclass mSectionEventClass;
+    jclass mMediaEventClass;
+    jclass mAudioDescriptorClass;
+    jclass mPesEventClass;
+    jclass mTsRecordEventClass;
+    jclass mMmtpRecordEventClass;
+    jclass mDownloadEventClass;
+    jclass mIpPayloadEventClass;
+    jclass mTemiEventClass;
+    jclass mScramblingStatusEventClass;
+    jclass mIpCidChangeEventClass;
+    jclass mRestartEventClass;
+    jmethodID mSectionEventInitID;
+    jmethodID mMediaEventInitID;
+    jmethodID mAudioDescriptorInitID;
+    jmethodID mPesEventInitID;
+    jmethodID mTsRecordEventInitID;
+    jmethodID mMmtpRecordEventInitID;
+    jmethodID mDownloadEventInitID;
+    jmethodID mIpPayloadEventInitID;
+    jmethodID mTemiEventInitID;
+    jmethodID mScramblingStatusEventInitID;
+    jmethodID mIpCidChangeEventInitID;
+    jmethodID mRestartEventInitID;
+    jfieldID mMediaEventFieldContextID;
     bool mSharedFilter;
     void getSectionEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
     void getMediaEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
