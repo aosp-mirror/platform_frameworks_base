@@ -90,7 +90,6 @@ import android.os.ServiceManager;
 import android.os.ShellCommand;
 import android.os.StrictMode;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -175,6 +174,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private boolean mStreaming;   // Streaming the profiling output to a file.
     private String mAgent;  // Agent to attach on startup.
     private boolean mAttachAgentDuringBind;  // Whether agent should be attached late.
+    private int mClockType; // Whether we need thread cpu / wall clock / both.
     private int mDisplayId;
     private int mTaskDisplayAreaFeatureId;
     private int mWindowingMode;
@@ -400,6 +400,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mAutoStop = false;
                 } else if (opt.equals("--sampling")) {
                     mSamplingInterval = Integer.parseInt(getNextArgRequired());
+                } else if (opt.equals("--clock-type")) {
+                    String clock_type = getNextArgRequired();
+                    mClockType = ProfilerInfo.getClockTypeFromString(clock_type);
                 } else if (opt.equals("--streaming")) {
                     mStreaming = true;
                 } else if (opt.equals("--attach-agent")) {
@@ -548,7 +551,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     }
                 }
                 profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop,
-                        mStreaming, mAgent, mAttachAgentDuringBind);
+                        mStreaming, mAgent, mAttachAgentDuringBind, mClockType);
             }
 
             pw.println("Starting: " + intent);
@@ -878,24 +881,15 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    static void removeWallOption() {
-        String props = SystemProperties.get("dalvik.vm.extra-opts");
-        if (props != null && props.contains("-Xprofile:wallclock")) {
-            props = props.replace("-Xprofile:wallclock", "");
-            props = props.trim();
-            SystemProperties.set("dalvik.vm.extra-opts", props);
-        }
-    }
-
     private int runProfile(PrintWriter pw) throws RemoteException {
         final PrintWriter err = getErrPrintWriter();
         String profileFile = null;
         boolean start = false;
-        boolean wall = false;
         int userId = UserHandle.USER_CURRENT;
         int profileType = 0;
         mSamplingInterval = 0;
         mStreaming = false;
+        mClockType = ProfilerInfo.CLOCK_TYPE_DEFAULT;
 
         String process = null;
 
@@ -907,8 +901,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             while ((opt=getNextOption()) != null) {
                 if (opt.equals("--user")) {
                     userId = UserHandle.parseUserArg(getNextArgRequired());
-                } else if (opt.equals("--wall")) {
-                    wall = true;
+                } else if (opt.equals("--clock-type")) {
+                    String clock_type = getNextArgRequired();
+                    mClockType = ProfilerInfo.getClockTypeFromString(clock_type);
                 } else if (opt.equals("--streaming")) {
                     mStreaming = true;
                 } else if (opt.equals("--sampling")) {
@@ -956,29 +951,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return -1;
             }
             profilerInfo = new ProfilerInfo(profileFile, fd, mSamplingInterval, false, mStreaming,
-                    null, false);
+                    null, false, mClockType);
         }
 
-        try {
-            if (wall) {
-                // XXX doesn't work -- this needs to be set before booting.
-                String props = SystemProperties.get("dalvik.vm.extra-opts");
-                if (props == null || !props.contains("-Xprofile:wallclock")) {
-                    props = props + " -Xprofile:wallclock";
-                    //SystemProperties.set("dalvik.vm.extra-opts", props);
-                }
-            } else if (start) {
-                //removeWallOption();
-            }
-            if (!mInterface.profileControl(process, userId, start, profilerInfo, profileType)) {
-                wall = false;
-                err.println("PROFILE FAILED on process " + process);
-                return -1;
-            }
-        } finally {
-            if (!wall) {
-                //removeWallOption();
-            }
+        if (!mInterface.profileControl(process, userId, start, profilerInfo, profileType)) {
+            err.println("PROFILE FAILED on process " + process);
+            return -1;
         }
         return 0;
     }
@@ -3456,8 +3434,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  help");
             pw.println("      Print this help text.");
             pw.println("  start-activity [-D] [-N] [-W] [-P <FILE>] [--start-profiler <FILE>]");
-            pw.println("          [--sampling INTERVAL] [--streaming] [-R COUNT] [-S]");
-            pw.println("          [--track-allocation] [--user <USER_ID> | current] <INTENT>");
+            pw.println("          [--sampling INTERVAL] [--clock-type <TYPE>] [--streaming]");
+            pw.println("          [-R COUNT] [-S] [--track-allocation]");
+            pw.println("          [--user <USER_ID> | current] <INTENT>");
             pw.println("      Start an Activity.  Options are:");
             pw.println("      -D: enable debugging");
             pw.println("      -N: enable native debugging");
@@ -3465,6 +3444,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --start-profiler <FILE>: start profiler and send results to <FILE>");
             pw.println("      --sampling INTERVAL: use sample profiling with INTERVAL microseconds");
             pw.println("          between samples (use with --start-profiler)");
+            pw.println("      --clock-type <TYPE>: type can be wall / thread-cpu / dual. Specify");
+            pw.println("          the clock that is used to report the timestamps when profiling");
+            pw.println("          The default value is dual. (use with --start-profiler)");
             pw.println("      --streaming: stream the profiling output to the specified file");
             pw.println("          (use with --start-profiler)");
             pw.println("      -P <FILE>: like above, but profiling stops when app goes idle");
@@ -3542,12 +3524,16 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      stop: stop tracing IPC transactions and dump the results to file.");
             pw.println("      --dump-file <FILE>: Specify the file the trace should be dumped to.");
             pw.println("  profile start [--user <USER_ID> current]");
+            pw.println("          [--clock-type <TYPE>]");
             pw.println("          [--sampling INTERVAL | --streaming] <PROCESS> <FILE>");
             pw.println("      Start profiler on a process.  The given <PROCESS> argument");
             pw.println("        may be either a process name or pid.  Options are:");
             pw.println("      --user <USER_ID> | current: When supplying a process name,");
             pw.println("          specify user of process to profile; uses current user if not");
             pw.println("          specified.");
+            pw.println("      --clock-type <TYPE>: use the specified clock to report timestamps.");
+            pw.println("          The type can be one of wall | thread-cpu | dual. The default");
+            pw.println("          value is dual.");
             pw.println("      --sampling INTERVAL: use sample profiling with INTERVAL microseconds");
             pw.println("          between samples.");
             pw.println("      --streaming: stream the profiling output to the specified file.");
