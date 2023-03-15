@@ -30,6 +30,9 @@ import static android.app.AlarmManager.INTERVAL_DAY;
 import static android.app.AlarmManager.INTERVAL_HOUR;
 import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.RTC_WAKEUP;
+import static android.content.PermissionChecker.PERMISSION_GRANTED;
+import static android.content.PermissionChecker.PID_UNKNOWN;
+import static android.content.PermissionChecker.checkPermissionForPreflight;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.os.PowerExemptionManager.REASON_ALARM_MANAGER_ALARM_CLOCK;
 import static android.os.PowerExemptionManager.REASON_DENIED;
@@ -87,11 +90,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserPackage;
-import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.BatteryStatsInternal;
@@ -182,7 +183,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
@@ -269,7 +269,8 @@ public class AlarmManagerService extends SystemService {
 
     /**
      * A map from uid to the last op-mode we have seen for
-     * {@link AppOpsManager#OP_SCHEDULE_EXACT_ALARM}
+     * {@link AppOpsManager#OP_SCHEDULE_EXACT_ALARM}. Used for evaluating permission state change
+     * when the denylist changes.
      */
     @VisibleForTesting
     @GuardedBy("mLock")
@@ -2097,20 +2098,31 @@ public class AlarmManagerService extends SystemService {
                                 if (oldMode == newMode) {
                                     return;
                                 }
-                                final boolean allowedByDefault =
-                                        isScheduleExactAlarmAllowedByDefault(packageName, uid);
+                                final boolean deniedByDefault = isScheduleExactAlarmDeniedByDefault(
+                                        packageName, UserHandle.getUserId(uid));
 
                                 final boolean hadPermission;
-                                if (oldMode != AppOpsManager.MODE_DEFAULT) {
-                                    hadPermission = (oldMode == AppOpsManager.MODE_ALLOWED);
-                                } else {
-                                    hadPermission = allowedByDefault;
-                                }
                                 final boolean hasPermission;
-                                if (newMode != AppOpsManager.MODE_DEFAULT) {
-                                    hasPermission = (newMode == AppOpsManager.MODE_ALLOWED);
+
+                                if (deniedByDefault) {
+                                    final boolean permissionState = getContext().checkPermission(
+                                            Manifest.permission.SCHEDULE_EXACT_ALARM, PID_UNKNOWN,
+                                            uid) == PackageManager.PERMISSION_GRANTED;
+                                    hadPermission = (oldMode == AppOpsManager.MODE_DEFAULT)
+                                            ? permissionState
+                                            : (oldMode == AppOpsManager.MODE_ALLOWED);
+                                    hasPermission = (newMode == AppOpsManager.MODE_DEFAULT)
+                                            ? permissionState
+                                            : (newMode == AppOpsManager.MODE_ALLOWED);
                                 } else {
-                                    hasPermission = allowedByDefault;
+                                    final boolean allowedByDefault =
+                                            !mConstants.EXACT_ALARM_DENY_LIST.contains(packageName);
+                                    hadPermission = (oldMode == AppOpsManager.MODE_DEFAULT)
+                                            ? allowedByDefault
+                                            : (oldMode == AppOpsManager.MODE_ALLOWED);
+                                    hasPermission = (newMode == AppOpsManager.MODE_DEFAULT)
+                                            ? allowedByDefault
+                                            : (newMode == AppOpsManager.MODE_ALLOWED);
                                 }
 
                                 if (hadPermission && !hasPermission) {
@@ -2754,41 +2766,13 @@ public class AlarmManagerService extends SystemService {
 
     boolean hasUseExactAlarmInternal(String packageName, int uid) {
         return isUseExactAlarmEnabled(packageName, UserHandle.getUserId(uid))
-                && (PermissionChecker.checkPermissionForPreflight(getContext(),
-                Manifest.permission.USE_EXACT_ALARM, PermissionChecker.PID_UNKNOWN, uid,
-                packageName) == PermissionChecker.PERMISSION_GRANTED);
-    }
-
-    /**
-     * Returns whether SCHEDULE_EXACT_ALARM is allowed by default.
-     */
-    boolean isScheduleExactAlarmAllowedByDefault(String packageName, int uid) {
-        if (isScheduleExactAlarmDeniedByDefault(packageName, UserHandle.getUserId(uid))) {
-
-            // This is essentially like changing the protection level of the permission to
-            // (privileged|signature|role|appop), but have to implement this logic to maintain
-            // compatibility for older apps.
-            if (mPackageManagerInternal.isPlatformSigned(packageName)
-                    || mPackageManagerInternal.isUidPrivileged(uid)) {
-                return true;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                final List<String> wellbeingHolders = (mRoleManager != null)
-                        ? mRoleManager.getRoleHolders(RoleManager.ROLE_SYSTEM_WELLBEING)
-                        : Collections.emptyList();
-                return wellbeingHolders.contains(packageName);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-        return !mConstants.EXACT_ALARM_DENY_LIST.contains(packageName);
+                && (checkPermissionForPreflight(getContext(), Manifest.permission.USE_EXACT_ALARM,
+                PID_UNKNOWN, uid, packageName) == PERMISSION_GRANTED);
     }
 
     boolean hasScheduleExactAlarmInternal(String packageName, int uid) {
         final long start = mStatLogger.getTime();
 
-        // Not using getScheduleExactAlarmState as this can avoid some calls to AppOpsService.
         // Not using #mLastOpScheduleExactAlarm as it may contain stale values.
         // No locking needed as all internal containers being queried are immutable.
         final boolean hasPermission;
@@ -2796,11 +2780,16 @@ public class AlarmManagerService extends SystemService {
             hasPermission = false;
         } else if (!isExactAlarmChangeEnabled(packageName, UserHandle.getUserId(uid))) {
             hasPermission = false;
+        } else if (isScheduleExactAlarmDeniedByDefault(packageName, UserHandle.getUserId(uid))) {
+            hasPermission = (checkPermissionForPreflight(getContext(),
+                    Manifest.permission.SCHEDULE_EXACT_ALARM, PID_UNKNOWN, uid, packageName)
+                    == PERMISSION_GRANTED);
         } else {
+            // Compatibility permission check for older apps.
             final int mode = mAppOps.checkOpNoThrow(AppOpsManager.OP_SCHEDULE_EXACT_ALARM, uid,
                     packageName);
             if (mode == AppOpsManager.MODE_DEFAULT) {
-                hasPermission = isScheduleExactAlarmAllowedByDefault(packageName, uid);
+                hasPermission = !mConstants.EXACT_ALARM_DENY_LIST.contains(packageName);
             } else {
                 hasPermission = (mode == AppOpsManager.MODE_ALLOWED);
             }
@@ -4683,10 +4672,6 @@ public class AlarmManagerService extends SystemService {
 
         ClockReceiver getClockReceiver(AlarmManagerService service) {
             return service.new ClockReceiver();
-        }
-
-        void registerContentObserver(ContentObserver contentObserver, Uri uri) {
-            mContext.getContentResolver().registerContentObserver(uri, false, contentObserver);
         }
 
         void registerDeviceConfigListener(DeviceConfig.OnPropertiesChangedListener listener) {
