@@ -103,7 +103,6 @@ public final class InputManager {
     @Nullable
     private Boolean mIsStylusPointerIconEnabled = null;
 
-    private InputDeviceSensorManager mInputDeviceSensorManager;
     /**
      * Broadcast Action: Query available keyboard layouts.
      * <p>
@@ -1224,11 +1223,7 @@ public final class InputManager {
      * @hide
      */
     public InputSensorInfo[] getSensorList(int deviceId) {
-        try {
-            return mIm.getSensorList(deviceId);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.getSensorList(deviceId);
     }
 
     /**
@@ -1238,12 +1233,8 @@ public final class InputManager {
      */
     public boolean enableSensor(int deviceId, int sensorType, int samplingPeriodUs,
             int maxBatchReportLatencyUs) {
-        try {
-            return mIm.enableSensor(deviceId, sensorType, samplingPeriodUs,
-                    maxBatchReportLatencyUs);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.enableSensor(deviceId, sensorType, samplingPeriodUs,
+                maxBatchReportLatencyUs);
     }
 
     /**
@@ -1252,11 +1243,7 @@ public final class InputManager {
      * @hide
      */
     public void disableSensor(int deviceId, int sensorType) {
-        try {
-            mIm.disableSensor(deviceId, sensorType);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        mGlobal.disableSensor(deviceId, sensorType);
     }
 
     /**
@@ -1265,11 +1252,7 @@ public final class InputManager {
      * @hide
      */
     public boolean flushSensor(int deviceId, int sensorType) {
-        try {
-            return mIm.flushSensor(deviceId, sensorType);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.flushSensor(deviceId, sensorType);
     }
 
     /**
@@ -1278,11 +1261,7 @@ public final class InputManager {
      * @hide
      */
     public boolean registerSensorListener(IInputSensorEventListener listener) {
-        try {
-            return mIm.registerSensorListener(listener);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.registerSensorListener(listener);
     }
 
     /**
@@ -1291,11 +1270,7 @@ public final class InputManager {
      * @hide
      */
     public void unregisterSensorListener(IInputSensorEventListener listener) {
-        try {
-            mIm.unregisterSensorListener(listener);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        mGlobal.unregisterSensorListener(listener);
     }
 
     /**
@@ -1504,10 +1479,7 @@ public final class InputManager {
      */
     @NonNull
     public SensorManager getInputDeviceSensorManager(int deviceId) {
-        if (mInputDeviceSensorManager == null) {
-            mInputDeviceSensorManager = new InputDeviceSensorManager(this);
-        }
-        return mInputDeviceSensorManager.getSensorManager(deviceId);
+        return mGlobal.getInputDeviceSensorManager(deviceId);
     }
 
     /**
