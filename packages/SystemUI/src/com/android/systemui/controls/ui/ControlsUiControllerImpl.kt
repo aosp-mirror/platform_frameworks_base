@@ -605,6 +605,7 @@ class ControlsUiControllerImpl @Inject constructor (
         if (items.size == 1) {
             spinner.setBackground(null)
             anchor.setOnClickListener(null)
+            anchor.isClickable = false
             return
         } else {
             spinner.background = parent.context.resources
