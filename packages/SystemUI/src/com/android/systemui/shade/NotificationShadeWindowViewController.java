@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade;
 
+import static com.android.systemui.flags.Flags.TRACKPAD_GESTURE_BACK;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.app.StatusBarManager;
@@ -39,6 +40,7 @@ import com.android.systemui.R;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -88,10 +90,12 @@ public class NotificationShadeWindowViewController {
     private final NotificationInsetsController mNotificationInsetsController;
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     private final UdfpsOverlayInteractor mUdfpsOverlayInteractor;
+    private final boolean mIsTrackpadGestureBackEnabled;
     private GestureDetector mPulsingWakeupGestureHandler;
     private View mBrightnessMirror;
     private boolean mTouchActive;
     private boolean mTouchCancelled;
+    private MotionEvent mDownEvent;
     private boolean mExpandAnimationRunning;
     private NotificationStackScrollLayout mStackScrollLayout;
     private PhoneStatusBarViewController mStatusBarViewController;
@@ -137,8 +141,8 @@ public class NotificationShadeWindowViewController {
             AlternateBouncerInteractor alternateBouncerInteractor,
             UdfpsOverlayInteractor udfpsOverlayInteractor,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
-            PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel
-    ) {
+            PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
+            FeatureFlags featureFlags) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
@@ -159,6 +163,7 @@ public class NotificationShadeWindowViewController {
         mNotificationInsetsController = notificationInsetsController;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mUdfpsOverlayInteractor = udfpsOverlayInteractor;
+        mIsTrackpadGestureBackEnabled = featureFlags.isEnabled(TRACKPAD_GESTURE_BACK);
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -219,9 +224,11 @@ public class NotificationShadeWindowViewController {
                 if (isDown) {
                     mTouchActive = true;
                     mTouchCancelled = false;
+                    mDownEvent = ev;
                 } else if (ev.getActionMasked() == MotionEvent.ACTION_UP
                         || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) {
                     mTouchActive = false;
+                    mDownEvent = null;
                 }
                 if (mTouchCancelled || mExpandAnimationRunning) {
                     return false;
@@ -447,9 +454,17 @@ public class NotificationShadeWindowViewController {
     public void cancelCurrentTouch() {
         if (mTouchActive) {
             final long now = SystemClock.uptimeMillis();
-            MotionEvent event = MotionEvent.obtain(now, now,
-                    MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
-            event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+            final MotionEvent event;
+            if (mIsTrackpadGestureBackEnabled) {
+                event = MotionEvent.obtain(mDownEvent);
+                event.setDownTime(now);
+                event.setAction(MotionEvent.ACTION_CANCEL);
+                event.setLocation(0.0f, 0.0f);
+            } else {
+                event = MotionEvent.obtain(now, now,
+                        MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
+                event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+            }
             mView.dispatchTouchEvent(event);
             event.recycle();
             mTouchCancelled = true;

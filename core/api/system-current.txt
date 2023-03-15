@@ -1797,25 +1797,19 @@ package android.app.backup {
     field public final long bytesTransferred;
   }
 
-  public class BackupRestoreEventLogger {
-    method public void logBackupMetaData(@android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType @NonNull String, @NonNull String);
-    method public void logItemsBackedUp(@android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType @NonNull String, int);
-    method public void logItemsBackupFailed(@android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType @NonNull String, int, @android.app.backup.BackupRestoreEventLogger.BackupRestoreError @Nullable String);
-    method public void logItemsRestoreFailed(@android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType @NonNull String, int, @android.app.backup.BackupRestoreEventLogger.BackupRestoreError @Nullable String);
-    method public void logItemsRestored(@android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType @NonNull String, int);
-    method public void logRestoreMetadata(@android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType @NonNull String, @NonNull String);
-  }
-
-  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface BackupRestoreEventLogger.BackupRestoreDataType {
-  }
-
-  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface BackupRestoreEventLogger.BackupRestoreError {
+  public final class BackupRestoreEventLogger {
+    method public void logBackupMetadata(@NonNull String, @NonNull String);
+    method public void logItemsBackedUp(@NonNull String, int);
+    method public void logItemsBackupFailed(@NonNull String, int, @Nullable String);
+    method public void logItemsRestoreFailed(@NonNull String, int, @Nullable String);
+    method public void logItemsRestored(@NonNull String, int);
+    method public void logRestoreMetadata(@NonNull String, @NonNull String);
   }
 
   public static final class BackupRestoreEventLogger.DataTypeResult implements android.os.Parcelable {
     ctor public BackupRestoreEventLogger.DataTypeResult(@NonNull String);
     method public int describeContents();
-    method @android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType @NonNull public String getDataType();
+    method @NonNull public String getDataType();
     method @NonNull public java.util.Map<java.lang.String,java.lang.Integer> getErrors();
     method public int getFailCount();
     method @Nullable public byte[] getMetadataHash();

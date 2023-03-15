@@ -19,7 +19,7 @@
     <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="29">
         <!-- This fails because 31 is not version 5 -->
         <extension-sdk android:sdkVersion="30" android:minExtensionVersion="0" />
-        <extension-sdk android:sdkVersion="31" android:minExtensionVersion="1000" />
+        <extension-sdk android:sdkVersion="31" android:minExtensionVersion="10000" />
     </uses-sdk>
 
     <application>

@@ -43,10 +43,8 @@ oneway interface ISatelliteListener {
 
     /**
      * Indicates that the satellite has pending datagrams for the device to be pulled.
-     *
-     * @param count Number of pending datagrams.
      */
-    void onPendingDatagramCount(in int count);
+    void onPendingDatagrams();
 
     /**
      * Indicates that the satellite pointing input has changed.
@@ -61,11 +59,4 @@ oneway interface ISatelliteListener {
      * @param state The current satellite modem state.
      */
     void onSatelliteModemStateChanged(in SatelliteModemState state);
-
-    /**
-     * Indicates that the satellite radio technology has changed.
-     *
-     * @param technology The current satellite radio technology.
-     */
-    void onSatelliteRadioTechnologyChanged(in NTRadioTechnology technology);
 }

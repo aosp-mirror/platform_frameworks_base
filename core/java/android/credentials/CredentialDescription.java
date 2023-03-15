@@ -42,7 +42,7 @@ public final class CredentialDescription implements Parcelable {
     private final String mType;
 
     /**
-     * The flattened JSON string that will be matched with requests.
+     * Flattened semicolon separated keys of JSON values to match with requests.
      */
     @NonNull
     private final String mFlattenedRequestString;
@@ -57,7 +57,8 @@ public final class CredentialDescription implements Parcelable {
      * Constructs a {@link CredentialDescription}.
      *
      * @param type the type of the credential returned.
-     * @param flattenedRequestString flattened JSON string that will be matched with requests.
+     * @param flattenedRequestString flattened semicolon separated keys of JSON values
+     *                              to match with requests.
      * @param credentialEntries a list of {@link CredentialEntry}s that are to be shown on the
      *                          account selector if a credential matches with this description.
      *                          Each entry contains information to be displayed within an
@@ -150,5 +151,30 @@ public final class CredentialDescription implements Parcelable {
     @NonNull
     public List<CredentialEntry> getCredentialEntries() {
         return mCredentialEntries;
+    }
+
+    /**
+     * {@link CredentialDescription#mType} and
+     * {@link CredentialDescription#mFlattenedRequestString} are enough for hashing. Constructor
+     * enforces {@link CredentialEntry} to have the same type and
+     * {@link android.app.slice.Slice} contained by the entry can not be hashed.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(mType, mFlattenedRequestString);
+    }
+
+    /**
+     * {@link CredentialDescription#mType} and
+     * {@link CredentialDescription#mFlattenedRequestString} are enough for equality check.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof CredentialDescription)) {
+            return false;
+        }
+        CredentialDescription other = (CredentialDescription) obj;
+        return mType.equals(other.mType)
+                && mFlattenedRequestString.equals(other.mFlattenedRequestString);
     }
 }

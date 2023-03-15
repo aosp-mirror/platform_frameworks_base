@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.os.Binder;
 import android.os.BinderProxy;
+import android.os.Build;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -62,7 +63,7 @@ public final class SurfaceSyncGroup {
     private static final int MAX_COUNT = 100;
 
     private static final AtomicInteger sCounter = new AtomicInteger(0);
-    private static final int TRANSACTION_READY_TIMEOUT = 1000;
+    private static final int TRANSACTION_READY_TIMEOUT = 1000 * Build.HW_TIMEOUT_MULTIPLIER;
 
     private static Supplier<Transaction> sTransactionFactory = Transaction::new;
 

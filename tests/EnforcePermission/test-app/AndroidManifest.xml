@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2010 The Android Open Source Project
+<!-- Copyright (C) 2023 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,13 +14,19 @@
      limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.frameworks.servicestests.install_uses_sdk">
+  package="android.tests.enforcepermission.tests">
 
-    <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="29">
-        <!-- This will fail to install, because minExtensionVersion is not met -->
-        <extension-sdk android:sdkVersion="30" android:minExtensionVersion="1000" />
-    </uses-sdk>
+    <!-- Expected for the tests (not actually used) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+
+    <queries>
+        <package android:name="android.tests.enforcepermission.service" />
+    </queries>
 
     <application>
+        <uses-library android:name="android.test.runner" />
     </application>
+    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
+                     android:targetPackage="android.tests.enforcepermission.tests"/>
 </manifest>

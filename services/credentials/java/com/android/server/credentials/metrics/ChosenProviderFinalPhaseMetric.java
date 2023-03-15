@@ -21,16 +21,22 @@ import android.util.Log;
 import com.android.server.credentials.MetricUtilities;
 
 /**
- * The central chosen provider metric object that mimics our defined metric setup.
+ * The central chosen provider metric object that mimics our defined metric setup. This is used
+ * in the final phase of the flow and emits final status metrics.
  * Some types are redundant across these metric collectors, but that has debug use-cases as
  * these data-types are available at different moments of the flow (and typically, one can feed
  * into the next).
  * TODO(b/270403549) - iterate on this in V3+
+ * TODO(Immediately) - finalize V3 only types
  */
-public class ChosenProviderMetric {
+public class ChosenProviderFinalPhaseMetric {
 
-    // TODO(b/270403549) - applies elsewhere, likely removed or replaced with a count-index (1,2,3)
-    private static final String TAG = "ChosenProviderMetric";
+    // TODO(b/270403549) - applies elsewhere, likely removed or replaced w/ some hashed/count index
+    private static final String TAG = "ChosenFinalPhaseMetric";
+    // The session id associated with this API call, used to unite split emits
+    private long mSessionId = -1;
+    // Reveals if the UI was returned, false by default
+    private boolean mUiReturned = false;
     private int mChosenUid = -1;
 
     // Latency figures typically fed in from prior CandidateProviderMetric
@@ -39,16 +45,29 @@ public class ChosenProviderMetric {
     private int mQueryPhaseLatencyMicroseconds = -1;
 
     // Timestamps kept in raw nanoseconds. Expected to be converted to microseconds from using
-    // reference 'mServiceBeganTimeNanoseconds' during metric log point.
+    // reference 'mServiceBeganTimeNanoseconds' during metric log point
 
+    // Kept for local reference purposes, the initial timestamp of the service called passed in
     private long mServiceBeganTimeNanoseconds = -1;
+    // The first query timestamp, which upon emit is normalized to microseconds using the reference
+    // start timestamp
     private long mQueryStartTimeNanoseconds = -1;
+    // The UI call timestamp, which upon emit will be normalized to microseconds using reference
     private long mUiCallStartTimeNanoseconds = -1;
+    // The UI return timestamp, which upon emit will be normalized to microseconds using reference
     private long mUiCallEndTimeNanoseconds = -1;
+    // The final finish timestamp, which upon emit will be normalized to microseconds with reference
     private long mFinalFinishTimeNanoseconds = -1;
-    private int mChosenProviderStatus = -1;
+    // The status of this provider after selection
 
-    public ChosenProviderMetric() {
+    // Other General Information, such as final api status, provider status, entry info, etc...
+
+    private int mChosenProviderStatus = -1;
+    // TODO add remaining properties based on the Atom ; specifically, migrate the candidate
+    // Entry information, and store final status here
+
+
+    public ChosenProviderFinalPhaseMetric() {
     }
 
     /* ------------------- UID ------------------- */
@@ -199,5 +218,25 @@ public class ChosenProviderMetric {
 
     public void setChosenProviderStatus(int chosenProviderStatus) {
         mChosenProviderStatus = chosenProviderStatus;
+    }
+
+    /* ----------- Session ID -------------- */
+
+    public void setSessionId(long sessionId) {
+        mSessionId = sessionId;
+    }
+
+    public long getSessionId() {
+        return mSessionId;
+    }
+
+    /* ----------- UI Returned Successfully -------------- */
+
+    public void setUiReturned(boolean uiReturned) {
+        mUiReturned = uiReturned;
+    }
+
+    public boolean isUiReturned() {
+        return mUiReturned;
     }
 }

@@ -26,6 +26,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.UidTraffic;
@@ -498,14 +499,6 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-    }
-
-    /** Handles calls to AlarmManager */
-    public interface AlarmInterface {
-        /** Schedule an RTC alarm */
-        void schedule(long rtcTimeMs, long windowLengthMs);
-        /** Cancel the previously scheduled alarm */
-        void cancel();
     }
 
     private final PlatformIdleStateCallback mPlatformIdleStateCallback;
@@ -1569,8 +1562,15 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     protected BatteryStatsConfig mBatteryStatsConfig = new BatteryStatsConfig.Builder().build();
 
-    @VisibleForTesting
-    protected AlarmInterface mLongPlugInAlarmInterface = null;
+    @GuardedBy("this")
+    private AlarmManager mAlarmManager = null;
+
+    private final AlarmManager.OnAlarmListener mLongPlugInAlarmHandler = () ->
+            mHandler.post(() -> {
+                synchronized (BatteryStatsImpl.this) {
+                    maybeResetWhilePluggedInLocked();
+                }
+            });
 
     /*
      * Holds a SamplingTimer associated with each Resource Power Manager state and voter,
@@ -11061,18 +11061,6 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     /**
-     * Injects an AlarmInterface for the long plug in alarm.
-     */
-    public void setLongPlugInAlarmInterface(AlarmInterface longPlugInAlarmInterface) {
-        synchronized (this) {
-            mLongPlugInAlarmInterface = longPlugInAlarmInterface;
-            if (mBatteryPluggedIn) {
-                scheduleNextResetWhilePluggedInCheck();
-            }
-        }
-    }
-
-    /**
      * Starts tracking CPU time-in-state for threads of the system server process,
      * keeping a separate account of threads receiving incoming binder calls.
      */
@@ -14173,6 +14161,7 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * Might reset battery stats if conditions are met. Assumed the device is currently plugged in.
      */
+    @VisibleForTesting
     @GuardedBy("this")
     public void maybeResetWhilePluggedInLocked() {
         final long elapsedRealtimeMs = mClock.elapsedRealtime();
@@ -14189,28 +14178,31 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @GuardedBy("this")
     private void scheduleNextResetWhilePluggedInCheck() {
-        if (mLongPlugInAlarmInterface != null) {
-            final long timeoutMs = mClock.currentTimeMillis()
-                    + mConstants.RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS
-                    * DateUtils.HOUR_IN_MILLIS;
-            Calendar nextAlarm = Calendar.getInstance();
-            nextAlarm.setTimeInMillis(timeoutMs);
+        if (mAlarmManager == null) return;
+        final long timeoutMs = mClock.currentTimeMillis()
+                + mConstants.RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS
+                * DateUtils.HOUR_IN_MILLIS;
+        Calendar nextAlarm = Calendar.getInstance();
+        nextAlarm.setTimeInMillis(timeoutMs);
 
-            // Find the 2 AM the same day as the end of the minimum duration.
-            // This logic does not handle a Daylight Savings transition, or a timezone change
-            // while the alarm has been set. The need to reset after a long period while plugged
-            // in is not strict enough to warrant a well architected out solution.
-            nextAlarm.set(Calendar.MILLISECOND, 0);
-            nextAlarm.set(Calendar.SECOND, 0);
-            nextAlarm.set(Calendar.MINUTE, 0);
-            nextAlarm.set(Calendar.HOUR_OF_DAY, 2);
-            long nextTimeMs = nextAlarm.getTimeInMillis();
-            if (nextTimeMs < timeoutMs) {
-                // The 2AM on the day of the timeout, move on the next day.
-                nextTimeMs += DateUtils.DAY_IN_MILLIS;
-            }
-            mLongPlugInAlarmInterface.schedule(nextTimeMs, DateUtils.HOUR_IN_MILLIS);
+        // Find the 2 AM the same day as the end of the minimum duration.
+        // This logic does not handle a Daylight Savings transition, or a timezone change
+        // while the alarm has been set. The need to reset after a long period while plugged
+        // in is not strict enough to warrant a well architected out solution.
+        nextAlarm.set(Calendar.MILLISECOND, 0);
+        nextAlarm.set(Calendar.SECOND, 0);
+        nextAlarm.set(Calendar.MINUTE, 0);
+        nextAlarm.set(Calendar.HOUR_OF_DAY, 2);
+        long possibleNextTimeMs = nextAlarm.getTimeInMillis();
+        if (possibleNextTimeMs < timeoutMs) {
+            // The 2AM on the day of the timeout, move on the next day.
+            possibleNextTimeMs += DateUtils.DAY_IN_MILLIS;
         }
+        final long nextTimeMs = possibleNextTimeMs;
+        final AlarmManager am = mAlarmManager;
+        mHandler.post(() -> am.setWindow(AlarmManager.RTC, nextTimeMs,
+                DateUtils.HOUR_IN_MILLIS,
+                TAG, mLongPlugInAlarmHandler, mHandler));
     }
 
 
@@ -14339,8 +14331,12 @@ public class BatteryStatsImpl extends BatteryStats {
                 initActiveHistoryEventsLocked(mSecRealtime, mSecUptime);
             }
             mBatteryPluggedIn = false;
-            if (mLongPlugInAlarmInterface != null) {
-                mLongPlugInAlarmInterface.cancel();
+            if (mAlarmManager != null) {
+                final AlarmManager am = mAlarmManager;
+                mHandler.post(() -> {
+                    // No longer plugged in. Cancel the long plug in alarm.
+                    am.cancel(mLongPlugInAlarmHandler);
+                });
             }
             mHistory.recordBatteryState(mSecRealtime, mSecUptime, level, mBatteryPluggedIn);
             mDischargeCurrentLevel = mDischargeUnplugLevel = level;
@@ -15178,6 +15174,14 @@ public class BatteryStatsImpl extends BatteryStats {
     public void systemServicesReady(Context context) {
         mConstants.startObserving(context.getContentResolver());
         registerUsbStateReceiver(context);
+
+        synchronized (this) {
+            mAlarmManager = context.getSystemService(AlarmManager.class);
+            if (mBatteryPluggedIn) {
+                // Already plugged in. Schedule the long plug in alarm.
+                scheduleNextResetWhilePluggedInCheck();
+            }
+        }
     }
 
     /**

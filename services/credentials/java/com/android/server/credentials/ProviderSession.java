@@ -38,6 +38,7 @@ import java.util.UUID;
 
 /**
  * Provider session storing the state of provider response and ui entries.
+ *
  * @param <T> The request to be sent to the provider
  * @param <R> The response to be expected from the provider
  */
@@ -46,21 +47,35 @@ public abstract class ProviderSession<T, R>
 
     private static final String TAG = "ProviderSession";
 
-    @NonNull protected final Context mContext;
-    @NonNull protected final ComponentName mComponentName;
-    @Nullable protected final CredentialProviderInfo mProviderInfo;
-    @Nullable protected final RemoteCredentialService mRemoteCredentialService;
-    @NonNull protected final int mUserId;
-    @NonNull protected Status mStatus = Status.NOT_STARTED;
-    @Nullable protected final ProviderInternalCallback mCallbacks;
-    @Nullable protected Credential mFinalCredentialResponse;
-    @Nullable protected ICancellationSignal mProviderCancellationSignal;
-    @NonNull protected final T mProviderRequest;
-    @Nullable protected R mProviderResponse;
-    @NonNull protected Boolean mProviderResponseSet = false;
+    @NonNull
+    protected final Context mContext;
+    @NonNull
+    protected final ComponentName mComponentName;
+    @Nullable
+    protected final CredentialProviderInfo mProviderInfo;
+    @Nullable
+    protected final RemoteCredentialService mRemoteCredentialService;
+    @NonNull
+    protected final int mUserId;
+    @NonNull
+    protected Status mStatus = Status.NOT_STARTED;
+    @Nullable
+    protected final ProviderInternalCallback mCallbacks;
+    @Nullable
+    protected Credential mFinalCredentialResponse;
+    @Nullable
+    protected ICancellationSignal mProviderCancellationSignal;
+    @NonNull
+    protected final T mProviderRequest;
+    @Nullable
+    protected R mProviderResponse;
+    @NonNull
+    protected Boolean mProviderResponseSet = false;
     // Specific candidate provider metric for the provider this session handles
-    @Nullable protected CandidatePhaseMetric mCandidateProviderMetric;
-    @NonNull private int mProviderSessionUid;
+    @Nullable
+    protected CandidatePhaseMetric mCandidatePhasePerProviderMetric;
+    @NonNull
+    private int mProviderSessionUid;
 
     /**
      * Returns true if the given status reflects that the provider state is ready to be shown
@@ -100,6 +115,7 @@ public abstract class ProviderSession<T, R>
      * Interface to be implemented by any class that wishes to get a callback when a particular
      * provider session's status changes. Typically, implemented by the {@link RequestSession}
      * class.
+     *
      * @param <V> the type of the final response expected
      */
     public interface ProviderInternalCallback<V> {
@@ -127,7 +143,7 @@ public abstract class ProviderSession<T, R>
         mUserId = userId;
         mComponentName = componentName;
         mRemoteCredentialService = remoteCredentialService;
-        mCandidateProviderMetric = new CandidatePhaseMetric();
+        mCandidatePhasePerProviderMetric = new CandidatePhaseMetric();
         mProviderSessionUid = MetricUtilities.getPackageUid(mContext, mComponentName);
     }
 
@@ -158,7 +174,7 @@ public abstract class ProviderSession<T, R>
     }
 
     public Credential getFinalCredentialResponse() {
-        return  mFinalCredentialResponse;
+        return mFinalCredentialResponse;
     }
 
     /** Propagates cancellation signal to the remote provider service. */
@@ -192,7 +208,7 @@ public abstract class ProviderSession<T, R>
         return mRemoteCredentialService;
     }
 
-    /** Updates the status .*/
+    /** Updates the status . */
     protected void updateStatusAndInvokeCallback(@NonNull Status status) {
         setStatus(status);
         updateCandidateMetric(status);
@@ -200,15 +216,18 @@ public abstract class ProviderSession<T, R>
     }
 
     private void updateCandidateMetric(Status status) {
-        mCandidateProviderMetric.setCandidateUid(mProviderSessionUid);
-        mCandidateProviderMetric
+        mCandidatePhasePerProviderMetric.setCandidateUid(mProviderSessionUid);
+        // TODO immediately update the candidate phase here to have more new data
+        mCandidatePhasePerProviderMetric
                 .setQueryFinishTimeNanoseconds(System.nanoTime());
         if (isTerminatingStatus(status)) {
-            mCandidateProviderMetric.setProviderQueryStatus(ProviderStatusForMetrics.QUERY_FAILURE
-                    .getMetricCode());
+            mCandidatePhasePerProviderMetric.setProviderQueryStatus(
+                    ProviderStatusForMetrics.QUERY_FAILURE
+                            .getMetricCode());
         } else if (isCompletionStatus(status)) {
-            mCandidateProviderMetric.setProviderQueryStatus(ProviderStatusForMetrics.QUERY_SUCCESS
-                    .getMetricCode());
+            mCandidatePhasePerProviderMetric.setProviderQueryStatus(
+                    ProviderStatusForMetrics.QUERY_SUCCESS
+                            .getMetricCode());
         }
     }
 
@@ -228,7 +247,8 @@ public abstract class ProviderSession<T, R>
     }
 
     /** Update the response state stored with the provider session. */
-    @Nullable protected R getProviderResponse() {
+    @Nullable
+    protected R getProviderResponse() {
         return mProviderResponse;
     }
 
@@ -265,15 +285,20 @@ public abstract class ProviderSession<T, R>
         return false;
     }
 
-    /** Should be overridden to prepare, and stores state for {@link ProviderData} to be
-     * shown on the UI. */
-    @Nullable protected abstract ProviderData prepareUiData();
+    /**
+     * Should be overridden to prepare, and stores state for {@link ProviderData} to be
+     * shown on the UI.
+     */
+    @Nullable
+    protected abstract ProviderData prepareUiData();
 
     /** Should be overridden to handle the selected entry from the UI. */
     protected abstract void onUiEntrySelected(String entryType, String entryId,
             ProviderPendingIntentResponse providerPendingIntentResponse);
 
-    /** Should be overridden to invoke the provider at a defined location. Helpful for
-     * situations such as metric generation. */
+    /**
+     * Should be overridden to invoke the provider at a defined location. Helpful for
+     * situations such as metric generation.
+     */
     protected abstract void invokeSession();
 }

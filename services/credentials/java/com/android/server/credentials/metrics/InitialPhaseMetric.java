@@ -24,16 +24,14 @@ package com.android.server.credentials.metrics;
  * TODO(b/270403549) - iterate on this in V3+
  */
 public class InitialPhaseMetric {
-    private static final String TAG = "PreCandidateMetric";
-    // A sequence id to order united emits, due to split, this will statically always be 1
-    public static final int SEQUENCE_ID = 1;
+    private static final String TAG = "InitialPhaseMetric";
 
     // The api being called, default set to unknown
     private int mApiName = ApiName.UNKNOWN.getMetricCode();
     // The caller uid of the calling application, default to -1
     private int mCallerUid = -1;
     // The session id to unite multiple atom emits, default to -1
-    private long mSessionId = -1;
+    private int mSessionId = -1;
     private int mCountRequestClassType = -1;
 
     // Raw timestamps in nanoseconds, *the only* one logged as such (i.e. 64 bits) since it is a
@@ -100,14 +98,13 @@ public class InitialPhaseMetric {
 
     /* ------ SessionId ------ */
 
-    public void setSessionId(long sessionId) {
+    public void setSessionId(int sessionId) {
         mSessionId = sessionId;
     }
 
-    public long getSessionId() {
+    public int getSessionId() {
         return mSessionId;
     }
-
 
     /* ------ Count Request Class Types ------ */
 

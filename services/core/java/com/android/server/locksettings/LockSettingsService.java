@@ -421,6 +421,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     static class Injector {
 
         protected Context mContext;
+        private ServiceThread mHandlerThread;
+        private Handler mHandler;
 
         public Injector(Context context) {
             mContext = context;
@@ -431,14 +433,20 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         public ServiceThread getServiceThread() {
-            ServiceThread handlerThread = new ServiceThread(TAG, Process.THREAD_PRIORITY_BACKGROUND,
-                    true /*allowIo*/);
-            handlerThread.start();
-            return handlerThread;
+            if (mHandlerThread == null) {
+                mHandlerThread = new ServiceThread(TAG,
+                        Process.THREAD_PRIORITY_BACKGROUND,
+                        true /*allowIo*/);
+                mHandlerThread.start();
+            }
+            return mHandlerThread;
         }
 
         public Handler getHandler(ServiceThread handlerThread) {
-            return new Handler(handlerThread.getLooper());
+            if (mHandler == null) {
+                mHandler = new Handler(handlerThread.getLooper());
+            }
+            return mHandler;
         }
 
         public LockSettingsStorage getStorage() {
@@ -519,7 +527,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         public RebootEscrowManager getRebootEscrowManager(RebootEscrowManager.Callbacks callbacks,
                 LockSettingsStorage storage) {
-            return new RebootEscrowManager(mContext, callbacks, storage);
+            return new RebootEscrowManager(mContext, callbacks, storage,
+                    getHandler(getServiceThread()));
         }
 
         public int binderGetCallingUid() {

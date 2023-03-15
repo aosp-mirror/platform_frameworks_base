@@ -22,20 +22,27 @@ package android.speech;
  */
 public interface ModelDownloadListener {
     /**
-     * Called by {@link RecognitionService} when there's an update on the download progress.
+     * Called by {@link RecognitionService} only if the download has started after the request.
      *
-     * <p>RecognitionService will call this zero or more times during the download.</p>
+     * <p> The number of calls to this method varies depending of the {@link RecognitionService}
+     * implementation. If the download finished quickly enough, {@link #onSuccess()} may be called
+     * directly. In other cases, this method may be called any number of times during the download.
+     *
+     * @param completedPercent the percentage of download that is completed
      */
     void onProgress(int completedPercent);
 
     /**
-     * Called when {@link RecognitionService} completed the download and it can now be used to
-     * satisfy recognition requests.
+     * This method is called:
+     * <li> if the model is already available;
+     * <li> if the {@link RecognitionService} has started and completed the download.
+     *
+     * <p> Once this method is called, the model can be safely used to satisfy recognition requests.
      */
     void onSuccess();
 
     /**
-     * Called when {@link RecognitionService} scheduled the download but won't satisfy it
+     * Called when {@link RecognitionService} scheduled the download, but won't satisfy it
      * immediately. There will be no further updates on this listener.
      */
     void onScheduled();

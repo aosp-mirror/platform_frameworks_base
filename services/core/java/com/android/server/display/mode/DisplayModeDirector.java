@@ -2088,7 +2088,7 @@ public class DisplayModeDirector {
         }
 
         @VisibleForTesting
-        void onRefreshRateSettingChangedLocked(float min, float max) {
+        public void onRefreshRateSettingChangedLocked(float min, float max) {
             boolean changeable = (max - min > 1f && max > 60f);
             if (mRefreshRateChangeable != changeable) {
                 mRefreshRateChangeable = changeable;

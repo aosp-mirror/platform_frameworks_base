@@ -20,6 +20,9 @@ import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_FORCE;
 import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_PASSTHROUGH;
 import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_SYSTEM;
 import static android.media.AudioFormat.SURROUND_SOUND_ENCODING;
+import static android.net.ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI_AVOID;
+import static android.net.ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI_IGNORE;
+import static android.net.ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI_PROMPT;
 import static android.provider.settings.validators.SettingsValidators.ANY_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
@@ -103,6 +106,14 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(
                 Global.NETWORK_RECOMMENDATIONS_ENABLED,
                 new DiscreteValueValidator(new String[] {"-1", "0", "1"}));
+        VALIDATORS.put(
+                Global.NETWORK_AVOID_BAD_WIFI,
+                new DiscreteValueValidator(
+                        new String[] {
+                                String.valueOf(NETWORK_AVOID_BAD_WIFI_IGNORE),
+                                String.valueOf(NETWORK_AVOID_BAD_WIFI_PROMPT),
+                                String.valueOf(NETWORK_AVOID_BAD_WIFI_AVOID),
+                        }));
         VALIDATORS.put(Global.WIFI_WAKEUP_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, BOOLEAN_VALIDATOR);
         VALIDATORS.put(

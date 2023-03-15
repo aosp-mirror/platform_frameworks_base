@@ -875,15 +875,6 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /**
-     * Returns true if any visible windows belonging to apps with this window configuration should
-     * be kept on screen when the app is killed due to something like the low memory killer.
-     * @hide
-     */
-    public boolean keepVisibleDeadAppWindowOnScreen() {
-        return mWindowingMode != WINDOWING_MODE_PINNED;
-    }
-
-    /**
      * Returns true if the backdrop on the client side should match the frame of the window.
      * Returns false, if the backdrop should be fullscreen.
      * @hide
