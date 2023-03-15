@@ -40,9 +40,12 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Опитахте да отключите телефона и сбъркахте <xliff:g id="NUMBER">%d</xliff:g> пъти. Служебният потребителски профил ще бъде премахнат, при което ще се изтрият всички данни за него."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%1$d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешни опита ще бъдете помолени да отключите таблета си посредством имейл адрес.\n\n Опитайте отново след <xliff:g id="NUMBER_2">%3$d</xliff:g> секунди."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%1$d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешни опита ще бъдете помолени да отключите телефона посредством имейл адрес.\n\n Опитайте отново след <xliff:g id="NUMBER_2">%3$d</xliff:g> секунди."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="1242939073723573315">"Сензорът за отпечатъци се намира върху бутона за захранване. Този бутон е плосък и е разположен на ръба на таблета до повдигнатия бутон за силата на звука.\n\nС натискането на бутона за захранване се изключва екранът."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="7305137594359170451">"Сензорът за отпечатъци се намира върху бутона за захранване. Този бутон е плосък и е разположен на ръба на устройството до повдигнатия бутон за силата на звука.\n\nС натискането на бутона за захранване се изключва екранът."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="3238514774114999081">"Сензорът за отпечатъци се намира върху бутона за захранване. Този бутон е плосък и е разположен на ръба на телефона до повдигнатия бутон за силата на звука.\n\nС натискането на бутона за захранване се изключва екранът."</string>
+    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (3726972508570143945) -->
+    <skip />
+    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (2929467060295094725) -->
+    <skip />
+    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (8582726566542997639) -->
+    <skip />
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Отключете телефона си за още опции"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Отключете таблета си за още опции"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Отключете устройството си за още опции"</string>
