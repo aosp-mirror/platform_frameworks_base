@@ -6812,7 +6812,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             if (ps == null) {
                 return null;
             }
-            return new IncrementalStatesInfo(ps.isLoading(), ps.getLoadingProgress());
+            return new IncrementalStatesInfo(ps.isLoading(), ps.getLoadingProgress(),
+                    ps.getLoadingCompletedTime());
         }
 
         @Override
