@@ -418,7 +418,6 @@ type bazelCombinedApisAttributes struct {
 // combined_apis bp2build converter
 func (a *CombinedApis) ConvertWithBp2build(ctx android.TopDownMutatorContext) {
 	basePrefix := "non-updatable"
-	scopeNames := []string{"public", "system", "module-lib", "system-server"}
 	scopeToSuffix := map[string]string{
 		"public":        "-current.txt",
 		"system":        "-system-current.txt",
@@ -426,8 +425,7 @@ func (a *CombinedApis) ConvertWithBp2build(ctx android.TopDownMutatorContext) {
 		"system-server": "-system-server-current.txt",
 	}
 
-	for _, scopeName := range scopeNames{
-		suffix := scopeToSuffix[scopeName]
+	for scopeName, suffix := range scopeToSuffix{
 		name := a.Name() + suffix
 
 		var scope bazel.StringAttribute
