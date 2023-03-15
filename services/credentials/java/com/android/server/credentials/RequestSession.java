@@ -78,8 +78,8 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
     protected final CancellationSignal mCancellationSignal;
 
     protected final Map<String, ProviderSession> mProviders = new HashMap<>();
-    protected InitialPhaseMetric mInitialPhaseMetric = new InitialPhaseMetric();
-    protected ChosenProviderFinalPhaseMetric
+    protected final InitialPhaseMetric mInitialPhaseMetric = new InitialPhaseMetric();
+    protected final ChosenProviderFinalPhaseMetric
             mChosenProviderFinalPhaseMetric = new ChosenProviderFinalPhaseMetric();
 
     // TODO(b/271135048) - Group metrics used in a scope together, such as here in RequestSession
@@ -123,9 +123,17 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
                 mUserId, this);
         mHybridService = context.getResources().getString(
                 R.string.config_defaultCredentialManagerHybridService);
-        mInitialPhaseMetric.setCredentialServiceStartedTimeNanoseconds(timestampStarted);
-        mInitialPhaseMetric.setSessionId(mRequestId.hashCode());
-        mInitialPhaseMetric.setCallerUid(mCallingUid);
+        initialPhaseMetricSetup(timestampStarted);
+    }
+
+    private void initialPhaseMetricSetup(long timestampStarted) {
+        try {
+            mInitialPhaseMetric.setCredentialServiceStartedTimeNanoseconds(timestampStarted);
+            mInitialPhaseMetric.setSessionId(mRequestId.hashCode());
+            mInitialPhaseMetric.setCallerUid(mCallingUid);
+        } catch (Exception e) {
+            Log.w(TAG, "Unexpected error during metric logging: " + e);
+        }
     }
 
     public abstract ProviderSession initiateProviderSession(CredentialProviderInfo providerInfo,
@@ -170,13 +178,17 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
 
     private void logBrowsingPhasePerSelect(UserSelectionDialogResult selection,
             ProviderSession providerSession) {
-        CandidateBrowsingPhaseMetric browsingPhaseMetric = new CandidateBrowsingPhaseMetric();
-        browsingPhaseMetric.setSessionId(this.mInitialPhaseMetric.getSessionId());
-        browsingPhaseMetric.setEntryEnum(
-                EntryEnum.getMetricCodeFromString(selection.getEntryKey()));
-        browsingPhaseMetric.setProviderUid(providerSession.mCandidatePhasePerProviderMetric
-                .getCandidateUid());
-        this.mCandidateBrowsingPhaseMetric.add(new CandidateBrowsingPhaseMetric());
+        try {
+            CandidateBrowsingPhaseMetric browsingPhaseMetric = new CandidateBrowsingPhaseMetric();
+            browsingPhaseMetric.setSessionId(this.mInitialPhaseMetric.getSessionId());
+            browsingPhaseMetric.setEntryEnum(
+                    EntryEnum.getMetricCodeFromString(selection.getEntryKey()));
+            browsingPhaseMetric.setProviderUid(providerSession.mCandidatePhasePerProviderMetric
+                    .getCandidateUid());
+            this.mCandidateBrowsingPhaseMetric.add(new CandidateBrowsingPhaseMetric());
+        } catch (Exception e) {
+            Log.w(TAG, "Unexpected error during metric logging: " + e);
+        }
     }
 
     protected void finishSession(boolean propagateCancellation) {
@@ -233,6 +245,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         Log.i(TAG, "In getProviderDataAndInitiateUi providers size: " + mProviders.size());
 
         if (isSessionCancelled()) {
+            MetricUtilities.logApiCalled(mProviders, ++mSequenceCounter);
             finishSession(/*propagateCancellation=*/true);
             return;
         }
@@ -248,13 +261,8 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         }
         if (!providerDataList.isEmpty()) {
             Log.i(TAG, "provider list not empty about to initiate ui");
-            // TODO immediately Add paths to end it (say it fails)
-            if (isSessionCancelled()) {
-                Log.i(TAG, "In getProviderDataAndInitiateUi but session has been cancelled");
-                // TODO immedaitely Add paths
-            } else {
-                launchUiWithProviderData(providerDataList);
-            }
+            MetricUtilities.logApiCalled(mProviders, ++mSequenceCounter);
+            launchUiWithProviderData(providerDataList);
         }
     }
 
@@ -264,22 +272,27 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
      * @param componentName the componentName to associate with a provider
      */
     protected void setChosenMetric(ComponentName componentName) {
-        CandidatePhaseMetric metric = this.mProviders.get(componentName.flattenToString())
-                .mCandidatePhasePerProviderMetric;
+        try {
+            CandidatePhaseMetric metric = this.mProviders.get(componentName.flattenToString())
+                    .mCandidatePhasePerProviderMetric;
 
-        mChosenProviderFinalPhaseMetric.setSessionId(metric.getSessionId());
-        mChosenProviderFinalPhaseMetric.setChosenUid(metric.getCandidateUid());
+            mChosenProviderFinalPhaseMetric.setSessionId(metric.getSessionId());
+            mChosenProviderFinalPhaseMetric.setChosenUid(metric.getCandidateUid());
 
-        mChosenProviderFinalPhaseMetric.setQueryPhaseLatencyMicroseconds(
-                metric.getQueryLatencyMicroseconds());
+            mChosenProviderFinalPhaseMetric.setQueryPhaseLatencyMicroseconds(
+                    metric.getQueryLatencyMicroseconds());
 
-        mChosenProviderFinalPhaseMetric.setServiceBeganTimeNanoseconds(
-                metric.getServiceBeganTimeNanoseconds());
-        mChosenProviderFinalPhaseMetric.setQueryStartTimeNanoseconds(
-                metric.getStartQueryTimeNanoseconds());
+            mChosenProviderFinalPhaseMetric.setServiceBeganTimeNanoseconds(
+                    metric.getServiceBeganTimeNanoseconds());
+            mChosenProviderFinalPhaseMetric.setQueryStartTimeNanoseconds(
+                    metric.getStartQueryTimeNanoseconds());
 
-        // TODO immediately update with the entry count numbers from the candidate metrics
+            // TODO immediately update with the entry count numbers from the candidate metrics
+            // TODO immediately add the exception bit for candidates and providers
 
-        mChosenProviderFinalPhaseMetric.setFinalFinishTimeNanoseconds(System.nanoTime());
+            mChosenProviderFinalPhaseMetric.setFinalFinishTimeNanoseconds(System.nanoTime());
+        } catch (Exception e) {
+            Log.w(TAG, "Unexpected error during metric logging: " + e);
+        }
     }
 }
