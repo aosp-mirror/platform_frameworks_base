@@ -1799,7 +1799,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         public void finish() {
-            mController.finishTransition(mLastTransit.getToken());
+            mController.finishTransition(mLastTransit);
         }
     }
 }
