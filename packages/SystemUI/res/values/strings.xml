@@ -2471,6 +2471,15 @@
     <!-- Controls management favorites screen. See other apps button [CHAR LIMIT=30] -->
     <string name="controls_favorite_see_other_apps">See other apps</string>
 
+    <!-- Controls management favorites screen. Rearrange controls button [CHAR LIMIT=30]-->
+    <string name="controls_favorite_rearrange_button">Rearrange</string>
+
+    <!-- Controls management edit screen. Add controls button [CHAR LIMIT=30]-->
+    <string name="controls_favorite_add_controls">Add controls</string>
+
+    <!-- Controls management edit screen. Return to editing button [CHAR LIMIT=30]-->
+    <string name="controls_favorite_back_to_editing">Back to editing</string>
+
     <!-- Controls management controls screen error on load message [CHAR LIMIT=NONE] -->
     <string name="controls_favorite_load_error">Controls could not be loaded. Check the <xliff:g id="app" example="System UI">%s</xliff:g> app to make sure that the app settings haven\u2019t changed.</string>
     <!-- Controls management controls screen no controls found on load message [CHAR LIMIT=NONE] -->
