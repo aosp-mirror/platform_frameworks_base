@@ -16,7 +16,9 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.util.ArrayMap
 import android.util.ArraySet
+import java.util.concurrent.Executor
 
 /**
  * Keeps track of task data related to desktop mode.
@@ -30,40 +32,67 @@ class DesktopModeTaskRepository {
      * Task gets removed from this list when it vanishes. Or when desktop mode is turned off.
      */
     private val activeTasks = ArraySet<Int>()
-    private val listeners = ArraySet<Listener>()
+    private val visibleTasks = ArraySet<Int>()
+    // Tasks currently in freeform mode, ordered from top to bottom (top is at index 0).
+    private val freeformTasksInZOrder = mutableListOf<Int>()
+    private val activeTasksListeners = ArraySet<ActiveTasksListener>()
+    // Track visible tasks separately because a task may be part of the desktop but not visible.
+    private val visibleTasksListeners = ArrayMap<VisibleTasksListener, Executor>()
 
     /**
-     * Add a [Listener] to be notified of updates to the repository.
+     * Add a [ActiveTasksListener] to be notified of updates to active tasks in the repository.
      */
-    fun addListener(listener: Listener) {
-        listeners.add(listener)
+    fun addActiveTaskListener(activeTasksListener: ActiveTasksListener) {
+        activeTasksListeners.add(activeTasksListener)
     }
 
     /**
-     * Remove a previously registered [Listener]
+     * Add a [VisibleTasksListener] to be notified when freeform tasks are visible or not.
      */
-    fun removeListener(listener: Listener) {
-        listeners.remove(listener)
+    fun addVisibleTasksListener(visibleTasksListener: VisibleTasksListener, executor: Executor) {
+        visibleTasksListeners.put(visibleTasksListener, executor)
+        executor.execute(
+                Runnable { visibleTasksListener.onVisibilityChanged(visibleTasks.size > 0) })
+    }
+
+    /**
+     * Remove a previously registered [ActiveTasksListener]
+     */
+    fun removeActiveTasksListener(activeTasksListener: ActiveTasksListener) {
+        activeTasksListeners.remove(activeTasksListener)
+    }
+
+    /**
+     * Remove a previously registered [VisibleTasksListener]
+     */
+    fun removeVisibleTasksListener(visibleTasksListener: VisibleTasksListener) {
+        visibleTasksListeners.remove(visibleTasksListener)
     }
 
     /**
      * Mark a task with given [taskId] as active.
+     *
+     * @return `true` if the task was not active
      */
-    fun addActiveTask(taskId: Int) {
+    fun addActiveTask(taskId: Int): Boolean {
         val added = activeTasks.add(taskId)
         if (added) {
-            listeners.onEach { it.onActiveTasksChanged() }
+            activeTasksListeners.onEach { it.onActiveTasksChanged() }
         }
+        return added
     }
 
     /**
      * Remove task with given [taskId] from active tasks.
+     *
+     * @return `true` if the task was active
      */
-    fun removeActiveTask(taskId: Int) {
+    fun removeActiveTask(taskId: Int): Boolean {
         val removed = activeTasks.remove(taskId)
         if (removed) {
-            listeners.onEach { it.onActiveTasksChanged() }
+            activeTasksListeners.onEach { it.onActiveTasksChanged() }
         }
+        return removed
     }
 
     /**
@@ -74,6 +103,13 @@ class DesktopModeTaskRepository {
     }
 
     /**
+     * Whether a task is visible.
+     */
+    fun isVisibleTask(taskId: Int): Boolean {
+        return visibleTasks.contains(taskId)
+    }
+
+    /**
      * Get a set of the active tasks
      */
     fun getActiveTasks(): ArraySet<Int> {
@@ -81,9 +117,67 @@ class DesktopModeTaskRepository {
     }
 
     /**
-     * Defines interface for classes that can listen to changes in repository state.
+     * Get a list of freeform tasks, ordered from top-bottom (top at index 0).
      */
-    interface Listener {
-        fun onActiveTasksChanged()
+    fun getFreeformTasksInZOrder(): List<Int> {
+        return freeformTasksInZOrder
+    }
+
+    /**
+     * Updates whether a freeform task with this id is visible or not and notifies listeners.
+     */
+    fun updateVisibleFreeformTasks(taskId: Int, visible: Boolean) {
+        val prevCount: Int = visibleTasks.size
+        if (visible) {
+            visibleTasks.add(taskId)
+        } else {
+            visibleTasks.remove(taskId)
+        }
+        if (prevCount == 0 && visibleTasks.size == 1 ||
+                prevCount > 0 && visibleTasks.size == 0) {
+            for ((listener, executor) in visibleTasksListeners) {
+                executor.execute(
+                        Runnable { listener.onVisibilityChanged(visibleTasks.size > 0) })
+            }
+        }
+    }
+
+    /**
+     * Add (or move if it already exists) the task to the top of the ordered list.
+     */
+    fun addOrMoveFreeformTaskToTop(taskId: Int) {
+        if (freeformTasksInZOrder.contains(taskId)) {
+            freeformTasksInZOrder.remove(taskId)
+        }
+        freeformTasksInZOrder.add(0, taskId)
+    }
+
+    /**
+     * Remove the task from the ordered list.
+     */
+    fun removeFreeformTask(taskId: Int) {
+        freeformTasksInZOrder.remove(taskId)
+    }
+
+    /**
+     * Defines interface for classes that can listen to changes for active tasks in desktop mode.
+     */
+    interface ActiveTasksListener {
+        /**
+         * Called when the active tasks change in desktop mode.
+         */
+        @JvmDefault
+        fun onActiveTasksChanged() {}
+    }
+
+    /**
+     * Defines interface for classes that can listen to changes for visible tasks in desktop mode.
+     */
+    interface VisibleTasksListener {
+        /**
+         * Called when the desktop starts or stops showing freeform tasks.
+         */
+        @JvmDefault
+        fun onVisibilityChanged(hasVisibleFreeformTasks: Boolean) {}
     }
 }

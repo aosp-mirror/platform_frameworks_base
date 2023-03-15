@@ -53,7 +53,7 @@
     <string name="keyguard_plugged_in_charging_slowly"><xliff:g id="percentage">%s</xliff:g> • Charging slowly</string>
 
     <!-- When the lock screen is showing and the phone plugged in, and the defend mode is triggered, say that charging is temporarily limited.  -->
-    <string name="keyguard_plugged_in_charging_limited"><xliff:g id="percentage">%s</xliff:g> • Charging is paused to protect battery</string>
+    <string name="keyguard_plugged_in_charging_limited"><xliff:g id="percentage">%s</xliff:g> • Charging optimized to protect battery</string>
 
     <!-- On the keyguard screen, when pattern lock is disabled, only tell them to press menu to unlock.  This is shown in small font at the bottom. -->
     <string name="keyguard_instructions_when_pattern_disabled">Press Menu to unlock.</string>
@@ -201,13 +201,13 @@
     <string name="kg_prompt_reason_restart_password">Password required after device restarts</string>
 
     <!-- An explanation text that the pattern needs to be solved since the user hasn't used strong authentication since quite some time. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_timeout_pattern">Pattern required for additional security</string>
+    <string name="kg_prompt_reason_timeout_pattern">For additional security, use pattern instead</string>
 
     <!-- An explanation text that the pin needs to be entered since the user hasn't used strong authentication since quite some time. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_timeout_pin">PIN required for additional security</string>
+    <string name="kg_prompt_reason_timeout_pin">For additional security, use PIN instead</string>
 
     <!-- An explanation text that the password needs to be entered since the user hasn't used strong authentication since quite some time. [CHAR LIMIT=80] -->
-    <string name="kg_prompt_reason_timeout_password">Password required for additional security</string>
+    <string name="kg_prompt_reason_timeout_password">For additional security, use password instead</string>
 
     <!-- An explanation text that the credential needs to be entered because a device admin has
     locked the device. [CHAR LIMIT=80] -->
@@ -241,4 +241,6 @@
     <string name="clock_title_bubble">Bubble</string>
     <!-- Name of the "Analog" clock face [CHAR LIMIT=15]-->
     <string name="clock_title_analog">Analog</string>
+    <!-- Title of bouncer when we want to authenticate before continuing with action. [CHAR LIMIT=NONE] -->
+    <string name="keyguard_unlock_to_continue">Unlock your device to continue</string>
 </resources>

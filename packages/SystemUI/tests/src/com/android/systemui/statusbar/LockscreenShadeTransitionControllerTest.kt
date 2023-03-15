@@ -10,7 +10,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.WakefulnessLifecycle
-import com.android.systemui.media.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.shade.NotificationPanelViewController

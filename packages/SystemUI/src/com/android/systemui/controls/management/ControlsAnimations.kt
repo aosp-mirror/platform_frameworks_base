@@ -50,7 +50,12 @@ object ControlsAnimations {
      * Setup an activity to handle enter/exit animations. [view] should be the root of the content.
      * Fade and translate together.
      */
-    fun observerForAnimations(view: ViewGroup, window: Window, intent: Intent): LifecycleObserver {
+    fun observerForAnimations(
+            view: ViewGroup,
+            window: Window,
+            intent: Intent,
+            animateY: Boolean = true
+    ): LifecycleObserver {
         return object : LifecycleObserver {
             var showAnimation = intent.getBooleanExtra(ControlsUiController.EXTRA_ANIMATE, false)
 
@@ -61,8 +66,12 @@ object ControlsAnimations {
                 view.transitionAlpha = 0.0f
 
                 if (translationY == -1f) {
-                    translationY = view.context.resources.getDimensionPixelSize(
-                        R.dimen.global_actions_controls_y_translation).toFloat()
+                    if (animateY) {
+                        translationY = view.context.resources.getDimensionPixelSize(
+                                R.dimen.global_actions_controls_y_translation).toFloat()
+                    } else {
+                        translationY = 0f
+                    }
                 }
             }
 

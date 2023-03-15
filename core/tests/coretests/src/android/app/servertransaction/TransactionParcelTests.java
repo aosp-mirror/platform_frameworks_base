@@ -250,7 +250,7 @@ public class TransactionParcelTests {
     public void testResume() {
         // Write to parcel
         ResumeActivityItem item = ResumeActivityItem.obtain(27 /* procState */,
-                true /* isForward */);
+                true /* isForward */, false /* shouldSendCompatFakeFocus */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert

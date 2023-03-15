@@ -244,7 +244,8 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
         mCameraUser = mUtils.getCameraService().connectDevice(mMockCb, mCameraId,
                 clientPackageName, clientAttributionTag, ICameraService.USE_CALLING_UID,
-                /*oomScoreOffset*/0, getContext().getApplicationInfo().targetSdkVersion);
+                /*oomScoreOffset*/0, getContext().getApplicationInfo().targetSdkVersion,
+                /*overrideToPortrait*/false);
         assertNotNull(String.format("Camera %s was null", mCameraId), mCameraUser);
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
@@ -417,7 +418,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
     @SmallTest
     public void testCameraCharacteristics() throws RemoteException {
         CameraMetadataNative info = mUtils.getCameraService().getCameraCharacteristics(mCameraId,
-                getContext().getApplicationInfo().targetSdkVersion);
+                getContext().getApplicationInfo().targetSdkVersion, /*overrideToPortrait*/false);
 
         assertFalse(info.isEmpty());
         assertNotNull(info.get(CameraCharacteristics.SCALER_AVAILABLE_FORMATS));

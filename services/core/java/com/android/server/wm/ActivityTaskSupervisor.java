@@ -27,6 +27,7 @@ import static android.app.ActivityManager.START_FLAG_DEBUG;
 import static android.app.ActivityManager.START_FLAG_NATIVE_DEBUGGING;
 import static android.app.ActivityManager.START_FLAG_TRACK_ALLOCATION;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
+import static android.app.ActivityOptions.ANIM_REMOTE_ANIMATION;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
 import static android.app.WaitResult.INVALID_DELAY;
@@ -145,6 +146,7 @@ import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.HostingRecord;
 import com.android.server.am.UserState;
+import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.utils.Slogf;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
 
@@ -916,7 +918,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
                 if (andResume) {
-                    lifecycleItem = ResumeActivityItem.obtain(isTransitionForward);
+                    lifecycleItem = ResumeActivityItem.obtain(isTransitionForward,
+                            r.shouldSendCompatFakeFocus());
                 } else {
                     lifecycleItem = PauseActivityItem.obtain();
                 }
@@ -1481,7 +1484,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             handleNonResizableTaskIfNeeded(task, WINDOWING_MODE_UNDEFINED,
                     mRootWindowContainer.getDefaultTaskDisplayArea(), currentRootTask,
                     forceNonResizeable);
-            if (r != null) {
+            if (r != null && (options == null || !options.getDisableStartingWindow())) {
                 // Use a starting window to reduce the transition latency for reshowing the task.
                 // Note that with shell transition, this should be executed before requesting
                 // transition to avoid delaying the starting window.
@@ -2592,7 +2595,15 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         // Apply options to prevent pendingOptions be taken when scheduling
                         // activity lifecycle transaction to make sure the override pending app
                         // transition will be applied immediately.
+                        if (activityOptions != null
+                                && activityOptions.getAnimationType() == ANIM_REMOTE_ANIMATION) {
+                            targetActivity.mPendingRemoteAnimation =
+                                    activityOptions.getRemoteAnimationAdapter();
+                        }
                         targetActivity.applyOptionsAnimation();
+                        if (activityOptions != null && activityOptions.getLaunchCookie() != null) {
+                            targetActivity.mLaunchCookie = activityOptions.getLaunchCookie();
+                        }
                     } finally {
                         mActivityMetricsLogger.notifyActivityLaunched(launchingState,
                                 START_TASK_TO_FRONT, false /* newActivityCreated */,
@@ -2625,12 +2636,17 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         // ActivityStarter will acquire the lock where the places need, so execute the request
         // outside of the lock.
         try {
+            // We need to temporarily disable the explicit intent filter matching enforcement
+            // because Task does not store the resolved type of the intent data, causing filter
+            // mismatch in certain cases. (b/240373119)
+            PackageManagerServiceUtils.DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.set(true);
             return mService.getActivityStartController().startActivityInPackage(taskCallingUid,
                     callingPid, callingUid, callingPackage, callingFeatureId, intent, null, null,
                     null, 0, 0, options, userId, task, "startActivityFromRecents",
                     false /* validateIncomingUser */, null /* originatingPendingIntent */,
                     false /* allowBackgroundActivityStart */);
         } finally {
+            PackageManagerServiceUtils.DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.set(false);
             synchronized (mService.mGlobalLock) {
                 mService.continueWindowLayout();
             }

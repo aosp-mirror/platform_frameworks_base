@@ -79,7 +79,7 @@ public class GestureLauncherService extends SystemService {
      * completed faster than this, we assume it's not performed by human and the
      * event gets ignored.
      */
-    @VisibleForTesting static final int EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS = 160;
+    @VisibleForTesting static final int EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS = 200;
 
     /**
      * Interval in milliseconds in which the power button must be depressed in succession to be

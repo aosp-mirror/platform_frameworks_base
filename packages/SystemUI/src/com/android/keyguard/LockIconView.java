@@ -158,6 +158,10 @@ public class LockIconView extends FrameLayout implements Dumpable {
         return mLockIconCenter.y - mRadius;
     }
 
+    float getLocationBottom() {
+        return mLockIconCenter.y + mRadius;
+    }
+
     /**
      * Updates the icon its default state where no visual is shown.
      */

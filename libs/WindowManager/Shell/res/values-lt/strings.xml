@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Nebeslėpti"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Programa gali neveikti naudojant išskaidyto ekrano režimą."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Programoje nepalaikomas skaidytas ekranas."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Šią programą galima atidaryti tik viename lange."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Programa gali neveikti antriniame ekrane."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Programa nepalaiko paleisties antriniuose ekranuose."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Skaidyto ekrano daliklis"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"Padidinti"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Sumažinti"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Uždaryti"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Atgal"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Rankenėlė"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Visas ekranas"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Stalinio kompiuterio režimas"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Išskaidyto ekrano režimas"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Daugiau"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Slankusis langas"</string>
 </resources>

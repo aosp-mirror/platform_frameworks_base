@@ -14,6 +14,7 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
@@ -31,10 +32,10 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     private val hostView = FrameLayout(context)
     private val stackScrollAlgorithm = StackScrollAlgorithm(context, hostView)
-    private val notificationRow = mock(ExpandableNotificationRow::class.java)
-    private val dumpManager = mock(DumpManager::class.java)
-    private val mStatusBarKeyguardViewManager = mock(StatusBarKeyguardViewManager::class.java)
-    private val notificationShelf = mock(NotificationShelf::class.java)
+    private val notificationRow = mock<ExpandableNotificationRow>()
+    private val dumpManager = mock<DumpManager>()
+    private val mStatusBarKeyguardViewManager = mock<StatusBarKeyguardViewManager>()
+    private val notificationShelf = mock<NotificationShelf>()
     private val emptyShadeView = EmptyShadeView(context, /* attrs= */ null).apply {
         layout(/* l= */ 0, /* t= */ 0, /* r= */ 100, /* b= */ 100)
     }
@@ -46,7 +47,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             mStatusBarKeyguardViewManager
     )
 
-    private val testableResources = mContext.orCreateTestableResources
+    private val testableResources = mContext.getOrCreateTestableResources()
 
     private fun px(@DimenRes id: Int): Float =
             testableResources.resources.getDimensionPixelSize(id).toFloat()
@@ -98,7 +99,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
 
         val marginBottom =
-            context.resources.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom)
+                context.resources.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom)
         val fullHeight = ambientState.layoutMaxHeight + marginBottom - ambientState.stackY
         val centeredY = ambientState.stackY + fullHeight / 2f - emptyShadeView.height / 2f
         assertThat(emptyShadeView.viewState?.yTranslation).isEqualTo(centeredY)
@@ -118,7 +119,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     fun resetViewStates_expansionChanging_notificationBecomesTransparent() {
-        whenever(mStatusBarKeyguardViewManager.isBouncerInTransit).thenReturn(false)
+        whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(false)
         resetViewStates_expansionChanging_notificationAlphaUpdated(
                 expansionFraction = 0.25f,
                 expectedAlpha = 0.0f
@@ -127,7 +128,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     fun resetViewStates_expansionChangingWhileBouncerInTransit_viewBecomesTransparent() {
-        whenever(mStatusBarKeyguardViewManager.isBouncerInTransit).thenReturn(true)
+        whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(true)
         resetViewStates_expansionChanging_notificationAlphaUpdated(
                 expansionFraction = 0.85f,
                 expectedAlpha = 0.0f
@@ -136,7 +137,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     fun resetViewStates_expansionChanging_notificationAlphaUpdated() {
-        whenever(mStatusBarKeyguardViewManager.isBouncerInTransit).thenReturn(false)
+        whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(false)
         resetViewStates_expansionChanging_notificationAlphaUpdated(
                 expansionFraction = 0.6f,
                 expectedAlpha = getContentAlpha(0.6f)
@@ -145,7 +146,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     fun resetViewStates_expansionChangingWhileBouncerInTransit_notificationAlphaUpdated() {
-        whenever(mStatusBarKeyguardViewManager.isBouncerInTransit).thenReturn(true)
+        whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(true)
         resetViewStates_expansionChanging_notificationAlphaUpdated(
                 expansionFraction = 0.95f,
                 expectedAlpha = aboutToShowBouncerProgress(0.95f)
@@ -506,6 +507,190 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 /* originalCornerRoundness= */ 1f)
         assertEquals(1f, currentRoundness)
     }
+
+    @Test
+    fun shadeOpened_hunFullyOverlapsQqsPanel_hunShouldHaveFullShadow() {
+        // Given: shade is opened, yTranslation of HUN is 0,
+        // the height of HUN equals to the height of QQS Panel,
+        // and HUN fully overlaps with QQS Panel
+        ambientState.stackTranslation = px(R.dimen.qqs_layout_margin_top) +
+                px(R.dimen.qqs_layout_padding_bottom)
+        val childHunView = createHunViewMock(
+                isShadeOpen = true,
+                fullyVisible = false,
+                headerVisibleAmount = 1f,
+        )
+        val algorithmState = StackScrollAlgorithm.StackScrollAlgorithmState()
+        algorithmState.visibleChildren.add(childHunView)
+
+        // When: updateChildZValue() is called for the top HUN
+        stackScrollAlgorithm.updateChildZValue(
+                /* i= */ 0,
+                /* StackScrollAlgorithmState= */ algorithmState,
+                /* ambientState= */ ambientState,
+                /* shouldElevateHun= */ true
+        )
+
+        // Then: full shadow would be applied
+        assertEquals(px(R.dimen.heads_up_pinned_elevation), childHunView.viewState.zTranslation)
+    }
+
+    @Test
+    fun shadeOpened_hunPartiallyOverlapsQQS_hunShouldHavePartialShadow() {
+        // Given: shade is opened, yTranslation of HUN is greater than 0,
+        // the height of HUN is equal to the height of QQS Panel,
+        // and HUN partially overlaps with QQS Panel
+        ambientState.stackTranslation = px(R.dimen.qqs_layout_margin_top) +
+                px(R.dimen.qqs_layout_padding_bottom)
+        val childHunView = createHunViewMock(
+                isShadeOpen = true,
+                fullyVisible = false,
+                headerVisibleAmount = 1f,
+        )
+        // Use half of the HUN's height as overlap
+        childHunView.viewState.yTranslation = (childHunView.viewState.height + 1 shr 1).toFloat()
+        val algorithmState = StackScrollAlgorithm.StackScrollAlgorithmState()
+        algorithmState.visibleChildren.add(childHunView)
+
+        // When: updateChildZValue() is called for the top HUN
+        stackScrollAlgorithm.updateChildZValue(
+                /* i= */ 0,
+                /* StackScrollAlgorithmState= */ algorithmState,
+                /* ambientState= */ ambientState,
+                /* shouldElevateHun= */ true
+        )
+
+        // Then: HUN should have shadow, but not as full size
+        assertThat(childHunView.viewState.zTranslation).isGreaterThan(0.0f)
+        assertThat(childHunView.viewState.zTranslation)
+                .isLessThan(px(R.dimen.heads_up_pinned_elevation))
+    }
+
+    @Test
+    fun shadeOpened_hunDoesNotOverlapQQS_hunShouldHaveNoShadow() {
+        // Given: shade is opened, yTranslation of HUN is equal to QQS Panel's height,
+        // the height of HUN is equal to the height of QQS Panel,
+        // and HUN doesn't overlap with QQS Panel
+        ambientState.stackTranslation = px(R.dimen.qqs_layout_margin_top) +
+                px(R.dimen.qqs_layout_padding_bottom)
+        // Mock the height of shade
+        ambientState.setLayoutMinHeight(1000)
+        val childHunView = createHunViewMock(
+                isShadeOpen = true,
+                fullyVisible = true,
+                headerVisibleAmount = 1f,
+        )
+        // HUN doesn't overlap with QQS Panel
+        childHunView.viewState.yTranslation = ambientState.topPadding +
+                ambientState.stackTranslation
+        val algorithmState = StackScrollAlgorithm.StackScrollAlgorithmState()
+        algorithmState.visibleChildren.add(childHunView)
+
+        // When: updateChildZValue() is called for the top HUN
+        stackScrollAlgorithm.updateChildZValue(
+                /* i= */ 0,
+                /* StackScrollAlgorithmState= */ algorithmState,
+                /* ambientState= */ ambientState,
+                /* shouldElevateHun= */ true
+        )
+
+        // Then: HUN should not have shadow
+        assertEquals(0f, childHunView.viewState.zTranslation)
+    }
+
+    @Test
+    fun shadeClosed_hunShouldHaveFullShadow() {
+        // Given: shade is closed, ambientState.stackTranslation == -ambientState.topPadding,
+        // the height of HUN is equal to the height of QQS Panel,
+        ambientState.stackTranslation = -ambientState.topPadding
+        // Mock the height of shade
+        ambientState.setLayoutMinHeight(1000)
+        val childHunView = createHunViewMock(
+                isShadeOpen = false,
+                fullyVisible = false,
+                headerVisibleAmount = 0f,
+        )
+        childHunView.viewState.yTranslation = 0f
+        // Shade is closed, thus childHunView's headerVisibleAmount is 0
+        childHunView.headerVisibleAmount = 0f
+        val algorithmState = StackScrollAlgorithm.StackScrollAlgorithmState()
+        algorithmState.visibleChildren.add(childHunView)
+
+        // When: updateChildZValue() is called for the top HUN
+        stackScrollAlgorithm.updateChildZValue(
+                /* i= */ 0,
+                /* StackScrollAlgorithmState= */ algorithmState,
+                /* ambientState= */ ambientState,
+                /* shouldElevateHun= */ true
+        )
+
+        // Then: HUN should have full shadow
+        assertEquals(px(R.dimen.heads_up_pinned_elevation), childHunView.viewState.zTranslation)
+    }
+
+    @Test
+    fun draggingHunToOpenShade_hunShouldHavePartialShadow() {
+        // Given: shade is closed when HUN pops up,
+        // now drags down the HUN to open shade
+        ambientState.stackTranslation = -ambientState.topPadding
+        // Mock the height of shade
+        ambientState.setLayoutMinHeight(1000)
+        val childHunView = createHunViewMock(
+                isShadeOpen = false,
+                fullyVisible = false,
+                headerVisibleAmount = 0.5f,
+        )
+        childHunView.viewState.yTranslation = 0f
+        // Shade is being opened, thus childHunView's headerVisibleAmount is between 0 and 1
+        // use 0.5 as headerVisibleAmount here
+        childHunView.headerVisibleAmount = 0.5f
+        val algorithmState = StackScrollAlgorithm.StackScrollAlgorithmState()
+        algorithmState.visibleChildren.add(childHunView)
+
+        // When: updateChildZValue() is called for the top HUN
+        stackScrollAlgorithm.updateChildZValue(
+                /* i= */ 0,
+                /* StackScrollAlgorithmState= */ algorithmState,
+                /* ambientState= */ ambientState,
+                /* shouldElevateHun= */ true
+        )
+
+        // Then: HUN should have shadow, but not as full size
+        assertThat(childHunView.viewState.zTranslation).isGreaterThan(0.0f)
+        assertThat(childHunView.viewState.zTranslation)
+                .isLessThan(px(R.dimen.heads_up_pinned_elevation))
+    }
+
+    private fun createHunViewMock(
+            isShadeOpen: Boolean,
+            fullyVisible: Boolean,
+            headerVisibleAmount: Float,
+    ) =
+            mock<ExpandableNotificationRow>().apply {
+                val childViewStateMock = createHunChildViewState(isShadeOpen, fullyVisible)
+                whenever(this.viewState).thenReturn(childViewStateMock)
+
+                whenever(this.mustStayOnScreen()).thenReturn(true)
+                whenever(this.headerVisibleAmount).thenReturn(headerVisibleAmount)
+            }
+
+
+    private fun createHunChildViewState(
+            isShadeOpen: Boolean,
+            fullyVisible: Boolean,
+    ) =
+            ExpandableViewState().apply {
+                // Mock the HUN's height with ambientState.topPadding +
+                // ambientState.stackTranslation
+                height = (ambientState.topPadding + ambientState.stackTranslation).toInt()
+                if (isShadeOpen && fullyVisible) {
+                    yTranslation =
+                            ambientState.topPadding + ambientState.stackTranslation
+                } else {
+                    yTranslation = 0f
+                }
+                headsUpIsVisible = fullyVisible
+            }
 
     private fun resetViewStates_expansionChanging_notificationAlphaUpdated(
             expansionFraction: Float,

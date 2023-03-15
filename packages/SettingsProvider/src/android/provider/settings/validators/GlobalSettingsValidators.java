@@ -17,6 +17,9 @@
 package android.provider.settings.validators;
 
 import static android.media.AudioFormat.SURROUND_SOUND_ENCODING;
+import static android.net.ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI_AVOID;
+import static android.net.ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI_IGNORE;
+import static android.net.ConnectivitySettingsManager.NETWORK_AVOID_BAD_WIFI_PROMPT;
 import static android.provider.settings.validators.SettingsValidators.ANY_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
@@ -95,6 +98,14 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(
                 Global.NETWORK_RECOMMENDATIONS_ENABLED,
                 new DiscreteValueValidator(new String[] {"-1", "0", "1"}));
+        VALIDATORS.put(
+                Global.NETWORK_AVOID_BAD_WIFI,
+                new DiscreteValueValidator(
+                        new String[] {
+                                String.valueOf(NETWORK_AVOID_BAD_WIFI_IGNORE),
+                                String.valueOf(NETWORK_AVOID_BAD_WIFI_PROMPT),
+                                String.valueOf(NETWORK_AVOID_BAD_WIFI_AVOID),
+                        }));
         VALIDATORS.put(Global.WIFI_WAKEUP_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
@@ -175,6 +186,7 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.ADVANCED_BATTERY_USAGE_AMOUNT, PERCENTAGE_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.POWER_BUTTON_LONG_PRESS_DURATION_MS, NONE_NEGATIVE_LONG_VALIDATOR);
+        VALIDATORS.put(Global.STYLUS_EVER_USED, BOOLEAN_VALIDATOR);
 
         VALIDATORS.put(Global.Wearable.HAS_PAY_TOKENS, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.GMS_CHECKIN_TIMEOUT_MIN, ANY_INTEGER_VALIDATOR);
@@ -338,4 +350,3 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.COOLDOWN_MODE_ON, BOOLEAN_VALIDATOR);
     }
 }
-

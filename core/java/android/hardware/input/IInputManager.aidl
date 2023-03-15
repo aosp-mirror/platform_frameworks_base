@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.IInputDevicesChangedListener;
+import android.hardware.input.IInputDeviceBatteryListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.TouchCalibration;
 import android.os.CombinedVibration;
@@ -155,4 +156,13 @@ interface IInputManager {
     void closeLightSession(int deviceId, in IBinder token);
 
     void cancelCurrentTouch();
+
+    void registerBatteryListener(int deviceId, IInputDeviceBatteryListener listener);
+
+    void unregisterBatteryListener(int deviceId, IInputDeviceBatteryListener listener);
+
+    @EnforcePermission("MONITOR_INPUT")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MONITOR_INPUT)")
+    void pilferPointers(IBinder inputChannelToken);
 }

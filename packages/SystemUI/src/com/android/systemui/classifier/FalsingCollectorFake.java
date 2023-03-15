@@ -49,10 +49,6 @@ public class FalsingCollectorFake implements FalsingCollector {
     }
 
     @Override
-    public void setQsExpanded(boolean expanded) {
-    }
-
-    @Override
     public boolean shouldEnforceBouncer() {
         return false;
     }
@@ -160,5 +156,9 @@ public class FalsingCollectorFake implements FalsingCollector {
 
     @Override
     public void updateFalseConfidence(FalsingClassifier.Result result) {
+    }
+
+    @Override
+    public void onA11yAction() {
     }
 }

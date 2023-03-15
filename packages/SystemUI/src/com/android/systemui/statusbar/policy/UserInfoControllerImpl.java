@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,7 +27,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract;
@@ -40,8 +38,11 @@ import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.settings.UserTracker;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -53,6 +54,7 @@ public class UserInfoControllerImpl implements UserInfoController {
     private static final String TAG = "UserInfoController";
 
     private final Context mContext;
+    private final UserTracker mUserTracker;
     private final ArrayList<OnUserInfoChangedListener> mCallbacks =
             new ArrayList<OnUserInfoChangedListener>();
     private AsyncTask<Void, Void, UserInfoQueryResult> mUserInfoTask;
@@ -64,11 +66,11 @@ public class UserInfoControllerImpl implements UserInfoController {
     /**
      */
     @Inject
-    public UserInfoControllerImpl(Context context) {
+    public UserInfoControllerImpl(Context context, @Main Executor mainExecutor,
+            UserTracker userTracker) {
         mContext = context;
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
-        mContext.registerReceiver(mReceiver, filter);
+        mUserTracker = userTracker;
+        mUserTracker.addCallback(mUserChangedCallback, mainExecutor);
 
         IntentFilter profileFilter = new IntentFilter();
         profileFilter.addAction(ContactsContract.Intents.ACTION_PROFILE_CHANGED);
@@ -88,15 +90,13 @@ public class UserInfoControllerImpl implements UserInfoController {
         mCallbacks.remove(callback);
     }
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                reloadUserInfo();
-            }
-        }
-    };
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    reloadUserInfo();
+                }
+            };
 
     private final BroadcastReceiver mProfileReceiver = new BroadcastReceiver() {
         @Override
@@ -104,15 +104,11 @@ public class UserInfoControllerImpl implements UserInfoController {
             final String action = intent.getAction();
             if (ContactsContract.Intents.ACTION_PROFILE_CHANGED.equals(action) ||
                     Intent.ACTION_USER_INFO_CHANGED.equals(action)) {
-                try {
-                    final int currentUser = ActivityManager.getService().getCurrentUser().id;
-                    final int changedUser =
-                            intent.getIntExtra(Intent.EXTRA_USER_HANDLE, getSendingUserId());
-                    if (changedUser == currentUser) {
-                        reloadUserInfo();
-                    }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Couldn't get current user id for profile change", e);
+                final int currentUser = mUserTracker.getUserId();
+                final int changedUser =
+                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, getSendingUserId());
+                if (changedUser == currentUser) {
+                    reloadUserInfo();
                 }
             }
         }
@@ -130,14 +126,11 @@ public class UserInfoControllerImpl implements UserInfoController {
         Context currentUserContext;
         UserInfo userInfo;
         try {
-            userInfo = ActivityManager.getService().getCurrentUser();
+            userInfo = mUserTracker.getUserInfo();
             currentUserContext = mContext.createPackageContextAsUser("android", 0,
                     new UserHandle(userInfo.id));
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Couldn't create user context", e);
-            throw new RuntimeException(e);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Couldn't get user info", e);
             throw new RuntimeException(e);
         }
         final int userId = userInfo.id;

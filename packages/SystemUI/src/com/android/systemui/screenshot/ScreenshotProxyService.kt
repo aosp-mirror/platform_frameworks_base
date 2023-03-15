@@ -15,19 +15,28 @@
  */
 package com.android.systemui.screenshot
 
-import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.shade.ShadeExpansionStateManager
+import com.android.systemui.statusbar.phone.CentralSurfaces
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.Optional
 import javax.inject.Inject
 
 /**
  * Provides state from the main SystemUI process on behalf of the Screenshot process.
  */
 internal class ScreenshotProxyService @Inject constructor(
-    private val mExpansionMgr: PanelExpansionStateManager
-) : Service() {
+    private val mExpansionMgr: ShadeExpansionStateManager,
+    private val mCentralSurfacesOptional: Optional<CentralSurfaces>,
+    @Main private val mMainDispatcher: CoroutineDispatcher,
+) : LifecycleService() {
 
     private val mBinder: IBinder = object : IScreenshotProxy.Stub() {
         /**
@@ -38,7 +47,29 @@ internal class ScreenshotProxyService @Inject constructor(
             Log.d(TAG, "isNotificationShadeExpanded(): $expanded")
             return expanded
         }
+
+        override fun dismissKeyguard(callback: IOnDoneCallback) {
+            lifecycleScope.launch {
+                executeAfterDismissing(callback)
+            }
+        }
     }
+
+    private suspend fun executeAfterDismissing(callback: IOnDoneCallback) =
+        withContext(mMainDispatcher) {
+            mCentralSurfacesOptional.ifPresentOrElse(
+                    {
+                        it.executeRunnableDismissingKeyguard(
+                                Runnable {
+                                    callback.onDone(true)
+                                }, null,
+                                true /* dismissShade */, true /* afterKeyguardGone */,
+                                true /* deferred */
+                        )
+                    },
+                    { callback.onDone(false) }
+            )
+        }
 
     override fun onBind(intent: Intent): IBinder? {
         Log.d(TAG, "onBind: $intent")

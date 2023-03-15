@@ -23,6 +23,7 @@
     android:layout_height="wrap_content"
     android:layout_gravity="@integer/notification_panel_layout_gravity"
     android:background="@android:color/transparent"
+    android:importantForAccessibility="no"
     android:baselineAligned="false"
     android:clickable="false"
     android:clipChildren="false"
@@ -56,7 +57,7 @@
             android:clipToPadding="false"
             android:focusable="true"
             android:paddingBottom="@dimen/qqs_layout_padding_bottom"
-            android:importantForAccessibility="yes">
+            android:importantForAccessibility="no">
         </com.android.systemui.qs.QuickQSPanel>
     </RelativeLayout>
 

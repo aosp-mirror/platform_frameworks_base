@@ -47,6 +47,14 @@ public abstract class BatteryManagerInternal {
     public abstract int getBatteryLevel();
 
     /**
+     * Returns battery health status as an integer representing the current battery health constant.
+     *
+     * This is a simple accessor that's safe to be called from any locks, but internally it may
+     * wait on the battery service lock.
+     */
+    public abstract int getBatteryHealth();
+
+    /**
      * Instantaneous battery capacity in uA-h, as defined in the HealthInfo HAL struct.
      * Please note apparently it could be bigger than {@link #getBatteryFullCharge}.
      *

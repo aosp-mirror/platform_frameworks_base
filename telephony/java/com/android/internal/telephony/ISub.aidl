@@ -135,11 +135,11 @@ interface ISub {
 
     /**
      * Set SIM icon tint color by simInfo index
-     * @param tint the icon tint color of the SIM
      * @param subId the unique SubscriptionInfo index in database
+     * @param tint the icon tint color of the SIM
      * @return the number of records updated
      */
-    int setIconTint(int tint, int subId);
+    int setIconTint(int subId, int tint);
 
     /**
      * Set display name by simInfo index with name source
@@ -242,8 +242,6 @@ interface ISub {
 
     int getDefaultSubId();
 
-    int clearSubInfo();
-
     int getPhoneId(int subId);
 
     /**
@@ -274,11 +272,6 @@ interface ISub {
     boolean isSubscriptionEnabled(int subId);
 
     int getEnabledSubscriptionId(int slotIndex);
-    /**
-     * Get the SIM state for the slot index
-     * @return SIM state as the ordinal of IccCardConstants.State
-     */
-    int getSimStateForSlotIndex(int slotIndex);
 
     boolean isActiveSubId(int subId, String callingPackage, String callingFeatureId);
 

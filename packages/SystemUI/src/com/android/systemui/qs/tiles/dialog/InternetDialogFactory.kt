@@ -66,7 +66,8 @@ class InternetDialogFactory @Inject constructor(
         } else {
             internetDialog = InternetDialog(
                 context, this, internetDialogController,
-                canConfigMobileData, canConfigWifi, aboveStatusBar, uiEventLogger, handler,
+                canConfigMobileData, canConfigWifi, aboveStatusBar, uiEventLogger,
+                    dialogLaunchAnimator, handler,
                 executor, keyguardStateController
             )
             if (view != null) {

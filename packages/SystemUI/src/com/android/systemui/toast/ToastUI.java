@@ -50,13 +50,14 @@ import javax.inject.Inject;
  * Controls display of text toasts.
  */
 @SysUISingleton
-public class ToastUI extends CoreStartable implements CommandQueue.Callbacks {
+public class ToastUI implements CoreStartable, CommandQueue.Callbacks {
     // values from NotificationManagerService#LONG_DELAY and NotificationManagerService#SHORT_DELAY
     private static final int TOAST_LONG_TIME = 3500; // 3.5 seconds
     private static final int TOAST_SHORT_TIME = 2000; // 2 seconds
 
     private static final String TAG = "ToastUI";
 
+    private final Context mContext;
     private final CommandQueue mCommandQueue;
     private final INotificationManager mNotificationManager;
     private final IAccessibilityManager mIAccessibilityManager;
@@ -90,7 +91,7 @@ public class ToastUI extends CoreStartable implements CommandQueue.Callbacks {
             @Nullable IAccessibilityManager accessibilityManager,
             ToastFactory toastFactory, ToastLogger toastLogger
     ) {
-        super(context);
+        mContext = context;
         mCommandQueue = commandQueue;
         mNotificationManager = notificationManager;
         mIAccessibilityManager = accessibilityManager;
@@ -179,7 +180,7 @@ public class ToastUI extends CoreStartable implements CommandQueue.Callbacks {
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(Configuration newConfig) {
         if (newConfig.orientation != mOrientation) {
             mOrientation = newConfig.orientation;
             if (mToast != null) {

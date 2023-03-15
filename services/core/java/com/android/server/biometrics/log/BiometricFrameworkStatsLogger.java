@@ -62,8 +62,7 @@ public class BiometricFrameworkStatsLogger {
     /** {@see FrameworkStatsLog.BIOMETRIC_AUTHENTICATED}. */
     public void authenticate(OperationContext operationContext,
             int statsModality, int statsAction, int statsClient, boolean isDebug, long latency,
-            int authState, boolean requireConfirmation,
-            int targetUserId, float ambientLightLux) {
+            int authState, boolean requireConfirmation, int targetUserId, float ambientLightLux) {
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_AUTHENTICATED,
                 statsModality,
                 targetUserId,
@@ -78,6 +77,16 @@ public class BiometricFrameworkStatsLogger {
                 operationContext.id,
                 sessionType(operationContext.reason),
                 operationContext.isAod);
+    }
+
+    /** {@see FrameworkStatsLog.BIOMETRIC_AUTHENTICATED}. */
+    public void authenticate(OperationContext operationContext,
+            int statsModality, int statsAction, int statsClient, boolean isDebug, long latency,
+            int authState, boolean requireConfirmation, int targetUserId, ALSProbe alsProbe) {
+        alsProbe.awaitNextLux((ambientLightLux) -> {
+            authenticate(operationContext, statsModality, statsAction, statsClient, isDebug,
+                    latency, authState, requireConfirmation, targetUserId, ambientLightLux);
+        }, null /* handler */);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_ENROLLED}. */

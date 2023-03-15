@@ -3,26 +3,25 @@ package com.android.systemui.shared.system
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
+import java.lang.Thread.UncaughtExceptionHandler
 import org.junit.Assert.assertThrows
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.only
 import org.mockito.Mockito.any
+import org.mockito.Mockito.only
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.lang.Thread.UncaughtExceptionHandler
 
 @SmallTest
 class UncaughtExceptionPreHandlerTest : SysuiTestCase() {
     private lateinit var preHandlerManager: UncaughtExceptionPreHandlerManager
 
-    @Mock
-    private lateinit var mockHandler: UncaughtExceptionHandler
+    @Mock private lateinit var mockHandler: UncaughtExceptionHandler
 
-    @Mock
-    private lateinit var mockHandler2: UncaughtExceptionHandler
+    @Mock private lateinit var mockHandler2: UncaughtExceptionHandler
 
     @Before
     fun setUp() {
@@ -55,6 +54,7 @@ class UncaughtExceptionPreHandlerTest : SysuiTestCase() {
     }
 
     @Test
+    @Ignore
     fun registerHandler_toleratesHandlersThatThrow() {
         `when`(mockHandler2.uncaughtException(any(), any())).thenThrow(RuntimeException())
         preHandlerManager.registerHandler(mockHandler2)

@@ -715,7 +715,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
         activity.onDisplayChanged(dc);
         activity.setOccludesParent(true);
         activity.setVisible(true);
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
+    }
+
+    static TaskFragment createTaskFragmentWithParentTask(@NonNull Task parentTask) {
+        return createTaskFragmentWithParentTask(parentTask, false /* createEmbeddedTask */);
     }
 
     /**
@@ -1205,7 +1209,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     mTask.moveToFront("createActivity");
                 }
                 if (mVisible) {
-                    activity.mVisibleRequested = true;
+                    activity.setVisibleRequested(true);
                     activity.setVisible(true);
                 }
             }
@@ -1727,7 +1731,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         void startTransition() {
-            mOrganizer.startTransition(mLastRequest.getType(), mLastTransit, null);
+            mOrganizer.startTransition(mLastTransit.getToken(), null);
         }
 
         void onTransactionReady(SurfaceControl.Transaction t) {
@@ -1740,7 +1744,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         public void finish() {
-            mController.finishTransition(mLastTransit);
+            mController.finishTransition(mLastTransit.getToken());
         }
     }
 }

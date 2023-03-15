@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Vis"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Appen fungerer muligvis ikke i opdelt skærm."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Appen understøtter ikke opdelt skærm."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Denne app kan kun åbnes i 1 vindue."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Appen fungerer muligvis ikke på sekundære skærme."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Appen kan ikke åbnes på sekundære skærme."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Adskiller til opdelt skærm"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"Maksimér"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimer"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Luk"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Tilbage"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Håndtag"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Fuld skærm"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Computertilstand"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Opdelt skærm"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Mere"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Svævende"</string>
 </resources>

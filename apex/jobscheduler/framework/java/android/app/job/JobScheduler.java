@@ -237,4 +237,32 @@ public abstract class JobScheduler {
      */
     @SuppressWarnings("HiddenAbstractMethod")
     public abstract List<JobSnapshot> getAllJobSnapshots();
+
+    /**
+     * @hide
+     */
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    @SuppressWarnings("HiddenAbstractMethod")
+    public abstract void registerUserVisibleJobObserver(@NonNull IUserVisibleJobObserver observer);
+
+    /**
+     * @hide
+     */
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    @SuppressWarnings("HiddenAbstractMethod")
+    public abstract void unregisterUserVisibleJobObserver(
+            @NonNull IUserVisibleJobObserver observer);
+
+    /**
+     * @hide
+     */
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    @SuppressWarnings("HiddenAbstractMethod")
+    public abstract void stopUserVisibleJobsForUser(@NonNull String packageName, int userId);
 }

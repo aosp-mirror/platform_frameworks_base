@@ -34,11 +34,14 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dumpable;
+import com.android.systemui.ProtoDumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.dump.nano.SystemUIProtoDump;
 import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
@@ -48,9 +51,9 @@ import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServiceKey;
 import com.android.systemui.qs.external.TileServiceRequestController;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.nano.QsTileState;
 import com.android.systemui.settings.UserFileManager;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -59,16 +62,20 @@ import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.util.settings.SecureSettings;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -82,7 +89,7 @@ import javax.inject.Provider;
  * This class also provides the interface for adding/removing/changing tiles.
  */
 @SysUISingleton
-public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, Dumpable {
+public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, ProtoDumpable {
     private static final String TAG = "QSTileHost";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final int MAX_QS_INSTANCE_ID = 1 << 20;
@@ -420,11 +427,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mMainExecutor.execute(() -> changeTileSpecs(tileSpecs -> tileSpecs.removeAll(specs)));
     }
 
-    @Override
-    public void unmarkTileAsAutoAdded(String spec) {
-        if (mAutoTiles != null) mAutoTiles.unmarkTileAsAutoAdded(spec);
-    }
-
     /**
      * Add a tile to the end
      *
@@ -601,7 +603,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
 
         if (TextUtils.isEmpty(tileList)) {
             tileList = res.getString(R.string.quick_settings_tiles);
-            if (DEBUG) Log.d(TAG, "Loaded tile specs from config: " + tileList);
+            if (DEBUG) Log.d(TAG, "Loaded tile specs from default config: " + tileList);
         } else {
             if (DEBUG) Log.d(TAG, "Loaded tile specs from setting: " + tileList);
         }
@@ -670,5 +672,16 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         pw.println("QSTileHost:");
         mTiles.values().stream().filter(obj -> obj instanceof Dumpable)
                 .forEach(o -> ((Dumpable) o).dump(pw, args));
+    }
+
+    @Override
+    public void dumpProto(@NotNull SystemUIProtoDump systemUIProtoDump, @NotNull String[] args) {
+        List<QsTileState> data = mTiles.values().stream()
+                .map(QSTile::getState)
+                .map(TileStateToProtoKt::toProto)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        systemUIProtoDump.tiles = data.toArray(new QsTileState[0]);
     }
 }

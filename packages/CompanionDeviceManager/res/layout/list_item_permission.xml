@@ -30,7 +30,8 @@
         android:layout_height="24dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="12dp"
-        android:contentDescription="Permission Icon"/>
+        android:importantForAccessibility="no"
+        android:contentDescription="@null"/>
 
     <LinearLayout
         android:layout_width="match_parent"

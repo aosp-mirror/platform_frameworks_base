@@ -26,7 +26,9 @@ package com.android.systemui.util.mockito
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatcher
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.mockito.stubbing.OngoingStubbing
+import org.mockito.stubbing.Stubber
 
 /**
  * Returns Mockito.eq() as nullable type to avoid java.lang.IllegalStateException when
@@ -89,7 +91,8 @@ inline fun <reified T : Any> mock(apply: T.() -> Unit = {}): T = Mockito.mock(T:
  *
  * @see Mockito.when
  */
-fun <T> whenever(methodCall: T): OngoingStubbing<T> = Mockito.`when`(methodCall)
+fun <T> whenever(methodCall: T): OngoingStubbing<T> = `when`(methodCall)
+fun <T> Stubber.whenever(mock: T): T = `when`(mock)
 
 /**
  * A kotlin implemented wrapper of [ArgumentCaptor] which prevents the following exception when

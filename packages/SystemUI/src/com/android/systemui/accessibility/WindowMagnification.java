@@ -52,11 +52,12 @@ import javax.inject.Inject;
  * when {@code IStatusBar#requestWindowMagnificationConnection(boolean)} is called.
  */
 @SysUISingleton
-public class WindowMagnification extends CoreStartable implements WindowMagnifierCallback,
+public class WindowMagnification implements CoreStartable, WindowMagnifierCallback,
         CommandQueue.Callbacks {
     private static final String TAG = "WindowMagnification";
 
     private final ModeSwitchesController mModeSwitchesController;
+    private final Context mContext;
     private final Handler mHandler;
     private final AccessibilityManager mAccessibilityManager;
     private final CommandQueue mCommandQueue;
@@ -102,7 +103,7 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     public WindowMagnification(Context context, @Main Handler mainHandler,
             CommandQueue commandQueue, ModeSwitchesController modeSwitchesController,
             SysUiState sysUiState, OverviewProxyService overviewProxyService) {
-        super(context);
+        mContext = context;
         mHandler = mainHandler;
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mCommandQueue = commandQueue;

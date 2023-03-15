@@ -29,9 +29,9 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.media.MediaHierarchyManager;
-import com.android.systemui.media.MediaHost;
-import com.android.systemui.media.MediaHostState;
+import com.android.systemui.media.controls.ui.MediaHierarchyManager;
+import com.android.systemui.media.controls.ui.MediaHost;
+import com.android.systemui.media.controls.ui.MediaHostState;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
@@ -122,9 +122,8 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         }
         switchTileLayout(true);
         mBrightnessMirrorHandler.onQsPanelAttached();
-
-        ((PagedTileLayout) mView.getOrCreateTileLayout())
-                .setOnTouchListener(mTileLayoutTouchListener);
+        PagedTileLayout pagedTileLayout= ((PagedTileLayout) mView.getOrCreateTileLayout());
+        pagedTileLayout.setOnTouchListener(mTileLayoutTouchListener);
     }
 
     @Override
@@ -146,6 +145,12 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         if (mView.isListening()) {
             refreshAllTiles();
         }
+    }
+
+    @Override
+    protected void onSplitShadeChanged() {
+        ((PagedTileLayout) mView.getOrCreateTileLayout())
+                .forceTilesRedistribution("Split shade state changed");
     }
 
     /** */
@@ -237,7 +242,11 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
      * @return if bouncer is in transit
      */
     public boolean isBouncerInTransit() {
-        return mStatusBarKeyguardViewManager.isBouncerInTransit();
+        return mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit();
+    }
+
+    public int getPaddingBottom() {
+        return mView.getPaddingBottom();
     }
 }
 

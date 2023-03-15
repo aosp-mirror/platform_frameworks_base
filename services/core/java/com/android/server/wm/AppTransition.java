@@ -169,7 +169,8 @@ public class AppTransition implements Dump {
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
 
-    private final TransitionAnimation mTransitionAnimation;
+    @VisibleForTesting
+    final TransitionAnimation mTransitionAnimation;
 
     private @TransitionFlags int mNextAppTransitionFlags = 0;
     private final ArrayList<Integer> mNextAppTransitionRequests = new ArrayList<>();
@@ -315,8 +316,31 @@ public class AppTransition implements Dump {
         setAppTransitionState(APP_STATE_TIMEOUT);
     }
 
+    /**
+     * Gets the animation overridden by app via {@link #overridePendingAppTransition}.
+     */
+    @Nullable
+    Animation getNextAppRequestedAnimation(boolean enter) {
+        final Animation a = mTransitionAnimation.loadAppTransitionAnimation(
+                mNextAppTransitionPackage,
+                enter ? mNextAppTransitionEnter : mNextAppTransitionExit);
+        if (mNextAppTransitionBackgroundColor != 0 && a != null) {
+            a.setBackdropColor(mNextAppTransitionBackgroundColor);
+        }
+        return a;
+    }
+
+    /**
+     * Gets the animation background color overridden by app via
+     * {@link #overridePendingAppTransition}.
+     */
     @ColorInt int getNextAppTransitionBackgroundColor() {
         return mNextAppTransitionBackgroundColor;
+    }
+
+    @VisibleForTesting
+    boolean isNextAppTransitionOverrideRequested() {
+        return mNextAppTransitionOverrideRequested;
     }
 
     HardwareBuffer getAppTransitionThumbnailHeader(WindowContainer container) {
@@ -411,9 +435,12 @@ public class AppTransition implements Dump {
     }
 
     void clear() {
+        clear(true /* clearAppOverride */);
+    }
+
+    private void clear(boolean clearAppOverride) {
         mNextAppTransitionType = NEXT_TRANSIT_TYPE_NONE;
         mNextAppTransitionOverrideRequested = false;
-        mNextAppTransitionPackage = null;
         mNextAppTransitionAnimationsSpecs.clear();
         mRemoteAnimationController = null;
         mNextAppTransitionAnimationsSpecsFuture = null;
@@ -421,6 +448,12 @@ public class AppTransition implements Dump {
         mAnimationFinishedCallback = null;
         mOverrideTaskTransition = false;
         mNextAppTransitionIsSync = false;
+        if (clearAppOverride) {
+            mNextAppTransitionPackage = null;
+            mNextAppTransitionEnter = 0;
+            mNextAppTransitionExit = 0;
+            mNextAppTransitionBackgroundColor = 0;
+        }
     }
 
     void freeze() {
@@ -528,7 +561,7 @@ public class AppTransition implements Dump {
         return TransitionAnimation.loadAnimationSafely(context, resId, TAG);
     }
 
-    static int mapOpenCloseTransitTypes(int transit, boolean enter) {
+    private static int mapOpenCloseTransitTypes(int transit, boolean enter) {
         int animAttr = 0;
         switch (transit) {
             case TRANSIT_OLD_ACTIVITY_OPEN:
@@ -788,11 +821,7 @@ public class AppTransition implements Dump {
                     "applyAnimation: anim=%s transit=%s Callers=%s", a,
                     appTransitionOldToString(transit), Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM) {
-            a = mTransitionAnimation.loadAppTransitionAnimation(mNextAppTransitionPackage,
-                    enter ? mNextAppTransitionEnter : mNextAppTransitionExit);
-            if (mNextAppTransitionBackgroundColor != 0) {
-                a.setBackdropColor(mNextAppTransitionBackgroundColor);
-            }
+            a = getNextAppRequestedAnimation(enter);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s nextAppTransition=ANIM_CUSTOM transit=%s "
                             + "isEntrance=%b Callers=%s",
@@ -1032,7 +1061,9 @@ public class AppTransition implements Dump {
         ProtoLog.i(WM_DEBUG_APP_TRANSITIONS, "Override pending remote transitionSet=%b adapter=%s",
                         isTransitionSet(), remoteAnimationAdapter);
         if (isTransitionSet() && !mNextAppTransitionIsSync) {
-            clear();
+            // ActivityEmbedding animation will run by the app process for which we want to respect
+            // the app override for whether or not to show background color.
+            clear(!isActivityEmbedding /* clearAppOverride */);
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_REMOTE;
             mRemoteAnimationController = new RemoteAnimationController(mService, mDisplayContent,
                     remoteAnimationAdapter, mHandler, isActivityEmbedding);
@@ -1458,6 +1489,12 @@ public class AppTransition implements Dump {
         return transit == TRANSIT_OLD_ACTIVITY_OPEN
                 || transit == TRANSIT_OLD_ACTIVITY_CLOSE
                 || transit == TRANSIT_OLD_ACTIVITY_RELAUNCH;
+    }
+
+    static boolean isTaskFragmentTransitOld(@TransitionOldType int transit) {
+        return transit == TRANSIT_OLD_TASK_FRAGMENT_OPEN
+                || transit == TRANSIT_OLD_TASK_FRAGMENT_CLOSE
+                || transit == TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
     }
 
     static boolean isChangeTransitOld(@TransitionOldType int transit) {

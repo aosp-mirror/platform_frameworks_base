@@ -75,6 +75,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.R;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.common.shared.model.ContentDescription;
 import com.android.systemui.common.shared.model.Icon;
 import com.android.systemui.dagger.SysUISingleton;
@@ -190,8 +191,9 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
     }
 
     /** Show the device monitoring dialog. */
-    public void showDeviceMonitoringDialog(Context quickSettingsContext, @Nullable View view) {
-        createDialog(quickSettingsContext, view);
+    public void showDeviceMonitoringDialog(Context quickSettingsContext,
+            @Nullable Expandable expandable) {
+        createDialog(quickSettingsContext, expandable);
     }
 
     /**
@@ -245,7 +247,7 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
 
         Icon icon;
         ContentDescription contentDescription = null;
-        if (isParentalControlsEnabled) {
+        if (isParentalControlsEnabled && securityModel.getDeviceAdminIcon() != null) {
             icon = new Icon.Loaded(securityModel.getDeviceAdminIcon(), contentDescription);
         } else if (vpnName != null || vpnNameWorkProfile != null) {
             if (securityModel.isVpnBranded()) {
@@ -440,7 +442,7 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
         }
     }
 
-    private void createDialog(Context quickSettingsContext, @Nullable View view) {
+    private void createDialog(Context quickSettingsContext, @Nullable Expandable expandable) {
         mShouldUseSettingsButton.set(false);
         mBgHandler.post(() -> {
             String settingsButtonText = getSettingsButton();
@@ -453,9 +455,12 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
                         ? settingsButtonText : getNegativeButton(), this);
 
                 mDialog.setView(dialogView);
-                if (view != null && view.isAggregatedVisible()) {
-                    mDialogLaunchAnimator.showFromView(mDialog, view, new DialogCuj(
-                            InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG));
+                DialogLaunchAnimator.Controller controller =
+                        expandable != null ? expandable.dialogLaunchController(new DialogCuj(
+                                InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG))
+                                : null;
+                if (controller != null) {
+                    mDialogLaunchAnimator.show(mDialog, controller);
                 } else {
                     mDialog.show();
                 }
@@ -471,7 +476,7 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
     @VisibleForTesting
     View createDialogView(Context quickSettingsContext) {
         if (mSecurityController.isParentalControlsEnabled()) {
-            return createParentalControlsDialogView();
+            return createParentalControlsDialogView(quickSettingsContext);
         }
         return createOrganizationDialogView(quickSettingsContext);
     }
@@ -574,8 +579,8 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
         return dialogView;
     }
 
-    private View createParentalControlsDialogView() {
-        View dialogView = LayoutInflater.from(mContext)
+    private View createParentalControlsDialogView(Context quickSettingsContext) {
+        View dialogView = LayoutInflater.from(quickSettingsContext)
                 .inflate(R.layout.quick_settings_footer_dialog_parental_controls, null, false);
 
         DeviceAdminInfo info = mSecurityController.getDeviceAdminInfo();

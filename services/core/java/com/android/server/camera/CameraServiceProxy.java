@@ -74,6 +74,7 @@ import android.view.Surface;
 import android.view.WindowManagerGlobal;
 
 import com.android.framework.protobuf.nano.MessageNano;
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
@@ -389,6 +390,16 @@ public class CameraServiceProxy extends SystemService
             return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
         }
 
+        // When config_isWindowManagerCameraCompatTreatmentEnabled is true,
+        // DisplayRotationCompatPolicy in WindowManager force rotates fullscreen activities with
+        // fixed orientation to align them with the natural orientation of the device.
+        if (ctx.getResources().getBoolean(
+                R.bool.config_isWindowManagerCameraCompatTreatmentEnabled)) {
+            Slog.v(TAG, "Disable Rotate and Crop to avoid conflicts with"
+                    + " WM force rotation treatment.");
+            return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+        }
+
         // External cameras do not need crop-rotate-scale.
         if (lensFacing != CameraMetadata.LENS_FACING_FRONT
                 && lensFacing != CameraMetadata.LENS_FACING_BACK) {
@@ -487,7 +498,8 @@ public class CameraServiceProxy extends SystemService
 
             if ((recentTasks != null) && (!recentTasks.getList().isEmpty())) {
                 for (ActivityManager.RecentTaskInfo task : recentTasks.getList()) {
-                    if (packageName.equals(task.topActivityInfo.packageName)) {
+                    if (task.topActivityInfo != null && packageName.equals(
+                            task.topActivityInfo.packageName)) {
                         taskInfo = new TaskInfo();
                         taskInfo.frontTaskId = task.taskId;
                         taskInfo.isResizeable =

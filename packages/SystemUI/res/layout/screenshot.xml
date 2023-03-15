@@ -35,12 +35,6 @@
         android:visibility="gone"
         android:elevation="7dp"
         android:src="@android:color/white"/>
-    <com.android.systemui.screenshot.ScreenshotSelectorView
-        android:id="@+id/screenshot_selector"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"
-        android:pointerIcon="crosshair"/>
     <include layout="@layout/screenshot_static"
              android:id="@+id/screenshot_static"/>
 </com.android.systemui.screenshot.ScreenshotView>

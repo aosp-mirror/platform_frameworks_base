@@ -245,6 +245,10 @@ public final class SmartspaceTarget implements Parcelable {
     public static final int UI_TEMPLATE_COMBINED_CARDS = 6;
     // Sub-card template whose data is represented by {@link SubCardTemplateData}
     public static final int UI_TEMPLATE_SUB_CARD = 7;
+    // Reserved: 8
+    // Template type used by non-UI template features for sending logging information in the
+    // base template data. This should not be used for UI template features.
+    // public static final int UI_TEMPLATE_LOGGING_ONLY = 8;
 
     /**
      * The types of the Smartspace ui templates.

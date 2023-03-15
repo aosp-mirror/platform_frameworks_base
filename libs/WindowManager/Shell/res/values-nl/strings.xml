@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Niet meer verbergen"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"De app werkt mogelijk niet met gesplitst scherm."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"App biedt geen ondersteuning voor gesplitst scherm."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Deze app kan slechts in 1 venster worden geopend."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"App werkt mogelijk niet op een secundair scherm."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"App kan niet op secundaire displays worden gestart."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Scheiding voor gesplitst scherm"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"Maximaliseren"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimaliseren"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Sluiten"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Terug"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Gebruikersnaam"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Volledig scherm"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Desktopmodus"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Gesplitst scherm"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Meer"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Zwevend"</string>
 </resources>

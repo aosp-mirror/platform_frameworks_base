@@ -18,6 +18,8 @@ package com.android.internal.app;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.hardware.soundtrigger.KeyphraseMetadata;
+import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
 import android.media.permission.Identity;
 import android.os.Bundle;
@@ -25,18 +27,17 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.SharedMemory;
+import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
+import android.service.voice.IVoiceInteractionService;
+import android.service.voice.IVoiceInteractionSession;
+import android.service.voice.VisibleActivityInfo;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceActionCheckCallback;
-import com.android.internal.app.IVoiceInteractionSessionShowCallback;
-import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.IVoiceInteractionSessionListener;
+import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractionSoundTriggerSession;
-import android.hardware.soundtrigger.KeyphraseMetadata;
-import android.hardware.soundtrigger.SoundTrigger;
-import android.service.voice.IVoiceInteractionService;
-import android.service.voice.IVoiceInteractionSession;
-import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
+import com.android.internal.app.IVoiceInteractor;
 
 interface IVoiceInteractionManagerService {
     void showSession(in Bundle sessionArgs, int flags);
@@ -289,4 +290,14 @@ interface IVoiceInteractionManagerService {
      * Notifies when the session window is shown or hidden.
      */
     void setSessionWindowVisible(in IBinder token, boolean visible);
+
+    /**
+     * Notifies when the Activity lifecycle event changed.
+     *
+     * @param activityToken The token of activity.
+     * @param type The type of lifecycle event of the activity lifecycle.
+     */
+    oneway void notifyActivityEventChanged(
+            in IBinder activityToken,
+            int type);
 }

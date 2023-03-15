@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"ಧ್ವನಿಮೇಲ್"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"ಸಂಪರ್ಕ ಸಮಸ್ಯೆ ಇಲ್ಲವೇ ಅಮಾನ್ಯ MMI ಕೋಡ್."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ಫೀಚರ್ ಬಂಬಲಿಸುತ್ತಿಲ್ಲ."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"ಕಾರ್ಯಾಚರಣೆಯನ್ನು ಸ್ಥಿರ ದೂರವಾಣಿ ಸಂಖ್ಯೆಗಳಿಗೆ ಮಾತ್ರ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"ನೀವು ರೋಮಿಂಗ್‌ನಲ್ಲಿರುವಾಗ ನಿಮ್ಮ ಫೋನ್‌ನಿಂದ ಕರೆ ಫಾರ್ವರ್ಡ್ ಮಾಡುವಿಕೆಯ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"ಸೇವೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>

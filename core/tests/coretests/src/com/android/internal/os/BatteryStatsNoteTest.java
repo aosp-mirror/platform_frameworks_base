@@ -47,6 +47,7 @@ import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.util.MutableInt;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
@@ -82,6 +83,7 @@ import java.util.function.IntConsumer;
  *      com.android.frameworks.coretests/androidx.test.runner.AndroidJUnitRunner
  */
 public class BatteryStatsNoteTest extends TestCase {
+    private static final String TAG = BatteryStatsNoteTest.class.getSimpleName();
 
     private static final int UID = 10500;
     private static final int ISOLATED_APP_ID = Process.FIRST_ISOLATED_UID + 23;
@@ -2029,6 +2031,115 @@ public class BatteryStatsNoteTest extends TestCase {
         assertEquals(
                 "An inactive radio should not be queried on proc state change",
                 noRadioProcFlags, lastProcStateChangeFlags.value);
+    }
+
+
+
+    @SmallTest
+    public void testNoteMobileRadioPowerStateLocked() {
+        long curr;
+        boolean update;
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
+        final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.setOnBatteryInternal(true);
+
+        // Note mobile radio is on.
+        curr = 1000L * (clocks.realtime = clocks.uptime = 1001);
+        bi.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH, curr,
+                UID);
+
+        // Note mobile radio is still on.
+        curr = 1000L * (clocks.realtime = clocks.uptime = 2001);
+        update = bi.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH,
+                curr, UID);
+        assertFalse(
+                "noteMobileRadioPowerStateLocked should not request an update when the power "
+                        + "state does not change from HIGH.",
+                update);
+
+        // Note mobile radio is off.
+        curr = 1000L * (clocks.realtime = clocks.uptime = 3001);
+        update = bi.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
+                curr, UID);
+        assertTrue(
+                "noteMobileRadioPowerStateLocked should request an update when the power state "
+                        + "changes from HIGH to LOW.",
+                update);
+
+        // Note mobile radio is still off.
+        curr = 1000L * (clocks.realtime = clocks.uptime = 4001);
+        update = bi.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
+                curr, UID);
+        assertFalse(
+                "noteMobileRadioPowerStateLocked should not request an update when the power "
+                        + "state does not change from LOW.",
+                update);
+
+        // Note mobile radio is on.
+        curr = 1000L * (clocks.realtime = clocks.uptime = 5001);
+        update = bi.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH,
+                curr, UID);
+        assertFalse(
+                "noteMobileRadioPowerStateLocked should not request an update when the power "
+                        + "state changes from LOW to HIGH.",
+                update);
+    }
+
+    @SmallTest
+    public void testNoteMobileRadioPowerStateLocked_rateLimited() {
+        long curr;
+        boolean update;
+        final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
+        final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.setPowerProfile(mock(PowerProfile.class));
+
+        final int txLevelCount = CellSignalStrength.getNumSignalStrengthLevels();
+        final ModemActivityInfo mai = new ModemActivityInfo(0L, 0L, 0L, new int[txLevelCount], 0L);
+
+        final long rateLimit = bi.getMobileRadioPowerStateUpdateRateLimit();
+        if (rateLimit < 0) {
+            Log.w(TAG, "Skipping testNoteMobileRadioPowerStateLocked_rateLimited, rateLimit = "
+                    + rateLimit);
+            return;
+        }
+        bi.setOnBatteryInternal(true);
+
+        // Note mobile radio is on.
+        curr = 1000L * (clocks.realtime = clocks.uptime = 1001);
+        bi.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH, curr,
+                UID);
+
+        clocks.realtime = clocks.uptime = 2001;
+        mai.setTimestamp(clocks.realtime);
+        bi.noteModemControllerActivity(mai, POWER_DATA_UNAVAILABLE,
+                clocks.realtime, clocks.uptime, mNetworkStatsManager);
+
+        // Note mobile radio is off within the rate limit duration.
+        clocks.realtime = clocks.uptime = clocks.realtime + (long) (rateLimit * 0.7);
+        curr = 1000L * clocks.realtime;
+        update = bi.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
+                curr, UID);
+        assertFalse(
+                "noteMobileRadioPowerStateLocked should not request an update when the power "
+                        + "state so soon after a noteModemControllerActivity",
+                update);
+
+        // Note mobile radio is on.
+        clocks.realtime = clocks.uptime = clocks.realtime + (long) (rateLimit * 0.7);
+        curr = 1000L * clocks.realtime;
+        bi.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH, curr,
+                UID);
+
+        // Note mobile radio is off much later
+        clocks.realtime = clocks.uptime = clocks.realtime + rateLimit;
+        curr = 1000L * clocks.realtime;
+        update = bi.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
+                curr, UID);
+        assertTrue(
+                "noteMobileRadioPowerStateLocked should request an update when the power state "
+                        + "changes from HIGH to LOW much later after a "
+                        + "noteModemControllerActivity.",
+                update);
     }
 
     private void setFgState(int uid, boolean fgOn, MockBatteryStatsImpl bi) {

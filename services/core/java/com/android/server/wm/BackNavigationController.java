@@ -319,7 +319,7 @@ class BackNavigationController {
                     // launch-behind to bump its visibility for the duration of the back gesture.
                     prevActivity = prevTask.getTopNonFinishingActivity();
                     if (prevActivity != null) {
-                        if (!prevActivity.mVisibleRequested) {
+                        if (!prevActivity.isVisibleRequested()) {
                             prevActivity.setVisibility(true);
                         }
                         prevActivity.mLaunchTaskBehind = true;
@@ -492,7 +492,7 @@ class BackNavigationController {
     private void prepareBackToHomeTransition(ActivityRecord currentActivity, Task homeTask) {
         final DisplayContent dc = currentActivity.getDisplayContent();
         final ActivityRecord homeActivity = homeTask.getTopNonFinishingActivity();
-        if (!homeActivity.mVisibleRequested) {
+        if (!homeActivity.isVisibleRequested()) {
             homeActivity.setVisibility(true);
         }
         homeActivity.mLaunchTaskBehind = true;

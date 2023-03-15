@@ -17,6 +17,10 @@ package com.android.systemui.dreams.complication;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -29,6 +33,7 @@ import org.junit.runner.RunWith;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.function.Consumer;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -97,10 +102,64 @@ public class ComplicationLayoutParamsTest extends SysuiTestCase {
     }
 
     /**
+     * Ensures unspecified margin uses default.
+     */
+    @Test
+    public void testDefaultMargin() {
+        final ComplicationLayoutParams params = new ComplicationLayoutParams(
+                100,
+                100,
+                ComplicationLayoutParams.POSITION_TOP,
+                ComplicationLayoutParams.DIRECTION_DOWN,
+                3);
+        assertThat(params.getMargin(10) == 10).isTrue();
+    }
+
+    /**
+     * Ensures specified margin is used instead of default.
+     */
+    @Test
+    public void testSpecifiedMargin() {
+        final ComplicationLayoutParams params = new ComplicationLayoutParams(
+                100,
+                100,
+                ComplicationLayoutParams.POSITION_TOP,
+                ComplicationLayoutParams.DIRECTION_DOWN,
+                3,
+                10);
+        assertThat(params.getMargin(5) == 10).isTrue();
+    }
+
+    /**
      * Ensures ComplicationLayoutParams is properly duplicated on copy construction.
      */
     @Test
     public void testCopyConstruction() {
+        final ComplicationLayoutParams params = new ComplicationLayoutParams(
+                100,
+                100,
+                ComplicationLayoutParams.POSITION_TOP,
+                ComplicationLayoutParams.DIRECTION_DOWN,
+                3,
+                10,
+                20);
+        final ComplicationLayoutParams copy = new ComplicationLayoutParams(params);
+
+        assertThat(copy.getDirection() == params.getDirection()).isTrue();
+        assertThat(copy.getPosition() == params.getPosition()).isTrue();
+        assertThat(copy.getWeight() == params.getWeight()).isTrue();
+        assertThat(copy.getMargin(0) == params.getMargin(1)).isTrue();
+        assertThat(copy.getConstraint() == params.getConstraint()).isTrue();
+        assertThat(copy.height == params.height).isTrue();
+        assertThat(copy.width == params.width).isTrue();
+    }
+
+    /**
+     * Ensures ComplicationLayoutParams is properly duplicated on copy construction with unspecified
+     * margin.
+     */
+    @Test
+    public void testCopyConstructionWithUnspecifiedMargin() {
         final ComplicationLayoutParams params = new ComplicationLayoutParams(
                 100,
                 100,
@@ -112,7 +171,50 @@ public class ComplicationLayoutParamsTest extends SysuiTestCase {
         assertThat(copy.getDirection() == params.getDirection()).isTrue();
         assertThat(copy.getPosition() == params.getPosition()).isTrue();
         assertThat(copy.getWeight() == params.getWeight()).isTrue();
+        assertThat(copy.getMargin(1) == params.getMargin(1)).isTrue();
         assertThat(copy.height == params.height).isTrue();
         assertThat(copy.width == params.width).isTrue();
+    }
+
+    /**
+     * Ensures that constraint is set correctly.
+     */
+    @Test
+    public void testConstraint() {
+        final ComplicationLayoutParams paramsWithoutConstraint = new ComplicationLayoutParams(
+                100,
+                100,
+                ComplicationLayoutParams.POSITION_TOP,
+                ComplicationLayoutParams.DIRECTION_DOWN,
+                3,
+                10);
+        assertThat(paramsWithoutConstraint.constraintSpecified()).isFalse();
+
+        final int constraint = 10;
+        final ComplicationLayoutParams paramsWithConstraint = new ComplicationLayoutParams(
+                100,
+                100,
+                ComplicationLayoutParams.POSITION_TOP,
+                ComplicationLayoutParams.DIRECTION_DOWN,
+                3,
+                10,
+                constraint);
+        assertThat(paramsWithConstraint.constraintSpecified()).isTrue();
+        assertThat(paramsWithConstraint.getConstraint()).isEqualTo(constraint);
+    }
+
+    @Test
+    public void testIteratePositions() {
+        final int positions = ComplicationLayoutParams.POSITION_TOP
+                | ComplicationLayoutParams.POSITION_START
+                | ComplicationLayoutParams.POSITION_END;
+        final Consumer<Integer> consumer = mock(Consumer.class);
+
+        ComplicationLayoutParams.iteratePositions(consumer, positions);
+
+        verify(consumer).accept(ComplicationLayoutParams.POSITION_TOP);
+        verify(consumer).accept(ComplicationLayoutParams.POSITION_START);
+        verify(consumer).accept(ComplicationLayoutParams.POSITION_END);
+        verify(consumer, never()).accept(ComplicationLayoutParams.POSITION_BOTTOM);
     }
 }

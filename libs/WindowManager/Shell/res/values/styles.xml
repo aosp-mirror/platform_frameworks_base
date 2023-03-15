@@ -30,6 +30,13 @@
         <item name="android:activityCloseExitAnimation">@anim/forced_resizable_exit</item>
     </style>
 
+    <style name="CaptionButtonStyle">
+        <item name="android:layout_width">32dp</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:padding">4dp</item>
+    </style>
+
     <style name="DockedDividerBackground">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/split_divider_bar_width</item>

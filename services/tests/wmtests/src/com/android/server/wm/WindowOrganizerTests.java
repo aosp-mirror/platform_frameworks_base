@@ -994,7 +994,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final Task task = createTask(rootTaskController1);
         final WindowState w = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window");
 
-        w.mActivityRecord.mVisibleRequested = true;
+        w.mActivityRecord.setVisibleRequested(true);
         w.mActivityRecord.setVisible(true);
 
         BLASTSyncEngine bse = new BLASTSyncEngine(mWm);
@@ -1179,7 +1179,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertTrue(rootTask2.isOrganized());
 
         // Verify a back pressed does not call the organizer
-        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(activity.token,
+        mWm.mAtmService.mActivityClientController.onBackPressed(activity.token,
                 new IRequestFinishCallback.Default());
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
@@ -1190,7 +1190,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 rootTask.mRemoteToken.toWindowContainerToken(), true);
 
         // Verify now that the back press does call the organizer
-        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(activity.token,
+        mWm.mAtmService.mActivityClientController.onBackPressed(activity.token,
                 new IRequestFinishCallback.Default());
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
@@ -1201,7 +1201,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 rootTask.mRemoteToken.toWindowContainerToken(), false);
 
         // Verify now that the back press no longer calls the organizer
-        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(activity.token,
+        mWm.mAtmService.mActivityClientController.onBackPressed(activity.token,
                 new IRequestFinishCallback.Default());
         // Ensure events dispatch to organizer.
         mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
@@ -1240,7 +1240,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertTrue(w1.useBLASTSync());
         assertTrue(w2.useBLASTSync());
 
-        w1.immediatelyNotifyBlastSync();
+        // A drawn window can complete the sync state automatically.
+        w1.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
         mWm.mSyncEngine.onSurfacePlacement();
         verify(mockCallback).onTransactionReady(anyInt(), any());
         assertFalse(w1.useBLASTSync());
@@ -1407,7 +1408,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         mWm.mWindowPlacerLocked.deferLayout();
 
         rootTask.removeImmediately();
-        mWm.mAtmService.mActivityClientController.onBackPressedOnTaskRoot(record.token,
+        mWm.mAtmService.mActivityClientController.onBackPressed(record.token,
                 new IRequestFinishCallback.Default());
         waitUntilHandlersIdle();
 

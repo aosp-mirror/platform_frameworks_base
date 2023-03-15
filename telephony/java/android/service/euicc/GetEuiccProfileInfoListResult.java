@@ -123,4 +123,16 @@ public final class GetEuiccProfileInfoListResult implements Parcelable {
     public int describeContents() {
         return 0;
     }
+
+    /**
+     * @hide
+     *
+     * @return String representation of {@link GetEuiccProfileInfoListResult}
+     */
+    @Override
+    public String toString() {
+        return "[GetEuiccProfileInfoListResult: result=" + EuiccService.resultToString(result)
+                + ", isRemovable=" + mIsRemovable + ", mProfiles=" + Arrays.toString(mProfiles)
+                + "]";
+    }
 }

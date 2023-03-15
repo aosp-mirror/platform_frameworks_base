@@ -116,7 +116,7 @@ public class PowerGroupTest {
     @Test
     public void testDreamPowerGroup() {
         assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
-        mPowerGroup.dreamLocked(TIMESTAMP1, UID);
+        mPowerGroup.dreamLocked(TIMESTAMP1, UID, /* allowWake= */ false);
         assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DREAMING);
         assertThat(mPowerGroup.isSandmanSummonedLocked()).isTrue();
         verify(mWakefulnessCallbackMock).onWakefulnessChangedLocked(eq(GROUP_ID),
@@ -172,9 +172,25 @@ public class PowerGroupTest {
                 eq(UID), /* opUid= */ anyInt(), /* opPackageName= */ isNull(),
                 /* details= */ isNull());
         assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
-        assertThat(mPowerGroup.dreamLocked(TIMESTAMP2, UID)).isFalse();
+        assertThat(mPowerGroup.dreamLocked(TIMESTAMP2, UID, /* allowWake= */ false)).isFalse();
         assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
         verify(mWakefulnessCallbackMock, never()).onWakefulnessChangedLocked(
+                eq(GROUP_ID), /* wakefulness= */ eq(WAKEFULNESS_DREAMING), eq(TIMESTAMP2),
+                /* reason= */ anyInt(), eq(UID), /* opUid= */ anyInt(), /* opPackageName= */ any(),
+                /* details= */ any());
+    }
+
+    @Test
+    public void testDreamPowerGroupWhenNotAwakeShouldWake() {
+        mPowerGroup.dozeLocked(TIMESTAMP1, UID, GO_TO_SLEEP_REASON_TIMEOUT);
+        verify(mWakefulnessCallbackMock).onWakefulnessChangedLocked(eq(GROUP_ID),
+                eq(WAKEFULNESS_DOZING), eq(TIMESTAMP1), eq(GO_TO_SLEEP_REASON_TIMEOUT),
+                eq(UID), /* opUid= */ anyInt(), /* opPackageName= */ isNull(),
+                /* details= */ isNull());
+        assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
+        assertThat(mPowerGroup.dreamLocked(TIMESTAMP2, UID, /* allowWake= */ true)).isTrue();
+        assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DREAMING);
+        verify(mWakefulnessCallbackMock).onWakefulnessChangedLocked(
                 eq(GROUP_ID), /* wakefulness= */ eq(WAKEFULNESS_DREAMING), eq(TIMESTAMP2),
                 /* reason= */ anyInt(), eq(UID), /* opUid= */ anyInt(), /* opPackageName= */ any(),
                 /* details= */ any());
@@ -242,7 +258,6 @@ public class PowerGroupTest {
                 .build();
 
         mPowerGroup.updateLocked(/* screenBrightnessOverride= */ BRIGHTNESS,
-                /* autoBrightness = */ false,
                 /* useProximitySensor= */ false,
                 /* boostScreenBrightness= */ false,
                 /* dozeScreenStateOverride= */ Display.STATE_ON,
@@ -259,7 +274,6 @@ public class PowerGroupTest {
                 mPowerGroup.mDisplayPowerRequest;
         assertThat(displayPowerRequest.policy).isEqualTo(POLICY_DIM);
         assertThat(displayPowerRequest.screenBrightnessOverride).isWithin(PRECISION).of(BRIGHTNESS);
-        assertThat(displayPowerRequest.useAutoBrightness).isEqualTo(false);
         assertThat(displayPowerRequest.useProximitySensor).isEqualTo(false);
         assertThat(displayPowerRequest.boostScreenBrightness).isEqualTo(false);
         assertThat(displayPowerRequest.dozeScreenState).isEqualTo(Display.STATE_UNKNOWN);
@@ -283,7 +297,6 @@ public class PowerGroupTest {
         mPowerGroup.setWakeLockSummaryLocked(WAKE_LOCK_DOZE);
 
         mPowerGroup.updateLocked(/* screenBrightnessOverride= */ BRIGHTNESS,
-                /* autoBrightness = */ true,
                 /* useProximitySensor= */ true,
                 /* boostScreenBrightness= */ true,
                 /* dozeScreenStateOverride= */ Display.STATE_ON,
@@ -300,7 +313,6 @@ public class PowerGroupTest {
                 mPowerGroup.mDisplayPowerRequest;
         assertThat(displayPowerRequest.policy).isEqualTo(POLICY_DOZE);
         assertThat(displayPowerRequest.screenBrightnessOverride).isWithin(PRECISION).of(BRIGHTNESS);
-        assertThat(displayPowerRequest.useAutoBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.useProximitySensor).isEqualTo(true);
         assertThat(displayPowerRequest.boostScreenBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.dozeScreenState).isEqualTo(Display.STATE_ON);
@@ -323,7 +335,6 @@ public class PowerGroupTest {
         assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
 
         mPowerGroup.updateLocked(/* screenBrightnessOverride= */ BRIGHTNESS,
-                /* autoBrightness = */ true,
                 /* useProximitySensor= */ true,
                 /* boostScreenBrightness= */ true,
                 /* dozeScreenStateOverride= */ Display.STATE_ON,
@@ -340,7 +351,6 @@ public class PowerGroupTest {
                 mPowerGroup.mDisplayPowerRequest;
         assertThat(displayPowerRequest.policy).isEqualTo(POLICY_OFF);
         assertThat(displayPowerRequest.screenBrightnessOverride).isWithin(PRECISION).of(BRIGHTNESS);
-        assertThat(displayPowerRequest.useAutoBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.useProximitySensor).isEqualTo(true);
         assertThat(displayPowerRequest.boostScreenBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.dozeScreenState).isEqualTo(Display.STATE_UNKNOWN);
@@ -362,7 +372,6 @@ public class PowerGroupTest {
         assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
 
         mPowerGroup.updateLocked(/* screenBrightnessOverride= */ BRIGHTNESS,
-                /* autoBrightness = */ true,
                 /* useProximitySensor= */ true,
                 /* boostScreenBrightness= */ true,
                 /* dozeScreenStateOverride= */ Display.STATE_ON,
@@ -379,7 +388,6 @@ public class PowerGroupTest {
                 mPowerGroup.mDisplayPowerRequest;
         assertThat(displayPowerRequest.policy).isEqualTo(POLICY_OFF);
         assertThat(displayPowerRequest.screenBrightnessOverride).isWithin(PRECISION).of(BRIGHTNESS);
-        assertThat(displayPowerRequest.useAutoBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.useProximitySensor).isEqualTo(true);
         assertThat(displayPowerRequest.boostScreenBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.dozeScreenState).isEqualTo(Display.STATE_UNKNOWN);
@@ -401,7 +409,6 @@ public class PowerGroupTest {
         mPowerGroup.sleepLocked(TIMESTAMP1, UID, GO_TO_SLEEP_REASON_TIMEOUT);
         assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
         mPowerGroup.updateLocked(/* screenBrightnessOverride= */ BRIGHTNESS,
-                /* autoBrightness = */ true,
                 /* useProximitySensor= */ true,
                 /* boostScreenBrightness= */ true,
                 /* dozeScreenStateOverride= */ Display.STATE_ON,
@@ -418,7 +425,6 @@ public class PowerGroupTest {
                 mPowerGroup.mDisplayPowerRequest;
         assertThat(displayPowerRequest.policy).isEqualTo(POLICY_OFF);
         assertThat(displayPowerRequest.screenBrightnessOverride).isWithin(PRECISION).of(BRIGHTNESS);
-        assertThat(displayPowerRequest.useAutoBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.useProximitySensor).isEqualTo(true);
         assertThat(displayPowerRequest.boostScreenBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.dozeScreenState).isEqualTo(Display.STATE_UNKNOWN);
@@ -439,7 +445,6 @@ public class PowerGroupTest {
                 .build();
         assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
         mPowerGroup.updateLocked(/* screenBrightnessOverride= */ BRIGHTNESS,
-                /* autoBrightness = */ true,
                 /* useProximitySensor= */ true,
                 /* boostScreenBrightness= */ true,
                 /* dozeScreenStateOverride= */ Display.STATE_ON,
@@ -456,7 +461,6 @@ public class PowerGroupTest {
                 mPowerGroup.mDisplayPowerRequest;
         assertThat(displayPowerRequest.policy).isEqualTo(POLICY_VR);
         assertThat(displayPowerRequest.screenBrightnessOverride).isWithin(PRECISION).of(BRIGHTNESS);
-        assertThat(displayPowerRequest.useAutoBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.useProximitySensor).isEqualTo(true);
         assertThat(displayPowerRequest.boostScreenBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.dozeScreenState).isEqualTo(Display.STATE_UNKNOWN);
@@ -478,7 +482,6 @@ public class PowerGroupTest {
         mPowerGroup.sleepLocked(TIMESTAMP1, UID, GO_TO_SLEEP_REASON_TIMEOUT);
         assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
         mPowerGroup.updateLocked(/* screenBrightnessOverride= */ BRIGHTNESS,
-                /* autoBrightness = */ true,
                 /* useProximitySensor= */ true,
                 /* boostScreenBrightness= */ true,
                 /* dozeScreenStateOverride= */ Display.STATE_ON,
@@ -495,7 +498,6 @@ public class PowerGroupTest {
                 mPowerGroup.mDisplayPowerRequest;
         assertThat(displayPowerRequest.policy).isEqualTo(POLICY_OFF);
         assertThat(displayPowerRequest.screenBrightnessOverride).isWithin(PRECISION).of(BRIGHTNESS);
-        assertThat(displayPowerRequest.useAutoBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.useProximitySensor).isEqualTo(true);
         assertThat(displayPowerRequest.boostScreenBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.dozeScreenState).isEqualTo(Display.STATE_UNKNOWN);
@@ -514,11 +516,10 @@ public class PowerGroupTest {
                 .setBatterySaverEnabled(batterySaverEnabled)
                 .setBrightnessFactor(brightnessFactor)
                 .build();
-        mPowerGroup.dreamLocked(TIMESTAMP1, UID);
+        mPowerGroup.dreamLocked(TIMESTAMP1, UID, /* allowWake= */ false);
         assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DREAMING);
         mPowerGroup.setWakeLockSummaryLocked(WAKE_LOCK_SCREEN_BRIGHT);
         mPowerGroup.updateLocked(/* screenBrightnessOverride= */ BRIGHTNESS,
-                /* autoBrightness = */ true,
                 /* useProximitySensor= */ true,
                 /* boostScreenBrightness= */ true,
                 /* dozeScreenStateOverride= */ Display.STATE_ON,
@@ -535,7 +536,6 @@ public class PowerGroupTest {
                 mPowerGroup.mDisplayPowerRequest;
         assertThat(displayPowerRequest.policy).isEqualTo(POLICY_BRIGHT);
         assertThat(displayPowerRequest.screenBrightnessOverride).isWithin(PRECISION).of(BRIGHTNESS);
-        assertThat(displayPowerRequest.useAutoBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.useProximitySensor).isEqualTo(true);
         assertThat(displayPowerRequest.boostScreenBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.dozeScreenState).isEqualTo(Display.STATE_UNKNOWN);
@@ -556,7 +556,6 @@ public class PowerGroupTest {
                 .build();
         assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
         mPowerGroup.updateLocked(/* screenBrightnessOverride= */ BRIGHTNESS,
-                /* autoBrightness = */ true,
                 /* useProximitySensor= */ true,
                 /* boostScreenBrightness= */ true,
                 /* dozeScreenStateOverride= */ Display.STATE_ON,
@@ -573,7 +572,6 @@ public class PowerGroupTest {
                 mPowerGroup.mDisplayPowerRequest;
         assertThat(displayPowerRequest.policy).isEqualTo(POLICY_BRIGHT);
         assertThat(displayPowerRequest.screenBrightnessOverride).isWithin(PRECISION).of(BRIGHTNESS);
-        assertThat(displayPowerRequest.useAutoBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.useProximitySensor).isEqualTo(true);
         assertThat(displayPowerRequest.boostScreenBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.dozeScreenState).isEqualTo(Display.STATE_UNKNOWN);
@@ -595,7 +593,6 @@ public class PowerGroupTest {
         assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
         mPowerGroup.setUserActivitySummaryLocked(USER_ACTIVITY_SCREEN_BRIGHT);
         mPowerGroup.updateLocked(/* screenBrightnessOverride= */ BRIGHTNESS,
-                /* autoBrightness = */ true,
                 /* useProximitySensor= */ true,
                 /* boostScreenBrightness= */ true,
                 /* dozeScreenStateOverride= */ Display.STATE_ON,
@@ -612,7 +609,6 @@ public class PowerGroupTest {
                 mPowerGroup.mDisplayPowerRequest;
         assertThat(displayPowerRequest.policy).isEqualTo(POLICY_BRIGHT);
         assertThat(displayPowerRequest.screenBrightnessOverride).isWithin(PRECISION).of(BRIGHTNESS);
-        assertThat(displayPowerRequest.useAutoBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.useProximitySensor).isEqualTo(true);
         assertThat(displayPowerRequest.boostScreenBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.dozeScreenState).isEqualTo(Display.STATE_UNKNOWN);
@@ -633,7 +629,6 @@ public class PowerGroupTest {
                 .build();
         assertThat(mPowerGroup.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
         mPowerGroup.updateLocked(/* screenBrightnessOverride= */ BRIGHTNESS,
-                /* autoBrightness = */ true,
                 /* useProximitySensor= */ true,
                 /* boostScreenBrightness= */ true,
                 /* dozeScreenStateOverride= */ Display.STATE_ON,
@@ -650,7 +645,6 @@ public class PowerGroupTest {
                 mPowerGroup.mDisplayPowerRequest;
         assertThat(displayPowerRequest.policy).isEqualTo(POLICY_BRIGHT);
         assertThat(displayPowerRequest.screenBrightnessOverride).isWithin(PRECISION).of(BRIGHTNESS);
-        assertThat(displayPowerRequest.useAutoBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.useProximitySensor).isEqualTo(true);
         assertThat(displayPowerRequest.boostScreenBrightness).isEqualTo(true);
         assertThat(displayPowerRequest.dozeScreenState).isEqualTo(Display.STATE_UNKNOWN);

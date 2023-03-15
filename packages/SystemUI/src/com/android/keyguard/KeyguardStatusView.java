@@ -16,7 +16,10 @@
 
 package com.android.keyguard;
 
+import static java.util.Collections.emptySet;
+
 import android.content.Context;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,8 +90,9 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     /** Sets a translationY value on every child view except for the media view. */
-    public void setChildrenTranslationYExcludingMediaView(float translationY) {
-        setChildrenTranslationYExcluding(translationY, Set.of(mMediaHostContainer));
+    public void setChildrenTranslationY(float translationY, boolean excludeMedia) {
+        setChildrenTranslationYExcluding(translationY,
+                excludeMedia ? Set.of(mMediaHostContainer) : emptySet());
     }
 
     /** Sets a translationY value on every view except for the views in the provided set. */
@@ -111,5 +115,12 @@ public class KeyguardStatusView extends GridLayout {
         if (mKeyguardSlice != null) {
             mKeyguardSlice.dump(pw, args);
         }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Trace.beginSection("KeyguardStatusView#onMeasure");
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        Trace.endSection();
     }
 }

@@ -31,4 +31,9 @@ data class StructureInfo(
     val componentName: ComponentName,
     val structure: CharSequence,
     val controls: List<ControlInfo>
-)
+) {
+    companion object {
+        val EMPTY_COMPONENT = ComponentName("", "")
+        val EMPTY_STRUCTURE = StructureInfo(EMPTY_COMPONENT, "", mutableListOf())
+    }
+}

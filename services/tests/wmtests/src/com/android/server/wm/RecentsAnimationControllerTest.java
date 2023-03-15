@@ -172,12 +172,12 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // executed.
         final ActivityRecord activity1 = createActivityRecord(task);
         activity1.setVisible(true);
-        activity1.mVisibleRequested = false;
+        activity1.setVisibleRequested(false);
         activity1.addWindow(createWindowState(new LayoutParams(TYPE_BASE_APPLICATION), activity1));
 
         final ActivityRecord activity2 = createActivityRecord(task);
         activity2.setVisible(false);
-        activity2.mVisibleRequested = true;
+        activity2.setVisibleRequested(true);
 
         mDefaultDisplay.getConfiguration().windowConfiguration.setRotation(
                 mDefaultDisplay.getRotation());

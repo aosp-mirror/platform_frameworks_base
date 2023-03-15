@@ -377,6 +377,11 @@ public final class DeviceStateManagerGlobalTest {
             notifyDeviceStateInfoChanged();
         }
 
+        // No-op in the test since DeviceStateManagerGlobal just calls into the system server with
+        // no business logic around it.
+        @Override
+        public void onStateRequestOverlayDismissed(boolean shouldCancelMode) {}
+
         public void setSupportedStates(int[] states) {
             mSupportedStates = states;
             notifyDeviceStateInfoChanged();

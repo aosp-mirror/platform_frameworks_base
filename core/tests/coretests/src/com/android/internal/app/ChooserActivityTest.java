@@ -81,6 +81,7 @@ import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.service.chooser.ChooserTarget;
+import android.util.Pair;
 import android.view.View;
 
 import androidx.annotation.CallSuper;
@@ -89,6 +90,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
 import com.android.internal.R;
+import com.android.internal.app.ChooserActivity.ServiceResultInfo;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -2166,8 +2168,8 @@ public class ChooserActivityTest {
         assertThat(logger.numCalls(), is(6));
     }
 
-    @Test @Ignore
-    public void testDirectTargetLogging() throws InterruptedException {
+    @Test
+    public void testDirectTargetLogging() {
         Intent sendIntent = createSendTextIntent();
         // We need app targets for direct targets to get displayed
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -2187,29 +2189,34 @@ public class ChooserActivityTest {
                 resolvedComponentInfos.get(0).getResolveInfoAt(0).activityInfo.packageName);
         ResolveInfo ri = ResolverDataProvider.createResolveInfo(3, 0);
 
+        ChooserActivityOverrideData
+                .getInstance()
+                .directShareTargets = (activity, adapter) -> {
+                    DisplayResolveInfo displayInfo = activity.createTestDisplayResolveInfo(
+                            sendIntent,
+                            ri,
+                             "testLabel",
+                             "testInfo",
+                            sendIntent,
+                            /* resolveInfoPresentationGetter */ null);
+                    ServiceResultInfo[] results = {
+                            new ServiceResultInfo(
+                                    displayInfo,
+                                    serviceTargets,
+                                    adapter.getUserHandle())};
+                    // TODO: consider covering the other type.
+                    //  Only 2 types are expected out of the shortcut loading logic:
+                    //  - TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER, if shortcuts were loaded from
+                    //    the ShortcutManager, and;
+                    //  - TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE, if shortcuts were loaded
+                    //    from AppPredictor.
+                    //  Ideally, our tests should cover all of them.
+                    return new Pair<>(TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER, results);
+                };
+
         // Start activity
         final IChooserWrapper activity = (IChooserWrapper)
                 mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
-
-        // Insert the direct share target
-        Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos = new HashMap<>();
-        directShareToShortcutInfos.put(serviceTargets.get(0), null);
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(
-                () -> activity.getAdapter().addServiceResults(
-                        activity.createTestDisplayResolveInfo(sendIntent,
-                                ri,
-                                "testLabel",
-                                "testInfo",
-                                sendIntent,
-                                /* resolveInfoPresentationGetter */ null),
-                        serviceTargets,
-                        TARGET_TYPE_CHOOSER_TARGET,
-                        directShareToShortcutInfos)
-        );
-        // Thread.sleep shouldn't be a thing in an integration test but it's
-        // necessary here because of the way the code is structured
-        // TODO: restructure the tests b/129870719
-        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         assertThat("Chooser should have 3 targets (2 apps, 1 direct)",
                 activity.getAdapter().getCount(), is(3));

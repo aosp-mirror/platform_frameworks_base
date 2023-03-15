@@ -24,6 +24,7 @@
     <!-- margin from keyguard status bar to clock. For split shade it should be
          keyguard_split_shade_top_margin - status_bar_header_height_keyguard = 8dp -->
     <dimen name="keyguard_clock_top_margin">8dp</dimen>
+    <dimen name="keyguard_smartspace_top_offset">0dp</dimen>
 
     <!-- QS-->
     <dimen name="qs_panel_padding_top">16dp</dimen>

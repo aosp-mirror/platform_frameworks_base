@@ -25,6 +25,7 @@ import android.os.Process;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.BroadcastRunning;
 import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.dagger.qualifiers.Main;
 
@@ -46,6 +47,17 @@ public abstract class SysUIConcurrencyModule {
     @Background
     public static Looper provideBgLooper() {
         HandlerThread thread = new HandlerThread("SysUiBg",
+                Process.THREAD_PRIORITY_BACKGROUND);
+        thread.start();
+        return thread.getLooper();
+    }
+
+    /** BroadcastRunning Looper (for sending and receiving broadcasts) */
+    @Provides
+    @SysUISingleton
+    @BroadcastRunning
+    public static Looper provideBroadcastRunningLooper() {
+        HandlerThread thread = new HandlerThread("BroadcastRunning",
                 Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
         return thread.getLooper();
@@ -83,7 +95,17 @@ public abstract class SysUIConcurrencyModule {
     }
 
     /**
-     * Provide a Long running Executor by default.
+     * Provide a BroadcastRunning Executor (for sending and receiving broadcasts).
+     */
+    @Provides
+    @SysUISingleton
+    @BroadcastRunning
+    public static Executor provideBroadcastRunningExecutor(@BroadcastRunning Looper looper) {
+        return new ExecutorImpl(looper);
+    }
+
+    /**
+     * Provide a Long running Executor.
      */
     @Provides
     @SysUISingleton

@@ -19,6 +19,7 @@ package androidx.window.extensions.embedding;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
 
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.DEFAULT_FINISH_PRIMARY_WITH_SECONDARY;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.DEFAULT_FINISH_SECONDARY_WITH_PRIMARY;
@@ -60,17 +61,21 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 import android.util.Size;
+import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentInfo;
+import android.window.TaskFragmentOperation;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 import androidx.window.extensions.layout.WindowLayoutInfo;
 
@@ -113,7 +118,9 @@ public class SplitPresenterTest {
         MockitoAnnotations.initMocks(this);
         doReturn(new WindowLayoutInfo(new ArrayList<>())).when(mWindowLayoutComponent)
                 .getCurrentWindowLayoutInfo(anyInt(), any());
-        mController = new SplitController(mWindowLayoutComponent);
+        DeviceStateManagerFoldingFeatureProducer producer =
+                mock(DeviceStateManagerFoldingFeatureProducer.class);
+        mController = new SplitController(mWindowLayoutComponent, producer);
         mPresenter = mController.mPresenter;
         spyOn(mController);
         spyOn(mPresenter);
@@ -163,7 +170,38 @@ public class SplitPresenterTest {
                 WINDOWING_MODE_MULTI_WINDOW);
 
         verify(mTransaction, never()).setWindowingMode(any(), anyInt());
+    }
 
+    @Test
+    public void testUpdateAnimationParams() {
+        final TaskFragmentContainer container = mController.newContainer(mActivity, TASK_ID);
+
+        // Verify the default.
+        assertTrue(container.areLastRequestedAnimationParamsEqual(
+                TaskFragmentAnimationParams.DEFAULT));
+
+        final int bgColor = Color.GREEN;
+        final TaskFragmentAnimationParams animationParams =
+                new TaskFragmentAnimationParams.Builder()
+                        .setAnimationBackgroundColor(bgColor)
+                        .build();
+        mPresenter.updateAnimationParams(mTransaction, container.getTaskFragmentToken(),
+                animationParams);
+
+        final TaskFragmentOperation expectedOperation = new TaskFragmentOperation.Builder(
+                OP_TYPE_SET_ANIMATION_PARAMS)
+                .setAnimationParams(animationParams)
+                .build();
+        verify(mTransaction).setTaskFragmentOperation(container.getTaskFragmentToken(),
+                expectedOperation);
+        assertTrue(container.areLastRequestedAnimationParamsEqual(animationParams));
+
+        // No request to set the same animation params.
+        clearInvocations(mTransaction);
+        mPresenter.updateAnimationParams(mTransaction, container.getTaskFragmentToken(),
+                animationParams);
+
+        verify(mTransaction, never()).setTaskFragmentOperation(any(), any());
     }
 
     @Test

@@ -17,21 +17,13 @@
 package com.android.wm.shell.protolog;
 
 import android.annotation.Nullable;
-import android.content.Context;
-import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.BaseProtoLogImpl;
 import com.android.internal.protolog.ProtoLogViewerConfigReader;
 import com.android.internal.protolog.common.IProtoLogGroup;
-import com.android.wm.shell.R;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
-
-import org.json.JSONException;
 
 
 /**
@@ -40,8 +32,9 @@ import org.json.JSONException;
 public class ShellProtoLogImpl extends BaseProtoLogImpl {
     private static final String TAG = "ProtoLogImpl";
     private static final int BUFFER_CAPACITY = 1024 * 1024;
-    // TODO: Get the right path for the proto log file when we initialize the shell components
-    private static final String LOG_FILENAME = new File("wm_shell_log.pb").getAbsolutePath();
+    // TODO: find a proper location to save the protolog message file
+    private static final String LOG_FILENAME = "/data/misc/wmtrace/shell_log.winscope";
+    private static final String VIEWER_CONFIG_FILENAME = "/system_ext/etc/wmshell.protolog.json.gz";
 
     private static ShellProtoLogImpl sServiceInstance = null;
 
@@ -111,18 +104,8 @@ public class ShellProtoLogImpl extends BaseProtoLogImpl {
     }
 
     public int startTextLogging(String[] groups, PrintWriter pw) {
-        try (InputStream is =
-                     getClass().getClassLoader().getResourceAsStream("wm_shell_protolog.json")){
-            mViewerConfig.loadViewerConfig(is);
-            return setLogging(true /* setTextLogging */, true, pw, groups);
-        } catch (IOException e) {
-            Log.i(TAG, "Unable to load log definitions: IOException while reading "
-                    + "wm_shell_protolog. " + e);
-        } catch (JSONException e) {
-            Log.i(TAG, "Unable to load log definitions: JSON parsing exception while reading "
-                    + "wm_shell_protolog. " + e);
-        }
-        return -1;
+        mViewerConfig.loadViewerConfig(pw, VIEWER_CONFIG_FILENAME);
+        return setLogging(true /* setTextLogging */, true, pw, groups);
     }
 
     public int stopTextLogging(String[] groups, PrintWriter pw) {
@@ -130,7 +113,8 @@ public class ShellProtoLogImpl extends BaseProtoLogImpl {
     }
 
     private ShellProtoLogImpl() {
-        super(new File(LOG_FILENAME), null, BUFFER_CAPACITY, new ProtoLogViewerConfigReader());
+        super(new File(LOG_FILENAME), VIEWER_CONFIG_FILENAME, BUFFER_CAPACITY,
+                new ProtoLogViewerConfigReader());
     }
 }
 

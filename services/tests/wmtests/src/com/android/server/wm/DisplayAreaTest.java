@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -471,28 +473,6 @@ public class DisplayAreaTest extends WindowTestsBase {
     }
 
     @Test
-    public void testSetIgnoreOrientationRequest() {
-        final DisplayArea.Tokens area = new DisplayArea.Tokens(mWm, ABOVE_TASKS, "test");
-        final WindowToken token = createWindowToken(TYPE_APPLICATION_OVERLAY);
-        spyOn(token);
-        doReturn(mock(DisplayContent.class)).when(token).getDisplayContent();
-        doNothing().when(token).setParent(any());
-        final WindowState win = createWindowState(token);
-        spyOn(win);
-        doNothing().when(win).setParent(any());
-        win.mAttrs.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-        token.addChild(win, 0);
-        area.addChild(token);
-        doReturn(true).when(win).isVisible();
-
-        assertEquals(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, area.getOrientation());
-
-        area.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-
-        assertEquals(ActivityInfo.SCREEN_ORIENTATION_UNSET, area.getOrientation());
-    }
-
-    @Test
     public void testSetIgnoreOrientationRequest_notCallSuperOnDescendantOrientationChanged() {
         final TaskDisplayArea tda = mDisplayContent.getDefaultTaskDisplayArea();
         final Task stack =
@@ -514,7 +494,49 @@ public class DisplayAreaTest extends WindowTestsBase {
     }
 
     @Test
-    public void testSetIgnoreOrientationRequest_updateOrientationRequestingTaskDisplayArea() {
+    public void testSetIgnoreOrientationRequest_callSuperOnDescendantOrientationChangedNoSensor() {
+        final TaskDisplayArea tda = mDisplayContent.getDefaultTaskDisplayArea();
+        final Task stack =
+                new TaskBuilder(mSupervisor).setOnTop(!ON_TOP).setCreateActivity(true).build();
+        final ActivityRecord activity = stack.getTopNonFinishingActivity();
+
+        tda.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        activity.setRequestedOrientation(SCREEN_ORIENTATION_NOSENSOR);
+
+        verify(tda).onDescendantOrientationChanged(any());
+        verify(mDisplayContent).onDescendantOrientationChanged(any());
+
+        tda.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);
+        activity.setRequestedOrientation(SCREEN_ORIENTATION_NOSENSOR);
+
+        verify(tda).onDescendantOrientationChanged(any());
+        verify(mDisplayContent).onDescendantOrientationChanged(any());
+    }
+
+    @Test
+    public void testSetIgnoreOrientationRequest_callSuperOnDescendantOrientationChangedLocked() {
+        final TaskDisplayArea tda = mDisplayContent.getDefaultTaskDisplayArea();
+        final Task stack =
+                new TaskBuilder(mSupervisor).setOnTop(!ON_TOP).setCreateActivity(true).build();
+        final ActivityRecord activity = stack.getTopNonFinishingActivity();
+
+        tda.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        activity.setRequestedOrientation(SCREEN_ORIENTATION_LOCKED);
+
+        verify(tda).onDescendantOrientationChanged(any());
+        verify(mDisplayContent).onDescendantOrientationChanged(any());
+
+        tda.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);
+        activity.setRequestedOrientation(SCREEN_ORIENTATION_LOCKED);
+
+        verify(tda).onDescendantOrientationChanged(any());
+        verify(mDisplayContent).onDescendantOrientationChanged(any());
+    }
+
+    @Test
+    public void testGetOrientationRequestingTaskDisplayArea_updateOrientationTaskDisplayArea() {
         final TaskDisplayArea tda = mDisplayContent.getDefaultTaskDisplayArea();
         final Task stack =
                 new TaskBuilder(mSupervisor).setOnTop(!ON_TOP).setCreateActivity(true).build();
@@ -526,7 +548,7 @@ public class DisplayAreaTest extends WindowTestsBase {
         // TDA is no longer handling orientation request, clear the last focused TDA.
         tda.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
 
-        assertThat(mDisplayContent.getOrientationRequestingTaskDisplayArea()).isNull();
+        assertThat(mDisplayContent.getOrientationRequestingTaskDisplayArea()).isEqualTo(tda);
 
         // TDA now handles orientation request, update last focused TDA based on the focused app.
         tda.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);

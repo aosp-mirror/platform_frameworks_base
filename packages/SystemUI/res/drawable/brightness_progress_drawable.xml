@@ -30,7 +30,7 @@
     </item>
     <item android:id="@android:id/progress"
           android:gravity="center_vertical|fill_horizontal">
-            <com.android.systemui.util.RoundedCornerProgressDrawable
+            <com.android.systemui.util.BrightnessProgressDrawable
                 android:drawable="@drawable/brightness_progress_full_drawable"
             />
     </item>

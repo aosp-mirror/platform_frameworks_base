@@ -102,7 +102,9 @@ public class SettingsBackupTest {
                     Settings.System.MIN_REFRESH_RATE, // depends on hardware capabilities
                     Settings.System.PEAK_REFRESH_RATE, // depends on hardware capabilities
                     Settings.System.SCREEN_BRIGHTNESS_FLOAT,
+                    Settings.System.SCREEN_BRIGHTNESS_FOR_VR,
                     Settings.System.SCREEN_BRIGHTNESS_FOR_VR_FLOAT,
+                    Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
                     Settings.System.MULTI_AUDIO_FOCUS_ENABLED, // form-factor/OEM specific
                     Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED
                     );
@@ -274,6 +276,7 @@ public class SettingsBackupTest {
                     Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
                     Settings.Global.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS,
                     Settings.Global.STYLUS_HANDWRITING_ENABLED,
+                    Settings.Global.STYLUS_EVER_USED,
                     Settings.Global.ENABLE_ADB_INCREMENTAL_INSTALL_DEFAULT,
                     Settings.Global.ENABLE_MULTI_SLOT_TIMEOUT_MILLIS,
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,
@@ -374,7 +377,6 @@ public class SettingsBackupTest {
                     Settings.Global.NETPOLICY_QUOTA_FRAC_JOBS,
                     Settings.Global.NETPOLICY_QUOTA_FRAC_MULTIPATH,
                     Settings.Global.NETPOLICY_OVERRIDE_ENABLED,
-                    Settings.Global.NETWORK_AVOID_BAD_WIFI,
                     Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES,
                     Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE,
                     Settings.Global.NETWORK_WATCHLIST_LAST_REPORT_TIME,

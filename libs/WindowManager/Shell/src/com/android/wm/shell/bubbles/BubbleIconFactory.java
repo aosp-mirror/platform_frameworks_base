@@ -79,6 +79,6 @@ public class BubbleIconFactory extends BaseIconFactory {
                 true /* shrinkNonAdaptiveIcons */,
                 null /* outscale */,
                 outScale);
-        return createIconBitmap(icon, outScale[0], BITMAP_GENERATION_MODE_WITH_SHADOW);
+        return createIconBitmap(icon, outScale[0], MODE_WITH_SHADOW);
     }
 }
