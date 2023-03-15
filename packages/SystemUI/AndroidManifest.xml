@@ -946,7 +946,7 @@
                   android:showWhenLocked="true"
                   android:showForAllUsers="true"
                   android:finishOnTaskLaunch="true"
-                  android:lockTaskMode="if_whitelisted"
+                  android:lockTaskMode="always"
                   android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                   android:visibleToInstantApps="true">
         </activity>
