@@ -45,8 +45,6 @@ public:
 
     std::optional<FloatRect> getBounds() const;
     void move(float deltaX, float deltaY);
-    void setButtonState(int32_t buttonState);
-    int32_t getButtonState() const;
     void setPosition(float x, float y);
     FloatPoint getPosition() const;
     int32_t getDisplayId() const;
@@ -95,8 +93,6 @@ private:
 
         PointerIconStyle requestedPointerType;
         PointerIconStyle resolvedPointerType;
-
-        int32_t buttonState;
 
         bool animating{false};
 
