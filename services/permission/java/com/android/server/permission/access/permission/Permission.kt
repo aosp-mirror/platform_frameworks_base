@@ -140,9 +140,7 @@ data class Permission(
         get() = permissionInfo.flags.hasBits(PermissionInfo.FLAG_SOFT_RESTRICTED)
 
     inline val isHardOrSoftRestricted: Boolean
-        get() = permissionInfo.flags.hasBits(
-            PermissionInfo.FLAG_HARD_RESTRICTED or PermissionInfo.FLAG_SOFT_RESTRICTED
-        )
+        get() = isHardRestricted || isSoftRestricted
 
     inline val isImmutablyRestricted: Boolean
         get() = permissionInfo.flags.hasBits(PermissionInfo.FLAG_IMMUTABLY_RESTRICTED)

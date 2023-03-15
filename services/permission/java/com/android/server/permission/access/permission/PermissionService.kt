@@ -1570,27 +1570,33 @@ class PermissionService(
                         return@forEachIndexed
                     }
 
-                    val wasAllowlisted = oldFlags.hasAnyBit(PermissionFlags.MASK_EXEMPT)
-                    val isAllowlisted = newFlags.hasAnyBit(PermissionFlags.MASK_EXEMPT)
+                    val isExempt = newFlags.hasAnyBit(PermissionFlags.MASK_EXEMPT)
 
                     // If the permission is policy fixed as granted but it is no longer
                     // on any of the allowlists we need to clear the policy fixed flag
                     // as allowlisting trumps policy i.e. policy cannot grant a non
                     // grantable permission.
                     if (oldFlags.hasBits(PermissionFlags.POLICY_FIXED)) {
-                        if (!isAllowlisted && wasGranted) {
+                        if (!isExempt && wasGranted) {
                             mask = mask or PermissionFlags.POLICY_FIXED
                             newFlags = newFlags andInv PermissionFlags.POLICY_FIXED
                         }
                     }
 
-                    // If we are allowlisting an app that does not support runtime permissions
-                    // we need to make sure it goes through the permission review UI at launch.
-                    if (androidPackage.targetSdkVersion < Build.VERSION_CODES.M &&
-                        !wasAllowlisted && isAllowlisted) {
-                        mask = mask or PermissionFlags.IMPLICIT
-                        newFlags = newFlags or PermissionFlags.IMPLICIT
+                    val isHardRestricted = permission.isHardRestricted && !isExempt
+                    newFlags = if (isHardRestricted) {
+                        newFlags or PermissionFlags.RESTRICTION_REVOKED
+                    } else {
+                        newFlags andInv PermissionFlags.RESTRICTION_REVOKED
                     }
+                    val isSoftRestricted = permission.isSoftRestricted && !isExempt
+                    newFlags = if (isSoftRestricted) {
+                        newFlags or PermissionFlags.SOFT_RESTRICTED
+                    } else {
+                        newFlags andInv PermissionFlags.SOFT_RESTRICTED
+                    }
+                    mask = mask or PermissionFlags.RESTRICTION_REVOKED or
+                        PermissionFlags.SOFT_RESTRICTED
 
                     updatePermissionFlags(
                         appId, userId, requestedPermission, mask, newFlags
