@@ -52,11 +52,24 @@ public interface DeviceStateProvider {
      */
     int SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_CRITICAL = 3;
 
+    /**
+     * Indicating that the supported device states have changed because power save mode was enabled.
+     */
+    int SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_ENABLED = 4;
+
+    /**
+     * Indicating that the supported device states have changed because power save mode was
+     * disabled.
+     */
+    int SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_DISABLED = 5;
+
     @IntDef(prefix = { "SUPPORTED_DEVICE_STATES_CHANGED_" }, value = {
             SUPPORTED_DEVICE_STATES_CHANGED_DEFAULT,
             SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED,
             SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_NORMAL,
-            SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_CRITICAL
+            SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_CRITICAL,
+            SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_ENABLED,
+            SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_DISABLED
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface SupportedStatesUpdatedReason {}
