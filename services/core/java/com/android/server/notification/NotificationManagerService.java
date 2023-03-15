@@ -6864,7 +6864,8 @@ public class NotificationManagerService extends SystemService {
      * A notification should be dismissible, unless it's exempted for some reason.
      */
     private boolean canBeNonDismissible(ApplicationInfo ai, Notification notification) {
-        return notification.isMediaNotification() || isEnterpriseExempted(ai);
+        return notification.isMediaNotification() || isEnterpriseExempted(ai)
+                || isCallNotification(ai.packageName, ai.uid, notification);
     }
 
     private boolean isEnterpriseExempted(ApplicationInfo ai) {
