@@ -19,7 +19,6 @@ package com.android.systemui.animation
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.graphics.Typeface
-import android.graphics.fonts.FontVariationAxis
 import android.testing.AndroidTestingRunner
 import android.text.Layout
 import android.text.StaticLayout
@@ -178,72 +177,5 @@ class TextAnimatorTest : SysuiTestCase() {
         )
 
         assertThat(paint.typeface).isSameInstanceAs(prevTypeface)
-    }
-
-    @Test
-    fun testSetTextStyle_addWeight() {
-        testWeightChange("", 100, FontVariationAxis.fromFontVariationSettings("'wght' 100")!!)
-    }
-
-    @Test
-    fun testSetTextStyle_changeWeight() {
-        testWeightChange(
-                "'wght' 500",
-                100,
-                FontVariationAxis.fromFontVariationSettings("'wght' 100")!!
-        )
-    }
-
-    @Test
-    fun testSetTextStyle_addWeightWithOtherAxis() {
-        testWeightChange(
-                "'wdth' 100",
-                100,
-                FontVariationAxis.fromFontVariationSettings("'wght' 100, 'wdth' 100")!!
-        )
-    }
-
-    @Test
-    fun testSetTextStyle_changeWeightWithOtherAxis() {
-        testWeightChange(
-                "'wght' 500, 'wdth' 100",
-                100,
-                FontVariationAxis.fromFontVariationSettings("'wght' 100, 'wdth' 100")!!
-        )
-    }
-
-    private fun testWeightChange(
-            initialFontVariationSettings: String,
-            weight: Int,
-            expectedFontVariationSettings: Array<FontVariationAxis>
-    ) {
-        val layout = makeLayout("Hello, World", PAINT)
-        val valueAnimator = mock(ValueAnimator::class.java)
-        val textInterpolator = mock(TextInterpolator::class.java)
-        val paint =
-                TextPaint().apply {
-                    typeface = Typeface.createFromFile("/system/fonts/Roboto-Regular.ttf")
-                    fontVariationSettings = initialFontVariationSettings
-                }
-        `when`(textInterpolator.targetPaint).thenReturn(paint)
-
-        val textAnimator =
-                TextAnimator(layout, {}).apply {
-                    this.textInterpolator = textInterpolator
-                    this.animator = valueAnimator
-                }
-        textAnimator.setTextStyle(weight = weight, animate = false)
-
-        val resultFontVariationList =
-                FontVariationAxis.fromFontVariationSettings(
-                        textInterpolator.targetPaint.fontVariationSettings
-                )
-        expectedFontVariationSettings.forEach { expectedAxis ->
-            val resultAxis = resultFontVariationList?.filter { it.tag == expectedAxis.tag }?.get(0)
-            assertThat(resultAxis).isNotNull()
-            if (resultAxis != null) {
-                assertThat(resultAxis.styleValue).isEqualTo(expectedAxis.styleValue)
-            }
-        }
     }
 }

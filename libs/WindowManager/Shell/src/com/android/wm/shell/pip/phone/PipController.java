@@ -43,6 +43,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -71,6 +72,7 @@ import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
+import com.android.wm.shell.common.TabletopModeController;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.onehanded.OneHandedController;
@@ -101,7 +103,6 @@ import com.android.wm.shell.sysui.UserChangeListener;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -115,6 +116,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         RemoteCallable<PipController>, ConfigurationChangeListener, KeyguardChangeListener,
         UserChangeListener {
     private static final String TAG = "PipController";
+
+    private static final String LAUNCHER_KEEP_CLEAR_AREA_TAG = "hotseat";
 
     private static final long PIP_KEEP_CLEAR_AREAS_DELAY =
             SystemProperties.getLong("persist.wm.debug.pip_keep_clear_areas_delay", 200);
@@ -145,6 +148,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private TaskStackListenerImpl mTaskStackListener;
     private PipParamsChangedForwarder mPipParamsChangedForwarder;
     private DisplayInsetsController mDisplayInsetsController;
+    private TabletopModeController mTabletopModeController;
     private Optional<OneHandedController> mOneHandedController;
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellController mShellController;
@@ -400,6 +404,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
             DisplayInsetsController displayInsetsController,
+            TabletopModeController pipTabletopController,
             Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
@@ -414,7 +419,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 pipMotionHelper, pipMediaController, phonePipMenuController, pipTaskOrganizer,
                 pipTransitionState, pipTouchHandler, pipTransitionController,
                 windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
-                displayInsetsController, oneHandedController, mainExecutor)
+                displayInsetsController, pipTabletopController, oneHandedController, mainExecutor)
                 .mImpl;
     }
 
@@ -440,6 +445,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
             DisplayInsetsController displayInsetsController,
+            TabletopModeController tabletopModeController,
             Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor
     ) {
@@ -472,6 +478,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 .getInteger(R.integer.config_pipEnterAnimationDuration);
         mPipParamsChangedForwarder = pipParamsChangedForwarder;
         mDisplayInsetsController = displayInsetsController;
+        mTabletopModeController = tabletopModeController;
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -654,6 +661,42 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         }
                     }
                 });
+
+        mTabletopModeController.registerOnTabletopModeChangedListener((isInTabletopMode) -> {
+            if (!mTabletopModeController.enableMoveFloatingWindowInTabletop()) return;
+            final String tag = "tabletop-mode";
+            if (!isInTabletopMode) {
+                mPipBoundsState.removeNamedUnrestrictedKeepClearArea(tag);
+                return;
+            }
+
+            // To prepare for the entry bounds.
+            final Rect displayBounds = mPipBoundsState.getDisplayBounds();
+            if (mTabletopModeController.getPreferredHalfInTabletopMode()
+                    == TabletopModeController.PREFERRED_TABLETOP_HALF_TOP) {
+                // Prefer top, avoid the bottom half of the display.
+                mPipBoundsState.addNamedUnrestrictedKeepClearArea(tag, new Rect(
+                        displayBounds.left, displayBounds.centerY(),
+                        displayBounds.right, displayBounds.bottom));
+            } else {
+                // Prefer bottom, avoid the top half of the display.
+                mPipBoundsState.addNamedUnrestrictedKeepClearArea(tag, new Rect(
+                        displayBounds.left, displayBounds.top,
+                        displayBounds.right, displayBounds.centerY()));
+            }
+
+            // Try to move the PiP window if we have entered PiP mode.
+            if (mPipTransitionState.hasEnteredPip()) {
+                final Rect pipBounds = mPipBoundsState.getBounds();
+                final Point edgeInsets = mPipSizeSpecHandler.getScreenEdgeInsets();
+                if ((pipBounds.height() + 2 * edgeInsets.y) > (displayBounds.height() / 2)) {
+                    // PiP bounds is too big to fit either half, bail early.
+                    return;
+                }
+                mMainExecutor.removeCallbacks(mMovePipInResponseToKeepClearAreasChangeCallback);
+                mMainExecutor.execute(mMovePipInResponseToKeepClearAreasChangeCallback);
+            }
+        });
 
         mOneHandedController.ifPresent(controller -> {
             controller.registerTransitionCallback(
@@ -887,12 +930,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     0, mPipBoundsState.getDisplayBounds().bottom - height,
                     mPipBoundsState.getDisplayBounds().right,
                     mPipBoundsState.getDisplayBounds().bottom);
-            Set<Rect> restrictedKeepClearAreas = new HashSet<>(
-                    mPipBoundsState.getRestrictedKeepClearAreas());
-            restrictedKeepClearAreas.add(rect);
-            mPipBoundsState.setKeepClearAreas(restrictedKeepClearAreas,
-                    mPipBoundsState.getUnrestrictedKeepClearAreas());
+            mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG, rect);
             updatePipPositionForKeepClearAreas();
+        } else {
+            mPipBoundsState.removeNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG);
         }
     }
 

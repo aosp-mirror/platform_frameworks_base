@@ -377,7 +377,6 @@ public class SettingsBackupTest {
                     Settings.Global.NETPOLICY_QUOTA_FRAC_JOBS,
                     Settings.Global.NETPOLICY_QUOTA_FRAC_MULTIPATH,
                     Settings.Global.NETPOLICY_OVERRIDE_ENABLED,
-                    Settings.Global.NETWORK_AVOID_BAD_WIFI,
                     Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES,
                     Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE,
                     Settings.Global.NETWORK_WATCHLIST_LAST_REPORT_TIME,

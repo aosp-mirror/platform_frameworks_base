@@ -2258,7 +2258,7 @@
 
     <!-- Shows in a dialog presented to the user to authorize this app to display a Device controls
          panel (embedded activity) instead of controls rendered by SystemUI [CHAR LIMIT=NONE] -->
-    <string name="controls_panel_authorization"><xliff:g id="appName" example="My app">%s</xliff:g>can choose which controls and content show here.</string>
+    <string name="controls_panel_authorization"><xliff:g id="appName" example="My app">%s</xliff:g> can choose which controls and content show here.</string>
 
     <!-- Shows in a dialog presented to the user to authorize this app removal from a Device
          controls panel [CHAR LIMIT=NONE] -->
