@@ -56,7 +56,7 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
     private static final int MSG_SENSOR_ACCURACY_CHANGED = 1;
     private static final int MSG_SENSOR_CHANGED = 2;
 
-    private InputManager mInputManager;
+    private InputManagerGlobal mGlobal;
 
     // sensor map from device id to sensor list
     @GuardedBy("mInputSensorLock")
@@ -70,15 +70,15 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
     private final HandlerThread mSensorThread;
     private final Handler mSensorHandler;
 
-    public InputDeviceSensorManager(InputManager inputManager) {
-        mInputManager = inputManager;
+    public InputDeviceSensorManager(InputManagerGlobal inputManagerGlobal) {
+        mGlobal = inputManagerGlobal;
 
         mSensorThread = new HandlerThread("SensorThread");
         mSensorThread.start();
         mSensorHandler = new Handler(mSensorThread.getLooper());
 
         // Register the input device listener
-        mInputManager.registerInputDeviceListener(this, mSensorHandler);
+        mGlobal.registerInputDeviceListener(this, mSensorHandler);
         // Initialize the sensor list
         initializeSensors();
     }
@@ -100,7 +100,7 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
         final InputDevice inputDevice = InputDevice.getDevice(deviceId);
         if (inputDevice != null && inputDevice.hasSensor()) {
             final InputSensorInfo[] sensorInfos =
-                    mInputManager.getSensorList(deviceId);
+                    mGlobal.getSensorList(deviceId);
             populateSensorsForInputDeviceLocked(deviceId, sensorInfos);
         }
     }
@@ -154,7 +154,7 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
     private void initializeSensors() {
         synchronized (mInputSensorLock) {
             mSensors.clear();
-            int[] deviceIds = mInputManager.getInputDeviceIds();
+            int[] deviceIds = mGlobal.getInputDeviceIds();
             for (int i = 0; i < deviceIds.length; i++) {
                 final int deviceId = deviceIds[i];
                 updateInputDeviceSensorInfoLocked(deviceId);
@@ -455,7 +455,7 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
                     Slog.e(TAG, "The device doesn't have the sensor:" + sensor);
                     return false;
                 }
-                if (!mInputManager.enableSensor(deviceId, sensor.getType(), delayUs,
+                if (!mGlobal.enableSensor(deviceId, sensor.getType(), delayUs,
                         maxBatchReportLatencyUs)) {
                     Slog.e(TAG, "Can't enable the sensor:" + sensor);
                     return false;
@@ -467,7 +467,7 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
             // Register the InputManagerService sensor listener if not yet.
             if (mInputServiceSensorListener == null) {
                 mInputServiceSensorListener = new InputSensorEventListener();
-                if (!mInputManager.registerSensorListener(mInputServiceSensorListener)) {
+                if (!mGlobal.registerSensorListener(mInputServiceSensorListener)) {
                     Slog.e(TAG, "Failed registering the sensor listener");
                     return false;
                 }
@@ -516,7 +516,7 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
             }
             // If no delegation remains, unregister the listener to input service
             if (mInputServiceSensorListener != null && mInputSensorEventListeners.size() == 0) {
-                mInputManager.unregisterSensorListener(mInputServiceSensorListener);
+                mGlobal.unregisterSensorListener(mInputServiceSensorListener);
                 mInputServiceSensorListener = null;
             }
             // For each sensor type check if it is still in use by other listeners.
@@ -539,7 +539,7 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
                     if (DEBUG) {
                         Slog.d(TAG, "device " + deviceId + " sensor " + sensorType + " disabled");
                     }
-                    mInputManager.disableSensor(deviceId, sensorType);
+                    mGlobal.disableSensor(deviceId, sensorType);
                 }
             }
         }
@@ -553,7 +553,7 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
             }
             for (Sensor sensor : mInputSensorEventListeners.get(idx).getSensors()) {
                 final int deviceId = sensor.getId();
-                if (!mInputManager.flushSensor(deviceId, sensor.getType())) {
+                if (!mGlobal.flushSensor(deviceId, sensor.getType())) {
                     return false;
                 }
             }
