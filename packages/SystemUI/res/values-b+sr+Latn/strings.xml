@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# kontrola je dodata.}one{# kontrola je dodata.}few{# kontrole su dodate.}other{# kontrola je dodato.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Uklonjeno"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Želite li da dodate <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> može da odabere koje kontrole i sadržaj se prikazuju ovde."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Želite da uklonite kontrole za <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Označeno je kao omiljeno"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Označeno je kao omiljeno, <xliff:g id="NUMBER">%d</xliff:g>. pozicija"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Želite li da prikazujete i kontrolišete uređaje sa zaključanog ekrana?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Možete da dodate kontrole za spoljne uređaje na zaključani ekran.\n\nAplikacija na uređaju može da vam omogući da kontrolišete neke uređaje bez otključavanja telefona ili tableta.\n\nTo možete da promenite kad god želite u Podešavanjima."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Želite li da kontrolišete uređaje sa zaključanog ekrana?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Neke uređaje možete da kontrolišete bez otključavanja telefona ili tableta. Aplikacija na uređaju određuje koji uređaji mogu da se kontrolišu na ovaj način."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Ne, hvala"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Da"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN sadrži slova ili simbole"</string>

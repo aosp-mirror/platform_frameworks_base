@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{已新增 # 個控制項。}other{已新增 # 個控制項。}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"已移除"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"要新增「<xliff:g id="APPNAME">%s</xliff:g>」嗎？"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"「<xliff:g id="APPNAME">%s</xliff:g>」可選擇要在這裡顯示的控制項和內容。"</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"要移除「<xliff:g id="APPNAME">%s</xliff:g>」的控制項嗎？"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"已加入收藏"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"已加入至收藏位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"要從上鎖畫面查看及控制裝置嗎？"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"您可以在上鎖畫面新增外部裝置的控制項。\n\n裝置應用程式可能會讓您在不解鎖手機或平板電腦的情況下控制部分裝置。\n\n您可隨時在「設定」中作出變更。"</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"要在上鎖畫面控制裝置嗎？"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"您可以在不解鎖手機或平板電腦的情況下控制部分裝置。裝置應用程式決定哪些裝置可透過此方式控制。"</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"不用了，謝謝"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"是"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN 含有字母或符號"</string>

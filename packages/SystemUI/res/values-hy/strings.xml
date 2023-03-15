@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Ավելացվեց կառավարման # տարր։}one{Ավելացվեց կառավարման # տարր։}other{Ավելացվեց կառավարման # տարր։}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Հեռացված է"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Ավելացնե՞լ <xliff:g id="APPNAME">%s</xliff:g> հավելվածը"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> հավելվածը կարող է ընտրել, թե որ կարգավորումները և ինչ բովանդակություն ցուցադրվեն այստեղ։"</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Հեռացնե՞լ <xliff:g id="APPNAME">%s</xliff:g> հավելվածի համար կարգավորումները։"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Ավելացված է ընտրանիում"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Ավելացված է ընտրանիում, դիրքը՝ <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Ցույց տա՞լ և կառավարել սարքերը կողպէկրանից"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Դուք կարող եք կարգավորումներ ավելացնել ձեր արտաքին սարքերի համար կողպէկրանին։\n\nՁեր սարքի հավելվածը կարող է ձեզ թույլ տալ որոշ սարքեր կառավարել առանց ապակողպելու հեռախոսը կամ պլանշետը։\n\nՑանկացած ժամանակ փոփոխություններ կատարեք Կարգավորումներում։"</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Կառավարե՞լ սարքերը կողպէկրանից"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Դուք կարող եք կառավարել որոշ սարքեր առանց ապակողպելու ձեր հեռախոսը կամ պլանշետը։ Ձեր սարքի հավելվածը որոշում է, թե որ սարքերը կարելի է կառավարել այս եղանակով։"</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Ոչ, շնորհակալություն"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Այո"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN կոդը տառեր և նշաններ է պարունակում"</string>

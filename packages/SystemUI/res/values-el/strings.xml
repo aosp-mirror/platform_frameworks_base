@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Προστέθηκε # στοιχείο ελέγχου.}other{Προστέθηκαν # στοιχεία ελέγχου.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Καταργήθηκε"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Προσθήκη <xliff:g id="APPNAME">%s</xliff:g>;"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"Η εφαρμογή <xliff:g id="APPNAME">%s</xliff:g> μπορεί να επιλέξει ποια στοιχεία ελέγχου και τι περιεχόμενο θα εμφανίζεται εδώ."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Κατάργηση στοιχείων ελέγχου για την εφαρμογή <xliff:g id="APPNAME">%s</xliff:g>;"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Προστέθηκε στα αγαπημένα"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Προστέθηκε στα αγαπημένα, στη θέση <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Εμφάνιση και έλεγχος συσκευών από την οθόνη κλειδώματος;"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Μπορείτε να προσθέσετε στοιχεία ελέγχου για τις εξωτερικές συσκευές σας στην οθόνη κλειδώματος.\n\nΗ εφαρμογή της συσκευής σας μπορεί να σας παρέχει τη δυνατότητα ελέγχου ορισμένων συσκευών χωρίς να ξεκλειδώσετε το τηλέφωνο ή το tablet.\n\nΜπορείτε να κάνετε αλλαγές στις Ρυθμίσεις ανά πάσα στιγμή."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Έλεγχος συσκευών από την οθόνη κλειδώματος;"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Μπορείτε να ελέγχετε ορισμένες συσκευές χωρίς να ξεκλειδώσετε το τηλέφωνο ή το tablet σας. Η εφαρμογή της συσκευής σας καθορίζει ποιες συσκευές μπορούν να ελέγχονται με αυτόν τον τρόπο."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Όχι, ευχαριστώ"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Ναι"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Το PIN περιέχει γράμματα ή σύμβολα"</string>
