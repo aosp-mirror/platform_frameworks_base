@@ -137,6 +137,7 @@ public class SettingsBackupTest {
                     Settings.Global.AUTOFILL_LOGGING_LEVEL,
                     Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE,
                     Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
+                    Settings.Global.AUTO_TIME_ZONE_EXPLICIT,
                     Settings.Global.AVERAGE_TIME_TO_DISCHARGE,
                     Settings.Global.BATTERY_CHARGING_STATE_UPDATE_DELAY,
                     Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME,
