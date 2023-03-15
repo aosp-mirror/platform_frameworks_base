@@ -15,6 +15,10 @@ siyamed@google.com
 # Autofill
 per-file ViewStructure.java = file:/core/java/android/service/autofill/OWNERS
 
+# Choreographer
+per-file Choreographer.java = file:platform/frameworks/native:/services/surfaceflinger/OWNERS
+per-file DisplayEventReceiver.java = file:platform/frameworks/native:/services/surfaceflinger/OWNERS
+
 # Display
 per-file Display*.java = file:/services/core/java/com/android/server/display/OWNERS
 per-file Display*.aidl = file:/services/core/java/com/android/server/display/OWNERS
