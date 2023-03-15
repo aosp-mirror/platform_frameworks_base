@@ -225,8 +225,10 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         val iconRippleView: ReceiverChipRippleView = view.requireViewById(R.id.icon_glow_ripple)
         val rippleView: ReceiverChipRippleView = view.requireViewById(R.id.ripple)
         val translationYBy = getTranslationAmount()
+        // Expand ripple before translating icon container to make sure both views have same bounds.
+        rippleController.expandToInProgressState(rippleView, iconRippleView)
         // Make the icon container view starts animation from bottom of the screen.
-        iconContainerView.translationY += rippleController.getReceiverIconSize()
+        iconContainerView.translationY = rippleController.getReceiverIconSize().toFloat()
         animateViewTranslationAndFade(
             iconContainerView,
             translationYBy = -1 * translationYBy,
@@ -235,7 +237,6 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         ) {
             animateBouncingView(iconContainerView, translationYBy * BOUNCE_TRANSLATION_RATIO)
         }
-        rippleController.expandToInProgressState(rippleView, iconRippleView)
     }
 
     override fun animateViewOut(view: ViewGroup, removalReason: String?, onAnimationEnd: Runnable) {
@@ -293,7 +294,7 @@ open class MediaTttChipControllerReceiver @Inject constructor(
 
     /** Returns the amount that the chip will be translated by in its intro animation. */
     private fun getTranslationAmount(): Float {
-        return rippleController.getRippleSize() * 0.5f
+        return rippleController.getReceiverIconSize() * 2f
     }
 
     private fun View.getAppIconView(): CachingIconView {
