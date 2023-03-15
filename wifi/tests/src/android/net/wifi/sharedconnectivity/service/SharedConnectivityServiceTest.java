@@ -75,9 +75,6 @@ public class SharedConnectivityServiceTest {
                     .addSecurityType(SECURITY_TYPE_EAP).setNetworkProviderInfo(
                             NETWORK_PROVIDER_INFO).build();
     private static final List<KnownNetwork> KNOWN_NETWORKS = List.of(KNOWN_NETWORK);
-    private static final SharedConnectivitySettingsState SETTINGS_STATE =
-            new SharedConnectivitySettingsState.Builder().setInstantTetherEnabled(true)
-                    .setExtras(Bundle.EMPTY).build();
     private static final HotspotNetworkConnectionStatus TETHER_NETWORK_CONNECTION_STATUS =
             new HotspotNetworkConnectionStatus.Builder().setStatus(CONNECTION_STATUS_UNKNOWN)
                     .setHotspotNetwork(HOTSPOT_NETWORK).setExtras(Bundle.EMPTY).build();
@@ -155,10 +152,11 @@ public class SharedConnectivityServiceTest {
         SharedConnectivityService service = createService();
         ISharedConnectivityService.Stub binder =
                 (ISharedConnectivityService.Stub) service.onBind(new Intent());
+        when(mContext.getPackageName()).thenReturn("android.net.wifi.nonupdatable.test");
 
-        service.setSettingsState(SETTINGS_STATE);
+        service.setSettingsState(buildSettingsState());
 
-        assertThat(binder.getSettingsState()).isEqualTo(SETTINGS_STATE);
+        assertThat(binder.getSettingsState()).isEqualTo(buildSettingsState());
     }
 
     @Test
@@ -231,5 +229,11 @@ public class SharedConnectivityServiceTest {
         FakeSharedConnectivityService service = new FakeSharedConnectivityService();
         service.attachBaseContext(mContext);
         return service;
+    }
+
+    private SharedConnectivitySettingsState buildSettingsState() {
+        return new SharedConnectivitySettingsState.Builder(mContext).setInstantTetherEnabled(true)
+                .setInstantTetherSettingsPendingIntent(new Intent())
+                .setExtras(Bundle.EMPTY).build();
     }
 }
