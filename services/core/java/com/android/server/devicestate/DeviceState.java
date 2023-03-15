@@ -76,7 +76,13 @@ public final class DeviceState {
      * This flag indicates that the corresponding state should be disabled when the device is
      * overheating and reaching the critical status.
      */
-    public static final int FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL = 1 << 4;
+    public static final int FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL = 1 << 4;
+
+    /**
+     * This flag indicates that the corresponding state should be disabled when power save mode
+     * is enabled.
+     */
+    public static final int FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE = 1 << 5;
 
     /** @hide */
     @IntDef(prefix = {"FLAG_"}, flag = true, value = {
@@ -84,7 +90,8 @@ public final class DeviceState {
             FLAG_APP_INACCESSIBLE,
             FLAG_EMULATED_ONLY,
             FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP,
-            FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL
+            FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL,
+            FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeviceStateFlags {}
