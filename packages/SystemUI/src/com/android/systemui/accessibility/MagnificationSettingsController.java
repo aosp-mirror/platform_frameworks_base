@@ -81,12 +81,20 @@ public class MagnificationSettingsController implements ComponentCallbacks {
         }
     }
 
-    void showMagnificationSettings() {
+    /**
+     * Shows magnification settings panel {@link WindowMagnificationSettings}. The panel ui would be
+     * various for different magnification mode.
+     *
+     * @param mode      The magnification mode
+     * @see android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
+     * @see android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
+     */
+    void showMagnificationSettings(int mode) {
         if (!mWindowMagnificationSettings.isSettingPanelShowing()) {
             onConfigurationChanged(mContext.getResources().getConfiguration());
             mContext.registerComponentCallbacks(this);
         }
-        mWindowMagnificationSettings.showSettingPanel();
+        mWindowMagnificationSettings.showSettingPanel(mode);
     }
 
     void closeMagnificationSettings() {

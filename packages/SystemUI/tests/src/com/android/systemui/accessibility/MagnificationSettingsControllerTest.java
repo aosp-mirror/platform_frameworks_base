@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -73,9 +74,10 @@ public class MagnificationSettingsControllerTest extends SysuiTestCase {
 
     @Test
     public void testShowSettingsPanel() {
-        mMagnificationSettingsController.showMagnificationSettings();
+        final int mode = ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
+        mMagnificationSettingsController.showMagnificationSettings(mode);
 
-        verify(mWindowMagnificationSettings).showSettingPanel();
+        verify(mWindowMagnificationSettings).showSettingPanel(eq(mode));
     }
 
     @Test

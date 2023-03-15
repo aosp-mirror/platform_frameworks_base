@@ -180,11 +180,12 @@ public class WindowMagnificationTest extends SysuiTestCase {
     }
 
     @Test
-    public void onClickSettingsButton_enabled_showPanel() {
+    public void onClickSettingsButton_enabled_showPanelForWindowMode() {
         mWindowMagnification.mWindowMagnifierCallback.onClickSettingsButton(TEST_DISPLAY);
         waitForIdleSync();
 
-        verify(mMagnificationSettingsController).showMagnificationSettings();
+        verify(mMagnificationSettingsController).showMagnificationSettings(
+                eq(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW));
     }
 
     @Test

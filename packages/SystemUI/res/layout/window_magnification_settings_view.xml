@@ -100,11 +100,11 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/magnifier_horizontal_lock_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="@dimen/magnification_setting_view_margin"
-        android:layout_marginBottom="@dimen/magnification_setting_view_margin"
         android:focusable="true">
 
         <TextView
@@ -132,6 +132,7 @@
         android:layout_height="wrap_content"
         android:text="@string/accessibility_magnification_zoom"
         android:textAppearance="@style/TextAppearance.MagnificationSetting.Title"
+        android:layout_marginTop="@dimen/magnification_setting_view_margin"
         android:focusable="true" />
 
     <com.android.systemui.common.ui.view.SeekBarWithIconButtonsView

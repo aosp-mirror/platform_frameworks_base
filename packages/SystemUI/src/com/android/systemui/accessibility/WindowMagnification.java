@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility;
 
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 
@@ -167,7 +168,10 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
                 mMagnificationSettingsControllerCallback, displayManager, secureSettings);
 
         mModeSwitchesController.setClickListenerDelegate(
-                displayId -> mHandler.post(() -> showMagnificationSettingsPanel(displayId)));
+                displayId -> mHandler.post(() -> {
+                    showMagnificationSettingsPanel(displayId,
+                            ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+                }));
     }
 
     @Override
@@ -249,11 +253,11 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
     }
 
     @MainThread
-    void showMagnificationSettingsPanel(int displayId) {
+    void showMagnificationSettingsPanel(int displayId, int mode) {
         final MagnificationSettingsController magnificationSettingsController =
                 mMagnificationSettingsSupplier.get(displayId);
         if (magnificationSettingsController != null) {
-            magnificationSettingsController.showMagnificationSettings();
+            magnificationSettingsController.showMagnificationSettings(mode);
         }
     }
 
@@ -329,7 +333,9 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
 
         @Override
         public void onClickSettingsButton(int displayId) {
-            mHandler.post(() -> showMagnificationSettingsPanel(displayId));
+            mHandler.post(() -> {
+                showMagnificationSettingsPanel(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+            });
         }
     };
 
