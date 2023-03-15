@@ -592,9 +592,13 @@ public final class CredentialManagerService
         }
 
         private void finalizeAndEmitInitialPhaseMetric(RequestSession session) {
-            var initMetric = session.mInitialPhaseMetric;
-            initMetric.setCredentialServiceBeginQueryTimeNanoseconds(System.nanoTime());
-            MetricUtilities.logApiCalled(initMetric);
+            try {
+                var initMetric = session.mInitialPhaseMetric;
+                initMetric.setCredentialServiceBeginQueryTimeNanoseconds(System.nanoTime());
+                MetricUtilities.logApiCalled(initMetric);
+            } catch (Exception e) {
+                Log.w(TAG, "Unexpected error during metric logging: " + e);
+            }
         }
 
         @Override

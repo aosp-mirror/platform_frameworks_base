@@ -40,6 +40,8 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 
+import com.android.server.credentials.metrics.EntryEnum;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +67,8 @@ public final class ProviderCreateSession extends ProviderSession<
     private final ProviderResponseDataHandler mProviderResponseDataHandler;
 
     /** Creates a new provider session to be used by the request session. */
-    @Nullable public static ProviderCreateSession createNewSession(
+    @Nullable
+    public static ProviderCreateSession createNewSession(
             Context context,
             @UserIdInt int userId,
             CredentialProviderInfo providerInfo,
@@ -155,6 +158,7 @@ public final class ProviderCreateSession extends ProviderSession<
             // Store query phase exception for aggregation with final response
             mProviderException = (CreateCredentialException) exception;
         }
+        captureCandidateFailure();
         updateStatusAndInvokeCallback(toStatus(errorCode));
     }
 
@@ -175,14 +179,32 @@ public final class ProviderCreateSession extends ProviderSession<
         mProviderResponseDataHandler.addResponseContent(response.getCreateEntries(),
                 response.getRemoteCreateEntry());
         if (mProviderResponseDataHandler.isEmptyResponse(response)) {
+            gatheCandidateEntryMetrics(response);
             updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE);
         } else {
+            gatheCandidateEntryMetrics(response);
             updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED);
         }
     }
 
+    private void gatheCandidateEntryMetrics(BeginCreateCredentialResponse response) {
+        try {
+            var createEntries = response.getCreateEntries();
+            int numCreateEntries = createEntries == null ? 0 : createEntries.size();
+            // TODO confirm how to get types from slice
+            if (numCreateEntries > 0) {
+                createEntries.forEach(c ->
+                        mCandidatePhasePerProviderMetric.addEntry(EntryEnum.CREDENTIAL_ENTRY));
+            }
+            mCandidatePhasePerProviderMetric.setNumEntriesTotal(numCreateEntries);
+        } catch (Exception e) {
+            Log.w(TAG, "Unexpected error during metric logging: " + e);
+        }
+    }
+
     @Override
-    @Nullable protected CreateCredentialProviderData prepareUiData()
+    @Nullable
+    protected CreateCredentialProviderData prepareUiData()
             throws IllegalArgumentException {
         Log.i(TAG, "In prepareUiData");
         if (!ProviderSession.isUiInvokingStatus(getStatus())) {
@@ -226,14 +248,7 @@ public final class ProviderCreateSession extends ProviderSession<
     @Override
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
-            /*
-            InitialPhaseMetric initMetric = ((RequestSession)mCallbacks).initMetric;
-            TODO immediately once the other change patched through
-            mCandidateProviderMetric.setSessionId(initMetric
-            .mInitialPhaseMetric.getSessionId());
-            mCandidateProviderMetric.setStartTime(initMetric.getStartTime())
-             */
-            mCandidatePhasePerProviderMetric.setStartQueryTimeNanoseconds(System.nanoTime());
+            startCandidateMetrics();
             mRemoteCredentialService.onCreateCredential(mProviderRequest, this);
         }
     }
@@ -305,12 +320,14 @@ public final class ProviderCreateSession extends ProviderSession<
     }
 
     private class ProviderResponseDataHandler {
-        @Nullable private final ComponentName mExpectedRemoteEntryProviderService;
+        @Nullable
+        private final ComponentName mExpectedRemoteEntryProviderService;
 
         @NonNull
         private final Map<String, Pair<CreateEntry, Entry>> mUiCreateEntries = new HashMap<>();
 
-        @Nullable private Pair<String, Pair<RemoteEntry, Entry>> mUiRemoteEntry = null;
+        @Nullable
+        private Pair<String, Pair<RemoteEntry, Entry>> mUiRemoteEntry = null;
 
         ProviderResponseDataHandler(@Nullable ComponentName expectedRemoteEntryProviderService) {
             mExpectedRemoteEntryProviderService = expectedRemoteEntryProviderService;
@@ -323,6 +340,7 @@ public final class ProviderCreateSession extends ProviderSession<
                 setRemoteEntry(remoteEntry);
             }
         }
+
         public void addCreateEntry(CreateEntry createEntry) {
             String id = generateUniqueId();
             Entry entry = new Entry(SAVE_ENTRY_KEY,
@@ -373,6 +391,7 @@ public final class ProviderCreateSession extends ProviderSession<
         private boolean isEmptyResponse() {
             return mUiCreateEntries.isEmpty() && mUiRemoteEntry == null;
         }
+
         @Nullable
         public RemoteEntry getRemoteEntry(String entryKey) {
             return mUiRemoteEntry == null || mUiRemoteEntry

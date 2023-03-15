@@ -81,6 +81,34 @@ public class MetricUtilities {
     }
 
     /**
+     * A logging utility used primarily for the candidate phase of the current metric setup.
+     *
+     * @param providers            a map with known providers
+     * @param emitSequenceId       an emitted sequence id for the current session
+     */
+    protected static void logApiCalled(Map<String, ProviderSession> providers,
+            int emitSequenceId) {
+        try {
+            var providerSessions = providers.values();
+            int providerSize = providerSessions.size();
+            int[] candidateUidList = new int[providerSize];
+            int[] candidateQueryRoundTripTimeList = new int[providerSize];
+            int[] candidateStatusList = new int[providerSize];
+            int index = 0;
+            for (var session : providerSessions) {
+                CandidatePhaseMetric metric = session.mCandidatePhasePerProviderMetric;
+                candidateUidList[index] = metric.getCandidateUid();
+                candidateQueryRoundTripTimeList[index] = metric.getQueryLatencyMicroseconds();
+                candidateStatusList[index] = metric.getProviderQueryStatus();
+                index++;
+            }
+            // TODO Handle the emit here
+        } catch (Exception e) {
+            Log.w(TAG, "Unexpected error during metric logging: " + e);
+        }
+    }
+
+    /**
      * The most common logging helper, handles the overall status of the API request with the
      * provider status and latencies. Other versions of this method may be more useful depending
      * on the situation, as this is geared towards the logging of {@link ProviderSession} types.
@@ -90,6 +118,7 @@ public class MetricUtilities {
      * @param providers            a map with known providers
      * @param callingUid           the calling UID of the client app
      * @param chosenProviderFinalPhaseMetric the metric data type of the final chosen provider
+     * TODO remove soon
      */
     protected static void logApiCalled(ApiName apiName, ApiStatus apiStatus,
             Map<String, ProviderSession> providers, int callingUid,
@@ -133,6 +162,7 @@ public class MetricUtilities {
      * contain default values for all other optional parameters.
      *
      * TODO(b/271135048) - given space requirements, this may be a good candidate for another atom
+     * TODO immediately remove and carry over TODO to new log for this setup
      *
      * @param apiName    the api name to log
      * @param apiStatus  the status to log
