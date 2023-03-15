@@ -61,14 +61,14 @@
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Энэ аппыг үйлдвэрээс ирсэн хувилбараар солих уу? Бүх өгөгдөл устах болно. Энэ нь эдгээр ажлын профайлтай бүхий энэ төхөөрөмжийн бүх хэрэглэгчид нөлөөлнө."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Аппын өгөгдлийн <xliff:g id="SIZE">%1$s</xliff:g>-г үлдээнэ үү."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Та энэ аппыг устгахыг хүсэж байна уу?"</string>
-    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Та энэ аппыг устгахыг хүсэж байна уу? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> клоныг мөн устгана."</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Та энэ аппыг устгахыг хүсэж байна уу? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-н хувилалыг мөн устгана."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Устгаж байна"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Устгаж чадсангүй"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Устгаж байна…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-г устгаж байна…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Устгаж дууслаа."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-г устгасан"</string>
-    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> клоныг устгасан"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-н хувилалыг устгасан"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Устгах амжилтгүй боллоо."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-г устгах амжилтгүй боллоо."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> клоныг устгаж байна…"</string>
