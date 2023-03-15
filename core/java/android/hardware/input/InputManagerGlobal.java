@@ -16,12 +16,15 @@
 
 package android.hardware.input;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.hardware.BatteryState;
 import android.hardware.input.InputManager.InputDeviceBatteryListener;
 import android.hardware.input.InputManager.InputDeviceListener;
+import android.hardware.input.InputManager.KeyboardBacklightListener;
 import android.hardware.input.InputManager.OnTabletModeChangedListener;
 import android.os.Handler;
 import android.os.IBinder;
@@ -44,7 +47,7 @@ import java.util.concurrent.Executor;
 
 /**
  * Manages communication with the input manager service on behalf of
- * an application process.  You're probably looking for {@link InputManager}.
+ * an application process. You're probably looking for {@link InputManager}.
  *
  * @hide
  */
@@ -72,6 +75,12 @@ public final class InputManagerGlobal {
     @Nullable private SparseArray<RegisteredBatteryListeners> mBatteryListeners;
     @GuardedBy("mBatteryListenersLock")
     @Nullable private IInputDeviceBatteryListener mInputDeviceBatteryListener;
+
+    private final Object mKeyboardBacklightListenerLock = new Object();
+    @GuardedBy("mKeyboardBacklightListenerLock")
+    @Nullable private ArrayList<KeyboardBacklightListenerDelegate> mKeyboardBacklightListeners;
+    @GuardedBy("mKeyboardBacklightListenerLock")
+    @Nullable private IKeyboardBacklightListener mKeyboardBacklightListener;
 
     private static InputManagerGlobal sInstance;
 
@@ -696,6 +705,120 @@ public final class InputManagerGlobal {
         @Override
         public float getCapacity() {
             return mCapacity;
+        }
+    }
+
+    private static final class KeyboardBacklightListenerDelegate {
+        final InputManager.KeyboardBacklightListener mListener;
+        final Executor mExecutor;
+
+        KeyboardBacklightListenerDelegate(KeyboardBacklightListener listener, Executor executor) {
+            mListener = listener;
+            mExecutor = executor;
+        }
+
+        void notifyKeyboardBacklightChange(int deviceId, IKeyboardBacklightState state,
+                boolean isTriggeredByKeyPress) {
+            mExecutor.execute(() ->
+                    mListener.onKeyboardBacklightChanged(deviceId,
+                            new LocalKeyboardBacklightState(state.brightnessLevel,
+                                    state.maxBrightnessLevel), isTriggeredByKeyPress));
+        }
+    }
+
+    private class LocalKeyboardBacklightListener extends IKeyboardBacklightListener.Stub {
+
+        @Override
+        public void onBrightnessChanged(int deviceId, IKeyboardBacklightState state,
+                boolean isTriggeredByKeyPress) {
+            synchronized (mKeyboardBacklightListenerLock) {
+                if (mKeyboardBacklightListeners == null) return;
+                final int numListeners = mKeyboardBacklightListeners.size();
+                for (int i = 0; i < numListeners; i++) {
+                    mKeyboardBacklightListeners.get(i)
+                            .notifyKeyboardBacklightChange(deviceId, state, isTriggeredByKeyPress);
+                }
+            }
+        }
+    }
+
+    // Implementation of the android.hardware.input.KeyboardBacklightState interface used to report
+    // the keyboard backlight state via the KeyboardBacklightListener interfaces.
+    private static final class LocalKeyboardBacklightState extends KeyboardBacklightState {
+
+        private final int mBrightnessLevel;
+        private final int mMaxBrightnessLevel;
+
+        LocalKeyboardBacklightState(int brightnessLevel, int maxBrightnessLevel) {
+            mBrightnessLevel = brightnessLevel;
+            mMaxBrightnessLevel = maxBrightnessLevel;
+        }
+
+        @Override
+        public int getBrightnessLevel() {
+            return mBrightnessLevel;
+        }
+
+        @Override
+        public int getMaxBrightnessLevel() {
+            return mMaxBrightnessLevel;
+        }
+    }
+
+    /**
+     * @see InputManager#registerKeyboardBacklightListener(Executor, KeyboardBacklightListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_KEYBOARD_BACKLIGHT)
+    void registerKeyboardBacklightListener(@NonNull Executor executor,
+            @NonNull KeyboardBacklightListener listener) throws IllegalArgumentException {
+        Objects.requireNonNull(executor, "executor should not be null");
+        Objects.requireNonNull(listener, "listener should not be null");
+
+        synchronized (mKeyboardBacklightListenerLock) {
+            if (mKeyboardBacklightListener == null) {
+                mKeyboardBacklightListeners = new ArrayList<>();
+                mKeyboardBacklightListener = new LocalKeyboardBacklightListener();
+
+                try {
+                    mIm.registerKeyboardBacklightListener(mKeyboardBacklightListener);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+            final int numListeners = mKeyboardBacklightListeners.size();
+            for (int i = 0; i < numListeners; i++) {
+                if (mKeyboardBacklightListeners.get(i).mListener == listener) {
+                    throw new IllegalArgumentException("Listener has already been registered!");
+                }
+            }
+            KeyboardBacklightListenerDelegate delegate =
+                    new KeyboardBacklightListenerDelegate(listener, executor);
+            mKeyboardBacklightListeners.add(delegate);
+        }
+    }
+
+    /**
+     * @see InputManager#unregisterKeyboardBacklightListener(KeyboardBacklightListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_KEYBOARD_BACKLIGHT)
+    void unregisterKeyboardBacklightListener(
+            @NonNull KeyboardBacklightListener listener) {
+        Objects.requireNonNull(listener, "listener should not be null");
+
+        synchronized (mKeyboardBacklightListenerLock) {
+            if (mKeyboardBacklightListeners == null) {
+                return;
+            }
+            mKeyboardBacklightListeners.removeIf((delegate) -> delegate.mListener == listener);
+            if (mKeyboardBacklightListeners.isEmpty()) {
+                try {
+                    mIm.unregisterKeyboardBacklightListener(mKeyboardBacklightListener);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+                mKeyboardBacklightListeners = null;
+                mKeyboardBacklightListener = null;
+            }
         }
     }
 }
