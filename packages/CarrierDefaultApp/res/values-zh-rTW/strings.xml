@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="5247871339820894594">"電信業者預設應用程式"</string>
+    <!-- no translation found for app_name (2809080280462257271) -->
+    <skip />
     <string name="android_system_label" msgid="2797790869522345065">"電信業者"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"行動數據已用盡"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"你的行動數據已停用"</string>
@@ -15,8 +16,10 @@
     <string name="ssl_error_example" msgid="6188711843183058764">"例如，登入網頁中顯示的機構可能並非該網頁實際隸屬的機構。"</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"仍要透過瀏覽器繼續操作"</string>
     <string name="performance_boost_notification_channel" msgid="3475440855635538592">"效能提升方案"</string>
-    <string name="performance_boost_notification_title" msgid="6091638924925876776">"改善應用程式體驗"</string>
-    <string name="performance_boost_notification_detail" msgid="907363829888387028">"輕觸即可造訪「%s」的網站及瞭解詳情"</string>
+    <!-- no translation found for performance_boost_notification_title (3126203390685781861) -->
+    <skip />
+    <!-- no translation found for performance_boost_notification_detail (216569851036236346) -->
+    <skip />
     <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"暫時不要"</string>
     <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"管理"</string>
     <string name="slice_purchase_app_label" msgid="7170191659233241166">"購買效能提升方案。"</string>
