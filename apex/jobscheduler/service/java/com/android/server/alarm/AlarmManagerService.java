@@ -1948,7 +1948,7 @@ public class AlarmManagerService extends SystemService {
                             | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
             mTimeTickOptions = BroadcastOptions.makeBasic()
                     .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
-                    .setDeferUntilActive(true)
+                    .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
                     .toBundle();
             mTimeTickTrigger = new IAlarmListener.Stub() {
                 @Override

@@ -8170,7 +8170,7 @@ public class AudioService extends IAudioService.Stub
             volumeChangedOptions.setDeliveryGroupPolicy(DELIVERY_GROUP_POLICY_MOST_RECENT);
             volumeChangedOptions.setDeliveryGroupMatchingKey(
                     AudioManager.VOLUME_CHANGED_ACTION, String.valueOf(mStreamType));
-            volumeChangedOptions.setDeferUntilActive(true);
+            volumeChangedOptions.setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
             mVolumeChangedOptions = volumeChangedOptions.toBundle();
 
             mStreamDevicesChanged = new Intent(AudioManager.STREAM_DEVICES_CHANGED_ACTION);
@@ -8179,7 +8179,8 @@ public class AudioService extends IAudioService.Stub
             streamDevicesChangedOptions.setDeliveryGroupPolicy(DELIVERY_GROUP_POLICY_MOST_RECENT);
             streamDevicesChangedOptions.setDeliveryGroupMatchingKey(
                     AudioManager.STREAM_DEVICES_CHANGED_ACTION, String.valueOf(mStreamType));
-            streamDevicesChangedOptions.setDeferUntilActive(true);
+            streamDevicesChangedOptions.setDeferralPolicy(
+                    BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
             mStreamDevicesChangedOptions = streamDevicesChangedOptions.toBundle();
         }
 
