@@ -347,7 +347,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         whenever(controlsController.removeFavorites(eq(componentName))).thenReturn(true)
         val panel = SelectedItem.PanelItem("App name", componentName)
         preferredPanelRepository.setSelectedComponent(
-                SelectedComponentRepository.SelectedComponent(panel)
+            SelectedComponentRepository.SelectedComponent(panel)
         )
         underTest.show(parent, {}, context)
         underTest.startRemovingApp(componentName, "Test App")
@@ -359,6 +359,26 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
             .isEqualTo(SelectedItem.EMPTY_SELECTION)
         assertThat(preferredPanelRepository.shouldAddDefaultComponent()).isFalse()
         assertThat(preferredPanelRepository.getSelectedComponent()).isNull()
+    }
+
+    @Test
+    fun testCancelRemovingAppsDoesntRemoveFavorite() {
+        val componentName = ComponentName(context, "cls")
+        whenever(controlsController.removeFavorites(eq(componentName))).thenReturn(true)
+        val panel = SelectedItem.PanelItem("App name", componentName)
+        preferredPanelRepository.setSelectedComponent(
+            SelectedComponentRepository.SelectedComponent(panel)
+        )
+        underTest.show(parent, {}, context)
+        underTest.startRemovingApp(componentName, "Test App")
+
+        fakeDialogController.clickNeutral()
+
+        verify(controlsController, never()).removeFavorites(eq(componentName))
+        assertThat(underTest.getPreferredSelectedItem(emptyList())).isEqualTo(panel)
+        assertThat(preferredPanelRepository.shouldAddDefaultComponent()).isTrue()
+        assertThat(preferredPanelRepository.getSelectedComponent())
+            .isEqualTo(SelectedComponentRepository.SelectedComponent(panel))
     }
 
     @Test
@@ -375,7 +395,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     private fun setUpPanel(panel: SelectedItem.PanelItem): ControlsServiceInfo {
         val activity = ComponentName(context, "activity")
         preferredPanelRepository.setSelectedComponent(
-                SelectedComponentRepository.SelectedComponent(panel)
+            SelectedComponentRepository.SelectedComponent(panel)
         )
         return ControlsServiceInfo(panel.componentName, panel.appName, activity)
     }
