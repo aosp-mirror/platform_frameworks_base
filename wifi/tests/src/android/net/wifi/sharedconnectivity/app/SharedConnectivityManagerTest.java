@@ -497,8 +497,9 @@ public class SharedConnectivityManagerTest {
     @Test
     public void getSettingsState_serviceConnected_shouldReturnState() throws RemoteException {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
-        SharedConnectivitySettingsState state = new SharedConnectivitySettingsState.Builder()
-                .setInstantTetherEnabled(true).setExtras(new Bundle()).build();
+        SharedConnectivitySettingsState state =
+                new SharedConnectivitySettingsState.Builder(mContext).setInstantTetherEnabled(true)
+                        .setExtras(new Bundle()).build();
         manager.setService(mService);
         when(mService.getSettingsState()).thenReturn(state);
 
