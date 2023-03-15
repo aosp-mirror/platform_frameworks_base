@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{S-a adăugat # comandă.}few{S-au adăugat # comenzi.}other{S-au adăugat # de comenzi.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Eliminată"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Adaugi <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> poate să aleagă comenzile și conținutul care se afișează aici."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Elimini comenzile pentru <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Marcată ca preferată"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Marcată ca preferată, poziția <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Afișezi și controlezi dispozitivele de pe ecranul de blocare?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Poți adăuga comenzi pentru dispozitivele externe pe ecranul de blocare.\n\nAplicația de pe dispozitiv îți poate permite să controlezi unele dispozitive fără să deblochezi telefonul.\n\nPoți face modificări oricând în setări."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Controlezi dispozitivele de pe ecranul de blocare?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Poți controla unele dispozitive fără să deblochezi telefonul sau tableta. Aplicația de dispozitiv stabilește dispozitivele care pot fi controlate astfel."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Nu, mulțumesc"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Da"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Codul PIN conține litere sau simboluri"</string>

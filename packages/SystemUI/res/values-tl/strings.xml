@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Nagdagdag ng # kontrol.}one{Nagdagdag ng # kontrol.}other{Nagdagdag ng # na kontrol.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Inalis"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Idagdag ang <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"Mapipili ng <xliff:g id="APPNAME">%s</xliff:g> kung aling mga kontrol at content ang lalabas dito."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Alisin ang mga kontrol para sa <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Ginawang paborito"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Ginawang paborito, posisyon <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Ipakita at kontrolin ang mga device mula sa lock screen?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Puwede kang magdagdag ng mga kontrol para sa iyong mga external device sa lock screen.\n\nPosibleng payagan ka ng app ng iyong device na kontrolin ang ilang device nang hindi ina-unlock ang telepono o tablet mo.\n\nPuwede kang magsagawa ng mga pagbabago anumang oras sa Mga Setting."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Kontrolin ang mga device mula sa lock screen?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Puwede mong kontrolin ang ilang device nang hindi ina-unlock ang iyong telepono o tablet. Nakadepende sa app ng iyong device kung aling mga device ang puwedeng kontrolin sa ganitong paraan."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Huwag na lang"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Oo"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"May mga titik o simbolo ang PIN"</string>

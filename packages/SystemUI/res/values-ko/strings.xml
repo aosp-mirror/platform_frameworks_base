@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{설정이 #개 추가되었습니다.}other{설정이 #개 추가되었습니다.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"삭제됨"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g>을(를) 추가할까요?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g>에서 여기에 표시되는 컨트롤 및 콘텐츠를 선택할 수 있습니다."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> 컨트롤을 삭제할까요?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"즐겨찾기에 추가됨"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"즐겨찾기에 추가됨, 위치 <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"잠금 화면에서 기기를 표시하고 제어하시겠습니까?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"외부 기기에 대한 제어 권한을 잠금 화면에 추가할 수 있습니다.\n\n기기 앱을 사용하여 휴대전화나 태블릿의 잠금을 해제하지 않고 해당 기기를 제어할 수도 있습니다.\n\n언제든지 설정에서 옵션을 변경할 수 있습니다."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"잠금 화면에서 기기를 제어하시겠습니까?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"일부 기기의 경우 휴대전화나 태블릿을 잠금 해제하지 않고 해당 기기를 제어할 수 있습니다. 기기 앱에 어떤 기기를 이러한 방식으로 제어할 수 있는지 표시됩니다."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"아니요"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"예"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN에 문자나 기호가 포함됨"</string>

@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# kontrol ditambahkan.}other{# kontrol ditambahkan.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Dihapus"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Tambahkan <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> dapat memilih kontrol dan konten yang ditampilkan di sini."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Hapus kontrol untuk <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Difavoritkan"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Difavoritkan, posisi <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Tampilkan dan kontrol perangkat dari layar kunci?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Anda dapat menambahkan kontrol untuk perangkat eksternal ke layar kunci.\n\nAplikasi perangkat Anda mungkin mengizinkan Anda mengontrol beberapa perangkat tanpa membuka kunci ponsel atau tablet.\n\nAnda dapat melakukan perubahan kapan saja di Setelan."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Kontrol perangkat dari layar kunci?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Anda dapat mengontrol beberapa perangkat tanpa membuka kunci ponsel atau tablet. Aplikasi perangkat Anda menentukan perangkat yang dapat dikontrol dengan cara ini."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Lain kali"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Ya"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN berisi huruf atau simbol"</string>

@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# નિયંત્રણ ઉમેર્યું.}one{# નિયંત્રણ ઉમેર્યું.}other{# નિયંત્રણ ઉમેર્યા.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"કાઢી નાખ્યું"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> ઉમેરીએ?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> પસંદ કરી શકે છે કે કયા નિયંત્રણો અને કન્ટેન્ટ અહીં બતાવવામાં આવે."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> માટે નિયંત્રણો કાઢી નાખીએ?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"મનપસંદમાં ઉમેર્યું"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"મનપસંદમાં ઉમેર્યું, સ્થાન <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"લૉક સ્ક્રીનમાંથી ડિવાઇસ બતાવીએ અને નિયંત્રિત કરીએ?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"તમે તમારા બાહ્ય ડિવાઇસ માટેના નિયંત્રણો લૉક સ્ક્રીન પર ઉમેરી શકો છો.\n\nતમારી ડિવાઇસ ઍપ કદાચ તમને તમારો ફોન કે ટૅબ્લેટ અનલૉક કર્યા વિના અમુક ડિવાઇસ નિયંત્રિત કરવાની મંજૂરી આપી શકે.\n\nતમે ગમે ત્યારે સેટિંગમાં જઈને ફેરફાર કરી શકો છો."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"લૉક સ્ક્રીનમાંથી ડિવાઇસ નિયંત્રિત કરીએ?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"તમે તમારા ફોન કે ટૅબ્લેટને અનલૉક કર્યા વિના અમુક ડિવાઇસ નિયંત્રિત કરી શકો છો. તમારી ડિવાઇસ ઍપ નક્કી કરે છે કે આ રીતે કયા ડિવાઇસને નિયંત્રિત કરવા."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"ના, આભાર"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"હા"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"પિનમાં અક્ષરો અથવા પ્રતીકોનો સમાવેશ થાય છે"</string>

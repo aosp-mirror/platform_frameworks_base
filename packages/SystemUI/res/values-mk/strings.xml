@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Додадена е # контрола.}one{Додадени се # контрола.}other{Додадени се # контроли.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Отстранета"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Да се додаде <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g>може да избере кои контроли и содржини се прикажуваат овде."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Да се отстранат контролите за <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Омилена"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Омилена, позиција <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Да се прикажуваат и контролираат уреди од заклучениот екран?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Може да додадете контроли за надворешните уреди на заклучениот екран.\n\nАпликацијата на уредот може да ви дозволи да контролирате одредени уреди без да го отклучувате телефонот или таблетот.\n\nМоже да извршите промени во секое време во „Поставки“."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Да се контролираат уреди од заклучен екран?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Може да контролирате одредени уреди без отклучување на телефонот или таблетот. Апликацијата на вашиот уред одредува кои уреди може да се контролираат вака."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Не, фала"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Да"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN-кодот содржи букви или симболи"</string>
