@@ -169,21 +169,25 @@ void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDispla
                           gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.frameInterval,
                           vsyncEventData.frameInterval);
 
-        jobjectArray frameTimelinesObj = reinterpret_cast<jobjectArray>(
-                env->GetObjectField(vsyncEventDataObj.get(),
-                                    gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo
-                                            .frameTimelines));
+        ScopedLocalRef<jobjectArray>
+                frameTimelinesObj(env,
+                                  reinterpret_cast<jobjectArray>(
+                                          env->GetObjectField(vsyncEventDataObj.get(),
+                                                              gDisplayEventReceiverClassInfo
+                                                                      .vsyncEventDataClassInfo
+                                                                      .frameTimelines)));
         for (int i = 0; i < VsyncEventData::kFrameTimelinesLength; i++) {
             VsyncEventData::FrameTimeline& frameTimeline = vsyncEventData.frameTimelines[i];
-            jobject frameTimelineObj = env->GetObjectArrayElement(frameTimelinesObj, i);
-            env->SetLongField(frameTimelineObj,
+            ScopedLocalRef<jobject>
+                    frameTimelineObj(env, env->GetObjectArrayElement(frameTimelinesObj.get(), i));
+            env->SetLongField(frameTimelineObj.get(),
                               gDisplayEventReceiverClassInfo.frameTimelineClassInfo.vsyncId,
                               frameTimeline.vsyncId);
-            env->SetLongField(frameTimelineObj,
+            env->SetLongField(frameTimelineObj.get(),
                               gDisplayEventReceiverClassInfo.frameTimelineClassInfo
                                       .expectedPresentationTime,
                               frameTimeline.expectedPresentationTime);
-            env->SetLongField(frameTimelineObj,
+            env->SetLongField(frameTimelineObj.get(),
                               gDisplayEventReceiverClassInfo.frameTimelineClassInfo.deadline,
                               frameTimeline.deadlineTimestamp);
         }
