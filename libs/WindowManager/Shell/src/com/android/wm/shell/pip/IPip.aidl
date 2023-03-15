@@ -75,4 +75,9 @@ interface IPip {
      * Sets the height and visibility of the Launcher keep clear area.
      */
     oneway void setLauncherKeepClearAreaHeight(boolean visible, int height) = 6;
+
+    /**
+     * Sets the app icon size in pixel used by Launcher
+     */
+     oneway void setLauncherAppIconSize(int iconSizePx) = 7;
 }
