@@ -10441,6 +10441,31 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void fixCallNotification_withOnGoingFlag_shouldNotBeNonDismissible()
+            throws Exception {
+        // Given: a call notification has the flag FLAG_ONGOING_EVENT set
+        // feature flag: ALLOW_DISMISS_ONGOING is on
+        mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
+        when(mTelecomManager.isInManagedCall()).thenReturn(true);
+
+        Person person = new Person.Builder()
+                .setName("caller")
+                .build();
+        Notification n = new Notification.Builder(mContext, "test")
+                .setOngoing(true)
+                .setStyle(Notification.CallStyle.forOngoingCall(
+                        person, mock(PendingIntent.class)))
+                .build();
+
+        // When: fix the notification with NotificationManagerService
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+
+        // Then: the notification's flag FLAG_NO_DISMISS should be set
+        assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
+    }
+
+
+    @Test
     public void fixNonExemptNotification_withOnGoingFlag_shouldBeDismissible() throws Exception {
         // Given: a non-exempt notification has the flag FLAG_ONGOING_EVENT set
         // feature flag: ALLOW_DISMISS_ONGOING is on
