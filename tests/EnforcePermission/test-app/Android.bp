@@ -34,5 +34,5 @@ android_test {
     ],
     platform_apis: true,
     certificate: "platform",
-    test_suites: ["general-tests"],
+    test_suites: ["device-tests"],
 }
