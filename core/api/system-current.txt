@@ -10134,16 +10134,18 @@ package android.net.wifi.sharedconnectivity.app {
   public final class SharedConnectivitySettingsState implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.os.Bundle getExtras();
+    method @Nullable public android.app.PendingIntent getInstantTetherSettingsPendingIntent();
     method public boolean isInstantTetherEnabled();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState> CREATOR;
   }
 
   public static final class SharedConnectivitySettingsState.Builder {
-    ctor public SharedConnectivitySettingsState.Builder();
+    ctor public SharedConnectivitySettingsState.Builder(@NonNull android.content.Context);
     method @NonNull public android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState build();
     method @NonNull public android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState.Builder setInstantTetherEnabled(boolean);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState.Builder setInstantTetherSettingsPendingIntent(@NonNull android.content.Intent);
   }
 
 }
