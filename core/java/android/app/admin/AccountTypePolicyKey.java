@@ -23,6 +23,7 @@ import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_KEY;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.Parcel;
 
@@ -49,6 +50,7 @@ public final class AccountTypePolicyKey extends PolicyKey {
     /**
      * @hide
      */
+    @TestApi
     public AccountTypePolicyKey(@NonNull String key, @NonNull String accountType) {
         super(key);
         mAccountType = Objects.requireNonNull((accountType));
