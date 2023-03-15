@@ -2582,7 +2582,8 @@ public class UserManager {
             enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
             requiresAnyOfPermissionsIfNotCaller = {
                     android.Manifest.permission.MANAGE_USERS,
-                    android.Manifest.permission.CREATE_USERS}
+                    android.Manifest.permission.CREATE_USERS,
+                    android.Manifest.permission.QUERY_USERS}
     )
     public boolean isLinkedUser() {
         return isRestrictedProfile();
@@ -2600,7 +2601,8 @@ public class UserManager {
             enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
             requiresAnyOfPermissionsIfNotCaller = {
                     android.Manifest.permission.MANAGE_USERS,
-                    android.Manifest.permission.CREATE_USERS}
+                    android.Manifest.permission.CREATE_USERS,
+                    android.Manifest.permission.QUERY_USERS}
     )
     public boolean isRestrictedProfile() {
         try {
@@ -2621,7 +2623,8 @@ public class UserManager {
     @SystemApi
     @RequiresPermission(anyOf = {
             Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS},
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS},
             conditional = true)
     public boolean isRestrictedProfile(@NonNull UserHandle user) {
         try {
