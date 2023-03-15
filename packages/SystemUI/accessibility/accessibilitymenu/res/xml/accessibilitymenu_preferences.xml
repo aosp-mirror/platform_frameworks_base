@@ -28,6 +28,6 @@
 
     <Preference
         android:key="@string/pref_help"
-        android:title="@string/pref_help_and_feedback_title"/>
+        android:title="@string/pref_help_title"/>
 
 </androidx.preference.PreferenceScreen>

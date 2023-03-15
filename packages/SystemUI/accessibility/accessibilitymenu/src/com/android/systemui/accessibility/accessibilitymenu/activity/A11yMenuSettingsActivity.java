@@ -71,8 +71,6 @@ public class A11yMenuSettingsActivity extends FragmentActivity {
         private void initializeHelpAndFeedbackPreference() {
             final Preference prefHelp = findPreference(getString(R.string.pref_help));
             if (prefHelp != null) {
-                prefHelp.setTitle(R.string.pref_help_title);
-
                 // Do not allow access to web during setup.
                 if (Settings.Secure.getInt(
                         getContext().getContentResolver(),
