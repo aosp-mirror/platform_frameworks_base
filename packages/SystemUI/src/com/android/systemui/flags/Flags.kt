@@ -243,12 +243,21 @@ object Flags {
 
     // TODO(b/270223352): Tracking Bug
     @JvmField
-    val HIDE_SMARTSPACE_ON_DREAM_OVERLAY = unreleasedFlag(404, "hide_smartspace_on_dream_overlay")
+    val HIDE_SMARTSPACE_ON_DREAM_OVERLAY =
+        unreleasedFlag(
+            404,
+            "hide_smartspace_on_dream_overlay",
+            teamfood = true
+    )
 
     // TODO(b/271460958): Tracking Bug
     @JvmField
-    val SHOW_WEATHER_COMPLICATION_ON_DREAM_OVERLAY = unreleasedFlag(405,
-        "show_weather_complication_on_dream_overlay")
+    val SHOW_WEATHER_COMPLICATION_ON_DREAM_OVERLAY =
+        unreleasedFlag(
+            405,
+            "show_weather_complication_on_dream_overlay",
+            teamfood = true
+        )
 
     // 500 - quick settings
 
