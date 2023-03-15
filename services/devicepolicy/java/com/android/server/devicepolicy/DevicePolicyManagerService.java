@@ -425,6 +425,7 @@ import android.security.keystore.AttestationUtils;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.stats.devicepolicy.DevicePolicyEnums;
+import android.telecom.TelecomManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
@@ -3533,26 +3534,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 userId == UserHandle.USER_SYSTEM ? UserHandle.USER_ALL : userId);
         updatePermissionPolicyCache(userId);
         updateAdminCanGrantSensorsPermissionCache(userId);
-        final List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs;
-        boolean isManagedSubscription;
 
+        final List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs;
         synchronized (getLockObject()) {
             ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
             preferentialNetworkServiceConfigs = owner != null
                     ? owner.mPreferentialNetworkServiceConfigs
                     : List.of(PreferentialNetworkServiceConfig.DEFAULT);
-
-            isManagedSubscription = owner != null && owner.mManagedSubscriptionsPolicy != null
-                    && owner.mManagedSubscriptionsPolicy.getPolicyType()
-                    == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS;
         }
         updateNetworkPreferenceForUser(userId, preferentialNetworkServiceConfigs);
 
-        if (isManagedSubscription) {
-            String defaultDialerPackageName = getDefaultRoleHolderPackageName(
-                    com.android.internal.R.string.config_defaultDialer);
-            String defaultSmsPackageName = getDefaultRoleHolderPackageName(
-                    com.android.internal.R.string.config_defaultSms);
+        if (isProfileOwnerOfOrganizationOwnedDevice(userId)
+                && getManagedSubscriptionsPolicy().getPolicyType()
+                == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
+            String defaultDialerPackageName = getOemDefaultDialerPackage();
+            String defaultSmsPackageName = getOemDefaultSmsPackage();
             updateDialerAndSmsManagedShortcutsOverrideCache(defaultDialerPackageName,
                     defaultSmsPackageName);
         }
@@ -22780,10 +22776,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void installOemDefaultDialerAndSmsApp(int targetUserId) {
         try {
-            String defaultDialerPackageName = getDefaultRoleHolderPackageName(
-                    com.android.internal.R.string.config_defaultDialer);
-            String defaultSmsPackageName = getDefaultRoleHolderPackageName(
-                    com.android.internal.R.string.config_defaultSms);
+            String defaultDialerPackageName = getOemDefaultDialerPackage();
+            String defaultSmsPackageName = getOemDefaultSmsPackage();
 
             if (defaultDialerPackageName != null) {
                 mIPackageManager.installExistingPackageAsUser(defaultDialerPackageName,
@@ -22807,6 +22801,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // shouldn't happen
             Slogf.wtf(LOG_TAG, "Failed to install dialer/sms app", re);
         }
+    }
+
+    private String getOemDefaultDialerPackage() {
+        TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
+        return telecomManager.getSystemDialerPackage();
+    }
+
+    private String getOemDefaultSmsPackage() {
+        return mContext.getString(R.string.config_defaultSms);
     }
 
     private void updateDialerAndSmsManagedShortcutsOverrideCache(
