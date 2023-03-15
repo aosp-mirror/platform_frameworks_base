@@ -27,6 +27,9 @@ import android.hardware.input.InputManager.InputDeviceBatteryListener;
 import android.hardware.input.InputManager.InputDeviceListener;
 import android.hardware.input.InputManager.KeyboardBacklightListener;
 import android.hardware.input.InputManager.OnTabletModeChangedListener;
+import android.hardware.lights.Light;
+import android.hardware.lights.LightState;
+import android.hardware.lights.LightsRequest;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -901,6 +904,76 @@ public final class InputManagerGlobal {
             mIm.unregisterSensorListener(listener);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets a list of light objects associated with an input device.
+     * @return The list of lights, never null.
+     */
+    @NonNull List<Light> getLights(int deviceId) {
+        try {
+            return mIm.getLights(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the state of an input device light.
+     * @return the light state
+     */
+    @NonNull LightState getLightState(int deviceId, @NonNull Light light) {
+        try {
+            return mIm.getLightState(deviceId, light.getId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request to modify the states of multiple lights.
+     *
+     * @param request the settings for lights that should change
+     */
+    void requestLights(int deviceId, @NonNull LightsRequest request, IBinder token) {
+        try {
+            List<Integer> lightIdList = request.getLights();
+            int[] lightIds = new int[lightIdList.size()];
+            for (int i = 0; i < lightIds.length; i++) {
+                lightIds[i] = lightIdList.get(i);
+            }
+            List<LightState> lightStateList = request.getLightStates();
+            mIm.setLightStates(deviceId, lightIds,
+                    lightStateList.toArray(new LightState[0]),
+                    token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Open light session for input device manager
+     *
+     * @param token The token for the light session
+     */
+    void openLightSession(int deviceId, String opPkg, @NonNull IBinder token) {
+        try {
+            mIm.openLightSession(deviceId, opPkg, token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Close light session
+     *
+     */
+    void closeLightSession(int deviceId, @NonNull IBinder token) {
+        try {
+            mIm.closeLightSession(deviceId, token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }
