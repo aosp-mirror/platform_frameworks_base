@@ -184,6 +184,9 @@ object CustomizationProviderContract {
         /** Flag denoting whether the Monochromatic Theme is enabled. */
         const val FLAG_NAME_MONOCHROMATIC_THEME = "is_monochromatic_theme_enabled"
 
+        /** Flag denoting AI Wallpapers are enabled in wallpaper picker. */
+        const val FLAG_NAME_WALLPAPER_PICKER_UI_FOR_AIWP = "wallpaper_picker_ui_for_aiwp"
+
         object Columns {
             /** String. Unique ID for the flag. */
             const val NAME = "name"
