@@ -429,6 +429,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         public void onPropertiesChanged(DeviceConfig.Properties properties) {
             boolean apiQuotaScheduleUpdated = false;
             boolean concurrencyUpdated = false;
+            boolean persistenceUpdated = false;
             boolean runtimeUpdated = false;
             for (int controller = 0; controller < mControllers.size(); controller++) {
                 final StateController sc = mControllers.get(controller);
@@ -488,9 +489,13 @@ public class JobSchedulerService extends com.android.server.SystemService
                                 runtimeUpdated = true;
                             }
                             break;
+                        case Constants.KEY_MAX_NUM_PERSISTED_JOB_WORK_ITEMS:
                         case Constants.KEY_PERSIST_IN_SPLIT_FILES:
-                            mConstants.updatePersistingConstantsLocked();
-                            mJobs.setUseSplitFiles(mConstants.PERSIST_IN_SPLIT_FILES);
+                            if (!persistenceUpdated) {
+                                mConstants.updatePersistingConstantsLocked();
+                                mJobs.setUseSplitFiles(mConstants.PERSIST_IN_SPLIT_FILES);
+                                persistenceUpdated = true;
+                            }
                             break;
                         default:
                             if (name.startsWith(JobConcurrencyManager.CONFIG_KEY_PREFIX_CONCURRENCY)
@@ -586,6 +591,9 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         private static final String KEY_PERSIST_IN_SPLIT_FILES = "persist_in_split_files";
 
+        private static final String KEY_MAX_NUM_PERSISTED_JOB_WORK_ITEMS =
+                "max_num_persisted_job_work_items";
+
         private static final int DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT = 5;
         private static final long DEFAULT_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = 31 * MINUTE_IN_MILLIS;
         private static final float DEFAULT_HEAVY_USE_FACTOR = .9f;
@@ -621,6 +629,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         public static final long DEFAULT_RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS =
                 Math.min(Long.MAX_VALUE, DEFAULT_RUNTIME_USER_INITIATED_LIMIT_MS);
         static final boolean DEFAULT_PERSIST_IN_SPLIT_FILES = true;
+        static final int DEFAULT_MAX_NUM_PERSISTED_JOB_WORK_ITEMS = 100_000;
 
         /**
          * Minimum # of non-ACTIVE jobs for which the JMS will be happy running some work early.
@@ -766,6 +775,11 @@ public class JobSchedulerService extends com.android.server.SystemService
         public boolean PERSIST_IN_SPLIT_FILES = DEFAULT_PERSIST_IN_SPLIT_FILES;
 
         /**
+         * The maximum number of {@link JobWorkItem JobWorkItems} that can be persisted per job.
+         */
+        public int MAX_NUM_PERSISTED_JOB_WORK_ITEMS = DEFAULT_MAX_NUM_PERSISTED_JOB_WORK_ITEMS;
+
+        /**
          * If true, use TARE policy for job limiting. If false, use quotas.
          */
         public boolean USE_TARE_POLICY = EconomyManager.DEFAULT_ENABLE_POLICY_JOB_SCHEDULER
@@ -827,6 +841,10 @@ public class JobSchedulerService extends com.android.server.SystemService
         private void updatePersistingConstantsLocked() {
             PERSIST_IN_SPLIT_FILES = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_PERSIST_IN_SPLIT_FILES, DEFAULT_PERSIST_IN_SPLIT_FILES);
+            MAX_NUM_PERSISTED_JOB_WORK_ITEMS = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_MAX_NUM_PERSISTED_JOB_WORK_ITEMS,
+                    DEFAULT_MAX_NUM_PERSISTED_JOB_WORK_ITEMS);
         }
 
         private void updatePrefetchConstantsLocked() {
@@ -970,6 +988,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS).println();
 
             pw.print(KEY_PERSIST_IN_SPLIT_FILES, PERSIST_IN_SPLIT_FILES).println();
+            pw.print(KEY_MAX_NUM_PERSISTED_JOB_WORK_ITEMS, MAX_NUM_PERSISTED_JOB_WORK_ITEMS)
+                    .println();
 
             pw.print(Settings.Global.ENABLE_TARE, USE_TARE_POLICY).println();
 
@@ -1353,6 +1373,25 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // Fast path: we are adding work to an existing job, and the JobInfo is not
                 // changing.  We can just directly enqueue this work in to the job.
                 if (toCancel.getJob().equals(job)) {
+                    // On T and below, JobWorkItem count was unlimited but they could not be
+                    // persisted. Now in U and above, we allow persisting them. In both cases,
+                    // there is a danger of apps adding too many JobWorkItems and causing the
+                    // system to OOM since we keep everything in memory. The persisting danger
+                    // is greater because it could technically lead to a boot loop if the system
+                    // keeps trying to load all the JobWorkItems that led to the initial OOM.
+                    // Therefore, for now (partly for app compatibility), we tackle the latter
+                    // and limit the number of JobWorkItems that can be persisted.
+                    // Moving forward, we should look into two things:
+                    //   1. Limiting the number of unpersisted JobWorkItems
+                    //   2. Offloading some state to disk so we don't keep everything in memory
+                    // TODO(273758274): improve JobScheduler's resilience and memory management
+                    if (toCancel.getWorkCount() >= mConstants.MAX_NUM_PERSISTED_JOB_WORK_ITEMS
+                            && toCancel.isPersisted()) {
+                        Slog.w(TAG, "Too many JWIs for uid " + uId);
+                        throw new IllegalStateException("Apps may not persist more than "
+                                + mConstants.MAX_NUM_PERSISTED_JOB_WORK_ITEMS
+                                + " JobWorkItems per job");
+                    }
 
                     toCancel.enqueueWorkLocked(work);
                     mJobs.touchJob(toCancel);
@@ -1397,6 +1436,26 @@ public class JobSchedulerService extends com.android.server.SystemService
             jobStatus.prepareLocked();
 
             if (toCancel != null) {
+                // On T and below, JobWorkItem count was unlimited but they could not be
+                // persisted. Now in U and above, we allow persisting them. In both cases,
+                // there is a danger of apps adding too many JobWorkItems and causing the
+                // system to OOM since we keep everything in memory. The persisting danger
+                // is greater because it could technically lead to a boot loop if the system
+                // keeps trying to load all the JobWorkItems that led to the initial OOM.
+                // Therefore, for now (partly for app compatibility), we tackle the latter
+                // and limit the number of JobWorkItems that can be persisted.
+                // Moving forward, we should look into two things:
+                //   1. Limiting the number of unpersisted JobWorkItems
+                //   2. Offloading some state to disk so we don't keep everything in memory
+                // TODO(273758274): improve JobScheduler's resilience and memory management
+                if (work != null && toCancel.isPersisted()
+                        && toCancel.getWorkCount() >= mConstants.MAX_NUM_PERSISTED_JOB_WORK_ITEMS) {
+                    Slog.w(TAG, "Too many JWIs for uid " + uId);
+                    throw new IllegalStateException("Apps may not persist more than "
+                            + mConstants.MAX_NUM_PERSISTED_JOB_WORK_ITEMS
+                            + " JobWorkItems per job");
+                }
+
                 // Implicitly replaces the existing job record with the new instance
                 cancelJobImplLocked(toCancel, jobStatus, JobParameters.STOP_REASON_CANCELLED_BY_APP,
                         JobParameters.INTERNAL_STOP_REASON_CANCELED, "job rescheduled by app");

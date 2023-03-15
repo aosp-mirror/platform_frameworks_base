@@ -50,6 +50,7 @@ import android.app.UiModeManager;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
+import android.app.job.JobWorkItem;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
@@ -91,6 +92,7 @@ import java.time.ZoneOffset;
 
 public class JobSchedulerServiceTest {
     private static final String TAG = JobSchedulerServiceTest.class.getSimpleName();
+    private static final int TEST_UID = 10123;
 
     private JobSchedulerService mService;
 
@@ -177,6 +179,9 @@ public class JobSchedulerServiceTest {
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
+        mService.cancelJobsForUid(TEST_UID, true,
+                JobParameters.STOP_REASON_UNDEFINED, JobParameters.INTERNAL_STOP_REASON_UNKNOWN,
+                "test cleanup");
     }
 
     private Clock getAdvancedClock(Clock clock, long incrementMs) {
@@ -1170,7 +1175,7 @@ public class JobSchedulerServiceTest {
                     i < 300 ? JobScheduler.RESULT_SUCCESS : JobScheduler.RESULT_FAILURE;
             assertEquals("Got unexpected result for schedule #" + (i + 1),
                     expected,
-                    mService.scheduleAsPackage(job, null, 10123, null, 0, "JSSTest", ""));
+                    mService.scheduleAsPackage(job, null, TEST_UID, null, 0, "JSSTest", ""));
         }
     }
 
@@ -1191,7 +1196,7 @@ public class JobSchedulerServiceTest {
         for (int i = 0; i < 500; ++i) {
             assertEquals("Got unexpected result for schedule #" + (i + 1),
                     JobScheduler.RESULT_SUCCESS,
-                    mService.scheduleAsPackage(job, null, 10123, null, 0, "JSSTest", ""));
+                    mService.scheduleAsPackage(job, null, TEST_UID, null, 0, "JSSTest", ""));
         }
     }
 
@@ -1212,7 +1217,7 @@ public class JobSchedulerServiceTest {
         for (int i = 0; i < 500; ++i) {
             assertEquals("Got unexpected result for schedule #" + (i + 1),
                     JobScheduler.RESULT_SUCCESS,
-                    mService.scheduleAsPackage(job, null, 10123, "proxied.package", 0, "JSSTest",
+                    mService.scheduleAsPackage(job, null, TEST_UID, "proxied.package", 0, "JSSTest",
                             ""));
         }
     }
@@ -1236,8 +1241,60 @@ public class JobSchedulerServiceTest {
                     i < 300 ? JobScheduler.RESULT_SUCCESS : JobScheduler.RESULT_FAILURE;
             assertEquals("Got unexpected result for schedule #" + (i + 1),
                     expected,
-                    mService.scheduleAsPackage(job, null, 10123, job.getService().getPackageName(),
+                    mService.scheduleAsPackage(job, null, TEST_UID,
+                            job.getService().getPackageName(),
                             0, "JSSTest", ""));
+        }
+    }
+
+    /**
+     * Tests that the number of persisted JobWorkItems is capped.
+     */
+    @Test
+    public void testScheduleLimiting_JobWorkItems_Nonpersisted() {
+        mService.mConstants.MAX_NUM_PERSISTED_JOB_WORK_ITEMS = 500;
+        mService.mConstants.ENABLE_API_QUOTAS = false;
+        mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
+        mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = false;
+        mService.updateQuotaTracker();
+
+        final JobInfo job = createJobInfo().setPersisted(false).build();
+        final JobWorkItem item = new JobWorkItem.Builder().build();
+        for (int i = 0; i < 1000; ++i) {
+            assertEquals("Got unexpected result for schedule #" + (i + 1),
+                    JobScheduler.RESULT_SUCCESS,
+                    mService.scheduleAsPackage(job, item, TEST_UID,
+                            job.getService().getPackageName(),
+                            0, "JSSTest", ""));
+        }
+    }
+
+    /**
+     * Tests that the number of persisted JobWorkItems is capped.
+     */
+    @Test
+    public void testScheduleLimiting_JobWorkItems_Persisted() {
+        mService.mConstants.MAX_NUM_PERSISTED_JOB_WORK_ITEMS = 500;
+        mService.mConstants.ENABLE_API_QUOTAS = false;
+        mService.mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION = false;
+        mService.mConstants.API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = false;
+        mService.updateQuotaTracker();
+
+        final JobInfo job = createJobInfo().setPersisted(true).build();
+        final JobWorkItem item = new JobWorkItem.Builder().build();
+        for (int i = 0; i < 500; ++i) {
+            assertEquals("Got unexpected result for schedule #" + (i + 1),
+                    JobScheduler.RESULT_SUCCESS,
+                    mService.scheduleAsPackage(job, item, TEST_UID,
+                            job.getService().getPackageName(),
+                            0, "JSSTest", ""));
+        }
+        try {
+            mService.scheduleAsPackage(job, item, TEST_UID, job.getService().getPackageName(),
+                    0, "JSSTest", "");
+            fail("Added more items than allowed");
+        } catch (IllegalStateException expected) {
+            // Success
         }
     }
 
