@@ -834,8 +834,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Phóng to toàn màn hình"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Phóng to một phần màn hình"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Chuyển"</string>
-    <!-- no translation found for magnification_open_settings_click_label (6151849212725923363) -->
-    <skip />
+    <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Mở chế độ cài đặt phóng to"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Kéo góc để thay đổi kích thước"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Cho phép cuộn chéo"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Đổi kích thước"</string>
@@ -845,8 +844,7 @@
     <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"Ô điều khiển bên trái"</string>
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Ô điều khiển bên phải"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Ô điều khiển dưới cùng"</string>
-    <!-- no translation found for accessibility_magnification_settings_panel_description (8174187340747846953) -->
-    <skip />
+    <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Chế độ cài đặt phóng to"</string>
     <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Kích thước phóng to"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Thu phóng"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Vừa"</string>
@@ -873,8 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Đã thêm # chế độ điều khiển.}other{Đã thêm # chế độ điều khiển.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Đã xóa"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Thêm <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> có thể chọn nút điều khiển và nội dung nào sẽ hiển thị ở đây."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Xoá chế độ cài đặt cho <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Được yêu thích"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Được yêu thích, vị trí số <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -899,8 +896,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Bạn muốn hiện và điều khiển các thiết bị từ màn hình khoá?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Bạn có thể thêm các chế độ điều khiển cho những thiết bị bên ngoài vào màn hình khoá.\n\nỨng dụng thiết bị có thể cho phép bạn điều khiển một số thiết bị mà không cần mở khoá điện thoại hoặc máy tính bảng.\n\nBạn có thể thay đổi chế độ cài đặt này bất cứ lúc nào trong phần Cài đặt."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Bạn muốn điều khiển các thiết bị từ màn hình khoá?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Bạn có thể điều khiển một số thiết bị mà không cần mở khoá điện thoại hoặc máy tính bảng. Ứng dụng thiết lập và quản lý thiết bị phụ sẽ xác định thiết bị mà bạn có thể điều khiển bằng cách này."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Không, cảm ơn"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Có"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Mã PIN chứa các ký tự hoặc ký hiệu"</string>
