@@ -959,7 +959,7 @@ public class ScreenshotController {
                                 transitionDestination, onTransitionEnd,
                                 longScreenshot);
                         // TODO: Do this via ActionIntentExecutor instead.
-                        mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+                        mContext.closeSystemDialogs();
                     }
             );
 
