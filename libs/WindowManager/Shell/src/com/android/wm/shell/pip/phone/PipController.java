@@ -103,7 +103,6 @@ import com.android.wm.shell.sysui.UserChangeListener;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -117,6 +116,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         RemoteCallable<PipController>, ConfigurationChangeListener, KeyguardChangeListener,
         UserChangeListener {
     private static final String TAG = "PipController";
+
+    private static final String LAUNCHER_KEEP_CLEAR_AREA_TAG = "hotseat";
 
     private static final long PIP_KEEP_CLEAR_AREAS_DELAY =
             SystemProperties.getLong("persist.wm.debug.pip_keep_clear_areas_delay", 200);
@@ -929,12 +930,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     0, mPipBoundsState.getDisplayBounds().bottom - height,
                     mPipBoundsState.getDisplayBounds().right,
                     mPipBoundsState.getDisplayBounds().bottom);
-            Set<Rect> restrictedKeepClearAreas = new HashSet<>(
-                    mPipBoundsState.getRestrictedKeepClearAreas());
-            restrictedKeepClearAreas.add(rect);
-            mPipBoundsState.setKeepClearAreas(restrictedKeepClearAreas,
-                    mPipBoundsState.getUnrestrictedKeepClearAreas());
+            mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG, rect);
             updatePipPositionForKeepClearAreas();
+        } else {
+            mPipBoundsState.removeNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG);
         }
     }
 
