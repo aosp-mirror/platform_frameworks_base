@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"অ্যাকাউন্টের জন্য উন্নত সুরক্ষা"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"প্রতিটি \'কী\' যে অ্যাপ বা ওয়েবসাইটের জন্য তৈরি করা হয়েছে, সেগুলির সাথে এই \'কী\' বিশেষভাবে লিঙ্ক করা থাকে। তাই কখনই আপনি ভুলবশত কোনও ভুয়ো অ্যাপ বা ওয়েবসাইটে সাইন-ইন করতে পারবেন না। পাশাপাশি, যেসব সার্ভারে শুধু সর্বজনীন \'কী\' রয়েছে, তা হ্যাক করা খুবই কঠিন।"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"নির্বিঘ্ন ট্রানজিশন"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"আমরা পাসওয়ার্ডবিহীন ভবিষ্যতের দিকে এগিয়ে গেলেও, এখনও \'পাসকী\'-এর পাশাপাশি পাসওয়ার্ড ব্যবহার করা যাবে"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"আপনার <xliff:g id="CREATETYPES">%1$s</xliff:g> কোথায় সেভ করবেন তা বেছে নিন"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"আপনার তথ্য সেভ করতে একটি Password Manager বেছে নিন এবং পরের বার আরও দ্রুত সাইন-ইন করুন"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g>-এর জন্য \'পাসকী\' তৈরি করবেন?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> এখানে সেভ করুন"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"অন্য ডিভাইসে পাসকী তৈরি করবেন?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"আপনার সব সাইন-ইনের জন্য <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ব্যবহার করবেন?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g>-এর জন্য এই Password Manager আপনার পাসওয়ার্ড ও \'পাসকী\' সেভ করবে যাতে সহজেই সাইন-ইন করতে পারেন"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ডিফল্ট হিসেবে সেট করুন"</string>
     <string name="use_once" msgid="9027366575315399714">"একবার ব্যবহার করুন"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>টি পাসওয়ার্ড • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>টি \'পাসকী\'"</string>

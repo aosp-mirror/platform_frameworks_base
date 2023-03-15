@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"بهبود امنیت حساب"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"هر کلید با برنامه یا وب‌سایتی که برای آن ایجاد شده است پیوند انحصاری دارد، بنابراین هرگز نمی‌توانید به‌اشتباه به سیستم برنامه یا وب‌سایتی جعلی وارد شوید. به‌علاوه، با سرورهایی که فقط کلیدهای عمومی را نگه می‌دارند رخنه‌گری بسیار سخت‌تر است."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"انتقال یک‌پارچه"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"درحالی‌که به‌سوی آینده‌ای بدون گذرواژه حرکت می‌کنیم، گذرواژه‌ها همچنان در کنار گذرکلیدها دردسترس خواهند بود"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"جایی را برای ذخیره کردن <xliff:g id="CREATETYPES">%1$s</xliff:g> انتخاب کنید"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"مدیر گذرواژه‌ای انتخاب کنید تا اطلاعاتتان ذخیره شود و دفعه بعدی سریع‌تر به سیستم وارد شوید"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"برای <xliff:g id="APPNAME">%1$s</xliff:g> گذرکلید ایجاد شود؟"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"ذخیره <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> در"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"گذرکلید در دستگاه دیگر ایجاد شود؟"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"از <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> برای همه ورود به سیستم‌ها استفاده شود؟"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"این مدیر گذرواژه برای <xliff:g id="USERNAME">%1$s</xliff:g> گذرکلیدها و گذرواژه‌های شما را ذخیره می‌کند تا به‌راحتی بتوانید به سیستم وارد شوید"</string>
     <string name="set_as_default" msgid="4415328591568654603">"تنظیم به‌عنوان پیش‌فرض"</string>
     <string name="use_once" msgid="9027366575315399714">"یک‌بار استفاده"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> گذرواژه • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> گذرکلید"</string>

@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Hisob xavfsizligi yaxshilandi"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Har bir kalit faqat ular uchun yaratilgan ilova yoki veb-sayt bilan ulangan, shuning uchun siz hech qachon xatolik bilan soxta ilova yoki veb-saytga kira olmaysiz. Shuningdek, serverlar bilan faqat ochiq kalitlarni saqlagan holda, buzib kirish ancha qiyinroq boʻladi."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Uzluksiz oʻtish"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Parolsiz kelajak sari borayotganimizda, parollar kodlar bilan birga ishlatilishda davom etadi"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Bu <xliff:g id="CREATETYPES">%1$s</xliff:g> qayerga saqlanishini tanlang"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Maʼlumotlaringizni saqlash va keyingi safar tez kirish uchun parollar menejerini tanlang"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> uchun kod yaratilsinmi?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Bu <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>ni saqlash"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Boshqa qurilmada kod yaratilsinmi?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Hamma kirishlarda <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ishlatilsinmi?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> uchun bu parollar menejerida hisobga oson kirishga yordam beruvchi parol va kalitlar saqlanadi"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Birlamchi deb belgilash"</string>
     <string name="use_once" msgid="9027366575315399714">"Bir marta ishlatish"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ta parol • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> ta kod"</string>

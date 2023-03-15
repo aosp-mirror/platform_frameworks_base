@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Аккаунттун коопсуздугу жакшыртылды"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Ар бир ачкыч өзү арналган колдонмо же вебсайт менен гана байланыштырылгандыктан, эч качан шылуундардын колдонмолоруна же вебсайттарына жаңылыштык менен кирип албайсыз. Мындан тышкары, серверлерде жалпыга ачык ачкычтар гана сакталгандыктан, хакерлик кылуу кыйла кыйын."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Тез которулуу"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Сырсөзсүз келечекти көздөй баратсак да, аларды мүмкүндүк алуу ачкычтары менен бирге колдоно берүүгө болот"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g> кайда сакталарын тандаңыз"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Маалыматыңызды сактоо жана кийинки жолу тезирээк кирүү үчүн сырсөздөрдү башкаргычты тандаңыз"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> колдонмосуна киргизүүчү ачкыч түзөсүзбү?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> төмөнкүгө сакталсын:"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Киргизүүчү ачкыч башка түзмөктө түзүлсүнбү?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> бардык аккаунттарга кирүү үчүн колдонулсунбу?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Сырсөздөрүңүздү жана ачкычтарыңызды <xliff:g id="USERNAME">%1$s</xliff:g> аккаунтуңуздагы сырсөздөрдү башкаргычка сактап коюп, каалаган убакта колдоно берсеңиз болот"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Демейки катары коюу"</string>
     <string name="use_once" msgid="9027366575315399714">"Бир жолу колдонуу"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> сырсөз • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> киргизүүчү ачкыч"</string>

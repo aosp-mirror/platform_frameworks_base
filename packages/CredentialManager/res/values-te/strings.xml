@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"మెరుగైన ఖాతా సెక్యూరిటీ"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"ప్రతి కీ దానిని క్రియేట్ చేసిన యాప్ లేదా వెబ్‌సైట్‌తో ప్రత్యేకంగా లింక్ చేయబడి ఉంటుంది, కాబట్టి మీరు పొరపాటున కూడా మోసపూరిత యాప్ లేదా వెబ్‌సైట్‌కు సైన్ ఇన్ చేయలేరు. అంతే కాకుండా, సర్వర్‌లు పబ్లిక్ కీలను మాత్రమే స్టోర్ చేయడం వల్ల, హ్యాకింగ్ చేయడం చాలా కష్టం."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"అవాంతరాలు లేని పరివర్తన"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"మనం భవిష్యత్తులో పాస్‌వర్డ్ రహిత టెక్నాలజీని ఉపయోగించినా, పాస్-కీలతో పాటు పాస్‌వర్డ్‌లు కూడా అందుబాటులో ఉంటాయి"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"మీ <xliff:g id="CREATETYPES">%1$s</xliff:g> ఎక్కడ సేవ్ చేయాలో ఎంచుకోండి"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"మీ సమాచారాన్ని సేవ్ చేయడం కోసం ఒక Password Managerను ఎంచుకొని, తర్వాతిసారి వేగంగా సైన్ ఇన్ చేయండి"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> కోసం పాస్‌-కీని క్రియేట్ చేయాలా?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>‌లో సేవ్ చేయండి"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"మరొక పరికరంలో పాస్‌కీని క్రియేట్ చేయాలా?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"మీ అన్ని సైన్-ఇన్ వివరాల కోసం <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ను ఉపయోగించాలా?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> కోసం ఈ పాస్‌వర్డ్ మేనేజర్ మీకు సులభంగా సైన్ ఇన్ చేయడంలో సహాయపడటానికి మీ పాస్‌వర్డ్‌లు, పాస్-కీలను స్టోర్ చేస్తుంది"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ఆటోమేటిక్ సెట్టింగ్‌గా సెట్ చేయండి"</string>
     <string name="use_once" msgid="9027366575315399714">"ఒకసారి ఉపయోగించండి"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> పాస్‌వర్డ్‌లు • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> పాస్-కీలు"</string>

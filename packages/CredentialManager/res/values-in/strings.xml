@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Keamanan akun yang ditingkatkan"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Setiap kunci ditautkan secara eksklusif dengan aplikasi atau situs tempatnya dibuat, sehingga Anda tidak akan login ke aplikasi atau situs yang menipu secara tidak sengaja. Selain itu, peretasan lebih sulit dilakukan karena server hanya menyimpan kunci publik."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Transisi yang lancar"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Seiring kita menuju masa depan tanpa sandi, sandi akan tetap tersedia bersama kunci sandi"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Pilih tempat penyimpanan <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Pilih pengelola sandi untuk menyimpan info Anda dan login lebih cepat lain kali"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Buat kunci sandi untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Simpan <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ke"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Buat kunci sandi di perangkat lain?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Gunakan <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> untuk semua info login Anda?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Pengelola sandi untuk <xliff:g id="USERNAME">%1$s</xliff:g> ini akan menyimpan sandi dan kunci sandi guna membantu Anda login dengan mudah"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Setel sebagai default"</string>
     <string name="use_once" msgid="9027366575315399714">"Gunakan sekali"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> sandi • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> kunci sandi"</string>

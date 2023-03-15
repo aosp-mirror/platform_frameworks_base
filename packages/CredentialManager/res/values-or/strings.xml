@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"ଉନ୍ନତ ଆକାଉଣ୍ଟ ସୁରକ୍ଷା"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"ପ୍ରତ୍ୟେକ କୀ\'କୁ ସେହି ଆପ କିମ୍ବା ୱେବସାଇଟ ସହ ଏକ୍ସକ୍ଲୁସିଭ ଭାବେ ଲିଙ୍କ କରାଯାଏ ଯେଉଁଥିପାଇଁ ଏହାକୁ ତିଆରି କରାଯାଇଛି, ଫଳରେ ଆପଣ ଭୁଲବଶତଃ କୌଣସି ପ୍ରତାରଣାମୂଳକ ଆପ କିମ୍ବା ୱେବସାଇଟରେ କେବେ ବି ସାଇନ ଇନ କରିପାରିବେ ନାହିଁ। ଏହା ସହ, କେବଳ ସର୍ଭରଗୁଡ଼ିକ ସାର୍ବଜନୀନ କୀ ରଖୁଥିବା ଯୋଗୁଁ ଏହାକୁ ହେକ କରିବା ବହୁତ କଷ୍ଟକର।"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"ବାଧାରହିତ ଟ୍ରାଞ୍ଜିସନ"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"ଆମେ ଏକ ପାସୱାର୍ଡବିହୀନ ଭବିଷ୍ୟତ ଆଡ଼କୁ ମୁଭ କରୁଥିବା ଯୋଗୁଁ ଏବେ ବି ପାସକୀଗୁଡ଼ିକ ସହିତ ପାସୱାର୍ଡ ଉପଲବ୍ଧ ହେବ"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"ଆପଣଙ୍କ <xliff:g id="CREATETYPES">%1$s</xliff:g> କେଉଁଠାରେ ସେଭ କରିବେ ତାହା ବାଛନ୍ତୁ"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ଆପଣଙ୍କ ସୂଚନା ସେଭ କରି ପରବର୍ତ୍ତୀ ସମୟରେ ଶୀଘ୍ର ସାଇନ ଇନ କରିବା ପାଇଁ ଏକ Password Manager ଚୟନ କରନ୍ତୁ"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> ପାଇଁ ପାସକୀ ତିଆରି କରିବେ?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>କୁ ଏଥିରେ ସେଭ କରନ୍ତୁ"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"ଅନ୍ୟ ଏକ ଡିଭାଇସରେ ପାସକୀ ତିଆରି କରିବେ?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ଆପଣଙ୍କ ସମସ୍ତ ସାଇନ-ଇନ ପାଇଁ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ବ୍ୟବହାର କରିବେ?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"ସହଜରେ ସାଇନ ଇନ କରିବାରେ ଆପଣଙ୍କୁ ସାହାଯ୍ୟ କରିବାକୁ <xliff:g id="USERNAME">%1$s</xliff:g>ଙ୍କ ପାଇଁ ଏହି Password Manager ଆପଣଙ୍କ ପାସୱାର୍ଡ ଏବଂ ପାସକୀଗୁଡ଼ିକୁ ଷ୍ଟୋର କରିବ"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ଡିଫଲ୍ଟ ଭାବେ ସେଟ କରନ୍ତୁ"</string>
     <string name="use_once" msgid="9027366575315399714">"ଥରେ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>ଟି ପାସୱାର୍ଡ • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>ଟି ପାସକୀ"</string>

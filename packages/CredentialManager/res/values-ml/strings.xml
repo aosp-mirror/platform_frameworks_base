@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"മെച്ചപ്പെടുത്തിയ അക്കൗണ്ട് സുരക്ഷ"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"ഓരോ കീയും ഏത് ആപ്പിന് അല്ലെങ്കിൽ വെബ്സൈറ്റിന് വേണ്ടിയാണോ സൃഷ്ടിച്ചത്, അതുമായി മാത്രം ലിങ്ക് ചെയ്തിരിക്കുന്നു, അതുകൊണ്ട് നിങ്ങൾ ഒരിക്കലും വഞ്ചനാപരമായ ഒരു ആപ്പിലേക്കോ വെബ്സൈറ്റിലേക്കോ അബദ്ധവശാൽ സൈൻ ഇൻ ചെയ്യില്ല. ഇതോടൊപ്പം, സെർവറുകളിൽ എല്ലാവർക്കുമായുള്ള കീകൾ മാത്രം സൂക്ഷിക്കുന്നതിനാൽ ഹാക്ക് ചെയ്യാൻ വളരെ ബുദ്ധിമുട്ടാണ്."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"ആയാസരഹിതമായ മാറ്റം"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"നമ്മൾ പാസ്‍വേഡ് രഹിത ഭാവിയിലേക്ക് ചുവടുവെച്ചുകൊണ്ടിരിക്കുകയാണ് എങ്കിലും, പാസ്‌കീകൾക്കൊപ്പം പാസ്‍വേഡുകൾ തുടർന്നും ലഭ്യമായിരിക്കും"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"നിങ്ങളുടെ <xliff:g id="CREATETYPES">%1$s</xliff:g> എവിടെയാണ് സംരക്ഷിക്കേണ്ടതെന്ന് തിരഞ്ഞെടുക്കുക"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"നിങ്ങളുടെ വിവരങ്ങൾ സംരക്ഷിക്കാനും അടുത്ത തവണ വേഗത്തിൽ സൈൻ ഇൻ ചെയ്യാനും ഒരു പാസ്‌വേഡ് മാനേജർ തിരഞ്ഞെടുക്കുക"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> എന്നതിനായി പാസ്‌കീ സൃഷ്ടിക്കണോ?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ഇനിപ്പറയുന്നതിലേക്ക് സംരക്ഷിക്കുക"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"മറ്റൊരു ഉപകരണത്തിൽ പാസ്‌കീ സൃഷ്ടിക്കണോ?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"നിങ്ങളുടെ എല്ലാ സൈൻ ഇന്നുകൾക്കും <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ഉപയോഗിക്കണോ?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"എളുപ്പത്തിൽ സൈൻ ഇൻ ചെയ്യാൻ സഹായിക്കുന്നതിന്, <xliff:g id="USERNAME">%1$s</xliff:g> എന്ന വിലാസത്തിന്റെ ഈ Password Manager നിങ്ങളുടെ പാസ്‌വേഡുകളും പാസ്‌കീകളും സംഭരിക്കും"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ഡിഫോൾട്ടായി സജ്ജീകരിക്കുക"</string>
     <string name="use_once" msgid="9027366575315399714">"ഒരു തവണ ഉപയോഗിക്കുക"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> പാസ്‌വേഡുകൾ • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> പാസ്‌കീകൾ"</string>

@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Seguretat dels comptes millorada"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Cada clau està exclusivament enllaçada a l\'aplicació o al lloc web per als quals s\'ha creat. D\'aquesta manera, mai iniciaràs la sessió en una aplicació o un lloc web fraudulents per error. A més, com que els servidors només conserven les claus públiques, el hacking és molt més difícil."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Transició fluida"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Tot i que avancem cap a un futur sense contrasenyes, continuaran estant disponibles juntament amb les claus d\'accés"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Tria on vols desar les <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecciona un gestor de contrasenyes per desar la teva informació i iniciar la sessió més ràpidament la pròxima vegada"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vols crear la clau d\'accés per a <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Desa la <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> a"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Vols crear una clau d\'accés en un altre dispositiu?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Vols utilitzar <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> per a tots els teus inicis de sessió?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Aquest gestor de contrasenyes per a <xliff:g id="USERNAME">%1$s</xliff:g> emmagatzemarà les teves contrasenyes i claus d\'accés per ajudar-te a iniciar la sessió fàcilment"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Estableix com a predeterminada"</string>
     <string name="use_once" msgid="9027366575315399714">"Utilitza un cop"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> contrasenyes • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> claus d\'accés"</string>
