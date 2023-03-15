@@ -37,6 +37,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.SurfaceControl;
@@ -128,6 +129,7 @@ class SplitScreenTransitions {
             final int mode = info.getChanges().get(i).getMode();
 
             if (mode == TRANSIT_CHANGE) {
+                final int rootIdx = TransitionUtil.rootIndexFor(change, info);
                 if (change.getParent() != null) {
                     // This is probably reparented, so we want the parent to be immediately visible
                     final TransitionInfo.Change parentChange = info.getChange(change.getParent());
@@ -135,7 +137,7 @@ class SplitScreenTransitions {
                     t.setAlpha(parentChange.getLeash(), 1.f);
                     // and then animate this layer outside the parent (since, for example, this is
                     // the home task animating from fullscreen to part-screen).
-                    t.reparent(leash, info.getRootLeash());
+                    t.reparent(leash, info.getRoot(rootIdx).getLeash());
                     t.setLayer(leash, info.getChanges().size() - i);
                     // build the finish reparent/reposition
                     mFinishTransaction.reparent(leash, parentChange.getLeash());
@@ -145,8 +147,9 @@ class SplitScreenTransitions {
                 // TODO(shell-transitions): screenshot here
                 final Rect startBounds = new Rect(change.getStartAbsBounds());
                 final Rect endBounds = new Rect(change.getEndAbsBounds());
-                startBounds.offset(-info.getRootOffset().x, -info.getRootOffset().y);
-                endBounds.offset(-info.getRootOffset().x, -info.getRootOffset().y);
+                final Point rootOffset = info.getRoot(rootIdx).getOffset();
+                startBounds.offset(-rootOffset.x, -rootOffset.y);
+                endBounds.offset(-rootOffset.x, -rootOffset.y);
                 startExampleResizeAnimation(leash, startBounds, endBounds);
             }
             boolean isRootOrSplitSideRoot = change.getParent() == null

@@ -29,6 +29,7 @@ import android.hardware.SensorManager;
 import android.hardware.input.HostUsiVersion;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.hardware.lights.LightsManager;
 import android.icu.util.ULocale;
 import android.os.Build;
@@ -742,7 +743,7 @@ public final class InputDevice implements Parcelable {
      */
     @Nullable
     public static InputDevice getDevice(int id) {
-        return InputManager.getInstance().getInputDevice(id);
+        return InputManagerGlobal.getInstance().getInputDevice(id);
     }
 
     /**
@@ -750,7 +751,7 @@ public final class InputDevice implements Parcelable {
      * @return The input device ids.
      */
     public static int[] getDeviceIds() {
-        return InputManager.getInstance().getInputDeviceIds();
+        return InputManagerGlobal.getInstance().getInputDeviceIds();
     }
 
     /**

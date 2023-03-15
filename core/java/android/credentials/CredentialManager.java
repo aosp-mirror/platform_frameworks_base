@@ -167,6 +167,48 @@ public final class CredentialManager {
     }
 
     /**
+     * Gets a {@link GetPendingCredentialResponse} that can launch the credential retrieval UI flow
+     * to request a user credential for your app.
+     *
+     * @param request            the request specifying type(s) of credentials to get from the user
+     * @param cancellationSignal an optional signal that allows for cancelling this call
+     * @param executor           the callback will take place on this {@link Executor}
+     * @param callback           the callback invoked when the request succeeds or fails
+     *
+     * @hide
+     */
+    public void getPendingCredential(
+            @NonNull GetCredentialRequest request,
+            @Nullable CancellationSignal cancellationSignal,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<
+                    GetPendingCredentialResponse, GetCredentialException> callback) {
+        requireNonNull(request, "request must not be null");
+        requireNonNull(executor, "executor must not be null");
+        requireNonNull(callback, "callback must not be null");
+
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+            Log.w(TAG, "getPendingCredential already canceled");
+            return;
+        }
+
+        ICancellationSignal cancelRemote = null;
+        try {
+            cancelRemote =
+                    mService.executeGetPendingCredential(
+                            request,
+                            new GetPendingCredentialTransport(executor, callback),
+                            mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        if (cancellationSignal != null && cancelRemote != null) {
+            cancellationSignal.setRemote(cancelRemote);
+        }
+    }
+
+    /**
      * Launches the necessary flows to register an app credential for the user.
      *
      * <p>The execution can potentially launch UI flows to collect user consent to creating or
@@ -439,6 +481,32 @@ public final class CredentialManager {
             mService.unregisterCredentialDescription(request, mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
+        }
+    }
+
+    private static class GetPendingCredentialTransport extends IGetPendingCredentialCallback.Stub {
+        // TODO: listen for cancellation to release callback.
+
+        private final Executor mExecutor;
+        private final OutcomeReceiver<
+                GetPendingCredentialResponse, GetCredentialException> mCallback;
+
+        private GetPendingCredentialTransport(
+                Executor executor,
+                OutcomeReceiver<GetPendingCredentialResponse, GetCredentialException> callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onResponse(GetPendingCredentialResponse response) {
+            mExecutor.execute(() -> mCallback.onResult(response));
+        }
+
+        @Override
+        public void onError(String errorType, String message) {
+            mExecutor.execute(
+                    () -> mCallback.onError(new GetCredentialException(errorType, message)));
         }
     }
 

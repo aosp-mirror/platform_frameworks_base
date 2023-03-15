@@ -308,6 +308,7 @@ public:
     void setMotionClassifierEnabled(bool enabled);
     std::optional<std::string> getBluetoothAddress(int32_t deviceId);
     void setStylusButtonMotionEventsEnabled(bool enabled);
+    FloatPoint getMouseCursorPosition();
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -366,7 +367,7 @@ public:
     virtual PointerIconStyle getDefaultPointerIconId();
     virtual PointerIconStyle getDefaultStylusIconId();
     virtual PointerIconStyle getCustomPointerIconId();
-    virtual void onPointerDisplayIdChanged(int32_t displayId, float xPos, float yPos);
+    virtual void onPointerDisplayIdChanged(int32_t displayId, const FloatPoint& position);
 
     /* --- If touch mode is enabled per display or global --- */
 
@@ -730,11 +731,11 @@ std::shared_ptr<PointerControllerInterface> NativeInputManager::obtainPointerCon
     return controller;
 }
 
-void NativeInputManager::onPointerDisplayIdChanged(int32_t pointerDisplayId, float xPos,
-                                                   float yPos) {
+void NativeInputManager::onPointerDisplayIdChanged(int32_t pointerDisplayId,
+                                                   const FloatPoint& position) {
     JNIEnv* env = jniEnv();
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.onPointerDisplayIdChanged, pointerDisplayId,
-                        xPos, yPos);
+                        position.x, position.y);
     checkAndClearExceptionFromCallback(env, "onPointerDisplayIdChanged");
 }
 
@@ -1655,6 +1656,14 @@ bool NativeInputManager::isPerDisplayTouchModeEnabled() {
     return static_cast<bool>(enabled);
 }
 
+FloatPoint NativeInputManager::getMouseCursorPosition() {
+    AutoMutex _l(mLock);
+    const auto pc = mLocked.pointerController.lock();
+    if (!pc) return {AMOTION_EVENT_INVALID_CURSOR_POSITION, AMOTION_EVENT_INVALID_CURSOR_POSITION};
+
+    return pc->getPosition();
+}
+
 // ----------------------------------------------------------------------------
 
 static NativeInputManager* getNativeInputManager(JNIEnv* env, jobject clazz) {
@@ -2547,6 +2556,15 @@ static void nativeSetStylusButtonMotionEventsEnabled(JNIEnv* env, jobject native
     im->setStylusButtonMotionEventsEnabled(enabled);
 }
 
+static jfloatArray nativeGetMouseCursorPosition(JNIEnv* env, jobject nativeImplObj) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    const auto p = im->getMouseCursorPosition();
+    const std::array<float, 2> arr = {{p.x, p.y}};
+    jfloatArray outArr = env->NewFloatArray(2);
+    env->SetFloatArrayRegion(outArr, 0, arr.size(), arr.data());
+    return outArr;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2640,6 +2658,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"getBluetoothAddress", "(I)Ljava/lang/String;", (void*)nativeGetBluetoothAddress},
         {"setStylusButtonMotionEventsEnabled", "(Z)V",
          (void*)nativeSetStylusButtonMotionEventsEnabled},
+        {"getMouseCursorPosition", "()[F", (void*)nativeGetMouseCursorPosition},
 };
 
 #define FIND_CLASS(var, className) \

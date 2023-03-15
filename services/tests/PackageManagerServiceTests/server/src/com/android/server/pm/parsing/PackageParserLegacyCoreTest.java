@@ -575,10 +575,10 @@ public class PackageParserLegacyCoreTest {
         assertEquals(0, minExtVers.get(31, -1));
 
         Map<Pair<String, Integer>, Integer> appToError = new HashMap<>();
-        appToError.put(Pair.create("install_uses_sdk.apk_r1000", R.raw.install_uses_sdk_r1000),
+        appToError.put(Pair.create("install_uses_sdk.apk_r10000", R.raw.install_uses_sdk_r10000),
                        PackageManager.INSTALL_FAILED_OLDER_SDK);
         appToError.put(
-                Pair.create("install_uses_sdk.apk_r0_s1000", R.raw.install_uses_sdk_r0_s1000),
+                Pair.create("install_uses_sdk.apk_r0_s10000", R.raw.install_uses_sdk_r0_s10000),
                 PackageManager.INSTALL_FAILED_OLDER_SDK);
 
         appToError.put(Pair.create("install_uses_sdk.apk_q0", R.raw.install_uses_sdk_q0),

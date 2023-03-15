@@ -16,80 +16,15 @@
 
 package android.telephony.satellite;
 
-import android.annotation.NonNull;
-import android.os.Binder;
-
-import java.util.concurrent.Executor;
-
 /**
  * A callback class for monitoring satellite modem state change events.
  *
  * @hide
  */
-public class SatelliteStateCallback {
-    private final CallbackBinder mBinder = new CallbackBinder(this);
-
-    private static class CallbackBinder extends ISatelliteStateCallback.Stub {
-        private final SatelliteStateCallback mLocalCallback;
-        private Executor mExecutor;
-
-        private CallbackBinder(SatelliteStateCallback localCallback) {
-            mLocalCallback = localCallback;
-        }
-
-        @Override
-        public void onSatelliteModemStateChanged(@SatelliteManager.SatelliteModemState int state) {
-            final long callingIdentity = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(() ->
-                        mLocalCallback.onSatelliteModemStateChanged(state));
-            } finally {
-                restoreCallingIdentity(callingIdentity);
-            }
-        }
-
-        @Override
-        public void onPendingDatagramCount(int count) {
-            final long callingIdentity = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(() ->
-                        mLocalCallback.onPendingDatagramCount(count));
-            } finally {
-                restoreCallingIdentity(callingIdentity);
-            }
-        }
-
-        private void setExecutor(Executor executor) {
-            mExecutor = executor;
-        }
-    }
-
+public interface SatelliteStateCallback {
     /**
      * Called when satellite modem state changes.
      * @param state The new satellite modem state.
      */
-    public void onSatelliteModemStateChanged(@SatelliteManager.SatelliteModemState int state) {
-        // Base Implementation
-    }
-
-    /**
-     * Called when there are pending datagrams to be received from satellite.
-     * @param count Pending datagram count.
-     */
-    public void onPendingDatagramCount(int count) {
-        // Base Implementation
-    }
-
-    //TODO: Add an API for datagram transfer state update here.
-
-    /**@hide*/
-    @NonNull
-    final ISatelliteStateCallback getBinder() {
-        return mBinder;
-    }
-
-    /**@hide*/
-    public void setExecutor(@NonNull Executor executor) {
-        mBinder.setExecutor(executor);
-    }
+    void onSatelliteModemStateChanged(@SatelliteManager.SatelliteModemState int state);
 }

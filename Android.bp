@@ -343,6 +343,7 @@ java_defaults {
             "hardware/interfaces/biometrics/fingerprint/aidl",
             "hardware/interfaces/graphics/common/aidl",
             "hardware/interfaces/keymaster/aidl",
+            "system/hardware/interfaces/media/aidl",
         ],
     },
     dxflags: [
@@ -632,6 +633,7 @@ stubs_defaults {
             "hardware/interfaces/biometrics/fingerprint/aidl",
             "hardware/interfaces/graphics/common/aidl",
             "hardware/interfaces/keymaster/aidl",
+            "system/hardware/interfaces/media/aidl",
         ],
     },
     // These are libs from framework-internal-utils that are required (i.e. being referenced)

@@ -39,6 +39,9 @@ import java.util.Locale;
 import java.util.Set;
 
 public class LocaleStore {
+    private static final int TIER_LANGUAGE = 1;
+    private static final int TIER_REGION = 2;
+    private static final int TIER_NUMBERING = 3;
     private static final HashMap<String, LocaleInfo> sLocaleCache = new HashMap<>();
     private static final String TAG = LocaleStore.class.getSimpleName();
     private static boolean sFullyInitialized = false;
@@ -68,10 +71,13 @@ public class LocaleStore {
         private String mFullCountryNameNative;
         private String mLangScriptKey;
 
+        private boolean mHasNumberingSystems;
+
         private LocaleInfo(Locale locale) {
             this.mLocale = locale;
             this.mId = locale.toLanguageTag();
             this.mParent = getParent(locale);
+            this.mHasNumberingSystems = false;
             this.mIsChecked = false;
             this.mSuggestionFlags = SUGGESTION_TYPE_NONE;
             this.mIsTranslated = false;
@@ -91,6 +97,11 @@ public class LocaleStore {
                     .setRegion("")
                     .setExtension(Locale.UNICODE_LOCALE_EXTENSION, "")
                     .build();
+        }
+
+        /** Return true if there are any same locales with different numbering system. */
+        public boolean hasNumberingSystems() {
+            return mHasNumberingSystems;
         }
 
         @Override
@@ -193,6 +204,10 @@ public class LocaleStore {
             } else {
                 return getFullNameNative();
             }
+        }
+
+        String getNumberingSystem() {
+            return LocaleHelper.getDisplayNumberingSystemKeyValue(mLocale, mLocale);
         }
 
         String getContentDescription(boolean countryMode) {
@@ -383,6 +398,12 @@ public class LocaleStore {
 
         final boolean isInDeveloperMode = Settings.Global.getInt(context.getContentResolver(),
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0;
+        Set<Locale> numberSystemLocaleList = new HashSet<>();
+        for (String localeId : LocalePicker.getSupportedLocales(context)) {
+            if (Locale.forLanguageTag(localeId).getUnicodeLocaleType("nu") != null) {
+                numberSystemLocaleList.add(Locale.forLanguageTag(localeId));
+            }
+        }
         for (String localeId : LocalePicker.getSupportedLocales(context)) {
             if (localeId.isEmpty()) {
                 throw new IllformedLocaleException("Bad locale entry in locale_config.xml");
@@ -403,6 +424,12 @@ public class LocaleStore {
             if (simCountries.contains(li.getLocale().getCountry())) {
                 li.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_SIM;
             }
+            numberSystemLocaleList.forEach(l -> {
+                if (li.getLocale().stripExtensions().equals(l.stripExtensions())) {
+                    li.mHasNumberingSystems = true;
+                }
+            });
+
             sLocaleCache.put(li.getId(), li);
             final Locale parent = li.getParent();
             if (parent != null) {
@@ -445,20 +472,43 @@ public class LocaleStore {
         sFullyInitialized = true;
     }
 
-    private static int getLevel(Set<String> ignorables, LocaleInfo li, boolean translatedOnly) {
-        if (ignorables.contains(li.getId())) return 0;
-        if (li.mIsPseudo) return 2;
-        if (translatedOnly && !li.isTranslated()) return 0;
-        if (li.getParent() != null) return 2;
-        return 0;
+    private static boolean isShallIgnore(
+            Set<String> ignorables, LocaleInfo li, boolean translatedOnly) {
+        if (ignorables.stream().anyMatch(tag ->
+                Locale.forLanguageTag(tag).stripExtensions()
+                        .equals(li.getLocale().stripExtensions()))) {
+            return true;
+        }
+        if (li.mIsPseudo) return false;
+        if (translatedOnly && !li.isTranslated()) return true;
+        if (li.getParent() != null) return false;
+        return true;
+    }
+
+    private static int getLocaleTier(LocaleInfo parent) {
+        if (parent == null) {
+            return TIER_LANGUAGE;
+        } else if (parent.getLocale().getCountry().isEmpty()) {
+            return TIER_REGION;
+        } else {
+            return TIER_NUMBERING;
+        }
     }
 
     /**
      * Returns a list of locales for language or region selection.
+     *
      * If the parent is null, then it is the language list.
+     *
      * If it is not null, then the list will contain all the locales that belong to that parent.
      * Example: if the parent is "ar", then the region list will contain all Arabic locales.
-     * (this is not language based, but language-script, so that it works for zh-Hant and so on.
+     * (this is not language based, but language-script, so that it works for zh-Hant and so on.)
+     *
+     * If it is not null and has country, then the list will contain all locales with that parent's
+     * language and country, i.e. containing alternate numbering systems.
+     *
+     * Example: if the parent is "ff-Adlm-BF", then the numbering list will contain all
+     * Fula (Adlam, Burkina Faso) i.e. "ff-Adlm-BF" and "ff-Adlm-BF-u-nu-latn"
      */
     @UnsupportedAppUsage
     public static Set<LocaleInfo> getLevelLocales(Context context, Set<String> ignorables,
@@ -478,28 +528,49 @@ public class LocaleStore {
      */
     public static Set<LocaleInfo> getLevelLocales(Context context, Set<String> ignorables,
             LocaleInfo parent, boolean translatedOnly, LocaleList explicitLocales) {
-        fillCache(context);
-        String parentId = parent == null ? null : parent.getId();
-        HashSet<LocaleInfo> result = new HashSet<>();
+        if (context != null) {
+            fillCache(context);
+        }
         HashMap<String, LocaleInfo> supportedLcoaleInfos =
                 explicitLocales == null
                         ? sLocaleCache
                         : convertExplicitLocales(explicitLocales, sLocaleCache.values());
+        return getTierLocales(ignorables, parent, translatedOnly, supportedLcoaleInfos);
+    }
 
+    private static Set<LocaleInfo> getTierLocales(
+            Set<String> ignorables,
+            LocaleInfo parent,
+            boolean translatedOnly,
+            HashMap<String, LocaleInfo> supportedLcoaleInfos) {
+
+        boolean hasTargetParent = parent != null;
+        String parentId = hasTargetParent ? parent.getId() : null;
+        HashSet<LocaleInfo> result = new HashSet<>();
         for (LocaleStore.LocaleInfo li : supportedLcoaleInfos.values()) {
-            int level = getLevel(ignorables, li, translatedOnly);
-            if (level == 2) {
-                if (parent != null) { // region selection
-                    if (parentId.equals(li.getParent().toLanguageTag())) {
-                        result.add(li);
-                    }
-                } else { // language selection
+            if (isShallIgnore(ignorables, li, translatedOnly)) {
+                continue;
+            }
+            switch(getLocaleTier(parent)) {
+                case TIER_LANGUAGE:
                     if (li.isSuggestionOfType(LocaleInfo.SUGGESTION_TYPE_SIM)) {
                         result.add(li);
                     } else {
-                        result.add(getLocaleInfo(li.getParent()));
+                        result.add(getLocaleInfo(li.getParent(), supportedLcoaleInfos));
                     }
-                }
+                    break;
+                case TIER_REGION:
+                    if (parentId.equals(li.getParent().toLanguageTag())) {
+                        result.add(getLocaleInfo(
+                                li.getLocale().stripExtensions(), supportedLcoaleInfos));
+                    }
+                    break;
+                case TIER_NUMBERING:
+                    if (parent.getLocale().stripExtensions()
+                            .equals(li.getLocale().stripExtensions())) {
+                        result.add(li);
+                    }
+                    break;
             }
         }
         return result;
@@ -538,18 +609,21 @@ public class LocaleStore {
     }
 
     private static LocaleList matchLocaleFromSupportedLocaleList(
-            LocaleList explicitLocales, Collection<LocaleInfo> localeinfo) {
+            LocaleList explicitLocales, Collection<LocaleInfo> localeInfos) {
+        if (localeInfos == null) {
+            return explicitLocales;
+        }
         //TODO: Adds a function for unicode extension if needed.
         Locale[] resultLocales = new Locale[explicitLocales.size()];
         for (int i = 0; i < explicitLocales.size(); i++) {
-            Locale locale = explicitLocales.get(i).stripExtensions();
+            Locale locale = explicitLocales.get(i);
             if (!TextUtils.isEmpty(locale.getCountry())) {
-                for (LocaleInfo localeInfo :localeinfo) {
+                for (LocaleInfo localeInfo :localeInfos) {
                     if (LocaleList.matchesLanguageAndScript(locale, localeInfo.getLocale())
                             && TextUtils.equals(locale.getCountry(),
                             localeInfo.getLocale().getCountry())) {
                         resultLocales[i] = localeInfo.getLocale();
-                        continue;
+                        break;
                     }
                 }
             }
@@ -562,18 +636,23 @@ public class LocaleStore {
 
     @UnsupportedAppUsage
     public static LocaleInfo getLocaleInfo(Locale locale) {
+        return getLocaleInfo(locale, sLocaleCache);
+    }
+
+    private static LocaleInfo getLocaleInfo(
+            Locale locale, HashMap<String, LocaleInfo> localeInfos) {
         String id = locale.toLanguageTag();
         LocaleInfo result;
-        if (!sLocaleCache.containsKey(id)) {
+        if (!localeInfos.containsKey(id)) {
             // Locale preferences can modify the language tag to current system languages, so we
             // need to check the input locale without extra u extension except numbering system.
             Locale filteredLocale = new Locale.Builder()
                     .setLocale(locale.stripExtensions())
                     .setUnicodeLocaleKeyword("nu", locale.getUnicodeLocaleType("nu"))
                     .build();
-            if (sLocaleCache.containsKey(filteredLocale.toLanguageTag())) {
+            if (localeInfos.containsKey(filteredLocale.toLanguageTag())) {
                 result = new LocaleInfo(locale);
-                LocaleInfo localeInfo = sLocaleCache.get(filteredLocale.toLanguageTag());
+                LocaleInfo localeInfo = localeInfos.get(filteredLocale.toLanguageTag());
                 // This locale is included in supported locales, so follow the settings
                 // of supported locales.
                 result.mIsPseudo = localeInfo.mIsPseudo;
@@ -582,9 +661,9 @@ public class LocaleStore {
                 return result;
             }
             result = new LocaleInfo(locale);
-            sLocaleCache.put(id, result);
+            localeInfos.put(id, result);
         } else {
-            result = sLocaleCache.get(id);
+            result = localeInfos.get(id);
         }
         return result;
     }

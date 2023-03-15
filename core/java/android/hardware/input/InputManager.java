@@ -44,8 +44,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IVibratorStateListener;
 import android.os.InputEventInjectionSync;
-import android.os.Looper;
-import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -68,7 +66,6 @@ import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.SomeArgs;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -87,10 +84,6 @@ public final class InputManager {
     private static final String TAG = "InputManager";
     // To enable these logs, run: 'adb shell setprop log.tag.InputManager DEBUG' (requires restart)
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-
-    private static final int MSG_DEVICE_ADDED = 1;
-    private static final int MSG_DEVICE_REMOVED = 2;
-    private static final int MSG_DEVICE_CHANGED = 3;
 
     private static InputManager sInstance;
 
@@ -111,18 +104,6 @@ public final class InputManager {
      */
     @Nullable
     private Boolean mIsStylusPointerIconEnabled = null;
-
-    // Guarded by mInputDevicesLock
-    private final Object mInputDevicesLock = new Object();
-    private SparseArray<InputDevice> mInputDevices;
-    private InputDevicesChangedListener mInputDevicesChangedListener;
-    private final ArrayList<InputDeviceListenerDelegate> mInputDeviceListeners = new ArrayList<>();
-
-    // Guarded by mTabletModeLock
-    private final Object mTabletModeLock = new Object();
-    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
-    private TabletModeChangedListener mTabletModeChangedListener;
-    private ArrayList<OnTabletModeChangedListenerDelegate> mOnTabletModeChangedListeners;
 
     private final Object mBatteryListenersLock = new Object();
     // Maps a deviceId whose battery is currently being monitored to an entry containing the
@@ -403,27 +384,7 @@ public final class InputManager {
      */
     @Nullable
     public InputDevice getInputDevice(int id) {
-        synchronized (mInputDevicesLock) {
-            populateInputDevicesLocked();
-
-            int index = mInputDevices.indexOfKey(id);
-            if (index < 0) {
-                return null;
-            }
-
-            InputDevice inputDevice = mInputDevices.valueAt(index);
-            if (inputDevice == null) {
-                try {
-                    inputDevice = mIm.getInputDevice(id);
-                } catch (RemoteException ex) {
-                    throw ex.rethrowFromSystemServer();
-                }
-                if (inputDevice != null) {
-                    mInputDevices.setValueAt(index, inputDevice);
-                }
-            }
-            return inputDevice;
-        }
+        return mGlobal.getInputDevice(id);
     }
 
     /**
@@ -433,34 +394,7 @@ public final class InputManager {
      * @hide
      */
     public InputDevice getInputDeviceByDescriptor(String descriptor) {
-        if (descriptor == null) {
-            throw new IllegalArgumentException("descriptor must not be null.");
-        }
-
-        synchronized (mInputDevicesLock) {
-            populateInputDevicesLocked();
-
-            int numDevices = mInputDevices.size();
-            for (int i = 0; i < numDevices; i++) {
-                InputDevice inputDevice = mInputDevices.valueAt(i);
-                if (inputDevice == null) {
-                    int id = mInputDevices.keyAt(i);
-                    try {
-                        inputDevice = mIm.getInputDevice(id);
-                    } catch (RemoteException ex) {
-                        throw ex.rethrowFromSystemServer();
-                    }
-                    if (inputDevice == null) {
-                        continue;
-                    }
-                    mInputDevices.setValueAt(i, inputDevice);
-                }
-                if (descriptor.equals(inputDevice.getDescriptor())) {
-                    return inputDevice;
-                }
-            }
-            return null;
-        }
+        return mGlobal.getInputDeviceByDescriptor(descriptor);
     }
 
     /**
@@ -468,16 +402,7 @@ public final class InputManager {
      * @return The input device ids.
      */
     public int[] getInputDeviceIds() {
-        synchronized (mInputDevicesLock) {
-            populateInputDevicesLocked();
-
-            final int count = mInputDevices.size();
-            final int[] ids = new int[count];
-            for (int i = 0; i < count; i++) {
-                ids[i] = mInputDevices.keyAt(i);
-            }
-            return ids;
-        }
+        return mGlobal.getInputDeviceIds();
     }
 
     /**
@@ -547,17 +472,7 @@ public final class InputManager {
      * @see #unregisterInputDeviceListener
      */
     public void registerInputDeviceListener(InputDeviceListener listener, Handler handler) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-
-        synchronized (mInputDevicesLock) {
-            populateInputDevicesLocked();
-            int index = findInputDeviceListenerLocked(listener);
-            if (index < 0) {
-                mInputDeviceListeners.add(new InputDeviceListenerDelegate(listener, handler));
-            }
-        }
+        mGlobal.registerInputDeviceListener(listener, handler);
     }
 
     /**
@@ -568,28 +483,7 @@ public final class InputManager {
      * @see #registerInputDeviceListener
      */
     public void unregisterInputDeviceListener(InputDeviceListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-
-        synchronized (mInputDevicesLock) {
-            int index = findInputDeviceListenerLocked(listener);
-            if (index >= 0) {
-                InputDeviceListenerDelegate d = mInputDeviceListeners.get(index);
-                d.removeCallbacksAndMessages(null);
-                mInputDeviceListeners.remove(index);
-            }
-        }
-    }
-
-    private int findInputDeviceListenerLocked(InputDeviceListener listener) {
-        final int numListeners = mInputDeviceListeners.size();
-        for (int i = 0; i < numListeners; i++) {
-            if (mInputDeviceListeners.get(i).mListener == listener) {
-                return i;
-            }
-        }
-        return -1;
+        mGlobal.unregisterInputDeviceListener(listener);
     }
 
     /**
@@ -618,20 +512,7 @@ public final class InputManager {
      */
     public void registerOnTabletModeChangedListener(
             OnTabletModeChangedListener listener, Handler handler) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-        synchronized (mTabletModeLock) {
-            if (mOnTabletModeChangedListeners == null) {
-                initializeTabletModeListenerLocked();
-            }
-            int idx = findOnTabletModeChangedListenerLocked(listener);
-            if (idx < 0) {
-                OnTabletModeChangedListenerDelegate d =
-                    new OnTabletModeChangedListenerDelegate(listener, handler);
-                mOnTabletModeChangedListeners.add(d);
-            }
-        }
+        mGlobal.registerOnTabletModeChangedListener(listener, handler);
     }
 
     /**
@@ -641,37 +522,7 @@ public final class InputManager {
      * @hide
      */
     public void unregisterOnTabletModeChangedListener(OnTabletModeChangedListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-        synchronized (mTabletModeLock) {
-            int idx = findOnTabletModeChangedListenerLocked(listener);
-            if (idx >= 0) {
-                OnTabletModeChangedListenerDelegate d = mOnTabletModeChangedListeners.remove(idx);
-                d.removeCallbacksAndMessages(null);
-            }
-        }
-    }
-
-    private void initializeTabletModeListenerLocked() {
-        final TabletModeChangedListener listener = new TabletModeChangedListener();
-        try {
-            mIm.registerTabletModeChangedListener(listener);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-        mTabletModeChangedListener = listener;
-        mOnTabletModeChangedListeners = new ArrayList<>();
-    }
-
-    private int findOnTabletModeChangedListenerLocked(OnTabletModeChangedListener listener) {
-        final int N = mOnTabletModeChangedListeners.size();
-        for (int i = 0; i < N; i++) {
-            if (mOnTabletModeChangedListeners.get(i).mListener == listener) {
-                return i;
-            }
-        }
-        return -1;
+        mGlobal.unregisterOnTabletModeChangedListener(listener);
     }
 
     /**
@@ -1543,133 +1394,7 @@ public final class InputManager {
      */
     @Nullable
     public HostUsiVersion getHostUsiVersion(@NonNull Display display) {
-        Objects.requireNonNull(display, "display should not be null");
-
-        // Return the first valid USI version reported by any input device associated with
-        // the display.
-        synchronized (mInputDevicesLock) {
-            populateInputDevicesLocked();
-
-            for (int i = 0; i < mInputDevices.size(); i++) {
-                final InputDevice device = getInputDevice(mInputDevices.keyAt(i));
-                if (device != null && device.getAssociatedDisplayId() == display.getDisplayId()) {
-                    if (device.getHostUsiVersion() != null) {
-                        return device.getHostUsiVersion();
-                    }
-                }
-            }
-        }
-
-        // If there are no input devices that report a valid USI version, see if there is a config
-        // that specifies the USI version for the display. This is to handle cases where the USI
-        // input device is not registered by the kernel/driver all the time.
-        try {
-            return mIm.getHostUsiVersionFromDisplayConfig(display.getDisplayId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    private void populateInputDevicesLocked() {
-        if (mInputDevicesChangedListener == null) {
-            final InputDevicesChangedListener listener = new InputDevicesChangedListener();
-            try {
-                mIm.registerInputDevicesChangedListener(listener);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
-            mInputDevicesChangedListener = listener;
-        }
-
-        if (mInputDevices == null) {
-            final int[] ids;
-            try {
-                ids = mIm.getInputDeviceIds();
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
-
-            mInputDevices = new SparseArray<>();
-            for (int id : ids) {
-                mInputDevices.put(id, null);
-            }
-        }
-    }
-
-    private void onInputDevicesChanged(int[] deviceIdAndGeneration) {
-        if (DEBUG) {
-            Log.d(TAG, "Received input devices changed.");
-        }
-
-        synchronized (mInputDevicesLock) {
-            for (int i = mInputDevices.size(); --i > 0; ) {
-                final int deviceId = mInputDevices.keyAt(i);
-                if (!containsDeviceId(deviceIdAndGeneration, deviceId)) {
-                    if (DEBUG) {
-                        Log.d(TAG, "Device removed: " + deviceId);
-                    }
-                    mInputDevices.removeAt(i);
-                    sendMessageToInputDeviceListenersLocked(MSG_DEVICE_REMOVED, deviceId);
-                }
-            }
-
-            for (int i = 0; i < deviceIdAndGeneration.length; i += 2) {
-                final int deviceId = deviceIdAndGeneration[i];
-                int index = mInputDevices.indexOfKey(deviceId);
-                if (index >= 0) {
-                    final InputDevice device = mInputDevices.valueAt(index);
-                    if (device != null) {
-                        final int generation = deviceIdAndGeneration[i + 1];
-                        if (device.getGeneration() != generation) {
-                            if (DEBUG) {
-                                Log.d(TAG, "Device changed: " + deviceId);
-                            }
-                            mInputDevices.setValueAt(index, null);
-                            sendMessageToInputDeviceListenersLocked(MSG_DEVICE_CHANGED, deviceId);
-                        }
-                    }
-                } else {
-                    if (DEBUG) {
-                        Log.d(TAG, "Device added: " + deviceId);
-                    }
-                    mInputDevices.put(deviceId, null);
-                    sendMessageToInputDeviceListenersLocked(MSG_DEVICE_ADDED, deviceId);
-                }
-            }
-        }
-    }
-
-    private void sendMessageToInputDeviceListenersLocked(int what, int deviceId) {
-        final int numListeners = mInputDeviceListeners.size();
-        for (int i = 0; i < numListeners; i++) {
-            InputDeviceListenerDelegate listener = mInputDeviceListeners.get(i);
-            listener.sendMessage(listener.obtainMessage(what, deviceId, 0));
-        }
-    }
-
-    private static boolean containsDeviceId(int[] deviceIdAndGeneration, int deviceId) {
-        for (int i = 0; i < deviceIdAndGeneration.length; i += 2) {
-            if (deviceIdAndGeneration[i] == deviceId) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    private void onTabletModeChanged(long whenNanos, boolean inTabletMode) {
-        if (DEBUG) {
-            Log.d(TAG, "Received tablet mode changed: "
-                    + "whenNanos=" + whenNanos + ", inTabletMode=" + inTabletMode);
-        }
-        synchronized (mTabletModeLock) {
-            final int numListeners = mOnTabletModeChangedListeners.size();
-            for (int i = 0; i < numListeners; i++) {
-                OnTabletModeChangedListenerDelegate listener =
-                        mOnTabletModeChangedListeners.get(i);
-                listener.sendTabletModeChanged(whenNanos, inTabletMode);
-            }
-        }
+        return mGlobal.getHostUsiVersion(display);
     }
 
     /**
@@ -2149,7 +1874,7 @@ public final class InputManager {
     public interface InputDeviceListener {
         /**
          * Called whenever an input device has been added to the system.
-         * Use {@link InputManager#getInputDevice} to get more information about the device.
+         * Use {@link InputManagerGlobal#getInputDevice} to get more information about the device.
          *
          * @param deviceId The id of the input device that was added.
          */
@@ -2170,37 +1895,6 @@ public final class InputManager {
          * @param deviceId The id of the input device that changed.
          */
         void onInputDeviceChanged(int deviceId);
-    }
-
-    private final class InputDevicesChangedListener extends IInputDevicesChangedListener.Stub {
-        @Override
-        public void onInputDevicesChanged(int[] deviceIdAndGeneration) throws RemoteException {
-            InputManager.this.onInputDevicesChanged(deviceIdAndGeneration);
-        }
-    }
-
-    private static final class InputDeviceListenerDelegate extends Handler {
-        public final InputDeviceListener mListener;
-
-        public InputDeviceListenerDelegate(InputDeviceListener listener, Handler handler) {
-            super(handler != null ? handler.getLooper() : Looper.myLooper());
-            mListener = listener;
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_DEVICE_ADDED:
-                    mListener.onInputDeviceAdded(msg.arg1);
-                    break;
-                case MSG_DEVICE_REMOVED:
-                    mListener.onInputDeviceRemoved(msg.arg1);
-                    break;
-                case MSG_DEVICE_CHANGED:
-                    mListener.onInputDeviceChanged(msg.arg1);
-                    break;
-            }
-        }
     }
 
     /** @hide */
@@ -2234,43 +1928,6 @@ public final class InputManager {
          */
         void onKeyboardBacklightChanged(
                 int deviceId, @NonNull KeyboardBacklightState state, boolean isTriggeredByKeyPress);
-    }
-
-    private final class TabletModeChangedListener extends ITabletModeChangedListener.Stub {
-        @Override
-        public void onTabletModeChanged(long whenNanos, boolean inTabletMode) {
-            InputManager.this.onTabletModeChanged(whenNanos, inTabletMode);
-        }
-    }
-
-    private static final class OnTabletModeChangedListenerDelegate extends Handler {
-        private static final int MSG_TABLET_MODE_CHANGED = 0;
-
-        public final OnTabletModeChangedListener mListener;
-
-        public OnTabletModeChangedListenerDelegate(
-                OnTabletModeChangedListener listener, Handler handler) {
-            super(handler != null ? handler.getLooper() : Looper.myLooper());
-            mListener = listener;
-        }
-
-        public void sendTabletModeChanged(long whenNanos, boolean inTabletMode) {
-            SomeArgs args = SomeArgs.obtain();
-            args.argi1 = (int) whenNanos;
-            args.argi2 = (int) (whenNanos >> 32);
-            args.arg1 = inTabletMode;
-            obtainMessage(MSG_TABLET_MODE_CHANGED, args).sendToTarget();
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == MSG_TABLET_MODE_CHANGED) {
-                SomeArgs args = (SomeArgs) msg.obj;
-                long whenNanos = (args.argi1 & 0xFFFFFFFFL) | ((long) args.argi2 << 32);
-                boolean inTabletMode = (boolean) args.arg1;
-                mListener.onTabletModeChanged(whenNanos, inTabletMode);
-            }
-        }
     }
 
     // Implementation of the android.hardware.BatteryState interface used to report the battery

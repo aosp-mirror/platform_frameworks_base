@@ -22,6 +22,7 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.logcatLogBuffer
+import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
@@ -58,6 +59,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.BDDMockito.clearInvocations
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
@@ -166,6 +168,12 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         mGroupChild1 = mHelper.createChildNotification(GROUP_ALERT_ALL, 1, "child", 350)
         mGroupChild2 = mHelper.createChildNotification(GROUP_ALERT_ALL, 2, "child", 250)
         mGroupChild3 = mHelper.createChildNotification(GROUP_ALERT_ALL, 3, "child", 150)
+
+        // Set the default FSI decision
+        setShouldFullScreen(any(), FullScreenIntentDecision.NO_FULL_SCREEN_INTENT)
+
+        // Run tests with default feature flag state
+        whenever(mFlags.fsiOnDNDUpdate()).thenReturn(Flags.FSI_ON_DND_UPDATE.default)
     }
 
     @Test
@@ -810,6 +818,39 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun onEntryAdded_whenLaunchingFSI_doesLogDecision() {
+        // GIVEN A new notification can FSI
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
+        mCollectionListener.onEntryAdded(mEntry)
+
+        verify(mLaunchFullScreenIntentProvider).launchFullScreenIntent(mEntry)
+        verify(mNotificationInterruptStateProvider).logFullScreenIntentDecision(
+                mEntry, FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
+    }
+
+    @Test
+    fun onEntryAdded_whenNotLaunchingFSI_doesLogDecision() {
+        // GIVEN A new notification can't FSI
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.NO_FULL_SCREEN_INTENT)
+        mCollectionListener.onEntryAdded(mEntry)
+
+        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
+        verify(mNotificationInterruptStateProvider).logFullScreenIntentDecision(
+                mEntry, FullScreenIntentDecision.NO_FULL_SCREEN_INTENT)
+    }
+
+    @Test
+    fun onEntryAdded_whenNotLaunchingFSIBecauseOfDnd_doesLogDecision() {
+        // GIVEN A new notification can't FSI because of DND
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
+        mCollectionListener.onEntryAdded(mEntry)
+
+        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
+        verify(mNotificationInterruptStateProvider).logFullScreenIntentDecision(
+                mEntry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
+    }
+
+    @Test
     fun testOnRankingApplied_noFSIOnUpdateWhenFlagOff() {
         // Ensure the feature flag is off
         whenever(mFlags.fsiOnDNDUpdate()).thenReturn(false)
@@ -818,13 +859,22 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         setShouldFullScreen(mEntry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
         mCollectionListener.onEntryAdded(mEntry)
 
+        // Verify that this causes a log
+        verify(mNotificationInterruptStateProvider).logFullScreenIntentDecision(
+                mEntry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
+        clearInvocations(mNotificationInterruptStateProvider)
+
         // and it is then updated to allow full screen
         setShouldFullScreen(mEntry, FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
         whenever(mNotifPipeline.allNotifs).thenReturn(listOf(mEntry))
         mCollectionListener.onRankingApplied()
 
         // THEN it should not full screen because the feature is off
-        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(mEntry)
+        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
+
+        // VERIFY that no additional logging happens either
+        verify(mNotificationInterruptStateProvider, never())
+                .logFullScreenIntentDecision(any(), any())
     }
 
     @Test
@@ -836,8 +886,11 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         setShouldFullScreen(mEntry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
         mCollectionListener.onEntryAdded(mEntry)
 
-        // at this point, it should not have full screened
-        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(mEntry)
+        // at this point, it should not have full screened, but should have logged
+        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
+        verify(mNotificationInterruptStateProvider).logFullScreenIntentDecision(mEntry,
+                FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
+        clearInvocations(mNotificationInterruptStateProvider)
 
         // and it is then updated to allow full screen AND HUN
         setShouldFullScreen(mEntry, FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
@@ -847,10 +900,110 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         mBeforeTransformGroupsListener.onBeforeTransformGroups(listOf(mEntry))
         mBeforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(mEntry))
 
-        // THEN it should full screen but it should NOT HUN
+        // THEN it should full screen and log but it should NOT HUN
         verify(mLaunchFullScreenIntentProvider).launchFullScreenIntent(mEntry)
         verify(mHeadsUpViewBinder, never()).bindHeadsUpView(any(), any())
         verify(mHeadsUpManager, never()).showNotification(any())
+        verify(mNotificationInterruptStateProvider).logFullScreenIntentDecision(mEntry,
+                FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
+        clearInvocations(mNotificationInterruptStateProvider)
+
+        // WHEN ranking updates again and the pipeline reruns
+        clearInvocations(mLaunchFullScreenIntentProvider)
+        mCollectionListener.onRankingApplied()
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(listOf(mEntry))
+        mBeforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(mEntry))
+
+        // VERIFY that the FSI does not launch again or log
+        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
+        verify(mNotificationInterruptStateProvider, never())
+                .logFullScreenIntentDecision(any(), any())
+    }
+
+    @Test
+    fun testOnRankingApplied_withOnlyDndSuppressionAllowsFsiLater() {
+        // Turn on the feature
+        whenever(mFlags.fsiOnDNDUpdate()).thenReturn(true)
+
+        // GIVEN that mEntry was previously suppressed from full-screen only by DND
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
+        mCollectionListener.onEntryAdded(mEntry)
+
+        // at this point, it should not have full screened, but should have logged
+        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
+        verify(mNotificationInterruptStateProvider).logFullScreenIntentDecision(mEntry,
+                FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
+        clearInvocations(mNotificationInterruptStateProvider)
+
+        // ranking is applied with only DND blocking FSI
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
+        mCollectionListener.onRankingApplied()
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(listOf(mEntry))
+        mBeforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(mEntry))
+
+        // THEN it should still not yet full screen or HUN
+        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
+        verify(mHeadsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(mHeadsUpManager, never()).showNotification(any())
+
+        // Same decision as before; is not logged
+        verify(mNotificationInterruptStateProvider, never())
+                .logFullScreenIntentDecision(any(), any())
+        clearInvocations(mNotificationInterruptStateProvider)
+
+        // and it is then updated to allow full screen AND HUN
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
+        setShouldHeadsUp(mEntry)
+        whenever(mNotifPipeline.allNotifs).thenReturn(listOf(mEntry))
+        mCollectionListener.onRankingApplied()
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(listOf(mEntry))
+        mBeforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(mEntry))
+
+        // THEN it should full screen and log but it should NOT HUN
+        verify(mLaunchFullScreenIntentProvider).launchFullScreenIntent(mEntry)
+        verify(mHeadsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(mHeadsUpManager, never()).showNotification(any())
+        verify(mNotificationInterruptStateProvider).logFullScreenIntentDecision(mEntry,
+                FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
+        clearInvocations(mNotificationInterruptStateProvider)
+    }
+
+    @Test
+    fun testOnRankingApplied_newNonFullScreenAnswerInvalidatesCandidate() {
+        // Turn on the feature
+        whenever(mFlags.fsiOnDNDUpdate()).thenReturn(true)
+
+        // GIVEN that mEntry was previously suppressed from full-screen only by DND
+        whenever(mNotifPipeline.allNotifs).thenReturn(listOf(mEntry))
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
+        mCollectionListener.onEntryAdded(mEntry)
+
+        // at this point, it should not have full screened
+        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(mEntry)
+
+        // now some other condition blocks FSI in addition to DND
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_BY_DND)
+        mCollectionListener.onRankingApplied()
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(listOf(mEntry))
+        mBeforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(mEntry))
+
+        // THEN it should NOT full screen or HUN
+        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
+        verify(mHeadsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(mHeadsUpManager, never()).showNotification(any())
+
+        // NOW the DND logic changes and FSI and HUN are available
+        clearInvocations(mLaunchFullScreenIntentProvider)
+        setShouldFullScreen(mEntry, FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
+        setShouldHeadsUp(mEntry)
+        mCollectionListener.onRankingApplied()
+        mBeforeTransformGroupsListener.onBeforeTransformGroups(listOf(mEntry))
+        mBeforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(mEntry))
+
+        // VERIFY that the FSI didn't happen, but that we do HUN
+        verify(mLaunchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
+        finishBind(mEntry)
+        verify(mHeadsUpManager).showNotification(mEntry)
     }
 
     @Test
