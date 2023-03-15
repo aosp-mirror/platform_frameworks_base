@@ -862,8 +862,16 @@ class BackNavigationController {
                 WindowContainer target, boolean isOpen) {
             final BackWindowAnimationAdaptor adaptor =
                     new BackWindowAnimationAdaptor(target, isOpen);
-            target.startAnimation(target.getPendingTransaction(), adaptor, false /* hidden */,
-                    ANIMATION_TYPE_PREDICT_BACK);
+            final SurfaceControl.Transaction pt = target.getPendingTransaction();
+            target.startAnimation(pt, adaptor, false /* hidden */, ANIMATION_TYPE_PREDICT_BACK);
+            // Workaround to show TaskFragment which can be hide in Transitions and won't show
+            // during isAnimating.
+            if (isOpen && target.asActivityRecord() != null) {
+                final TaskFragment fragment = target.asActivityRecord().getTaskFragment();
+                if (fragment != null) {
+                    pt.show(fragment.mSurfaceControl);
+                }
+            }
             return adaptor;
         }
 
