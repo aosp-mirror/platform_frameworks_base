@@ -849,7 +849,7 @@ public final class NotificationPanelViewController implements Dumpable {
         mLayoutInflater = layoutInflater;
         mFeatureFlags = featureFlags;
         mAnimateBack = mFeatureFlags.isEnabled(Flags.WM_SHADE_ANIMATE_BACK_GESTURE);
-        mTrackpadGestureBack = mFeatureFlags.isEnabled(Flags.TRACKPAD_GESTURE_BACK);
+        mTrackpadGestureBack = mFeatureFlags.isEnabled(Flags.TRACKPAD_GESTURE_FEATURES);
         mFalsingCollector = falsingCollector;
         mPowerManager = powerManager;
         mWakeUpCoordinator = coordinator;
