@@ -247,7 +247,7 @@ interface IPackageManager {
     @UnsupportedAppUsage
     String getInstallerPackageName(in String packageName);
 
-    InstallSourceInfo getInstallSourceInfo(in String packageName);
+    InstallSourceInfo getInstallSourceInfo(in String packageName, int userId);
 
     void resetApplicationPreferences(int userId);
 

@@ -4982,9 +4982,11 @@ public class ComputerEngine implements Computer {
 
     @Override
     @Nullable
-    public InstallSourceInfo getInstallSourceInfo(@NonNull String packageName) {
+    public InstallSourceInfo getInstallSourceInfo(@NonNull String packageName,
+            @UserIdInt int userId) {
         final int callingUid = Binder.getCallingUid();
-        final int userId = UserHandle.getUserId(callingUid);
+        enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
+                false /* checkShell */, "getInstallSourceInfo");
 
         String installerPackageName;
         String initiatingPackageName;
