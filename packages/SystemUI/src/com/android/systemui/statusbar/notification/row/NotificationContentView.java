@@ -2062,6 +2062,23 @@ public class NotificationContentView extends FrameLayout implements Notification
             pw.print("null");
         }
         pw.println();
+
+        pw.print("RemoteInputViews { ");
+        pw.print(" visibleType: " + mVisibleType);
+        if (mHeadsUpRemoteInputController != null) {
+            pw.print(", headsUpRemoteInputController.isActive: "
+                    + mHeadsUpRemoteInputController.isActive());
+        } else {
+            pw.print(", headsUpRemoteInputController: null");
+        }
+
+        if (mExpandedRemoteInputController != null) {
+            pw.print(", expandedRemoteInputController.isActive: "
+                    + mExpandedRemoteInputController.isActive());
+        } else {
+            pw.print(", expandedRemoteInputController: null");
+        }
+        pw.println(" }");
     }
 
     /** Add any existing SmartReplyView to the dump */
