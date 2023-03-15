@@ -28,6 +28,7 @@ import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.statusbar.notification.RemoteInputControllerLogger;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
@@ -52,10 +53,14 @@ public class RemoteInputController {
     private final Delegate mDelegate;
     private final RemoteInputUriController mRemoteInputUriController;
 
+    private final RemoteInputControllerLogger mLogger;
+
     public RemoteInputController(Delegate delegate,
-            RemoteInputUriController remoteInputUriController) {
+            RemoteInputUriController remoteInputUriController,
+            RemoteInputControllerLogger logger) {
         mDelegate = delegate;
         mRemoteInputUriController = remoteInputUriController;
+        mLogger = logger;
     }
 
     /**
@@ -117,6 +122,9 @@ public class RemoteInputController {
         boolean isActive = isRemoteInputActive(entry);
         boolean found = pruneWeakThenRemoveAndContains(
                 entry /* contains */, null /* remove */, token /* removeToken */);
+        mLogger.logAddRemoteInput(entry.getKey()/* entryKey */,
+                isActive /* isRemoteInputAlreadyActive */,
+                found /* isRemoteInputFound */);
         if (!found) {
             mOpen.add(new Pair<>(new WeakReference<>(entry), token));
         }
@@ -137,9 +145,22 @@ public class RemoteInputController {
      */
     public void removeRemoteInput(NotificationEntry entry, Object token) {
         Objects.requireNonNull(entry);
-        if (entry.mRemoteEditImeVisible && entry.mRemoteEditImeAnimatingAway) return;
+        if (entry.mRemoteEditImeVisible && entry.mRemoteEditImeAnimatingAway) {
+            mLogger.logRemoveRemoteInput(
+                    entry.getKey() /* entryKey*/,
+                    true /* remoteEditImeVisible */,
+                    true /* remoteEditImeAnimatingAway */);
+            return;
+        }
         // If the view is being removed, this may be called even though we're not active
-        if (!isRemoteInputActive(entry)) return;
+        boolean remoteInputActive = isRemoteInputActive(entry);
+        mLogger.logRemoveRemoteInput(
+                entry.getKey() /* entryKey*/,
+                entry.mRemoteEditImeVisible /* remoteEditImeVisible */,
+                entry.mRemoteEditImeAnimatingAway /* remoteEditImeAnimatingAway */,
+                remoteInputActive /* isRemoteInputActive */);
+
+        if (!remoteInputActive) return;
 
         pruneWeakThenRemoveAndContains(null /* contains */, entry /* remove */, token);
 
