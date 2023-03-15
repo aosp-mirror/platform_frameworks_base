@@ -1303,7 +1303,8 @@ public final class AlarmManagerServiceTest {
         final BroadcastOptions actualOptions = new BroadcastOptions(actualOptionsBundle);
         assertEquals(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT,
                 actualOptions.getDeliveryGroupPolicy());
-        assertTrue(actualOptions.isDeferUntilActive());
+        assertEquals(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE,
+                actualOptions.getDeferralPolicy());
     }
 
     @Test

@@ -14507,18 +14507,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        // resultTo broadcasts are always infinitely deferrable.
-        if ((resultTo != null) && !ordered && mEnableModernQueue) {
-            if (brOptions == null) {
-                brOptions = BroadcastOptions.makeBasic();
-            }
-            brOptions.setDeferUntilActive(true);
-        }
-
-        if (mEnableModernQueue && ordered && brOptions != null && brOptions.isDeferUntilActive()) {
-            throw new IllegalArgumentException("Ordered broadcasts can't be deferred until active");
-        }
-
         // Verify that protected broadcasts are only being sent by system code,
         // and that system code is only sending protected broadcasts.
         final boolean isProtectedBroadcast;
