@@ -26,8 +26,6 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.app.Activity;
-import android.app.ActivityThread;
-import android.app.OnActivityPausedListener;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -1570,17 +1568,11 @@ public final class NfcAdapter {
         if (activity == null || intent == null) {
             throw new NullPointerException();
         }
-        if (!activity.isResumed()) {
-            throw new IllegalStateException("Foreground dispatch can only be enabled " +
-                    "when your activity is resumed");
-        }
         try {
             TechListParcel parcel = null;
             if (techLists != null && techLists.length > 0) {
                 parcel = new TechListParcel(techLists);
             }
-            ActivityThread.currentActivityThread().registerOnActivityPausedListener(activity,
-                    mForegroundDispatchListener);
             sService.setForegroundDispatch(intent, filters, parcel);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
@@ -1608,25 +1600,8 @@ public final class NfcAdapter {
                 throw new UnsupportedOperationException();
             }
         }
-        ActivityThread.currentActivityThread().unregisterOnActivityPausedListener(activity,
-                mForegroundDispatchListener);
-        disableForegroundDispatchInternal(activity, false);
-    }
-
-    OnActivityPausedListener mForegroundDispatchListener = new OnActivityPausedListener() {
-        @Override
-        public void onPaused(Activity activity) {
-            disableForegroundDispatchInternal(activity, true);
-        }
-    };
-
-    void disableForegroundDispatchInternal(Activity activity, boolean force) {
         try {
             sService.setForegroundDispatch(null, null, null);
-            if (!force && !activity.isResumed()) {
-                throw new IllegalStateException("You must disable foreground dispatching " +
-                        "while your activity is still resumed");
-            }
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
         }
