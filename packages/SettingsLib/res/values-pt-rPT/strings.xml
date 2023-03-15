@@ -371,10 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Apresentar limites de clipes, margens, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forçar direção do esquema RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forçar dir. do esq. do ecrã p. RTL tds os locais"</string>
-    <!-- no translation found for transparent_navigation_bar (1933192171384678484) -->
-    <skip />
-    <!-- no translation found for transparent_navigation_bar_summary (5454359021817330722) -->
-    <skip />
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Barra de navegação transparente"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Torne a cor de fundo da barra de navegação transparente por predefinição"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Permitir esbater janelas"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forçar 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Ativar o 4x MSAA em aplicações OpenGL ES 2.0"</string>

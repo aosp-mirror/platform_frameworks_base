@@ -371,10 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"கிளிப் எல்லைகள், ஓரங்கள், மேலும் பலவற்றைக் காட்டு"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL தளவமைப்பின் திசையை வலியுறுத்து"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"எல்லா மொழிகளுக்கும் திரையின் தளவமைப்பு திசையை RTL க்கு மாற்றும்"</string>
-    <!-- no translation found for transparent_navigation_bar (1933192171384678484) -->
-    <skip />
-    <!-- no translation found for transparent_navigation_bar_summary (5454359021817330722) -->
-    <skip />
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"தெளிவுத்திறனுடன் இருக்கும் வழிசெலுத்தல் பட்டி"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"வழிசெலுத்தல் பட்டியின் பின்னணி வண்ணத்தை இயல்பாகவே தெளிவுத்திறன் உடையதாக அமைக்கவும்"</string>
     <string name="window_blurs" msgid="6831008984828425106">"திரை-நிலை மங்கலை அனுமதி"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ஐ வலியுறுத்து"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 பயன்பாடுகளில் 4x MSAA ஐ இயக்கு"</string>
@@ -683,6 +681,5 @@
     <item msgid="7728484337962740316">"வலதுபுறம் நகர்த்துங்கள்"</item>
     <item msgid="324200556467459329">"மேலே நகர்த்துங்கள்"</item>
   </string-array>
-    <!-- no translation found for font_scale_percentage (2624057443622817886) -->
-    <skip />
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>
