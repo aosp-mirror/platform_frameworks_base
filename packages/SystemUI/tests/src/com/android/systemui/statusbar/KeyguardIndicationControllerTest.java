@@ -105,6 +105,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -188,6 +189,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private AuthController mAuthController;
     @Mock
     private AlarmManager mAlarmManager;
+    @Mock
+    private UserTracker mUserTracker;
     @Captor
     private ArgumentCaptor<DockManager.AlignmentStateListener> mAlignmentListener;
     @Captor
@@ -209,6 +212,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private BroadcastReceiver mBroadcastReceiver;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
     private TestableLooper mTestableLooper;
+    private final int mCurrentUserId = 1;
 
     private KeyguardIndicationTextView mTextView; // AOD text
 
@@ -260,6 +264,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 .thenReturn(mDisclosureGeneric);
         when(mDevicePolicyResourcesManager.getString(anyString(), any(), anyString()))
                 .thenReturn(mDisclosureWithOrganization);
+        when(mUserTracker.getUserId()).thenReturn(mCurrentUserId);
 
         mWakeLock = new WakeLockFake();
         mWakeLockBuilder = new WakeLockFake.Builder(mContext);
@@ -291,7 +296,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 mKeyguardBypassController, mAccessibilityManager,
                 mFaceHelpMessageDeferral, mock(KeyguardLogger.class),
                 mAlternateBouncerInteractor,
-                mAlarmManager
+                mAlarmManager,
+                mUserTracker
         );
         mController.init();
         mController.setIndicationArea(mIndicationArea);
@@ -813,7 +819,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void faceErrorTimeout_whenFingerprintEnrolled_doesNotShowMessage() {
         createController();
         when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                0)).thenReturn(true);
+                getCurrentUser())).thenReturn(true);
         String message = "A message";
 
         mController.setVisible(true);
@@ -828,7 +834,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // GIVEN fingerprint enrolled
         when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                0)).thenReturn(true);
+                getCurrentUser())).thenReturn(true);
 
         // WHEN help messages received that are allowed to show
         final String helpString = "helpString";
@@ -855,7 +861,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // GIVEN fingerprint enrolled
         when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                0)).thenReturn(true);
+                getCurrentUser())).thenReturn(true);
 
         // WHEN help messages received that aren't supposed to show
         final String helpString = "helpString";
@@ -882,7 +888,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // GIVEN fingerprint NOT enrolled
         when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                0)).thenReturn(false);
+                getCurrentUser())).thenReturn(false);
 
         // WHEN help messages received
         final Set<CharSequence> helpStrings = new HashSet<>();
@@ -913,7 +919,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // GIVEN fingerprint NOT enrolled
         when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                0)).thenReturn(false);
+                getCurrentUser())).thenReturn(false);
 
         // WHEN help message received and deferred message is valid
         final String helpString = "helpMsg";
@@ -944,7 +950,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // GIVEN fingerprint enrolled
         when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                0)).thenReturn(true);
+                getCurrentUser())).thenReturn(true);
 
         // WHEN help message received and deferredMessage is valid
         final String helpString = "helpMsg";
@@ -1173,7 +1179,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // WHEN trust is granted
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
-        mKeyguardUpdateMonitorCallback.onTrustChanged(KeyguardUpdateMonitor.getCurrentUser());
+        mKeyguardUpdateMonitorCallback.onTrustChanged(getCurrentUser());
 
         // THEN verify the trust granted message shows
         verifyIndicationMessage(
@@ -1238,7 +1244,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void coEx_faceSuccess_showsPressToOpen() {
         // GIVEN bouncer isn't showing, can skip bouncer, udfps is supported, no a11y enabled
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser()))
                 .thenReturn(true);
         when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(true);
         when(mAccessibilityManager.isEnabled()).thenReturn(false);
@@ -1262,7 +1268,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void coEx_faceSuccess_touchExplorationEnabled_showsFaceUnlockedSwipeToOpen() {
         // GIVEN bouncer isn't showing, can skip bouncer, udfps is supported, a11y enabled
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser()))
                 .thenReturn(true);
         when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(true);
         when(mAccessibilityManager.isEnabled()).thenReturn(true);
@@ -1286,7 +1292,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void coEx_faceSuccess_a11yEnabled_showsFaceUnlockedSwipeToOpen() {
         // GIVEN bouncer isn't showing, can skip bouncer, udfps is supported, a11y is enabled
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser()))
                 .thenReturn(true);
         when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(true);
         when(mAccessibilityManager.isEnabled()).thenReturn(true);
@@ -1309,7 +1315,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void faceOnly_faceSuccess_showsFaceUnlockedSwipeToOpen() {
         // GIVEN bouncer isn't showing, can skip bouncer, no udfps supported
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser()))
                 .thenReturn(true);
         when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(false);
         createController();
@@ -1331,7 +1337,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void udfpsOnly_a11yEnabled_showsSwipeToOpen() {
         // GIVEN bouncer isn't showing, can skip bouncer, udfps is supported, a11y is enabled
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser()))
                 .thenReturn(true);
         when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(true);
         when(mAccessibilityManager.isEnabled()).thenReturn(true);
@@ -1351,7 +1357,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void udfpsOnly_showsPressToOpen() {
         // GIVEN bouncer isn't showing, udfps is supported, a11y is NOT enabled, can skip bouncer
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser()))
                 .thenReturn(true);
         when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(true);
         when(mAccessibilityManager.isEnabled()).thenReturn(false);
@@ -1372,7 +1378,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         // GIVEN bouncer isn't showing, can skip bouncer, no security (udfps isn't supported,
         // face wasn't authenticated)
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser()))
                 .thenReturn(true);
         when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(false);
         createController();
@@ -1390,7 +1396,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void cannotSkipBouncer_showSwipeToUnlockHint() {
         // GIVEN bouncer isn't showing and cannot skip bouncer
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser()))
                 .thenReturn(false);
         createController();
         mController.setVisible(true);
@@ -1746,8 +1752,12 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     private void setupFingerprintUnlockPossible(boolean possible) {
         when(mKeyguardUpdateMonitor
-                .getCachedIsUnlockWithFingerprintPossible(KeyguardUpdateMonitor.getCurrentUser()))
+                .getCachedIsUnlockWithFingerprintPossible(getCurrentUser()))
                 .thenReturn(possible);
+    }
+
+    private int getCurrentUser() {
+        return mCurrentUserId;
     }
 
     private void onFaceLockoutError(String errMsg) {
