@@ -33,31 +33,24 @@ public final class SatelliteCapabilities implements Parcelable {
     @NonNull @SatelliteManager.NTRadioTechnology private Set<Integer> mSupportedRadioTechnologies;
 
     /**
-     * Whether satellite modem is always on.
-     * This indicates the power impact of keeping it on is very minimal.
-     */
-    private boolean mIsAlwaysOn;
-
-    /**
      * Whether UE needs to point to a satellite to send and receive data.
      */
-    private boolean mNeedsPointingToSatellite;
+    private boolean mIsPointingRequired;
 
     /**
-     * Whether UE needs a separate SIM profile to communicate with the satellite network.
+     * The maximum number of bytes per datagram that can be sent over satellite.
      */
-    private boolean mNeedsSeparateSimProfile;
+    private int mMaxBytesPerOutgoingDatagram;
 
     /**
      * @hide
      */
-    public SatelliteCapabilities(Set<Integer> supportedRadioTechnologies, boolean isAlwaysOn,
-            boolean needsPointingToSatellite, boolean needsSeparateSimProfile) {
+    public SatelliteCapabilities(Set<Integer> supportedRadioTechnologies,
+            boolean isPointingRequired, int maxBytesPerOutgoingDatagram) {
         mSupportedRadioTechnologies = supportedRadioTechnologies == null
                 ? new HashSet<>() : supportedRadioTechnologies;
-        mIsAlwaysOn = isAlwaysOn;
-        mNeedsPointingToSatellite = needsPointingToSatellite;
-        mNeedsSeparateSimProfile = needsSeparateSimProfile;
+        mIsPointingRequired = isPointingRequired;
+        mMaxBytesPerOutgoingDatagram = maxBytesPerOutgoingDatagram;
     }
 
     private SatelliteCapabilities(Parcel in) {
@@ -80,9 +73,8 @@ public final class SatelliteCapabilities implements Parcelable {
             out.writeInt(0);
         }
 
-        out.writeBoolean(mIsAlwaysOn);
-        out.writeBoolean(mNeedsPointingToSatellite);
-        out.writeBoolean(mNeedsSeparateSimProfile);
+        out.writeBoolean(mIsPointingRequired);
+        out.writeInt(mMaxBytesPerOutgoingDatagram);
     }
 
     @NonNull public static final Creator<SatelliteCapabilities> CREATOR = new Creator<>() {
@@ -111,16 +103,12 @@ public final class SatelliteCapabilities implements Parcelable {
             sb.append("none,");
         }
 
-        sb.append("isAlwaysOn:");
-        sb.append(mIsAlwaysOn);
+        sb.append("isPointingRequired:");
+        sb.append(mIsPointingRequired);
         sb.append(",");
 
-        sb.append("needsPointingToSatellite:");
-        sb.append(mNeedsPointingToSatellite);
-        sb.append(",");
-
-        sb.append("needsSeparateSimProfile:");
-        sb.append(mNeedsSeparateSimProfile);
+        sb.append("maxBytesPerOutgoingDatagram");
+        sb.append(mMaxBytesPerOutgoingDatagram);
         return sb.toString();
     }
 
@@ -133,33 +121,22 @@ public final class SatelliteCapabilities implements Parcelable {
     }
 
     /**
-     * Get whether the satellite modem is always on.
-     * This indicates the power impact of keeping it on is very minimal.
-     *
-     * @return {@code true} if the satellite modem is always on and {@code false} otherwise.
-     */
-    public boolean isAlwaysOn() {
-        return mIsAlwaysOn;
-    }
-
-    /**
      * Get whether UE needs to point to a satellite to send and receive data.
      *
-     * @return {@code true} if UE needs to pointing to a satellite to send and receive data and
+     * @return {@code true} if UE needs to point to a satellite to send and receive data and
      *         {@code false} otherwise.
      */
-    public boolean needsPointingToSatellite() {
-        return mNeedsPointingToSatellite;
+    public boolean isPointingRequired() {
+        return mIsPointingRequired;
     }
 
     /**
-     * Get whether UE needs a separate SIM profile to communicate with the satellite network.
+     * The maximum number of bytes per datagram that can be sent over satellite.
      *
-     * @return {@code true} if UE needs a separate SIM profile to comunicate with the satellite
-     *         network and {@code false} otherwise.
+     * @return The maximum number of bytes per datagram that can be sent over satellite.
      */
-    public boolean needsSeparateSimProfile() {
-        return mNeedsSeparateSimProfile;
+    public int getMaxBytesPerOutgoingDatagram() {
+        return mMaxBytesPerOutgoingDatagram;
     }
 
     private void readFromParcel(Parcel in) {
@@ -171,8 +148,7 @@ public final class SatelliteCapabilities implements Parcelable {
             }
         }
 
-        mIsAlwaysOn = in.readBoolean();
-        mNeedsPointingToSatellite = in.readBoolean();
-        mNeedsSeparateSimProfile = in.readBoolean();
+        mIsPointingRequired = in.readBoolean();
+        mMaxBytesPerOutgoingDatagram = in.readInt();
     }
 }

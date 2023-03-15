@@ -16,6 +16,15 @@
 
 package com.android.systemui.accessibility.accessibilitymenu.tests;
 
+import static android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN;
+import static android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS;
+import static android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_POWER_DIALOG;
+import static android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS;
+import static android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_RECENTS;
+import static android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT;
+
+import static com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService.INTENT_GLOBAL_ACTION;
+import static com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService.INTENT_GLOBAL_ACTION_EXTRA;
 import static com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService.INTENT_HIDE_MENU;
 import static com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService.INTENT_TOGGLE_MENU;
 import static com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService.PACKAGE_NAME;
@@ -23,11 +32,15 @@ import static com.android.systemui.accessibility.accessibilitymenu.Accessibility
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Instrumentation;
 import android.app.UiAutomation;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManager;
+import android.media.AudioManager;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -37,22 +50,29 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.compatibility.common.util.TestUtils;
 import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut.ShortcutId;
 
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityMenuServiceTest {
     private static final String TAG = "A11yMenuServiceTest";
+    private static final int CLICK_ID = AccessibilityNodeInfo.ACTION_CLICK;
 
     private static final int TIMEOUT_SERVICE_STATUS_CHANGE_S = 5;
-    private static final int TIMEOUT_UI_CHANGE_S = 5;
+    private static final int TIMEOUT_UI_CHANGE_S = 10;
+    private static final int NO_GLOBAL_ACTION = -1;
+    private static final String INPUT_KEYEVENT_KEYCODE_BACK = "input keyevent KEYCODE_BACK";
 
     private static Instrumentation sInstrumentation;
     private static UiAutomation sUiAutomation;
+    private static AtomicInteger sLastGlobalAction;
 
     private static AccessibilityManager sAccessibilityManager;
 
@@ -62,7 +82,7 @@ public class AccessibilityMenuServiceTest {
         sInstrumentation = InstrumentationRegistry.getInstrumentation();
         sUiAutomation = sInstrumentation.getUiAutomation(
                 UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES);
-        final Context context = sInstrumentation.getContext();
+        final Context context = sInstrumentation.getTargetContext();
         sAccessibilityManager = context.getSystemService(AccessibilityManager.class);
 
         // Disable all a11yServices if any are active.
@@ -85,6 +105,17 @@ public class AccessibilityMenuServiceTest {
                 () -> sAccessibilityManager.getEnabledAccessibilityServiceList(
                         AccessibilityServiceInfo.FEEDBACK_ALL_MASK).stream().filter(
                                 info -> info.getId().contains(serviceName)).count() == 1);
+
+        sLastGlobalAction = new AtomicInteger(NO_GLOBAL_ACTION);
+        context.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.i(TAG, "Received global action intent.");
+                sLastGlobalAction.set(
+                        intent.getIntExtra(INTENT_GLOBAL_ACTION_EXTRA, NO_GLOBAL_ACTION));
+            }},
+                new IntentFilter(PACKAGE_NAME + INTENT_GLOBAL_ACTION),
+                null, null, Context.RECEIVER_EXPORTED);
     }
 
     @AfterClass
@@ -93,23 +124,39 @@ public class AccessibilityMenuServiceTest {
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, "");
     }
 
-    private boolean isMenuVisible() {
-        return sUiAutomation.getRootInActiveWindow() != null
-                && sUiAutomation.getRootInActiveWindow().getPackageName().toString().equals(
-                PACKAGE_NAME);
+    @Before
+    public void setup() throws Throwable {
+        openMenu();
     }
 
-    private void openMenu() throws Throwable {
-        if (isMenuVisible()) {
-            return;
-        }
+    @After
+    public void tearDown() throws Throwable {
+        closeMenu();
+        sLastGlobalAction.set(NO_GLOBAL_ACTION);
+    }
+
+    private static boolean isMenuVisible() {
+        AccessibilityNodeInfo root = sUiAutomation.getRootInActiveWindow();
+        return root != null && root.getPackageName().toString().equals(PACKAGE_NAME);
+    }
+
+    private static void openMenu() throws Throwable {
         Intent intent = new Intent(PACKAGE_NAME + INTENT_TOGGLE_MENU);
         sInstrumentation.getContext().sendBroadcast(intent);
+
         TestUtils.waitUntil("Timed out before menu could appear.",
-                TIMEOUT_UI_CHANGE_S, () -> isMenuVisible());
+                TIMEOUT_UI_CHANGE_S,
+                () -> {
+                    if (isMenuVisible()) {
+                        return true;
+                    } else {
+                        sInstrumentation.getContext().sendBroadcast(intent);
+                        return false;
+                    }
+                });
     }
 
-    private void closeMenu() throws Throwable {
+    private static void closeMenu() throws Throwable {
         if (!isMenuVisible()) {
             return;
         }
@@ -119,11 +166,21 @@ public class AccessibilityMenuServiceTest {
                 TIMEOUT_UI_CHANGE_S, () -> !isMenuVisible());
     }
 
+    /**
+     * Provides list of all present shortcut buttons.
+     * @return List of shortcut buttons.
+     */
     private List<AccessibilityNodeInfo> getGridButtonList() {
         return sUiAutomation.getRootInActiveWindow()
                         .findAccessibilityNodeInfosByViewId(PACKAGE_NAME + ":id/shortcutIconBtn");
     }
 
+    /**
+     * Returns the first button whose uniqueID matches the provided text.
+     * @param buttons List of buttons.
+     * @param text Text to match button's uniqueID to.
+     * @return Button whose uniqueID matches text, {@code null} otherwise.
+     */
     private AccessibilityNodeInfo findGridButtonInfo(
             List<AccessibilityNodeInfo> buttons, String text) {
         for (AccessibilityNodeInfo button: buttons) {
@@ -136,8 +193,6 @@ public class AccessibilityMenuServiceTest {
 
     @Test
     public void testAdjustBrightness() throws Throwable {
-        openMenu();
-
         Context context = sInstrumentation.getTargetContext();
         DisplayManager displayManager = context.getSystemService(
                 DisplayManager.class);
@@ -149,7 +204,6 @@ public class AccessibilityMenuServiceTest {
         AccessibilityNodeInfo brightnessDownButton = findGridButtonInfo(buttons,
                 String.valueOf(ShortcutId.ID_BRIGHTNESS_DOWN_VALUE.ordinal()));
 
-        int clickId = AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK.getId();
         BrightnessInfo brightnessInfo = displayManager.getDisplay(
                 context.getDisplayId()).getBrightnessInfo();
 
@@ -159,7 +213,7 @@ public class AccessibilityMenuServiceTest {
                     TIMEOUT_UI_CHANGE_S,
                     () -> displayManager.getBrightness(context.getDisplayId())
                             == brightnessInfo.brightnessMinimum);
-            brightnessUpButton.performAction(clickId);
+            brightnessUpButton.performAction(CLICK_ID);
             TestUtils.waitUntil("Did not detect an increase in brightness.",
                     TIMEOUT_UI_CHANGE_S,
                     () -> displayManager.getBrightness(context.getDisplayId())
@@ -170,14 +224,155 @@ public class AccessibilityMenuServiceTest {
                     TIMEOUT_UI_CHANGE_S,
                     () -> displayManager.getBrightness(context.getDisplayId())
                             == brightnessInfo.brightnessMaximum);
-            brightnessDownButton.performAction(clickId);
+            brightnessDownButton.performAction(CLICK_ID);
             TestUtils.waitUntil("Did not detect a decrease in brightness.",
                     TIMEOUT_UI_CHANGE_S,
                     () -> displayManager.getBrightness(context.getDisplayId())
                             < brightnessInfo.brightnessMaximum);
         } finally {
             displayManager.setBrightness(context.getDisplayId(), resetBrightness);
-            closeMenu();
         }
+    }
+
+    @Test
+    public void testAdjustVolume() throws Throwable {
+        Context context = sInstrumentation.getTargetContext();
+        AudioManager audioManager = context.getSystemService(AudioManager.class);
+        int resetVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+
+        List<AccessibilityNodeInfo> buttons = getGridButtonList();
+        AccessibilityNodeInfo volumeUpButton = findGridButtonInfo(buttons,
+                String.valueOf(ShortcutId.ID_VOLUME_UP_VALUE.ordinal()));
+        AccessibilityNodeInfo volumeDownButton = findGridButtonInfo(buttons,
+                String.valueOf(ShortcutId.ID_VOLUME_DOWN_VALUE.ordinal()));
+
+        try {
+            int min = audioManager.getStreamMinVolume(AudioManager.STREAM_MUSIC);
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, min,
+                    AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
+            TestUtils.waitUntil("Could not change audio stream to minimum volume.",
+                    TIMEOUT_UI_CHANGE_S,
+                    () -> audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == min);
+            volumeUpButton.performAction(CLICK_ID);
+            TestUtils.waitUntil("Did not detect an increase in volume.",
+                    TIMEOUT_UI_CHANGE_S,
+                    () -> audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) > min);
+
+            int max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, max,
+                    AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
+            TestUtils.waitUntil("Could not change audio stream to maximum volume.",
+                    TIMEOUT_UI_CHANGE_S,
+                    () -> audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == max);
+            volumeDownButton.performAction(CLICK_ID);
+            TestUtils.waitUntil("Did not detect a decrease in volume.",
+                    TIMEOUT_UI_CHANGE_S,
+                    () -> audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) < max);
+        } finally {
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
+                    resetVolume, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
+        }
+    }
+
+    @Test
+    public void testAssistantButton_opensVoiceAssistant() throws Throwable {
+        AccessibilityNodeInfo assistantButton = findGridButtonInfo(getGridButtonList(),
+                String.valueOf(ShortcutId.ID_ASSISTANT_VALUE.ordinal()));
+        Intent expectedIntent = new Intent(Intent.ACTION_VOICE_COMMAND);
+        String expectedPackage = expectedIntent.resolveActivity(
+                sInstrumentation.getContext().getPackageManager()).getPackageName();
+
+        sUiAutomation.executeAndWaitForEvent(
+                () -> assistantButton.performAction(CLICK_ID),
+                (event) -> expectedPackage.contains(event.getPackageName()),
+                TIMEOUT_UI_CHANGE_S * 1000
+        );
+    }
+
+    @Test
+    public void testAccessibilitySettingsButton_opensAccessibilitySettings() throws Throwable {
+        AccessibilityNodeInfo settingsButton = findGridButtonInfo(getGridButtonList(),
+                String.valueOf(ShortcutId.ID_A11YSETTING_VALUE.ordinal()));
+        Intent expectedIntent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+        String expectedPackage = expectedIntent.resolveActivity(
+                sInstrumentation.getContext().getPackageManager()).getPackageName();
+
+        sUiAutomation.executeAndWaitForEvent(
+                () -> settingsButton.performAction(CLICK_ID),
+                (event) -> expectedPackage.contains(event.getPackageName()),
+                TIMEOUT_UI_CHANGE_S * 1000
+        );
+    }
+
+    @Test
+    public void testPowerButton_performsGlobalAction() throws Throwable {
+        AccessibilityNodeInfo button = findGridButtonInfo(getGridButtonList(),
+                String.valueOf(ShortcutId.ID_POWER_VALUE.ordinal()));
+
+        button.performAction(CLICK_ID);
+        TestUtils.waitUntil("Did not detect Power action being performed.",
+                TIMEOUT_UI_CHANGE_S,
+                () -> sLastGlobalAction.compareAndSet(
+                        GLOBAL_ACTION_POWER_DIALOG, NO_GLOBAL_ACTION));
+    }
+
+    @Test
+    public void testRecentButton_performsGlobalAction() throws Throwable {
+        AccessibilityNodeInfo button = findGridButtonInfo(getGridButtonList(),
+                String.valueOf(ShortcutId.ID_RECENT_VALUE.ordinal()));
+
+        button.performAction(CLICK_ID);
+        TestUtils.waitUntil("Did not detect Recents action being performed.",
+                TIMEOUT_UI_CHANGE_S,
+                () -> sLastGlobalAction.compareAndSet(
+                        GLOBAL_ACTION_RECENTS, NO_GLOBAL_ACTION));
+    }
+
+    @Test
+    public void testLockButton_performsGlobalAction() throws Throwable {
+        AccessibilityNodeInfo button = findGridButtonInfo(getGridButtonList(),
+                String.valueOf(ShortcutId.ID_LOCKSCREEN_VALUE.ordinal()));
+
+        button.performAction(CLICK_ID);
+        TestUtils.waitUntil("Did not detect Lock action being performed.",
+                TIMEOUT_UI_CHANGE_S,
+                () -> sLastGlobalAction.compareAndSet(
+                        GLOBAL_ACTION_LOCK_SCREEN, NO_GLOBAL_ACTION));
+    }
+
+    @Test
+    public void testQuickSettingsButton_performsGlobalAction() throws Throwable {
+        AccessibilityNodeInfo button = findGridButtonInfo(getGridButtonList(),
+                String.valueOf(ShortcutId.ID_QUICKSETTING_VALUE.ordinal()));
+
+        button.performAction(CLICK_ID);
+        TestUtils.waitUntil("Did not detect Quick Settings action being performed.",
+                TIMEOUT_UI_CHANGE_S,
+                () -> sLastGlobalAction.compareAndSet(
+                        GLOBAL_ACTION_QUICK_SETTINGS, NO_GLOBAL_ACTION));
+    }
+
+    @Test
+    public void testNotificationsButton_performsGlobalAction() throws Throwable {
+        AccessibilityNodeInfo button = findGridButtonInfo(getGridButtonList(),
+                String.valueOf(ShortcutId.ID_NOTIFICATION_VALUE.ordinal()));
+
+        button.performAction(CLICK_ID);
+        TestUtils.waitUntil("Did not detect Notifications action being performed.",
+                TIMEOUT_UI_CHANGE_S,
+                () -> sLastGlobalAction.compareAndSet(
+                        GLOBAL_ACTION_NOTIFICATIONS, NO_GLOBAL_ACTION));
+    }
+
+    @Test
+    public void testScreenshotButton_performsGlobalAction() throws Throwable {
+        AccessibilityNodeInfo button = findGridButtonInfo(getGridButtonList(),
+                String.valueOf(ShortcutId.ID_SCREENSHOT_VALUE.ordinal()));
+
+        button.performAction(CLICK_ID);
+        TestUtils.waitUntil("Did not detect Screenshot action being performed.",
+                TIMEOUT_UI_CHANGE_S,
+                () -> sLastGlobalAction.compareAndSet(
+                        GLOBAL_ACTION_TAKE_SCREENSHOT, NO_GLOBAL_ACTION));
     }
 }

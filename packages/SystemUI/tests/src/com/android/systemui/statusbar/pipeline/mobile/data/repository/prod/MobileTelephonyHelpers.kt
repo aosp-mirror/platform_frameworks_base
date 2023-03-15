@@ -16,10 +16,14 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
+import android.telephony.CellSignalStrengthCdma
+import android.telephony.SignalStrength
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.mockito.Mockito.verify
 
@@ -29,6 +33,19 @@ object MobileTelephonyHelpers {
         val callbackCaptor = argumentCaptor<TelephonyCallback>()
         verify(mockTelephonyManager).registerTelephonyCallback(any(), callbackCaptor.capture())
         return callbackCaptor.allValues
+    }
+
+    /** Convenience constructor for SignalStrength */
+    fun signalStrength(gsmLevel: Int, cdmaLevel: Int, isGsm: Boolean): SignalStrength {
+        val signalStrength = mock<SignalStrength>()
+        whenever(signalStrength.isGsm).thenReturn(isGsm)
+        whenever(signalStrength.level).thenReturn(gsmLevel)
+        val cdmaStrength =
+            mock<CellSignalStrengthCdma>().also { whenever(it.level).thenReturn(cdmaLevel) }
+        whenever(signalStrength.getCellSignalStrengths(CellSignalStrengthCdma::class.java))
+            .thenReturn(listOf(cdmaStrength))
+
+        return signalStrength
     }
 
     inline fun <reified T> getTelephonyCallbackForType(mockTelephonyManager: TelephonyManager): T {

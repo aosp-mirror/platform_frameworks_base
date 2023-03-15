@@ -29,4 +29,15 @@
         android:targetPackage="com.android.systemui.accessibility.accessibilitymenu.tests"
         android:label="AccessibilityMenu Test Cases">
     </instrumentation>
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VOICE_COMMAND" />
+        </intent>
+    </queries>
 </manifest>

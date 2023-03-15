@@ -1254,7 +1254,12 @@ public class TvView extends ViewGroup {
          * @param inputId The ID of the TV input bound to this view.
          * @param type The type of message received, such as
          *             {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
-         * @param data The raw data of the message
+         * @param data The raw data of the message. The bundle keys are:
+         *             {@link TvInputManager#TV_MESSAGE_KEY_STREAM_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_RAW_DATA}.
+         *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
+         *             how to parse this data.
          */
         public void onTvMessage(@NonNull String inputId,
                 @TvInputManager.TvMessageType int type, @NonNull Bundle data) {

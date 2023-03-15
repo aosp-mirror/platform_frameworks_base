@@ -60,7 +60,7 @@ public:
     virtual PointerIconStyle getDefaultPointerIconId() override;
     virtual PointerIconStyle getDefaultStylusIconId() override;
     virtual PointerIconStyle getCustomPointerIconId() override;
-    virtual void onPointerDisplayIdChanged(int32_t displayId, float xPos, float yPos) override;
+    virtual void onPointerDisplayIdChanged(int32_t displayId, const FloatPoint& position) override;
 
     bool allResourcesAreLoaded();
     bool noResourcesAreLoaded();
@@ -143,8 +143,8 @@ void MockPointerControllerPolicyInterface::loadPointerIconForType(SpriteIcon* ic
 }
 
 void MockPointerControllerPolicyInterface::onPointerDisplayIdChanged(int32_t displayId,
-                                                                     float /*xPos*/,
-                                                                     float /*yPos*/) {
+                                                                     const FloatPoint& /*position*/
+) {
     latestPointerDisplayId = displayId;
 }
 

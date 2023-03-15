@@ -17,23 +17,22 @@
 package com.android.server.credentials.metrics;
 
 /**
- * A part of the Candidate Phase, but emitted alongside {@link ChosenProviderMetric}. The user is
- * shown various entries from the provider responses, and may selectively browse through many
- * entries. It is possible that the initial set of browsing is for a provider that is ultimately
- * not chosen. This metric will be gathered PER browsing click, and aggregated, so that we can
- * understand where user interaction is more cumbersome, informing us for future improvements. This
- * can only be complete when the browsing is finished, ending in a final user choice, or possibly
- * a cancellation. Thus, this will be collected and emitted in the final phase, though collection
- * will begin in the candidate phase when the user begins browsing options.
+ * A part of the Candidate Phase, but emitted alongside {@link ChosenProviderFinalPhaseMetric}.
+ * The user is shown various entries from the provider responses, and may selectively browse through
+ * many entries. It is possible that the initial set of browsing is for a provider that is
+ * ultimately not chosen. This metric will be gathered PER browsing click, and aggregated, so that
+ * we can understand where user interaction is more cumbersome, informing us for future
+ * improvements. This can only be complete when the browsing is finished, ending in a final user
+ * choice, or possibly a cancellation. Thus, this will be collected and emitted in the final phase,
+ * though collection will begin in the candidate phase when the user begins browsing options.
  */
 public class CandidateBrowsingPhaseMetric {
 
-    private static final String TAG = "CandidateSelectionPhaseMetric";
-    private static final int SEQUENCE_ID = 3;
+    private static final String TAG = "CandidateBrowsingPhaseMetric";
     // The session id associated with the API Call this candidate provider is a part of, default -1
     private int mSessionId = -1;
-    // The EntryEnum that was pressed, defaults to -1 (TODO immediately, generate entry enum).
-    private int mEntryEnum = -1;
+    // The EntryEnum that was pressed, defaults to -1
+    private int mEntryEnum = EntryEnum.UNKNOWN.getMetricCode();
     // The provider associated with the press, defaults to -1
     private int mProviderUid = -1;
 
@@ -45,12 +44,6 @@ public class CandidateBrowsingPhaseMetric {
 
     public int getSessionId() {
         return mSessionId;
-    }
-
-    /* -- The sequence ID -- */
-
-    public int getSequenceId() {
-        return SEQUENCE_ID;
     }
 
     /* -- The Entry of this tap -- */
