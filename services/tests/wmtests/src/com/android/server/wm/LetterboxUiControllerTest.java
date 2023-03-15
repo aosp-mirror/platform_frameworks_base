@@ -453,8 +453,17 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mainWindow.mInvGlobalScale = invGlobalScale;
         mLetterboxConfiguration.setLetterboxActivityCornersRadius(configurationRadius);
 
+        doReturn(true).when(mActivity).isInLetterboxAnimation();
         assertEquals(expectedRadius, mController.getRoundedCornersRadius(mainWindow));
 
+        doReturn(false).when(mActivity).isInLetterboxAnimation();
+        assertEquals(expectedRadius, mController.getRoundedCornersRadius(mainWindow));
+
+        doReturn(false).when(mainWindow).isOnScreen();
+        assertEquals(0, mController.getRoundedCornersRadius(mainWindow));
+
+        doReturn(true).when(mActivity).isInLetterboxAnimation();
+        assertEquals(expectedRadius, mController.getRoundedCornersRadius(mainWindow));
     }
 
     @Test
@@ -489,6 +498,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
             doReturn(taskbar).when(insets).peekSource(taskbar.getType());
         }
         doReturn(mLetterboxedPortraitTaskBounds).when(mActivity).getBounds();
+        doReturn(false).when(mActivity).isInLetterboxAnimation();
         doReturn(true).when(mActivity).isVisible();
         doReturn(true).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
         doReturn(insets).when(mainWindow).getInsetsState();
