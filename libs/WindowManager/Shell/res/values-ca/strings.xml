@@ -56,7 +56,7 @@
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Inicia el mode d\'una mà"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Surt del mode d\'una mà"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Configuració de les bombolles: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Menú addicional"</string>
+    <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Menú de desbordament"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Torna a afegir a la pila"</string>
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> de: <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> (<xliff:g id="APP_NAME">%2$s</xliff:g>) i <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> més"</string>
