@@ -320,7 +320,7 @@ public final class DropBoxManagerService extends SystemService {
                     .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MERGED)
                     .setDeliveryGroupMatchingFilter(matchingFilter)
                     .setDeliveryGroupExtrasMerger(extrasMerger)
-                    .setDeferUntilActive(true)
+                    .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
                     .toBundle();
         }
 
