@@ -481,7 +481,6 @@ public class LongScreenshotActivity extends Activity {
             mCropView.setExtraPadding(extraPadding + mPreview.getPaddingTop(),
                     extraPadding + mPreview.getPaddingBottom());
             imageTop += (previewHeight - imageHeight) / 2;
-            mCropView.setExtraPadding(extraPadding, extraPadding);
             mCropView.setImageWidth(previewWidth);
             scale = previewWidth / (float) mPreview.getDrawable().getIntrinsicWidth();
         } else {
