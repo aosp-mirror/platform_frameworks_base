@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.wifi.sharedconnectivity.service.SharedConnectivityService;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -86,6 +87,7 @@ public final class HotspotNetwork implements Parcelable {
     @Nullable
     @SecurityType
     private final ArraySet<Integer> mHotspotSecurityTypes;
+    private final Bundle mExtras;
 
     /**
      * Builder class for {@link HotspotNetwork}.
@@ -102,8 +104,8 @@ public final class HotspotNetwork implements Parcelable {
         private String mHotspotBssid;
         @Nullable
         @SecurityType
-        private final ArraySet<Integer> mHotspotSecurityTypes =
-                new ArraySet<>();
+        private final ArraySet<Integer> mHotspotSecurityTypes = new ArraySet<>();
+        private Bundle mExtras = Bundle.EMPTY;
 
         /**
          * Set the remote device ID.
@@ -190,6 +192,17 @@ public final class HotspotNetwork implements Parcelable {
         }
 
         /**
+         * Sets the extras bundle
+         *
+         * @return Returns the Builder object.
+         */
+        @NonNull
+        public Builder setExtras(@NonNull Bundle extras) {
+            mExtras = extras;
+            return this;
+        }
+
+        /**
          * Builds the {@link HotspotNetwork} object.
          *
          * @return Returns the built {@link HotspotNetwork} object.
@@ -203,7 +216,8 @@ public final class HotspotNetwork implements Parcelable {
                     mNetworkName,
                     mHotspotSsid,
                     mHotspotBssid,
-                    mHotspotSecurityTypes);
+                    mHotspotSecurityTypes,
+                    mExtras);
         }
     }
 
@@ -231,7 +245,8 @@ public final class HotspotNetwork implements Parcelable {
             @NonNull String networkName,
             @Nullable String hotspotSsid,
             @Nullable String hotspotBssid,
-            @Nullable @SecurityType ArraySet<Integer> hotspotSecurityTypes) {
+            @Nullable @SecurityType ArraySet<Integer> hotspotSecurityTypes,
+            @NonNull Bundle extras) {
         validate(deviceId,
                 networkType,
                 networkName,
@@ -243,6 +258,7 @@ public final class HotspotNetwork implements Parcelable {
         mHotspotSsid = hotspotSsid;
         mHotspotBssid = hotspotBssid;
         mHotspotSecurityTypes = new ArraySet<>(hotspotSecurityTypes);
+        mExtras = extras;
     }
 
     /**
@@ -315,6 +331,16 @@ public final class HotspotNetwork implements Parcelable {
         return mHotspotSecurityTypes;
     }
 
+    /**
+     * Gets the extras Bundle.
+     *
+     * @return Returns a Bundle object.
+     */
+    @NonNull
+    public Bundle getExtras() {
+        return mExtras;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof HotspotNetwork)) return false;
@@ -348,6 +374,7 @@ public final class HotspotNetwork implements Parcelable {
         dest.writeString(mHotspotSsid);
         dest.writeString(mHotspotBssid);
         dest.writeArraySet(mHotspotSecurityTypes);
+        dest.writeBundle(mExtras);
     }
 
     /**
@@ -359,7 +386,7 @@ public final class HotspotNetwork implements Parcelable {
     public static HotspotNetwork readFromParcel(@NonNull Parcel in) {
         return new HotspotNetwork(in.readLong(), NetworkProviderInfo.readFromParcel(in),
                 in.readInt(), in.readString(), in.readString(), in.readString(),
-                (ArraySet<Integer>) in.readArraySet(null));
+                (ArraySet<Integer>) in.readArraySet(null), in.readBundle());
     }
 
     @NonNull
@@ -385,6 +412,7 @@ public final class HotspotNetwork implements Parcelable {
                 .append(", hotspotSsid=").append(mHotspotSsid)
                 .append(", hotspotBssid=").append(mHotspotBssid)
                 .append(", hotspotSecurityTypes=").append(mHotspotSecurityTypes.toString())
+                .append(", extras=").append(mExtras.toString())
                 .append("]").toString();
     }
 }

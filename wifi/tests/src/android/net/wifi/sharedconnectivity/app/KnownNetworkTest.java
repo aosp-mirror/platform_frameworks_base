@@ -25,6 +25,7 @@ import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.util.ArraySet;
 
@@ -47,6 +48,9 @@ public class KnownNetworkTest {
             new NetworkProviderInfo.Builder("TEST_NAME", "TEST_MODEL")
                     .setDeviceType(DEVICE_TYPE_TABLET).setConnectionStrength(2)
                     .setBatteryPercentage(50).build();
+    private static final String BUNDLE_KEY = "INT-KEY";
+    private static final int BUNDLE_VALUE = 1;
+
     private static final int NETWORK_SOURCE_1 = NETWORK_SOURCE_CLOUD_SELF;
     private static final String SSID_1 = "TEST_SSID1";
     private static final int[] SECURITY_TYPES_1 = {SECURITY_TYPE_PSK};
@@ -113,6 +117,7 @@ public class KnownNetworkTest {
         assertThat(network.getSsid()).isEqualTo(SSID);
         assertThat(network.getSecurityTypes()).containsExactlyElementsIn(securityTypes);
         assertThat(network.getNetworkProviderInfo()).isEqualTo(NETWORK_PROVIDER_INFO);
+        assertThat(network.getExtras().getInt(BUNDLE_KEY)).isEqualTo(BUNDLE_VALUE);
     }
 
     @Test
@@ -125,8 +130,15 @@ public class KnownNetworkTest {
 
     private KnownNetwork.Builder buildKnownNetworkBuilder() {
         KnownNetwork.Builder builder = new KnownNetwork.Builder().setNetworkSource(NETWORK_SOURCE)
-                .setSsid(SSID).setNetworkProviderInfo(NETWORK_PROVIDER_INFO);
+                .setSsid(SSID).setNetworkProviderInfo(NETWORK_PROVIDER_INFO)
+                .setExtras(buildBundle());
         Arrays.stream(SECURITY_TYPES).forEach(builder::addSecurityType);
         return builder;
+    }
+
+    private Bundle buildBundle() {
+        Bundle bundle = new Bundle();
+        bundle.putInt(BUNDLE_KEY, BUNDLE_VALUE);
+        return bundle;
     }
 }
