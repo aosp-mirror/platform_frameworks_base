@@ -31,8 +31,7 @@
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • वेगाने चार्ज होत आहे"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • सावकाश चार्ज होत आहे"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • बॅटरीचे संरक्षण करण्यासाठी चार्जिंग ऑप्टिमाइझ केले आहे"</string>
-    <!-- no translation found for keyguard_plugged_in_incompatible_charger (3687961801947819076) -->
-    <skip />
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्जिंगच्या ॲक्सेसरीसंबंधित समस्या"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"अनलॉक करण्यासाठी मेनू दाबा."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"नेटवर्क लॉक केले"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"सिम नाही"</string>
