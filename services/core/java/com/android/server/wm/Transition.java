@@ -1012,6 +1012,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             dc.removeImeSurfaceImmediately();
             dc.handleCompleteDeferredRemoval();
         }
+        validateVisibility();
 
         mState = STATE_FINISHED;
         mController.mTransitionTracer.logState(this);
@@ -1920,6 +1921,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 change.setLastParent(info.mStartParent.mRemoteToken.toWindowContainerToken());
             }
             change.setMode(info.getTransitMode(target));
+            info.mReadyMode = change.getMode();
             change.setStartAbsBounds(info.mAbsoluteBounds);
             change.setFlags(info.getChangeFlags(target));
             change.setDisplayId(info.mDisplayId, getDisplayId(target));
@@ -2177,6 +2179,26 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return mainWin.getAttrs().rotationAnimation;
     }
 
+    private void validateVisibility() {
+        for (int i = mTargets.size() - 1; i >= 0; --i) {
+            if (reduceMode(mTargets.get(i).mReadyMode) != TRANSIT_CLOSE) {
+                return;
+            }
+        }
+        // All modes are CLOSE. The surfaces may be hidden by the animation unexpectedly.
+        // If the window container should be visible, then recover it.
+        mController.mStateValidators.add(() -> {
+            for (int i = mTargets.size() - 1; i >= 0; --i) {
+                final ChangeInfo change = mTargets.get(i);
+                if (!change.mContainer.isVisibleRequested()) continue;
+                Slog.e(TAG, "Force show for visible " + change.mContainer
+                        + " which may be hidden by transition unexpectedly");
+                change.mContainer.getSyncTransaction().show(change.mContainer.mSurfaceControl);
+                change.mContainer.scheduleAnimation();
+            }
+        });
+    }
+
     /** Applies the new configuration for the changed displays. */
     void applyDisplayChangeIfNeeded() {
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
@@ -2261,6 +2283,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         /** Snapshot surface and luma, if relevant. */
         SurfaceControl mSnapshot;
         float mSnapshotLuma;
+
+        /** The mode which is set when the transition is ready. */
+        @TransitionInfo.TransitionMode
+        int mReadyMode;
 
         ChangeInfo(@NonNull WindowContainer origState) {
             mContainer = origState;
