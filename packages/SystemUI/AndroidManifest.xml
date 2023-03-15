@@ -924,7 +924,7 @@
                   android:showForAllUsers="true"
                   android:finishOnTaskLaunch="true"
                   android:launchMode="singleInstance"
-                  android:configChanges="screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden"
+                  android:configChanges="screenLayout|keyboard|keyboardHidden|orientation"
                   android:visibleToInstantApps="true">
         </activity>
 
