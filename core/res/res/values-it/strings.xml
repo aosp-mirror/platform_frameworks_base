@@ -141,6 +141,8 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Chiamate Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Off"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Chiamata tramite Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Chiamata su rete mobile"</string>
@@ -1394,10 +1396,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Scegli il metodo di immissione"</string>
     <string name="show_ime" msgid="6406112007347443383">"Tieni sullo schermo quando è attiva la tastiera fisica"</string>
     <string name="hardware" msgid="1800597768237606953">"Mostra tastiera virtuale"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (5823199895322205589) -->
-    <skip />
-    <!-- no translation found for select_multiple_keyboards_layout_notification_title (6999491025126641938) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configura <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Configura le tastiere fisiche"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Tocca per selezionare la lingua e il layout"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1995,7 +1995,7 @@
     <string name="app_info" msgid="6113278084877079851">"Informazioni app"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Avvio della demo…"</string>
-    <string name="demo_restarting_message" msgid="1160053183701746766">"Ripristino del dispositivo…"</string>
+    <string name="demo_restarting_message" msgid="1160053183701746766">"Reset del dispositivo…"</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"Widget <xliff:g id="LABEL">%1$s</xliff:g> disattivato"</string>
     <string name="conference_call" msgid="5731633152336490471">"Audioconferenza"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"Descrizione comando"</string>
@@ -2327,18 +2327,11 @@
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Il dispositivo è troppo caldo"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Il doppio schermo non è disponibile perché il telefono si sta surriscaldando"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Disattiva"</string>
-    <!-- no translation found for keyboard_layout_notification_selected_title (1202560174252421219) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_one_selected_message (4314216053129257197) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_two_selected_message (1876349944065922950) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_three_selected_message (280734264593115419) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_more_than_three_selected_message (1581834181578206937) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_multiple_selected_title (5242444914367024499) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_multiple_selected_message (6576533454124419202) -->
-    <skip />
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Dispositivo <xliff:g id="DEVICE_NAME">%s</xliff:g> configurato"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Layout tastiera impostato su <xliff:g id="LAYOUT_1">%s</xliff:g>. Tocca per cambiare l\'impostazione."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Layout tastiera impostato su <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Tocca per cambiare l\'impostazione."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Layout tastiera impostato su <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Tocca per cambiare l\'impostazione."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Layout tastiera impostato su <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Tocca per cambiare l\'impostazione."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Tastiere fisiche configurate"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Tocca per visualizzare le tastiere"</string>
 </resources>

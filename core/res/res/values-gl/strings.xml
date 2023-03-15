@@ -140,6 +140,8 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wifi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Chamadas por wifi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Desactivado"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Chama por wifi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Chama pola rede de telefonía móbil"</string>
@@ -1393,10 +1395,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Escoller método de introdución de texto"</string>
     <string name="show_ime" msgid="6406112007347443383">"Móstrase na pantalla mentres o teclado físico estea activo"</string>
     <string name="hardware" msgid="1800597768237606953">"Mostrar teclado virtual"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (5823199895322205589) -->
-    <skip />
-    <!-- no translation found for select_multiple_keyboards_layout_notification_title (6999491025126641938) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configura o teclado (<xliff:g id="DEVICE_NAME">%s</xliff:g>)"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Configura os teclados físicos"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Toca para seleccionar o idioma e o deseño"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"</string>
@@ -1721,8 +1721,7 @@
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Dispositivos auditivos"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas de volume premidas. Activouse o servizo <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume premidas. Desactivouse <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for accessibility_shortcut_spoken_feedback (3760999147597564314) -->
-    <skip />
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Solta as teclas de volume. Para activar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, mantenas premidas de novo durante 3 segundos."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Escolle a función que queres utilizar cando toques o botón Accesibilidade:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Escolle a función que queres usar co xesto de accesibilidade (pasa dous dedos cara arriba desde a parte inferior da pantalla):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Escolle a función que queres usar co xesto de accesibilidade (pasa tres dedos cara arriba desde a parte inferior da pantalla):"</string>
@@ -2327,18 +2326,11 @@
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"O dispositivo está demasiado quente"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"A pantalla dual non está dispoñible porque o teléfono está quentando demasiado"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desactivar"</string>
-    <!-- no translation found for keyboard_layout_notification_selected_title (1202560174252421219) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_one_selected_message (4314216053129257197) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_two_selected_message (1876349944065922950) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_three_selected_message (280734264593115419) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_more_than_three_selected_message (1581834181578206937) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_multiple_selected_title (5242444914367024499) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_multiple_selected_message (6576533454124419202) -->
-    <skip />
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Configurouse o teclado (<xliff:g id="DEVICE_NAME">%s</xliff:g>)"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"O deseño do teclado estableceuse en <xliff:g id="LAYOUT_1">%s</xliff:g>. Toca para cambialo."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"O deseño do teclado estableceuse en <xliff:g id="LAYOUT_1">%1$s</xliff:g> e <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Toca para cambialo."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"O deseño do teclado estableceuse en <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> e <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Toca para cambialo."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"O deseño do teclado estableceuse en <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Toca para cambialo."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Configuráronse varios teclados físicos"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Toca para ver os teclados"</string>
 </resources>
