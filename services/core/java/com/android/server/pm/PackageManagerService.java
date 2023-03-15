@@ -1329,7 +1329,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             throw new ParcelableException(new PackageManager.NameNotFoundException(packageName));
         }
 
-        final InstallSourceInfo installSourceInfo = snapshot.getInstallSourceInfo(packageName);
+        final InstallSourceInfo installSourceInfo = snapshot.getInstallSourceInfo(packageName,
+                userId);
         final String installerPackageName;
         if (installSourceInfo != null) {
             if (!TextUtils.isEmpty(installSourceInfo.getInitiatingPackageName())) {

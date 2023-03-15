@@ -463,8 +463,9 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @Override
     @Nullable
     @Deprecated
-    public final InstallSourceInfo getInstallSourceInfo(@NonNull String packageName) {
-        return snapshot().getInstallSourceInfo(packageName);
+    public final InstallSourceInfo getInstallSourceInfo(@NonNull String packageName,
+            @UserIdInt int userId) {
+        return snapshot().getInstallSourceInfo(packageName, userId);
     }
 
     @Override
