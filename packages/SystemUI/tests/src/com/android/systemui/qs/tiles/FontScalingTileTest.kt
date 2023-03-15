@@ -84,6 +84,7 @@ class FontScalingTileTest : SysuiTestCase() {
                 qsLogger,
                 dialogLaunchAnimator,
                 FakeSettings(),
+                FakeSettings(),
                 featureFlags
             )
         fontScalingTile.initialize()

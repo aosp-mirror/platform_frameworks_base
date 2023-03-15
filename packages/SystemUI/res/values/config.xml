@@ -99,6 +99,7 @@
         <item>accessibility_display_daltonizer_enabled:color_correction</item>
         <item>accessibility_display_inversion_enabled:inversion</item>
         <item>one_handed_mode_enabled:onehanded</item>
+        <item>accessibility_font_scaling_has_been_changed:font_scaling</item>
     </string-array>
 
     <!-- Use collapsed layout for media player in landscape QQS -->
