@@ -646,12 +646,15 @@ public class MediaControlPanel {
                     } else {
                         mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
                         if (device.getIntent() != null) {
-                            if (device.getIntent().isActivity()) {
-                                mActivityStarter.startActivity(
-                                        device.getIntent().getIntent(), true);
+                            PendingIntent deviceIntent = device.getIntent();
+                            boolean showOverLockscreen = mKeyguardStateController.isShowing()
+                                    && mActivityIntentHelper.wouldPendingShowOverLockscreen(
+                                        deviceIntent, mLockscreenUserManager.getCurrentUserId());
+                            if (deviceIntent.isActivity() && !showOverLockscreen) {
+                                mActivityStarter.postStartActivityDismissingKeyguard(deviceIntent);
                             } else {
                                 try {
-                                    device.getIntent().send();
+                                    deviceIntent.send();
                                 } catch (PendingIntent.CanceledException e) {
                                     Log.e(TAG, "Device pending intent was canceled");
                                 }
