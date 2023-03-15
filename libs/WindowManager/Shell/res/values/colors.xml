@@ -54,4 +54,14 @@
     <color name="splash_screen_bg_light">#FFFFFF</color>
     <color name="splash_screen_bg_dark">#000000</color>
     <color name="splash_window_background_default">@color/splash_screen_bg_light</color>
+
+    <!-- Desktop Mode -->
+    <color name="desktop_mode_caption_handle_bar_light">#EFF1F2</color>
+    <color name="desktop_mode_caption_handle_bar_dark">#1C1C17</color>
+    <color name="desktop_mode_caption_expand_button_light">#EFF1F2</color>
+    <color name="desktop_mode_caption_expand_button_dark">#48473A</color>
+    <color name="desktop_mode_caption_close_button_light">#EFF1F2</color>
+    <color name="desktop_mode_caption_close_button_dark">#1C1C17</color>
+    <color name="desktop_mode_caption_app_name_light">#EFF1F2</color>
+    <color name="desktop_mode_caption_app_name_dark">#1C1C17</color>
 </resources>
