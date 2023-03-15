@@ -89,11 +89,12 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mBackNavigationController = Mockito.spy(new BackNavigationController());
+        final BackNavigationController original = new BackNavigationController();
+        original.setWindowManager(mWm);
+        mBackNavigationController = Mockito.spy(original);
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         mWindowManagerInternal = mock(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
-        mBackNavigationController.setWindowManager(mWm);
         mBackAnimationAdapter = mock(BackAnimationAdapter.class);
         mRootHomeTask = initHomeActivity();
     }
@@ -129,7 +130,9 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         // verify if back animation would start.
         assertTrue("Animation scheduled", backNavigationInfo.isPrepareRemoteAnimation());
 
-        // reset drawning status
+        // reset drawing status
+        backNavigationInfo.onBackNavigationFinished(false);
+        mBackNavigationController.clearBackAnimations();
         topTask.forAllWindows(w -> {
             makeWindowVisibleAndDrawn(w);
         }, true);
@@ -138,6 +141,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertThat(typeToString(backNavigationInfo.getType()))
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_CALLBACK));
 
+        backNavigationInfo.onBackNavigationFinished(false);
+        mBackNavigationController.clearBackAnimations();
         doReturn(true).when(recordA).canShowWhenLocked();
         backNavigationInfo = startBackNavigation();
         assertThat(typeToString(backNavigationInfo.getType()))
@@ -194,6 +199,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertTrue("Animation scheduled", backNavigationInfo.isPrepareRemoteAnimation());
 
         // reset drawing status
+        backNavigationInfo.onBackNavigationFinished(false);
+        mBackNavigationController.clearBackAnimations();
         testCase.recordFront.forAllWindows(w -> {
             makeWindowVisibleAndDrawn(w);
         }, true);
@@ -202,6 +209,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertThat(typeToString(backNavigationInfo.getType()))
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_CALLBACK));
 
+        backNavigationInfo.onBackNavigationFinished(false);
+        mBackNavigationController.clearBackAnimations();
         doReturn(true).when(testCase.recordBack).canShowWhenLocked();
         backNavigationInfo = startBackNavigation();
         assertThat(typeToString(backNavigationInfo.getType()))
@@ -240,6 +249,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertThat(typeToString(backNavigationInfo.getType()))
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_RETURN_TO_HOME));
 
+        backNavigationInfo.onBackNavigationFinished(false);
+        mBackNavigationController.clearBackAnimations();
         setupKeyguardOccluded();
         backNavigationInfo = startBackNavigation();
         assertThat(typeToString(backNavigationInfo.getType()))
@@ -553,6 +564,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertTrue(toHomeBuilder.mIsLaunchBehind);
         toHomeBuilder.build();
         verify(animationHandler, never()).createStartingSurface(any());
+        animationHandler.clearBackAnimateTarget();
 
         // Back to ACTIVITY and TASK have the same logic, just with different target.
         final ActivityRecord topActivity = createActivityRecord(task);
