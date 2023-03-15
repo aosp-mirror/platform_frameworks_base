@@ -170,6 +170,23 @@ public class GenerationRegistryTest {
         checkBundle(b, 1, 2, false);
     }
 
+    @Test
+    public void testGlobalSettings() throws IOException {
+        final GenerationRegistry generationRegistry = new GenerationRegistry(new Object());
+        final int globalKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_GLOBAL, 0);
+        final String testGlobalSetting = "test_global_setting";
+        final Bundle b = new Bundle();
+        generationRegistry.addGenerationData(b, globalKey, testGlobalSetting);
+        checkBundle(b, 0, 1, false);
+        final MemoryIntArray array = getArray(b);
+        final int globalKey2 = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_GLOBAL, 10);
+        b.clear();
+        generationRegistry.addGenerationData(b, globalKey2, testGlobalSetting);
+        checkBundle(b, 0, 1, false);
+        final MemoryIntArray array2 = getArray(b);
+        // Check that user10 and user0 use the same array to store global settings' generations
+        assertThat(array).isEqualTo(array2);
+    }
 
     private void checkBundle(Bundle b, int expectedIndex, int expectedGeneration, boolean isNull)
             throws IOException {
