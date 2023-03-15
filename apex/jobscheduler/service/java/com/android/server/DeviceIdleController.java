@@ -2625,7 +2625,7 @@ public class DeviceIdleController extends SystemService
 
                 final Bundle mostRecentDeliveryOptions = BroadcastOptions.makeBasic()
                         .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
-                        .setDeferUntilActive(true)
+                        .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
                         .toBundle();
 
                 mIdleIntent = new Intent(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
