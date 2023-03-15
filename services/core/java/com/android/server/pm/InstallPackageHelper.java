@@ -1134,22 +1134,22 @@ final class InstallPackageHelper {
         // behavior.
         if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
                 "MinInstallableTargetSdk__install_block_enabled",
-                true)) {
+                false)) {
             int minInstallableTargetSdk =
                     DeviceConfig.getInt(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
                             "MinInstallableTargetSdk__min_installable_target_sdk",
-                            PackageManagerService.MIN_INSTALLABLE_TARGET_SDK);
+                            0);
 
             // Determine if enforcement is in strict mode
             boolean strictMode = false;
 
             if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
                     "MinInstallableTargetSdk__install_block_strict_mode_enabled",
-                    true)) {
+                    false)) {
                 if (parsedPackage.getTargetSdkVersion()
                         < DeviceConfig.getInt(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
                         "MinInstallableTargetSdk__strict_mode_target_sdk",
-                        PackageManagerService.MIN_INSTALLABLE_TARGET_SDK)) {
+                        0)) {
                     strictMode = true;
                 }
             }
