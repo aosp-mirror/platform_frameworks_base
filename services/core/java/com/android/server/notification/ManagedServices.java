@@ -26,6 +26,7 @@ import static android.service.notification.NotificationListenerService.META_DATA
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -1520,8 +1521,11 @@ abstract public class ManagedServices {
 
         intent.putExtra(Intent.EXTRA_CLIENT_LABEL, mConfig.clientLabel);
 
+        final ActivityOptions activityOptions = ActivityOptions.makeBasic();
+        activityOptions.setIgnorePendingIntentCreatorForegroundState(true);
         final PendingIntent pendingIntent = PendingIntent.getActivity(
-            mContext, 0, new Intent(mConfig.settingsAction), PendingIntent.FLAG_IMMUTABLE);
+                mContext, 0, new Intent(mConfig.settingsAction), PendingIntent.FLAG_IMMUTABLE,
+                activityOptions.toBundle());
         intent.putExtra(Intent.EXTRA_CLIENT_INTENT, pendingIntent);
 
         ApplicationInfo appInfo = null;
