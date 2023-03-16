@@ -294,7 +294,7 @@ interface IWindowSession {
     * an input channel where the client can receive input.
     */
     void grantInputChannel(int displayId, in SurfaceControl surface, in IWindow window,
-            in IBinder hostInputToken, int flags, int privateFlags, int type,
+            in IBinder hostInputToken, int flags, int privateFlags, int inputFeatures, int type,
             in IBinder windowToken, in IBinder focusGrantToken, String inputHandleName,
             out InputChannel outInputChannel);
 
@@ -302,7 +302,8 @@ interface IWindowSession {
      * Update the flags on an input channel associated with a particular surface.
      */
     oneway void updateInputChannel(in IBinder channelToken, int displayId,
-            in SurfaceControl surface, int flags, int privateFlags, in Region region);
+            in SurfaceControl surface, int flags, int privateFlags, int inputFeatures,
+            in Region region);
 
     /**
      * Transfer window focus to an embedded window if the calling window has focus.
