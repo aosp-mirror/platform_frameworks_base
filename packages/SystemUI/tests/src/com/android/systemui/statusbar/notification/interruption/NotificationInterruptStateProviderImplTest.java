@@ -51,7 +51,6 @@ import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.service.dreams.IDreamManager;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -86,8 +85,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
 
     @Mock
     PowerManager mPowerManager;
-    @Mock
-    IDreamManager mDreamManager;
     @Mock
     AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     @Mock
@@ -126,7 +123,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                 new NotificationInterruptStateProviderImpl(
                         mContext.getContentResolver(),
                         mPowerManager,
-                        mDreamManager,
                         mAmbientDisplayConfiguration,
                         mBatteryController,
                         mStatusBarStateController,
@@ -150,7 +146,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mHeadsUpManager.isSnoozed(any())).thenReturn(false);
 
         when(mStatusBarStateController.isDozing()).thenReturn(false);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mPowerManager.isScreenOn()).thenReturn(true);
     }
 
@@ -352,7 +348,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
 
         // Also not in use if screen is on but we're showing screen saver / "dreaming"
         when(mPowerManager.isDeviceIdleMode()).thenReturn(true);
-        when(mDreamManager.isDreaming()).thenReturn(true);
+        when(mStatusBarStateController.isDreaming()).thenReturn(true);
         assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isFalse();
     }
 
@@ -532,7 +528,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     public void testShouldNotFullScreen_notPendingIntent() throws RemoteException {
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
         when(mPowerManager.isInteractive()).thenReturn(true);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
 
         assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
@@ -551,7 +547,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                 .setSuppressedVisualEffects(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT)
                 .build();
         when(mPowerManager.isInteractive()).thenReturn(false);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
 
         assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
@@ -570,7 +566,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                 .setSuppressedVisualEffects(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT)
                 .build();
         when(mPowerManager.isInteractive()).thenReturn(false);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
 
         assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
@@ -592,7 +588,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     public void testShouldNotFullScreen_notHighImportance() throws RemoteException {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_DEFAULT, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
 
         assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
@@ -614,7 +610,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     public void testShouldNotFullScreen_isGroupAlertSilenced() throws RemoteException {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ true);
         when(mPowerManager.isInteractive()).thenReturn(false);
-        when(mDreamManager.isDreaming()).thenReturn(true);
+        when(mStatusBarStateController.isDreaming()).thenReturn(true);
         when(mStatusBarStateController.getState()).thenReturn(KEYGUARD);
 
         assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
@@ -643,7 +639,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     public void testShouldFullScreen_notInteractive() throws RemoteException {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(false);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
 
         assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
@@ -665,7 +661,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     public void testShouldFullScreen_isDreaming() throws RemoteException {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
-        when(mDreamManager.isDreaming()).thenReturn(true);
+        when(mStatusBarStateController.isDreaming()).thenReturn(true);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
 
         assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
@@ -687,7 +683,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     public void testShouldFullScreen_onKeyguard() throws RemoteException {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(KEYGUARD);
 
         assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
@@ -710,7 +706,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
 
         assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
@@ -727,7 +723,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
         when(mHeadsUpManager.isSnoozed("a")).thenReturn(true);
 
@@ -746,7 +742,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
         when(mHeadsUpManager.isSnoozed("a")).thenReturn(true);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
@@ -767,7 +763,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
         when(mHeadsUpManager.isSnoozed("a")).thenReturn(true);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
@@ -792,7 +788,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE_LOCKED);
         when(mHeadsUpManager.isSnoozed("a")).thenReturn(true);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
@@ -813,7 +809,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE_LOCKED);
         when(mHeadsUpManager.isSnoozed("a")).thenReturn(true);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
@@ -838,7 +834,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
         when(mHeadsUpManager.isSnoozed("a")).thenReturn(true);
         when(mKeyguardStateController.isShowing()).thenReturn(false);
@@ -859,7 +855,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
-        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
         when(mHeadsUpManager.isSnoozed("a")).thenReturn(true);
         when(mKeyguardStateController.isShowing()).thenReturn(false);
