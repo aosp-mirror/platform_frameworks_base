@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -73,6 +74,7 @@ public final class KnownNetwork implements Parcelable {
     @SecurityType
     private final ArraySet<Integer> mSecurityTypes;
     private final NetworkProviderInfo mNetworkProviderInfo;
+    private final Bundle mExtras;
 
     /**
      * Builder class for {@link KnownNetwork}.
@@ -84,6 +86,7 @@ public final class KnownNetwork implements Parcelable {
         @SecurityType
         private final ArraySet<Integer> mSecurityTypes = new ArraySet<>();
         private NetworkProviderInfo mNetworkProviderInfo;
+        private Bundle mExtras = Bundle.EMPTY;
 
         /**
          * Sets the indicated source of the known network.
@@ -135,6 +138,17 @@ public final class KnownNetwork implements Parcelable {
         }
 
         /**
+         * Sets the extras bundle
+         *
+         * @return Returns the Builder object.
+         */
+        @NonNull
+        public Builder setExtras(@NonNull Bundle extras) {
+            mExtras = extras;
+            return this;
+        }
+
+        /**
          * Builds the {@link KnownNetwork} object.
          *
          * @return Returns the built {@link KnownNetwork} object.
@@ -145,7 +159,8 @@ public final class KnownNetwork implements Parcelable {
                     mNetworkSource,
                     mSsid,
                     mSecurityTypes,
-                    mNetworkProviderInfo);
+                    mNetworkProviderInfo,
+                    mExtras);
         }
     }
 
@@ -173,12 +188,14 @@ public final class KnownNetwork implements Parcelable {
             @NetworkSource int networkSource,
             @NonNull String ssid,
             @NonNull @SecurityType ArraySet<Integer> securityTypes,
-            @Nullable NetworkProviderInfo networkProviderInfo) {
+            @Nullable NetworkProviderInfo networkProviderInfo,
+            @NonNull Bundle extras) {
         validate(networkSource, ssid, securityTypes, networkProviderInfo);
         mNetworkSource = networkSource;
         mSsid = ssid;
         mSecurityTypes = new ArraySet<>(securityTypes);
         mNetworkProviderInfo = networkProviderInfo;
+        mExtras = extras;
     }
 
     /**
@@ -223,6 +240,16 @@ public final class KnownNetwork implements Parcelable {
         return mNetworkProviderInfo;
     }
 
+    /**
+     * Gets the extras Bundle.
+     *
+     * @return Returns a Bundle object.
+     */
+    @NonNull
+    public Bundle getExtras() {
+        return mExtras;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof KnownNetwork)) return false;
@@ -249,6 +276,7 @@ public final class KnownNetwork implements Parcelable {
         dest.writeString(mSsid);
         dest.writeArraySet(mSecurityTypes);
         mNetworkProviderInfo.writeToParcel(dest, flags);
+        dest.writeBundle(mExtras);
     }
 
     /**
@@ -260,7 +288,7 @@ public final class KnownNetwork implements Parcelable {
     public static KnownNetwork readFromParcel(@NonNull Parcel in) {
         return new KnownNetwork(in.readInt(), in.readString(),
                 (ArraySet<Integer>) in.readArraySet(null),
-                NetworkProviderInfo.readFromParcel(in));
+                NetworkProviderInfo.readFromParcel(in), in.readBundle());
     }
 
     @NonNull
@@ -283,6 +311,7 @@ public final class KnownNetwork implements Parcelable {
                 .append(", ssid=").append(mSsid)
                 .append(", securityTypes=").append(mSecurityTypes.toString())
                 .append(", networkProviderInfo=").append(mNetworkProviderInfo.toString())
+                .append(", extras=").append(mExtras.toString())
                 .append("]").toString();
     }
 }
