@@ -110,16 +110,6 @@ interface IWindowSession {
             int requestedWidth, int requestedHeight, int viewVisibility, int flags, int seq,
             int lastSyncSeqId);
 
-    /*
-     * Notify the window manager that an application is relaunching and
-     * windows should be prepared for replacement.
-     *
-     * @param appToken The application
-     * @param childrenOnly Whether to only prepare child windows for replacement
-     * (for example when main windows are being reused via preservation).
-     */
-    oneway void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly);
-
     /**
      * Called by a client to report that it ran out of graphics memory.
      */
