@@ -417,7 +417,8 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mUseBLASTAdapter;
     private boolean mForceDisableBLAST;
 
-    private boolean mFastScrollSoundEffectsEnabled;
+    /** lazily-initialized in getAudioManager() */
+    private boolean mFastScrollSoundEffectsEnabled = false;
 
     /**
      * Signals that compatibility booleans have been initialized according to
@@ -1028,8 +1029,6 @@ public final class ViewRootImpl implements ViewParent,
 
         loadSystemProperties();
         mImeFocusController = new ImeFocusController(this);
-        AudioManager audioManager = mContext.getSystemService(AudioManager.class);
-        mFastScrollSoundEffectsEnabled = audioManager.areNavigationRepeatSoundEffectsEnabled();
 
         mScrollCaptureRequestTimeout = SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS;
         mOnBackInvokedDispatcher = new WindowOnBackInvokedDispatcher(context);
@@ -8344,6 +8343,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         if (mAudioManager == null) {
             mAudioManager = (AudioManager) mView.getContext().getSystemService(Context.AUDIO_SERVICE);
+            mFastScrollSoundEffectsEnabled = mAudioManager.areNavigationRepeatSoundEffectsEnabled();
         }
         return mAudioManager;
     }
