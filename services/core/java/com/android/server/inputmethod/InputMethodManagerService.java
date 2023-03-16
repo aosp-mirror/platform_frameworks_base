@@ -2339,6 +2339,19 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    /** {@code true} when a {@link ClientState} has attached from starting the input connection. */
+    @GuardedBy("ImfLock.class")
+    boolean hasAttachedClient() {
+        return mCurClient != null;
+    }
+
+    @VisibleForTesting
+    void setAttachedClientForTesting(@NonNull ClientState cs) {
+        synchronized (ImfLock.class) {
+            mCurClient = cs;
+        }
+    }
+
     @GuardedBy("ImfLock.class")
     void clearInputShownLocked() {
         mVisibilityStateComputer.setInputShown(false);
