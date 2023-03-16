@@ -863,10 +863,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/263984287): Make this public API.
+    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION =
             "android.window.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION";
 
@@ -899,8 +897,6 @@ public interface WindowManager extends ViewManager {
      *     android:value="false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
     // TODO(b/263984287): Make this public API.
     String PROPERTY_COMPAT_ALLOW_SANDBOXING_VIEW_BOUNDS_APIS =
@@ -937,10 +933,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/263984287): Make this public API.
+    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_ENABLE_FAKE_FOCUS = "android.window.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS";
 
     /**
@@ -976,10 +970,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/263984287): Make this public API.
+    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION =
             "android.window.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION";
 
@@ -1023,10 +1015,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/263984287): Make this public API.
+    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH =
             "android.window.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH";
 
@@ -1073,17 +1063,28 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/263984287): Make this public API.
+    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE =
             "android.window.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE";
 
     /**
      * Application level {@link android.content.pm.PackageManager.Property PackageManager
      * .Property} for an app to inform the system that the app should be excluded from the
-     * compatibility override for orientation set by the device manufacturer.
+     * compatibility override for orientation set by the device manufacturer. When the orientation
+     * override is applied it can:
+     * <ul>
+     *   <li>Replace the specific orientation requested by the app with another selected by the
+             device manufacturer, e.g. replace undefined requested by the app with portrait.
+     *   <li>Always use an orientation selected by the device manufacturer.
+     *   <li>Do one of the above but only when camera connection is open.
+     * </ul>
+     *
+     * <p>This property is different from {@link PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION}
+     * (which is used to avoid orientation loops caused by the incorrect use of {@link
+     * android.app.Activity#setRequestedOrientation}) because this property overrides the app to an
+     * orientation selected by the device manufacturer rather than ignoring one of orientation
+     * requests coming from the app while respecting the previous one.
      *
      * <p>With this property set to {@code true} or unset, device manufacturers can override
      * orientation for the app using their discretion to improve display compatibility.
@@ -1099,10 +1100,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/263984287): Make this public API.
+    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE =
             "android.window.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE";
 
@@ -1144,10 +1143,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/263984287): Make this public API.
+    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE =
             "android.window.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE";
 
