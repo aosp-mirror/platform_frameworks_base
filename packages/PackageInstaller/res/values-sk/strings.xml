@@ -68,7 +68,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"Prebieha odinštalovanie balíka <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Odinštalovanie bolo dokončené."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Balík <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> bol odinštalovaný"</string>
-    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Klon balíka <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> bol odstránený"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Klon <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> bol odstránený"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Nepodarilo sa odinštalovať."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Balík <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> sa nepodarilo odinštalovať."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Klon <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> sa odstraňuje…"</string>
