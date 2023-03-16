@@ -329,9 +329,14 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return mTaskOrganizer.getRunningTaskInfo(taskId);
     }
 
+    /** Check task is under split or not by taskId. */
     public boolean isTaskInSplitScreen(int taskId) {
-        return isSplitScreenVisible()
-                && mStageCoordinator.getStageOfTask(taskId) != STAGE_TYPE_UNDEFINED;
+        return mStageCoordinator.getStageOfTask(taskId) != STAGE_TYPE_UNDEFINED;
+    }
+
+    /** Check split is foreground and task is under split or not by taskId. */
+    public boolean isTaskInSplitScreenForeground(int taskId) {
+        return isTaskInSplitScreen(taskId) && isSplitScreenVisible();
     }
 
     public @SplitPosition int getSplitPosition(int taskId) {
