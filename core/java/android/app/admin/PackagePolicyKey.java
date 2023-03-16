@@ -23,6 +23,7 @@ import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_KEY;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -50,6 +51,7 @@ public final class PackagePolicyKey extends PolicyKey {
     /**
      * @hide
      */
+    @TestApi
     public PackagePolicyKey(@NonNull String key, @NonNull String packageName) {
         super(key);
         mPackageName = Objects.requireNonNull((packageName));
