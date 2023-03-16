@@ -185,7 +185,6 @@ public class ZygoteInit {
     private static void preloadSharedLibraries() {
         Log.i(TAG, "Preloading shared libraries...");
         System.loadLibrary("android");
-        System.loadLibrary("compiler_rt");
         System.loadLibrary("jnigraphics");
     }
 
