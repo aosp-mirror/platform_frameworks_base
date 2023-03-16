@@ -29,14 +29,15 @@ import com.android.systemui.plugins.ClockMetadata
 import com.android.systemui.plugins.ClockProvider
 import com.android.systemui.plugins.ClockProviderPlugin
 import com.android.systemui.plugins.ClockSettings
+import com.android.systemui.plugins.PluginLifecycleManager
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.plugins.PluginManager
 import com.android.systemui.util.Assert
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-private val TAG = ClockRegistry::class.simpleName!!
 private const val DEBUG = true
 private val KEY_TIMESTAMP = "appliedTimestamp"
 
@@ -51,7 +52,10 @@ open class ClockRegistry(
     val handleAllUsers: Boolean,
     defaultClockProvider: ClockProvider,
     val fallbackClockId: ClockId = DEFAULT_CLOCK_ID,
+    val keepAllLoaded: Boolean,
+    val subTag: String,
 ) {
+    private val TAG = "${ClockRegistry::class.simpleName} ($subTag)"
     interface ClockChangeListener {
         // Called when the active clock changes
         fun onCurrentClockChanged() {}
@@ -76,11 +80,85 @@ open class ClockRegistry(
 
     private val pluginListener =
         object : PluginListener<ClockProviderPlugin> {
-            override fun onPluginConnected(plugin: ClockProviderPlugin, context: Context) =
-                connectClocks(plugin)
+            override fun onPluginAttached(manager: PluginLifecycleManager<ClockProviderPlugin>) {
+                manager.loadPlugin()
+            }
 
-            override fun onPluginDisconnected(plugin: ClockProviderPlugin) =
-                disconnectClocks(plugin)
+            override fun onPluginLoaded(
+                plugin: ClockProviderPlugin,
+                pluginContext: Context,
+                manager: PluginLifecycleManager<ClockProviderPlugin>
+            ) {
+                var isClockListChanged = false
+                for (clock in plugin.getClocks()) {
+                    val id = clock.clockId
+                    var isNew = false
+                    val info =
+                        availableClocks.getOrPut(id) {
+                            isNew = true
+                            ClockInfo(clock, plugin, manager)
+                        }
+
+                    if (isNew) {
+                        isClockListChanged = true
+                        onConnected(id)
+                    }
+
+                    if (manager != info.manager) {
+                        Log.e(
+                            TAG,
+                            "Clock Id conflict on load: $id is registered to another provider"
+                        )
+                        continue
+                    }
+
+                    info.provider = plugin
+                    onLoaded(id)
+                }
+
+                if (isClockListChanged) {
+                    triggerOnAvailableClocksChanged()
+                }
+                verifyLoadedProviders()
+            }
+
+            override fun onPluginUnloaded(
+                plugin: ClockProviderPlugin,
+                manager: PluginLifecycleManager<ClockProviderPlugin>
+            ) {
+                for (clock in plugin.getClocks()) {
+                    val id = clock.clockId
+                    val info = availableClocks[id]
+                    if (info?.manager != manager) {
+                        Log.e(
+                            TAG,
+                            "Clock Id conflict on unload: $id is registered to another provider"
+                        )
+                        continue
+                    }
+                    info.provider = null
+                    onUnloaded(id)
+                }
+
+                verifyLoadedProviders()
+            }
+
+            override fun onPluginDetached(manager: PluginLifecycleManager<ClockProviderPlugin>) {
+                val removed = mutableListOf<ClockId>()
+                availableClocks.entries.removeAll {
+                    if (it.value.manager != manager) {
+                        return@removeAll false
+                    }
+
+                    removed.add(it.key)
+                    return@removeAll true
+                }
+
+                removed.forEach(::onDisconnected)
+                if (removed.size > 0) {
+                    triggerOnAvailableClocksChanged()
+                }
+            }
         }
 
     private val userSwitchObserver =
@@ -96,7 +174,8 @@ open class ClockRegistry(
         protected set(value) {
             if (field != value) {
                 field = value
-                scope.launch(mainDispatcher) { onClockChanged { it.onCurrentClockChanged() } }
+                verifyLoadedProviders()
+                triggerOnCurrentClockChanged()
             }
         }
 
@@ -168,9 +247,36 @@ open class ClockRegistry(
         Assert.isNotMainThread()
     }
 
-    private fun onClockChanged(func: (ClockChangeListener) -> Unit) {
-        assertMainThread()
-        clockChangeListeners.forEach(func)
+    private var isClockChanged = AtomicBoolean(false)
+    private fun triggerOnCurrentClockChanged() {
+        val shouldSchedule = isClockChanged.compareAndSet(false, true)
+        if (!shouldSchedule) {
+            return
+        }
+
+        android.util.Log.e("HAWK", "triggerOnCurrentClockChanged")
+        scope.launch(mainDispatcher) {
+            assertMainThread()
+            android.util.Log.e("HAWK", "isClockChanged")
+            isClockChanged.set(false)
+            clockChangeListeners.forEach { it.onCurrentClockChanged() }
+        }
+    }
+
+    private var isClockListChanged = AtomicBoolean(false)
+    private fun triggerOnAvailableClocksChanged() {
+        val shouldSchedule = isClockListChanged.compareAndSet(false, true)
+        if (!shouldSchedule) {
+            return
+        }
+
+        android.util.Log.e("HAWK", "triggerOnAvailableClocksChanged")
+        scope.launch(mainDispatcher) {
+            assertMainThread()
+            android.util.Log.e("HAWK", "isClockListChanged")
+            isClockListChanged.set(false)
+            clockChangeListeners.forEach { it.onAvailableClocksChanged() }
+        }
     }
 
     public fun mutateSetting(mutator: (ClockSettings) -> ClockSettings) {
@@ -190,7 +296,12 @@ open class ClockRegistry(
         }
 
     init {
-        connectClocks(defaultClockProvider)
+        // Register default clock designs
+        for (clock in defaultClockProvider.getClocks()) {
+            availableClocks[clock.clockId] = ClockInfo(clock, defaultClockProvider, null)
+        }
+
+        // Something has gone terribly wrong if the default clock isn't present
         if (!availableClocks.containsKey(DEFAULT_CLOCK_ID)) {
             throw IllegalArgumentException(
                 "$defaultClockProvider did not register clock at $DEFAULT_CLOCK_ID"
@@ -244,59 +355,87 @@ open class ClockRegistry(
         }
     }
 
-    private fun connectClocks(provider: ClockProvider) {
-        var isAvailableChanged = false
-        val currentId = currentClockId
-        for (clock in provider.getClocks()) {
-            val id = clock.clockId
-            val current = availableClocks[id]
-            if (current != null) {
-                Log.e(
-                    TAG,
-                    "Clock Id conflict: $id is registered by both " +
-                        "${provider::class.simpleName} and ${current.provider::class.simpleName}"
-                )
-                continue
-            }
-
-            availableClocks[id] = ClockInfo(clock, provider)
-            isAvailableChanged = true
-            if (DEBUG) {
-                Log.i(TAG, "Added ${clock.clockId}")
-            }
-
-            if (currentId == id) {
-                if (DEBUG) {
-                    Log.i(TAG, "Current clock ($currentId) was connected")
-                }
-                onClockChanged { it.onCurrentClockChanged() }
-            }
+    private var isVerifying = AtomicBoolean(false)
+    private fun verifyLoadedProviders() {
+        val shouldSchedule = isVerifying.compareAndSet(false, true)
+        if (!shouldSchedule) {
+            return
         }
 
-        if (isAvailableChanged) {
-            onClockChanged { it.onAvailableClocksChanged() }
+        scope.launch(bgDispatcher) {
+            if (keepAllLoaded) {
+                // Enforce that all plugins are loaded if requested
+                for ((_, info) in availableClocks) {
+                    info.manager?.loadPlugin()
+                }
+                isVerifying.set(false)
+                return@launch
+            }
+
+            val currentClock = availableClocks[currentClockId]
+            if (currentClock == null) {
+                // Current Clock missing, load no plugins and use default
+                for ((_, info) in availableClocks) {
+                    info.manager?.unloadPlugin()
+                }
+                isVerifying.set(false)
+                return@launch
+            }
+
+            val currentManager = currentClock.manager
+            currentManager?.loadPlugin()
+
+            for ((_, info) in availableClocks) {
+                val manager = info.manager
+                if (manager != null && manager.isLoaded && currentManager != manager) {
+                    manager.unloadPlugin()
+                }
+            }
+            isVerifying.set(false)
         }
     }
 
-    private fun disconnectClocks(provider: ClockProvider) {
-        var isAvailableChanged = false
-        val currentId = currentClockId
-        for (clock in provider.getClocks()) {
-            availableClocks.remove(clock.clockId)
-            isAvailableChanged = true
-
-            if (DEBUG) {
-                Log.i(TAG, "Removed ${clock.clockId}")
-            }
-
-            if (currentId == clock.clockId) {
-                Log.w(TAG, "Current clock ($currentId) was disconnected")
-                onClockChanged { it.onCurrentClockChanged() }
-            }
+    private fun onConnected(clockId: ClockId) {
+        if (DEBUG) {
+            Log.i(TAG, "Connected $clockId")
         }
 
-        if (isAvailableChanged) {
-            onClockChanged { it.onAvailableClocksChanged() }
+        if (currentClockId == clockId) {
+            if (DEBUG) {
+                Log.i(TAG, "Current clock ($clockId) was connected")
+            }
+        }
+    }
+
+    private fun onLoaded(clockId: ClockId) {
+        if (DEBUG) {
+            Log.i(TAG, "Loaded $clockId")
+        }
+
+        if (currentClockId == clockId) {
+            Log.i(TAG, "Current clock ($clockId) was loaded")
+            triggerOnCurrentClockChanged()
+        }
+    }
+
+    private fun onUnloaded(clockId: ClockId) {
+        if (DEBUG) {
+            Log.i(TAG, "Unloaded $clockId")
+        }
+
+        if (currentClockId == clockId) {
+            Log.w(TAG, "Current clock ($clockId) was unloaded")
+            triggerOnCurrentClockChanged()
+        }
+    }
+
+    private fun onDisconnected(clockId: ClockId) {
+        if (DEBUG) {
+            Log.i(TAG, "Disconnected $clockId")
+        }
+
+        if (currentClockId == clockId) {
+            Log.w(TAG, "Current clock ($clockId) was disconnected")
         }
     }
 
@@ -345,6 +484,7 @@ open class ClockRegistry(
 
     private data class ClockInfo(
         val metadata: ClockMetadata,
-        val provider: ClockProvider,
+        var provider: ClockProvider?,
+        val manager: PluginLifecycleManager<ClockProviderPlugin>?,
     )
 }
