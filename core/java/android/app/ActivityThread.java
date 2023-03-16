@@ -888,6 +888,7 @@ public final class ActivityThread extends ClientTransactionHandler
         ApplicationInfo appInfo;
         String sdkSandboxClientAppVolumeUuid;
         String sdkSandboxClientAppPackage;
+        boolean isSdkInSandbox;
         @UnsupportedAppUsage
         List<ProviderInfo> providers;
         ComponentName instrumentationName;
@@ -1169,19 +1170,34 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         @Override
-        public final void bindApplication(String processName, ApplicationInfo appInfo,
-                String sdkSandboxClientAppVolumeUuid, String sdkSandboxClientAppPackage,
-                ProviderInfoList providerList, ComponentName instrumentationName,
-                ProfilerInfo profilerInfo, Bundle instrumentationArgs,
+        public final void bindApplication(
+                String processName,
+                ApplicationInfo appInfo,
+                String sdkSandboxClientAppVolumeUuid,
+                String sdkSandboxClientAppPackage,
+                boolean isSdkInSandbox,
+                ProviderInfoList providerList,
+                ComponentName instrumentationName,
+                ProfilerInfo profilerInfo,
+                Bundle instrumentationArgs,
                 IInstrumentationWatcher instrumentationWatcher,
-                IUiAutomationConnection instrumentationUiConnection, int debugMode,
-                boolean enableBinderTracking, boolean trackAllocation,
-                boolean isRestrictedBackupMode, boolean persistent, Configuration config,
-                CompatibilityInfo compatInfo, Map services, Bundle coreSettings,
-                String buildSerial, AutofillOptions autofillOptions,
-                ContentCaptureOptions contentCaptureOptions, long[] disabledCompatChanges,
+                IUiAutomationConnection instrumentationUiConnection,
+                int debugMode,
+                boolean enableBinderTracking,
+                boolean trackAllocation,
+                boolean isRestrictedBackupMode,
+                boolean persistent,
+                Configuration config,
+                CompatibilityInfo compatInfo,
+                Map services,
+                Bundle coreSettings,
+                String buildSerial,
+                AutofillOptions autofillOptions,
+                ContentCaptureOptions contentCaptureOptions,
+                long[] disabledCompatChanges,
                 SharedMemory serializedSystemFontMap,
-                long startRequestedElapsedTime, long startRequestedUptime) {
+                long startRequestedElapsedTime,
+                long startRequestedUptime) {
             if (services != null) {
                 if (false) {
                     // Test code to make sure the app could see the passed-in services.
@@ -1215,6 +1231,7 @@ public final class ActivityThread extends ClientTransactionHandler
             data.appInfo = appInfo;
             data.sdkSandboxClientAppVolumeUuid = sdkSandboxClientAppVolumeUuid;
             data.sdkSandboxClientAppPackage = sdkSandboxClientAppPackage;
+            data.isSdkInSandbox = isSdkInSandbox;
             data.providers = providerList.getList();
             data.instrumentationName = instrumentationName;
             data.instrumentationArgs = instrumentationArgs;
@@ -7213,8 +7230,14 @@ public final class ActivityThread extends ClientTransactionHandler
         // The test context's op package name == the target app's op package name, because
         // the app ops manager checks the op package name against the real calling UID,
         // which is what the target package name is associated with.
-        final ContextImpl instrContext = ContextImpl.createAppContext(this, pi,
-                appContext.getOpPackageName());
+        // In the case of instrumenting an sdk running in the sdk sandbox, appContext refers
+        // to the context of the sdk running in the sandbox. Since the sandbox does not have
+        // access to data outside the sandbox, we require the instrContext to point to the
+        // sdk in the sandbox as well, and not to the test context.
+        final ContextImpl instrContext =
+                (data.isSdkInSandbox)
+                        ? appContext
+                        : ContextImpl.createAppContext(this, pi, appContext.getOpPackageName());
 
         try {
             final ClassLoader cl = instrContext.getClassLoader();

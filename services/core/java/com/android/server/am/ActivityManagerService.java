@@ -4655,6 +4655,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if (instr2 != null) {
                 thread.bindApplication(processName, appInfo,
                         app.sdkSandboxClientAppVolumeUuid, app.sdkSandboxClientAppPackage,
+                        instr2.mIsSdkInSandbox,
                         providerList,
                         instr2.mClass,
                         profilerInfo, instr2.mArguments,
@@ -4671,6 +4672,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else {
                 thread.bindApplication(processName, appInfo,
                         app.sdkSandboxClientAppVolumeUuid, app.sdkSandboxClientAppPackage,
+                        /* isSdkInSandbox= */ false,
                         providerList, null, profilerInfo, null, null, null, testMode,
                         mBinderTransactionTrackingEnabled, enableTrackAllocation,
                         isRestrictedBackupMode || !normalMode, app.isPersistent(),
@@ -15436,6 +15438,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         activeInstr.mClass = className;
         activeInstr.mTargetProcesses = new String[]{sdkSandboxInfo.processName};
         activeInstr.mTargetInfo = sdkSandboxInfo;
+        activeInstr.mIsSdkInSandbox = isSdkInSandbox;
         activeInstr.mProfileFile = profileFile;
         activeInstr.mArguments = arguments;
         activeInstr.mWatcher = watcher;
@@ -15452,7 +15455,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             sandboxManagerLocal.notifyInstrumentationStarted(
                     sdkSandboxClientAppInfo.packageName, sdkSandboxClientAppInfo.uid);
             synchronized (mProcLock) {
-                int sdkSandboxUid = Process.toSdkSandboxUid(sdkSandboxClientAppInfo.uid);
                 // Kill the package sdk sandbox process belong to. At this point sdk sandbox is
                 // already killed.
                 forceStopPackageLocked(
@@ -15471,7 +15473,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         sdkSandboxInfo.processName,
                         /* isolated= */ false,
                         /* isSdkSandbox= */ true,
-                        sdkSandboxUid,
+                        sdkSandboxInfo.uid,
                         sdkSandboxClientAppInfo.packageName,
                         disableHiddenApiChecks,
                         disableTestApiChecks,
