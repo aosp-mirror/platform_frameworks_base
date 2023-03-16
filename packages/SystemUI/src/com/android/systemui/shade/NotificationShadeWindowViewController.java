@@ -23,7 +23,6 @@ import android.app.StatusBarManager;
 import android.media.AudioManager;
 import android.media.session.MediaSessionLegacyHelper;
 import android.os.PowerManager;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.InputDevice;
@@ -31,6 +30,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AuthKeyguardMessageArea;
@@ -39,8 +39,10 @@ import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -49,6 +51,8 @@ import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.binder.KeyguardBouncerViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
+import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor;
+import com.android.systemui.multishade.ui.view.MultiShadeView;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationInsetsController;
@@ -63,11 +67,13 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
+import com.android.systemui.util.time.SystemClock;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Controller for {@link NotificationShadeWindowView}.
@@ -115,6 +121,7 @@ public class NotificationShadeWindowViewController {
                 mIsOcclusionTransitionRunning =
                     step.getTransitionState() == TransitionState.RUNNING;
             };
+    private final SystemClock mClock;
 
     @Inject
     public NotificationShadeWindowViewController(
@@ -142,7 +149,9 @@ public class NotificationShadeWindowViewController {
             UdfpsOverlayInteractor udfpsOverlayInteractor,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            Provider<MultiShadeInteractor> multiShadeInteractorProvider,
+            SystemClock clock) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
@@ -175,6 +184,16 @@ public class NotificationShadeWindowViewController {
 
         collectFlow(mView, keyguardTransitionInteractor.getLockscreenToDreamingTransition(),
                 mLockscreenToDreamingTransition);
+
+        mClock = clock;
+        if (ComposeFacade.INSTANCE.isComposeAvailable()
+                && featureFlags.isEnabled(Flags.DUAL_SHADE)) {
+            final ViewStub multiShadeViewStub = mView.findViewById(R.id.multi_shade_stub);
+            if (multiShadeViewStub != null) {
+                final MultiShadeView multiShadeView = (MultiShadeView) multiShadeViewStub.inflate();
+                multiShadeView.init(multiShadeInteractorProvider.get(), clock);
+            }
+        }
     }
 
     /**
@@ -269,7 +288,7 @@ public class NotificationShadeWindowViewController {
                 mLockIconViewController.onTouchEvent(
                         ev,
                         () -> mService.wakeUpIfDozing(
-                                SystemClock.uptimeMillis(),
+                                mClock.uptimeMillis(),
                                 mView,
                                 "LOCK_ICON_TOUCH",
                                 PowerManager.WAKE_REASON_GESTURE)
@@ -453,7 +472,7 @@ public class NotificationShadeWindowViewController {
 
     public void cancelCurrentTouch() {
         if (mTouchActive) {
-            final long now = SystemClock.uptimeMillis();
+            final long now = mClock.uptimeMillis();
             final MotionEvent event;
             if (mIsTrackpadGestureBackEnabled) {
                 event = MotionEvent.obtain(mDownEvent);
