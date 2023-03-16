@@ -674,4 +674,9 @@ object Flags {
     @JvmField
     val LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION =
             unreleasedFlag(2602, "large_shade_granular_alpha_interpolation", teamfood = true)
+
+    // TODO(b/272805037): Tracking Bug
+    @JvmField
+    val ADVANCED_VPN_ENABLED = unreleasedFlag(2800, name = "AdvancedVpn__enable_feature",
+            namespace = "vpn", teamfood = false)
 }
