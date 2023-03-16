@@ -300,7 +300,7 @@ public class SoundDoseHelper {
                 SAFE_MEDIA_VOLUME_UNINITIALIZED);
     }
 
-    float getRs2Value() {
+    float getOutputRs2UpperBound() {
         if (!mEnableCsd) {
             return 0.f;
         }
@@ -312,14 +312,14 @@ public class SoundDoseHelper {
         }
 
         try {
-            return soundDose.getOutputRs2();
+            return soundDose.getOutputRs2UpperBound();
         } catch (RemoteException e) {
             Log.e(TAG, "Exception while getting the RS2 exposure value", e);
             return 0.f;
         }
     }
 
-    void setRs2Value(float rs2Value) {
+    void setOutputRs2UpperBound(float rs2Value) {
         if (!mEnableCsd) {
             return;
         }
@@ -331,7 +331,7 @@ public class SoundDoseHelper {
         }
 
         try {
-            soundDose.setOutputRs2(rs2Value);
+            soundDose.setOutputRs2UpperBound(rs2Value);
         } catch (RemoteException e) {
             Log.e(TAG, "Exception while setting the RS2 exposure value", e);
         }

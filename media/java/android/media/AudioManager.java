@@ -6752,7 +6752,7 @@ public class AudioManager {
 
     /**
      * @hide
-     * Lower media volume to RS1
+     * Lower media volume to RS1 interval
      */
     public void lowerVolumeToRs1() {
         try {
@@ -6764,13 +6764,13 @@ public class AudioManager {
 
     /**
      * @hide
-     * @return the RS2 value used for momentary exposure warnings
+     * @return the RS2 upper bound used for momentary exposure warnings
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public float getRs2Value() {
         try {
-            return getService().getRs2Value();
+            return getService().getOutputRs2UpperBound();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -6778,13 +6778,13 @@ public class AudioManager {
 
     /**
      * @hide
-     * Sets the RS2 value used for momentary exposure warnings
+     * Sets the RS2 upper bound used for momentary exposure warnings
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void setRs2Value(float rs2Value) {
         try {
-            getService().setRs2Value(rs2Value);
+            getService().setOutputRs2UpperBound(rs2Value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
