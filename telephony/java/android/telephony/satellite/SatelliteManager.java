@@ -647,6 +647,7 @@ public class SatelliteManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteDatagramTransferState {}
+    // TODO: Split into two enums for sending and receiving states
 
     /**
      * Satellite modem is in idle state.
@@ -750,19 +751,27 @@ public class SatelliteManager {
                 };
                 ISatelliteTransmissionUpdateCallback internalCallback =
                         new ISatelliteTransmissionUpdateCallback.Stub() {
-                            @Override
-                            public void onDatagramTransferStateChanged(int state,
-                                    int sendPendingCount, int receivePendingCount, int errorCode) {
-                                executor.execute(() -> Binder.withCleanCallingIdentity(
-                                        () -> callback.onDatagramTransferStateChanged(
-                                                state, sendPendingCount, receivePendingCount,
-                                                errorCode)));
-                            }
 
                             @Override
                             public void onSatellitePositionChanged(PointingInfo pointingInfo) {
                                 executor.execute(() -> Binder.withCleanCallingIdentity(
                                         () -> callback.onSatellitePositionChanged(pointingInfo)));
+                            }
+
+                            @Override
+                            public void onSendDatagramStateChanged(int state, int sendPendingCount,
+                                    int errorCode) {
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onSendDatagramStateChanged(
+                                                state, sendPendingCount, errorCode)));
+                            }
+
+                            @Override
+                            public void onReceiveDatagramStateChanged(int state,
+                                    int receivePendingCount, int errorCode) {
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onReceiveDatagramStateChanged(
+                                                state, receivePendingCount, errorCode)));
                             }
                         };
                 sSatelliteTransmissionUpdateCallbackMap.put(callback, internalCallback);
