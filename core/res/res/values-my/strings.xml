@@ -140,6 +140,8 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"WiFi ခေါ်ဆိုမှု"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ပိတ်"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Wi-Fi သုံး၍ ခေါ်ဆိုသည်"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"မိုဘိုင်းကွန်ရက်သုံး၍ ခေါ်ဆိုသည်"</string>
@@ -1393,10 +1395,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"ထည့်သွင်းရေး နည်းကို ရွေးရန်"</string>
     <string name="show_ime" msgid="6406112007347443383">"စက်၏ကီးဘုတ် ဖွင့်ထားစဉ်တွင် ၎င်းကို ဖန်သားပြင်ပေါ်တွင် ဆက်ထားပါ"</string>
     <string name="hardware" msgid="1800597768237606953">"ပကတိအသွင်ကီးဘုတ်ပြရန်"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (5823199895322205589) -->
-    <skip />
-    <!-- no translation found for select_multiple_keyboards_layout_notification_title (6999491025126641938) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> ကို စီစဉ်သတ်မှတ်ရန်"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"ပကတိကီးဘုတ်များကို စီစဉ်သတ်မှတ်ရန်"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ဘာသာစကားနှင့် အသွင်အပြင်ရွေးချယ်ရန် တို့ပါ"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1721,8 +1721,7 @@
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"နားကြားကိရိယာ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"အသံခလုတ်များကို ဖိထားသည်။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ဖွင့်လိုက်သည်။"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"အသံခလုတ်များကို ဖိထားသည်။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ပိတ်လိုက်သည်။"</string>
-    <!-- no translation found for accessibility_shortcut_spoken_feedback (3760999147597564314) -->
-    <skip />
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"အသံထိန်းခလုတ်များကို လွှတ်လိုက်ပါ။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ဖွင့်ရန် အသံထိန်းခလုတ်နှစ်ခုစလုံးကို ၃ စက္ကန့်ကြာအောင် ထပ်နှိပ်ပါ။"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"သုံးနိုင်မှုခလုတ်ကို တို့ပြီးလျှင် ဝန်ဆောင်မှုတစ်ခု ရွေးပါ−"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"သုံးနိုင်မှုလက်ဟန်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုတစ်ခုကို ရွေးပါ (ဖန်သားပြင်အောက်ခြေမှနေ၍ လက်နှစ်ချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပါ)-"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"သုံးနိုင်မှုလက်ဟန်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုတစ်ခုကို ရွေးပါ (ဖန်သားပြင်အောက်ခြေမှနေ၍ လက်သုံးချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပါ)-"</string>
@@ -2327,18 +2326,11 @@
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"စက်ပစ္စည်း အလွန်ပူနေသည်"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"သင့်ဖုန်း အလွန်ပူနေသဖြင့် ‘စခရင်နှစ်ခု’ သုံး၍မရပါ"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ပိတ်ရန်"</string>
-    <!-- no translation found for keyboard_layout_notification_selected_title (1202560174252421219) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_one_selected_message (4314216053129257197) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_two_selected_message (1876349944065922950) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_three_selected_message (280734264593115419) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_more_than_three_selected_message (1581834181578206937) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_multiple_selected_title (5242444914367024499) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_multiple_selected_message (6576533454124419202) -->
-    <skip />
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> စီစဉ်သတ်မှတ်ထားသည်"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"ကီးဘုတ်အပြင်အဆင်ကို <xliff:g id="LAYOUT_1">%s</xliff:g> ဟု သတ်မှတ်ထားသည်။ ပြောင်းရန်တို့ပါ။"</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"ကီးဘုတ်အပြင်အဆင်ကို <xliff:g id="LAYOUT_1">%1$s</xliff:g>၊ <xliff:g id="LAYOUT_2">%2$s</xliff:g> ဟု သတ်မှတ်ထားသည်။ ပြောင်းရန်တို့ပါ။"</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"ကီးဘုတ်အပြင်အဆင်ကို <xliff:g id="LAYOUT_1">%1$s</xliff:g>၊ <xliff:g id="LAYOUT_2">%2$s</xliff:g>၊ <xliff:g id="LAYOUT_3">%3$s</xliff:g> ဟု သတ်မှတ်ထားသည်။ ပြောင်းရန်တို့ပါ။"</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"ကီးဘုတ်အပြင်အဆင်ကို <xliff:g id="LAYOUT_1">%1$s</xliff:g>၊ <xliff:g id="LAYOUT_2">%2$s</xliff:g>၊ <xliff:g id="LAYOUT_3">%3$s</xliff:g> သို့ သတ်မှတ်လိုက်သည်… ပြောင်းရန် တို့ပါ။"</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ပကတိကီးဘုတ်များကို စီစဉ်သတ်မှတ်ထားသည်"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"ကီးဘုတ်များကြည့်ရန် တို့ပါ"</string>
 </resources>

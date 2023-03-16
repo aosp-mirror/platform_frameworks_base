@@ -142,6 +142,8 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi-тэлефанія"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWi-Fi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Выкл."</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Выклікаць праз Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Выклікаць праз мабільную сетку"</string>
@@ -1395,10 +1397,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Выберыце метад уводу"</string>
     <string name="show_ime" msgid="6406112007347443383">"Захоўваць яе на экране ў той час, калі фізічная клавіятура актыўная"</string>
     <string name="hardware" msgid="1800597768237606953">"Паказаць віртуальную клавіятуру"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (5823199895322205589) -->
-    <skip />
-    <!-- no translation found for select_multiple_keyboards_layout_notification_title (6999491025126641938) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Наладзьце прыладу \"<xliff:g id="DEVICE_NAME">%s</xliff:g>\""</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Наладзьце фізічныя клавіятуры"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Дакраніцеся, каб выбраць мову і раскладку"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" АБВГДЕЁЖЗІЙКЛМНОПРСТУЎФХЦЧШ\'ЫЬЭЮЯ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1723,8 +1723,7 @@
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Слыхавыя апараты"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Клавішы гучнасці ўтрымліваліся націснутымі. Уключана служба \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Клавішы гучнасці ўтрымліваліся націснутымі. Служба \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\" выключана."</string>
-    <!-- no translation found for accessibility_shortcut_spoken_feedback (3760999147597564314) -->
-    <skip />
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Адпусціце клавішы гучнасці. Каб уключыць сэрвіс \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\", націсніце абедзве клавішы гучнасці яшчэ раз і ўтрымлівайце іх на працягу 3 секунд."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Выберыце функцыю, якую будзеце выкарыстоўваць пры націску кнопкі спецыяльных магчымасцей:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Выберыце функцыю, якую будзеце выкарыстоўваць з жэстам спецыяльных магчымасцей (правесці двума пальцамі па экране знізу ўверх):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Выберыце функцыю, якую будзеце выкарыстоўваць з жэстам спецыяльных магчымасцей (правесці трыма пальцамі па экране знізу ўверх):"</string>
@@ -2329,18 +2328,11 @@
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Прылада моцна нагрэлася"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Функцыя \"Двайны экран\" недаступная, бо тэлефон моцна награваецца"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Выключыць"</string>
-    <!-- no translation found for keyboard_layout_notification_selected_title (1202560174252421219) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_one_selected_message (4314216053129257197) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_two_selected_message (1876349944065922950) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_three_selected_message (280734264593115419) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_more_than_three_selected_message (1581834181578206937) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_multiple_selected_title (5242444914367024499) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_multiple_selected_message (6576533454124419202) -->
-    <skip />
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Прылада \"<xliff:g id="DEVICE_NAME">%s</xliff:g>\" наладжана"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Раскладка клавіятуры наладжана для мовы \"<xliff:g id="LAYOUT_1">%s</xliff:g>\". Націсніце, каб змяніць."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Раскладка клавіятуры наладжана для наступных моў: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Націсніце, каб змяніць."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Раскладка клавіятуры наладжана для наступных моў: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Націсніце, каб змяніць."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Раскладка клавіятуры наладжана для наступных моў: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Націсніце, каб змяніць."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Фізічныя клавіятуры наладжаны"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Націсніце, каб праглядзець клавіятуры"</string>
 </resources>

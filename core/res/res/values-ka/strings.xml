@@ -140,6 +140,8 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"WiFi დარეკვა"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"გამორთული"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"დარეკვა Wi-Fi-ის მეშვეობით"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"დარეკვა მობილური ქსელის მეშვეობით"</string>
@@ -1721,8 +1723,7 @@
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"სმენის აპარატები"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ხანგრძლივად დააჭირეთ ხმის ღილაკებს. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ჩართულია."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ხანგრძლივად დააჭირეთ ხმის ღილაკებს. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> გამორთულია."</string>
-    <!-- no translation found for accessibility_shortcut_spoken_feedback (3760999147597564314) -->
-    <skip />
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ხელი აუშვით ხმის ღილაკებს. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>-ის ჩასართველად, ხელმეორედ ხანგრძლივად დააჭირეთ ორივე ხმის ღილაკს 3 წამის განმავლობაში."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"აირჩიეთ მარტივი წვდომის ღილაკზე შეხებისას გამოსაყენებელი ფუნქცია:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"აირჩიეთ მარტივი წვდომის ჟესტთან (ორი თითით გადაფურცვლა ეკრანის ქვედა კიდიდან ზემოთ) გამოსაყენებელი ფუნქცია:"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"აირჩიეთ მარტივი წვდომის ჟესტთან (სამი თითით გადაფურცვლა ეკრანის ქვედა კიდიდან ზემოთ) გამოსაყენებელი ფუნქცია:"</string>

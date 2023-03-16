@@ -140,6 +140,8 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"የWi-Fi ጥሪ"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ጠፍቷል"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"በ Wi-Fi በኩል ደውል"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"ከተንቀሳቃሽ ስልክ አውታረ መረብ በኩል ደውል"</string>
@@ -1721,8 +1723,7 @@
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"የመስሚያ መሣሪያዎች"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"የድምፅ ቁልፎችን ይዟል። <xliff:g id="SERVICE_NAME">%1$s</xliff:g> በርቷል።"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"የድምፅ ቁልፎችን ይዟል። <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ጠፍተዋል።"</string>
-    <!-- no translation found for accessibility_shortcut_spoken_feedback (3760999147597564314) -->
-    <skip />
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"የድምጽ መጠን ቁልፎቹን ይልቀቁ። <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ን ለማብራት ሁለቱንም የድምጽ መጠን ቁልፎች በድጋሚ ለ3 ሰከንዶች ተጭነው ይያዙ።"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"የተደራሽነት አዝራርን መታ በሚያደርጉበት ጊዜ ጥቅም ላይ የሚውለውን ባሕሪ ይምረጡ፦"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ከተደራሽነት ጣት ምልክት ጋር የሚጠቀሙበት ባሕሪ ይምረጡ (በሁለት ጣቶች ከማያ ገጹ ግርጌ ወደ ላይ ይጥረጉ)፦"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ከተደራሽነት ጣት ምልክት ጋር አብረው የሚጠቀሙበት ባሕሪ ይምረጡ (በሦስት ጣቶች ከማያ ገጹ ግርጌ ወደ ላይ ይጥረጉ)፦"</string>
