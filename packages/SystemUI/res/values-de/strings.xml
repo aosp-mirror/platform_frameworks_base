@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# Steuerelement hinzugefügt.}other{# Steuerelemente hinzugefügt.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Entfernt"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> hinzufügen?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> darf auswählen, welche Einstellungen und Inhalte hier angezeigt werden."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Einstellungen für <xliff:g id="APPNAME">%s</xliff:g> entfernen?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Zu Favoriten hinzugefügt"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Zu Favoriten hinzugefügt, Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Geräte auf Sperrbildschirm anzeigen und steuern?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Du kannst dem Sperrbildschirm Steuerelemente für deine externen Geräte hinzufügen.\n\nDie App deines Geräts ermöglicht dir eventuell, einige Geräte zu steuern, ohne dein Smartphone oder Tablet zu entsperren.\n\nDu kannst jederzeit Änderungen in den Einstellungen vornehmen."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Geräte über den Sperrbildschirm steuern?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Du kannst einige Geräte steuern, ohne dass dazu das Smartphone oder Tablet entsperrt werden muss. Die Geräte-App ermittelt, welche Geräte auf diese Weise gesteuert werden können."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Nein danke"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Ja"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Die PIN enthält Buchstaben oder Symbole"</string>

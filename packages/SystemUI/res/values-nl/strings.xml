@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# bedieningselement toegevoegd.}other{# bedieningselementen toegevoegd.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Verwijderd"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> toevoegen?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> kan kiezen welke bedieningselementen en content hier worden getoond."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Bedieningselementen voor <xliff:g id="APPNAME">%s</xliff:g> verwijderen?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Gemarkeerd als favoriet"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Gemarkeerd als favoriet, positie <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Apparaten tonen en bedienen via het vergrendelscherm?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Je kunt bedieningselementen voor je externe apparaten toevoegen aan het vergrendelscherm.\n\nMet je apparaat-app kun je misschien bepaalde apparaten bedienen zonder je telefoon of tablet te ontgrendelen.\n\nJe kunt op elk moment wijzigingen aanbrengen via Instellingen."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Apparaten bedienen via vergrendelscherm?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Je kunt bepaalde apparaten bedienen zonder je telefoon of tablet te ontgrendelen. Je apparaat-app bepaalt welke apparaten op deze manier kunnen worden bediend."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Nee, bedankt"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Ja"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Pincode bevat letters of symbolen"</string>

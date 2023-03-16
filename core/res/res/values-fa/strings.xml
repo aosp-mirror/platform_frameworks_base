@@ -2041,7 +2041,7 @@
     <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"سیم‌کارت <xliff:g id="SIMNUMBER">%d</xliff:g> مجوز لازم را ندارد"</string>
     <string name="mmcc_illegal_ms_msim_template" msgid="832644375774599327">"سیم‌کارت <xliff:g id="SIMNUMBER">%d</xliff:g> مجاز نیست"</string>
     <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"سیم‌کارت <xliff:g id="SIMNUMBER">%d</xliff:g> مجاز نیست"</string>
-    <string name="popup_window_default_title" msgid="6907717596694826919">"پنجره بازشو"</string>
+    <string name="popup_window_default_title" msgid="6907717596694826919">"پنجره بالاپر"</string>
     <string name="slice_more_content" msgid="3377367737876888459">"‎+ <xliff:g id="NUMBER">%1$d</xliff:g>‎"</string>
     <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"نسخه برنامه تنزل داده شده است یا با این میان‌بر سازگار نیست"</string>
     <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"نمی‌توان میان‌بر را بازیابی کرد زیرا برنامه از پشتیبان‌گیری و بازیابی پشتیبانی نمی‌کند"</string>

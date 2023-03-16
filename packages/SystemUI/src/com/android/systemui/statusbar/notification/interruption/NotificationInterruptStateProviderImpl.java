@@ -28,11 +28,8 @@ import android.database.ContentObserver;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.os.RemoteException;
 import android.provider.Settings;
-import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
-import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
@@ -67,7 +64,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     private final KeyguardStateController mKeyguardStateController;
     private final ContentResolver mContentResolver;
     private final PowerManager mPowerManager;
-    private final IDreamManager mDreamManager;
     private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     private final BatteryController mBatteryController;
     private final HeadsUpManager mHeadsUpManager;
@@ -109,7 +105,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     public NotificationInterruptStateProviderImpl(
             ContentResolver contentResolver,
             PowerManager powerManager,
-            IDreamManager dreamManager,
             AmbientDisplayConfiguration ambientDisplayConfiguration,
             BatteryController batteryController,
             StatusBarStateController statusBarStateController,
@@ -123,7 +118,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             UserTracker userTracker) {
         mContentResolver = contentResolver;
         mPowerManager = powerManager;
-        mDreamManager = dreamManager;
         mBatteryController = batteryController;
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
         mStatusBarStateController = statusBarStateController;
@@ -283,7 +277,9 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         }
 
         // If the device is currently dreaming, then launch the FullScreenIntent
-        if (isDreaming()) {
+        // We avoid using IDreamManager#isDreaming here as that method will return false during
+        // the dream's wake-up phase.
+        if (mStatusBarStateController.isDreaming()) {
             return getDecisionGivenSuppression(FullScreenIntentDecision.FSI_DEVICE_IS_DREAMING,
                     suppressedByDND);
         }
@@ -383,16 +379,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                 mLogger.logFullscreen(entry, "Expected not to HUN");
         }
     }
-
-    private boolean isDreaming() {
-        try {
-            return mDreamManager.isDreaming();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to query dream manager.", e);
-            return false;
-        }
-    }
-
     private boolean shouldHeadsUpWhenAwake(NotificationEntry entry, boolean log) {
         StatusBarNotification sbn = entry.getSbn();
 
@@ -442,7 +428,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
-        boolean inUse = mPowerManager.isScreenOn() && !isDreaming();
+        boolean inUse = mPowerManager.isScreenOn() && !mStatusBarStateController.isDreaming();
 
         if (!inUse) {
             if (log) mLogger.logNoHeadsUpNotInUse(entry);

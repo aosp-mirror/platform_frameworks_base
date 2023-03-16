@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Bol pridaný # ovládací prvok.}few{Boli pridané # ovládacie prvky.}many{# controls added.}other{Bolo pridaných # ovládacích prvkov.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Odstránené"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Chcete pridať aplikáciu <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> môže vyberať ovládanie a obsah, ktoré sa tu zobrazujú."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Chcete odstrániť ovládanie aplikácie <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Pridané medzi obľúbené"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Pridané medzi obľúbené, pozícia <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Chcete zobrazovať a ovládať zariadenia na uzamknutej obrazovke?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Na uzamknutú obrazovku si môžete pridať ovládanie externých zariadení.\n\nAplikácia zariadenia vám môže umožniť ovládať niektoré zariadenia bez odomknutia telefónu či tabletu.\n\nZmeny môžete vykonať kedykoľvek v Nastaveniach."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Chcete ovládať zariadenia na uzamknutej obrazovke?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Niektoré zariadenia môžete ovládať bez odomknutia telefónu či tabletu. Aplikácia zariadenia určuje, ktoré zariadenia sa dajú týmto spôsobom ovládať."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Nie, vďaka"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Áno"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN obsahuje písmená či symboly"</string>

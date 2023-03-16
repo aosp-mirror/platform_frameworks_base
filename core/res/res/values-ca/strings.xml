@@ -1910,7 +1910,7 @@
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="2836276258480904434">"Port perifèric USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"Més opcions"</string>
-    <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"Tanca el menú addicional"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"Tanca el menú de desbordament"</string>
     <string name="maximize_button_text" msgid="4258922519914732645">"Maximitza"</string>
     <string name="close_button_text" msgid="10603510034455258">"Tanca"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>

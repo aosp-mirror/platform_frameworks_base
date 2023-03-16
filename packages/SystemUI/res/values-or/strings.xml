@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{#ଟି ନିୟନ୍ତ୍ରଣ ଯୋଗ କରାଯାଇଛି।}other{#ଟି ନିୟନ୍ତ୍ରଣ ଯୋଗ କରାଯାଇଛି।}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"କାଢ଼ି ଦିଆଯାଇଛି"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g>କୁ ଯୋଗ କରିବେ?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"ଏଠାରେ କେଉଁ ନିୟନ୍ତ୍ରଣ ଏବଂ ବିଷୟବସ୍ତୁ ଦେଖାଯିବ ତାହା <xliff:g id="APPNAME">%s</xliff:g> ବାଛିପାରିବ।"</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> ପାଇଁ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ କାଢ଼ି ଦେବେ?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"ପସନ୍ଦ କରାଯାଇଛି"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"ପସନ୍ଦ କରାଯାଇଛି, ସ୍ଥିତି <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"ଲକ ସ୍କ୍ରିନରୁ ଡିଭାଇସଗୁଡ଼ିକୁ ଦେଖାଇବେ ଏବଂ ନିୟନ୍ତ୍ରଣ କରିବେ?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"ଆପଣ ଲକ ସ୍କ୍ରିନରେ ଆପଣଙ୍କ ଏକ୍ସଟର୍ନଲ ଡିଭାଇସଗୁଡ଼ିକ ପାଇଁ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ଯୋଗ କରିପାରିବେ।\n\nଆପଣଙ୍କ ଫୋନ କିମ୍ବା ଟାବଲେଟକୁ ଅନଲକ ନକରି କିଛି ଡିଭାଇସକୁ ନିୟନ୍ତ୍ରଣ କରିବା ପାଇଁ ଆପଣଙ୍କ ଡିଭାଇସର ଆପ ଆପଣଙ୍କୁ ଅନୁମତି ଦେଇପାରେ।\n\nଆପଣ ଯେ କୌଣସି ସମୟରେ ସେଟିଂସରେ ପରିବର୍ତ୍ତନ କରିପାରିବେ।"</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"ଲକ ସ୍କ୍ରିନରୁ ଡିଭାଇସଗୁଡ଼ିକୁ ନିୟନ୍ତ୍ରଣ କରିବେ?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"ଆପଣ ଆପଣଙ୍କ ଫୋନ କିମ୍ବା ଟାବଲେଟକୁ ଅନଲକ ନକରି କିଛି ଡିଭାଇସକୁ ନିୟନ୍ତ୍ରଣ କରିପାରିବେ। ଏହି ଉପାୟରେ କେଉଁ ଡିଭାଇସଗୁଡ଼ିକୁ ନିୟନ୍ତ୍ରଣ କରାଯାଇପାରିବ ତାହା ଆପଣଙ୍କ ଡିଭାଇସ ଆପ ସ୍ଥିର କରେ।"</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"ନା, ଧନ୍ୟବାଦ"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"ହଁ"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PINରେ ଅକ୍ଷର କିମ୍ୱା ପ୍ରତୀକଗୁଡ଼ିକ ଥାଏ"</string>

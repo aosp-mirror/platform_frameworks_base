@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ।}one{# ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ।}other{# ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕੀਤੇ ਗਏ।}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"ਹਟਾਇਆ ਗਿਆ"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"ਕੀ <xliff:g id="APPNAME">%s</xliff:g> ਸ਼ਾਮਲ ਕਰਨਾ ਹੈ?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> ਇਹ ਚੁਣ ਸਕਦੀ ਹੈ ਕਿ ਇੱਥੇ ਕਿਹੜੇ ਕੰਟਰੋਲ ਅਤੇ ਕਿਹੜੀ ਸਮੱਗਰੀ ਦਿਸੇਗੀ।"</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"ਕੀ <xliff:g id="APPNAME">%s</xliff:g> ਲਈ ਕੰਟਰੋਲਾਂ ਨੂੰ ਹਟਾਉਣਾ ਹੈ?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"ਮਨਪਸੰਦ ਵਿੱਚ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"ਮਨਪਸੰਦ ਵਿੱਚ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ, ਸਥਾਨ <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"ਕੀ ਲਾਕ ਸਕ੍ਰੀਨ ਤੋਂ ਡੀਵਾਈਸਾਂ ਨੂੰ ਦੇਖਣਾ ਅਤੇ ਕੰਟਰੋਲ ਕਰਨਾ ਹੈ?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"ਤੁਸੀਂ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਆਪਣੇ ਬਾਹਰੀ ਡੀਵਾਈਸਾਂ ਲਈ ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕਰ ਸਕਦੇ ਹੋ।\n\nਤੁਹਾਡੇ ਡੀਵਾਈਸ \'ਤੇ ਮੌਜੂਦ ਐਪ ਤੁਹਾਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ ਜਾਂ ਟੈਬਲੈੱਟ ਨੂੰ ਅਣਲਾਕ ਕੀਤੇ ਬਿਨਾਂ ਕੁਝ ਡੀਵਾਈਸਾਂ ਨੂੰ ਕੰਟਰੋਲ ਕਰਨ ਦੇ ਸਕਦੀ ਹੈ।\n\nਤੁਸੀਂ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਜਾ ਕੇ ਕਿਸੇ ਵੇਲੇ ਵੀ ਤਬਦੀਲੀਆਂ ਕਰ ਸਕਦੇ ਹੋ।"</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"ਕੀ ਲਾਕ ਸਕ੍ਰੀਨ ਤੋਂ ਡੀਵਾਈਸਾਂ ਨੂੰ ਕੰਟਰੋਲ ਕਰਨਾ ਹੈ?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"ਤੁਸੀਂ ਆਪਣੇ ਫ਼ੋਨ ਜਾਂ ਟੈਬਲੈੱਟ ਨੂੰ ਅਣਲਾਕ ਕੀਤੇ ਬਿਨਾਂ ਕੁਝ ਡੀਵਾਈਸਾਂ ਨੂੰ ਕੰਟਰੋਲ ਕਰ ਸਕਦੇ ਹੋ। ਤੁਹਾਡੇ ਡੀਵਾਈਸ \'ਤੇ ਮੌਜੂਦ ਐਪ ਇਹ ਨਿਰਧਾਰਿਤ ਕਰਦੀ ਹੈ ਕਿ ਇਸ ਤਰੀਕੇ ਨਾਲ ਕਿਹੜੇ ਡੀਵਾਈਸਾਂ ਨੂੰ ਕੰਟਰੋਲ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ।"</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"ਨਹੀਂ ਧੰਨਵਾਦ"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"ਹਾਂ"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"ਪਿੰਨ ਵਿੱਚ ਅੱਖਰ ਜਾਂ ਚਿੰਨ੍ਹ ਸ਼ਾਮਲ ਹਨ"</string>

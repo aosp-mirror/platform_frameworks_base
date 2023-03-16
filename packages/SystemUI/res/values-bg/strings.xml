@@ -237,7 +237,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Автоматично завъртане на екрана"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Местоположение"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Скрийнсейвър"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Камера: достъп"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Достъп до камерата"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Достъп до микрофона"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Налице"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Блокирано"</string>
@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Добавена е # контрола.}other{Добавени са # контроли.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Премахнато"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Да се добави ли <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> може да избира съдържанието и контролите, които да се показват тук."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Да се премахнат ли контролите за <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Означено като любимо"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Означено като любимо – позиция <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Да се показват ли устройствата на заключения екран и да се контролират ли оттам?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Можете да добавите към заключения екран контроли за външните си устройства.\n\nПриложението на устройството ви може да ви дава възможност да управлявате някои устройства, без да отключвате телефона или таблета си.\n\nПо всяко време можете да правите промени в „Настройки“."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Да се контролират ли устройствата от заключения екран?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Имате възможност да контролирате някои устройства, без да отключвате телефона или таблета си. Приложението на устройството ви определя кои устройства могат да бъдат контролирани по този начин."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Не, благодаря"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Да"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"ПИН кодът съдържа букви или символи"</string>

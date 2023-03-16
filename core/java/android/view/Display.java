@@ -1600,6 +1600,21 @@ public final class Display {
     }
 
     /**
+     * Returns the committed state of the display.
+     *
+     * @return The latest committed display state, such as {@link #STATE_ON}. The display state
+     * {@link Display#getState()} is set as committed only after power state changes finish.
+     *
+     * @hide
+     */
+    public int getCommittedState() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return mIsValid ? mDisplayInfo.committedState : STATE_UNKNOWN;
+        }
+    }
+
+    /**
      * Returns true if the specified UID has access to this display.
      * @hide
      */

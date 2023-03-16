@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# vezérlő hozzáadva.}other{# vezérlő hozzáadva.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Eltávolítva"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Hozzáadja a(z) <xliff:g id="APPNAME">%s</xliff:g> alkalmazást?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"A(z) <xliff:g id="APPNAME">%s</xliff:g> eldöntheti, milyen vezérlőket és tartalmakat jelenít meg itt."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Eltávolítja a(z) <xliff:g id="APPNAME">%s</xliff:g> vezérlőit?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Hozzáadva a kedvencekhez"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Hozzáadva a kedvencekhez <xliff:g id="NUMBER">%d</xliff:g>. helyen"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Szeretne megtekinteni és vezérelni eszközöket a lezárási képernyőn?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Hozzáadhatja külső eszközök vezérlőit a lezárási képernyőhöz.\n\nAz eszközön lévő alkalmazás segítségével telefonja vagy táblagépe feloldása nélkül is vezérelhet néhány eszközt.\n\nA Beállításokban bármikor módosíthatja ezt a funkciót."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Szeretne eszközöket vezérelni a lezárási képernyőn?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Telefonja vagy táblagépe feloldása nélkül is vezérelhet néhány eszközt. Az eszközalkalmazás határozza meg, hogy mely eszközök vezérelhetők ilyen módon."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Most nem"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Igen"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"A PIN-kód betűket vagy szimbólumokat tartalmaz"</string>

@@ -40,9 +40,12 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"നിങ്ങൾ <xliff:g id="NUMBER">%d</xliff:g> തവണ തെറ്റായ രീതിയിൽ ഫോൺ അൺലോക്ക് ചെയ്യാൻ ശ്രമിച്ചു. ഔദ്യോഗിക പ്രൊഫൈൽ നീക്കം ചെയ്യപ്പെടുകയും, അതുവഴി എല്ലാ പ്രൊഫൈൽ ഡാറ്റയും ഇല്ലാതാകുകയും ചെയ്യും."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായ രീതിയിൽ അൺലോക്ക് പാറ്റേൺ വരച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ, ഒരു ഇമെയിൽ അക്കൗണ്ടുപയോഗിച്ച് ടാബ്‌ലെറ്റ് അൺലോക്ക് ചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> സെക്കന്റ് കഴിഞ്ഞ് വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ തെറ്റായ രീതിയിൽ അൺലോക്ക് പാറ്റേൺ വരച്ചു. <xliff:g id="NUMBER_1">%2$d</xliff:g> ശ്രമങ്ങൾ കൂടി പരാജയപ്പെട്ടാൽ, ഒരു ഇമെയിൽ അക്കൗണ്ടുപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> സെക്കന്റ് കഴിഞ്ഞ് വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="1242939073723573315">"പവർ ബട്ടണിലാണ് ഫിംഗർപ്രിന്റ് സെൻസർ ഉള്ളത്. ടാബ്‌ലെറ്റിന്റെ അരികിൽ ഉയർന്ന് നിൽക്കുന്ന ശബ്ദ ബട്ടണിന്റെ അടുത്തുള്ള പരന്ന ബട്ടൺ ആണ് ഇത്.\n\nപവർ ബട്ടൺ അമർത്തുമ്പോൾ സ്ക്രീൻ ഓഫാകും."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="7305137594359170451">"പവർ ബട്ടണിലാണ് ഫിംഗർപ്രിന്റ് സെൻസർ ഉള്ളത്. ഉപകരണത്തിന്റെ അരികിൽ ഉയർന്ന് നിൽക്കുന്ന ശബ്ദ ബട്ടണിന്റെ അടുത്തുള്ള പരന്ന ബട്ടൺ ആണ് ഇത്.\n\nപവർ ബട്ടൺ അമർത്തുമ്പോൾ സ്ക്രീൻ ഓഫാകും."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="3238514774114999081">"പവർ ബട്ടണിലാണ് ഫിംഗർപ്രിന്റ് സെൻസർ ഉള്ളത്. ഫോണിന്റെ അരികിൽ ഉയർന്ന് നിൽക്കുന്ന ശബ്ദ ബട്ടണിന്റെ അടുത്തുള്ള പരന്ന ബട്ടൺ ആണ് ഇത്.\n\nപവർ ബട്ടൺ അമർത്തുമ്പോൾ സ്ക്രീൻ ഓഫാകും."</string>
+    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (3726972508570143945) -->
+    <skip />
+    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (2929467060295094725) -->
+    <skip />
+    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (8582726566542997639) -->
+    <skip />
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"കൂടുതൽ ഓപ്ഷനുകൾക്ക് നിങ്ങളുടെ ഫോൺ അൺലോക്ക് ചെയ്യുക"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"കൂടുതൽ ഓപ്ഷനുകൾക്ക് നിങ്ങളുടെ ടാബ്‌ലെറ്റ് അൺലോക്ക് ചെയ്യുക"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"കൂടുതൽ ഓപ്ഷനുകൾക്ക് നിങ്ങളുടെ ഉപകരണം അൺലോക്ക് ചെയ്യുക"</string>

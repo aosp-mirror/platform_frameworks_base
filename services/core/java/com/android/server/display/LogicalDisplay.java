@@ -390,6 +390,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.appVsyncOffsetNanos = deviceInfo.appVsyncOffsetNanos;
             mBaseDisplayInfo.presentationDeadlineNanos = deviceInfo.presentationDeadlineNanos;
             mBaseDisplayInfo.state = deviceInfo.state;
+            mBaseDisplayInfo.committedState = deviceInfo.committedState;
             mBaseDisplayInfo.smallestNominalAppWidth = maskedWidth;
             mBaseDisplayInfo.smallestNominalAppHeight = maskedHeight;
             mBaseDisplayInfo.largestNominalAppWidth = maskedWidth;

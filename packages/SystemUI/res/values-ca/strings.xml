@@ -238,7 +238,7 @@
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Ubicació"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Estalvi de pantalla"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accés a la càmera"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Accés al micròfon"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Accés al micro"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponible"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloquejat"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Dispositiu multimèdia"</string>
@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{S\'ha afegit # control.}many{S\'han afegit # controls.}other{S\'han afegit # controls.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Suprimit"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Vols afegir <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> pot triar quins controls i continguts es mostren aquí."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vols suprimir els controls per a <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Afegit als preferits"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Afegit als preferits, posició <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Vols mostrar i controlar dispositius a la pantalla de bloqueig?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Pots afegir controls dels teus dispositius externs a la pantalla de bloqueig.\n\nL\'aplicació del dispositiu et pot permetre controlar alguns dispositius sense desbloquejar el telèfon o la tauleta.\n\nPots fer canvis en qualsevol moment a Configuració."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Vols controlar dispositius des de la pantalla de bloqueig?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Pots controlar alguns dispositius sense desbloquejar el telèfon o la tauleta. L\'aplicació del dispositiu determina quins dispositius es poden controlar d\'aquesta manera."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"No, gràcies"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Sí"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"El PIN conté lletres o símbols"</string>

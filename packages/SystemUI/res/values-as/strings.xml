@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# টা নিয়ন্ত্ৰণ যোগ দিয়া হৈছে।}one{# টা নিয়ন্ত্ৰণ যোগ দিয়া হৈছে।}other{# টা নিয়ন্ত্ৰণ যোগ দিয়া হৈছে।}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"আঁতৰোৱা হ’ল"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> যোগ দিবনে?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g>এ ইয়াত কোনবোৰ নিয়ন্ত্ৰণ আৰু সমল দেখুওৱা হ’ব সেয়া বাছনি কৰিব পাৰে।"</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g>ৰ নিয়ন্ত্ৰণ আঁতৰাবনে?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"প্ৰিয় হিচাপে চিহ্নিত কৰা হ’ল"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"প্ৰিয় হিচাপে চিহ্নিত কৰা হ’ল, স্থান <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,8 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"লক স্ক্ৰীনৰ পৰা ডিভাইচসমূহ লক আৰু নিয়ন্ত্ৰণ কৰিবনে?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"আপুনি লক স্ক্ৰীনত আপোনাৰ বাহ্যিক ডিভাইচৰ বাবে নিয়ন্ত্ৰণ যোগ দিব পাৰে।\n\nআপোনাৰ ডিভাইচ এপে আপোনাক আপোনাৰ ফ’ন অথবা টেবলেট আনলক নকৰাকৈ কিছুমান ডিভাইচ নিয়ন্ত্ৰণ কৰাৰ অনুমতি দিব পাৰে। \n\nআপুনি যিকোনো সময়তে ছেটিঙত সালসলনি কৰিব পাৰে।"</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"লক স্ক্ৰীনৰ পৰা ডিভাইচসমূহ নিয়ন্ত্ৰণ কৰিবনে?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"আপুনি আপোনাৰ ফ’ন অথবা টেবলেট আনলক নকৰাকৈ কিছুমান ডিভাইচ নিয়ন্ত্ৰণ কৰিব পাৰে।এইধৰণে কোনবোৰ ডিভাইচ নিয়ন্ত্ৰণ কৰিব পাৰি সেয়া আপোনাৰ ডিভাইচ এপে নিৰ্ধাৰণ কৰে।"</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"নালাগে, ধন্যবাদ"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"হয়"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"পিনত বৰ্ণ অথবা প্ৰতীকসমূহ থাকে"</string>
