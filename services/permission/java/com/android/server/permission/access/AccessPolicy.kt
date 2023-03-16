@@ -20,11 +20,15 @@ import android.util.Log
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.SystemConfig
-import com.android.server.permission.access.appop.PackageAppOpPolicy
 import com.android.server.permission.access.appop.AppIdAppOpPolicy
+import com.android.server.permission.access.appop.PackageAppOpPolicy
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.permission.AppIdPermissionPolicy
+import com.android.server.permission.access.util.attributeInt
+import com.android.server.permission.access.util.attributeInterned
 import com.android.server.permission.access.util.forEachTag
+import com.android.server.permission.access.util.getAttributeIntOrThrow
+import com.android.server.permission.access.util.getAttributeValueOrThrow
 import com.android.server.permission.access.util.tag
 import com.android.server.permission.access.util.tagName
 import com.android.server.pm.permission.PermissionAllowlist
@@ -49,7 +53,7 @@ class AccessPolicy private constructor(
         }
 
     fun GetStateScope.getDecision(subject: AccessUri, `object`: AccessUri): Int =
-        with(getSchemePolicy(subject, `object`)){ getDecision(subject, `object`) }
+        with(getSchemePolicy(subject, `object`)) { getDecision(subject, `object`) }
 
     fun MutateStateScope.setDecision(subject: AccessUri, `object`: AccessUri, decision: Int) {
         with(getSchemePolicy(subject, `object`)) { setDecision(subject, `object`, decision) }
@@ -107,6 +111,9 @@ class AccessPolicy private constructor(
         forEachSchemePolicy {
             with(it) { onUserAdded(userId) }
         }
+        newState.systemState.packageStates.forEach { (_, packageState) ->
+            upgradePackageVersion(packageState, userId)
+        }
     }
 
     fun MutateStateScope.onUserRemoved(userId: Int) {
@@ -147,6 +154,13 @@ class AccessPolicy private constructor(
         forEachSchemePolicy {
             with(it) { onStorageVolumeMounted(volumeUuid, isSystemUpdated) }
         }
+        packageStates.forEach { (_, packageState) ->
+            if (packageState.volumeUuid == volumeUuid) {
+                newState.systemState.userIds.forEachIndexed { _, userId ->
+                    upgradePackageVersion(packageState, userId)
+                }
+            }
+        }
     }
 
     fun MutateStateScope.onPackageAdded(
@@ -178,6 +192,9 @@ class AccessPolicy private constructor(
         }
         forEachSchemePolicy {
             with(it) { onPackageAdded(packageState) }
+        }
+        newState.systemState.userIds.forEachIndexed { _, userId ->
+            upgradePackageVersion(packageState, userId)
         }
     }
 
@@ -212,6 +229,10 @@ class AccessPolicy private constructor(
             forEachSchemePolicy {
                 with(it) { onAppIdRemoved(appId) }
             }
+        }
+        newState.userStates.forEachIndexed { _, _, userState ->
+            userState.packageVersions -= packageName
+            userState.requestWrite()
         }
     }
 
@@ -274,6 +295,38 @@ class AccessPolicy private constructor(
         }
     }
 
+    private fun MutateStateScope.upgradePackageVersion(packageState: PackageState, userId: Int) {
+        if (packageState.androidPackage == null) {
+            return
+        }
+
+        val packageName = packageState.packageName
+        // The version would be latest when the package is new to the system, e.g. newly
+        // installed, first boot, or system apps added via OTA.
+        val version = newState.userStates[userId].packageVersions[packageName]
+        when {
+            version == null -> {
+                newState.userStates[userId].apply {
+                    packageVersions[packageName] = VERSION_LATEST
+                    requestWrite()
+                }
+            }
+            version < VERSION_LATEST -> {
+                forEachSchemePolicy {
+                    with(it) { upgradePackageState(packageState, userId, version) }
+                }
+                newState.userStates[userId].apply {
+                    packageVersions[packageName] = VERSION_LATEST
+                    requestWrite()
+                }
+            }
+            version == VERSION_LATEST -> {}
+            else -> Log.w(
+                LOG_TAG, "Unexpected version $version for package $packageName," +
+                    "latest version is $VERSION_LATEST"
+            )
+        }
+    }
 
     fun BinaryXmlPullParser.parseSystemState(state: AccessState) {
         forEachTag {
@@ -303,8 +356,13 @@ class AccessPolicy private constructor(
             when (tagName) {
                 TAG_ACCESS -> {
                     forEachTag {
-                        forEachSchemePolicy {
-                            with(it) { parseUserState(state, userId) }
+                        when (tagName) {
+                            TAG_PACKAGE_VERSIONS -> parsePackageVersions(state, userId)
+                            else -> {
+                                forEachSchemePolicy {
+                                    with(it) { parseUserState(state, userId) }
+                                }
+                            }
                         }
                     }
                 }
@@ -318,10 +376,52 @@ class AccessPolicy private constructor(
         }
     }
 
+    private fun BinaryXmlPullParser.parsePackageVersions(state: AccessState, userId: Int) {
+        val userState = state.userStates[userId]
+        forEachTag {
+            when (tagName) {
+                TAG_PACKAGE -> parsePackageVersion(userState)
+                else -> Log.w(
+                    LOG_TAG,
+                    "Ignoring unknown tag $name when parsing package versions for user $userId"
+                )
+            }
+        }
+        userState.packageVersions.retainAllIndexed { _, packageName, _ ->
+            val hasPackage = packageName in state.systemState.packageStates
+            if (!hasPackage) {
+                Log.w(
+                    LOG_TAG,
+                    "Dropping unknown $packageName when parsing package versions for user $userId"
+                )
+            }
+            hasPackage
+        }
+    }
+
+    private fun BinaryXmlPullParser.parsePackageVersion(userState: UserState) {
+        val packageName = getAttributeValueOrThrow(ATTR_NAME).intern()
+        val version = getAttributeIntOrThrow(ATTR_VERSION)
+        userState.packageVersions[packageName] = version
+    }
+
     fun BinaryXmlSerializer.serializeUserState(state: AccessState, userId: Int) {
         tag(TAG_ACCESS) {
             forEachSchemePolicy {
                 with(it) { serializeUserState(state, userId) }
+            }
+
+            serializeVersions(state.userStates[userId])
+        }
+    }
+
+    private fun BinaryXmlSerializer.serializeVersions(userState: UserState) {
+        tag(TAG_PACKAGE_VERSIONS) {
+            userState.packageVersions.forEachIndexed { _, packageName, version ->
+                tag(TAG_PACKAGE) {
+                    attributeInterned(ATTR_NAME, packageName)
+                    attributeInt(ATTR_VERSION, version)
+                }
             }
         }
     }
@@ -340,7 +440,14 @@ class AccessPolicy private constructor(
     companion object {
         private val LOG_TAG = AccessPolicy::class.java.simpleName
 
+        internal const val VERSION_LATEST = 14
+
         private const val TAG_ACCESS = "access"
+        private const val TAG_PACKAGE_VERSIONS = "package-versions"
+        private const val TAG_PACKAGE = "package"
+
+        private const val ATTR_NAME = "name"
+        private const val ATTR_VERSION = "version"
     }
 }
 
@@ -387,6 +494,12 @@ abstract class SchemePolicy {
     open fun migrateSystemState(state: AccessState) {}
 
     open fun migrateUserState(state: AccessState, userId: Int) {}
+
+    open fun MutateStateScope.upgradePackageState(
+        packageState: PackageState,
+        userId: Int,
+        version: Int
+    ) {}
 
     open fun BinaryXmlPullParser.parseSystemState(state: AccessState) {}
 

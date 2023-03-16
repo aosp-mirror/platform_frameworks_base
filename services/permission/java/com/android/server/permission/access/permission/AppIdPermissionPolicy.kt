@@ -50,6 +50,8 @@ class AppIdPermissionPolicy : SchemePolicy() {
 
     private val migration = AppIdPermissionMigration()
 
+    private val upgrade = AppIdPermissionUpgrade(this)
+
     @Volatile
     private var onPermissionFlagsChangedListeners =
         IndexedListSet<OnPermissionFlagsChangedListener>()
@@ -1419,6 +1421,14 @@ class AppIdPermissionPolicy : SchemePolicy() {
 
     override fun migrateUserState(state: AccessState, userId: Int) {
         migration.migrateUserState(state, userId)
+    }
+
+    override fun MutateStateScope.upgradePackageState(
+        packageState: PackageState,
+        userId: Int,
+        version: Int
+    ) {
+        with(upgrade) { upgradePermissions(packageState, userId, version) }
     }
 
     companion object {

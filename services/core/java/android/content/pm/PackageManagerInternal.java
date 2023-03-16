@@ -1089,6 +1089,11 @@ public abstract class PackageManagerInternal {
     public abstract RuntimePermissionsState getLegacyPermissionsState(@UserIdInt int userId);
 
     /**
+     * @return permissions file version for the given user.
+     */
+    public abstract int getLegacyPermissionsVersion(@UserIdInt int userId);
+
+    /**
      * Returns {@code true} if the caller is the installer of record for the given package.
      * Otherwise, {@code false}.
      */
