@@ -87,6 +87,8 @@ import java.util.Set;
  */
 public class DisplayRotation {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayRotation" : TAG_WM;
+    // Delay to avoid race between fold update and orientation update.
+    private static final int ORIENTATION_UPDATE_DELAY_MS = 800;
 
     // Delay in milliseconds when updating config due to folding events. This prevents
     // config changes and unexpected jumps while folding the device to closed state.
@@ -1738,15 +1740,15 @@ public class DisplayRotation {
                 mDeviceState = newState;
                 // Now mFoldState is set to HALF_FOLDED, the overrideFrozenRotation function will
                 // return true, so rotation is unlocked.
-                mService.updateRotation(false /* alwaysSendConfiguration */,
-                        false /* forceRelayout */);
             } else {
                 mInHalfFoldTransition = true;
                 mDeviceState = newState;
-                // Tell the device to update its orientation.
-                mService.updateRotation(false /* alwaysSendConfiguration */,
-                        false /* forceRelayout */);
             }
+            UiThread.getHandler().postDelayed(
+                    () -> {
+                        mService.updateRotation(false /* alwaysSendConfiguration */,
+                                false /* forceRelayout */);
+                    }, ORIENTATION_UPDATE_DELAY_MS);
             // Alert the activity of possible new bounds.
             UiThread.getHandler().removeCallbacks(mActivityBoundsUpdateCallback);
             UiThread.getHandler().postDelayed(mActivityBoundsUpdateCallback,
