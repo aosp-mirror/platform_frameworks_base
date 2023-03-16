@@ -371,10 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Kəsim sərhəddi, sahəsi və digər şeyləri göstərilsin"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL düzən istiqamətinə məcbur edin"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Ekran düzən istiqamətini RTL üzərinə bütün yerli variantlar üçün məcbur edin"</string>
-    <!-- no translation found for transparent_navigation_bar (1933192171384678484) -->
-    <skip />
-    <!-- no translation found for transparent_navigation_bar_summary (5454359021817330722) -->
-    <skip />
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Şəffaf naviqasiya paneli"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Naviqasiya panelinin arxa fon rəngini defolt olaraq şəffaf edin"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Pəncərə səviyyəsində bulanıqlığa icazə verin"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA aktiv edilsin"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 tətbiqlərində 4x MSAA aktiv edilsin"</string>
@@ -683,6 +681,5 @@
     <item msgid="7728484337962740316">"Sağa köçürün"</item>
     <item msgid="324200556467459329">"Yuxarı köçürün"</item>
   </string-array>
-    <!-- no translation found for font_scale_percentage (2624057443622817886) -->
-    <skip />
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

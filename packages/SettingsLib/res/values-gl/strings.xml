@@ -371,10 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Mostra os límites dos clips, as marxes etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forzar dirección do deseño RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forza a dirección de pantalla de dereita a esquerda para todas as opcións de configuración rexionais"</string>
-    <!-- no translation found for transparent_navigation_bar (1933192171384678484) -->
-    <skip />
-    <!-- no translation found for transparent_navigation_bar_summary (5454359021817330722) -->
-    <skip />
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Barra de navegación transparente"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Cambia a cor de fondo da barra de navegación a transparente de forma predeterminada"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Permitir desenfoque de ventás"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forzar MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activa MSAA 4x en aplicacións OpenGL ES 2.0"</string>
@@ -683,6 +681,5 @@
     <item msgid="7728484337962740316">"Mover cara á dereita"</item>
     <item msgid="324200556467459329">"Mover cara arriba"</item>
   </string-array>
-    <!-- no translation found for font_scale_percentage (2624057443622817886) -->
-    <skip />
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>
