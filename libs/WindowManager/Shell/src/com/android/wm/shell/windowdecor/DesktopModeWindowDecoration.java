@@ -190,6 +190,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
         mWindowDecorViewHolder.bindData(mTaskInfo);
 
+        if (!mTaskInfo.isFocused) {
+            closeHandleMenu();
+        }
+
         if (!isDragResizeable) {
             closeDragResizeListener();
             return;
