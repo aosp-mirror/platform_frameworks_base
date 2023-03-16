@@ -953,15 +953,7 @@ public final class CachedAppOptimizerTest {
         mProcessDependencies.setRssAfterCompaction(rssAfter);
 
         // When moving within cached state
-        mCachedAppOptimizerUnderTest.onOomAdjustChanged(
-                ProcessList.CACHED_APP_MIN_ADJ, ProcessList.CACHED_APP_MIN_ADJ + 1, processRecord);
-        waitForHandler();
-        // THEN process IS NOT compacted.
-        assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNull();
-
-        // When moving into cached state
-        mCachedAppOptimizerUnderTest.onOomAdjustChanged(ProcessList.CACHED_APP_MIN_ADJ - 1,
-                ProcessList.CACHED_APP_MIN_ADJ + 1, processRecord);
+        mCachedAppOptimizerUnderTest.onProcessFrozen(processRecord);
         waitForHandler();
         // THEN process IS compacted.
         assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();

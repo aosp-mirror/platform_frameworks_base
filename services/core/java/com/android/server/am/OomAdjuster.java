@@ -2936,13 +2936,15 @@ public class OomAdjuster {
 
         int changes = 0;
 
+        if (state.getCurAdj() != state.getSetAdj()) {
+            mCachedAppOptimizer.onOomAdjustChanged(state.getSetAdj(), state.getCurAdj(), app);
+        }
+
         // don't compact during bootup
         if (mCachedAppOptimizer.useCompaction() && mService.mBooted) {
             // Cached and prev/home compaction
             // reminder: here, setAdj is previous state, curAdj is upcoming state
-            if (state.getCurAdj() != state.getSetAdj()) {
-                mCachedAppOptimizer.onOomAdjustChanged(state.getSetAdj(), state.getCurAdj(), app);
-            } else if (mService.mWakefulness.get() != PowerManagerInternal.WAKEFULNESS_AWAKE) {
+            if (mService.mWakefulness.get() != PowerManagerInternal.WAKEFULNESS_AWAKE) {
                 // See if we can compact persistent and bfgs services now that screen is off
                 if (state.getSetAdj() < FOREGROUND_APP_ADJ
                         && !state.isRunningRemoteAnimation()

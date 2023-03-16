@@ -728,32 +728,6 @@ public final class CachedAppOptimizer {
         }
     }
 
-    // This method returns true only if requirements are met. Note, that requirements are different
-    // from throttles applied at the time a compaction is trying to be executed in the sense that
-    // these are not subject to change dependent on time or memory as throttles usually do.
-    @GuardedBy("mProcLock")
-    boolean meetsCompactionRequirements(ProcessRecord proc) {
-        if (mAm.mInternal.isPendingTopUid(proc.uid)) {
-            // In case the OOM Adjust has not yet been propagated we see if this is
-            // pending on becoming top app in which case we should not compact.
-            if (DEBUG_COMPACTION) {
-                Slog.d(TAG_AM, "Skip compaction since UID is active for  " + proc.processName);
-            }
-            return false;
-        }
-
-        if (proc.mState.hasForegroundActivities()) {
-            if (DEBUG_COMPACTION) {
-                Slog.e(TAG_AM,
-                        "Skip compaction as process " + proc.processName
-                                + " has foreground activities");
-            }
-            return false;
-        }
-
-        return true;
-    }
-
     @GuardedBy("mProcLock")
     boolean compactApp(
             ProcessRecord app, CompactProfile compactProfile, CompactSource source, boolean force) {
@@ -777,7 +751,7 @@ public final class CachedAppOptimizer {
                 return false;
         }
 
-        if (!app.mOptRecord.hasPendingCompact() && (meetsCompactionRequirements(app) || force)) {
+        if (!app.mOptRecord.hasPendingCompact()) {
             final String processName = (app.processName != null ? app.processName : "");
             if (DEBUG_COMPACTION) {
                 Slog.d(TAG_AM,
@@ -795,8 +769,7 @@ public final class CachedAppOptimizer {
         if (DEBUG_COMPACTION) {
             Slog.d(TAG_AM,
                     " compactApp Skipped for " + app.processName + " pendingCompact= "
-                            + app.mOptRecord.hasPendingCompact() + " meetsCompactionRequirements="
-                            + meetsCompactionRequirements(app) + ". Requested compact profile: "
+                            + app.mOptRecord.hasPendingCompact() + ". Requested compact profile: "
                             + app.mOptRecord.getReqCompactProfile().name() + ". Compact source "
                             + app.mOptRecord.getReqCompactSource().name());
         }
@@ -1497,23 +1470,23 @@ public final class CachedAppOptimizer {
 
     @GuardedBy({"mService", "mProcLock"})
     void onOomAdjustChanged(int oldAdj, int newAdj, ProcessRecord app) {
-        // Cancel any currently executing compactions
-        // if the process moved out of cached state
-        if (newAdj < oldAdj && newAdj < ProcessList.CACHED_APP_MIN_ADJ) {
-            cancelCompactionForProcess(app, CancelCompactReason.OOM_IMPROVEMENT);
-        }
-
-        if (oldAdj <= ProcessList.PERCEPTIBLE_APP_ADJ
-                && (newAdj == ProcessList.PREVIOUS_APP_ADJ || newAdj == ProcessList.HOME_APP_ADJ)) {
-            if (ENABLE_FILE_COMPACT) {
-                // Perform a minor compaction when a perceptible app becomes the prev/home app
-                compactApp(app, CompactProfile.SOME, CompactSource.APP, false);
+        if (useCompaction()) {
+            // Cancel any currently executing compactions
+            // if the process moved out of cached state
+            if (newAdj < oldAdj && newAdj < ProcessList.CACHED_APP_MIN_ADJ) {
+                cancelCompactionForProcess(app, CancelCompactReason.OOM_IMPROVEMENT);
             }
-        } else if (oldAdj < ProcessList.CACHED_APP_MIN_ADJ
-                && newAdj >= ProcessList.CACHED_APP_MIN_ADJ
-                && newAdj <= ProcessList.CACHED_APP_MAX_ADJ) {
-            // Perform a major compaction when any app enters cached
-            compactApp(app, CompactProfile.FULL, CompactSource.APP, false);
+        }
+    }
+
+    /**
+     * Callback received after a process has been frozen.
+     */
+    void onProcessFrozen(ProcessRecord frozenProc) {
+        if (useCompaction()) {
+            synchronized (mProcLock) {
+                compactApp(frozenProc, CompactProfile.FULL, CompactSource.APP, false);
+            }
         }
     }
 
@@ -2021,6 +1994,9 @@ public final class CachedAppOptimizer {
                             }
                         }
                     }
+                    if (proc.mOptRecord.isFrozen()) {
+                        onProcessFrozen(proc);
+                    }
                 }
                     break;
                 case REPORT_UNFREEZE_MSG:
@@ -2050,6 +2026,10 @@ public final class CachedAppOptimizer {
             freezeAppAsyncLSP(proc);
         }
 
+        /**
+         * Freeze a process.
+         * @param proc process to be frozen
+         */
         @GuardedBy({"mAm"})
         private void freezeProcess(final ProcessRecord proc) {
             int pid = proc.getPid(); // Unlocked intentionally
@@ -2083,6 +2063,10 @@ public final class CachedAppOptimizer {
                 if (pid == 0 || opt.isFrozen()) {
                     // Already frozen or not a real process, either one being
                     // launched or one being killed
+                    if (DEBUG_FREEZER) {
+                        Slog.d(TAG_AM, "Skipping freeze for process " + pid
+                                + " " + name + ". Already frozen or not a real process");
+                    }
                     return;
                 }
 
