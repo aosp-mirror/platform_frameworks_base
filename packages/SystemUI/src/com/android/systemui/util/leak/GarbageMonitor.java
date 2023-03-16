@@ -59,6 +59,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
@@ -412,6 +413,7 @@ public class GarbageMonitor implements Dumpable {
         private final GarbageMonitor gm;
         private ProcessMemInfo pmi;
         private boolean dumpInProgress;
+        private final PanelInteractor mPanelInteractor;
 
         @Inject
         public MemoryTile(
@@ -423,11 +425,13 @@ public class GarbageMonitor implements Dumpable {
                 StatusBarStateController statusBarStateController,
                 ActivityStarter activityStarter,
                 QSLogger qsLogger,
-                GarbageMonitor monitor
+                GarbageMonitor monitor,
+                PanelInteractor panelInteractor
         ) {
             super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                     statusBarStateController, activityStarter, qsLogger);
             gm = monitor;
+            mPanelInteractor = panelInteractor;
         }
 
         @Override
@@ -457,7 +461,7 @@ public class GarbageMonitor implements Dumpable {
                     mHandler.post(() -> {
                         dumpInProgress = false;
                         refreshState();
-                        getHost().collapsePanels();
+                        mPanelInteractor.collapsePanels();
                         mActivityStarter.postStartActivityDismissingKeyguard(shareIntent, 0);
                     });
                 }
