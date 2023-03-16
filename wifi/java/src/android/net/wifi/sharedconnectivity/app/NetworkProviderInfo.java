@@ -21,6 +21,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.net.wifi.sharedconnectivity.service.SharedConnectivityService;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -89,6 +90,7 @@ public final class NetworkProviderInfo implements Parcelable {
     private final String mModelName;
     private final int mBatteryPercentage;
     private final int mConnectionStrength;
+    private final Bundle mExtras;
 
     /**
      * Builder class for {@link NetworkProviderInfo}.
@@ -99,6 +101,7 @@ public final class NetworkProviderInfo implements Parcelable {
         private String mModelName;
         private int mBatteryPercentage;
         private int mConnectionStrength;
+        private Bundle mExtras = Bundle.EMPTY;
 
         public Builder(@NonNull String deviceName, @NonNull String modelName) {
             Objects.requireNonNull(deviceName);
@@ -170,6 +173,17 @@ public final class NetworkProviderInfo implements Parcelable {
         }
 
         /**
+         * Sets the extras bundle
+         *
+         * @return Returns the Builder object.
+         */
+        @NonNull
+        public Builder setExtras(@NonNull Bundle extras) {
+            mExtras = extras;
+            return this;
+        }
+
+        /**
          * Builds the {@link NetworkProviderInfo} object.
          *
          * @return Returns the built {@link NetworkProviderInfo} object.
@@ -177,7 +191,7 @@ public final class NetworkProviderInfo implements Parcelable {
         @NonNull
         public NetworkProviderInfo build() {
             return new NetworkProviderInfo(mDeviceType, mDeviceName, mModelName, mBatteryPercentage,
-                    mConnectionStrength);
+                    mConnectionStrength, mExtras);
         }
     }
 
@@ -197,13 +211,15 @@ public final class NetworkProviderInfo implements Parcelable {
     }
 
     private NetworkProviderInfo(@DeviceType int deviceType, @NonNull String deviceName,
-            @NonNull String modelName, int batteryPercentage, int connectionStrength) {
+            @NonNull String modelName, int batteryPercentage, int connectionStrength,
+            @NonNull Bundle extras) {
         validate(deviceType, deviceName, modelName, batteryPercentage, connectionStrength);
         mDeviceType = deviceType;
         mDeviceName = deviceName;
         mModelName = modelName;
         mBatteryPercentage = batteryPercentage;
         mConnectionStrength = connectionStrength;
+        mExtras = extras;
     }
 
     /**
@@ -256,6 +272,16 @@ public final class NetworkProviderInfo implements Parcelable {
         return mConnectionStrength;
     }
 
+    /**
+     * Gets the extras Bundle.
+     *
+     * @return Returns a Bundle object.
+     */
+    @NonNull
+    public Bundle getExtras() {
+        return mExtras;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof NetworkProviderInfo)) return false;
@@ -280,6 +306,7 @@ public final class NetworkProviderInfo implements Parcelable {
         dest.writeString(mModelName);
         dest.writeInt(mBatteryPercentage);
         dest.writeInt(mConnectionStrength);
+        dest.writeBundle(mExtras);
     }
 
     @Override
@@ -295,7 +322,7 @@ public final class NetworkProviderInfo implements Parcelable {
     @NonNull
     public static NetworkProviderInfo readFromParcel(@NonNull Parcel in) {
         return new NetworkProviderInfo(in.readInt(), in.readString(), in.readString(), in.readInt(),
-                in.readInt());
+                in.readInt(), in.readBundle());
     }
 
     @NonNull
@@ -319,6 +346,7 @@ public final class NetworkProviderInfo implements Parcelable {
                 .append(", modelName=").append(mModelName)
                 .append(", batteryPercentage=").append(mBatteryPercentage)
                 .append(", connectionStrength=").append(mConnectionStrength)
+                .append(", extras=").append(mExtras.toString())
                 .append("]").toString();
     }
 }
