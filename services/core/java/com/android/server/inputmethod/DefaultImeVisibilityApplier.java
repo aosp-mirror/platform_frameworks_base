@@ -136,17 +136,16 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
                 mWindowManagerInternal.showImePostLayout(windowToken, statsToken);
                 break;
             case STATE_HIDE_IME:
-                if (mService.mCurFocusedWindowClient != null) {
+                if (mService.hasAttachedClient()) {
                     ImeTracker.forLogging().onProgress(statsToken,
                             ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
                     // IMMS only knows of focused window, not the actual IME target.
                     // e.g. it isn't aware of any window that has both
                     // NOT_FOCUSABLE, ALT_FOCUSABLE_IM flags set and can the IME target.
-                    // Send it to window manager to hide IME from IME target window.
-                    // TODO(b/139861270): send to mCurClient.client once IMMS is aware of
-                    // actual IME target.
+                    // Send it to window manager to hide IME from the actual IME control target
+                    // of the target display.
                     mWindowManagerInternal.hideIme(windowToken,
-                            mService.mCurFocusedWindowClient.mSelfReportedDisplayId, statsToken);
+                            mService.getDisplayIdToShowImeLocked(), statsToken);
                 } else {
                     ImeTracker.forLogging().onFailed(statsToken,
                             ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
