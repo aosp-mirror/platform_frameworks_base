@@ -22,13 +22,10 @@
     <string name="chooser_title" msgid="2262294130493605839">"ជ្រើសរើស <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ដើម្បីឱ្យស្ថិតក្រោម​ការគ្រប់គ្រងរបស់ &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="summary_watch" msgid="6566922405914995759">"ត្រូវការកម្មវិធីនេះ ដើម្បីគ្រប់គ្រង <xliff:g id="DEVICE_NAME">%1$s</xliff:g> របស់អ្នក។ <xliff:g id="APP_NAME">%2$s</xliff:g> នឹងត្រូវបានអនុញ្ញាតឱ្យ​ធ្វើសមកាលកម្មព័ត៌មានដូចជា ឈ្មោះមនុស្សដែលហៅទូរសព្ទ ធ្វើអន្តរកម្មជាមួយ​ការជូនដំណឹងរបស់អ្នក និងចូលប្រើការអនុញ្ញាតទូរសព្ទ, SMS, ទំនាក់ទំនង, ប្រតិទិន, កំណត់ហេតុហៅទូរសព្ទ និងឧបករណ៍នៅជិតរបស់អ្នក។"</string>
     <string name="summary_watch_single_device" msgid="7443464525873186735">"ត្រូវការកម្មវិធីនេះ ដើម្បីគ្រប់គ្រង <xliff:g id="DEVICE_NAME">%1$s</xliff:g> របស់អ្នក។ <xliff:g id="APP_NAME">%2$s</xliff:g> នឹងត្រូវបានអនុញ្ញាតឱ្យ​ធ្វើសមកាលកម្មព័ត៌មានដូចជា ឈ្មោះមនុស្សដែលហៅទូរសព្ទ និងចូលប្រើការអនុញ្ញាតទាំងនេះ៖"</string>
-    <!-- no translation found for confirmation_title_glasses (8288346850537727333) -->
-    <skip />
+    <string name="confirmation_title_glasses" msgid="8288346850537727333">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; គ្រប់គ្រង &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ឬ?"</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"វ៉ែនតា"</string>
-    <!-- no translation found for summary_glasses_multi_device (615259525961937348) -->
-    <skip />
-    <!-- no translation found for summary_glasses_single_device (5783761806783565716) -->
-    <skip />
+    <string name="summary_glasses_multi_device" msgid="615259525961937348">"ត្រូវការកម្មវិធីនេះ ដើម្បីគ្រប់គ្រង <xliff:g id="DEVICE_NAME">%1$s</xliff:g>។ <xliff:g id="APP_NAME">%2$s</xliff:g> នឹងត្រូវបានអនុញ្ញាតឱ្យ​ធ្វើអន្តរកម្មជាមួយ​ការជូនដំណឹងរបស់អ្នក និងចូលប្រើការអនុញ្ញាត​របស់ទូរសព្ទ, SMS, ទំនាក់ទំនង, មីក្រូហ្វូន និងឧបករណ៍នៅជិត​របស់អ្នក។"</string>
+    <string name="summary_glasses_single_device" msgid="5783761806783565716">"កម្មវិធីនេះ​នឹងត្រូវបានអនុញ្ញាតឱ្យ​ចូលប្រើការកំណត់ទាំងនេះ​នៅលើទូរសព្ទ​របស់អ្នក៖"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ចូលប្រើព័ត៌មាននេះពីទូរសព្ទរបស់អ្នក"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"សេវាកម្មឆ្លងកាត់ឧបករណ៍"</string>
     <string name="helper_summary_app_streaming" msgid="5977509499890099">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងស្នើសុំការអនុញ្ញាតជំនួសឱ្យ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> របស់អ្នក ដើម្បីបញ្ចាំងកម្មវិធីរវាងឧបករណ៍របស់អ្នក"</string>
@@ -38,10 +35,8 @@
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"សេវាកម្ម Google Play"</string>
     <string name="helper_summary_computer" msgid="9050724687678157852">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងស្នើសុំការអនុញ្ញាតជំនួសឱ្យ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> របស់អ្នក ដើម្បីចូលប្រើរូបថត មេឌៀ និងការជូនដំណឹងរបស់ទូរសព្ទអ្នក"</string>
-    <!-- no translation found for title_nearby_device_streaming (7269956847378799794) -->
-    <skip />
-    <!-- no translation found for helper_summary_nearby_device_streaming (2063965070936844876) -->
-    <skip />
+    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ធ្វើសកម្មភាពនេះឬ?"</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងស្នើសុំ​ការអនុញ្ញាតជំនួសឱ្យ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> របស់អ្នក ដើម្បីចាក់ផ្សាយកម្មវិធី និងមុខងារប្រព័ន្ធផ្សេងទៀត​ទៅកាន់​ឧបករណ៍នៅជិត"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ឧបករណ៍"</string>
     <string name="summary_generic_single_device" msgid="4735072202474939111">"កម្មវិធីនឹងអាច​ធ្វើសមកាលកម្មព័ត៌មាន​ដូចជា ឈ្មោះមនុស្សដែលហៅទូរសព្ទ​រវាងទូរសព្ទ និង <xliff:g id="DEVICE_NAME">%1$s</xliff:g> របស់អ្នក។"</string>
     <string name="summary_generic" msgid="4988130802522924650">"កម្មវិធីនេះនឹងអាច​ធ្វើសមកាលកម្មព័ត៌មាន​ដូចជា ឈ្មោះមនុស្សដែលហៅទូរសព្ទ​រវាងឧបករណ៍ដែលបានជ្រើសរើស និងទូរសព្ទរបស់អ្នក។"</string>
@@ -62,19 +57,16 @@
     <string name="permission_storage" msgid="6831099350839392343">"រូបថត និងមេឌៀ"</string>
     <string name="permission_notification" msgid="693762568127741203">"ការ​ជូនដំណឹង"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"កម្មវិធី"</string>
-    <!-- no translation found for permission_nearby_device_streaming (1023325519477349499) -->
-    <skip />
+    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"ការផ្សាយ"</string>
     <string name="permission_phone_summary" msgid="6684396967861278044">"អាចហៅទូរសព្ទ និងគ្រប់គ្រងការហៅទូរសព្ទ"</string>
     <string name="permission_call_logs_summary" msgid="6186103394658755022">"អាចអាន និងសរសេរ​កំណត់​ហេតុ​ហៅ​ទូរសព្ទ"</string>
     <string name="permission_sms_summary" msgid="3508442683678912017">"អាចផ្ញើ និងមើលសារ SMS"</string>
     <string name="permission_contacts_summary" msgid="675861979475628708">"អាចចូលប្រើទំនាក់ទំនងរបស់អ្នក"</string>
     <string name="permission_calendar_summary" msgid="6460000922511766226">"អាចចូលប្រើប្រតិទិនរបស់អ្នក"</string>
-    <!-- no translation found for permission_microphone_summary (3692091540613093394) -->
-    <skip />
+    <string name="permission_microphone_summary" msgid="3692091540613093394">"អាចថតសំឡេង"</string>
     <string name="permission_nearby_devices_summary" msgid="931940524460876655">"អាចស្វែងរក ភ្ជាប់ទៅ និងកំណត់​ចម្ងាយពាក់ព័ន្ធ​រវាងឧបករណ៍​ដែលនៅជិត"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"អាចអាន​ការជូនដំណឹង​ទាំងអស់ រួមទាំង​ព័ត៌មាន​ដូចជាទំនាក់ទំនង សារ និងរូបថត"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"ផ្សាយកម្មវិធីរបស់ទូរសព្ទអ្នក"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <!-- no translation found for permission_nearby_device_streaming_summary (8280824871197081246) -->
-    <skip />
+    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"ចាក់ផ្សាយ​កម្មវិធី និងមុខងារប្រព័ន្ធ​ផ្សេងទៀត​ពីទូរសព្ទ​របស់អ្នក"</string>
 </resources>
