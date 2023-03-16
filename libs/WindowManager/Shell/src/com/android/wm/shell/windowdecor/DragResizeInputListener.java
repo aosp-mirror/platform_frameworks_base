@@ -103,6 +103,7 @@ class DragResizeInputListener implements AutoCloseable {
                     null /* hostInputToken */,
                     FLAG_NOT_FOCUSABLE,
                     PRIVATE_FLAG_TRUSTED_OVERLAY,
+                    0 /* inputFeatures */,
                     TYPE_APPLICATION,
                     null /* windowToken */,
                     mFocusGrantToken,
@@ -208,6 +209,7 @@ class DragResizeInputListener implements AutoCloseable {
                     mDecorationSurface,
                     FLAG_NOT_FOCUSABLE,
                     PRIVATE_FLAG_TRUSTED_OVERLAY,
+                    0 /* inputFeatures */,
                     touchRegion);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
