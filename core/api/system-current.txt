@@ -968,10 +968,6 @@ package android.app {
     field public static final int SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY = 11; // 0xb
   }
 
-  public static class Notification.MediaStyle extends android.app.Notification.Style {
-    method @NonNull @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public android.app.Notification.MediaStyle setRemotePlaybackInfo(@NonNull CharSequence, @DrawableRes int, @Nullable android.app.PendingIntent);
-  }
-
   public static final class Notification.TvExtender implements android.app.Notification.Extender {
     method public boolean getSuppressShowOverApps();
     method public android.app.Notification.TvExtender setChannel(String);
