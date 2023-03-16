@@ -27,7 +27,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.dagger.MediaModule;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.external.QSExternalModule;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -45,7 +44,6 @@ import java.util.Map;
 
 import javax.inject.Named;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.Multibinds;
@@ -54,7 +52,13 @@ import dagger.multibindings.Multibinds;
  * Module for QS dependencies
  */
 @Module(subcomponents = {QSFragmentComponent.class},
-        includes = {MediaModule.class, QSExternalModule.class, QSFlagsModule.class})
+        includes = {
+                MediaModule.class,
+                QSExternalModule.class,
+                QSFlagsModule.class,
+                QSHostModule.class
+        }
+)
 public interface QSModule {
 
     /** A map of internal QS tiles. Ensures that this can be injected even if
@@ -100,8 +104,4 @@ public interface QSModule {
         manager.init();
         return manager;
     }
-
-    /** */
-    @Binds
-    QSHost provideQsHost(QSTileHost controllerImpl);
 }

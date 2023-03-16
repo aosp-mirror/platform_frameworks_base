@@ -45,6 +45,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
@@ -83,6 +84,8 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private DialogLaunchAnimator mDialogLaunchAnimator;
+    @Mock
+    private PanelInteractor mPanelInteractor;
 
     private TestableLooper mTestableLooper;
     private ScreenRecordTile mTile;
@@ -108,7 +111,8 @@ public class ScreenRecordTileTest extends SysuiTestCase {
                 mController,
                 mKeyguardDismissUtil,
                 mKeyguardStateController,
-                mDialogLaunchAnimator
+                mDialogLaunchAnimator,
+                mPanelInteractor
         );
 
         mTile.initialize();
@@ -146,7 +150,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         assertNotNull(onStartRecordingClicked.getValue());
         onStartRecordingClicked.getValue().run();
         verify(mDialogLaunchAnimator).disableAllCurrentDialogsExitAnimations();
-        verify(mHost).collapsePanels();
+        verify(mPanelInteractor).collapsePanels();
     }
 
     // Test that the tile is active and labeled correctly when the controller is starting
