@@ -579,17 +579,9 @@ jobject GraphicsJNI::getColorSpace(JNIEnv* env, SkColorSpace* decodeColorSpace,
     LOG_ALWAYS_FATAL_IF(res == skcms_TFType_HLGinvish || res == skcms_TFType_Invalid);
 
     jobject params;
-    if (res == skcms_TFType_PQish || res == skcms_TFType_HLGish) {
-        params = env->NewObject(gTransferParameters_class, gTransferParameters_constructorMethodID,
-                                transferParams.a, transferParams.b, transferParams.c,
-                                transferParams.d, transferParams.e, transferParams.f,
-                                transferParams.g, true);
-    } else {
-        params = env->NewObject(gTransferParameters_class, gTransferParameters_constructorMethodID,
-                                transferParams.a, transferParams.b, transferParams.c,
-                                transferParams.d, transferParams.e, transferParams.f,
-                                transferParams.g, false);
-    }
+    params = env->NewObject(gTransferParameters_class, gTransferParameters_constructorMethodID,
+                            transferParams.a, transferParams.b, transferParams.c, transferParams.d,
+                            transferParams.e, transferParams.f, transferParams.g);
 
     jfloatArray xyzArray = env->NewFloatArray(9);
     jfloat xyz[9] = {
@@ -817,7 +809,7 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gTransferParameters_class = MakeGlobalRefOrDie(env, FindClassOrDie(env,
             "android/graphics/ColorSpace$Rgb$TransferParameters"));
     gTransferParameters_constructorMethodID =
-            GetMethodIDOrDie(env, gTransferParameters_class, "<init>", "(DDDDDDDZ)V");
+            GetMethodIDOrDie(env, gTransferParameters_class, "<init>", "(DDDDDDD)V");
 
     gFontMetrics_class = FindClassOrDie(env, "android/graphics/Paint$FontMetrics");
     gFontMetrics_class = MakeGlobalRefOrDie(env, gFontMetrics_class);
