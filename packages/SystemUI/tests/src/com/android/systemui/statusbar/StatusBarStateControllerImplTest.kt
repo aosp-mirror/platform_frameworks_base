@@ -167,4 +167,13 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
         controller.setIsDreaming(false)
         verify(listener).onDreamingChanged(false)
     }
+
+    @Test
+    fun testSetDreamState_getterReturnsCurrentState() {
+        controller.setIsDreaming(true)
+        assertTrue(controller.isDreaming())
+
+        controller.setIsDreaming(false)
+        assertFalse(controller.isDreaming())
+    }
 }
