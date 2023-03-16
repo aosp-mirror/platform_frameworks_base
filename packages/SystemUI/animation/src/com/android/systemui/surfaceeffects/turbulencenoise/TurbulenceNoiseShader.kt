@@ -36,6 +36,7 @@ class TurbulenceNoiseShader(useFractal: Boolean = false) :
             uniform float in_aspectRatio;
             uniform float in_opacity;
             uniform float in_pixelDensity;
+            uniform float in_inverseLuma;
             layout(color) uniform vec4 in_color;
             layout(color) uniform vec4 in_backgroundColor;
         """
@@ -47,7 +48,7 @@ class TurbulenceNoiseShader(useFractal: Boolean = false) :
                 uv.x *= in_aspectRatio;
 
                 vec3 noiseP = vec3(uv + in_noiseMove.xy, in_noiseMove.z) * in_gridNum;
-                float luma = simplex3d(noiseP) * in_opacity;
+                float luma = abs(in_inverseLuma - simplex3d(noiseP)) * in_opacity;
                 vec3 mask = maskLuminosity(in_color.rgb, luma);
                 vec3 color = in_backgroundColor.rgb + mask * 0.6;
 
@@ -69,7 +70,7 @@ class TurbulenceNoiseShader(useFractal: Boolean = false) :
                 uv.x *= in_aspectRatio;
 
                 vec3 noiseP = vec3(uv + in_noiseMove.xy, in_noiseMove.z) * in_gridNum;
-                float luma = simplex3d_fractal(noiseP) * in_opacity;
+                float luma = abs(in_inverseLuma - simplex3d_fractal(noiseP)) * in_opacity;
                 vec3 mask = maskLuminosity(in_color.rgb, luma);
                 vec3 color = in_backgroundColor.rgb + mask * 0.6;
 
@@ -121,6 +122,17 @@ class TurbulenceNoiseShader(useFractal: Boolean = false) :
     fun setSize(width: Float, height: Float) {
         setFloatUniform("in_size", width, height)
         setFloatUniform("in_aspectRatio", width / max(height, 0.001f))
+    }
+
+    /**
+     * Sets whether to inverse the luminosity of the noise.
+     *
+     * By default noise will be used as a luma matte as is. This means that you will see color in
+     * the brighter area. If you want to invert it, meaning blend color onto the darker side, set to
+     * true.
+     */
+    fun setInverseNoiseLuminosity(inverse: Boolean) {
+        setFloatUniform("in_inverseLuma", if (inverse) 1f else 0f)
     }
 
     /** Current noise movements in x, y, and z axes. */
