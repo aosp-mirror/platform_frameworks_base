@@ -5131,9 +5131,10 @@ public class ComputerEngine implements Computer {
 
     @Override
     public boolean isComponentEffectivelyEnabled(@NonNull ComponentInfo componentInfo,
-            @UserIdInt int userId) {
+            @NonNull UserHandle userHandle) {
         try {
             String packageName = componentInfo.packageName;
+            int userId = userHandle.getIdentifier();
             int appEnabledSetting =
                     mSettings.getApplicationEnabledSetting(packageName, userId);
             if (appEnabledSetting == COMPONENT_ENABLED_STATE_DEFAULT) {
@@ -5156,9 +5157,10 @@ public class ComputerEngine implements Computer {
 
     @Override
     public boolean isApplicationEffectivelyEnabled(@NonNull String packageName,
-            @UserIdInt int userId) {
+            @NonNull UserHandle userHandle) {
         try {
-            int appEnabledSetting = mSettings.getApplicationEnabledSetting(packageName, userId);
+            int appEnabledSetting = mSettings.getApplicationEnabledSetting(packageName,
+                    userHandle.getIdentifier());
             if (appEnabledSetting == COMPONENT_ENABLED_STATE_DEFAULT) {
                 final AndroidPackage pkg = getPackage(packageName);
                 if (pkg == null) {
