@@ -21880,7 +21880,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                     if (!isProfileOwnerOfOrganizationOwnedDevice(
                             admin.info.getComponent(), user.getIdentifier())
-                            && !isDeviceOwner(admin)) {
+                            && !isDeviceOwner(admin)
+                            && !(isProfileOwner(admin.info.getComponent(), user.getIdentifier())
+                            && admin.getUserHandle().isSystem())) {
                         continue;
                     }
                     // Don't send the broadcast twice if the DPC is the same package as the
