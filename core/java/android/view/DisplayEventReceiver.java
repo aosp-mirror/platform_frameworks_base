@@ -164,6 +164,12 @@ public abstract class DisplayEventReceiver {
                 this.deadline = deadline;
             }
 
+            void copyFrom(FrameTimeline other) {
+                vsyncId = other.vsyncId;
+                expectedPresentationTime = other.expectedPresentationTime;
+                deadline = other.deadline;
+            }
+
             // The frame timeline vsync id, used to correlate a frame
             // produced by HWUI with the timeline data stored in Surface Flinger.
             public long vsyncId = FrameInfo.INVALID_VSYNC_ID;
@@ -201,6 +207,14 @@ public abstract class DisplayEventReceiver {
             this.frameTimelines = frameTimelines;
             this.preferredFrameTimelineIndex = preferredFrameTimelineIndex;
             this.frameInterval = frameInterval;
+        }
+
+        void copyFrom(VsyncEventData other) {
+            preferredFrameTimelineIndex = other.preferredFrameTimelineIndex;
+            frameInterval = other.frameInterval;
+            for (int i = 0; i < frameTimelines.length; i++) {
+                frameTimelines[i].copyFrom(other.frameTimelines[i]);
+            }
         }
 
         public FrameTimeline preferredFrameTimeline() {

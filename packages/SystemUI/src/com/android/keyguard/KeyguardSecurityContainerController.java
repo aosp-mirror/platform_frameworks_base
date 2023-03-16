@@ -1066,23 +1066,28 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     private void reloadColors() {
-        reinflateViewFlipper();
-        mView.reloadColors();
+        reinflateViewFlipper(() -> mView.reloadColors());
     }
 
     /** Handles density or font scale changes. */
     private void onDensityOrFontScaleChanged() {
-        reinflateViewFlipper();
-        mView.onDensityOrFontScaleChanged();
+        reinflateViewFlipper(() -> mView.onDensityOrFontScaleChanged());
     }
 
     /**
      * Reinflate the view flipper child view.
      */
-    public void reinflateViewFlipper() {
+    public void reinflateViewFlipper(
+            KeyguardSecurityViewFlipperController.OnViewInflatedListener onViewInflatedListener) {
         mSecurityViewFlipperController.clearViews();
-        mSecurityViewFlipperController.getSecurityView(mCurrentSecurityMode,
-                mKeyguardSecurityCallback);
+        if (mFeatureFlags.isEnabled(Flags.ASYNC_INFLATE_BOUNCER)) {
+            mSecurityViewFlipperController.asynchronouslyInflateView(mCurrentSecurityMode,
+                    mKeyguardSecurityCallback, onViewInflatedListener);
+        } else {
+            mSecurityViewFlipperController.getSecurityView(mCurrentSecurityMode,
+                    mKeyguardSecurityCallback);
+            onViewInflatedListener.onViewInflated();
+        }
     }
 
     /**

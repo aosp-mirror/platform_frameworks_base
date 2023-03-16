@@ -34,6 +34,7 @@ import static android.net.NetworkTemplate.OEM_MANAGED_PAID;
 import static android.net.NetworkTemplate.OEM_MANAGED_PRIVATE;
 import static android.os.Debug.getIonHeapsSizeKb;
 import static android.os.Process.LAST_SHARED_APPLICATION_GID;
+import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.getUidForPid;
 import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
 import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
@@ -89,8 +90,10 @@ import android.bluetooth.UidTraffic;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
@@ -4213,20 +4216,26 @@ public class StatsPullAtomService extends SystemService {
 
     int pullInstalledIncrementalPackagesLocked(int atomTag, List<StatsEvent> pulledData) {
         final PackageManager pm = mContext.getPackageManager();
+        final PackageManagerInternal pmIntenral =
+                LocalServices.getService(PackageManagerInternal.class);
         if (!pm.hasSystemFeature(PackageManager.FEATURE_INCREMENTAL_DELIVERY)) {
             // Incremental is not enabled on this device. The result list will be empty.
             return StatsManager.PULL_SUCCESS;
         }
         final long token = Binder.clearCallingIdentity();
         try {
-            int[] userIds = LocalServices.getService(UserManagerInternal.class).getUserIds();
+            final int[] userIds = LocalServices.getService(UserManagerInternal.class).getUserIds();
             for (int userId : userIds) {
-                List<PackageInfo> installedPackages = pm.getInstalledPackagesAsUser(0, userId);
+                final List<PackageInfo> installedPackages = pm.getInstalledPackagesAsUser(
+                        0, userId);
                 for (PackageInfo pi : installedPackages) {
                     if (IncrementalManager.isIncrementalPath(
                             pi.applicationInfo.getBaseCodePath())) {
+                        final IncrementalStatesInfo info = pmIntenral.getIncrementalStatesInfo(
+                                pi.packageName, SYSTEM_UID, userId);
                         pulledData.add(
-                                FrameworkStatsLog.buildStatsEvent(atomTag, pi.applicationInfo.uid));
+                                FrameworkStatsLog.buildStatsEvent(atomTag, pi.applicationInfo.uid,
+                                        info.isLoading(), info.getLoadingCompletedTime()));
                     }
                 }
             }

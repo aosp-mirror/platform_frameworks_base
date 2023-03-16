@@ -64,6 +64,8 @@ interface ControlsUiController {
      * This element will be the one that appears when the user first opens the controls activity.
      */
     fun getPreferredSelectedItem(structures: List<StructureInfo>): SelectedItem
+
+    fun onOrientationChange()
 }
 
 sealed class SelectedItem {

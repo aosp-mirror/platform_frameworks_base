@@ -3224,7 +3224,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         Bundle options = new BroadcastOptions()
                 .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
-                .setDeferUntilActive(true)
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
                 .toBundle();
         mInjector.binderWithCleanCallingIdentity(() ->
                 mContext.sendBroadcastAsUser(intent, new UserHandle(userHandle), null, options));

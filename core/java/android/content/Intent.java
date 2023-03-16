@@ -5920,9 +5920,8 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Optional argument to be used with {@link #ACTION_CHOOSER}.
-     * A {@link android.app.PendingIntent} to be sent when the user wants to modify the content that
-     * they're sharing. This can be used to allow the user to return to the source app to, for
-     * example, select different media.
+     * A {@link ChooserAction} to allow the user to modify what is being shared in some way. This
+     * may be integrated into the content preview on sharesheets that have a preview UI.
      */
     public static final String EXTRA_CHOOSER_MODIFY_SHARE_ACTION =
             "android.intent.extra.CHOOSER_MODIFY_SHARE_ACTION";

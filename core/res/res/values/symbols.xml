@@ -4931,12 +4931,17 @@
   <java-symbol type="array" name="device_state_notification_active_contents"/>
   <java-symbol type="array" name="device_state_notification_thermal_titles"/>
   <java-symbol type="array" name="device_state_notification_thermal_contents"/>
+  <java-symbol type="array" name="device_state_notification_power_save_titles"/>
+  <java-symbol type="array" name="device_state_notification_power_save_contents"/>
   <java-symbol type="string" name="concurrent_display_notification_name"/>
   <java-symbol type="string" name="concurrent_display_notification_active_title"/>
   <java-symbol type="string" name="concurrent_display_notification_active_content"/>
   <java-symbol type="string" name="concurrent_display_notification_thermal_title"/>
   <java-symbol type="string" name="concurrent_display_notification_thermal_content"/>
+  <java-symbol type="string" name="concurrent_display_notification_power_save_title"/>
+  <java-symbol type="string" name="concurrent_display_notification_power_save_content"/>
   <java-symbol type="string" name="device_state_notification_turn_off_button"/>
+  <java-symbol type="string" name="device_state_notification_settings_button"/>
   <java-symbol type="bool" name="config_independentLockscreenLiveWallpaper"/>
   <java-symbol type="integer" name="config_deviceStateConcurrentRearDisplay" />
   <java-symbol type="string" name="config_rearDisplayPhysicalAddress" />

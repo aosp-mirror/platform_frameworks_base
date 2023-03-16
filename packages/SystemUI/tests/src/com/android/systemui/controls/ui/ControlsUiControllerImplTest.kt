@@ -347,7 +347,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         whenever(controlsController.removeFavorites(eq(componentName))).thenReturn(true)
         val panel = SelectedItem.PanelItem("App name", componentName)
         preferredPanelRepository.setSelectedComponent(
-                SelectedComponentRepository.SelectedComponent(panel)
+            SelectedComponentRepository.SelectedComponent(panel)
         )
         underTest.show(parent, {}, context)
         underTest.startRemovingApp(componentName, "Test App")
@@ -362,6 +362,26 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testCancelRemovingAppsDoesntRemoveFavorite() {
+        val componentName = ComponentName(context, "cls")
+        whenever(controlsController.removeFavorites(eq(componentName))).thenReturn(true)
+        val panel = SelectedItem.PanelItem("App name", componentName)
+        preferredPanelRepository.setSelectedComponent(
+            SelectedComponentRepository.SelectedComponent(panel)
+        )
+        underTest.show(parent, {}, context)
+        underTest.startRemovingApp(componentName, "Test App")
+
+        fakeDialogController.clickNeutral()
+
+        verify(controlsController, never()).removeFavorites(eq(componentName))
+        assertThat(underTest.getPreferredSelectedItem(emptyList())).isEqualTo(panel)
+        assertThat(preferredPanelRepository.shouldAddDefaultComponent()).isTrue()
+        assertThat(preferredPanelRepository.getSelectedComponent())
+            .isEqualTo(SelectedComponentRepository.SelectedComponent(panel))
+    }
+
+    @Test
     fun testHideCancelsTheRemoveAppDialog() {
         val componentName = ComponentName(context, "cls")
         underTest.show(parent, {}, context)
@@ -372,10 +392,42 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         verify(fakeDialogController.dialog).cancel()
     }
 
+    @Test
+    fun testOnRotationWithPanelUpdateBoundsCalled() {
+        mockLayoutInflater()
+        val packageName = "pkg"
+        `when`(authorizedPanelsRepository.getAuthorizedPanels()).thenReturn(setOf(packageName))
+        val panel = SelectedItem.PanelItem("App name", ComponentName(packageName, "cls"))
+        val serviceInfo = setUpPanel(panel)
+
+        underTest.show(parent, {}, context)
+
+        val captor = argumentCaptor<ControlsListingController.ControlsListingCallback>()
+
+        verify(controlsListingController).addCallback(capture(captor))
+        captor.value.onServicesUpdated(listOf(serviceInfo))
+        FakeExecutor.exhaustExecutors(uiExecutor, bgExecutor)
+
+        val taskViewConsumerCaptor = argumentCaptor<Consumer<TaskView>>()
+        verify(taskViewFactory).create(eq(context), eq(uiExecutor), capture(taskViewConsumerCaptor))
+
+        val taskView: TaskView = mock {
+            `when`(this.post(any())).thenAnswer {
+                uiExecutor.execute(it.arguments[0] as Runnable)
+                true
+            }
+        }
+
+        taskViewConsumerCaptor.value.accept(taskView)
+
+        underTest.onOrientationChange()
+        verify(taskView).onLocationChanged()
+    }
+
     private fun setUpPanel(panel: SelectedItem.PanelItem): ControlsServiceInfo {
         val activity = ComponentName(context, "activity")
         preferredPanelRepository.setSelectedComponent(
-                SelectedComponentRepository.SelectedComponent(panel)
+            SelectedComponentRepository.SelectedComponent(panel)
         )
         return ControlsServiceInfo(panel.componentName, panel.appName, activity)
     }

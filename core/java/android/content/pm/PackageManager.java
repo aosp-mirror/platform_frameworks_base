@@ -8666,7 +8666,7 @@ public abstract class PackageManager {
      * requesting its own install information and is not an instant app.
      *
      * @param packageName The name of the package to query
-     * @throws NameNotFoundException if the given package name is not installed
+     * @throws NameNotFoundException if the given package name is not available to the caller.
      */
     @NonNull
     public InstallSourceInfo getInstallSourceInfo(@NonNull String packageName)

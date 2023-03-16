@@ -617,8 +617,6 @@ int64_t MediaEvent::getAudioHandle() {
 void FilterClientCallbackImpl::getSectionEvent(jobjectArray &arr, const int size,
                                                const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/SectionEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIIJ)V");
 
     const DemuxFilterSectionEvent &sectionEvent = event.get<DemuxFilterEvent::Tag::section>();
     jint tableId = sectionEvent.tableId;
@@ -626,23 +624,15 @@ void FilterClientCallbackImpl::getSectionEvent(jobjectArray &arr, const int size
     jint sectionNum = sectionEvent.sectionNum;
     jlong dataLength = sectionEvent.dataLength;
 
-    jobject obj = env->NewObject(eventClazz, eventInit, tableId, version, sectionNum, dataLength);
+    jobject obj = env->NewObject(mSectionEventClass, mSectionEventInitID, tableId, version,
+                                 sectionNum, dataLength);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
-    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
                                              const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/MediaEvent");
-    jmethodID eventInit = env->GetMethodID(
-            eventClazz,
-            "<init>",
-            "(IZJZJJJLandroid/media/MediaCodec$LinearBlock;"
-            "ZJIZILandroid/media/tv/tuner/filter/AudioDescriptor;"
-            "Ljava/util/List;)V");
-    jfieldID eventContext = env->GetFieldID(eventClazz, "mNativeContext", "J");
 
     const DemuxFilterMediaEvent &mediaEvent = event.get<DemuxFilterEvent::Tag::media>();
     jobject audioDescriptor = nullptr;
@@ -650,8 +640,6 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
     jobject presentationsJObj = JAudioPresentationInfo::asJobject(env, gAudioPresentationFields);
     switch (mediaEvent.extraMetaData.getTag()) {
         case DemuxFilterMediaEventExtraMetaData::Tag::audio: {
-            jclass adClazz = env->FindClass("android/media/tv/tuner/filter/AudioDescriptor");
-            jmethodID adInit = env->GetMethodID(adClazz, "<init>", "(BBCBBB)V");
 
             const AudioExtraMetaData &ad =
                     mediaEvent.extraMetaData.get<DemuxFilterMediaEventExtraMetaData::Tag::audio>();
@@ -662,9 +650,9 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
             jbyte adGainFront = ad.adGainFront;
             jbyte adGainSurround = ad.adGainSurround;
 
-            audioDescriptor = env->NewObject(adClazz, adInit, adFade, adPan, versionTextTag,
-                                             adGainCenter, adGainFront, adGainSurround);
-            env->DeleteLocalRef(adClazz);
+            audioDescriptor = env->NewObject(mAudioDescriptorClass, mAudioDescriptorInitID, adFade,
+                                             adPan, versionTextTag, adGainCenter, adGainFront,
+                                             adGainSurround);
             break;
         }
         case DemuxFilterMediaEventExtraMetaData::Tag::audioPresentations: {
@@ -705,10 +693,10 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
         sc = mediaEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scVvc>();
     }
 
-    jobject obj = env->NewObject(eventClazz, eventInit, streamId, isPtsPresent, pts, isDtsPresent,
-                                 dts, dataLength, offset, nullptr, isSecureMemory, avDataId,
-                                 mpuSequenceNumber, isPesPrivateData, sc, audioDescriptor,
-                                 presentationsJObj);
+    jobject obj = env->NewObject(mMediaEventClass, mMediaEventInitID, streamId, isPtsPresent, pts,
+                                 isDtsPresent, dts, dataLength, offset, nullptr, isSecureMemory,
+                                 avDataId, mpuSequenceNumber, isPesPrivateData, sc,
+                                 audioDescriptor, presentationsJObj);
 
     uint64_t avSharedMemSize = mFilterClient->getAvSharedHandleInfo().size;
     if (mediaEvent.avMemory.fds.size() > 0 || mediaEvent.avDataId != 0 ||
@@ -717,7 +705,7 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
                 new MediaEvent(mFilterClient, dupFromAidl(mediaEvent.avMemory),
                                mediaEvent.avDataId, dataLength + offset, obj);
         mediaEventSp->mAvHandleRefCnt++;
-        env->SetLongField(obj, eventContext, (jlong)mediaEventSp.get());
+        env->SetLongField(obj, mMediaEventFieldContextID, (jlong)mediaEventSp.get());
         mediaEventSp->incStrong(obj);
     }
 
@@ -726,32 +714,27 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
         env->DeleteLocalRef(audioDescriptor);
     }
     env->DeleteLocalRef(obj);
-    env->DeleteLocalRef(eventClazz);
     env->DeleteLocalRef(presentationsJObj);
 }
 
 void FilterClientCallbackImpl::getPesEvent(jobjectArray &arr, const int size,
                                            const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/PesEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(III)V");
 
     const DemuxFilterPesEvent &pesEvent = event.get<DemuxFilterEvent::Tag::pes>();
     jint streamId = pesEvent.streamId;
     jint dataLength = pesEvent.dataLength;
     jint mpuSequenceNumber = pesEvent.mpuSequenceNumber;
 
-    jobject obj = env->NewObject(eventClazz, eventInit, streamId, dataLength, mpuSequenceNumber);
+    jobject obj = env->NewObject(mPesEventClass, mPesEventInitID, streamId, dataLength,
+                                 mpuSequenceNumber);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
-    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getTsRecordEvent(jobjectArray &arr, const int size,
                                                 const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/TsRecordEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIIJJI)V");
 
     const DemuxFilterTsRecordEvent &tsRecordEvent = event.get<DemuxFilterEvent::Tag::tsRecord>();
     DemuxPid pid = tsRecordEvent.pid;
@@ -781,18 +764,15 @@ void FilterClientCallbackImpl::getTsRecordEvent(jobjectArray &arr, const int siz
     jlong pts = tsRecordEvent.pts;
     jint firstMbInSlice = tsRecordEvent.firstMbInSlice;
 
-    jobject obj =
-            env->NewObject(eventClazz, eventInit, jpid, ts, sc, byteNumber, pts, firstMbInSlice);
+    jobject obj = env->NewObject(mTsRecordEventClass, mTsRecordEventInitID, jpid, ts, sc,
+                                 byteNumber, pts, firstMbInSlice);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
-    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getMmtpRecordEvent(jobjectArray &arr, const int size,
                                                   const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/MmtpRecordEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IJIJII)V");
 
     const DemuxFilterMmtpRecordEvent &mmtpRecordEvent =
             event.get<DemuxFilterEvent::Tag::mmtpRecord>();
@@ -803,18 +783,15 @@ void FilterClientCallbackImpl::getMmtpRecordEvent(jobjectArray &arr, const int s
     jint firstMbInSlice = mmtpRecordEvent.firstMbInSlice;
     jlong tsIndexMask = mmtpRecordEvent.tsIndexMask;
 
-    jobject obj = env->NewObject(eventClazz, eventInit, scHevcIndexMask, byteNumber,
-                                 mpuSequenceNumber, pts, firstMbInSlice, tsIndexMask);
+    jobject obj = env->NewObject(mMmtpRecordEventClass, mMmtpRecordEventInitID, scHevcIndexMask,
+                                 byteNumber, mpuSequenceNumber, pts, firstMbInSlice, tsIndexMask);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
-    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getDownloadEvent(jobjectArray &arr, const int size,
                                                 const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/DownloadEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(IIIIII)V");
 
     const DemuxFilterDownloadEvent &downloadEvent = event.get<DemuxFilterEvent::Tag::download>();
     jint itemId = downloadEvent.itemId;
@@ -824,32 +801,27 @@ void FilterClientCallbackImpl::getDownloadEvent(jobjectArray &arr, const int siz
     jint lastItemFragmentIndex = downloadEvent.lastItemFragmentIndex;
     jint dataLength = downloadEvent.dataLength;
 
-    jobject obj = env->NewObject(eventClazz, eventInit, itemId, downloadId, mpuSequenceNumber,
-                                 itemFragmentIndex, lastItemFragmentIndex, dataLength);
+    jobject obj = env->NewObject(mDownloadEventClass, mDownloadEventInitID, itemId, downloadId,
+                                 mpuSequenceNumber, itemFragmentIndex, lastItemFragmentIndex,
+                                 dataLength);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
-    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getIpPayloadEvent(jobjectArray &arr, const int size,
                                                  const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/IpPayloadEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(I)V");
 
     const DemuxFilterIpPayloadEvent &ipPayloadEvent = event.get<DemuxFilterEvent::Tag::ipPayload>();
     jint dataLength = ipPayloadEvent.dataLength;
-    jobject obj = env->NewObject(eventClazz, eventInit, dataLength);
+    jobject obj = env->NewObject(mIpPayloadEventClass, mIpPayloadEventInitID, dataLength);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
-    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getTemiEvent(jobjectArray &arr, const int size,
                                             const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/TemiEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(JB[B)V");
 
     const DemuxFilterTemiEvent &temiEvent = event.get<DemuxFilterEvent::Tag::temi>();
     jlong pts = temiEvent.pts;
@@ -859,63 +831,53 @@ void FilterClientCallbackImpl::getTemiEvent(jobjectArray &arr, const int size,
     jbyteArray array = env->NewByteArray(descrData.size());
     env->SetByteArrayRegion(array, 0, descrData.size(), reinterpret_cast<jbyte *>(&descrData[0]));
 
-    jobject obj = env->NewObject(eventClazz, eventInit, pts, descrTag, array);
+    jobject obj = env->NewObject(mTemiEventClass, mTemiEventInitID, pts, descrTag, array);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(array);
     env->DeleteLocalRef(obj);
-    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getScramblingStatusEvent(jobjectArray &arr, const int size,
                                                         const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/ScramblingStatusEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(I)V");
 
     const DemuxFilterMonitorEvent &scramblingStatus =
             event.get<DemuxFilterEvent::Tag::monitorEvent>()
                     .get<DemuxFilterMonitorEvent::Tag::scramblingStatus>();
-    jobject obj = env->NewObject(eventClazz, eventInit, scramblingStatus);
+    jobject obj = env->NewObject(mScramblingStatusEventClass, mScramblingStatusEventInitID,
+                                 scramblingStatus);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
-    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getIpCidChangeEvent(jobjectArray &arr, const int size,
                                                    const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/IpCidChangeEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(I)V");
 
     const DemuxFilterMonitorEvent &cid = event.get<DemuxFilterEvent::Tag::monitorEvent>()
                                                  .get<DemuxFilterMonitorEvent::Tag::cid>();
-    jobject obj = env->NewObject(eventClazz, eventInit, cid);
+    jobject obj = env->NewObject(mIpCidChangeEventClass, mIpCidChangeEventInitID, cid);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
-    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getRestartEvent(jobjectArray &arr, const int size,
                                                const DemuxFilterEvent &event) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/RestartEvent");
-    jmethodID eventInit = env->GetMethodID(eventClazz, "<init>", "(I)V");
 
     const int32_t &startId = event.get<DemuxFilterEvent::Tag::startId>();
-    jobject obj = env->NewObject(eventClazz, eventInit, startId);
+    jobject obj = env->NewObject(mRestartEventClass, mRestartEventInitID, startId);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
-    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::onFilterEvent(const vector<DemuxFilterEvent> &events) {
     ALOGV("FilterClientCallbackImpl::onFilterEvent");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jclass eventClazz = env->FindClass("android/media/tv/tuner/filter/FilterEvent");
     jobjectArray array;
 
     if (!events.empty()) {
-        array = env->NewObjectArray(events.size(), eventClazz, nullptr);
+        array = env->NewObjectArray(events.size(), mEventClass, nullptr);
     }
 
     for (int i = 0, arraySize = 0; i < events.size(); i++) {
@@ -1004,7 +966,6 @@ void FilterClientCallbackImpl::onFilterEvent(const vector<DemuxFilterEvent> &eve
               "Filter object has been freed. Ignoring callback.");
     }
     env->DeleteLocalRef(array);
-    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::onFilterStatus(const DemuxFilterStatus status) {
@@ -1040,6 +1001,67 @@ void FilterClientCallbackImpl::setSharedFilter(jweak filterObj, sp<FilterClient>
     mSharedFilter = true;
 }
 
+FilterClientCallbackImpl::FilterClientCallbackImpl() {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    ScopedLocalRef eventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/FilterEvent"));
+    ScopedLocalRef sectionEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/SectionEvent"));
+    ScopedLocalRef mediaEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/MediaEvent"));
+    ScopedLocalRef audioDescriptorClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/AudioDescriptor"));
+    ScopedLocalRef pesEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/PesEvent"));
+    ScopedLocalRef tsRecordEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/TsRecordEvent"));
+    ScopedLocalRef mmtpRecordEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/MmtpRecordEvent"));
+    ScopedLocalRef downloadEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/DownloadEvent"));
+    ScopedLocalRef ipPayloadEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/IpPayloadEvent"));
+    ScopedLocalRef temiEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/TemiEvent"));
+    ScopedLocalRef scramblingStatusEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/ScramblingStatusEvent"));
+    ScopedLocalRef ipCidChangeEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/IpCidChangeEvent"));
+    ScopedLocalRef restartEventClass =
+        ScopedLocalRef(env, env->FindClass("android/media/tv/tuner/filter/RestartEvent"));
+    mEventClass = (jclass) env->NewGlobalRef(eventClass.get());
+    mSectionEventClass = (jclass) env->NewGlobalRef(sectionEventClass.get());
+    mMediaEventClass = (jclass) env->NewGlobalRef(mediaEventClass.get());
+    mAudioDescriptorClass = (jclass) env->NewGlobalRef(audioDescriptorClass.get());
+    mPesEventClass = (jclass) env->NewGlobalRef(pesEventClass.get());
+    mTsRecordEventClass = (jclass) env->NewGlobalRef(tsRecordEventClass.get());
+    mMmtpRecordEventClass = (jclass) env->NewGlobalRef(mmtpRecordEventClass.get());
+    mDownloadEventClass = (jclass) env->NewGlobalRef(downloadEventClass.get());
+    mIpPayloadEventClass = (jclass) env->NewGlobalRef(ipPayloadEventClass.get());
+    mTemiEventClass = (jclass) env->NewGlobalRef(temiEventClass.get());
+    mScramblingStatusEventClass = (jclass) env->NewGlobalRef(scramblingStatusEventClass.get());
+    mIpCidChangeEventClass = (jclass) env->NewGlobalRef(ipCidChangeEventClass.get());
+    mRestartEventClass = (jclass) env->NewGlobalRef(restartEventClass.get());
+    mSectionEventInitID = env->GetMethodID(mSectionEventClass, "<init>", "(IIIJ)V");
+    mMediaEventInitID = env->GetMethodID(
+            mMediaEventClass,
+            "<init>",
+            "(IZJZJJJLandroid/media/MediaCodec$LinearBlock;"
+            "ZJIZILandroid/media/tv/tuner/filter/AudioDescriptor;"
+            "Ljava/util/List;)V");
+    mAudioDescriptorInitID = env->GetMethodID(mAudioDescriptorClass, "<init>", "(BBCBBB)V");
+    mPesEventInitID = env->GetMethodID(mPesEventClass, "<init>", "(III)V");
+    mTsRecordEventInitID = env->GetMethodID(mTsRecordEventClass, "<init>", "(IIIJJI)V");
+    mMmtpRecordEventInitID = env->GetMethodID(mMmtpRecordEventClass, "<init>", "(IJIJII)V");
+    mDownloadEventInitID = env->GetMethodID(mDownloadEventClass, "<init>", "(IIIIII)V");
+    mIpPayloadEventInitID = env->GetMethodID(mIpPayloadEventClass, "<init>", "(I)V");
+    mTemiEventInitID = env->GetMethodID(mTemiEventClass, "<init>", "(JB[B)V");
+    mScramblingStatusEventInitID = env->GetMethodID(mScramblingStatusEventClass, "<init>", "(I)V");
+    mIpCidChangeEventInitID = env->GetMethodID(mIpCidChangeEventClass, "<init>", "(I)V");
+    mRestartEventInitID = env->GetMethodID(mRestartEventClass, "<init>", "(I)V");
+    mMediaEventFieldContextID = env->GetFieldID(mMediaEventClass, "mNativeContext", "J");
+}
+
 FilterClientCallbackImpl::~FilterClientCallbackImpl() {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     if (mFilterObj != nullptr) {
@@ -1047,6 +1069,19 @@ FilterClientCallbackImpl::~FilterClientCallbackImpl() {
         mFilterObj = nullptr;
     }
     mFilterClient = nullptr;
+    env->DeleteGlobalRef(mEventClass);
+    env->DeleteGlobalRef(mSectionEventClass);
+    env->DeleteGlobalRef(mMediaEventClass);
+    env->DeleteGlobalRef(mAudioDescriptorClass);
+    env->DeleteGlobalRef(mPesEventClass);
+    env->DeleteGlobalRef(mTsRecordEventClass);
+    env->DeleteGlobalRef(mMmtpRecordEventClass);
+    env->DeleteGlobalRef(mDownloadEventClass);
+    env->DeleteGlobalRef(mIpPayloadEventClass);
+    env->DeleteGlobalRef(mTemiEventClass);
+    env->DeleteGlobalRef(mScramblingStatusEventClass);
+    env->DeleteGlobalRef(mIpCidChangeEventClass);
+    env->DeleteGlobalRef(mRestartEventClass);
 }
 
 /////////////// FrontendClientCallbackImpl ///////////////////////

@@ -16,10 +16,16 @@
 
 package android.hardware.input;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.hardware.BatteryState;
+import android.hardware.SensorManager;
+import android.hardware.input.InputManager.InputDeviceBatteryListener;
 import android.hardware.input.InputManager.InputDeviceListener;
+import android.hardware.input.InputManager.KeyboardBacklightListener;
 import android.hardware.input.InputManager.OnTabletModeChangedListener;
 import android.os.Handler;
 import android.os.IBinder;
@@ -36,11 +42,13 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Manages communication with the input manager service on behalf of
- * an application process.  You're probably looking for {@link InputManager}.
+ * an application process. You're probably looking for {@link InputManager}.
  *
  * @hide
  */
@@ -60,6 +68,22 @@ public final class InputManagerGlobal {
     @GuardedBy("mOnTabletModeChangedListeners")
     private final ArrayList<OnTabletModeChangedListenerDelegate> mOnTabletModeChangedListeners =
             new ArrayList<>();
+
+    private final Object mBatteryListenersLock = new Object();
+    // Maps a deviceId whose battery is currently being monitored to an entry containing the
+    // registered listeners for that device.
+    @GuardedBy("mBatteryListenersLock")
+    @Nullable private SparseArray<RegisteredBatteryListeners> mBatteryListeners;
+    @GuardedBy("mBatteryListenersLock")
+    @Nullable private IInputDeviceBatteryListener mInputDeviceBatteryListener;
+
+    private final Object mKeyboardBacklightListenerLock = new Object();
+    @GuardedBy("mKeyboardBacklightListenerLock")
+    @Nullable private ArrayList<KeyboardBacklightListenerDelegate> mKeyboardBacklightListeners;
+    @GuardedBy("mKeyboardBacklightListenerLock")
+    @Nullable private IKeyboardBacklightListener mKeyboardBacklightListener;
+
+    @Nullable private InputDeviceSensorManager mInputDeviceSensorManager;
 
     private static InputManagerGlobal sInstance;
 
@@ -502,5 +526,381 @@ public final class InputManagerGlobal {
             }
         }
         return -1;
+    }
+
+    private static final class RegisteredBatteryListeners {
+        final List<InputDeviceBatteryListenerDelegate> mDelegates = new ArrayList<>();
+        IInputDeviceBatteryState mInputDeviceBatteryState;
+    }
+
+    private static final class InputDeviceBatteryListenerDelegate {
+        final InputDeviceBatteryListener mListener;
+        final Executor mExecutor;
+
+        InputDeviceBatteryListenerDelegate(InputDeviceBatteryListener listener, Executor executor) {
+            mListener = listener;
+            mExecutor = executor;
+        }
+
+        void notifyBatteryStateChanged(IInputDeviceBatteryState state) {
+            mExecutor.execute(() ->
+                    mListener.onBatteryStateChanged(state.deviceId, state.updateTime,
+                            new LocalBatteryState(state.isPresent, state.status, state.capacity)));
+        }
+    }
+
+    /**
+     * @see InputManager#addInputDeviceBatteryListener(int, Executor, InputDeviceBatteryListener)
+     */
+    void addInputDeviceBatteryListener(int deviceId, @NonNull Executor executor,
+            @NonNull InputDeviceBatteryListener listener) {
+        Objects.requireNonNull(executor, "executor should not be null");
+        Objects.requireNonNull(listener, "listener should not be null");
+
+        synchronized (mBatteryListenersLock) {
+            if (mBatteryListeners == null) {
+                mBatteryListeners = new SparseArray<>();
+                mInputDeviceBatteryListener = new LocalInputDeviceBatteryListener();
+            }
+            RegisteredBatteryListeners listenersForDevice = mBatteryListeners.get(deviceId);
+            if (listenersForDevice == null) {
+                // The deviceId is currently not being monitored for battery changes.
+                // Start monitoring the device.
+                listenersForDevice = new RegisteredBatteryListeners();
+                mBatteryListeners.put(deviceId, listenersForDevice);
+                try {
+                    mIm.registerBatteryListener(deviceId, mInputDeviceBatteryListener);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            } else {
+                // The deviceId is already being monitored for battery changes.
+                // Ensure that the listener is not already registered.
+                final int numDelegates = listenersForDevice.mDelegates.size();
+                for (int i = 0; i < numDelegates; i++) {
+                    InputDeviceBatteryListener registeredListener =
+                            listenersForDevice.mDelegates.get(i).mListener;
+                    if (Objects.equals(listener, registeredListener)) {
+                        throw new IllegalArgumentException(
+                                "Attempting to register an InputDeviceBatteryListener that has "
+                                        + "already been registered for deviceId: "
+                                        + deviceId);
+                    }
+                }
+            }
+            final InputDeviceBatteryListenerDelegate delegate =
+                    new InputDeviceBatteryListenerDelegate(listener, executor);
+            listenersForDevice.mDelegates.add(delegate);
+
+            // Notify the listener immediately if we already have the latest battery state.
+            if (listenersForDevice.mInputDeviceBatteryState != null) {
+                delegate.notifyBatteryStateChanged(listenersForDevice.mInputDeviceBatteryState);
+            }
+        }
+    }
+
+    /**
+     * @see InputManager#removeInputDeviceBatteryListener(int, InputDeviceBatteryListener)
+     */
+    void removeInputDeviceBatteryListener(int deviceId,
+            @NonNull InputDeviceBatteryListener listener) {
+        Objects.requireNonNull(listener, "listener should not be null");
+
+        synchronized (mBatteryListenersLock) {
+            if (mBatteryListeners == null) {
+                return;
+            }
+            RegisteredBatteryListeners listenersForDevice = mBatteryListeners.get(deviceId);
+            if (listenersForDevice == null) {
+                // The deviceId is not currently being monitored.
+                return;
+            }
+            final List<InputDeviceBatteryListenerDelegate> delegates =
+                    listenersForDevice.mDelegates;
+            for (int i = 0; i < delegates.size();) {
+                if (Objects.equals(listener, delegates.get(i).mListener)) {
+                    delegates.remove(i);
+                    continue;
+                }
+                i++;
+            }
+            if (!delegates.isEmpty()) {
+                return;
+            }
+
+            // There are no more battery listeners for this deviceId. Stop monitoring this device.
+            mBatteryListeners.remove(deviceId);
+            try {
+                mIm.unregisterBatteryListener(deviceId, mInputDeviceBatteryListener);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            if (mBatteryListeners.size() == 0) {
+                // There are no more devices being monitored, so the registered
+                // IInputDeviceBatteryListener will be automatically dropped by the server.
+                mBatteryListeners = null;
+                mInputDeviceBatteryListener = null;
+            }
+        }
+    }
+
+    private class LocalInputDeviceBatteryListener extends IInputDeviceBatteryListener.Stub {
+        @Override
+        public void onBatteryStateChanged(IInputDeviceBatteryState state) {
+            synchronized (mBatteryListenersLock) {
+                if (mBatteryListeners == null) return;
+                final RegisteredBatteryListeners entry = mBatteryListeners.get(state.deviceId);
+                if (entry == null) return;
+
+                entry.mInputDeviceBatteryState = state;
+                final int numDelegates = entry.mDelegates.size();
+                for (int i = 0; i < numDelegates; i++) {
+                    entry.mDelegates.get(i)
+                            .notifyBatteryStateChanged(entry.mInputDeviceBatteryState);
+                }
+            }
+        }
+    }
+
+    /**
+     * @see InputManager#getInputDeviceBatteryState(int, boolean)
+     */
+    @NonNull
+    BatteryState getInputDeviceBatteryState(int deviceId, boolean hasBattery) {
+        if (!hasBattery) {
+            return new LocalBatteryState();
+        }
+        try {
+            final IInputDeviceBatteryState state = mIm.getBatteryState(deviceId);
+            return new LocalBatteryState(state.isPresent, state.status, state.capacity);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    // Implementation of the android.hardware.BatteryState interface used to report the battery
+    // state via the InputDevice#getBatteryState() and InputDeviceBatteryListener interfaces.
+    private static final class LocalBatteryState extends BatteryState {
+        private final boolean mIsPresent;
+        private final int mStatus;
+        private final float mCapacity;
+
+        LocalBatteryState() {
+            this(false /*isPresent*/, BatteryState.STATUS_UNKNOWN, Float.NaN /*capacity*/);
+        }
+
+        LocalBatteryState(boolean isPresent, int status, float capacity) {
+            mIsPresent = isPresent;
+            mStatus = status;
+            mCapacity = capacity;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return mIsPresent;
+        }
+
+        @Override
+        public int getStatus() {
+            return mStatus;
+        }
+
+        @Override
+        public float getCapacity() {
+            return mCapacity;
+        }
+    }
+
+    private static final class KeyboardBacklightListenerDelegate {
+        final InputManager.KeyboardBacklightListener mListener;
+        final Executor mExecutor;
+
+        KeyboardBacklightListenerDelegate(KeyboardBacklightListener listener, Executor executor) {
+            mListener = listener;
+            mExecutor = executor;
+        }
+
+        void notifyKeyboardBacklightChange(int deviceId, IKeyboardBacklightState state,
+                boolean isTriggeredByKeyPress) {
+            mExecutor.execute(() ->
+                    mListener.onKeyboardBacklightChanged(deviceId,
+                            new LocalKeyboardBacklightState(state.brightnessLevel,
+                                    state.maxBrightnessLevel), isTriggeredByKeyPress));
+        }
+    }
+
+    private class LocalKeyboardBacklightListener extends IKeyboardBacklightListener.Stub {
+
+        @Override
+        public void onBrightnessChanged(int deviceId, IKeyboardBacklightState state,
+                boolean isTriggeredByKeyPress) {
+            synchronized (mKeyboardBacklightListenerLock) {
+                if (mKeyboardBacklightListeners == null) return;
+                final int numListeners = mKeyboardBacklightListeners.size();
+                for (int i = 0; i < numListeners; i++) {
+                    mKeyboardBacklightListeners.get(i)
+                            .notifyKeyboardBacklightChange(deviceId, state, isTriggeredByKeyPress);
+                }
+            }
+        }
+    }
+
+    // Implementation of the android.hardware.input.KeyboardBacklightState interface used to report
+    // the keyboard backlight state via the KeyboardBacklightListener interfaces.
+    private static final class LocalKeyboardBacklightState extends KeyboardBacklightState {
+
+        private final int mBrightnessLevel;
+        private final int mMaxBrightnessLevel;
+
+        LocalKeyboardBacklightState(int brightnessLevel, int maxBrightnessLevel) {
+            mBrightnessLevel = brightnessLevel;
+            mMaxBrightnessLevel = maxBrightnessLevel;
+        }
+
+        @Override
+        public int getBrightnessLevel() {
+            return mBrightnessLevel;
+        }
+
+        @Override
+        public int getMaxBrightnessLevel() {
+            return mMaxBrightnessLevel;
+        }
+    }
+
+    /**
+     * @see InputManager#registerKeyboardBacklightListener(Executor, KeyboardBacklightListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_KEYBOARD_BACKLIGHT)
+    void registerKeyboardBacklightListener(@NonNull Executor executor,
+            @NonNull KeyboardBacklightListener listener) throws IllegalArgumentException {
+        Objects.requireNonNull(executor, "executor should not be null");
+        Objects.requireNonNull(listener, "listener should not be null");
+
+        synchronized (mKeyboardBacklightListenerLock) {
+            if (mKeyboardBacklightListener == null) {
+                mKeyboardBacklightListeners = new ArrayList<>();
+                mKeyboardBacklightListener = new LocalKeyboardBacklightListener();
+
+                try {
+                    mIm.registerKeyboardBacklightListener(mKeyboardBacklightListener);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+            final int numListeners = mKeyboardBacklightListeners.size();
+            for (int i = 0; i < numListeners; i++) {
+                if (mKeyboardBacklightListeners.get(i).mListener == listener) {
+                    throw new IllegalArgumentException("Listener has already been registered!");
+                }
+            }
+            KeyboardBacklightListenerDelegate delegate =
+                    new KeyboardBacklightListenerDelegate(listener, executor);
+            mKeyboardBacklightListeners.add(delegate);
+        }
+    }
+
+    /**
+     * @see InputManager#unregisterKeyboardBacklightListener(KeyboardBacklightListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_KEYBOARD_BACKLIGHT)
+    void unregisterKeyboardBacklightListener(
+            @NonNull KeyboardBacklightListener listener) {
+        Objects.requireNonNull(listener, "listener should not be null");
+
+        synchronized (mKeyboardBacklightListenerLock) {
+            if (mKeyboardBacklightListeners == null) {
+                return;
+            }
+            mKeyboardBacklightListeners.removeIf((delegate) -> delegate.mListener == listener);
+            if (mKeyboardBacklightListeners.isEmpty()) {
+                try {
+                    mIm.unregisterKeyboardBacklightListener(mKeyboardBacklightListener);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+                mKeyboardBacklightListeners = null;
+                mKeyboardBacklightListener = null;
+            }
+        }
+    }
+
+    /**
+     * @see InputManager#getInputDeviceSensorManager(int)
+     */
+    @NonNull
+    SensorManager getInputDeviceSensorManager(int deviceId) {
+        if (mInputDeviceSensorManager == null) {
+            mInputDeviceSensorManager = new InputDeviceSensorManager(this);
+        }
+        return mInputDeviceSensorManager.getSensorManager(deviceId);
+    }
+
+    /**
+     * @see InputManager#getSensorList(int)
+     */
+    InputSensorInfo[] getSensorList(int deviceId) {
+        try {
+            return mIm.getSensorList(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#enableSensor(int, int, int, int)
+     */
+    boolean enableSensor(int deviceId, int sensorType, int samplingPeriodUs,
+            int maxBatchReportLatencyUs) {
+        try {
+            return mIm.enableSensor(deviceId, sensorType, samplingPeriodUs,
+                    maxBatchReportLatencyUs);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#disableSensor(int, int)
+     */
+    void disableSensor(int deviceId, int sensorType) {
+        try {
+            mIm.disableSensor(deviceId, sensorType);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#flushSensor(int, int)
+     */
+    boolean flushSensor(int deviceId, int sensorType) {
+        try {
+            return mIm.flushSensor(deviceId, sensorType);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#registerSensorListener(IInputSensorEventListener)
+     */
+    boolean registerSensorListener(IInputSensorEventListener listener) {
+        try {
+            return mIm.registerSensorListener(listener);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#unregisterSensorListener(IInputSensorEventListener)
+     */
+    void unregisterSensorListener(IInputSensorEventListener listener) {
+        try {
+            mIm.unregisterSensorListener(listener);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
     }
 }

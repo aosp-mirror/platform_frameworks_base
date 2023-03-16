@@ -33,7 +33,7 @@ import android.util.Slog;
  *
  * @hide
  */
-public final class  ProviderClearSession extends ProviderSession<ClearCredentialStateRequest,
+public final class ProviderClearSession extends ProviderSession<ClearCredentialStateRequest,
         Void>
         implements
         RemoteCredentialService.ProviderCallbacks<Void> {
@@ -42,7 +42,8 @@ public final class  ProviderClearSession extends ProviderSession<ClearCredential
     private ClearCredentialStateException mProviderException;
 
     /** Creates a new provider session to be used by the request session. */
-    @Nullable public static ProviderClearSession createNewSession(
+    @Nullable
+    public static ProviderClearSession createNewSession(
             Context context,
             @UserIdInt int userId,
             CredentialProviderInfo providerInfo,
@@ -53,7 +54,7 @@ public final class  ProviderClearSession extends ProviderSession<ClearCredential
                         clearRequestSession.mClientRequest,
                         clearRequestSession.mClientAppInfo);
         return new ProviderClearSession(context, providerInfo, clearRequestSession, userId,
-                    remoteCredentialService, providerRequest);
+                remoteCredentialService, providerRequest);
     }
 
     @Nullable
@@ -90,6 +91,7 @@ public final class  ProviderClearSession extends ProviderSession<ClearCredential
         if (exception instanceof ClearCredentialStateException) {
             mProviderException = (ClearCredentialStateException) exception;
         }
+        captureCandidateFailure();
         updateStatusAndInvokeCallback(toStatus(errorCode));
     }
 
@@ -120,14 +122,7 @@ public final class  ProviderClearSession extends ProviderSession<ClearCredential
     @Override
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
-            /*
-            InitialPhaseMetric initMetric = ((RequestSession)mCallbacks).initMetric;
-            TODO immediately once the other change patched through
-            mCandidateProviderMetric.setSessionId(initMetric
-            .mInitialPhaseMetric.getSessionId());
-            mCandidateProviderMetric.setStartTime(initMetric.getStartTime())
-             */
-            mCandidatePhasePerProviderMetric.setStartQueryTimeNanoseconds(System.nanoTime());
+            startCandidateMetrics();
             mRemoteCredentialService.onClearCredentialState(mProviderRequest, this);
         }
     }

@@ -19,6 +19,7 @@ package com.android.server.tare;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.PermissionChecker;
@@ -41,7 +42,8 @@ class InstalledPackageInfo {
     @Nullable
     public final String installerPackageName;
 
-    InstalledPackageInfo(@NonNull Context context, @NonNull PackageInfo packageInfo) {
+    InstalledPackageInfo(@NonNull Context context, @UserIdInt int userId,
+            @NonNull PackageInfo packageInfo) {
         final ApplicationInfo applicationInfo = packageInfo.applicationInfo;
         uid = applicationInfo == null ? NO_UID : applicationInfo.uid;
         packageName = packageInfo.packageName;
@@ -55,7 +57,8 @@ class InstalledPackageInfo {
                 applicationInfo.uid, packageName);
         InstallSourceInfo installSourceInfo = null;
         try {
-            installSourceInfo = AppGlobals.getPackageManager().getInstallSourceInfo(packageName);
+            installSourceInfo = AppGlobals.getPackageManager().getInstallSourceInfo(packageName,
+                    userId);
         } catch (RemoteException e) {
             // Shouldn't happen.
         }
