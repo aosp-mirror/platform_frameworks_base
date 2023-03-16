@@ -2902,6 +2902,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             serializer.attributeInt(null, "sharedUserId", pkg.getAppId());
         }
         serializer.attributeFloat(null, "loadingProgress", pkg.getLoadingProgress());
+        serializer.attributeLongHex(null, "loadingCompletedTime",
+                pkg.getLoadingCompletedTime());
 
         writeUsesSdkLibLPw(serializer, pkg.getUsesSdkLibraries(),
                 pkg.getUsesSdkLibrariesVersionsMajor());
@@ -2988,6 +2990,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             serializer.attributeBoolean(null, "isLoading", true);
         }
         serializer.attributeFloat(null, "loadingProgress", pkg.getLoadingProgress());
+        serializer.attributeLongHex(null, "loadingCompletedTime", pkg.getLoadingCompletedTime());
 
         serializer.attribute(null, "domainSetId", pkg.getDomainSetId().toString());
 
@@ -3687,9 +3690,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             ps.setAppId(sharedUserAppId);
             ps.setSharedUserAppId(sharedUserAppId);
         }
-        final float loadingProgress =
-                parser.getAttributeFloat(null, "loadingProgress", 0);
-        ps.setLoadingProgress(loadingProgress);
 
         int outerDepth = parser.getDepth();
         int type;
@@ -3760,6 +3760,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         long versionCode = 0;
         boolean installedForceQueryable = false;
         float loadingProgress = 0;
+        long loadingCompletedTime = 0;
         UUID domainSetId;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
@@ -3777,6 +3778,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             updateAvailable = parser.getAttributeBoolean(null, "updateAvailable", false);
             installedForceQueryable = parser.getAttributeBoolean(null, "forceQueryable", false);
             loadingProgress = parser.getAttributeFloat(null, "loadingProgress", 0);
+            loadingCompletedTime = parser.getAttributeLongHex(null, "loadingCompletedTime", 0);
 
             if (primaryCpuAbiString == null && legacyCpuAbiString != null) {
                 primaryCpuAbiString = legacyCpuAbiString;
@@ -3939,7 +3941,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     .setSecondaryCpuAbi(secondaryCpuAbiString)
                     .setUpdateAvailable(updateAvailable)
                     .setForceQueryableOverride(installedForceQueryable)
-                    .setLoadingProgress(loadingProgress);
+                    .setLoadingProgress(loadingProgress)
+                    .setLoadingCompletedTime(loadingCompletedTime);
             // Handle legacy string here for single-user mode
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
@@ -4900,9 +4903,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         }
         pw.print(prefix); pw.print("  packageSource=");
         pw.println(ps.getInstallSource().mPackageSource);
-        if (ps.isLoading()) {
+        if (ps.isIncremental()) {
             pw.print(prefix); pw.println("  loadingProgress=" +
                     (int) (ps.getLoadingProgress() * 100) + "%");
+            date.setTime(ps.getLoadingCompletedTime());
+            pw.print(prefix); pw.println("  loadingCompletedTime=" + sdf.format(date));
         }
         if (ps.getVolumeUuid() != null) {
             pw.print(prefix); pw.print("  volumeUuid=");

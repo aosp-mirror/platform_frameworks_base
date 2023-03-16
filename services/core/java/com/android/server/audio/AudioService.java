@@ -1372,8 +1372,8 @@ public class AudioService extends IAudioService.Stub
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         if (mMonitorRotation) {
             RotationHelper.init(mContext, mAudioHandler,
-                    rotationParam -> onRotationUpdate(rotationParam),
-                    foldParam -> onFoldUpdate(foldParam));
+                    rotation -> onRotationUpdate(rotation),
+                    foldState -> onFoldStateUpdate(foldState));
         }
 
         intentFilter.addAction(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
@@ -1515,16 +1515,20 @@ public class AudioService extends IAudioService.Stub
 
     //-----------------------------------------------------------------
     // rotation/fold updates coming from RotationHelper
-    void onRotationUpdate(String rotationParameter) {
+    void onRotationUpdate(Integer rotation) {
+        mSpatializerHelper.setDisplayOrientation((float) (rotation * Math.PI / 180.));
         // use REPLACE as only the last rotation matters
+        final String rotationParameter = "rotation=" + rotation;
         sendMsg(mAudioHandler, MSG_ROTATION_UPDATE, SENDMSG_REPLACE, /*arg1*/ 0, /*arg2*/ 0,
                 /*obj*/ rotationParameter, /*delay*/ 0);
     }
 
-    void onFoldUpdate(String foldParameter) {
+    void onFoldStateUpdate(Boolean foldState) {
+        mSpatializerHelper.setFoldState(foldState);
         // use REPLACE as only the last fold state matters
+        final String foldStateParameter = "device_folded=" + (foldState ? "on" : "off");
         sendMsg(mAudioHandler, MSG_FOLD_UPDATE, SENDMSG_REPLACE, /*arg1*/ 0, /*arg2*/ 0,
-                /*obj*/ foldParameter, /*delay*/ 0);
+                /*obj*/ foldStateParameter, /*delay*/ 0);
     }
 
     //-----------------------------------------------------------------
@@ -1739,6 +1743,9 @@ public class AudioService extends IAudioService.Stub
 
         mSpatializerHelper.reset(/* featureEnabled */ mHasSpatializerEffect);
         mSoundDoseHelper.reset();
+
+        // Restore rotation information.
+        RotationHelper.forceUpdate();
 
         onIndicateSystemReady();
         // indicate the end of reconfiguration phase to audio HAL
@@ -8170,7 +8177,7 @@ public class AudioService extends IAudioService.Stub
             volumeChangedOptions.setDeliveryGroupPolicy(DELIVERY_GROUP_POLICY_MOST_RECENT);
             volumeChangedOptions.setDeliveryGroupMatchingKey(
                     AudioManager.VOLUME_CHANGED_ACTION, String.valueOf(mStreamType));
-            volumeChangedOptions.setDeferUntilActive(true);
+            volumeChangedOptions.setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
             mVolumeChangedOptions = volumeChangedOptions.toBundle();
 
             mStreamDevicesChanged = new Intent(AudioManager.STREAM_DEVICES_CHANGED_ACTION);
@@ -8179,7 +8186,8 @@ public class AudioService extends IAudioService.Stub
             streamDevicesChangedOptions.setDeliveryGroupPolicy(DELIVERY_GROUP_POLICY_MOST_RECENT);
             streamDevicesChangedOptions.setDeliveryGroupMatchingKey(
                     AudioManager.STREAM_DEVICES_CHANGED_ACTION, String.valueOf(mStreamType));
-            streamDevicesChangedOptions.setDeferUntilActive(true);
+            streamDevicesChangedOptions.setDeferralPolicy(
+                    BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
             mStreamDevicesChangedOptions = streamDevicesChangedOptions.toBundle();
         }
 

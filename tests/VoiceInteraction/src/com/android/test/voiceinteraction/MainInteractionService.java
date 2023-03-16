@@ -20,7 +20,6 @@ import android.content.Intent;
 import android.service.voice.AlwaysOnHotwordDetector;
 import android.service.voice.AlwaysOnHotwordDetector.Callback;
 import android.service.voice.AlwaysOnHotwordDetector.EventPayload;
-import android.service.voice.HotwordDetector;
 import android.service.voice.VoiceInteractionService;
 import android.util.Log;
 
@@ -84,24 +83,16 @@ public class MainInteractionService extends VoiceInteractionService {
                 break;
             case AlwaysOnHotwordDetector.STATE_KEYPHRASE_UNENROLLED:
                 Log.i(TAG, "STATE_KEYPHRASE_UNENROLLED");
-                try {
-                    Intent enroll = mHotwordDetector.createEnrollIntent();
-                    Log.i(TAG, "Need to enroll with " + enroll);
-                } catch (HotwordDetector.IllegalDetectorStateException e) {
-                    Log.e(TAG, "createEnrollIntent failed", e);
-                }
+                Intent enroll = mHotwordDetector.createEnrollIntent();
+                Log.i(TAG, "Need to enroll with " + enroll);
                 break;
             case AlwaysOnHotwordDetector.STATE_KEYPHRASE_ENROLLED:
                 Log.i(TAG, "STATE_KEYPHRASE_ENROLLED - starting recognition");
-                try {
-                    if (mHotwordDetector.startRecognition(
-                            AlwaysOnHotwordDetector.RECOGNITION_FLAG_NONE)) {
-                        Log.i(TAG, "startRecognition succeeded");
-                    } else {
-                        Log.i(TAG, "startRecognition failed");
-                    }
-                } catch (HotwordDetector.IllegalDetectorStateException e) {
-                    Log.e(TAG, "startRecognition failed", e);
+                if (mHotwordDetector.startRecognition(
+                        AlwaysOnHotwordDetector.RECOGNITION_FLAG_NONE)) {
+                    Log.i(TAG, "startRecognition succeeded");
+                } else {
+                    Log.i(TAG, "startRecognition failed");
                 }
                 break;
         }

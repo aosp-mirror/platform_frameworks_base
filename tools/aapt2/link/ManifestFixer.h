@@ -18,11 +18,10 @@
 #define AAPT_LINK_MANIFESTFIXER_H
 
 #include <string>
+#include <vector>
 
 #include "android-base/macros.h"
-
 #include "process/IResourceTableConsumer.h"
-
 #include "xml/XmlActionExecutor.h"
 #include "xml/XmlDom.h"
 
@@ -74,6 +73,9 @@ struct ManifestFixerOptions {
   // The version codename of the framework being compiled against to set for
   // 'android:compileSdkVersionCodename' in the <manifest> tag.
   std::optional<std::string> compile_sdk_version_codename;
+
+  // The fingerprint prefixes to be added to the <install-constraints> tag.
+  std::vector<std::string> fingerprint_prefixes;
 
   // Whether validation errors should be treated only as warnings. If this is 'true', then an
   // incorrect node will not result in an error, but only as a warning, and the parsing will

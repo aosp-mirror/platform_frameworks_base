@@ -30,6 +30,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -799,12 +800,12 @@ public class InfoMediaManagerTest {
     }
 
     @Test
-    public void onTransferFailed_shouldDispatchOnRequestFailed() {
+    public void onTransferFailed_notDispatchOnRequestFailed() {
         mInfoMediaManager.registerCallback(mCallback);
 
         mInfoMediaManager.mMediaRouterCallback.onTransferFailed(null, null);
 
-        verify(mCallback).onRequestFailed(REASON_UNKNOWN_ERROR);
+        verify(mCallback, never()).onRequestFailed(REASON_UNKNOWN_ERROR);
     }
 
     @Test

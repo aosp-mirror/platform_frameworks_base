@@ -124,6 +124,7 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private var selectedItem: SelectedItem = SelectedItem.EMPTY_SELECTION
+    private var selectionItem: SelectionItem? = null
     private lateinit var allStructures: List<StructureInfo>
     private val controlsById = mutableMapOf<ControlKey, ControlWithState>()
     private val controlViewsById = mutableMapOf<ControlKey, ControlViewHolder>()
@@ -230,6 +231,7 @@ class ControlsUiControllerImpl @Inject constructor (
         this.overflowMenuAdapter = null
         hidden = false
         retainCache = false
+        selectionItem = null
 
         controlActionCoordinator.activityContext = activityContext
 
@@ -272,7 +274,7 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    private fun reload(parent: ViewGroup) {
+    private fun reload(parent: ViewGroup, dismissTaskView: Boolean = true) {
         if (hidden) return
 
         controlsListingController.get().removeCallback(listingCallback)
@@ -327,8 +329,8 @@ class ControlsUiControllerImpl @Inject constructor (
     @VisibleForTesting
     internal fun startRemovingApp(componentName: ComponentName, appName: CharSequence) {
         removeAppDialog?.cancel()
-        removeAppDialog = dialogsFactory.createRemoveAppDialog(context, appName) {
-            if (!controlsController.get().removeFavorites(componentName)) {
+        removeAppDialog = dialogsFactory.createRemoveAppDialog(context, appName) { shouldRemove ->
+            if (!shouldRemove || !controlsController.get().removeFavorites(componentName)) {
                 return@createRemoveAppDialog
             }
 
@@ -425,6 +427,7 @@ class ControlsUiControllerImpl @Inject constructor (
         } else {
             Log.w(ControlsUiController.TAG, "Not TaskViewFactory to display panel $selectionItem")
         }
+        this.selectionItem = selectionItem
 
         bgExecutor.execute {
             val intent = Intent(Intent.ACTION_MAIN)
@@ -657,6 +660,7 @@ class ControlsUiControllerImpl @Inject constructor (
         val maxColumns = ControlAdapter.findMaxColumns(activityContext.resources)
 
         val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
+        listView.removeAllViews()
         var lastRow: ViewGroup = createRow(inflater, listView)
         selectedStructure.controls.forEach {
             val key = ControlKey(selectedStructure.componentName, it.controlId)
@@ -802,6 +806,15 @@ class ControlsUiControllerImpl @Inject constructor (
         uiExecutor.execute {
             controlViewsById.get(key)?.actionResponse(response)
         }
+    }
+
+    override fun onOrientationChange() {
+        selectionItem?.let {
+            when (selectedItem) {
+                is SelectedItem.StructureItem -> createListView(it)
+                is SelectedItem.PanelItem -> taskViewController?.refreshBounds() ?: reload(parent)
+            }
+        } ?: reload(parent)
     }
 
     private fun createRow(inflater: LayoutInflater, listView: ViewGroup): ViewGroup {

@@ -997,7 +997,8 @@ final class LetterboxUiController {
 
     @VisibleForTesting
     boolean shouldShowLetterboxUi(WindowState mainWindow) {
-        return isSurfaceVisible(mainWindow) && mainWindow.areAppWindowBoundsLetterboxed()
+        return (mActivityRecord.isInLetterboxAnimation() || isSurfaceVisible(mainWindow))
+                && mainWindow.areAppWindowBoundsLetterboxed()
                 // Check for FLAG_SHOW_WALLPAPER explicitly instead of using
                 // WindowContainer#showWallpaper because the later will return true when this
                 // activity is using blurred wallpaper for letterbox background.
@@ -1104,7 +1105,7 @@ final class LetterboxUiController {
     // for all corners for consistency and pick a minimal bottom one for consistency with a
     // taskbar rounded corners.
     int getRoundedCornersRadius(final WindowState mainWindow) {
-        if (!requiresRoundedCorners(mainWindow) || mActivityRecord.isInLetterboxAnimation()) {
+        if (!requiresRoundedCorners(mainWindow)) {
             return 0;
         }
 

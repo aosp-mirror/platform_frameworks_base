@@ -37,7 +37,7 @@ interface ServerFlagReader {
     fun listenForChanges(values: Collection<Flag<*>>, listener: ChangeListener)
 
     interface ChangeListener {
-        fun onChange(flag: Flag<*>)
+        fun onChange(flag: Flag<*>, value: String?)
     }
 }
 
@@ -67,7 +67,7 @@ class ServerFlagReaderImpl @Inject constructor(
                 propLoop@ for (propName in properties.keyset) {
                     for (flag in flags) {
                         if (propName == flag.name) {
-                            listener.onChange(flag)
+                            listener.onChange(flag, properties.getString(propName, null))
                             break@propLoop
                         }
                     }
@@ -144,7 +144,7 @@ class ServerFlagReaderFake : ServerFlagReader {
         for ((listener, flags) in listeners) {
             flagLoop@ for (flag in flags) {
                 if (name == flag.name) {
-                    listener.onChange(flag)
+                    listener.onChange(flag, if (value) "true" else "false")
                     break@flagLoop
                 }
             }
@@ -159,5 +159,6 @@ class ServerFlagReaderFake : ServerFlagReader {
         flags: Collection<Flag<*>>,
         listener: ServerFlagReader.ChangeListener
     ) {
+        listeners.add(Pair(listener, flags))
     }
 }

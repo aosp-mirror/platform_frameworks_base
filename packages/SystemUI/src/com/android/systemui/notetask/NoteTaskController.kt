@@ -129,8 +129,7 @@ constructor(
             logDebug { "onShowNoteTask - start: $info" }
             when (info.launchMode) {
                 is NoteTaskLaunchMode.AppBubble -> {
-                    // TODO(b/267634412, b/268351693): Should use `showOrHideAppBubbleAsUser`
-                    bubbles.showOrHideAppBubble(intent)
+                    bubbles.showOrHideAppBubble(intent, userTracker.userHandle)
                     // App bubble logging happens on `onBubbleExpandChanged`.
                     logDebug { "onShowNoteTask - opened as app bubble: $info" }
                 }

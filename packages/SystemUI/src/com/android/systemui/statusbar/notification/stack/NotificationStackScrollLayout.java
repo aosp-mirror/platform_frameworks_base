@@ -732,19 +732,28 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             return;
         }
         // TODO: move this logic to controller, which will invoke updateFooterView directly
-        boolean showDismissView = mClearAllEnabled &&
-                mController.hasActiveClearableNotifications(ROWS_ALL);
-        boolean showFooterView = (showDismissView || mController.getVisibleNotificationCount() > 0)
-                && mIsCurrentUserSetup  // see: b/193149550
+        final boolean showHistory = mController.isHistoryEnabled();
+        final boolean showDismissView = shouldShowDismissView();
+
+        updateFooterView(shouldShowFooterView(showDismissView)/* visible */,
+                showDismissView /* showDismissView */,
+                showHistory/* showHistory */);
+    }
+
+    private boolean shouldShowDismissView() {
+        return mClearAllEnabled
+                && mController.hasActiveClearableNotifications(ROWS_ALL);
+    }
+
+    private boolean shouldShowFooterView(boolean showDismissView) {
+        return (showDismissView || mController.getVisibleNotificationCount() > 0)
+                && mIsCurrentUserSetup // see: b/193149550
                 && !onKeyguard()
                 && mUpcomingStatusBarState != StatusBarState.KEYGUARD
                 // quick settings don't affect notifications when not in full screen
                 && (mQsExpansionFraction != 1 || !mQsFullScreen)
                 && !mScreenOffAnimationController.shouldHideNotificationsFooter()
                 && !mIsRemoteInputActive;
-        boolean showHistory = mController.isHistoryEnabled();
-
-        updateFooterView(showFooterView, showDismissView, showHistory);
     }
 
     /**
@@ -5278,29 +5287,71 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         });
         pw.println();
         pw.println("Contents:");
-        DumpUtilsKt.withIncreasedIndent(pw, () -> {
-            int childCount = getChildCount();
-            pw.println("Number of children: " + childCount);
-            pw.println();
+        DumpUtilsKt.withIncreasedIndent(
+                pw,
+                () -> {
+                    int childCount = getChildCount();
+                    pw.println("Number of children: " + childCount);
+                    pw.println();
 
-            for (int i = 0; i < childCount; i++) {
-                ExpandableView child = getChildAtIndex(i);
-                child.dump(pw, args);
-                pw.println();
-            }
-            int transientViewCount = getTransientViewCount();
-            pw.println("Transient Views: " + transientViewCount);
-            for (int i = 0; i < transientViewCount; i++) {
-                ExpandableView child = (ExpandableView) getTransientView(i);
-                child.dump(pw, args);
-            }
-            View swipedView = mSwipeHelper.getSwipedView();
-            pw.println("Swiped view: " + swipedView);
-            if (swipedView instanceof ExpandableView) {
-                ExpandableView expandableView = (ExpandableView) swipedView;
-                expandableView.dump(pw, args);
-            }
-        });
+                    for (int i = 0; i < childCount; i++) {
+                        ExpandableView child = getChildAtIndex(i);
+                        child.dump(pw, args);
+                        if (child instanceof FooterView) {
+                            DumpUtilsKt.withIncreasedIndent(pw, () -> dumpFooterViewVisibility(pw));
+                        }
+                        pw.println();
+                    }
+                    int transientViewCount = getTransientViewCount();
+                    pw.println("Transient Views: " + transientViewCount);
+                    for (int i = 0; i < transientViewCount; i++) {
+                        ExpandableView child = (ExpandableView) getTransientView(i);
+                        child.dump(pw, args);
+                    }
+                    View swipedView = mSwipeHelper.getSwipedView();
+                    pw.println("Swiped view: " + swipedView);
+                    if (swipedView instanceof ExpandableView) {
+                        ExpandableView expandableView = (ExpandableView) swipedView;
+                        expandableView.dump(pw, args);
+                    }
+                });
+    }
+
+    private void dumpFooterViewVisibility(IndentingPrintWriter pw) {
+        final boolean showDismissView = shouldShowDismissView();
+
+        pw.println("showFooterView: " + shouldShowFooterView(showDismissView));
+        DumpUtilsKt.withIncreasedIndent(
+                pw,
+                () -> {
+                    pw.println("showDismissView: " + showDismissView);
+                    DumpUtilsKt.withIncreasedIndent(
+                            pw,
+                            () -> {
+                                pw.println("mClearAllEnabled: " + mClearAllEnabled);
+                                pw.println(
+                                        "hasActiveClearableNotifications: "
+                                                + mController.hasActiveClearableNotifications(
+                                                        ROWS_ALL));
+                            });
+                    pw.println();
+                    pw.println("showHistory: " + mController.isHistoryEnabled());
+                    pw.println();
+                    pw.println(
+                            "visibleNotificationCount: "
+                                    + mController.getVisibleNotificationCount());
+                    pw.println("mIsCurrentUserSetup: " + mIsCurrentUserSetup);
+                    pw.println("onKeyguard: " + onKeyguard());
+                    pw.println("mUpcomingStatusBarState: " + mUpcomingStatusBarState);
+                    pw.println("mQsExpansionFraction: " + mQsExpansionFraction);
+                    pw.println("mQsFullScreen: " + mQsFullScreen);
+                    pw.println(
+                            "mScreenOffAnimationController"
+                                    + ".shouldHideNotificationsFooter: "
+                                    + mScreenOffAnimationController
+                                            .shouldHideNotificationsFooter());
+                    pw.println("mIsRemoteInputActive: " + mIsRemoteInputActive);
+                });
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
