@@ -22,13 +22,10 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Choreographer;
@@ -36,7 +33,6 @@ import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.window.WindowContainerTransaction;
@@ -47,6 +43,9 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
+import com.android.wm.shell.windowdecor.viewholder.DesktopModeAppControlsWindowDecorationViewHolder;
+import com.android.wm.shell.windowdecor.viewholder.DesktopModeFocusedWindowDecorationViewHolder;
+import com.android.wm.shell.windowdecor.viewholder.DesktopModeWindowDecorationViewHolder;
 
 /**
  * Defines visuals and behaviors of a window decoration of a caption bar and shadows. It works with
@@ -61,6 +60,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final Choreographer mChoreographer;
     private final SyncTransactionQueue mSyncQueue;
 
+    private DesktopModeWindowDecorationViewHolder mWindowDecorViewHolder;
     private View.OnClickListener mOnCaptionButtonClickListener;
     private View.OnTouchListener mOnCaptionTouchListener;
     private DragPositioningCallback mDragPositioningCallback;
@@ -171,11 +171,24 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             return;
         }
         if (oldRootView != mResult.mRootView) {
-            setupRootView();
+            if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_focused_window_decor) {
+                mWindowDecorViewHolder = new DesktopModeFocusedWindowDecorationViewHolder(
+                        mResult.mRootView,
+                        mOnCaptionTouchListener,
+                        mOnCaptionButtonClickListener
+                );
+            } else if (mRelayoutParams.mLayoutResId
+                    == R.layout.desktop_mode_app_controls_window_decor) {
+                mWindowDecorViewHolder = new DesktopModeAppControlsWindowDecorationViewHolder(
+                        mResult.mRootView,
+                        mOnCaptionTouchListener,
+                        mOnCaptionButtonClickListener
+                );
+            } else {
+                throw new IllegalArgumentException("Unexpected layout resource id");
+            }
         }
-
-        updateAppInfo();
-        setCaptionColor(taskInfo.taskDescription.getStatusBarColor());
+        mWindowDecorViewHolder.bindData(mTaskInfo);
 
         if (!isDragResizeable) {
             closeDragResizeListener();
@@ -205,27 +218,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 mResult.mWidth, mResult.mHeight, resize_handle, resize_corner, touchSlop);
     }
 
-    /**
-     * Sets up listeners when a new root view is created.
-     */
-    private void setupRootView() {
-        final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
-        caption.setOnTouchListener(mOnCaptionTouchListener);
-        final View handle = caption.findViewById(R.id.caption_handle);
-        handle.setOnTouchListener(mOnCaptionTouchListener);
-        if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_focused_window_decor) {
-            handle.setOnClickListener(mOnCaptionButtonClickListener);
-        } else if (mRelayoutParams.mLayoutResId
-                == R.layout.desktop_mode_app_controls_window_decor) {
-            caption.findViewById(R.id.open_menu_button)
-                    .setOnClickListener(mOnCaptionButtonClickListener);
-            caption.findViewById(R.id.close_window)
-                    .setOnClickListener(mOnCaptionButtonClickListener);
-        } else {
-            throw new IllegalArgumentException("Unexpected layout resource id");
-        }
-    }
-
     private void setupHandleMenu() {
         final View menu = mHandleMenu.mWindowViewHost.getView();
         final View fullscreen = menu.findViewById(R.id.fullscreen_button);
@@ -249,17 +241,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         loadAppInfo(appName, appIcon);
     }
 
-    private void updateAppInfo() {
-        if (mRelayoutParams.mLayoutResId
-                != R.layout.desktop_mode_app_controls_window_decor) {
-            // The app info views only apply to the app controls window decor type.
-            return;
-        }
-        final TextView appNameTextView = mResult.mRootView.findViewById(R.id.application_name);
-        final ImageView appIconImageView = mResult.mRootView.findViewById(R.id.application_icon);
-        loadAppInfo(appNameTextView, appIconImageView);
-    }
-
     boolean isHandleMenuActive() {
         return mHandleMenu != null;
     }
@@ -276,61 +257,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Package not found: " + packageName, e);
         }
-    }
-
-    private void setCaptionColor(int captionColor) {
-        if (mResult.mRootView == null) {
-            return;
-        }
-
-        final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
-        final GradientDrawable captionDrawable = (GradientDrawable) caption.getBackground();
-        captionDrawable.setColor(captionColor);
-
-        final boolean shouldUseLightCaptionViews = Color.valueOf(captionColor).luminance() < 0.5;
-        if (mRelayoutParams.mLayoutResId
-                == R.layout.desktop_mode_focused_window_decor) {
-            final ImageButton captionBar = caption.findViewById(R.id.caption_handle);
-            captionBar.setImageTintList(ColorStateList.valueOf(
-                    getCaptionHandleBarColor(shouldUseLightCaptionViews)));
-        } else if (mRelayoutParams.mLayoutResId
-                == R.layout.desktop_mode_app_controls_window_decor) {
-            final ImageButton closeBtn = caption.findViewById(R.id.close_window);
-            final ImageButton expandBtn = caption.findViewById(R.id.expand_menu_button);
-            final TextView appNameTextView = caption.findViewById(R.id.application_name);
-            closeBtn.setImageTintList(ColorStateList.valueOf(
-                    getCaptionCloseButtonColor(shouldUseLightCaptionViews)));
-            expandBtn.setImageTintList(ColorStateList.valueOf(
-                    getCaptionExpandButtonColor(shouldUseLightCaptionViews)));
-            appNameTextView.setTextColor(
-                    getCaptionAppNameTextColor(shouldUseLightCaptionViews));
-        } else {
-            throw new IllegalArgumentException("Unexpected layout resource id");
-        }
-    }
-
-    private int getCaptionHandleBarColor(boolean shouldUseLightCaptionViews) {
-        return shouldUseLightCaptionViews
-                ? mContext.getColor(R.color.desktop_mode_caption_handle_bar_light)
-                : mContext.getColor(R.color.desktop_mode_caption_handle_bar_dark);
-    }
-
-    private int getCaptionAppNameTextColor(boolean shouldUseLightCaptionViews) {
-        return shouldUseLightCaptionViews
-                ? mContext.getColor(R.color.desktop_mode_caption_app_name_light)
-                : mContext.getColor(R.color.desktop_mode_caption_app_name_dark);
-    }
-
-    private int getCaptionCloseButtonColor(boolean shouldUseLightCaptionViews) {
-        return shouldUseLightCaptionViews
-                ? mContext.getColor(R.color.desktop_mode_caption_close_button_light)
-                : mContext.getColor(R.color.desktop_mode_caption_close_button_dark);
-    }
-
-    private int getCaptionExpandButtonColor(boolean shouldUseLightCaptionViews) {
-        return shouldUseLightCaptionViews
-                ? mContext.getColor(R.color.desktop_mode_caption_expand_button_light)
-                : mContext.getColor(R.color.desktop_mode_caption_expand_button_dark);
     }
 
     private void closeDragResizeListener() {
