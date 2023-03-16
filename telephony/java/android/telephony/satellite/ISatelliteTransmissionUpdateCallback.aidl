@@ -24,15 +24,22 @@ import android.telephony.satellite.PointingInfo;
  */
 oneway interface ISatelliteTransmissionUpdateCallback {
     /**
-     * Called when satellite datagram transfer state changed.
+     * Called when satellite datagram send state changed.
      *
-     * @param state The new datagram transfer state.
+     * @param state The new send datagram transfer state.
      * @param sendPendingCount The number of datagrams that are currently being sent.
-     * @param receivePendingCount The number of datagrams that are currently being received.
      * @param errorCode If datagram transfer failed, the reason for failure.
      */
-    void onDatagramTransferStateChanged(in int state, in int sendPendingCount,
-            in int receivePendingCount, in int errorCode);
+    void onSendDatagramStateChanged(in int state, in int sendPendingCount, in int errorCode);
+
+    /**
+     * Called when satellite datagram receive state changed.
+     *
+     * @param state The new receive datagram transfer state.
+     * @param receivePendingCount The number of datagrams that are currently pending to be received.
+     * @param errorCode If datagram transfer failed, the reason for failure.
+     */
+    void onReceiveDatagramStateChanged(in int state, in int receivePendingCount, in int errorCode);
 
     /**
      * Called when the satellite position changed.
