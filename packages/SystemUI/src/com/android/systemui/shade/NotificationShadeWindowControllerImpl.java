@@ -301,9 +301,11 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     private void applyKeyguardFlags(NotificationShadeWindowState state) {
-        final boolean keyguardOrAod = state.keyguardShowing
+        // Keyguard is visible if it's showing or if it's fading away (in which case we're animating
+        // it out, but the wallpaper should remain visible as a backdrop for the animation);
+        final boolean keyguardOrAodVisible = (state.keyguardShowing || state.keyguardFadingAway)
                 || (state.dozing && mDozeParameters.getAlwaysOn());
-        if ((keyguardOrAod && !state.mediaBackdropShowing && !state.lightRevealScrimOpaque)
+        if ((keyguardOrAodVisible && !state.mediaBackdropShowing && !state.lightRevealScrimOpaque)
                 || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehind()) {
             // Show the wallpaper if we're on keyguard/AOD and the wallpaper is not occluded by a
             // solid backdrop. Also, show it if we are currently animating between the
