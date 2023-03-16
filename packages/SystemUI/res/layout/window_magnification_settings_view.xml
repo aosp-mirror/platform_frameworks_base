@@ -63,7 +63,8 @@
             android:background="@drawable/accessibility_magnification_setting_view_image_btn_bg"
             android:src="@drawable/ic_magnification_menu_small"
             android:tint="@color/accessibility_magnification_image_button_tint"
-            android:tintMode="src_atop" />
+            android:tintMode="src_atop"
+            android:contentDescription="@string/accessibility_magnification_small" />
 
         <ImageButton
             android:id="@+id/magnifier_medium_button"
@@ -74,7 +75,8 @@
             android:background="@drawable/accessibility_magnification_setting_view_image_btn_bg"
             android:src="@drawable/ic_magnification_menu_medium"
             android:tint="@color/accessibility_magnification_image_button_tint"
-            android:tintMode="src_atop" />
+            android:tintMode="src_atop"
+            android:contentDescription="@string/accessibility_magnification_medium" />
 
         <ImageButton
             android:id="@+id/magnifier_large_button"
@@ -85,7 +87,8 @@
             android:background="@drawable/accessibility_magnification_setting_view_image_btn_bg"
             android:src="@drawable/ic_magnification_menu_large"
             android:tint="@color/accessibility_magnification_image_button_tint"
-            android:tintMode="src_atop" />
+            android:tintMode="src_atop"
+            android:contentDescription="@string/accessibility_magnification_large" />
 
         <ImageButton
             android:id="@+id/magnifier_full_button"
@@ -96,7 +99,8 @@
             android:background="@drawable/accessibility_magnification_setting_view_image_btn_bg"
             android:src="@drawable/ic_open_in_full"
             android:tint="@color/accessibility_magnification_image_button_tint"
-            android:tintMode="src_atop" />
+            android:tintMode="src_atop"
+            android:contentDescription="@string/accessibility_magnification_fullscreen" />
     </LinearLayout>
 
     <LinearLayout

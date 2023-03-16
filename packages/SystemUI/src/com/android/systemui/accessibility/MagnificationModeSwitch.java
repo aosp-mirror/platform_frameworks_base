@@ -120,7 +120,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
                         R.string.magnification_mode_switch_description));
                 final AccessibilityAction clickAction = new AccessibilityAction(
                         AccessibilityAction.ACTION_CLICK.getId(), mContext.getResources().getString(
-                        R.string.magnification_mode_switch_click_label));
+                        R.string.magnification_open_settings_click_label));
                 info.addAction(clickAction);
                 info.setClickable(true);
                 info.addAction(new AccessibilityAction(R.id.accessibility_action_move_up,

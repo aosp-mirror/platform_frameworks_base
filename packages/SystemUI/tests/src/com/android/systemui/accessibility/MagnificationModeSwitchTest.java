@@ -400,7 +400,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         assertThat(nodeInfo.getActionList(),
                 hasItems(new AccessibilityNodeInfo.AccessibilityAction(
                         ACTION_CLICK.getId(), mContext.getResources().getString(
-                        R.string.magnification_mode_switch_click_label))));
+                        R.string.magnification_open_settings_click_label))));
         assertThat(nodeInfo.getActionList(),
                 hasItems(new AccessibilityNodeInfo.AccessibilityAction(
                         R.id.accessibility_action_move_up, mContext.getResources().getString(

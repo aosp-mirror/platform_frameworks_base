@@ -170,39 +170,11 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         }
     }
 
-    private CharSequence formatContentDescription(int viewId) {
-        if (viewId == R.id.magnifier_small_button) {
-            return mContext.getResources().getString(
-                    R.string.accessibility_magnification_small);
-        } else if (viewId == R.id.magnifier_medium_button) {
-            return mContext.getResources().getString(
-                    R.string.accessibility_magnification_medium);
-        } else if (viewId == R.id.magnifier_large_button) {
-            return mContext.getResources().getString(
-                    R.string.accessibility_magnification_large);
-        } else if (viewId == R.id.magnifier_done_button) {
-            return mContext.getResources().getString(
-                    R.string.accessibility_magnification_done);
-        } else if (viewId == R.id.magnifier_edit_button) {
-            return mContext.getResources().getString(
-                    R.string.accessibility_resize);
-        } else {
-            return mContext.getResources().getString(
-                    R.string.magnification_mode_switch_description);
-        }
-    }
-
-    private final AccessibilityDelegate mButtonDelegate = new AccessibilityDelegate() {
+    private final AccessibilityDelegate mPanelDelegate = new AccessibilityDelegate() {
         @Override
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(host, info);
 
-            info.setContentDescription(formatContentDescription(host.getId()));
-            final AccessibilityAction clickAction = new AccessibilityAction(
-                    AccessibilityAction.ACTION_CLICK.getId(), mContext.getResources().getString(
-                    R.string.magnification_mode_switch_click_label));
-            info.addAction(clickAction);
-            info.setClickable(true);
             info.addAction(new AccessibilityAction(R.id.accessibility_action_move_up,
                     mContext.getString(R.string.accessibility_control_move_up)));
             info.addAction(new AccessibilityAction(R.id.accessibility_action_move_down,
@@ -432,6 +404,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mSettingView.setFocusableInTouchMode(true);
         mSettingView.setOnTouchListener(this::onTouch);
 
+        mSettingView.setAccessibilityDelegate(mPanelDelegate);
+
         mPanelView = mSettingView.findViewById(R.id.magnifier_panel_view);
         mSmallButton = mSettingView.findViewById(R.id.magnifier_small_button);
         mMediumButton = mSettingView.findViewById(R.id.magnifier_medium_button);
@@ -456,22 +430,11 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             toggleDiagonalScrolling();
         });
 
-        mSmallButton.setAccessibilityDelegate(mButtonDelegate);
         mSmallButton.setOnClickListener(mButtonClickListener);
-
-        mMediumButton.setAccessibilityDelegate(mButtonDelegate);
         mMediumButton.setOnClickListener(mButtonClickListener);
-
-        mLargeButton.setAccessibilityDelegate(mButtonDelegate);
         mLargeButton.setOnClickListener(mButtonClickListener);
-
-        mDoneButton.setAccessibilityDelegate(mButtonDelegate);
         mDoneButton.setOnClickListener(mButtonClickListener);
-
-        mFullScreenButton.setAccessibilityDelegate(mButtonDelegate);
         mFullScreenButton.setOnClickListener(mButtonClickListener);
-
-        mEditButton.setAccessibilityDelegate(mButtonDelegate);
         mEditButton.setOnClickListener(mButtonClickListener);
 
         mSettingView.setOnApplyWindowInsetsListener((v, insets) -> {
