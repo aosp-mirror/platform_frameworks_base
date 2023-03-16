@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -73,7 +72,6 @@ open class EnterPipOnUserLeaveHintTest(flicker: FlickerTest) : EnterPipTransitio
         super.pipAppWindowAlwaysVisible()
     }
 
-    @FlakyTest(bugId = 271878066)
     @Presubmit
     @Test
     override fun pipAppLayerAlwaysVisible() {
