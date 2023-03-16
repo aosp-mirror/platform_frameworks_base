@@ -88,7 +88,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
@@ -382,9 +381,6 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Amount of time (in milliseconds) to delay before declaring a window freeze timeout. */
     static final int WINDOW_FREEZE_TIMEOUT_DURATION = 2000;
 
-    /** Amount of time (in milliseconds) to delay before declaring a window replacement timeout. */
-    static final int WINDOW_REPLACEMENT_TIMEOUT_DURATION = 2000;
-
     /** Amount of time to allow a last ANR message to exist before freeing the memory. */
     static final int LAST_ANR_LIFETIME_DURATION_MSECS = 2 * 60 * 60 * 1000; // Two hours
 
@@ -563,12 +559,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** Global service lock used by the package that owns this service. */
     final WindowManagerGlobalLock mGlobalLock;
-
-    /**
-     * List of app window tokens that are waiting for replacing windows. If the
-     * replacement doesn't come in time the stale windows needs to be disposed of.
-     */
-    final ArrayList<ActivityRecord> mWindowReplacementTimeouts = new ArrayList<>();
 
     /**
      * Windows that are being resized.  Used so we can tell the client about
@@ -1774,15 +1764,6 @@ public class WindowManagerService extends IWindowManager.Stub
             final WindowStateAnimator winAnimator = win.mWinAnimator;
             winAnimator.mEnterAnimationPending = true;
             winAnimator.mEnteringAnimation = true;
-            // Check if we need to prepare a transition for replacing window first.
-            if (!win.mTransitionController.isShellTransitionsEnabled()
-                    && activity != null && activity.isVisible()
-                    && !prepareWindowReplacementTransition(activity)) {
-                // If not, check if need to set up a dummy transition during display freeze
-                // so that the unfreeze wait for the apps to draw. This might be needed if
-                // the app is relaunching.
-                prepareNoneTransitionForRelaunching(activity);
-            }
 
             if (displayPolicy.areSystemBarsForcedConsumedLw()) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS;
@@ -1940,48 +1921,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         + callingUid);
             }
             return appInfo.targetSdkVersion >= Build.VERSION_CODES.O;
-        }
-    }
-
-    /**
-     * Returns true if we're done setting up any transitions.
-     */
-    private boolean prepareWindowReplacementTransition(ActivityRecord activity) {
-        activity.clearAllDrawn();
-        final WindowState replacedWindow = activity.getReplacingWindow();
-        if (replacedWindow == null) {
-            // We expect to already receive a request to remove the old window. If it did not
-            // happen, let's just simply add a window.
-            return false;
-        }
-        // We use the visible frame, because we want the animation to morph the window from what
-        // was visible to the user to the final destination of the new window.
-        final Rect frame = new Rect(replacedWindow.getFrame());
-        final WindowManager.LayoutParams attrs = replacedWindow.mAttrs;
-        frame.inset(replacedWindow.getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
-                frame, attrs.type, replacedWindow.getWindowingMode(), attrs.softInputMode,
-                attrs.flags));
-        // We treat this as if this activity was opening, so we can trigger the app transition
-        // animation and piggy-back on existing transition animation infrastructure.
-        final DisplayContent dc = activity.getDisplayContent();
-        dc.mOpeningApps.add(activity);
-        dc.prepareAppTransition(TRANSIT_RELAUNCH);
-        dc.mAppTransition.overridePendingAppTransitionClipReveal(frame.left, frame.top,
-                frame.width(), frame.height());
-        dc.executeAppTransition();
-        return true;
-    }
-
-    private void prepareNoneTransitionForRelaunching(ActivityRecord activity) {
-        // Set up a none-transition and add the app to opening apps, so that the display
-        // unfreeze wait for the apps to be drawn.
-        // Note that if the display unfroze already because app unfreeze timed out,
-        // we don't set up the transition anymore and just let it go.
-        final DisplayContent dc = activity.getDisplayContent();
-        if (mDisplayFrozen && !dc.mOpeningApps.contains(activity) && activity.isRelaunching()) {
-            dc.mOpeningApps.add(activity);
-            dc.prepareAppTransition(TRANSIT_NONE);
-            dc.executeAppTransition();
         }
     }
 
@@ -2390,12 +2329,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // If we are not currently running the exit animation, we need to see about starting
             // one.
-            // We don't want to animate visibility of windows which are pending replacement.
-            // In the case of activity relaunch child windows could request visibility changes as
-            // they are detached from the main application window during the tear down process.
-            // If we satisfied these visibility changes though, we would cause a visual glitch
-            // hiding the window before it's replacement was available. So we just do nothing on
-            // our side.
             // This must be called before the call to performSurfacePlacement.
             if (!shouldRelayout && winAnimator.hasSurface() && !win.mAnimatingExit) {
                 if (DEBUG_VISIBILITY) {
@@ -2403,20 +2336,18 @@ public class WindowManagerService extends IWindowManager.Stub
                             "Relayout invis " + win + ": mAnimatingExit=" + win.mAnimatingExit);
                 }
                 result |= RELAYOUT_RES_SURFACE_CHANGED;
-                if (!win.mWillReplaceWindow) {
-                    // When FLAG_SHOW_WALLPAPER flag is removed from a window, we usually set a flag
-                    // in DC#pendingLayoutChanges and update the wallpaper target later.
-                    // However it's possible that FLAG_SHOW_WALLPAPER flag is removed from a window
-                    // when the window is about to exit, so we update the wallpaper target
-                    // immediately here. Otherwise this window will be stuck in exiting and its
-                    // surface remains on the screen.
-                    // TODO(b/189856716): Allow destroying surface even if it belongs to the
-                    //  keyguard target.
-                    if (wallpaperMayMove) {
-                        displayContent.mWallpaperController.adjustWallpaperWindows();
-                    }
-                    tryStartExitingAnimation(win, winAnimator);
+                // When FLAG_SHOW_WALLPAPER flag is removed from a window, we usually set a flag
+                // in DC#pendingLayoutChanges and update the wallpaper target later.
+                // However it's possible that FLAG_SHOW_WALLPAPER flag is removed from a window
+                // when the window is about to exit, so we update the wallpaper target
+                // immediately here. Otherwise this window will be stuck in exiting and its
+                // surface remains on the screen.
+                // TODO(b/189856716): Allow destroying surface even if it belongs to the
+                //  keyguard target.
+                if (wallpaperMayMove) {
+                    displayContent.mWallpaperController.adjustWallpaperWindows();
                 }
+                tryStartExitingAnimation(win, winAnimator);
             }
 
             // Create surfaceControl before surface placement otherwise layout will be skipped
@@ -5328,8 +5259,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int UPDATE_MULTI_WINDOW_STACKS = 41;
 
-        public static final int WINDOW_REPLACEMENT_TIMEOUT = 46;
-
         public static final int UPDATE_ANIMATION_SCALE = 51;
         public static final int WINDOW_HIDE_TIMEOUT = 52;
         public static final int RESTORE_POINTER_ICON = 55;
@@ -5552,16 +5481,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (displayContent != null) {
                             displayContent.adjustForImeIfNeeded();
                         }
-                    }
-                    break;
-                }
-                case WINDOW_REPLACEMENT_TIMEOUT: {
-                    synchronized (mGlobalLock) {
-                        for (int i = mWindowReplacementTimeouts.size() - 1; i >= 0; i--) {
-                            final ActivityRecord activity = mWindowReplacementTimeouts.get(i);
-                            activity.onWindowReplacementTimeout();
-                        }
-                        mWindowReplacementTimeouts.clear();
                     }
                     break;
                 }
@@ -7081,98 +7000,6 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public Object getWindowManagerLock() {
         return mGlobalLock;
-    }
-
-    /**
-     * Hint to a token that its activity will relaunch, which will trigger removal and addition of
-     * a window.
-     *
-     * @param token Application token for which the activity will be relaunched.
-     */
-    void setWillReplaceWindow(IBinder token, boolean animate) {
-        final ActivityRecord activity = mRoot.getActivityRecord(token);
-        if (activity == null) {
-            ProtoLog.w(WM_ERROR, "Attempted to set replacing window on non-existing app token %s",
-                    token);
-            return;
-        }
-        if (!activity.hasContentToDisplay()) {
-            ProtoLog.w(WM_ERROR,
-                    "Attempted to set replacing window on app token with no content %s",
-                    token);
-            return;
-        }
-        activity.setWillReplaceWindows(animate);
-    }
-
-    /**
-     * Hint to a token that its windows will be replaced across activity relaunch.
-     * The windows would otherwise be removed  shortly following this as the
-     * activity is torn down.
-     * @param token Application token for which the activity will be relaunched.
-     * @param childrenOnly Whether to mark only child windows for replacement
-     *                     (for the case where main windows are being preserved/
-     *                     reused rather than replaced).
-     *
-     */
-    // TODO: The s at the end of the method name is the only difference with the name of the method
-    // above. We should combine them or find better names.
-    void setWillReplaceWindows(IBinder token, boolean childrenOnly) {
-        synchronized (mGlobalLock) {
-            final ActivityRecord activity = mRoot.getActivityRecord(token);
-            if (activity == null) {
-                ProtoLog.w(WM_ERROR,
-                        "Attempted to set replacing window on non-existing app token %s",
-                        token);
-                return;
-            }
-            if (!activity.hasContentToDisplay()) {
-                ProtoLog.w(WM_ERROR,
-                        "Attempted to set replacing window on app token with no content %s",
-                        token);
-                return;
-            }
-
-            if (childrenOnly) {
-                activity.setWillReplaceChildWindows();
-            } else {
-                activity.setWillReplaceWindows(false /* animate */);
-            }
-
-            scheduleClearWillReplaceWindows(token, true /* replacing */);
-        }
-    }
-
-    /**
-     * If we're replacing the window, schedule a timer to clear the replaced window
-     * after a timeout, in case the replacing window is not coming.
-     *
-     * If we're not replacing the window, clear the replace window settings of the app.
-     *
-     * @param token     Application token for the activity whose window might be replaced.
-     * @param replacing Whether the window is being replaced or not.
-     */
-    void scheduleClearWillReplaceWindows(IBinder token, boolean replacing) {
-        final ActivityRecord activity = mRoot.getActivityRecord(token);
-        if (activity == null) {
-            ProtoLog.w(WM_ERROR, "Attempted to reset replacing window on non-existing app token %s",
-                    token);
-            return;
-        }
-        if (replacing) {
-            scheduleWindowReplacementTimeouts(activity);
-        } else {
-            activity.clearWillReplaceWindows();
-        }
-    }
-
-    void scheduleWindowReplacementTimeouts(ActivityRecord activity) {
-        if (!mWindowReplacementTimeouts.contains(activity)) {
-            mWindowReplacementTimeouts.add(activity);
-        }
-        mH.removeMessages(H.WINDOW_REPLACEMENT_TIMEOUT);
-        mH.sendEmptyMessageDelayed(
-                H.WINDOW_REPLACEMENT_TIMEOUT, WINDOW_REPLACEMENT_TIMEOUT_DURATION);
     }
 
     @Override
