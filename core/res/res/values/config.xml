@@ -720,14 +720,13 @@
          display is powered on at the same time. -->
     <bool name="config_supportsConcurrentInternalDisplays">true</bool>
 
-    <!-- Map of DeviceState to rotation lock setting. Each entry must be in the format
-         "key:value", for example: "0:1".
-          The keys are device states, and the values are one of
-          Settings.Secure.DeviceStateRotationLockSetting.
-          Any device state that doesn't have a default set here will be treated as
-          DEVICE_STATE_ROTATION_LOCK_IGNORED meaning it will not have its own rotation lock setting.
-          If this map is missing, the feature is disabled and only one global rotation lock setting
-           will apply, regardless of device state. -->
+    <!-- Map of device posture to rotation lock setting. Each entry must be in the format
+         "key:value", or "key:value:fallback_key" for example: "0:1" or "2:0:1". The keys are one of
+         Settings.Secure.DeviceStateRotationLockKey, and the values are one of
+         Settings.Secure.DeviceStateRotationLockSetting.
+         The fallback is a key to a device posture that can be specified when the value is
+         Settings.Secure.DEVICE_STATE_ROTATION_LOCK_IGNORED.
+     -->
     <string-array name="config_perDeviceStateRotationLockDefaults" />
 
     <!-- Dock behavior -->
