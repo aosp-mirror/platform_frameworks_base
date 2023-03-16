@@ -29,6 +29,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -100,6 +101,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final SmartReplyController mSmartReplyController;
     private final ExpandableNotificationRowDragController mDragController;
     private final NotificationDismissibilityProvider mDismissibilityProvider;
+    private final IStatusBarService mStatusBarService;
     private final ExpandableNotificationRow.ExpandableNotificationRowLogger mLoggerCallback =
             new ExpandableNotificationRow.ExpandableNotificationRowLogger() {
                 @Override
@@ -157,7 +159,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
             PeopleNotificationIdentifier peopleNotificationIdentifier,
             Optional<BubblesManager> bubblesManagerOptional,
             ExpandableNotificationRowDragController dragController,
-            NotificationDismissibilityProvider dismissibilityProvider) {
+            NotificationDismissibilityProvider dismissibilityProvider,
+            IStatusBarService statusBarService) {
         mView = view;
         mListContainer = listContainer;
         mRemoteInputViewSubcomponentFactory = rivSubcomponentFactory;
@@ -189,6 +192,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
         mSmartReplyConstants = smartReplyConstants;
         mSmartReplyController = smartReplyController;
         mDismissibilityProvider = dismissibilityProvider;
+        mStatusBarService = statusBarService;
     }
 
     /**
@@ -220,7 +224,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mMetricsLogger,
                 mSmartReplyConstants,
                 mSmartReplyController,
-                mFeatureFlags
+                mFeatureFlags,
+                mStatusBarService
         );
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (mAllowLongPress) {
