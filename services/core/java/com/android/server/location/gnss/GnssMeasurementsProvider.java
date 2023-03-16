@@ -21,6 +21,7 @@ import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 import static com.android.server.location.gnss.GnssManagerService.D;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.location.GnssMeasurementRequest;
@@ -31,6 +32,7 @@ import android.os.IBinder;
 import android.stats.location.LocationStatsEnums;
 import android.util.Log;
 
+import com.android.server.location.gnss.GnssConfiguration.HalInterfaceVersion;
 import com.android.server.location.gnss.hal.GnssNative;
 import com.android.server.location.injector.AppOpsHelper;
 import com.android.server.location.injector.Injector;
@@ -115,16 +117,6 @@ public final class GnssMeasurementsProvider extends
         if (request.getIntervalMillis() == GnssMeasurementRequest.PASSIVE_INTERVAL) {
             return true;
         }
-        // The HAL doc does not specify if consecutive start() calls will be allowed.
-        // Some vendors may ignore the 2nd start() call if stop() is not called.
-        // Thus, here we always call stop() before calling start() to avoid being ignored.
-        if (mGnssNative.stopMeasurementCollection()) {
-            if (D) {
-                Log.d(TAG, "stopping gnss measurements");
-            }
-        } else {
-            Log.e(TAG, "error stopping gnss measurements");
-        }
         if (mGnssNative.startMeasurementCollection(request.isFullTracking(),
                 request.isCorrelationVectorOutputsEnabled(),
                 request.getIntervalMillis())) {
@@ -136,6 +128,28 @@ public final class GnssMeasurementsProvider extends
             Log.e(TAG, "error starting gnss measurements");
             return false;
         }
+    }
+
+    @Override
+    protected boolean reregisterWithService(GnssMeasurementRequest old,
+            GnssMeasurementRequest request,
+            @NonNull Collection<GnssListenerRegistration> registrations) {
+        if (request.getIntervalMillis() == GnssMeasurementRequest.PASSIVE_INTERVAL) {
+            unregisterWithService();
+            return true;
+        }
+        HalInterfaceVersion halInterfaceVersion =
+                mGnssNative.getConfiguration().getHalInterfaceVersion();
+        boolean aidlV3Plus = halInterfaceVersion.mMajor == HalInterfaceVersion.AIDL_INTERFACE
+                && halInterfaceVersion.mMinor >= 3;
+        if (!aidlV3Plus) {
+            // The HAL doc does not specify if consecutive start() calls will be allowed.
+            // Some vendors may ignore the 2nd start() call if stop() is not called.
+            // Thus, here we always call stop() before calling start() to avoid being ignored.
+            // AIDL v3+ is free from this issue.
+            unregisterWithService();
+        }
+        return registerWithService(request, registrations);
     }
 
     @Override

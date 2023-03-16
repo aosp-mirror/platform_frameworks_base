@@ -92,6 +92,8 @@ public class GnssConfiguration {
     // Represents an HAL interface version. Instances of this class are created in the JNI layer
     // and returned through native methods.
     static class HalInterfaceVersion {
+        // mMajor being this value denotes AIDL HAL. In this case, mMinor denotes the AIDL version.
+        static final int AIDL_INTERFACE = 3;
         final int mMajor;
         final int mMinor;
 
