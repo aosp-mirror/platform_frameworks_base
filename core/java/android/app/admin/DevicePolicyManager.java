@@ -57,6 +57,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 
 import android.Manifest.permission;
 import android.accounts.Account;
+import android.annotation.BroadcastBehavior;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
@@ -3997,6 +3998,27 @@ public class DevicePolicyManager {
      */
     public static final String EXTRA_RESOURCE_IDS =
             "android.app.extra.RESOURCE_IDS";
+
+    /**
+     * Broadcast Action: Broadcast sent to indicate that the device financing state has changed.
+     *
+     * <p>This occurs when, for example, a financing kiosk app has been added or removed.
+     *
+     * <p>To query the current device financing state see {@link #isDeviceFinanced}.
+     *
+     * <p>This will be delivered to the following apps if they include a receiver for this action
+     * in their manifest:
+     * <ul>
+     *     <li>Device owner admins.
+     *     <li>Organization-owned profile owner admins
+     *     <li>The supervision app
+     *     <li>The device management role holder
+     * </ul>
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true, includeBackground = true)
+    public static final String ACTION_DEVICE_FINANCING_STATE_CHANGED =
+            "android.app.admin.action.DEVICE_FINANCING_STATE_CHANGED";
 
     /** Allow the user to choose whether to enable MTE on the device. */
     public static final int MTE_NOT_CONTROLLED_BY_POLICY = 0;
