@@ -8571,8 +8571,8 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     void grantInputChannel(Session session, int callingUid, int callingPid, int displayId,
             SurfaceControl surface, IWindow window, IBinder hostInputToken,
-            int flags, int privateFlags, int type, IBinder windowToken, IBinder focusGrantToken,
-            String inputHandleName, InputChannel outInputChannel) {
+            int flags, int privateFlags, int inputFeatures, int type, IBinder windowToken,
+            IBinder focusGrantToken, String inputHandleName, InputChannel outInputChannel) {
         final int sanitizedType = sanitizeWindowType(session, displayId, windowToken, type);
         final InputApplicationHandle applicationHandle;
         final String name;
@@ -8589,7 +8589,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         updateInputChannel(clientChannel.getToken(), callingUid, callingPid, displayId, surface,
-                name, applicationHandle, flags, privateFlags, sanitizedType,
+                name, applicationHandle, flags, privateFlags, inputFeatures, sanitizedType,
                 null /* region */, window);
 
         clientChannel.copyTo(outInputChannel);
@@ -8630,13 +8630,14 @@ public class WindowManagerService extends IWindowManager.Stub
     private void updateInputChannel(IBinder channelToken, int callingUid, int callingPid,
             int displayId, SurfaceControl surface, String name,
             InputApplicationHandle applicationHandle, int flags,
-            int privateFlags, int type, Region region, IWindow window) {
+            int privateFlags, int inputFeatures, int type, Region region, IWindow window) {
         final InputWindowHandle h = new InputWindowHandle(applicationHandle, displayId);
         h.token = channelToken;
         h.setWindowToken(window);
         h.name = name;
 
         flags = sanitizeFlagSlippery(flags, name, callingUid, callingPid);
+        inputFeatures = sanitizeSpyWindow(inputFeatures, name, callingUid, callingPid);
 
         final int sanitizedLpFlags =
                 (flags & (FLAG_NOT_TOUCHABLE | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE))
@@ -8646,7 +8647,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Do not allow any input features to be set without sanitizing them first.
         h.inputConfig = InputConfigAdapter.getInputConfigFromWindowParams(
-                        type, sanitizedLpFlags, 0 /*inputFeatures*/);
+                        type, sanitizedLpFlags, inputFeatures);
 
 
         if ((flags & LayoutParams.FLAG_NOT_FOCUSABLE) != 0) {
@@ -8683,7 +8684,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * is undefined.
      */
     void updateInputChannel(IBinder channelToken, int displayId, SurfaceControl surface,
-            int flags, int privateFlags, Region region) {
+            int flags, int privateFlags, int inputFeatures, Region region) {
         final InputApplicationHandle applicationHandle;
         final String name;
         final EmbeddedWindowController.EmbeddedWindow win;
@@ -8698,7 +8699,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         updateInputChannel(channelToken, win.mOwnerUid, win.mOwnerPid, displayId, surface, name,
-                applicationHandle, flags, privateFlags, win.mWindowType, region, win.mClient);
+                applicationHandle, flags, privateFlags, inputFeatures, win.mWindowType, region,
+                win.mClient);
     }
 
     /** Return whether layer tracing is enabled */
