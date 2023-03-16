@@ -1485,9 +1485,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // then we have to notify KeyguardService directly. This can happen if there is
             // another ongoing transition when the app changes occlusion OR if the app dies or
             // is killed. Both of these are common during tests.
-            final boolean notify = !(transit == TRANSIT_KEYGUARD_OCCLUDE
-                    || transit == TRANSIT_KEYGUARD_UNOCCLUDE);
-            mController.mAtm.mWindowManager.mPolicy.applyKeyguardOcclusionChange(notify);
+            if (transit != TRANSIT_KEYGUARD_OCCLUDE && transit != TRANSIT_KEYGUARD_UNOCCLUDE) {
+                mController.mAtm.mWindowManager.mPolicy.applyKeyguardOcclusionChange();
+            }
         }
     }
 
