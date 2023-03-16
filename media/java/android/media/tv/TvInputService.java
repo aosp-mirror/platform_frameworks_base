@@ -1512,7 +1512,7 @@ public abstract class TvInputService extends Service {
          *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
          *             how to parse this data.
          */
-        public void onTvMessage(@NonNull @TvInputManager.TvMessageType String type,
+        public void onTvMessage(@TvInputManager.TvMessageType int type,
                 @NonNull Bundle data) {
         }
 
@@ -2065,7 +2065,7 @@ public abstract class TvInputService extends Service {
             onAdBufferReady(buffer);
         }
 
-        void onTvMessageReceived(String type, Bundle data) {
+        void onTvMessageReceived(int type, Bundle data) {
             onTvMessage(type, data);
         }
 
