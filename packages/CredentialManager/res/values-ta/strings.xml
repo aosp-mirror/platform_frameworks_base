@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"மேம்படுத்தப்பட்ட கணக்குப் பாதுகாப்பு"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"ஒவ்வொரு குறியீடும் எந்த ஆப்ஸ்/இணையதளத்திற்காக உருவாக்கப்பட்டதோ அதனுடன் மட்டுமே இணைக்கப்பட்டிருக்கும். இது மோசடியான ஆப்ஸ்/இணையதளத்தில் நீங்கள் தவறுதலாக உள்நுழைவதைத் தடுக்கும். அத்துடன், சேவையகங்களில் பொதுக் குறியீடுகள் மட்டுமே சேமிக்கப்படுவதால் கணக்கை ஹேக் செய்வது மிகக் கடினமாகும்."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"தடையற்ற டிரான்ஸிஷன்"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"கடவுச்சொல்லற்ற எதிர்காலத்தை நோக்கி நாம் பயணிக்கிறோம். கடவுச்சாவிகளைப் பயன்படுத்தும் இதே வேளையில் கடவுச்சொற்களையும் பயன்படுத்த முடியும்"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"உங்கள் <xliff:g id="CREATETYPES">%1$s</xliff:g> எங்கே சேமிக்கப்பட வேண்டும் என்பதைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"உங்கள் தகவல்களைச் சேமித்து அடுத்த முறை விரைவாக உள்நுழைய ஒரு கடவுச்சொல் நிர்வாகியைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸுக்கான கடவுச்சாவியை உருவாக்கவா?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ஐ இதில் சேமியுங்கள்"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"வேறொரு சாதனத்தில் கடவுச்சாவியை உருவாக்க வேண்டுமா?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"உங்கள் அனைத்து உள்நுழைவுகளுக்கும் <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ஐப் பயன்படுத்தவா?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> என்ற மின்னஞ்சல் முகவரிக்கான இந்தக் கடவுச்சொல் நிர்வாகி உங்கள் கடவுச்சொற்களையும் கடவுச்சாவிகளையும் சேமித்து நீங்கள் எளிதாக உள்நுழைய உதவும்"</string>
     <string name="set_as_default" msgid="4415328591568654603">"இயல்பானதாக அமை"</string>
     <string name="use_once" msgid="9027366575315399714">"ஒருமுறை பயன்படுத்தவும்"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> கடவுச்சொற்கள் • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> கடவுச்சாவிகள்"</string>

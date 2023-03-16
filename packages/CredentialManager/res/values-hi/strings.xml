@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"खाते की बेहतर सुरक्षा"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"हर कुंजी खास तौर पर उस ऐप्लिकेशन या वेबसाइट से लिंक होती है जिसके लिए उसे बनाया गया है. ऐसा इसलिए किया जाता है, ताकि कोई भी व्यक्ति धोखाधड़ी करने वाले ऐप्लिकेशन या वेबसाइट पर कभी भी गलती से साइन इन न करे. साथ ही, सर्वर के पास सिर्फ़ सार्वजनिक कुंजी होती हैं, इसलिए पूरी कुंजी को हैक करना काफ़ी मुश्किल होता है."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"आसान ट्रांज़िशन"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"आने वाले समय में, बिना पासवर्ड के टेक्नोलॉजी का इस्तेमाल किया जा सकेगा. हालांकि, पासकी के साथ पासवर्ड भी इस्तेमाल किए जा सकेंगे"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"चुनें कि अपनी <xliff:g id="CREATETYPES">%1$s</xliff:g> कहां सेव करनी हैं"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"अपनी जानकारी सेव करने के लिए, पासवर्ड मैनेजर चुनें और अगली बार ज़्यादा तेज़ी से साइन इन करें"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"क्या आपको <xliff:g id="APPNAME">%1$s</xliff:g> के लिए पासकी बनानी है?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> को यहां सेव करें"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"क्या किसी दूसरे डिवाइस में पासकी सेव करनी है?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"क्या आपको साइन इन से जुड़ी सारी जानकारी सेव करने के लिए, <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> का इस्तेमाल करना है?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> के लिए यह पासवर्ड मैनेजर, आपके पासवर्ड और पासकी सेव करेगा, ताकि आपको साइन इन करने में आसानी हो"</string>
     <string name="set_as_default" msgid="4415328591568654603">"डिफ़ॉल्ट के तौर पर सेट करें"</string>
     <string name="use_once" msgid="9027366575315399714">"इसका इस्तेमाल एक बार किया जा सकता है"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> पासवर्ड • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> पासकी"</string>

@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"계정 보안 향상"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"각 키는 생성 시 대상으로 설정된 앱 또는 웹사이트와 단독으로 연결되어 있으므로 실수로 사기 앱 또는 웹사이트에 로그인할 일이 없습니다. 또한 서버에만 공개 키가 보관되므로 해킹이 더욱 까다롭습니다."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"원활한 이전"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"비밀번호가 필요 없는 미래로 나아가는 동안에도 비밀번호는 여전히 패스키와 함께 사용될 것입니다."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g> 저장 위치 선택"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"정보를 저장해서 다음에 더 빠르게 로그인하려면 비밀번호 관리자를 선택하세요."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g>의 패스키를 만드시겠습니까?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> 저장 위치"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"다른 기기에서 패스키를 만드시겠습니까?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"모든 로그인에 <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>을(를) 사용하시겠습니까?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g>님을 위한 이 비밀번호 관리자는 비밀번호와 패스키를 저장하여 사용자가 간편하게 로그인할 수 있도록 돕습니다."</string>
     <string name="set_as_default" msgid="4415328591568654603">"기본값으로 설정"</string>
     <string name="use_once" msgid="9027366575315399714">"한 번 사용"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"비밀번호 <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>개 • 패스키 <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>개"</string>

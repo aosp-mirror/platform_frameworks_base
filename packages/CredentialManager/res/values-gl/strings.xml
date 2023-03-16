@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Mellora na seguranza das contas"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Cada clave está vinculada de xeito exclusivo coa aplicación ou o sitio web para o que foi creada, de tal forma que nunca poidas iniciar sesión nunha aplicación ou un sitio web fraudulentos por erro. Ademais, como os servidores só gardan as claves públicas, resultan moito máis difíciles de piratear."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Transición fluída"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Durante este percorrido cara a un futuro sen contrasinais, estes seguirán estando dispoñibles a canda as claves de acceso"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Escolle onde queres gardar: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecciona un xestor de contrasinais para gardar a túa información e iniciar sesión máis rápido a próxima vez"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Queres crear unha clave de acceso para <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Gardar <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> en"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Queres crear unha clave de acceso noutro dispositivo?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Queres usar <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> cada vez que inicies sesión?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Este xestor de contrasinais de <xliff:g id="USERNAME">%1$s</xliff:g> almacenará os teus contrasinais e claves de acceso para axudarche a iniciar sesión facilmente"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Establecer como predeterminado"</string>
     <string name="use_once" msgid="9027366575315399714">"Usar unha vez"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> contrasinais • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> claves de acceso"</string>

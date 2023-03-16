@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"වැඩිදියුණු කළ ගිණුම් ආරක්ෂාව"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"සෑම යතුරක්ම ඒවා නිර්මාණය කරන ලද යෙදුම හෝ වෙබ් අඩවිය සමග අනන්‍ය වශයෙන්ම සම්බන්ධ කර ඇත, එබැවින් ඔබට කිසි විටෙක වැරදීමකින් වංචනික යෙදුමකට හෝ වෙබ් අඩවියකට පුරනය විය නොහැක. ඊට අමතරව, සේවාදායකයින් පොදු යතුරු තබා ගැනීමත් සමග, අනවසරයෙන් ඇතුළුවීම වඩා දුෂ්කරය."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"බාධාවකින් තොර සංක්‍රමණය"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"අපි මුරපද රහිත අනාගතයක් කරා ගමන් කරන විට, මුරයතුරු සමග මුරපද තවමත් පවතිනු ඇත"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"ඔබේ <xliff:g id="CREATETYPES">%1$s</xliff:g> සුරැකිය යුතු ස්ථානය තෝරා ගන්න"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ඔබේ තතු සුරැකීමට සහ මීළඟ වතාවේ වේගයෙන් පුරනය වීමට මුරපද කළමනාකරුවෙකු තෝරන්න"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> සඳහා මුරයතුර තනන්න ද?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"වෙත <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> සුරකින්න"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"වෙනත් උපාංගයක මුරයතුර තනන්න ද?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ඔබේ සියලු පුරනය වීම් සඳහා <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> භාවිතා කරන්න ද?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> සඳහා මෙම මුරපද කළමනාකරු ඔබට පහසුවෙන් පුරනය වීමට උදවු කිරීම සඳහා ඔබේ මුරපද සහ මුරයතුරු ගබඩා කරනු ඇත"</string>
     <string name="set_as_default" msgid="4415328591568654603">"පෙරනිමි ලෙස සකසන්න"</string>
     <string name="use_once" msgid="9027366575315399714">"වරක් භාවිතා කරන්න"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"මුරපද <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>ක් • මුරයතුරු <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>ක්"</string>
