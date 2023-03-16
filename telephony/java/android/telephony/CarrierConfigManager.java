@@ -1975,8 +1975,13 @@ public class CarrierConfigManager {
     /**
      * Boolean indicating if LTE+ icon should be shown if available.
      */
-    public static final String KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL =
-            "hide_lte_plus_data_icon_bool";
+    public static final String KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL = "hide_lte_plus_data_icon_bool";
+
+    /**
+     * Boolean indicting if the 5G slice icon should be shown if available.
+     * @hide
+     */
+    public static final String KEY_SHOW_5G_SLICE_ICON_BOOL = "show_5g_slice_icon_bool";
 
     /**
      * The combined channel bandwidth threshold (non-inclusive) in KHz required to display the
@@ -9914,6 +9919,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_OPERATOR_NAME_FILTER_PATTERN_STRING, "");
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
+        sDefaults.putBoolean(KEY_SHOW_5G_SLICE_ICON_BOOL, true);
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
         sDefaults.putInt(KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT, 0);
         sDefaults.putBoolean(KEY_INCLUDE_LTE_FOR_NR_ADVANCED_THRESHOLD_BANDWIDTH_BOOL, false);

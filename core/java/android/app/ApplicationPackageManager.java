@@ -2561,7 +2561,7 @@ public class ApplicationPackageManager extends PackageManager {
     public InstallSourceInfo getInstallSourceInfo(String packageName) throws NameNotFoundException {
         final InstallSourceInfo installSourceInfo;
         try {
-            installSourceInfo = mPM.getInstallSourceInfo(packageName);
+            installSourceInfo = mPM.getInstallSourceInfo(packageName, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

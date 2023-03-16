@@ -5601,16 +5601,15 @@ public class UserManager {
      *
      * @see #KEY_RESTRICTIONS_PENDING
      *
-     * @deprecated Use
+     * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * it is possible for there to be multiple managing apps on the device with the ability to set
+     * restrictions, e.g. an Enterprise Device Policy Controller (DPC) and a Supervision admin.
+     * This API will only to return the restrictions set by the DPCs. To retrieve restrictions
+     * set by all managing apps, use
      * {@link android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
-     * Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, it is
-     * possible for there to be multiple managing agents on the device with the ability to set
-     * restrictions. This API will only to return the restrictions set by device policy controllers
-     * (DPCs)
      *
      * @see DevicePolicyManager
      */
-    @Deprecated
     @WorkerThread
     @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public Bundle getApplicationRestrictions(String packageName) {
@@ -5623,12 +5622,15 @@ public class UserManager {
     }
 
     /**
-     * @deprecated Use
+     * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * it is possible for there to be multiple managing apps on the device with the ability to set
+     * restrictions, e.g. an Enterprise Device Policy Controller (DPC) and a Supervision admin.
+     * This API will only to return the restrictions set by the DPCs. To retrieve restrictions
+     * set by all managing apps, use
      * {@link android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
      *
      * @hide
      */
-    @Deprecated
     @WorkerThread
     public Bundle getApplicationRestrictions(String packageName, UserHandle user) {
         try {

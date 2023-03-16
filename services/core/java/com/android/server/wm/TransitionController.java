@@ -107,6 +107,9 @@ class TransitionController {
      */
     private final ArrayList<Transition> mPlayingTransitions = new ArrayList<>();
 
+    /** The currently finishing transition. */
+    Transition mFinishingTransition;
+
     /**
      * The windows that request to be invisible while it is in transition. After the transition
      * is finished and the windows are no longer animating, their surfaces will be destroyed.
@@ -313,6 +316,11 @@ class TransitionController {
         return false;
     }
 
+    /** Returns {@code true} if the `wc` is a participant of the finishing transition. */
+    boolean inFinishingTransition(WindowContainer<?> wc) {
+        return mFinishingTransition != null && mFinishingTransition.mParticipants.contains(wc);
+    }
+
     /** @return {@code true} if a transition is running */
     boolean inTransition() {
         // TODO(shell-transitions): eventually properly support multiple
@@ -358,11 +366,11 @@ class TransitionController {
     }
 
     boolean isTransientHide(@NonNull Task task) {
-        if (mCollectingTransition != null && mCollectingTransition.isTransientHide(task)) {
+        if (mCollectingTransition != null && mCollectingTransition.isInTransientHide(task)) {
             return true;
         }
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
-            if (mPlayingTransitions.get(i).isTransientHide(task)) return true;
+            if (mPlayingTransitions.get(i).isInTransientHide(task)) return true;
         }
         return false;
     }
@@ -672,14 +680,13 @@ class TransitionController {
     }
 
     /** @see Transition#finishTransition */
-    void finishTransition(@NonNull IBinder token) {
+    void finishTransition(Transition record) {
         // It is usually a no-op but make sure that the metric consumer is removed.
-        mTransitionMetricsReporter.reportAnimationStart(token, 0 /* startTime */);
+        mTransitionMetricsReporter.reportAnimationStart(record.getToken(), 0 /* startTime */);
         // It is a no-op if the transition did not change the display.
         mAtm.endLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
-        final Transition record = Transition.fromBinder(token);
-        if (record == null || !mPlayingTransitions.contains(record)) {
-            Slog.e(TAG, "Trying to finish a non-playing transition " + token);
+        if (!mPlayingTransitions.contains(record)) {
+            Slog.e(TAG, "Trying to finish a non-playing transition " + record);
             return;
         }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Finish Transition: %s", record);

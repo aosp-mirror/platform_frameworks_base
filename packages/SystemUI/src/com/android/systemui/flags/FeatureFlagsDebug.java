@@ -86,9 +86,34 @@ public class FeatureFlagsDebug implements FeatureFlags {
     private final ServerFlagReader.ChangeListener mOnPropertiesChanged =
             new ServerFlagReader.ChangeListener() {
                 @Override
-                public void onChange(Flag<?> flag) {
-                    mRestarter.restartSystemUI(
-                            "Server flag change: " + flag.getNamespace() + "." + flag.getName());
+                public void onChange(Flag<?> flag, String value) {
+                    boolean shouldRestart = false;
+                    if (mBooleanFlagCache.containsKey(flag.getName())) {
+                        boolean newValue = value == null ? false : Boolean.parseBoolean(value);
+                        if (mBooleanFlagCache.get(flag.getName()) != newValue) {
+                            shouldRestart = true;
+                        }
+                    } else if (mStringFlagCache.containsKey(flag.getName())) {
+                        String newValue = value == null ? "" : value;
+                        if (mStringFlagCache.get(flag.getName()) != value) {
+                            shouldRestart = true;
+                        }
+                    } else if (mIntFlagCache.containsKey(flag.getName())) {
+                        int newValue = 0;
+                        try {
+                            newValue = value == null ? 0 : Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                        }
+                        if (mIntFlagCache.get(flag.getName()) != newValue) {
+                            shouldRestart = true;
+                        }
+                    }
+                    if (shouldRestart) {
+                        mRestarter.restartSystemUI(
+                                "Server flag change: " + flag.getNamespace() + "."
+                                        + flag.getName());
+
+                    }
                 }
             };
 

@@ -194,19 +194,19 @@ public final class BatteryService extends SystemService {
 
     private Bundle mBatteryChangedOptions = BroadcastOptions.makeBasic()
             .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
-            .setDeferUntilActive(true)
+            .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
             .toBundle();
     /** Used for both connected/disconnected, so match using key */
     private Bundle mPowerOptions = BroadcastOptions.makeBasic()
             .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
             .setDeliveryGroupMatchingKey("android", Intent.ACTION_POWER_CONNECTED)
-            .setDeferUntilActive(true)
+            .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
             .toBundle();
     /** Used for both low/okay, so match using key */
     private Bundle mBatteryOptions = BroadcastOptions.makeBasic()
             .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
             .setDeliveryGroupMatchingKey("android", Intent.ACTION_BATTERY_OKAY)
-            .setDeferUntilActive(true)
+            .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
             .toBundle();
 
     private MetricsLogger mMetricsLogger;

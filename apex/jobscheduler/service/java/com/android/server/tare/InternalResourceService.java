@@ -625,7 +625,8 @@ public class InternalResourceService extends SystemService {
             mPackageToUidCache.add(userId, pkgName, uid);
         }
         synchronized (mLock) {
-            final InstalledPackageInfo ipo = new InstalledPackageInfo(getContext(), packageInfo);
+            final InstalledPackageInfo ipo = new InstalledPackageInfo(getContext(), userId,
+                    packageInfo);
             final InstalledPackageInfo oldIpo = mPkgCache.add(userId, pkgName, ipo);
             maybeUpdateInstallerStatusLocked(oldIpo, ipo);
             mUidToPackageCache.add(uid, pkgName);
@@ -683,7 +684,7 @@ public class InternalResourceService extends SystemService {
                     mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId);
             for (int i = pkgs.size() - 1; i >= 0; --i) {
                 final InstalledPackageInfo ipo =
-                        new InstalledPackageInfo(getContext(), pkgs.get(i));
+                        new InstalledPackageInfo(getContext(), userId, pkgs.get(i));
                 final InstalledPackageInfo oldIpo = mPkgCache.add(userId, ipo.packageName, ipo);
                 maybeUpdateInstallerStatusLocked(oldIpo, ipo);
             }
@@ -963,7 +964,7 @@ public class InternalResourceService extends SystemService {
                     mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId);
             for (int i = pkgs.size() - 1; i >= 0; --i) {
                 final InstalledPackageInfo ipo =
-                        new InstalledPackageInfo(getContext(), pkgs.get(i));
+                        new InstalledPackageInfo(getContext(), userId, pkgs.get(i));
                 final InstalledPackageInfo oldIpo = mPkgCache.add(userId, ipo.packageName, ipo);
                 maybeUpdateInstallerStatusLocked(oldIpo, ipo);
             }

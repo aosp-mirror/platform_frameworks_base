@@ -925,7 +925,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final int targetPackageUid = snapshot.getPackageUid(packageName, 0, userId);
         final boolean isUpdate = targetPackageUid != -1 || isApexSession();
         final InstallSourceInfo existingInstallSourceInfo = isUpdate
-                ? snapshot.getInstallSourceInfo(packageName)
+                ? snapshot.getInstallSourceInfo(packageName, userId)
                 : null;
         final String existingInstallerPackageName = existingInstallSourceInfo != null
                 ? existingInstallSourceInfo.getInstallingPackageName()

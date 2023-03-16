@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
+import com.android.systemui.statusbar.notification.RemoteInputControllerLogger;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -77,13 +78,13 @@ import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
 
-import java.util.Optional;
-import java.util.concurrent.Executor;
-
 import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.Optional;
+import java.util.concurrent.Executor;
 
 /**
  * This module provides instances needed to construct {@link CentralSurfacesImpl}. These are moved to
@@ -105,6 +106,7 @@ public interface CentralSurfacesDependenciesModule {
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             StatusBarStateController statusBarStateController,
             RemoteInputUriController remoteInputUriController,
+            RemoteInputControllerLogger remoteInputControllerLogger,
             NotificationClickNotifier clickNotifier,
             ActionClickLogger actionClickLogger,
             DumpManager dumpManager) {
@@ -117,6 +119,7 @@ public interface CentralSurfacesDependenciesModule {
                 centralSurfacesOptionalLazy,
                 statusBarStateController,
                 remoteInputUriController,
+                remoteInputControllerLogger,
                 clickNotifier,
                 actionClickLogger,
                 dumpManager);

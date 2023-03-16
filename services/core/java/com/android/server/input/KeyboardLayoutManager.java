@@ -65,6 +65,7 @@ import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.XmlUtils;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import libcore.io.Streams;
 
@@ -1226,9 +1227,15 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
                 mContext.getSystemService(UserManager.class));
         InputMethodManager inputMethodManager = Objects.requireNonNull(
                 mContext.getSystemService(InputMethodManager.class));
+        // Need to use InputMethodManagerInternal to call getEnabledInputMethodListAsUser()
+        // instead of using InputMethodManager which uses enforceCallingPermissions() that
+        // breaks when we are calling the method for work profile user ID since it doesn't check
+        // self permissions.
+        InputMethodManagerInternal inputMethodManagerInternal = InputMethodManagerInternal.get();
         for (UserHandle userHandle : userManager.getUserHandles(true /* excludeDying */)) {
             int userId = userHandle.getIdentifier();
-            for (InputMethodInfo imeInfo : inputMethodManager.getEnabledInputMethodListAsUser(
+            for (InputMethodInfo imeInfo :
+                    inputMethodManagerInternal.getEnabledInputMethodListAsUser(
                     userId)) {
                 for (InputMethodSubtype imeSubtype :
                         inputMethodManager.getEnabledInputMethodSubtypeList(

@@ -31,7 +31,6 @@ import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
-import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 
 import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
 
@@ -621,9 +620,11 @@ public class InfoMediaManager extends MediaManager {
             dispatchConnectedDeviceChanged(id);
         }
 
+        /**
+         * Ignore callback here since we'll also receive {@link onRequestFailed} with reason code.
+         */
         @Override
         public void onTransferFailed(RoutingSessionInfo session, MediaRoute2Info route) {
-            dispatchOnRequestFailed(REASON_UNKNOWN_ERROR);
         }
 
         @Override

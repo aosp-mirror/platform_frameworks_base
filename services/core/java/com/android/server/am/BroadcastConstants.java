@@ -236,6 +236,14 @@ public class BroadcastConstants {
     private static final int DEFAULT_MAX_HISTORY_SUMMARY_SIZE =
             ActivityManager.isLowRamDeviceStatic() ? 256 : 1024;
 
+    /**
+     * For {@link BroadcastRecord}: Default to treating all broadcasts sent by
+     * the system as be {@link BroadcastOptions#DEFERRAL_POLICY_UNTIL_ACTIVE}.
+     */
+    public boolean CORE_DEFER_UNTIL_ACTIVE = DEFAULT_CORE_DEFER_UNTIL_ACTIVE;
+    private static final String KEY_CORE_DEFER_UNTIL_ACTIVE = "bcast_core_defer_until_active";
+    private static final boolean DEFAULT_CORE_DEFER_UNTIL_ACTIVE = false;
+
     // Settings override tracking for this instance
     private String mSettingsKey;
     private SettingsObserver mSettingsObserver;
@@ -373,7 +381,12 @@ public class BroadcastConstants {
                     DEFAULT_MAX_HISTORY_COMPLETE_SIZE);
             MAX_HISTORY_SUMMARY_SIZE = getDeviceConfigInt(KEY_MAX_HISTORY_SUMMARY_SIZE,
                     DEFAULT_MAX_HISTORY_SUMMARY_SIZE);
+            CORE_DEFER_UNTIL_ACTIVE = getDeviceConfigBoolean(KEY_CORE_DEFER_UNTIL_ACTIVE,
+                    DEFAULT_CORE_DEFER_UNTIL_ACTIVE);
         }
+
+        // TODO: migrate BroadcastRecord to accept a BroadcastConstants
+        BroadcastRecord.CORE_DEFER_UNTIL_ACTIVE = CORE_DEFER_UNTIL_ACTIVE;
     }
 
     /**
@@ -418,6 +431,8 @@ public class BroadcastConstants {
                     MAX_CONSECUTIVE_URGENT_DISPATCHES).println();
             pw.print(KEY_MAX_CONSECUTIVE_NORMAL_DISPATCHES,
                     MAX_CONSECUTIVE_NORMAL_DISPATCHES).println();
+            pw.print(KEY_CORE_DEFER_UNTIL_ACTIVE,
+                    CORE_DEFER_UNTIL_ACTIVE).println();
             pw.decreaseIndent();
             pw.println();
         }

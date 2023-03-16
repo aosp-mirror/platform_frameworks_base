@@ -252,12 +252,6 @@ public final class ActiveServices {
 
     private static final boolean LOG_SERVICE_START_STOP = DEBUG_SERVICE;
 
-    // How long we wait for a service to finish executing.
-    static final int SERVICE_TIMEOUT = 20 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
-
-    // How long we wait for a service to finish executing.
-    static final int SERVICE_BACKGROUND_TIMEOUT = SERVICE_TIMEOUT * 10;
-
     // Foreground service types that always get immediate notification display,
     // expressed in the same bitmask format that ServiceRecord.foregroundServiceType
     // uses.
@@ -6609,13 +6603,15 @@ public final class ActiveServices {
                     return;
                 }
                 final ProcessServiceRecord psr = proc.mServices;
-                if (psr.numberOfExecutingServices() == 0 || proc.getThread() == null) {
+                if (psr.numberOfExecutingServices() == 0 || proc.getThread() == null
+                        || proc.isKilled()) {
                     return;
                 }
                 final long now = SystemClock.uptimeMillis();
                 final long maxTime =  now
                         - (psr.shouldExecServicesFg()
-                        ? SERVICE_TIMEOUT : SERVICE_BACKGROUND_TIMEOUT);
+                        ? mAm.mConstants.SERVICE_TIMEOUT
+                        : mAm.mConstants.SERVICE_BACKGROUND_TIMEOUT);
                 ServiceRecord timeout = null;
                 long nextTime = 0;
                 for (int i = psr.numberOfExecutingServices() - 1; i >= 0; i--) {
@@ -6646,8 +6642,8 @@ public final class ActiveServices {
                             ActivityManagerService.SERVICE_TIMEOUT_MSG);
                     msg.obj = proc;
                     mAm.mHandler.sendMessageAtTime(msg, psr.shouldExecServicesFg()
-                            ? (nextTime + SERVICE_TIMEOUT) :
-                            (nextTime + SERVICE_BACKGROUND_TIMEOUT));
+                            ? (nextTime + mAm.mConstants.SERVICE_TIMEOUT) :
+                            (nextTime + mAm.mConstants.SERVICE_BACKGROUND_TIMEOUT));
                 }
             }
 
@@ -6743,7 +6739,7 @@ public final class ActiveServices {
                 ActivityManagerService.SERVICE_TIMEOUT_MSG);
         msg.obj = proc;
         mAm.mHandler.sendMessageDelayed(msg, proc.mServices.shouldExecServicesFg()
-                ? SERVICE_TIMEOUT : SERVICE_BACKGROUND_TIMEOUT);
+                ? mAm.mConstants.SERVICE_TIMEOUT : mAm.mConstants.SERVICE_BACKGROUND_TIMEOUT);
     }
 
     void scheduleServiceForegroundTransitionTimeoutLocked(ServiceRecord r) {

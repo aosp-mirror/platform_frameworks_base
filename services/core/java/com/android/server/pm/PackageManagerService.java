@@ -557,14 +557,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     // How many required verifiers can be on the system.
     private static final int REQUIRED_VERIFIERS_MAX_COUNT = 2;
 
-    /**
-     * Specifies the minimum target SDK version an apk must specify in order to be installed
-     * on the system. This improves security and privacy by blocking low
-     * target sdk apps as malware can target older sdk versions to avoid
-     * the enforcement of new API behavior.
-     */
-    public static final int MIN_INSTALLABLE_TARGET_SDK = Build.VERSION_CODES.M;
-
     // Compilation reasons.
     // TODO(b/260124949): Clean this up with the legacy dexopt code.
     public static final int REASON_FIRST_BOOT = 0;
@@ -1336,7 +1328,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             throw new ParcelableException(new PackageManager.NameNotFoundException(packageName));
         }
 
-        final InstallSourceInfo installSourceInfo = snapshot.getInstallSourceInfo(packageName);
+        final InstallSourceInfo installSourceInfo = snapshot.getInstallSourceInfo(packageName,
+                userId);
         final String installerPackageName;
         if (installSourceInfo != null) {
             if (!TextUtils.isEmpty(installSourceInfo.getInitiatingPackageName())) {
@@ -6819,7 +6812,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             if (ps == null) {
                 return null;
             }
-            return new IncrementalStatesInfo(ps.isLoading(), ps.getLoadingProgress());
+            return new IncrementalStatesInfo(ps.isLoading(), ps.getLoadingProgress(),
+                    ps.getLoadingCompletedTime());
         }
 
         @Override

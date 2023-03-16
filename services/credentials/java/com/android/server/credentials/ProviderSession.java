@@ -32,6 +32,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.server.credentials.metrics.CandidatePhaseMetric;
+import com.android.server.credentials.metrics.InitialPhaseMetric;
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 
 import java.util.UUID;
@@ -72,8 +73,9 @@ public abstract class ProviderSession<T, R>
     @NonNull
     protected Boolean mProviderResponseSet = false;
     // Specific candidate provider metric for the provider this session handles
-    @Nullable
-    protected CandidatePhaseMetric mCandidatePhasePerProviderMetric;
+    @NonNull
+    protected final CandidatePhaseMetric mCandidatePhasePerProviderMetric =
+            new CandidatePhaseMetric();
     @NonNull
     private int mProviderSessionUid;
 
@@ -143,7 +145,6 @@ public abstract class ProviderSession<T, R>
         mUserId = userId;
         mComponentName = componentName;
         mRemoteCredentialService = remoteCredentialService;
-        mCandidatePhasePerProviderMetric = new CandidatePhaseMetric();
         mProviderSessionUid = MetricUtilities.getPackageUid(mContext, mComponentName);
     }
 
@@ -208,6 +209,12 @@ public abstract class ProviderSession<T, R>
         return mRemoteCredentialService;
     }
 
+    protected void captureCandidateFailure() {
+        mCandidatePhasePerProviderMetric.setHasException(true);
+        // TODO(b/271135048) - this is a true exception, but what about the empty case?
+        // Add more nuance in next iteration.
+    }
+
     /** Updates the status . */
     protected void updateStatusAndInvokeCallback(@NonNull Status status) {
         setStatus(status);
@@ -216,18 +223,37 @@ public abstract class ProviderSession<T, R>
     }
 
     private void updateCandidateMetric(Status status) {
-        mCandidatePhasePerProviderMetric.setCandidateUid(mProviderSessionUid);
-        // TODO immediately update the candidate phase here to have more new data
-        mCandidatePhasePerProviderMetric
-                .setQueryFinishTimeNanoseconds(System.nanoTime());
-        if (isTerminatingStatus(status)) {
-            mCandidatePhasePerProviderMetric.setProviderQueryStatus(
-                    ProviderStatusForMetrics.QUERY_FAILURE
-                            .getMetricCode());
-        } else if (isCompletionStatus(status)) {
-            mCandidatePhasePerProviderMetric.setProviderQueryStatus(
-                    ProviderStatusForMetrics.QUERY_SUCCESS
-                            .getMetricCode());
+        try {
+            mCandidatePhasePerProviderMetric.setCandidateUid(mProviderSessionUid);
+            // TODO immediately update the candidate phase here to have more new data
+            mCandidatePhasePerProviderMetric
+                    .setQueryFinishTimeNanoseconds(System.nanoTime());
+            if (isTerminatingStatus(status)) {
+                mCandidatePhasePerProviderMetric.setQueryReturned(false);
+                mCandidatePhasePerProviderMetric.setProviderQueryStatus(
+                        ProviderStatusForMetrics.QUERY_FAILURE
+                                .getMetricCode());
+            } else if (isCompletionStatus(status)) {
+                mCandidatePhasePerProviderMetric.setQueryReturned(true);
+                mCandidatePhasePerProviderMetric.setProviderQueryStatus(
+                        ProviderStatusForMetrics.QUERY_SUCCESS
+                                .getMetricCode());
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Unexpected error during metric logging: " + e);
+        }
+    }
+
+    // Common method to transfer metrics from the initial phase to the candidate phase per provider
+    protected void startCandidateMetrics() {
+        try {
+            InitialPhaseMetric initMetric = ((RequestSession) mCallbacks).mInitialPhaseMetric;
+            mCandidatePhasePerProviderMetric.setSessionId(initMetric.getSessionId());
+            mCandidatePhasePerProviderMetric.setServiceBeganTimeNanoseconds(
+                    initMetric.getCredentialServiceStartedTimeNanoseconds());
+            mCandidatePhasePerProviderMetric.setStartQueryTimeNanoseconds(System.nanoTime());
+        } catch (Exception e) {
+            Log.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
 

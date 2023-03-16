@@ -499,7 +499,7 @@ public interface Computer extends PackageDataSnapshot {
     String getInstallerPackageName(@NonNull String packageName, @UserIdInt int userId);
 
     @Nullable
-    InstallSourceInfo getInstallSourceInfo(@NonNull String packageName);
+    InstallSourceInfo getInstallSourceInfo(@NonNull String packageName, @UserIdInt int userId);
 
     @PackageManager.EnabledState
     int getApplicationEnabledSetting(@NonNull String packageName, @UserIdInt int userId);

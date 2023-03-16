@@ -462,12 +462,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final int CHANGE_WATCHER_PRIORITY = 100;
 
     /**
-     * The span priority of the {@link TransformationMethod} that is set on the text. It must be
+     * The span priority of the {@link OffsetMapping} that is set on the text. It must be
      * higher than the {@link DynamicLayout}'s {@link TextWatcher}, so that the transformed text is
      * updated before {@link DynamicLayout#reflow(CharSequence, int, int, int)} being triggered
      * by {@link TextWatcher#onTextChanged(CharSequence, int, int, int)}.
      */
-    private static final int TRANSFORMATION_SPAN_PRIORITY = 200;
+    private static final int OFFSET_MAPPING_SPAN_PRIORITY = 200;
 
     // New state used to change background based on whether this TextView is multiline.
     private static final int[] MULTILINE_STATE_SET = { R.attr.state_multiline };
@@ -7033,9 +7033,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         final int textLength = text.length();
+        final boolean isOffsetMapping = mTransformed instanceof OffsetMapping;
 
-        if (text instanceof Spannable && (!mAllowTransformationLengthChange
-                || text instanceof OffsetMapping)) {
+        if (text instanceof Spannable && (!mAllowTransformationLengthChange || isOffsetMapping)) {
             Spannable sp = (Spannable) text;
 
             // Remove any ChangeWatchers that might have come from other TextViews.
@@ -7053,8 +7053,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mEditor != null) mEditor.addSpanWatchers(sp);
 
             if (mTransformation != null) {
+                final int priority = isOffsetMapping ? OFFSET_MAPPING_SPAN_PRIORITY : 0;
                 sp.setSpan(mTransformation, 0, textLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE
-                        | (TRANSFORMATION_SPAN_PRIORITY << Spanned.SPAN_PRIORITY_SHIFT));
+                        | (priority << Spanned.SPAN_PRIORITY_SHIFT));
             }
 
             if (mMovement != null) {

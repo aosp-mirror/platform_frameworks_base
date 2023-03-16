@@ -321,6 +321,7 @@ applications that come with the platform
         <permission name="android.permission.REGISTER_CONNECTION_MANAGER"/>
         <permission name="android.permission.REGISTER_SIM_SUBSCRIPTION"/>
         <permission name="android.permission.RETRIEVE_WINDOW_CONTENT"/>
+        <permission name="android.permission.SCHEDULE_EXACT_ALARM"/>
         <permission name="android.permission.SET_ALWAYS_FINISH"/>
         <permission name="android.permission.SET_ANIMATION_SCALE"/>
         <permission name="android.permission.SET_DEBUG_APP"/>

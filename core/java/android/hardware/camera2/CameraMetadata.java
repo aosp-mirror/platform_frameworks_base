@@ -3645,17 +3645,13 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>This is the default sensor pixel mode. This is the only sensor pixel mode
-     * supported unless a camera device advertises
-     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }.</p>
+     * <p>This is the default sensor pixel mode.</p>
      * @see CaptureRequest#SENSOR_PIXEL_MODE
      */
     public static final int SENSOR_PIXEL_MODE_DEFAULT = 0;
 
     /**
-     * <p>This sensor pixel mode is offered by devices with capability
-     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }.
-     * In this mode, sensors typically do not bin pixels, as a result can offer larger
+     * <p>In this mode, sensors typically do not bin pixels, as a result can offer larger
      * image sizes.</p>
      * @see CaptureRequest#SENSOR_PIXEL_MODE
      */
