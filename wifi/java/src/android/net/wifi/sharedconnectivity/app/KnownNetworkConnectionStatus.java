@@ -72,7 +72,7 @@ public final class KnownNetworkConnectionStatus implements Parcelable {
     public static final class Builder {
         @ConnectionStatus private int mStatus;
         private KnownNetwork mKnownNetwork;
-        private Bundle mExtras;
+        private Bundle mExtras = Bundle.EMPTY;
 
         public Builder() {}
 
@@ -128,7 +128,7 @@ public final class KnownNetworkConnectionStatus implements Parcelable {
     }
 
     private KnownNetworkConnectionStatus(@ConnectionStatus int status, KnownNetwork knownNetwork,
-            Bundle extras) {
+            @NonNull Bundle extras) {
         validate(status);
         mStatus = status;
         mKnownNetwork = knownNetwork;
