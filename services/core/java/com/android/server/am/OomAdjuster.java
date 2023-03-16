@@ -2940,30 +2940,6 @@ public class OomAdjuster {
             mCachedAppOptimizer.onOomAdjustChanged(state.getSetAdj(), state.getCurAdj(), app);
         }
 
-        // don't compact during bootup
-        if (mCachedAppOptimizer.useCompaction() && mService.mBooted) {
-            // Cached and prev/home compaction
-            // reminder: here, setAdj is previous state, curAdj is upcoming state
-            if (mService.mWakefulness.get() != PowerManagerInternal.WAKEFULNESS_AWAKE) {
-                // See if we can compact persistent and bfgs services now that screen is off
-                if (state.getSetAdj() < FOREGROUND_APP_ADJ
-                        && !state.isRunningRemoteAnimation()
-                        // Because these can fire independent of oom_adj/procstate changes, we need
-                        // to throttle the actual dispatch of these requests in addition to the
-                        // processing of the requests. As a result, there is throttling both here
-                        // and in CachedAppOptimizer.
-                        && mCachedAppOptimizer.shouldCompactPersistent(app, now)) {
-                    mCachedAppOptimizer.compactApp(app, CachedAppOptimizer.CompactProfile.FULL,
-                            CachedAppOptimizer.CompactSource.PERSISTENT, false);
-                } else if (state.getCurProcState()
-                                == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
-                        && mCachedAppOptimizer.shouldCompactBFGS(app, now)) {
-                    mCachedAppOptimizer.compactApp(app, CachedAppOptimizer.CompactProfile.FULL,
-                            CachedAppOptimizer.CompactSource.BFGS, false);
-                }
-            }
-        }
-
         if (state.getCurAdj() != state.getSetAdj()) {
             ProcessList.setOomAdj(app.getPid(), app.uid, state.getCurAdj());
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ || mService.mCurOomAdjUid == app.info.uid) {

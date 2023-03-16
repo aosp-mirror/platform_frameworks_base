@@ -1093,7 +1093,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 synchronized (mInternal.mProcLock) {
                     mInternal.mOomAdjuster.mCachedAppOptimizer.compactApp(app,
                             CachedAppOptimizer.CompactProfile.FULL,
-                            CachedAppOptimizer.CompactSource.APP, true);
+                            CachedAppOptimizer.CompactSource.SHELL, true);
                 }
                 pw.println("Finished full compaction for " + app.mPid);
             } else if (isSomeCompact) {
@@ -1101,7 +1101,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 synchronized (mInternal.mProcLock) {
                     mInternal.mOomAdjuster.mCachedAppOptimizer.compactApp(app,
                             CachedAppOptimizer.CompactProfile.SOME,
-                            CachedAppOptimizer.CompactSource.APP, true);
+                            CachedAppOptimizer.CompactSource.SHELL, true);
                 }
                 pw.println("Finished some compaction for " + app.mPid);
             }

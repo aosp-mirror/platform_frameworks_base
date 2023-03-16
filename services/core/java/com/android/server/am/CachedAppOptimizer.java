@@ -226,8 +226,8 @@ public final class CachedAppOptimizer {
         FULL // File+anon compaction
     }
 
-    // This indicates the process OOM memory state that initiated the compaction request
-    public enum CompactSource { APP, PERSISTENT, BFGS }
+    // This indicates who initiated the compaction request
+    public enum CompactSource { APP, SHELL }
 
     public enum CancelCompactReason {
         SCREEN_ON, // screen was turned on which cancels all compactions.
@@ -372,10 +372,6 @@ public final class CachedAppOptimizer {
     @VisibleForTesting volatile long mCompactThrottleFullSome = DEFAULT_COMPACT_THROTTLE_3;
     @GuardedBy("mPhenotypeFlagLock")
     @VisibleForTesting volatile long mCompactThrottleFullFull = DEFAULT_COMPACT_THROTTLE_4;
-    @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting volatile long mCompactThrottleBFGS = DEFAULT_COMPACT_THROTTLE_5;
-    @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting volatile long mCompactThrottlePersistent = DEFAULT_COMPACT_THROTTLE_6;
     @GuardedBy("mPhenotypeFlagLock")
     @VisibleForTesting volatile long mCompactThrottleMinOomAdj =
             DEFAULT_COMPACT_THROTTLE_MIN_OOM_ADJ;
@@ -635,8 +631,6 @@ public final class CachedAppOptimizer {
             pw.println("  " + KEY_COMPACT_THROTTLE_2 + "=" + mCompactThrottleSomeFull);
             pw.println("  " + KEY_COMPACT_THROTTLE_3 + "=" + mCompactThrottleFullSome);
             pw.println("  " + KEY_COMPACT_THROTTLE_4 + "=" + mCompactThrottleFullFull);
-            pw.println("  " + KEY_COMPACT_THROTTLE_5 + "=" + mCompactThrottleBFGS);
-            pw.println("  " + KEY_COMPACT_THROTTLE_6 + "=" + mCompactThrottlePersistent);
             pw.println("  " + KEY_COMPACT_THROTTLE_MIN_OOM_ADJ + "=" + mCompactThrottleMinOomAdj);
             pw.println("  " + KEY_COMPACT_THROTTLE_MAX_OOM_ADJ + "=" + mCompactThrottleMaxOomAdj);
             pw.println("  " + KEY_COMPACT_STATSD_SAMPLE_RATE + "=" + mCompactStatsdSampleRate);
@@ -802,18 +796,6 @@ public final class CachedAppOptimizer {
             mPerSourceCompactStats.put(source, stats);
         }
         return stats;
-    }
-
-    @GuardedBy("mProcLock")
-    boolean shouldCompactPersistent(ProcessRecord app, long now) {
-        return (app.mOptRecord.getLastCompactTime() == 0
-                || (now - app.mOptRecord.getLastCompactTime()) > mCompactThrottlePersistent);
-    }
-
-    @GuardedBy("mProcLock")
-    boolean shouldCompactBFGS(ProcessRecord app, long now) {
-        return (app.mOptRecord.getLastCompactTime() == 0
-                || (now - app.mOptRecord.getLastCompactTime()) > mCompactThrottleBFGS);
     }
 
     void compactAllSystem() {
@@ -1103,8 +1085,6 @@ public final class CachedAppOptimizer {
                 mCompactThrottleSomeFull = Integer.parseInt(throttleSomeFullFlag);
                 mCompactThrottleFullSome = Integer.parseInt(throttleFullSomeFlag);
                 mCompactThrottleFullFull = Integer.parseInt(throttleFullFullFlag);
-                mCompactThrottleBFGS = Integer.parseInt(throttleBFGSFlag);
-                mCompactThrottlePersistent = Integer.parseInt(throttlePersistentFlag);
                 mCompactThrottleMinOomAdj = Long.parseLong(throttleMinOomAdjFlag);
                 mCompactThrottleMaxOomAdj = Long.parseLong(throttleMaxOomAdjFlag);
             } catch (NumberFormatException e) {
@@ -1117,8 +1097,6 @@ public final class CachedAppOptimizer {
             mCompactThrottleSomeFull = DEFAULT_COMPACT_THROTTLE_2;
             mCompactThrottleFullSome = DEFAULT_COMPACT_THROTTLE_3;
             mCompactThrottleFullFull = DEFAULT_COMPACT_THROTTLE_4;
-            mCompactThrottleBFGS = DEFAULT_COMPACT_THROTTLE_5;
-            mCompactThrottlePersistent = DEFAULT_COMPACT_THROTTLE_6;
             mCompactThrottleMinOomAdj = DEFAULT_COMPACT_THROTTLE_MIN_OOM_ADJ;
             mCompactThrottleMaxOomAdj = DEFAULT_COMPACT_THROTTLE_MAX_OOM_ADJ;
         }
@@ -1659,26 +1637,6 @@ public final class CachedAppOptimizer {
                             }
                             return true;
                         }
-                    }
-                } else if (source == CompactSource.PERSISTENT) {
-                    if (start - lastCompactTime < mCompactThrottlePersistent) {
-                        if (DEBUG_COMPACTION) {
-                            Slog.d(TAG_AM,
-                                    "Skipping persistent compaction for " + name
-                                            + ": too soon. throttle=" + mCompactThrottlePersistent
-                                            + " last=" + (start - lastCompactTime) + "ms ago");
-                        }
-                        return true;
-                    }
-                } else if (source == CompactSource.BFGS) {
-                    if (start - lastCompactTime < mCompactThrottleBFGS) {
-                        if (DEBUG_COMPACTION) {
-                            Slog.d(TAG_AM,
-                                    "Skipping bfgs compaction for " + name
-                                            + ": too soon. throttle=" + mCompactThrottleBFGS
-                                            + " last=" + (start - lastCompactTime) + "ms ago");
-                        }
-                        return true;
                     }
                 }
             }
