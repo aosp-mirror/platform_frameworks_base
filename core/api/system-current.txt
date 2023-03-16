@@ -13054,21 +13054,6 @@ package android.service.voice {
     method public int getStart();
   }
 
-  public final class DetectedPhrase implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getId();
-    method @Nullable public String getPhrase();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.DetectedPhrase> CREATOR;
-  }
-
-  public static final class DetectedPhrase.Builder {
-    ctor public DetectedPhrase.Builder();
-    method @NonNull public android.service.voice.DetectedPhrase build();
-    method @NonNull public android.service.voice.DetectedPhrase.Builder setId(int);
-    method @NonNull public android.service.voice.DetectedPhrase.Builder setPhrase(@NonNull String);
-  }
-
   public abstract class DetectorFailure implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public String getErrorMessage();
@@ -13110,14 +13095,13 @@ package android.service.voice {
     method @NonNull public java.util.List<android.service.voice.HotwordAudioStream> getAudioStreams();
     method public int getBackgroundAudioPower();
     method public int getConfidenceLevel();
-    method @NonNull public android.service.voice.DetectedPhrase getDetectedPhrase();
     method @NonNull public android.os.PersistableBundle getExtras();
     method public int getHotwordDurationMillis();
     method public int getHotwordOffsetMillis();
-    method @Deprecated public int getHotwordPhraseId();
+    method public int getHotwordPhraseId();
     method public static int getMaxBackgroundAudioPower();
     method public static int getMaxBundleSize();
-    method @Deprecated public static int getMaxHotwordPhraseId();
+    method public static int getMaxHotwordPhraseId();
     method public static int getMaxScore();
     method @Nullable public android.media.MediaSyncEvent getMediaSyncEvent();
     method public int getPersonalizedScore();
@@ -13148,12 +13132,11 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setAudioStreams(@NonNull java.util.List<android.service.voice.HotwordAudioStream>);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setBackgroundAudioPower(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setConfidenceLevel(int);
-    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setDetectedPhrase(@NonNull android.service.voice.DetectedPhrase);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setExtras(@NonNull android.os.PersistableBundle);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordDetectionPersonalized(boolean);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordDurationMillis(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordOffsetMillis(int);
-    method @Deprecated @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordPhraseId(int);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setHotwordPhraseId(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setMediaSyncEvent(@NonNull android.media.MediaSyncEvent);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setPersonalizedScore(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setScore(int);
