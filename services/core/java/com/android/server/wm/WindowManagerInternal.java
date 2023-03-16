@@ -740,7 +740,7 @@ public abstract class WindowManagerInternal {
     /**
      * Show IME on imeTargetWindow once IME has finished layout.
      *
-     * @param imeTargetWindowToken token of the (IME target) window on which IME should be shown.
+     * @param imeTargetWindowToken token of the (IME target) window which IME should be shown.
      * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
      */
     public abstract void showImePostLayout(IBinder imeTargetWindowToken,
@@ -749,7 +749,7 @@ public abstract class WindowManagerInternal {
     /**
      * Hide IME using imeTargetWindow when requested.
      *
-     * @param imeTargetWindowToken token of the (IME target) window on which IME should be hidden.
+     * @param imeTargetWindowToken token of the (IME target) window on which requests hiding IME.
      * @param displayId the id of the display the IME is on.
      * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
      */
