@@ -635,7 +635,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 && mLastKeyguardAndExpanded == onKeyguardAndExpanded
                 && mLastViewHeight == currentHeight
                 && mLastHeaderTranslation == headerTranslation
-                && mSquishinessFraction == squishinessFraction) {
+                && mSquishinessFraction == squishinessFraction
+                && mLastPanelFraction == panelExpansionFraction) {
             return;
         }
         mLastHeaderTranslation = headerTranslation;
