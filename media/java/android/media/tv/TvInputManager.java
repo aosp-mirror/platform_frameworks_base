@@ -3273,9 +3273,20 @@ public final class TvInputManager {
         /**
          * Sends TV messages to the service for testing purposes
          */
-        public void notifyTvMessage(@NonNull @TvMessageType int type, @NonNull Bundle data) {
+        public void notifyTvMessage(int type, Bundle data) {
             try {
                 mService.notifyTvMessage(mToken, type, data, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Sets whether the TV message of the specific type should be enabled.
+         */
+        public void setTvMessageEnabled(int type, boolean enabled) {
+            try {
+                mService.setTvMessageEnabled(mToken, type, enabled, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
