@@ -1256,6 +1256,7 @@ public class TvView extends ViewGroup {
          *             {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
          * @param data The raw data of the message. The bundle keys are:
          *             {@link TvInputManager#TV_MESSAGE_KEY_STREAM_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_GROUP_ID},
          *             {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE},
          *             {@link TvInputManager#TV_MESSAGE_KEY_RAW_DATA}.
          *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
