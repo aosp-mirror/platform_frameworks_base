@@ -3706,10 +3706,10 @@ public final class NotificationPanelViewController implements Dumpable {
                     mHeightAnimator.end();
                 }
             }
-            mQsController.setShadeExpandedHeight(mExpandedHeight);
-            mExpansionDragDownAmountPx = h;
             mExpandedFraction = Math.min(1f,
                     maxPanelHeight == 0 ? 0 : mExpandedHeight / maxPanelHeight);
+            mQsController.setShadeExpansion(mExpandedHeight, mExpandedFraction);
+            mExpansionDragDownAmountPx = h;
             mAmbientState.setExpansionFraction(mExpandedFraction);
             onHeightUpdated(mExpandedHeight);
             updatePanelExpansionAndVisibility();
