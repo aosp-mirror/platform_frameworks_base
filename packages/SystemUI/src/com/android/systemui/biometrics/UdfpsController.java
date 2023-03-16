@@ -42,6 +42,7 @@ import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback;
+import android.hardware.input.InputManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -169,6 +170,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     @NonNull private final SecureSettings mSecureSettings;
     @NonNull private final UdfpsUtils mUdfpsUtils;
+    @NonNull private final InputManager mInputManager;
 
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
@@ -576,6 +578,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                         data.getTime(),
                         data.getGestureStart(),
                         mStatusBarStateController.isDozing());
+
+                // Pilfer if valid overlap, don't allow following events to reach keyguard
+                mInputManager.pilferPointers(
+                        mOverlay.getOverlayView().getViewRootImpl().getInputToken());
                 break;
 
             case UP:
@@ -599,7 +605,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 break;
 
             case UNCHANGED:
-                if (!isWithinSensorArea(mOverlay.getOverlayView(), event.getX(), event.getY(),
+                if (!isWithinSensorArea(mOverlay.getOverlayView(), event.getRawX(), event.getRawY(),
                         true) && mActivePointerId == MotionEvent.INVALID_POINTER_ID
                         && event.getActionMasked() == MotionEvent.ACTION_DOWN
                         && mAlternateBouncerInteractor.isVisibleState()) {
@@ -611,6 +617,13 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 break;
         }
         logBiometricTouch(processedTouch.getEvent(), data);
+
+        // Always pilfer pointers that are within sensor area
+        if (isWithinSensorArea(mOverlay.getOverlayView(), event.getRawX(), event.getRawY(), true)) {
+            Log.d("Austin", "pilferTouch invalid overlap");
+            mInputManager.pilferPointers(
+                    mOverlay.getOverlayView().getViewRootImpl().getInputToken());
+        }
 
         return processedTouch.getTouchData().isWithinSensor(mOverlayParams.getNativeSensorBounds());
     }
@@ -798,6 +811,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull SessionTracker sessionTracker,
             @NonNull AlternateBouncerInteractor alternateBouncerInteractor,
             @NonNull SecureSettings secureSettings,
+            @NonNull InputManager inputManager,
             @NonNull UdfpsUtils udfpsUtils) {
         mContext = context;
         mExecution = execution;
@@ -841,6 +855,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mSecureSettings = secureSettings;
         mUdfpsUtils = udfpsUtils;
+        mInputManager = inputManager;
 
         mTouchProcessor = mFeatureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
                 ? singlePointerTouchProcessor : null;
