@@ -117,7 +117,7 @@ public final class HotspotNetworkConnectionStatus implements Parcelable {
         @ConnectionStatus
         private int mStatus;
         private HotspotNetwork mHotspotNetwork;
-        private Bundle mExtras;
+        private Bundle mExtras = Bundle.EMPTY;
 
         /**
          * Sets the status of the connection
@@ -179,7 +179,7 @@ public final class HotspotNetworkConnectionStatus implements Parcelable {
     }
 
     private HotspotNetworkConnectionStatus(@ConnectionStatus int status,
-            HotspotNetwork hotspotNetwork, Bundle extras) {
+            HotspotNetwork hotspotNetwork, @NonNull Bundle extras) {
         validate(status);
         mStatus = status;
         mHotspotNetwork = hotspotNetwork;
