@@ -2648,7 +2648,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Gets if the node's accessibility data is considered sensitive.
      *
-     * @return True if the node is editable, false otherwise.
+     * @return True if the node's data is considered sensitive, false otherwise.
      * @see View#isAccessibilityDataSensitive()
      */
     public boolean isAccessibilityDataSensitive() {
