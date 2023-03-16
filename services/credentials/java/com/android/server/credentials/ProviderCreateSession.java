@@ -236,7 +236,8 @@ public final class ProviderCreateSession extends ProviderSession<
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
             startCandidateMetrics();
-            mRemoteCredentialService.onCreateCredential(mProviderRequest, this);
+            mProviderCancellationSignal =
+                    mRemoteCredentialService.onCreateCredential(mProviderRequest, this);
         }
     }
 

@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.UserSelectionDialogResult;
@@ -29,8 +30,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.service.credentials.CallingAppInfo;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.server.credentials.metrics.ApiName;
@@ -39,8 +42,8 @@ import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 import com.android.server.credentials.metrics.RequestSessionMetric;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Base class of a request session, that listens to UI events. This class must be extended
@@ -48,6 +51,11 @@ import java.util.Map;
  */
 abstract class RequestSession<T, U, V> implements CredentialManagerUi.CredentialManagerUiCallback {
     private static final String TAG = "RequestSession";
+
+    public interface SessionLifetime {
+        /** Called when the user makes a selection. */
+        void onFinishRequestSession(@UserIdInt int userId, IBinder token);
+    }
 
     // TODO: Revise access levels of attributes
     @NonNull
@@ -72,9 +80,13 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
     @NonNull
     protected final CancellationSignal mCancellationSignal;
 
-    protected final Map<String, ProviderSession> mProviders = new HashMap<>();
+    protected final Map<String, ProviderSession> mProviders = new ConcurrentHashMap<>();
     protected final RequestSessionMetric mRequestSessionMetric = new RequestSessionMetric();
     protected final String mHybridService;
+
+    protected final Object mLock;
+
+    protected final SessionLifetime mSessionCallback;
 
     @NonNull
     protected RequestSessionStatus mRequestSessionStatus =
@@ -91,11 +103,15 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
     }
 
     protected RequestSession(@NonNull Context context,
-            @UserIdInt int userId, int callingUid, @NonNull T clientRequest, U clientCallback,
+            RequestSession.SessionLifetime sessionCallback,
+            Object lock, @UserIdInt int userId, int callingUid,
+            @NonNull T clientRequest, U clientCallback,
             @NonNull String requestType,
             CallingAppInfo callingAppInfo,
             CancellationSignal cancellationSignal, long timestampStarted) {
         mContext = context;
+        mLock = lock;
+        mSessionCallback = sessionCallback;
         mUserId = userId;
         mCallingUid = callingUid;
         mClientRequest = clientRequest;
@@ -111,6 +127,32 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
                 R.string.config_defaultCredentialManagerHybridService);
         mRequestSessionMetric.collectInitialPhaseMetricInfo(timestampStarted, mRequestId,
                 mCallingUid, ApiName.getMetricCodeFromRequestInfo(mRequestType));
+        setCancellationListener();
+    }
+
+    private void setCancellationListener() {
+        mCancellationSignal.setOnCancelListener(
+                () -> {
+                    boolean isUiActive = maybeCancelUi();
+                    finishSession(!isUiActive);
+                }
+        );
+    }
+
+    private boolean maybeCancelUi() {
+        if (mCredentialManagerUi.getStatus()
+                == CredentialManagerUi.UiStatus.USER_INTERACTION) {
+            final long originalCallingUidToken = Binder.clearCallingIdentity();
+            try {
+                mContext.startActivityAsUser(mCredentialManagerUi.createCancelIntent(
+                                mRequestId, mClientAppInfo.getPackageName())
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), UserHandle.of(mUserId));
+                return true;
+            } finally {
+                Binder.restoreCallingIdentity(originalCallingUidToken);
+            }
+        }
+        return false;
     }
 
     public abstract ProviderSession initiateProviderSession(CredentialProviderInfo providerInfo,
@@ -154,12 +196,19 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
     }
 
     protected void finishSession(boolean propagateCancellation) {
-        Log.i(TAG, "finishing session");
+        Slog.d(TAG, "finishing session with propagateCancellation " + propagateCancellation);
         if (propagateCancellation) {
             mProviders.values().forEach(ProviderSession::cancelProviderRemoteSession);
         }
         mRequestSessionStatus = RequestSessionStatus.COMPLETE;
         mProviders.clear();
+        clearRequestSessionLocked();
+    }
+
+    private void clearRequestSessionLocked() {
+        synchronized (mLock) {
+            mSessionCallback.onFinishRequestSession(mUserId, mRequestId);
+        }
     }
 
     protected boolean isAnyProviderPending() {
