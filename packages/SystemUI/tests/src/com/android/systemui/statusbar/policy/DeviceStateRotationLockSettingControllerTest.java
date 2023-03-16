@@ -55,6 +55,9 @@ import org.mockito.MockitoAnnotations;
 public class DeviceStateRotationLockSettingControllerTest extends SysuiTestCase {
 
     private static final String[] DEFAULT_SETTINGS = new String[]{"0:1", "2:0:1", "1:2"};
+    private static final int[] DEFAULT_FOLDED_STATES = new int[]{0};
+    private static final int[] DEFAULT_HALF_FOLDED_STATES = new int[]{2};
+    private static final int[] DEFAULT_UNFOLDED_STATES = new int[]{1};
 
     @Mock private DeviceStateManager mDeviceStateManager;
     @Mock private DeviceStateRotationLockSettingControllerLogger mLogger;
@@ -73,6 +76,9 @@ public class DeviceStateRotationLockSettingControllerTest extends SysuiTestCase 
         MockitoAnnotations.initMocks(/* testClass= */ this);
         TestableResources resources = mContext.getOrCreateTestableResources();
         resources.addOverride(R.array.config_perDeviceStateRotationLockDefaults, DEFAULT_SETTINGS);
+        resources.addOverride(R.array.config_foldedDeviceStates, DEFAULT_FOLDED_STATES);
+        resources.addOverride(R.array.config_halfFoldedDeviceStates, DEFAULT_HALF_FOLDED_STATES);
+        resources.addOverride(R.array.config_openDeviceStates, DEFAULT_UNFOLDED_STATES);
 
         ArgumentCaptor<DeviceStateManager.DeviceStateCallback> deviceStateCallbackArgumentCaptor =
                 ArgumentCaptor.forClass(DeviceStateManager.DeviceStateCallback.class);
