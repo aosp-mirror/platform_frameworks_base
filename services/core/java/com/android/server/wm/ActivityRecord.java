@@ -4357,17 +4357,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     void addWindow(WindowState w) {
         super.addWindow(w);
-
-        boolean gotReplacementWindow = false;
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState candidate = mChildren.get(i);
-            gotReplacementWindow |= candidate.setReplacementWindowIfNeeded(w);
-        }
-
-        // if we got a replacement window, reset the timeout to give drawing more time
-        if (gotReplacementWindow) {
-            mWmService.scheduleWindowReplacementTimeouts(this);
-        }
         checkKeyguardFlagsChanged();
     }
 
@@ -4382,27 +4371,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         updateLetterboxSurface(child);
     }
 
-    void onWindowReplacementTimeout() {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            (mChildren.get(i)).onWindowReplacementTimeout();
-        }
-    }
-
     void setAppLayoutChanges(int changes, String reason) {
         if (!mChildren.isEmpty()) {
             final DisplayContent dc = getDisplayContent();
             dc.pendingLayoutChanges |= changes;
             if (DEBUG_LAYOUT_REPEATS) {
                 mWmService.mWindowPlacerLocked.debugLayoutRepeats(reason, dc.pendingLayoutChanges);
-            }
-        }
-    }
-
-    void removeReplacedWindowIfNeeded(WindowState replacement) {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState win = mChildren.get(i);
-            if (win.removeReplacedWindowIfNeeded(replacement)) {
-                return;
             }
         }
     }
@@ -5633,10 +5607,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // * activity is transitioning visibility state
         // * or the activity was marked as hidden and is exiting before we had a chance to play the
         // transition animation
-        // * or this is an opening app and windows are being replaced (e.g. freeform window to
-        //   normal window).
-        return isVisible() != visible || mRequestForceTransition || (!isVisible() && mIsExiting)
-                || (visible && forAllWindows(WindowState::waitingForReplacement, true));
+        return isVisible() != visible || mRequestForceTransition || (!isVisible() && mIsExiting);
     }
 
     /**
@@ -7377,35 +7348,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // we need to get rid of the starting transition.
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Last window, removing starting window %s", win);
             removeStartingWindow();
-        }
-    }
-
-    void setWillReplaceWindows(boolean animate) {
-        ProtoLog.d(WM_DEBUG_ADD_REMOVE,
-                "Marking app token %s with replacing windows.", this);
-
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = mChildren.get(i);
-            w.setWillReplaceWindow(animate);
-        }
-    }
-
-    void setWillReplaceChildWindows() {
-        ProtoLog.d(WM_DEBUG_ADD_REMOVE, "Marking app token %s"
-                + " with replacing child windows.", this);
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = mChildren.get(i);
-            w.setWillReplaceChildWindows();
-        }
-    }
-
-    void clearWillReplaceWindows() {
-        ProtoLog.d(WM_DEBUG_ADD_REMOVE,
-                "Resetting app token %s of replacing window marks.", this);
-
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = mChildren.get(i);
-            w.clearWillReplaceWindow();
         }
     }
 

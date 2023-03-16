@@ -259,12 +259,6 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-1878839956": {
-      "message": "Marking app token %s with replacing windows.",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "-1872288685": {
       "message": "applyAnimation: anim=%s nextAppTransition=%s transit=%s isEntrance=%b Callers=%s",
       "level": "VERBOSE",
@@ -463,12 +457,6 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/Task.java"
     },
-    "-1698815688": {
-      "message": "Resetting app token %s of replacing window marks.",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "-1679411993": {
       "message": "setVr2dDisplayId called for: %d",
       "level": "DEBUG",
@@ -477,12 +465,6 @@
     },
     "-1670695197": {
       "message": "Attempted to add presentation window to a non-suitable display.  Aborting.",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "-1661704580": {
-      "message": "Attempted to set replacing window on non-existing app token %s",
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
@@ -613,12 +595,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-1515151503": {
-      "message": ">>> OPEN TRANSACTION removeReplacedWindows",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/RootWindowContainer.java"
-    },
     "-1501564055": {
       "message": "Organized TaskFragment is not ready= %s",
       "level": "VERBOSE",
@@ -690,12 +666,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
-    },
-    "-1471946192": {
-      "message": "Marking app token %s with replacing child windows.",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-1471518109": {
       "message": "Set animatingExit: reason=onAppVisibilityChanged win=%s",
@@ -918,12 +888,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_BACK_PREVIEW",
       "at": "com\/android\/server\/wm\/BackNavigationController.java"
-    },
-    "-1270731689": {
-      "message": "Attempted to set replacing window on app token with no content %s",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "-1263316010": {
       "message": "Computed rotation=%s (%d) for display id=%d based on lastOrientation=%s (%d) and oldRotation=%s (%d)",
@@ -1417,12 +1381,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
     },
-    "-799003045": {
-      "message": "Set animatingExit: reason=remove\/replaceWindow win=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ANIM",
-      "at": "com\/android\/server\/wm\/WindowState.java"
-    },
     "-787664727": {
       "message": "Cannot launch dream activity due to invalid state. dream component: %s packageName: %s",
       "level": "ERROR",
@@ -1452,6 +1410,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
+    },
+    "-778347463": {
+      "message": "Remove %s: mSurfaceController=%s mAnimatingExit=%b mRemoveOnExit=%b mHasSurface=%b surfaceShowing=%b animating=%b app-animation=%b mDisplayFrozen=%b callers=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/WindowState.java"
     },
     "-775004869": {
       "message": "Not a match: %s",
@@ -1963,12 +1927,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-320419645": {
-      "message": "Removing replaced window: %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/WindowState.java"
-    },
     "-319689203": {
       "message": "Reparenting to original parent: %s for %s",
       "level": "INFO",
@@ -2334,12 +2292,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
-    },
-    "38267433": {
-      "message": "Attempted to reset replacing window on non-existing app token %s",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "45285419": {
       "message": "startingWindow was set but startingSurface==null, couldn't remove",
@@ -2988,12 +2940,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
-    },
-    "594260654": {
-      "message": "Remove %s: mSurfaceController=%s mAnimatingExit=%b mRemoveOnExit=%b mHasSurface=%b surfaceShowing=%b animating=%b app-animation=%b mWillReplaceWindow=%b mDisplayFrozen=%b callers=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/WindowState.java"
     },
     "600140673": {
       "message": "checkBootAnimationComplete: Waiting for anim complete",
@@ -3829,12 +3775,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "1423592961": {
-      "message": "<<< CLOSE TRANSACTION removeReplacedWindows",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/RootWindowContainer.java"
-    },
     "1430336882": {
       "message": "findFocusedWindow: focusedApp windows not focusable using new focus @ %s",
       "level": "VERBOSE",
@@ -3900,12 +3840,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/WindowState.java"
-    },
-    "1515161239": {
-      "message": "removeDeadWindows: %s",
-      "level": "WARN",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "1518495446": {
       "message": "removeWindowToken: Attempted to remove non-existing token: %s",
@@ -4273,12 +4207,6 @@
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
     },
-    "1921821199": {
-      "message": "Preserving %s until the new one is added",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/WindowState.java"
-    },
     "1928325128": {
       "message": "Run showImeRunner",
       "level": "DEBUG",
@@ -4488,12 +4416,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
-    },
-    "2114149926": {
-      "message": "Not removing %s because app died while it's visible",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/WindowState.java"
     },
     "2117696413": {
       "message": "moveTaskToFront: moving taskId=%d",
