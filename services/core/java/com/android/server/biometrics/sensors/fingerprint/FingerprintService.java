@@ -343,7 +343,8 @@ public class FingerprintService extends SystemService {
             final FingerprintSensorPropertiesInternal sensorProps =
                     provider.second.getSensorProperties(sensorId);
             if (!isKeyguard && !Utils.isSettings(getContext(), opPackageName)
-                    && sensorProps != null && sensorProps.isAnyUdfpsType()) {
+                    && sensorProps != null && (sensorProps.isAnyUdfpsType()
+                    || sensorProps.isAnySidefpsType())) {
                 try {
                     return authenticateWithPrompt(operationId, sensorProps, callingUid,
                             callingUserId, receiver, opPackageName, ignoreEnrollmentState);
