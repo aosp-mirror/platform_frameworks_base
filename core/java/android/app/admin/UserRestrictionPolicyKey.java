@@ -20,6 +20,7 @@ import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_KEY;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.Parcel;
 
@@ -40,6 +41,7 @@ public final class UserRestrictionPolicyKey extends PolicyKey {
     /**
      * @hide
      */
+    @TestApi
     public UserRestrictionPolicyKey(@NonNull String identifier, @NonNull String restriction) {
         super(identifier);
         mRestriction = Objects.requireNonNull(restriction);
