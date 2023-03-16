@@ -191,7 +191,7 @@ object Flags {
     // flag for controlling auto pin confirmation and material u shapes in bouncer
     @JvmField
     val AUTO_PIN_CONFIRMATION =
-        unreleasedFlag(224, "auto_pin_confirmation", "auto_pin_confirmation")
+        releasedFlag(224, "auto_pin_confirmation", "auto_pin_confirmation", teamfood = true)
 
     // TODO(b/262859270): Tracking Bug
     @JvmField val FALSING_OFF_FOR_UNFOLDED = releasedFlag(225, "falsing_off_for_unfolded")
