@@ -12094,9 +12094,6 @@ public class Notification implements Parcelable
      * {@code TvExtender(Notification)} constructor, and then using the {@code get} methods
      * to access values.
      */
-    // TODO(b/193460475): Android Lint handles change from SystemApi to public incorrectly.
-    // TvExtender is made public in U, but existed back to O as an identical SystemApi.
-    @SuppressLint("NewApi")
     public static final class TvExtender implements Extender {
         private static final String TAG = "TvExtender";
 
@@ -12119,9 +12116,6 @@ public class Notification implements Parcelable
         /**
          * Create a {@link TvExtender} with default options.
          */
-        // TODO(b/193460475): Android Lint handles change from SystemApi to public incorrectly.
-        // TvExtender is made public in U, but existed back to O as an identical SystemApi.
-        @SuppressLint("NewApi")
         public TvExtender() {
             mFlags = FLAG_AVAILABLE_ON_TV;
         }
@@ -12131,9 +12125,6 @@ public class Notification implements Parcelable
          *
          * @param notif The notification from which to copy options.
          */
-        // TODO(b/193460475): Android Lint handles change from SystemApi to public incorrectly.
-        // TvExtender is made public in U, but existed back to O as an identical SystemApi.
-        @SuppressLint("NewApi")
         public TvExtender(@NonNull Notification notif) {
             Bundle bundle = notif.extras == null ?
                 null : notif.extras.getBundle(EXTRA_TV_EXTENDER);
@@ -12151,9 +12142,6 @@ public class Notification implements Parcelable
          * the {@link Notification.Builder#extend(Notification.Extender)}
          * method of {@link Notification.Builder}.
          */
-        // TODO(b/193460475): Android Lint handles change from SystemApi to public incorrectly.
-        // TvExtender is made public in U, but existed back to O as an identical SystemApi.
-        @SuppressLint("NewApi")
         @Override
         @NonNull
         public Notification.Builder extend(@NonNull Notification.Builder builder) {
@@ -12178,9 +12166,6 @@ public class Notification implements Parcelable
          * Returns true if this notification should be shown on TV. This method returns true
          * if the notification was extended with a TvExtender.
          */
-        // TODO(b/193460475): Android Lint handles change from SystemApi to public incorrectly.
-        // TvExtender is made public in U, but existed back to O as an identical SystemApi.
-        @SuppressLint("NewApi")
         public boolean isAvailableOnTv() {
             return (mFlags & FLAG_AVAILABLE_ON_TV) != 0;
         }
@@ -12205,9 +12190,6 @@ public class Notification implements Parcelable
          *
          * @return this object for method chaining
          */
-        // TODO(b/193460475): Android Lint handles change from SystemApi to public incorrectly.
-        // TvExtender is made public in U, but existed back to O as an identical SystemApi.
-        @SuppressLint("NewApi")
         @NonNull
         public TvExtender setChannelId(@Nullable String channelId) {
             mChannelId = channelId;
@@ -12227,9 +12209,6 @@ public class Notification implements Parcelable
         /**
          * Returns the id of the channel this notification posts to on TV.
          */
-        // TODO(b/193460475): Android Lint handles change from SystemApi to public incorrectly.
-        // TvExtender is made public in U, but existed back to O as an identical SystemApi.
-        @SuppressLint("NewApi")
         @Nullable
         public String getChannelId() {
             return mChannelId;
@@ -12243,9 +12222,6 @@ public class Notification implements Parcelable
          * @param intent the {@link PendingIntent} for the associated notification content
          * @return this object for method chaining
          */
-        // TODO(b/193460475): Android Lint handles change from SystemApi to public incorrectly.
-        // TvExtender is made public in U, but existed back to O as an identical SystemApi.
-        @SuppressLint("NewApi")
         @NonNull
         public TvExtender setContentIntent(@Nullable PendingIntent intent) {
             mContentIntent = intent;
@@ -12258,9 +12234,6 @@ public class Notification implements Parcelable
          *
          * @see Notification#contentIntent
          */
-        // TODO(b/193460475): Android Lint handles change from SystemApi to public incorrectly.
-        // TvExtender is made public in U, but existed back to O as an identical SystemApi.
-        @SuppressLint("NewApi")
         @Nullable
         public PendingIntent getContentIntent() {
             return mContentIntent;
@@ -12274,9 +12247,6 @@ public class Notification implements Parcelable
          * @param intent the {@link PendingIntent} for the associated notification deletion
          * @return this object for method chaining
          */
-        // TODO(b/193460475): Android Lint handles change from SystemApi to public incorrectly.
-        // TvExtender is made public in U, but existed back to O as an identical SystemApi.
-        @SuppressLint("NewApi")
         @NonNull
         public TvExtender setDeleteIntent(@Nullable PendingIntent intent) {
             mDeleteIntent = intent;
@@ -12289,9 +12259,6 @@ public class Notification implements Parcelable
          *
          * @see Notification#deleteIntent
          */
-        // TODO(b/193460475): Android Lint handles change from SystemApi to public incorrectly.
-        // TvExtender is made public in U, but existed back to O as an identical SystemApi.
-        @SuppressLint("NewApi")
         @Nullable
         public PendingIntent getDeleteIntent() {
             return mDeleteIntent;
@@ -12304,9 +12271,6 @@ public class Notification implements Parcelable
          * @param suppress whether the notification should suppress showing over apps.
          * @return this object for method chaining
          */
-        // TODO(b/193460475): Android Lint handles change from SystemApi to public incorrectly.
-        // TvExtender is made public in U, but existed back to O as an identical SystemApi.
-        @SuppressLint("NewApi")
         @NonNull
         public TvExtender setSuppressShowOverApps(boolean suppress) {
             mSuppressShowOverApps = suppress;
@@ -12328,9 +12292,6 @@ public class Notification implements Parcelable
          * Returns true if this notification should not show messages over top of apps
          * outside of the launcher.
          */
-        // TODO(b/193460475): Android Lint handles change from SystemApi to public incorrectly.
-        // TvExtender is made public in U, but existed back to O as an identical SystemApi.
-        @SuppressLint("NewApi")
         public boolean isSuppressShowOverApps() {
             return mSuppressShowOverApps;
         }
