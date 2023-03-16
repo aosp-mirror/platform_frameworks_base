@@ -65,6 +65,7 @@ import static com.android.server.alarm.AlarmManagerService.AlarmHandler.EXACT_AL
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.EXACT_ALARM_DENY_LIST_PACKAGES_REMOVED;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REFRESH_EXACT_ALARM_CANDIDATES;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_EXACT_ALARMS;
+import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_FOR_CANCELED;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.TARE_AFFORDABILITY_CHANGED;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.TEMPORARY_QUOTA_CHANGED;
@@ -3811,10 +3812,12 @@ public final class AlarmManagerServiceTest {
 
         assertEquals(8, mService.mAlarmStore.size());
 
-        mListener.removeListenerAlarmsForCachedUid(TEST_CALLING_UID);
+        mListener.handleUidCachedChanged(TEST_CALLING_UID, true);
+        assertAndHandleMessageSync(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED);
         assertEquals(7, mService.mAlarmStore.size());
 
-        mListener.removeListenerAlarmsForCachedUid(TEST_CALLING_UID_2);
+        mListener.handleUidCachedChanged(TEST_CALLING_UID_2, true);
+        assertAndHandleMessageSync(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED);
         assertEquals(6, mService.mAlarmStore.size());
     }
 
@@ -3845,10 +3848,12 @@ public final class AlarmManagerServiceTest {
         assertEquals(numExactListenerUid1 + 3, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
         assertEquals(numExactListenerUid2 + 2, mService.mAlarmsPerUid.get(TEST_CALLING_UID_2));
 
-        mListener.removeListenerAlarmsForCachedUid(TEST_CALLING_UID);
+        mListener.handleUidCachedChanged(TEST_CALLING_UID, true);
+        assertAndHandleMessageSync(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED);
         assertEquals(3, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
 
-        mListener.removeListenerAlarmsForCachedUid(TEST_CALLING_UID_2);
+        mListener.handleUidCachedChanged(TEST_CALLING_UID_2, true);
+        assertAndHandleMessageSync(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED);
         assertEquals(2, mService.mAlarmsPerUid.get(TEST_CALLING_UID_2));
     }
 }

@@ -58,6 +58,7 @@ import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_POLICY_PERMISSIO
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_PRIORITIZED;
 import static com.android.server.alarm.Alarm.REQUESTER_POLICY_INDEX;
 import static com.android.server.alarm.Alarm.TARE_POLICY_INDEX;
+import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED;
 import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_ALARM_CANCELLED;
 import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_DATA_CLEARED;
 import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_EXACT_PERMISSION_REVOKED;
@@ -739,6 +740,8 @@ public class AlarmManagerService extends SystemService {
                 "kill_on_schedule_exact_alarm_revoked";
         @VisibleForTesting
         static final String KEY_TEMPORARY_QUOTA_BUMP = "temporary_quota_bump";
+        @VisibleForTesting
+        static final String KEY_CACHED_LISTENER_REMOVAL_DELAY = "cached_listener_removal_delay";
 
         private static final long DEFAULT_MIN_FUTURITY = 5 * 1000;
         private static final long DEFAULT_MIN_INTERVAL = 60 * 1000;
@@ -783,6 +786,8 @@ public class AlarmManagerService extends SystemService {
         private static final int DEFAULT_TEMPORARY_QUOTA_BUMP = 0;
 
         private static final boolean DEFAULT_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF = true;
+
+        private static final long DEFAULT_CACHED_LISTENER_REMOVAL_DELAY = 10_000;
 
         // Minimum futurity of a new alarm
         public long MIN_FUTURITY = DEFAULT_MIN_FUTURITY;
@@ -879,6 +884,13 @@ public class AlarmManagerService extends SystemService {
 
         public boolean DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF =
                 DEFAULT_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF;
+
+        /**
+         * Exact listener alarms for apps that get cached are removed after this duration. This is
+         * a grace period to allow for transient procstate changes, e.g., when the app switches
+         * between different lifecycles.
+         */
+        public long CACHED_LISTENER_REMOVAL_DELAY = DEFAULT_CACHED_LISTENER_REMOVAL_DELAY;
 
         private long mLastAllowWhileIdleWhitelistDuration = -1;
         private int mVersion = 0;
@@ -1062,6 +1074,11 @@ public class AlarmManagerService extends SystemService {
                             DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF = properties.getBoolean(
                                     KEY_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF,
                                     DEFAULT_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF);
+                            break;
+                        case KEY_CACHED_LISTENER_REMOVAL_DELAY:
+                            CACHED_LISTENER_REMOVAL_DELAY = properties.getLong(
+                                    KEY_CACHED_LISTENER_REMOVAL_DELAY,
+                                    DEFAULT_CACHED_LISTENER_REMOVAL_DELAY);
                             break;
                         default:
                             if (name.startsWith(KEY_PREFIX_STANDBY_QUOTA) && !standbyQuotaUpdated) {
@@ -1305,6 +1322,11 @@ public class AlarmManagerService extends SystemService {
 
             pw.print(KEY_DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF,
                     DELAY_NONWAKEUP_ALARMS_WHILE_SCREEN_OFF);
+            pw.println();
+
+            pw.print(KEY_CACHED_LISTENER_REMOVAL_DELAY);
+            pw.print("=");
+            TimeUtils.formatDuration(CACHED_LISTENER_REMOVAL_DELAY, pw);
             pw.println();
 
             pw.decreaseIndent();
@@ -4968,6 +4990,7 @@ public class AlarmManagerService extends SystemService {
         public static final int TARE_AFFORDABILITY_CHANGED = 12;
         public static final int CHECK_EXACT_ALARM_PERMISSION_ON_UPDATE = 13;
         public static final int TEMPORARY_QUOTA_CHANGED = 14;
+        public static final int REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED = 15;
 
         AlarmHandler() {
             super(Looper.myLooper());
@@ -5086,6 +5109,21 @@ public class AlarmManagerService extends SystemService {
                     if (!hasScheduleExactAlarmInternal(packageName, uid)
                             && !hasUseExactAlarmInternal(packageName, uid)) {
                         removeExactAlarmsOnPermissionRevoked(uid, packageName, /*killUid = */false);
+                    }
+                    break;
+                case REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED:
+                    uid = (Integer) msg.obj;
+                    synchronized (mLock) {
+                        removeAlarmsInternalLocked(a -> {
+                            if (a.uid != uid || a.listener == null || a.windowLength != 0) {
+                                return false;
+                            }
+                            // TODO (b/265195908): Change to .w once we have some data on breakages.
+                            Slog.wtf(TAG, "Alarm " + a.listenerTag + " being removed for "
+                                    + UserHandle.formatUid(a.uid) + ":" + a.packageName
+                                    + " because the app went into cached state");
+                            return true;
+                        }, REMOVE_REASON_LISTENER_CACHED);
                     }
                     break;
                 default:
@@ -5444,20 +5482,30 @@ public class AlarmManagerService extends SystemService {
         }
 
         @Override
-        public void removeListenerAlarmsForCachedUid(int uid) {
+        public void handleUidCachedChanged(int uid, boolean cached) {
             if (!CompatChanges.isChangeEnabled(EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED, uid)) {
                 return;
             }
+            // Apps can quickly get frozen after being cached, breaking the exactness guarantee on
+            // listener alarms. So going forward, the contract of exact listener alarms explicitly
+            // states that they will be removed as soon as the app goes out of lifecycle. We still
+            // allow a short grace period for quick shuffling of proc-states that may happen
+            // unexpectedly when switching between different lifecycles and is generally hard for
+            // apps to avoid.
+
+            final long delay;
             synchronized (mLock) {
-                removeAlarmsInternalLocked(a -> {
-                    if (a.uid != uid || a.listener == null || a.windowLength != 0) {
-                        return false;
-                    }
-                    // TODO (b/265195908): Change to a .w once we have some data on breakages.
-                    Slog.wtf(TAG, "Alarm " + a.listenerTag + " being removed for " + a.packageName
-                            + " because the app went into cached state");
-                    return true;
-                }, REMOVE_REASON_LISTENER_CACHED);
+                delay = mConstants.CACHED_LISTENER_REMOVAL_DELAY;
+            }
+            final Integer uidObj = uid;
+
+            if (cached && !mHandler.hasEqualMessages(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED,
+                    uidObj)) {
+                mHandler.sendMessageDelayed(
+                        mHandler.obtainMessage(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED, uidObj),
+                        delay);
+            } else {
+                mHandler.removeEqualMessages(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED, uidObj);
             }
         }
     };

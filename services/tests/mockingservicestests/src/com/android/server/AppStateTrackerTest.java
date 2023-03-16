@@ -1365,8 +1365,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
-        verify(l, times(0)).removeAlarmsForUid(UID_10_1);
-        verify(l, times(0)).removeListenerAlarmsForCachedUid(UID_10_1);
+        verify(l, times(0)).removeAlarmsForUid(anyInt());
+        verify(l, times(0)).handleUidCachedChanged(anyInt(), anyBoolean());
         reset(l);
 
         mIUidObserver.onUidGone(UID_10_1, true);
@@ -1385,7 +1385,7 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         verify(l, times(1)).removeAlarmsForUid(UID_10_1);
-        verify(l, times(0)).removeListenerAlarmsForCachedUid(UID_10_1);
+        verify(l, times(0)).handleUidCachedChanged(anyInt(), anyBoolean());
         reset(l);
 
         mIUidObserver.onUidActive(UID_10_1);
@@ -1403,8 +1403,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
-        verify(l, times(0)).removeAlarmsForUid(UID_10_1);
-        verify(l, times(0)).removeListenerAlarmsForCachedUid(UID_10_1);
+        verify(l, times(0)).removeAlarmsForUid(anyInt());
+        verify(l, times(0)).handleUidCachedChanged(anyInt(), anyBoolean());
         reset(l);
 
         mIUidObserver.onUidIdle(UID_10_1, true);
@@ -1423,7 +1423,7 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         verify(l, times(1)).removeAlarmsForUid(UID_10_1);
-        verify(l, times(0)).removeListenerAlarmsForCachedUid(UID_10_1);
+        verify(l, times(0)).handleUidCachedChanged(anyInt(), anyBoolean());
         reset(l);
 
         mIUidObserver.onUidCachedChanged(UID_10_1, true);
@@ -1441,8 +1441,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
-        verify(l, times(0)).removeAlarmsForUid(UID_10_1);
-        verify(l, times(1)).removeListenerAlarmsForCachedUid(UID_10_1);
+        verify(l, times(0)).removeAlarmsForUid(anyInt());
+        verify(l, times(1)).handleUidCachedChanged(UID_10_1, true);
         reset(l);
 
         mIUidObserver.onUidCachedChanged(UID_10_1, false);
@@ -1460,8 +1460,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
-        verify(l, times(0)).removeAlarmsForUid(UID_10_1);
-        verify(l, times(0)).removeListenerAlarmsForCachedUid(UID_10_1);
+        verify(l, times(0)).removeAlarmsForUid(anyInt());
+        verify(l, times(1)).handleUidCachedChanged(UID_10_1, false);
         reset(l);
 
 
@@ -1481,8 +1481,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
-        verify(l, times(0)).removeAlarmsForUid(UID_10_1);
-        verify(l, times(0)).removeListenerAlarmsForCachedUid(UID_10_1);
+        verify(l, times(0)).removeAlarmsForUid(anyInt());
+        verify(l, times(0)).handleUidCachedChanged(anyInt(), anyBoolean());
         reset(l);
 
         mIUidObserver.onUidActive(UID_10_1);
@@ -1500,8 +1500,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
-        verify(l, times(0)).removeAlarmsForUid(UID_10_1);
-        verify(l, times(0)).removeListenerAlarmsForCachedUid(UID_10_1);
+        verify(l, times(0)).removeAlarmsForUid(anyInt());
+        verify(l, times(0)).handleUidCachedChanged(anyInt(), anyBoolean());
         reset(l);
 
         mIUidObserver.onUidGone(UID_10_1, true);
@@ -1520,7 +1520,7 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         verify(l, times(1)).removeAlarmsForUid(UID_10_1);
-        verify(l, times(0)).removeListenerAlarmsForCachedUid(UID_10_1);
+        verify(l, times(0)).handleUidCachedChanged(anyInt(), anyBoolean());
         reset(l);
 
         mIUidObserver.onUidActive(UID_10_1);
@@ -1538,8 +1538,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
-        verify(l, times(0)).removeAlarmsForUid(UID_10_1);
-        verify(l, times(0)).removeListenerAlarmsForCachedUid(UID_10_1);
+        verify(l, times(0)).removeAlarmsForUid(anyInt());
+        verify(l, times(0)).handleUidCachedChanged(anyInt(), anyBoolean());
         reset(l);
 
         mIUidObserver.onUidIdle(UID_10_1, true);
@@ -1558,7 +1558,7 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         verify(l, times(1)).removeAlarmsForUid(UID_10_1);
-        verify(l, times(0)).removeListenerAlarmsForCachedUid(UID_10_1);
+        verify(l, times(0)).handleUidCachedChanged(anyInt(), anyBoolean());
         reset(l);
 
         mIUidObserver.onUidCachedChanged(UID_10_1, true);
@@ -1576,8 +1576,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
-        verify(l, times(0)).removeAlarmsForUid(UID_10_1);
-        verify(l, times(1)).removeListenerAlarmsForCachedUid(UID_10_1);
+        verify(l, times(0)).removeAlarmsForUid(anyInt());
+        verify(l, times(1)).handleUidCachedChanged(UID_10_1, true);
         reset(l);
 
         mIUidObserver.onUidCachedChanged(UID_10_1, false);
@@ -1595,8 +1595,8 @@ public class AppStateTrackerTest {
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
-        verify(l, times(0)).removeAlarmsForUid(UID_10_1);
-        verify(l, times(0)).removeListenerAlarmsForCachedUid(UID_10_1);
+        verify(l, times(0)).removeAlarmsForUid(anyInt());
+        verify(l, times(1)).handleUidCachedChanged(UID_10_1, false);
         reset(l);
     }
 
