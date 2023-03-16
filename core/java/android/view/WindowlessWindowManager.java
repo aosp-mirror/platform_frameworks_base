@@ -415,10 +415,6 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void prepareToReplaceWindows(android.os.IBinder appToken, boolean childrenOnly) {
-    }
-
-    @Override
     public boolean outOfMemory(android.view.IWindow window) {
         return false;
     }

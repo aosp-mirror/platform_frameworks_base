@@ -376,46 +376,6 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testGetAnimationTargets_windowsAreBeingReplaced() {
-        // [DisplayContent] -+- [Task1] - [ActivityRecord1] (opening, visible)
-        //                                       +- [AppWindow1] (being-replaced)
-        //                   +- [Task2] - [ActivityRecord2] (closing, invisible)
-        //                                       +- [AppWindow2] (being-replaced)
-        final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
-        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
-                TYPE_BASE_APPLICATION);
-        attrs.setTitle("AppWindow1");
-        final TestWindowState appWindow1 = createWindowState(attrs, activity1);
-        appWindow1.mWillReplaceWindow = true;
-        activity1.addWindow(appWindow1);
-
-        final ActivityRecord activity2 = createActivityRecord(mDisplayContent);
-        activity2.setVisible(false);
-        activity2.setVisibleRequested(false);
-        attrs.setTitle("AppWindow2");
-        final TestWindowState appWindow2 = createWindowState(attrs, activity2);
-        appWindow2.mWillReplaceWindow = true;
-        activity2.addWindow(appWindow2);
-
-        final ArraySet<ActivityRecord> opening = new ArraySet<>();
-        opening.add(activity1);
-        final ArraySet<ActivityRecord> closing = new ArraySet<>();
-        closing.add(activity2);
-
-        // Animate opening apps even if it's already visible in case its windows are being replaced.
-        // Don't animate closing apps if it's already invisible even though its windows are being
-        // replaced.
-        assertEquals(
-                new ArraySet<>(new WindowContainer[]{activity1.getRootTask()}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, true /* visible */));
-        assertEquals(
-                new ArraySet<>(new WindowContainer[]{}),
-                AppTransitionController.getAnimationTargets(
-                        opening, closing, false /* visible */));
-    }
-
-    @Test
     public void testGetAnimationTargets_openingClosingInDifferentTask() {
         // [DisplayContent] -+- [Task1] -+- [ActivityRecord1] (opening, invisible)
         //                   |           +- [ActivityRecord2] (invisible)
