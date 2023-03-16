@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ക്ലിപ്പ് ബൗണ്ടുകൾ, മാർജിനുകൾ തുടങ്ങിയവ ദൃശ്യമാക്കുക"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL ലേഔട്ട് ഡയറക്ഷൻ നിർബന്ധമാക്കുക"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"എല്ലാ ഭാഷകൾക്കുമായി സ്‌ക്രീൻ ലേഔട്ട് ഡയറക്ഷൻ RTL-ലേക്ക് നിർബന്ധമാക്കുക"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"സുതാര്യമായ നാവിഗേഷൻ ബാർ"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"നാവിഗേഷൻ ബാറിന്റെ പശ്ചാത്തല നിറം ഡിഫോൾട്ട് ആയി സുതാര്യമാക്കുക"</string>
     <string name="window_blurs" msgid="6831008984828425106">"വിൻഡോ-ലെവൽ മങ്ങിക്കൽ അനുവദിക്കൂ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA നിർബന്ധമാക്കുക"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ആപ്പുകളിൽ 4x MSAA പ്രവർത്തനക്ഷമമാക്കൂ"</string>
@@ -679,4 +681,5 @@
     <item msgid="7728484337962740316">"വലത്തേക്ക് നീക്കുക"</item>
     <item msgid="324200556467459329">"മുകളിലേക്ക് നീക്കുക"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>
