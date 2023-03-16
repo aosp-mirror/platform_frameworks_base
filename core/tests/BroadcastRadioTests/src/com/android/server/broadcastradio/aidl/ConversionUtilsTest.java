@@ -16,6 +16,9 @@
 
 package com.android.server.broadcastradio.aidl;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+
+import android.app.compat.CompatChanges;
 import android.hardware.broadcastradio.AmFmBandRange;
 import android.hardware.broadcastradio.AmFmRegionConfig;
 import android.hardware.broadcastradio.DabTableEntry;
@@ -29,17 +32,23 @@ import android.hardware.radio.Announcement;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
-import android.os.Build;
+
+import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
+import com.android.server.broadcastradio.ExtendedRadioMockitoTestCase;
 
 import com.google.common.truth.Expect;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Map;
 import java.util.Set;
 
-public final class ConversionUtilsTest {
+public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
+
+    private static final int U_APP_UID = 1001;
+    private static final int T_APP_UID = 1002;
 
     private static final int FM_LOWER_LIMIT = 87_500;
     private static final int FM_UPPER_LIMIT = 108_000;
@@ -118,16 +127,29 @@ public final class ConversionUtilsTest {
     @Rule
     public final Expect expect = Expect.create();
 
+    @Override
+    protected void initializeSession(StaticMockitoSessionBuilder builder) {
+        builder.spyStatic(CompatChanges.class);
+    }
+
+    @Before
+    public void setUp() {
+        doReturn(true).when(() -> CompatChanges.isChangeEnabled(
+                ConversionUtils.RADIO_U_VERSION_REQUIRED, U_APP_UID));
+        doReturn(false).when(() -> CompatChanges.isChangeEnabled(
+                ConversionUtils.RADIO_U_VERSION_REQUIRED, T_APP_UID));
+    }
+
     @Test
     public void isAtLeastU_withTSdkVersion_returnsFalse() {
         expect.withMessage("Target SDK version of T")
-                .that(ConversionUtils.isAtLeastU(Build.VERSION_CODES.TIRAMISU)).isFalse();
+                .that(ConversionUtils.isAtLeastU(T_APP_UID)).isFalse();
     }
 
     @Test
     public void isAtLeastU_withCurrentSdkVersion_returnsTrue() {
         expect.withMessage("Target SDK version of U")
-                .that(ConversionUtils.isAtLeastU(Build.VERSION_CODES.CUR_DEVELOPMENT)).isTrue();
+                .that(ConversionUtils.isAtLeastU(U_APP_UID)).isTrue();
     }
 
     @Test
@@ -372,14 +394,14 @@ public final class ConversionUtilsTest {
     public void programSelectorMeetsSdkVersionRequirement_withLowerVersionId_returnsFalse() {
         expect.withMessage("Selector %s without required SDK version", TEST_DAB_SELECTOR)
                 .that(ConversionUtils.programSelectorMeetsSdkVersionRequirement(TEST_DAB_SELECTOR,
-                        Build.VERSION_CODES.TIRAMISU)).isFalse();
+                        T_APP_UID)).isFalse();
     }
 
     @Test
     public void programSelectorMeetsSdkVersionRequirement_withRequiredVersionId_returnsTrue() {
         expect.withMessage("Selector %s with required SDK version", TEST_FM_SELECTOR)
                 .that(ConversionUtils.programSelectorMeetsSdkVersionRequirement(TEST_FM_SELECTOR,
-                        Build.VERSION_CODES.TIRAMISU)).isTrue();
+                        T_APP_UID)).isTrue();
     }
 
     @Test
@@ -389,7 +411,7 @@ public final class ConversionUtilsTest {
 
         expect.withMessage("Program info %s without required SDK version", dabProgramInfo)
                 .that(ConversionUtils.programInfoMeetsSdkVersionRequirement(dabProgramInfo,
-                        Build.VERSION_CODES.TIRAMISU)).isFalse();
+                        T_APP_UID)).isFalse();
     }
 
     @Test
@@ -399,7 +421,7 @@ public final class ConversionUtilsTest {
 
         expect.withMessage("Program info %s with required SDK version", fmProgramInfo)
                 .that(ConversionUtils.programInfoMeetsSdkVersionRequirement(fmProgramInfo,
-                        Build.VERSION_CODES.TIRAMISU)).isTrue();
+                        T_APP_UID)).isTrue();
     }
 
     @Test
@@ -413,7 +435,7 @@ public final class ConversionUtilsTest {
                 Set.of(TEST_DAB_SID_EXT_ID, TEST_DAB_ENSEMBLE_ID, TEST_VENDOR_ID));
 
         ProgramList.Chunk convertedChunk = ConversionUtils.convertChunkToTargetSdkVersion(chunk,
-                Build.VERSION_CODES.TIRAMISU);
+                T_APP_UID);
 
         expect.withMessage(
                 "Purged state of the converted program list chunk with lower SDK version")
@@ -441,7 +463,7 @@ public final class ConversionUtilsTest {
                 Set.of(TEST_DAB_SID_EXT_ID, TEST_DAB_ENSEMBLE_ID, TEST_VENDOR_ID));
 
         ProgramList.Chunk convertedChunk = ConversionUtils.convertChunkToTargetSdkVersion(chunk,
-                Build.VERSION_CODES.CUR_DEVELOPMENT);
+                U_APP_UID);
 
         expect.withMessage("Converted program list chunk with required SDK version")
                 .that(convertedChunk).isEqualTo(chunk);

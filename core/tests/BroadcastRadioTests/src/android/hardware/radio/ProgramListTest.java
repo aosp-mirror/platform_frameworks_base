@@ -580,7 +580,7 @@ public final class ProgramListTest {
         doAnswer(invocation -> {
             mTunerCallback = (ITunerCallback) invocation.getArguments()[3];
             return mTunerMock;
-        }).when(mRadioServiceMock).openTuner(anyInt(), any(), anyBoolean(), any(), anyInt());
+        }).when(mRadioServiceMock).openTuner(anyInt(), any(), anyBoolean(), any());
 
         mRadioTuner = radioManager.openTuner(/* moduleId= */ 0, band,
                 /* withAudio= */ true, mTunerCallbackMock, /* handler= */ null);

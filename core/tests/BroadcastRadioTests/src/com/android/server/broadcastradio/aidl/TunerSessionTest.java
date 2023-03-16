@@ -33,6 +33,7 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.compat.CompatChanges;
 import android.graphics.Bitmap;
 import android.hardware.broadcastradio.IBroadcastRadio;
 import android.hardware.broadcastradio.ITunerCallback;
@@ -46,7 +47,6 @@ import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
-import android.os.Build;
 import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -73,7 +73,6 @@ import java.util.Set;
  */
 public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
-    private static final int TARGET_SDK_VERSION = Build.VERSION_CODES.CUR_DEVELOPMENT;
     private static final VerificationWithTimeout CALLBACK_TIMEOUT =
             timeout(/* millis= */ 200);
     private static final int SIGNAL_QUALITY = 90;
@@ -125,11 +124,13 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
     @Override
     protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder.spyStatic(RadioServiceUserController.class);
+        builder.spyStatic(RadioServiceUserController.class).spyStatic(CompatChanges.class);
     }
 
     @Before
     public void setup() throws Exception {
+        doReturn(true).when(() -> CompatChanges.isChangeEnabled(
+                eq(ConversionUtils.RADIO_U_VERSION_REQUIRED), anyInt()));
         doReturn(true).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
 
         mRadioModule = new RadioModule(mBroadcastRadioMock,
@@ -341,7 +342,9 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
     @Test
     public void tune_withLowerSdkVersion() throws Exception {
-        openAidlClients(/* numClients= */ 1, Build.VERSION_CODES.TIRAMISU);
+        doReturn(false).when(() -> CompatChanges.isChangeEnabled(
+                eq(ConversionUtils.RADIO_U_VERSION_REQUIRED), anyInt()));
+        openAidlClients(/* numClients= */ 1);
         ProgramSelector initialSel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
         RadioManager.ProgramInfo tuneInfo =
                 AidlTestUtils.makeProgramInfo(initialSel, SIGNAL_QUALITY);
@@ -1175,17 +1178,13 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
                     .onParametersUpdated(parametersExpected);
         }
     }
-    private void openAidlClients(int numClients) throws Exception {
-        openAidlClients(numClients, TARGET_SDK_VERSION);
-    }
 
-    private void openAidlClients(int numClients, int targetSdkVersion) throws Exception {
+    private void openAidlClients(int numClients) throws Exception {
         mAidlTunerCallbackMocks = new android.hardware.radio.ITunerCallback[numClients];
         mTunerSessions = new TunerSession[numClients];
         for (int index = 0; index < numClients; index++) {
             mAidlTunerCallbackMocks[index] = mock(android.hardware.radio.ITunerCallback.class);
-            mTunerSessions[index] = mRadioModule.openSession(mAidlTunerCallbackMocks[index],
-                    targetSdkVersion);
+            mTunerSessions[index] = mRadioModule.openSession(mAidlTunerCallbackMocks[index]);
         }
     }
 
