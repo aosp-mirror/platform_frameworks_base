@@ -923,6 +923,7 @@ class PackageManagerShellCommand extends ShellCommand {
         boolean showUid = false;
         boolean showVersionCode = false;
         boolean listApexOnly = false;
+        boolean showStopped = false;
         int uid = -1;
         int defaultUserId = UserHandle.USER_ALL;
         try {
@@ -979,6 +980,9 @@ class PackageManagerShellCommand extends ShellCommand {
                         break;
                     case "--match-libraries":
                         getFlags |= PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES;
+                        break;
+                    case "--show-stopped":
+                        showStopped = true;
                         break;
                     default:
                         pw.println("Error: Unknown option: " + opt);
@@ -1071,6 +1075,12 @@ class PackageManagerShellCommand extends ShellCommand {
                     } else {
                         stringBuilder.append(info.getLongVersionCode());
                     }
+                }
+                if (showStopped) {
+                    stringBuilder.append(" stopped=");
+                    stringBuilder.append(
+                            ((info.applicationInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0)
+                            ? "true" : "false");
                 }
                 if (listInstaller) {
                     stringBuilder.append("  installer=");
