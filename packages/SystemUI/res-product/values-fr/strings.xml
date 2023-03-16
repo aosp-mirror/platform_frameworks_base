@@ -40,9 +40,12 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Vous avez tenté de déverrouiller le téléphone à <xliff:g id="NUMBER">%d</xliff:g> reprises. Le profil professionnel et toutes les données associées vont être supprimés."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%1$d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%2$d</xliff:g> fois, vous devrez déverrouiller votre tablette à l\'aide d\'un compte de messagerie électronique.\n\nRéessayez dans <xliff:g id="NUMBER_2">%3$d</xliff:g> secondes."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%1$d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%2$d</xliff:g> fois, vous devrez déverrouiller votre téléphone à l\'aide d\'un compte de messagerie électronique.\n\nRéessayez dans <xliff:g id="NUMBER_2">%3$d</xliff:g> secondes."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="1242939073723573315">"Le lecteur d\'empreinte digitale se trouve sur le bouton Marche/Arrêt. C\'est le bouton plat à côté du bouton de volume en relief sur un bord de la tablette.\n\nAppuyer sur le bouton Marche/Arrêt éteint l\'écran."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="7305137594359170451">"Le lecteur d\'empreinte digitale se trouve sur le bouton Marche/Arrêt. C\'est le bouton plat à côté du bouton de volume en relief sur le bord de l\'appareil.\n\nAppuyer sur le bouton Marche/Arrêt éteint l\'écran."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="3238514774114999081">"Le lecteur d\'empreinte digitale se trouve sur le bouton Marche/Arrêt. C\'est le bouton plat à côté du bouton de volume en relief sur un bord du téléphone.\n\nAppuyer sur le bouton Marche/Arrêt éteint l\'écran."</string>
+    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (3726972508570143945) -->
+    <skip />
+    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (2929467060295094725) -->
+    <skip />
+    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (8582726566542997639) -->
+    <skip />
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Déverrouillez votre téléphone pour obtenir plus d\'options"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Déverrouillez votre tablette pour obtenir plus d\'options"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Déverrouillez votre appareil pour obtenir plus d\'options"</string>

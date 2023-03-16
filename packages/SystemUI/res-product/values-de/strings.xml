@@ -40,9 +40,12 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Du hast <xliff:g id="NUMBER">%d</xliff:g>-mal erfolglos versucht, das Smartphone zu entsperren. Das Arbeitsprofil wird nun entfernt und alle Profildaten werden gelöscht."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Du hast dein Entsperrungsmuster <xliff:g id="NUMBER_0">%1$d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%2$d</xliff:g> weiteren erfolglosen Versuchen wirst du aufgefordert, dein Tablet mithilfe eines E-Mail-Kontos zu entsperren.\n\n Versuche es in <xliff:g id="NUMBER_2">%3$d</xliff:g> Sekunden noch einmal."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Du hast dein Entsperrungsmuster <xliff:g id="NUMBER_0">%1$d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%2$d</xliff:g> weiteren erfolglosen Versuchen wirst du aufgefordert, dein Smartphone mithilfe eines E-Mail-Kontos zu entsperren.\n\n Versuche es in <xliff:g id="NUMBER_2">%3$d</xliff:g> Sekunden noch einmal."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="1242939073723573315">"Der Fingerabdrucksensor befindet sich auf der Ein-/Aus-Taste. Das ist die flache Taste neben der erhöhten Lautstärketaste an der Seite des Tablets.\n\nWenn du die Ein-/Aus-Taste drückst, schaltet sich das Display aus."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="7305137594359170451">"Der Fingerabdrucksensor befindet sich auf der Ein-/Aus-Taste. Das ist die flache Taste neben der erhöhten Lautstärketaste an der Seite des Geräts.\n\nWenn du die Ein-/Aus-Taste drückst, schaltet sich das Display aus."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="3238514774114999081">"Der Fingerabdrucksensor befindet sich auf der Ein-/Aus-Taste. Das ist die flache Taste neben der erhöhten Lautstärketaste an der Seite des Smartphones.\n\nWenn du die Ein-/Aus-Taste drückst, schaltet sich das Display aus."</string>
+    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (3726972508570143945) -->
+    <skip />
+    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (2929467060295094725) -->
+    <skip />
+    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (8582726566542997639) -->
+    <skip />
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Entsperre dein Smartphone für weitere Optionen"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Entsperre dein Tablet für weitere Optionen"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Entsperre dein Gerät für weitere Optionen"</string>
