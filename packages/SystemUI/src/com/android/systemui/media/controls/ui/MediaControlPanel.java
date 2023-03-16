@@ -1370,7 +1370,8 @@ public class MediaControlPanel {
                         itemIndex
                 );
             } else {
-                mediaCoverImageView.setImageIcon(recommendation.getIcon());
+                mediaCoverImageView.post(
+                        () -> mediaCoverImageView.setImageIcon(recommendation.getIcon()));
             }
 
             // Set up the media item's click listener if applicable.
