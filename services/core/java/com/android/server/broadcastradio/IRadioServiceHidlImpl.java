@@ -92,8 +92,7 @@ final class IRadioServiceHidlImpl extends IRadioService.Stub {
 
     @Override
     public ITuner openTuner(int moduleId, RadioManager.BandConfig bandConfig,
-            boolean withAudio, ITunerCallback callback, int targetSdkVersion)
-            throws RemoteException {
+            boolean withAudio, ITunerCallback callback) throws RemoteException {
         if (isDebugEnabled()) {
             Slog.d(TAG, "Opening module " + moduleId);
         }
