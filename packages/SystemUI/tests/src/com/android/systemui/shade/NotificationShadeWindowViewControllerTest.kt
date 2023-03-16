@@ -37,6 +37,9 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
+import com.android.systemui.multishade.data.remoteproxy.MultiShadeInputProxy
+import com.android.systemui.multishade.data.repository.MultiShadeRepository
+import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationInsetsController
@@ -50,8 +53,12 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -65,10 +72,12 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
 class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
+
     @Mock private lateinit var view: NotificationShadeWindowView
     @Mock private lateinit var sysuiStatusBarStateController: SysuiStatusBarStateController
     @Mock private lateinit var centralSurfaces: CentralSurfaces
@@ -102,6 +111,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
 
     private lateinit var underTest: NotificationShadeWindowViewController
 
+    private lateinit var testScope: TestScope
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -115,8 +126,12 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         whenever(keyguardTransitionInteractor.lockscreenToDreamingTransition)
             .thenReturn(emptyFlow<TransitionStep>())
 
-        val featureFlags = FakeFeatureFlags();
+        val featureFlags = FakeFeatureFlags()
         featureFlags.set(Flags.TRACKPAD_GESTURE_BACK, false)
+        featureFlags.set(Flags.DUAL_SHADE, false)
+
+        val inputProxy = MultiShadeInputProxy()
+        testScope = TestScope()
         underTest =
             NotificationShadeWindowViewController(
                 lockscreenShadeTransitionController,
@@ -144,6 +159,18 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 keyguardTransitionInteractor,
                 primaryBouncerToGoneTransitionViewModel,
                 featureFlags,
+                {
+                    MultiShadeInteractor(
+                        applicationScope = testScope.backgroundScope,
+                        repository =
+                            MultiShadeRepository(
+                                applicationContext = context,
+                                inputProxy = inputProxy,
+                            ),
+                        inputProxy = inputProxy,
+                    )
+                },
+                FakeSystemClock(),
             )
         underTest.setupExpandedStatusBar()
 
@@ -156,147 +183,162 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     // tests need to be added to test the rest of handleDispatchTouchEvent.
 
     @Test
-    fun handleDispatchTouchEvent_nullStatusBarViewController_returnsFalse() {
-        underTest.setStatusBarViewController(null)
+    fun handleDispatchTouchEvent_nullStatusBarViewController_returnsFalse() =
+        testScope.runTest {
+            underTest.setStatusBarViewController(null)
 
-        val returnVal = interactionEventHandler.handleDispatchTouchEvent(downEv)
+            val returnVal = interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)
 
-        assertThat(returnVal).isFalse()
-    }
-
-    @Test
-    fun handleDispatchTouchEvent_downTouchBelowView_sendsTouchToSb() {
-        underTest.setStatusBarViewController(phoneStatusBarViewController)
-        val ev = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, VIEW_BOTTOM + 4f, 0)
-        whenever(phoneStatusBarViewController.sendTouchToView(ev)).thenReturn(true)
-
-        val returnVal = interactionEventHandler.handleDispatchTouchEvent(ev)
-
-        verify(phoneStatusBarViewController).sendTouchToView(ev)
-        assertThat(returnVal).isTrue()
-    }
+            assertThat(returnVal).isFalse()
+        }
 
     @Test
-    fun handleDispatchTouchEvent_downTouchBelowViewThenAnotherTouch_sendsTouchToSb() {
-        underTest.setStatusBarViewController(phoneStatusBarViewController)
-        val downEvBelow =
-            MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, VIEW_BOTTOM + 4f, 0)
-        interactionEventHandler.handleDispatchTouchEvent(downEvBelow)
+    fun handleDispatchTouchEvent_downTouchBelowView_sendsTouchToSb() =
+        testScope.runTest {
+            underTest.setStatusBarViewController(phoneStatusBarViewController)
+            val ev = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, VIEW_BOTTOM + 4f, 0)
+            whenever(phoneStatusBarViewController.sendTouchToView(ev)).thenReturn(true)
 
-        val nextEvent = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, VIEW_BOTTOM + 5f, 0)
-        whenever(phoneStatusBarViewController.sendTouchToView(nextEvent)).thenReturn(true)
+            val returnVal = interactionEventHandler.handleDispatchTouchEvent(ev)
 
-        val returnVal = interactionEventHandler.handleDispatchTouchEvent(nextEvent)
-
-        verify(phoneStatusBarViewController).sendTouchToView(nextEvent)
-        assertThat(returnVal).isTrue()
-    }
+            verify(phoneStatusBarViewController).sendTouchToView(ev)
+            assertThat(returnVal).isTrue()
+        }
 
     @Test
-    fun handleDispatchTouchEvent_downAndPanelCollapsedAndInSbBoundAndSbWindowShow_sendsTouchToSb() {
-        underTest.setStatusBarViewController(phoneStatusBarViewController)
-        whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(true)
-        whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
-        whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
-            .thenReturn(true)
-        whenever(phoneStatusBarViewController.sendTouchToView(downEv)).thenReturn(true)
+    fun handleDispatchTouchEvent_downTouchBelowViewThenAnotherTouch_sendsTouchToSb() =
+        testScope.runTest {
+            underTest.setStatusBarViewController(phoneStatusBarViewController)
+            val downEvBelow =
+                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, VIEW_BOTTOM + 4f, 0)
+            interactionEventHandler.handleDispatchTouchEvent(downEvBelow)
 
-        val returnVal = interactionEventHandler.handleDispatchTouchEvent(downEv)
+            val nextEvent =
+                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, VIEW_BOTTOM + 5f, 0)
+            whenever(phoneStatusBarViewController.sendTouchToView(nextEvent)).thenReturn(true)
 
-        verify(phoneStatusBarViewController).sendTouchToView(downEv)
-        assertThat(returnVal).isTrue()
-    }
+            val returnVal = interactionEventHandler.handleDispatchTouchEvent(nextEvent)
 
-    @Test
-    fun handleDispatchTouchEvent_panelNotCollapsed_returnsNull() {
-        underTest.setStatusBarViewController(phoneStatusBarViewController)
-        whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(true)
-        whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
-            .thenReturn(true)
-        // Item we're testing
-        whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(false)
-
-        val returnVal = interactionEventHandler.handleDispatchTouchEvent(downEv)
-
-        verify(phoneStatusBarViewController, never()).sendTouchToView(downEv)
-        assertThat(returnVal).isNull()
-    }
+            verify(phoneStatusBarViewController).sendTouchToView(nextEvent)
+            assertThat(returnVal).isTrue()
+        }
 
     @Test
-    fun handleDispatchTouchEvent_touchNotInSbBounds_returnsNull() {
-        underTest.setStatusBarViewController(phoneStatusBarViewController)
-        whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(true)
-        whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
-        // Item we're testing
-        whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
-            .thenReturn(false)
+    fun handleDispatchTouchEvent_downAndPanelCollapsedAndInSbBoundAndSbWindowShow_sendsTouchToSb() =
+        testScope.runTest {
+            underTest.setStatusBarViewController(phoneStatusBarViewController)
+            whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(true)
+            whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
+            whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
+                .thenReturn(true)
+            whenever(phoneStatusBarViewController.sendTouchToView(DOWN_EVENT)).thenReturn(true)
 
-        val returnVal = interactionEventHandler.handleDispatchTouchEvent(downEv)
+            val returnVal = interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)
 
-        verify(phoneStatusBarViewController, never()).sendTouchToView(downEv)
-        assertThat(returnVal).isNull()
-    }
-
-    @Test
-    fun handleDispatchTouchEvent_sbWindowNotShowing_noSendTouchToSbAndReturnsTrue() {
-        underTest.setStatusBarViewController(phoneStatusBarViewController)
-        whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
-        whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
-            .thenReturn(true)
-        // Item we're testing
-        whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(false)
-
-        val returnVal = interactionEventHandler.handleDispatchTouchEvent(downEv)
-
-        verify(phoneStatusBarViewController, never()).sendTouchToView(downEv)
-        assertThat(returnVal).isTrue()
-    }
+            verify(phoneStatusBarViewController).sendTouchToView(DOWN_EVENT)
+            assertThat(returnVal).isTrue()
+        }
 
     @Test
-    fun handleDispatchTouchEvent_downEventSentToSbThenAnotherEvent_sendsTouchToSb() {
-        underTest.setStatusBarViewController(phoneStatusBarViewController)
-        whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(true)
-        whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
-        whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
-            .thenReturn(true)
+    fun handleDispatchTouchEvent_panelNotCollapsed_returnsNull() =
+        testScope.runTest {
+            underTest.setStatusBarViewController(phoneStatusBarViewController)
+            whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(true)
+            whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
+                .thenReturn(true)
+            // Item we're testing
+            whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(false)
 
-        // Down event first
-        interactionEventHandler.handleDispatchTouchEvent(downEv)
+            val returnVal = interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)
 
-        // Then another event
-        val nextEvent = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
-        whenever(phoneStatusBarViewController.sendTouchToView(nextEvent)).thenReturn(true)
-
-        val returnVal = interactionEventHandler.handleDispatchTouchEvent(nextEvent)
-
-        verify(phoneStatusBarViewController).sendTouchToView(nextEvent)
-        assertThat(returnVal).isTrue()
-    }
+            verify(phoneStatusBarViewController, never()).sendTouchToView(DOWN_EVENT)
+            assertThat(returnVal).isNull()
+        }
 
     @Test
-    fun shouldInterceptTouchEvent_downEventAlternateBouncer_ignoreIfInUdfpsOverlay() {
-        // Down event within udfpsOverlay bounds while alternateBouncer is showing
-        whenever(udfpsOverlayInteractor.canInterceptTouchInUdfpsBounds(downEv)).thenReturn(false)
-        whenever(alternateBouncerInteractor.isVisibleState()).thenReturn(true)
+    fun handleDispatchTouchEvent_touchNotInSbBounds_returnsNull() =
+        testScope.runTest {
+            underTest.setStatusBarViewController(phoneStatusBarViewController)
+            whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(true)
+            whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
+            // Item we're testing
+            whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
+                .thenReturn(false)
 
-        // Then touch should not be intercepted
-        val shouldIntercept = interactionEventHandler.shouldInterceptTouchEvent(downEv)
-        assertThat(shouldIntercept).isFalse()
-    }
+            val returnVal = interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)
 
-    @Test
-    fun testGetBouncerContainer() {
-        Mockito.clearInvocations(view)
-        underTest.bouncerContainer
-        verify(view).findViewById<ViewGroup>(R.id.keyguard_bouncer_container)
-    }
+            verify(phoneStatusBarViewController, never()).sendTouchToView(DOWN_EVENT)
+            assertThat(returnVal).isNull()
+        }
 
     @Test
-    fun testGetKeyguardMessageArea() {
-        underTest.keyguardMessageArea
-        verify(view).findViewById<ViewGroup>(R.id.keyguard_message_area)
+    fun handleDispatchTouchEvent_sbWindowNotShowing_noSendTouchToSbAndReturnsTrue() =
+        testScope.runTest {
+            underTest.setStatusBarViewController(phoneStatusBarViewController)
+            whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
+            whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
+                .thenReturn(true)
+            // Item we're testing
+            whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(false)
+
+            val returnVal = interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)
+
+            verify(phoneStatusBarViewController, never()).sendTouchToView(DOWN_EVENT)
+            assertThat(returnVal).isTrue()
+        }
+
+    @Test
+    fun handleDispatchTouchEvent_downEventSentToSbThenAnotherEvent_sendsTouchToSb() =
+        testScope.runTest {
+            underTest.setStatusBarViewController(phoneStatusBarViewController)
+            whenever(statusBarWindowStateController.windowIsShowing()).thenReturn(true)
+            whenever(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
+            whenever(phoneStatusBarViewController.touchIsWithinView(anyFloat(), anyFloat()))
+                .thenReturn(true)
+
+            // Down event first
+            interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)
+
+            // Then another event
+            val nextEvent = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
+            whenever(phoneStatusBarViewController.sendTouchToView(nextEvent)).thenReturn(true)
+
+            val returnVal = interactionEventHandler.handleDispatchTouchEvent(nextEvent)
+
+            verify(phoneStatusBarViewController).sendTouchToView(nextEvent)
+            assertThat(returnVal).isTrue()
+        }
+
+    @Test
+    fun shouldInterceptTouchEvent_downEventAlternateBouncer_ignoreIfInUdfpsOverlay() =
+        testScope.runTest {
+            // Down event within udfpsOverlay bounds while alternateBouncer is showing
+            whenever(udfpsOverlayInteractor.canInterceptTouchInUdfpsBounds(DOWN_EVENT))
+                .thenReturn(false)
+            whenever(alternateBouncerInteractor.isVisibleState()).thenReturn(true)
+
+            // Then touch should not be intercepted
+            val shouldIntercept = interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)
+            assertThat(shouldIntercept).isFalse()
+        }
+
+    @Test
+    fun testGetBouncerContainer() =
+        testScope.runTest {
+            Mockito.clearInvocations(view)
+            underTest.bouncerContainer
+            verify(view).findViewById<ViewGroup>(R.id.keyguard_bouncer_container)
+        }
+
+    @Test
+    fun testGetKeyguardMessageArea() =
+        testScope.runTest {
+            underTest.keyguardMessageArea
+            verify(view).findViewById<ViewGroup>(R.id.keyguard_message_area)
+        }
+
+    companion object {
+        private val DOWN_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+        private const val VIEW_BOTTOM = 100
     }
 }
-
-private val downEv = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
-private const val VIEW_BOTTOM = 100
