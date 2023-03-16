@@ -275,9 +275,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
 
     @Test
     public void testPanelStaysOpenWhenClosingQs() {
-        mShadeExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
-                /* expanded= */ true, /* tracking= */ false, /* dragDownPxAmount= */ 0);
-        mQsController.setShadeExpandedHeight(1);
+        mQsController.setShadeExpansion(/* shadeExpandedHeight= */ 1, /* expandedFraction=*/ 1);
 
         float shadeExpandedHeight = mQsController.getShadeExpandedHeight();
         mQsController.animateCloseQs(false);
@@ -289,7 +287,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     public void interceptTouchEvent_withinQs_shadeExpanded_startsQsTracking() {
         mQsController.setQs(mQs);
 
-        mQsController.setShadeExpandedHeight(1f);
+        mQsController.setShadeExpansion(/* shadeExpandedHeight= */ 1, /* expandedFraction=*/ 1);
         mQsController.onIntercept(
                 createMotionEvent(0, 0, ACTION_DOWN));
         mQsController.onIntercept(
@@ -303,7 +301,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
         enableSplitShade(true);
         mQsController.setQs(mQs);
 
-        mQsController.setShadeExpandedHeight(1f);
+        mQsController.setShadeExpansion(/* shadeExpandedHeight= */ 1, /* expandedFraction=*/ 1);
         mQsController.onIntercept(
                 createMotionEvent(0, 0, ACTION_DOWN));
         mQsController.onIntercept(
@@ -342,13 +340,8 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     public void handleTouch_downActionInQsArea() {
         mQsController.setQs(mQs);
         mQsController.setBarState(SHADE);
-        mQsController.onPanelExpansionChanged(
-                new ShadeExpansionChangeEvent(
-                        0.5f,
-                        true,
-                        true,
-                        0
-                ));
+        mQsController.setShadeExpansion(/* shadeExpandedHeight= */ 1, /* expandedFraction=*/ 0.5f);
+
         MotionEvent event =
                 createMotionEvent(QS_FRAME_WIDTH / 2, QS_FRAME_BOTTOM / 2, ACTION_DOWN);
         mQsController.handleTouch(event, false, false);
@@ -385,7 +378,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     @Test
     public void handleTouch_isConflictingExpansionGestureSet() {
         assertThat(mQsController.isConflictingExpansionGesture()).isFalse();
-        mShadeExpansionStateManager.onPanelExpansionChanged(1f, true, false, 0f);
+        mQsController.setShadeExpansion(/* shadeExpandedHeight= */ 1, /* expandedFraction=*/ 1);
         mQsController.handleTouch(MotionEvent.obtain(0L /* downTime */,
                 0L /* eventTime */, ACTION_DOWN, 0f /* x */, 0f /* y */,
                 0 /* metaState */), false, false);
@@ -394,7 +387,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
 
     @Test
     public void handleTouch_isConflictingExpansionGestureSet_cancel() {
-        mShadeExpansionStateManager.onPanelExpansionChanged(1f, true, false, 0f);
+        mQsController.setShadeExpansion(/* shadeExpandedHeight= */ 1, /* expandedFraction=*/ 1);
         mQsController.handleTouch(createMotionEvent(0, 0, ACTION_DOWN), false, false);
         assertThat(mQsController.isConflictingExpansionGesture()).isTrue();
         mQsController.handleTouch(createMotionEvent(0, 0, ACTION_UP), true, true);
