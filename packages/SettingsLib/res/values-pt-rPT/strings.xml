@@ -118,7 +118,7 @@
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Dispositivo de entrada"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Acesso à internet"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Partilha de contactos"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Utilizar para a partilha de contactos"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Usar para a partilha de contactos"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Partilha da ligação à internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Mensagens de texto"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Acesso ao SIM"</string>
@@ -137,15 +137,15 @@
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"Ligado a um dispositivo de entrada"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Lig. ao disposit. p/ acesso à Internet"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"A partilhar lig. à Internet local c/ dispos."</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Utilizar para acesso à Internet"</string>
-    <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Utilizar para o mapa"</string>
-    <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"Utilizar para acesso ao SIM"</string>
-    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"Utilizar para áudio de multimédia"</string>
-    <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Utilizar para áudio do telefone"</string>
-    <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Utilizar para transferência de ficheiros"</string>
-    <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Utilizar para entrada"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Utilizar para aparelhos auditivos"</string>
-    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Utilizar para LE_AUDIO"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Usar para acesso à Internet"</string>
+    <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Usar para o mapa"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"Usar para acesso ao SIM"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"Usar para áudio de multimédia"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Usar para áudio do telefone"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Usar para transferência de ficheiros"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Usar para entrada"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Usar para aparelhos auditivos"</string>
+    <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Usar para LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Sincr."</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SINCRONIZAR"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
@@ -441,7 +441,7 @@
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Definir implementação WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Esta opção já não é válida. Tente novamente."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Modo de cor da imagem"</string>
-    <string name="picture_color_mode_desc" msgid="151780973768136200">"Utilizar sRGB"</string>
+    <string name="picture_color_mode_desc" msgid="151780973768136200">"Usar sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Desativado"</string>
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Monocromacia"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomalia (vermelho-verde)"</string>
@@ -511,9 +511,9 @@
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Próximo"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Palavra-passe obrigatória"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Métodos de introdução activos"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Utilizar idiomas do sistema"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Usar idiomas do sistema"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Falha ao abrir as definições para <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
-    <string name="ime_security_warning" msgid="6547562217880551450">"Este método de introdução pode permitir a recolha de todo o texto que digitar, incluindo dados pessoais como, por exemplo, palavras-passe e números de cartões de crédito. Decorre da aplicação <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Utilizar este método de introdução?"</string>
+    <string name="ime_security_warning" msgid="6547562217880551450">"Este método de introdução pode permitir a recolha de todo o texto que digitar, incluindo dados pessoais como, por exemplo, palavras-passe e números de cartões de crédito. Decorre da aplicação <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Usar este método de introdução?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Nota: após reiniciar, só é possível iniciar esta aplicação quando o telemóvel for desbloqueado."</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Estado do registo IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Registado"</string>
@@ -649,7 +649,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teclado físico"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Escolha um esquema de teclado"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Predefinição"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Ative o ecrã"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Ativação do ecrã"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permitir a ativação do ecrã"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permita que uma app ative o ecrã. Se a autorização for concedida, a app pode ativar o ecrã em qualquer altura sem a sua intenção explícita."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Interromper a transmissão da app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

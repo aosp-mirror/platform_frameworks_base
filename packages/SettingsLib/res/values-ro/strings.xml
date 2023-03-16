@@ -523,7 +523,7 @@
     <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{Niciun dispozitiv conectat}=1{Un dispozitiv conectat}few{# dispozitive conectate}other{# de dispozitive conectate}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mai mult timp."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Mai puțin timp."</string>
-    <string name="cancel" msgid="5665114069455378395">"Anulați"</string>
+    <string name="cancel" msgid="5665114069455378395">"Anulează"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Gata"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarme și mementouri"</string>
