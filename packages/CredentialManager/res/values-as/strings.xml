@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"একাউণ্টৰ উন্নত সুৰক্ষা"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"প্ৰতিটো চাবি বিশেষভাৱে সেই এপ্‌ অথবা ৱেবছাইটৰ সৈতে লিংক কৰা হয় যাৰ বাবে সেইটো সৃষ্টি কৰা হৈছে, সেয়ে আপুনি কেতিয়াও ভুলতে কোনো প্ৰৱঞ্চনামূলক এপ্‌ অথবা ৱেবছাইটত ছাইন ইন কৰিব নোৱাৰে। ইয়াৰ উপৰিও, কেৱল ৰাজহুৱা চাবিসমূহ ৰখা ছাৰ্ভাৰৰ ক্ষেত্ৰত হেক কৰাটো বহুত কঠিন হৈ পৰে।"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"বাধাহীন স্থানান্তৰণ"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"আমি পাছৱৰ্ডবিহীন ভৱিষ্যতৰ দিশে আগবঢ়াৰ লগে লগে পাছকীৰ লগতে পাছৱৰ্ডসমূহো উপলব্ধ হ’ব"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"আপোনাৰ <xliff:g id="CREATETYPES">%1$s</xliff:g> ক’ত ছেভ কৰিব লাগে সেয়া বাছনি কৰক"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"আপোনাৰ তথ্য ছেভ কৰি পৰৱৰ্তী সময়ত দ্ৰুতভাৱে ছাইন ইন কৰিবলৈ এটা পাছৱৰ্ড পৰিচালক বাছনি কৰক"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g>ৰ বাবে পাছকী সৃষ্টি কৰিবনে?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ইয়াত ছেভ কৰক"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"অন্য এটা ডিভাইচত পাছকী সৃষ্টি কৰিবনে?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"আপোনাৰ আটাইবোৰ ছাইন ইনৰ বাবে <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ব্যৱহাৰ কৰিবনে?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"আপোনাক সহজে ছাইন ইন কৰাত সহায় কৰিবলৈ <xliff:g id="USERNAME">%1$s</xliff:g>ৰ বাবে থকা এই পাছৱৰ্ড পৰিচালকে আপোনাৰ পাছৱৰ্ড আৰু পাছকী ষ্ট’ৰ কৰিব"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ডিফ’ল্ট হিচাপে ছেট কৰক"</string>
     <string name="use_once" msgid="9027366575315399714">"এবাৰ ব্যৱহাৰ কৰক"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> টা পাছৱৰ্ড • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> টা পাছকী"</string>

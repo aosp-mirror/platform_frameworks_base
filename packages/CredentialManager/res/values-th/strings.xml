@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"ความปลอดภัยของบัญชีที่เพิ่มมากขึ้น"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"คีย์ที่สร้างขึ้นแต่ละคีย์จะลิงก์กับแอปหรือเว็บไซต์ที่ใช้งานคีย์ดังกล่าวเท่านั้น ดังนั้นจึงไม่มีการลงชื่อเข้าใช้แอปเว็บไซต์ที่เป็นการฉ้อโกงโดยไม่ตั้งใจเกิดขึ้น นอกจากนี้ เซิร์ฟเวอร์จะบันทึกเฉพาะคีย์สาธารณะ จึงทำให้แฮ็กได้ยากขึ้น"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"การเปลี่ยนผ่านอย่างราบรื่น"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"ในขณะที่เราก้าวไปสู่อนาคตที่ไม่ต้องใช้รหัสผ่านนั้น รหัสผ่านจะยังคงใช้ได้อยู่ควบคู่ไปกับการเปลี่ยนไปใช้พาสคีย์"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"เลือกว่าต้องการบันทึก<xliff:g id="CREATETYPES">%1$s</xliff:g>ไว้ที่ใด"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"เลือกเครื่องมือจัดการรหัสผ่านเพื่อบันทึกข้อมูลและลงชื่อเข้าใช้เร็วขึ้นในครั้งถัดไป"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"สร้างพาสคีย์สำหรับ <xliff:g id="APPNAME">%1$s</xliff:g> ไหม"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"บันทึก<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>ไปยัง"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"สร้างพาสคีย์ในอุปกรณ์อื่นไหม"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ใช้ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> สำหรับการลงชื่อเข้าใช้ทั้งหมดใช่ไหม"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"เครื่องมือจัดการรหัสผ่านสำหรับ <xliff:g id="USERNAME">%1$s</xliff:g> นี้จะจัดเก็บรหัสผ่านและพาสคีย์ไว้เพื่อช่วยให้คุณลงชื่อเข้าใช้ได้โดยง่าย"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ตั้งเป็นค่าเริ่มต้น"</string>
     <string name="use_once" msgid="9027366575315399714">"ใช้ครั้งเดียว"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"รหัสผ่าน <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> รายการ • พาสคีย์ <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> รายการ"</string>

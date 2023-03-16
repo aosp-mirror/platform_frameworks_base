@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Βελτιωμένη ασφάλεια λογαριασμού"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Κάθε κλειδί συνδέεται αποκλειστικά με την εφαρμογή ή τον ιστότοπο για τον οποίο δημιουργήθηκε ώστε να μην συνδέεστε ποτέ κατά λάθος σε μη νόμιμες εφαρμογές ή ιστοτόπους. Επιπλέον, οι παραβιάσεις είναι πολύ πιο δύσκολες, επειδή οι διακομιστές διατηρούν μόνο δημόσια κλειδιά."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Απρόσκοπτη μετάβαση"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Καθώς κινούμαστε προς ένα μέλλον χωρίς κωδικούς πρόσβασης, οι κωδικοί πρόσβασης θα εξακολουθούν να είναι διαθέσιμοι μαζί με τα κλειδιά πρόσβασης"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Επιλέξτε πού θα αποθηκεύονται τα <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Επιλέξτε ένα πρόγραμμα διαχείρισης κωδικών πρόσβασης για να αποθηκεύσετε τα στοιχεία σας και να συνδεθείτε πιο γρήγορα την επόμενη φορά."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Δημιουργία κλειδιού πρόσβασης για <xliff:g id="APPNAME">%1$s</xliff:g>;"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Αποθήκευση <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> σε"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Δημιουργία κλειδιού πρόσβασης σε άλλη συσκευή;"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Να χρησιμοποιηθεί το <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> για όλες τις συνδέσεις σας;"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Αυτός ο διαχειριστής κωδικών πρόσβασης για τον χρήστη <xliff:g id="USERNAME">%1$s</xliff:g> θα αποθηκεύει τους κωδικούς πρόσβασης και τα κλειδιά πρόσβασης, για πιο εύκολη πρόσβαση"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Ορισμός ως προεπιλογής"</string>
     <string name="use_once" msgid="9027366575315399714">"Χρήση μία φορά"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> κωδικοί πρόσβασης • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> κλειδιά πρόσβασης"</string>
