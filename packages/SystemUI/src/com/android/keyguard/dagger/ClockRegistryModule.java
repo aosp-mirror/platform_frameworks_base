@@ -60,7 +60,9 @@ public abstract class ClockRegistryModule {
                 featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS),
                 /* handleAllUsers= */ true,
                 new DefaultClockProvider(context, layoutInflater, resources),
-                context.getString(R.string.lockscreen_clock_id_fallback));
+                context.getString(R.string.lockscreen_clock_id_fallback),
+                /* keepAllLoaded = */ false,
+                /* subTag = */ "System");
         registry.registerListeners();
         return registry;
     }
