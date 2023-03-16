@@ -69,7 +69,7 @@ public abstract class Animator implements Cloneable {
      * backing field for backgroundPauseDelay property. This could be simply a hardcoded
      * value in AnimationHandler, but it is useful to be able to change the value in tests.
      */
-    private static long sBackgroundPauseDelay = 10000;
+    private static long sBackgroundPauseDelay = 1000;
 
     /**
      * A cache of the values in a list. Used so that when calling the list, we have a copy
