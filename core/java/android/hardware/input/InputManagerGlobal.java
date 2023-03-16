@@ -30,12 +30,15 @@ import android.hardware.input.InputManager.OnTabletModeChangedListener;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
 import android.hardware.lights.LightsRequest;
+import android.os.CombinedVibration;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IVibratorStateListener;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.VibrationEffect;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -974,6 +977,84 @@ public final class InputManagerGlobal {
             mIm.closeLightSession(deviceId, token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /*
+     * Get the list of device vibrators
+     * @return The list of vibrators IDs
+     */
+    int[] getVibratorIds(int deviceId) {
+        try {
+            return mIm.getVibratorIds(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /*
+     * Perform vibration effect
+     */
+    void vibrate(int deviceId, VibrationEffect effect, IBinder token) {
+        try {
+            mIm.vibrate(deviceId, effect, token);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /*
+     * Perform combined vibration effect
+     */
+    void vibrate(int deviceId, CombinedVibration effect, IBinder token) {
+        try {
+            mIm.vibrateCombined(deviceId, effect, token);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /*
+     * Cancel an ongoing vibration
+     */
+    void cancelVibrate(int deviceId, IBinder token) {
+        try {
+            mIm.cancelVibrate(deviceId, token);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /*
+     * Check if input device is vibrating
+     */
+    boolean isVibrating(int deviceId)  {
+        try {
+            return mIm.isVibrating(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Register input device vibrator state listener
+     */
+    boolean registerVibratorStateListener(int deviceId, IVibratorStateListener listener) {
+        try {
+            return mIm.registerVibratorStateListener(deviceId, listener);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister input device vibrator state listener
+     */
+    boolean unregisterVibratorStateListener(int deviceId, IVibratorStateListener listener) {
+        try {
+            return mIm.unregisterVibratorStateListener(deviceId, listener);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 }
