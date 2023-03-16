@@ -41,6 +41,7 @@ import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -518,14 +519,15 @@ public interface Computer extends PackageDataSnapshot {
      * returns false.
      */
     boolean isComponentEffectivelyEnabled(@NonNull ComponentInfo componentInfo,
-            @UserIdInt int userId);
+            @NonNull UserHandle userHandle);
 
     /**
      * @return true if the runtime app user enabled state and the install-time app manifest enabled
      * state are both effectively enabled for the given app. Or if the app cannot be found,
      * returns false.
      */
-    boolean isApplicationEffectivelyEnabled(@NonNull String packageName, @UserIdInt int userId);
+    boolean isApplicationEffectivelyEnabled(@NonNull String packageName,
+            @NonNull UserHandle userHandle);
 
     @Nullable
     KeySet getKeySetByAlias(@NonNull String packageName, @NonNull String alias);
