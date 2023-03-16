@@ -53,6 +53,7 @@ import kotlinx.coroutines.runBlocking
 fun View.captureToBitmap(window: Window? = null): ListenableFuture<Bitmap> {
     val bitmapFuture: ResolvableFuture<Bitmap> = ResolvableFuture.create()
     val mainExecutor = HandlerExecutor(Handler(Looper.getMainLooper()))
+    val isRobolectric = if (Build.FINGERPRINT.contains("robolectric")) true else false
 
     // disable drawing again if necessary once work is complete
     if (!HardwareRendererCompat.isDrawingEnabled()) {
@@ -61,8 +62,12 @@ fun View.captureToBitmap(window: Window? = null): ListenableFuture<Bitmap> {
     }
 
     mainExecutor.execute {
-        val forceRedrawFuture = forceRedraw()
-        forceRedrawFuture.addListener({ generateBitmap(bitmapFuture, window) }, mainExecutor)
+        if (isRobolectric) {
+            generateBitmap(bitmapFuture)
+        } else {
+            val forceRedrawFuture = forceRedraw()
+            forceRedrawFuture.addListener({ generateBitmap(bitmapFuture, window) }, mainExecutor)
+        }
     }
 
     return bitmapFuture
