@@ -25,6 +25,7 @@ import static com.android.systemui.statusbar.phone.ScrimState.SHADE_LOCKED;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -1163,8 +1164,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void testScrimFocus() {
         mScrimController.transitionTo(ScrimState.AOD);
-        Assert.assertFalse("Should not be focusable on AOD", mScrimBehind.isFocusable());
-        Assert.assertFalse("Should not be focusable on AOD", mScrimInFront.isFocusable());
+        assertFalse("Should not be focusable on AOD", mScrimBehind.isFocusable());
+        assertFalse("Should not be focusable on AOD", mScrimInFront.isFocusable());
 
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         Assert.assertTrue("Should be focusable on keyguard", mScrimBehind.isFocusable());
@@ -1224,7 +1225,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void testAnimatesTransitionToAod() {
         when(mDozeParameters.shouldControlScreenOff()).thenReturn(false);
         ScrimState.AOD.prepare(ScrimState.KEYGUARD);
-        Assert.assertFalse("No animation when ColorFade kicks in",
+        assertFalse("No animation when ColorFade kicks in",
                 ScrimState.AOD.getAnimateChange());
 
         reset(mDozeParameters);
@@ -1236,9 +1237,9 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testViewsDontHaveFocusHighlight() {
-        Assert.assertFalse("Scrim shouldn't have focus highlight",
+        assertFalse("Scrim shouldn't have focus highlight",
                 mScrimInFront.getDefaultFocusHighlightEnabled());
-        Assert.assertFalse("Scrim shouldn't have focus highlight",
+        assertFalse("Scrim shouldn't have focus highlight",
                 mScrimBehind.getDefaultFocusHighlightEnabled());
     }
 
@@ -1738,7 +1739,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void aodStateSetsFrontScrimToNotBlend() {
         mScrimController.transitionTo(ScrimState.AOD);
-        Assert.assertFalse("Front scrim should not blend with main color",
+        assertFalse("Front scrim should not blend with main color",
                 mScrimInFront.shouldBlendWithMainColor());
     }
 
@@ -1771,6 +1772,14 @@ public class ScrimControllerTest extends SysuiTestCase {
                         TransitionState.FINISHED, "ScrimControllerTest"));
 
         verify(mStatusBarKeyguardViewManager).onKeyguardFadedAway();
+    }
+
+    @Test
+    public void testDoNotAnimateChangeIfOccludeAnimationPlaying() {
+        mScrimController.setOccludeAnimationPlaying(true);
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+
+        assertFalse(ScrimState.UNLOCKED.mAnimateChange);
     }
 
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {
