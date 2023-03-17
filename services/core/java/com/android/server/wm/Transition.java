@@ -1107,12 +1107,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // needs to be updated for STATE_ABORT.
         commitVisibleActivities(transaction);
 
+        // Fall-back to the default display if there isn't one participating.
+        final DisplayContent primaryDisplay = !mTargetDisplays.isEmpty() ? mTargetDisplays.get(0)
+                : mController.mAtm.mRootWindowContainer.getDefaultDisplay();
+
         if (mState == STATE_ABORT) {
             mController.abort(this);
-            // Fall-back to the default display if there isn't one participating.
-            final DisplayContent dc = !mTargetDisplays.isEmpty() ? mTargetDisplays.get(0)
-                    : mController.mAtm.mRootWindowContainer.getDefaultDisplay();
-            dc.getPendingTransaction().merge(transaction);
+            primaryDisplay.getPendingTransaction().merge(transaction);
             mSyncId = -1;
             mOverrideOptions = null;
             cleanUpInternal();
@@ -1124,6 +1125,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mFinishTransaction = mController.mAtm.mWindowManager.mTransactionFactory.get();
         mController.moveToPlaying(this);
 
+        // Flags must be assigned before calculateTransitionInfo. Otherwise it won't take effect.
+        if (primaryDisplay.isKeyguardLocked()) {
+            mFlags |= TRANSIT_FLAG_KEYGUARD_LOCKED;
+        }
         // Check whether the participants were animated from back navigation.
         final boolean markBackAnimated = mController.mAtm.mBackNavigationController
                 .containsBackAnimationTargets(this);
@@ -1137,9 +1142,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final DisplayContent dc = mController.mAtm.mRootWindowContainer.getDisplayContent(
                     info.getRoot(i).getDisplayId());
             mTargetDisplays.add(dc);
-            if (dc.isKeyguardLocked()) {
-                mFlags |= TRANSIT_FLAG_KEYGUARD_LOCKED;
-            }
         }
 
         if (markBackAnimated) {
