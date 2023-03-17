@@ -27,6 +27,7 @@ import android.credentials.GetCredentialResponse;
 import android.credentials.IGetCredentialCallback;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.RequestInfo;
+import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
@@ -84,11 +85,12 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     protected void launchUiWithProviderData(ArrayList<ProviderData> providerDataList) {
         mChosenProviderFinalPhaseMetric.setUiCallStartTimeNanoseconds(System.nanoTime());
         try {
-            mClientCallback.onPendingIntent(mCredentialManagerUi.createPendingIntent(
+            Binder.withCleanCallingIdentity(() ->
+                    mClientCallback.onPendingIntent(mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newGetRequestInfo(
-                    mRequestId, mClientRequest, mClientAppInfo.getPackageName()),
-                    providerDataList));
-        } catch (RemoteException e) {
+                            mRequestId, mClientRequest, mClientAppInfo.getPackageName()),
+                    providerDataList)));
+        } catch (RuntimeException e) {
             mChosenProviderFinalPhaseMetric.setUiReturned(false);
             respondToClientWithErrorAndFinish(
                     GetCredentialException.TYPE_UNKNOWN, "Unable to instantiate selector");
