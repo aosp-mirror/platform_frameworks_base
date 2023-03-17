@@ -21,6 +21,8 @@ import static android.service.notification.NotificationListenerService.Ranking.U
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -35,10 +37,12 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent;
+import android.app.Person;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
@@ -46,11 +50,14 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.RemoteException;
+import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.SnoozeCriterion;
+import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -63,6 +70,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @SmallTest
@@ -92,6 +100,31 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         assertNotNull(service.getActiveNotifications(new String[0]));
         assertNotNull(service.getActiveNotifications(
                 new String[0], NotificationListenerService.TRIM_LIGHT));
+    }
+
+    @Test
+    public void testGetActiveNotifications_preP_mapsExtraPeople() throws RemoteException {
+        TestListenerService service = new TestListenerService();
+        service.attachBaseContext(mContext);
+        service.targetSdk = Build.VERSION_CODES.O_MR1;
+
+        Notification notification = new Notification();
+        ArrayList<Person> people = new ArrayList<>();
+        people.add(new Person.Builder().setUri("uri1").setName("P1").build());
+        people.add(new Person.Builder().setUri("uri2").setName("P2").build());
+        notification.extras.putParcelableArrayList(Notification.EXTRA_PEOPLE_LIST, people);
+        when(service.getNoMan().getActiveNotificationsFromListener(any(), any(), anyInt()))
+                .thenReturn(new ParceledListSlice<StatusBarNotification>(Arrays.asList(
+                        new StatusBarNotification("pkg", "opPkg", 1, "tag", 123, 1234,
+                                notification, UserHandle.of(0), null, 0))));
+
+        StatusBarNotification[] sbns = service.getActiveNotifications();
+
+        assertThat(sbns).hasLength(1);
+        String[] mappedPeople = sbns[0].getNotification().extras.getStringArray(
+                Notification.EXTRA_PEOPLE);
+        assertThat(mappedPeople).isNotNull();
+        assertThat(mappedPeople).asList().containsExactly("uri1", "uri2");
     }
 
     @Test
