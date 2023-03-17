@@ -17,6 +17,7 @@
 package com.android.systemui.dagger
 
 import com.android.keyguard.KeyguardBiometricLockoutLogger
+import com.android.systemui.ChooserPinMigration
 import com.android.systemui.ChooserSelector
 import com.android.systemui.CoreStartable
 import com.android.systemui.LatencyTester
@@ -75,6 +76,13 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(AuthController::class)
     abstract fun bindAuthController(service: AuthController): CoreStartable
+
+    /** Inject into ChooserPinMigration. */
+    @Binds
+    @IntoMap
+    @ClassKey(ChooserPinMigration::class)
+    @PerUser
+    abstract fun bindChooserPinMigration(sysui: ChooserPinMigration): CoreStartable
 
     /** Inject into ChooserCoreStartable. */
     @Binds

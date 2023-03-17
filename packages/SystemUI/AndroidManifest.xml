@@ -344,6 +344,15 @@
 
     <uses-permission android:name="android.permission.MONITOR_KEYBOARD_BACKLIGHT" />
 
+    <!-- Intent Chooser -->
+    <permission
+        android:name="android.permission.ADD_CHOOSER_PINS"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="android.permission.ADD_CHOOSER_PINS" />
+    <permission
+        android:name="android.permission.RECEIVE_CHOOSER_PIN_MIGRATION"
+        android:protectionLevel="signature" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
