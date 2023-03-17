@@ -3,7 +3,7 @@
 option java_package com.android.internal.jank;
 
 # Marks a request to start tracing a CUJ. Doesn't mean the request was executed.
-37001 jank_cuj_events_begin_request (CUJ Type|1|5),(Unix Time Ns|2|3),(Elapsed Time Ns|2|3),(Uptime Ns|2|3)
+37001 jank_cuj_events_begin_request (CUJ Type|1|5),(Unix Time Ns|2|3),(Elapsed Time Ns|2|3),(Uptime Ns|2|3),(Tag|3)
 # Marks a request to end tracing a CUJ. Doesn't mean the request was executed.
 37002 jank_cuj_events_end_request (CUJ Type|1|5),(Unix Time Ns|2|3),(Elapsed Time Ns|2|3),(Uptime Time Ns|2|3)
 # Marks a request to cancel tracing a CUJ. Doesn't mean the request was executed.
