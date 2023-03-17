@@ -35,7 +35,6 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.view.LaunchableImageView;
 import com.android.systemui.condition.SelfExecutingMonitor;
@@ -89,9 +88,6 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     private ArgumentCaptor<ControlsListingController.ControlsListingCallback> mCallbackCaptor;
 
     @Mock
-    private View mView;
-
-    @Mock
     private LaunchableImageView mHomeControlsView;
 
     @Mock
@@ -115,7 +111,6 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
         when(mControlsComponent.getControlsListingController()).thenReturn(
                 Optional.of(mControlsListingController));
         when(mControlsComponent.getVisibility()).thenReturn(AVAILABLE);
-        when(mView.findViewById(R.id.home_controls_chip)).thenReturn(mHomeControlsView);
 
         mMonitor = SelfExecutingMonitor.createInstance();
     }
@@ -223,7 +218,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void testClick_logsUiEvent() {
         final DreamHomeControlsComplication.DreamHomeControlsChipViewController viewController =
                 new DreamHomeControlsComplication.DreamHomeControlsChipViewController(
-                        mView,
+                        mHomeControlsView,
                         mActivityStarter,
                         mContext,
                         mControlsComponent,
