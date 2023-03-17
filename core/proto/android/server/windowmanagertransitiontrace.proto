@@ -53,7 +53,8 @@ message Transition {
   required int64 create_time_ns = 4;
   required int64 send_time_ns = 5;
   optional int64 finish_time_ns = 6; // consider aborted if not provided
-  repeated Target targets = 7;
+  required int32 type = 7;
+  repeated Target targets = 8;
 }
 
 message Target {
