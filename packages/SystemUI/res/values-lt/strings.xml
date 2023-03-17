@@ -807,7 +807,8 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Pridėtas # valdiklis.}one{Pridėtas # valdiklis.}few{Pridėti # valdikliai.}many{Pridėta # valdiklio.}other{Pridėta # valdiklių.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Pašalinta"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Pridėti „<xliff:g id="APPNAME">%s</xliff:g>“?"</string>
-    <string name="controls_panel_authorization" msgid="4665218066461350247">"„<xliff:g id="APPNAME">%s</xliff:g>“ gali pasirinkti, kuriuos valdiklius ir turinį čia rodyti."</string>
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
+    <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Pašalinti „<xliff:g id="APPNAME">%s</xliff:g>“ valdiklius?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Įtraukta į mėgstamiausius"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Įtraukta į mėgstamiausius, padėtis: <xliff:g id="NUMBER">%d</xliff:g>"</string>

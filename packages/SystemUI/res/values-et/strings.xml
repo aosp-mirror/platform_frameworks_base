@@ -807,7 +807,8 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Lisati # juhtnupp.}other{Lisati # juhtnuppu.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Eemaldatud"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Kas lisada <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <string name="controls_panel_authorization" msgid="4665218066461350247">"Rakendus <xliff:g id="APPNAME">%s</xliff:g> saab valida, millised juhtelemendid ja milline sisu siin kuvatakse."</string>
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
+    <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Kas soovite rakenduse <xliff:g id="APPNAME">%s</xliff:g> juhtelemendid eemaldada?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Lisatud lemmikuks"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Lisatud lemmikuks, positsioon <xliff:g id="NUMBER">%d</xliff:g>"</string>
