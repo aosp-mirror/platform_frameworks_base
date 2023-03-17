@@ -834,8 +834,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Memperbesar tampilan layar penuh"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Perbesar sebagian layar"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Alihkan"</string>
-    <!-- no translation found for magnification_open_settings_click_label (6151849212725923363) -->
-    <skip />
+    <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Buka setelan pembesaran"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Tarik pojok persegi untuk mengubah ukuran"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Izinkan scrolling diagonal"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Ubah ukuran"</string>
@@ -845,8 +844,7 @@
     <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"Tuas kiri"</string>
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Tuas kanan"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Tuas bawah"</string>
-    <!-- no translation found for accessibility_magnification_settings_panel_description (8174187340747846953) -->
-    <skip />
+    <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Setelan pembesaran"</string>
     <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Ukuran kaca pembesar"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Zoom"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Sedang"</string>
@@ -873,8 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# kontrol ditambahkan.}other{# kontrol ditambahkan.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Dihapus"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Tambahkan <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> dapat memilih kontrol dan konten yang ditampilkan di sini."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Hapus kontrol untuk <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Difavoritkan"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Difavoritkan, posisi <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -899,8 +896,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Tampilkan dan kontrol perangkat dari layar kunci?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Anda dapat menambahkan kontrol untuk perangkat eksternal ke layar kunci.\n\nAplikasi perangkat Anda mungkin mengizinkan Anda mengontrol beberapa perangkat tanpa membuka kunci ponsel atau tablet.\n\nAnda dapat melakukan perubahan kapan saja di Setelan."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Kontrol perangkat dari layar kunci?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Anda dapat mengontrol beberapa perangkat tanpa membuka kunci ponsel atau tablet. Aplikasi perangkat Anda menentukan perangkat yang dapat dikontrol dengan cara ini."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Lain kali"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Ya"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN berisi huruf atau simbol"</string>

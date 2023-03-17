@@ -871,8 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# 件のコントロールを追加しました。}other{# 件のコントロールを追加しました。}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"削除済み"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> を追加しますか？"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> はここに表示されるコントロールとコンテンツを選択できます。"</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> のコントロールを削除しますか？"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"お気に入りに追加済み"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"お気に入りに追加済み、位置: <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -897,8 +896,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"ロック画面にデバイスを表示して操作しますか？"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"ロック画面に外部デバイスのコントロールを追加できます。\n\nスマートフォンやタブレットのロックを解除しなくても、デバイスアプリによって一部のデバイスを操作できる可能性があります。\n\n設定でいつでも変更できます。"</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"ロック画面でデバイスを操作しますか？"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"スマートフォンやタブレットのロックを解除しなくても、一部のデバイスを操作できます。この方法でどのデバイスを操作できるかは、デバイスアプリが判断します。"</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"いいえ"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"はい"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN に英字や記号を含める"</string>

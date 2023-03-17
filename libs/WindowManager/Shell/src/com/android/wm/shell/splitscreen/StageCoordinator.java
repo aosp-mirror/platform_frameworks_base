@@ -259,37 +259,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
             };
 
-    private final SplitScreenTransitions.TransitionFinishedCallback
-            mRecentTransitionFinishedCallback =
-            new SplitScreenTransitions.TransitionFinishedCallback() {
-                @Override
-                public void onFinished(WindowContainerTransaction finishWct,
-                        SurfaceControl.Transaction finishT) {
-                    // Check if the recent transition is finished by returning to the current
-                    // split, so we
-                    // can restore the divider bar.
-                    for (int i = 0; i < finishWct.getHierarchyOps().size(); ++i) {
-                        final WindowContainerTransaction.HierarchyOp op =
-                                finishWct.getHierarchyOps().get(i);
-                        final IBinder container = op.getContainer();
-                        if (op.getType() == HIERARCHY_OP_TYPE_REORDER && op.getToTop()
-                                && (mMainStage.containsContainer(container)
-                                || mSideStage.containsContainer(container))) {
-                            updateSurfaceBounds(mSplitLayout, finishT,
-                                    false /* applyResizingOffset */);
-                            setDividerVisibility(true, finishT);
-                            return;
-                        }
-                    }
-
-                    // Dismiss the split screen if it's not returning to split.
-                    prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, finishWct);
-                    setSplitsVisible(false);
-                    setDividerVisibility(false, finishT);
-                    logExit(EXIT_REASON_UNKNOWN);
-                }
-            };
-
     protected StageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
             ShellTaskOrganizer taskOrganizer, DisplayController displayController,
             DisplayImeController displayImeController,
@@ -386,6 +355,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     public boolean isSplitActive() {
         return mMainStage.isActive();
+    }
+
+    /** Checks if `transition` is a pending enter-split transition. */
+    public boolean isPendingEnter(IBinder transition) {
+        return mSplitTransitions.isPendingEnter(transition);
     }
 
     @StageType
@@ -2264,11 +2238,16 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
             } else if (isOpening && inFullscreen) {
                 final int activityType = triggerTask.getActivityType();
-                if (activityType == ACTIVITY_TYPE_HOME
-                        || activityType == ACTIVITY_TYPE_RECENTS) {
-                    // Enter overview panel, so start recent transition.
-                    mSplitTransitions.setRecentTransition(transition, request.getRemoteTransition(),
-                            mRecentTransitionFinishedCallback);
+                if (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS) {
+                    if (request.getRemoteTransition() != null) {
+                        // starting recents/home, so don't handle this and let it fall-through to
+                        // the remote handler.
+                        return null;
+                    }
+                    // Need to use the old stuff for non-remote animations, otherwise we don't
+                    // exit split-screen.
+                    mSplitTransitions.setRecentTransition(transition, null /* remote */,
+                            this::onRecentsInSplitAnimationFinish);
                 }
             }
         } else {
@@ -2398,7 +2377,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             shouldAnimate = startPendingEnterAnimation(
                     transition, info, startTransaction, finishTransaction);
         } else if (mSplitTransitions.isPendingRecent(transition)) {
-            shouldAnimate = startPendingRecentAnimation(transition, info, startTransaction);
+            onRecentsInSplitAnimationStart(startTransaction);
         } else if (mSplitTransitions.isPendingDismiss(transition)) {
             shouldAnimate = startPendingDismissAnimation(
                     mSplitTransitions.mPendingDismiss, info, startTransaction, finishTransaction);
@@ -2653,10 +2632,35 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return true;
     }
 
-    private boolean startPendingRecentAnimation(@NonNull IBinder transition,
-            @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction t) {
+    /** Call this when starting the open-recents animation while split-screen is active. */
+    public void onRecentsInSplitAnimationStart(@NonNull SurfaceControl.Transaction t) {
         setDividerVisibility(false, t);
-        return true;
+    }
+
+    /** Call this when the recents animation during split-screen finishes. */
+    public void onRecentsInSplitAnimationFinish(WindowContainerTransaction finishWct,
+            SurfaceControl.Transaction finishT) {
+        // Check if the recent transition is finished by returning to the current
+        // split, so we can restore the divider bar.
+        for (int i = 0; i < finishWct.getHierarchyOps().size(); ++i) {
+            final WindowContainerTransaction.HierarchyOp op =
+                    finishWct.getHierarchyOps().get(i);
+            final IBinder container = op.getContainer();
+            if (op.getType() == HIERARCHY_OP_TYPE_REORDER && op.getToTop()
+                    && (mMainStage.containsContainer(container)
+                    || mSideStage.containsContainer(container))) {
+                updateSurfaceBounds(mSplitLayout, finishT,
+                        false /* applyResizingOffset */);
+                setDividerVisibility(true, finishT);
+                return;
+            }
+        }
+
+        // Dismiss the split screen if it's not returning to split.
+        prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, finishWct);
+        setSplitsVisible(false);
+        setDividerVisibility(false, finishT);
+        logExit(EXIT_REASON_UNKNOWN);
     }
 
     private void addDividerBarToTransition(@NonNull TransitionInfo info,

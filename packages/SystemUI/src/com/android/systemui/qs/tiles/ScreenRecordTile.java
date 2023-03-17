@@ -42,6 +42,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
@@ -66,6 +67,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
     private final Callback mCallback = new Callback();
     private final DialogLaunchAnimator mDialogLaunchAnimator;
     private final FeatureFlags mFlags;
+    private final PanelInteractor mPanelInteractor;
 
     private long mMillisUntilFinished = 0;
 
@@ -83,7 +85,8 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             RecordingController controller,
             KeyguardDismissUtil keyguardDismissUtil,
             KeyguardStateController keyguardStateController,
-            DialogLaunchAnimator dialogLaunchAnimator
+            DialogLaunchAnimator dialogLaunchAnimator,
+            PanelInteractor panelInteractor
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
@@ -93,6 +96,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         mKeyguardDismissUtil = keyguardDismissUtil;
         mKeyguardStateController = keyguardStateController;
         mDialogLaunchAnimator = dialogLaunchAnimator;
+        mPanelInteractor = panelInteractor;
     }
 
     @Override
@@ -171,7 +175,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             // disable the exit animation which looks weird when it happens at the same time as the
             // shade collapsing.
             mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
-            getHost().collapsePanels();
+            mPanelInteractor.collapsePanels();
         };
 
         final Dialog dialog = mController.createScreenRecordDialog(mContext, mFlags,

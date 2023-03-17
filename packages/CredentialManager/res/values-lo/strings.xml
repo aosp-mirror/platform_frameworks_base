@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"ປັບປຸງຄວາມປອດໄພບັນຊີ"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"ກະແຈແຕ່ລະອັນແມ່ນລິ້ງເຈາະຈົງກັບແອັບ ຫຼື ເວັບໄຊທີ່ພວກມັນຖືກສ້າງໃຫ້, ດັ່ງນັ້ນທ່ານຈະບໍ່ສາມາດເຂົ້າສູ່ລະບົບຫາແອັບ ຫຼື ເວັບໄຊສໍ້ໂກງຕ່າງໆໂດຍບໍ່ໄດ້ຕັ້ງໃຈໄດ້. ນອກຈາກນັ້ນ, ເຊີບເວີຍັງມີການເກັບກະແຈສາທາລະນະໄວ້ເທົ່ານັ້ນ, ການແຮັກຈຶ່ງເປັນເລື່ອງຍາກຂຶ້ນຫຼາຍ."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"ການປ່ຽນຜ່ານທີ່ຕໍ່ເນື່ອງ"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"ໃນຂະນະທີ່ພວກເຮົາກ້າວໄປສູ່ອະນາຄົດທີ່ບໍ່ຕ້ອງໃຊ້ລະຫັດຜ່ານ, ລະຫັດຜ່ານຈະຍັງຄົງໃຊ້ໄດ້ຄວບຄູ່ໄປກັບກະແຈຜ່ານ"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"ເລືອກບ່ອນທີ່ຈະບັນທຶກ <xliff:g id="CREATETYPES">%1$s</xliff:g> ຂອງທ່ານ"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ເລືອກຕົວຈັດການລະຫັດຜ່ານເພື່ອບັນທຶກຂໍ້ມູນຂອງທ່ານ ແລະ ເຂົ້າສູ່ລະບົບໄວຂຶ້ນໃນເທື່ອຕໍ່ໄປ"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"ສ້າງກະແຈຜ່ານສຳລັບ <xliff:g id="APPNAME">%1$s</xliff:g> ບໍ?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"ບັນທຶກ <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ໃສ່"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"ສ້າງກະແຈຜ່ານໃນອຸປະກອນອື່ນບໍ?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ໃຊ້ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ສຳລັບການເຂົ້າສູ່ລະບົບທັງໝົດຂອງທ່ານບໍ?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"ຕົວຈັດການລະຫັດຜ່ານນີ້ສຳລັບ <xliff:g id="USERNAME">%1$s</xliff:g> ຈະຈັດເກັບລະຫັດຜ່ານ ແລະ ກະແຈຜ່ານຂອງທ່ານໄວ້ເພື່ອຊ່ວຍໃຫ້ທ່ານເຂົ້າສູ່ລະບົບໄດ້ຢ່າງງ່າຍດາຍ"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ຕັ້ງເປັນຄ່າເລີ່ມຕົ້ນ"</string>
     <string name="use_once" msgid="9027366575315399714">"ໃຊ້ເທື່ອດຽວ"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ລະຫັດຜ່ານ • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> ກະແຈຜ່ານ"</string>

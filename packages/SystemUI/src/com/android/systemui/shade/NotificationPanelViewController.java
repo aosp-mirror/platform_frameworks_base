@@ -3581,15 +3581,12 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     private void endMotionEvent(MotionEvent event, float x, float y, boolean forceCancel) {
-        // don't fling while in keyguard to avoid jump in shade expand animation
-        boolean fullyExpandedInKeyguard = mBarState == KEYGUARD && mExpandedFraction >= 1.0;
         mTrackingPointer = -1;
         mAmbientState.setSwipingUp(false);
-        if (!fullyExpandedInKeyguard && ((mTracking && mTouchSlopExceeded)
-                || Math.abs(x - mInitialExpandX) > mTouchSlop
+        if ((mTracking && mTouchSlopExceeded) || Math.abs(x - mInitialExpandX) > mTouchSlop
                 || Math.abs(y - mInitialExpandY) > mTouchSlop
                 || (!isFullyExpanded() && !isFullyCollapsed())
-                || event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel)) {
+                || event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel) {
             mVelocityTracker.computeCurrentVelocity(1000);
             float vel = mVelocityTracker.getYVelocity();
             float vectorVel = (float) Math.hypot(
@@ -3637,9 +3634,9 @@ public final class NotificationPanelViewController implements Dumpable {
             if (mUpdateFlingOnLayout) {
                 mUpdateFlingVelocity = vel;
             }
-        } else if (fullyExpandedInKeyguard || (!mCentralSurfaces.isBouncerShowing()
+        } else if (!mCentralSurfaces.isBouncerShowing()
                 && !mAlternateBouncerInteractor.isVisibleState()
-                && !mKeyguardStateController.isKeyguardGoingAway())) {
+                && !mKeyguardStateController.isKeyguardGoingAway()) {
             onEmptySpaceClick();
             onTrackingStopped(true);
         }
@@ -3782,10 +3779,10 @@ public final class NotificationPanelViewController implements Dumpable {
                     mHeightAnimator.end();
                 }
             }
-            mQsController.setShadeExpandedHeight(mExpandedHeight);
-            mExpansionDragDownAmountPx = h;
             mExpandedFraction = Math.min(1f,
                     maxPanelHeight == 0 ? 0 : mExpandedHeight / maxPanelHeight);
+            mQsController.setShadeExpansion(mExpandedHeight, mExpandedFraction);
+            mExpansionDragDownAmountPx = h;
             mAmbientState.setExpansionFraction(mExpandedFraction);
             onHeightUpdated(mExpandedHeight);
             updatePanelExpansionAndVisibility();

@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Cải thiện tính bảo mật của tài khoản"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Mỗi khoá được liên kết riêng với ứng dụng hoặc trang web mà khoá đó được tạo. Vì vậy, bạn sẽ không bao giờ đăng nhập nhầm vào một ứng dụng hoặc trang web lừa đảo. Ngoài ra, với các máy chủ chỉ lưu giữ khoá công khai, việc xâm nhập càng khó hơn nhiều."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Chuyển đổi liền mạch"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Trong quá trình chúng tôi hướng đến tương lai không dùng mật khẩu, bạn vẫn sẽ dùng được mật khẩu cùng với mã xác thực"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Chọn vị trí lưu <xliff:g id="CREATETYPES">%1$s</xliff:g> của bạn"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Hãy chọn một trình quản lý mật khẩu để lưu thông tin của bạn và đăng nhập nhanh hơn trong lần tới"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Tạo mã xác thực cho <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Lưu <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> vào"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Tạo mã xác thực trên thiết bị khác?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Dùng <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> cho mọi thông tin đăng nhập của bạn?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Trình quản lý mật khẩu này cho <xliff:g id="USERNAME">%1$s</xliff:g> sẽ lưu trữ mật khẩu và mã xác thực để bạn dễ dàng đăng nhập"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Đặt làm mặc định"</string>
     <string name="use_once" msgid="9027366575315399714">"Dùng một lần"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> mật khẩu • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> mã xác thực"</string>

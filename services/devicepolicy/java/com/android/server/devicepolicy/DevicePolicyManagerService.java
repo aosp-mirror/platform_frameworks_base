@@ -95,6 +95,7 @@ import static android.app.admin.DeviceAdminReceiver.ACTION_COMPLIANCE_ACKNOWLEDG
 import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyIdentifiers.AUTO_TIMEZONE_POLICY;
 import static android.app.admin.DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE;
+import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_FINANCING_STATE_CHANGED;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_RESOURCE_UPDATED;
 import static android.app.admin.DevicePolicyManager.ACTION_MANAGED_PROFILE_PROVISIONED;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE;
@@ -15440,7 +15441,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Slogf.i(LOG_TAG, "Sending %s broadcast to manifest receivers.", intent.getAction());
             broadcastIntentToCrossProfileManifestReceivers(
                     intent, parentHandle, requiresPermission);
-            broadcastIntentToDevicePolicyManagerRoleHolder(intent, parentHandle);
+            broadcastExplicitIntentToRoleHolder(
+                    intent, RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT, parentHandle);
         }
 
         @Override
@@ -15474,36 +15476,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
                         mContext.sendBroadcastAsUser(packageIntent, userHandle);
                     }
-                }
-            } catch (RemoteException ex) {
-                Slogf.w(LOG_TAG, "Cannot get list of broadcast receivers for %s because: %s.",
-                        intent.getAction(), ex);
-            }
-        }
-
-        private void broadcastIntentToDevicePolicyManagerRoleHolder(
-                Intent intent, UserHandle userHandle) {
-            final int userId = userHandle.getIdentifier();
-            final String packageName = getDevicePolicyManagementRoleHolderPackageName(mContext);
-            if (packageName == null) {
-                return;
-            }
-            try {
-                final Intent packageIntent = new Intent(intent)
-                        .setPackage(packageName);
-                final List<ResolveInfo> receivers = mIPackageManager.queryIntentReceivers(
-                        packageIntent,
-                        /* resolvedType= */ null,
-                        STOCK_PM_FLAGS,
-                        userId).getList();
-                if (receivers.isEmpty()) {
-                    return;
-                }
-                for (ResolveInfo receiver : receivers) {
-                    final Intent componentIntent = new Intent(packageIntent)
-                            .setComponent(receiver.getComponentInfo().getComponentName())
-                            .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-                    mContext.sendBroadcastAsUser(componentIntent, userHandle);
                 }
             } catch (RemoteException ex) {
                 Slogf.w(LOG_TAG, "Cannot get list of broadcast receivers for %s because: %s.",
@@ -20718,7 +20690,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void maybeInstallDevicePolicyManagementRoleHolderInUser(int targetUserId) {
         String devicePolicyManagerRoleHolderPackageName =
-                getDevicePolicyManagementRoleHolderPackageName(mContext);
+                getRoleHolderPackageName(mContext, RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT);
         if (devicePolicyManagerRoleHolderPackageName == null) {
             Slogf.d(LOG_TAG, "No device policy management role holder specified.");
             return;
@@ -20744,14 +20716,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    /**
+     * If multiple packages hold the role, returns the first package in the list.
+     */
+    @Nullable
+    private String getRoleHolderPackageName(Context context, String role) {
+        return getRoleHolderPackageNameOnUser(context, role, Process.myUserHandle());
+    }
 
-    private String getDevicePolicyManagementRoleHolderPackageName(Context context) {
+    /**
+     * If multiple packages hold the role, returns the first package in the list.
+     */
+    @Nullable
+    private String getRoleHolderPackageNameOnUser(Context context, String role, UserHandle user) {
         RoleManager roleManager = context.getSystemService(RoleManager.class);
 
         // Calling identity needs to be cleared as this method is used in the permissions checks.
         return mInjector.binderWithCleanCallingIdentity(() -> {
-            List<String> roleHolders =
-                    roleManager.getRoleHolders(RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT);
+            List<String> roleHolders = roleManager.getRoleHoldersAsUser(role, user);
             if (roleHolders.isEmpty()) {
                 return null;
             }
@@ -20762,7 +20744,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private boolean isCallerDevicePolicyManagementRoleHolder(CallerIdentity caller) {
         int callerUid = caller.getUid();
         String devicePolicyManagementRoleHolderPackageName =
-                getDevicePolicyManagementRoleHolderPackageName(mContext);
+                getRoleHolderPackageName(mContext, RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT);
         int roleHolderUid = mInjector.getPackageManagerInternal().getPackageUid(
                 devicePolicyManagementRoleHolderPackageName, 0, caller.getUserId());
 
@@ -21830,15 +21812,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         public void register() {
-            mRm.addOnRoleHoldersChangedListenerAsUser(mExecutor, this, UserHandle.SYSTEM);
+            mRm.addOnRoleHoldersChangedListenerAsUser(mExecutor, this, UserHandle.ALL);
         }
 
         @Override
         public void onRoleHoldersChanged(@NonNull String roleName, @NonNull UserHandle user) {
-            if (!RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT.equals(roleName)) {
+            if (RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT.equals(roleName)) {
+                handleDevicePolicyManagementRoleChange(user);
                 return;
             }
-            String newRoleHolder = getRoleHolder();
+            if (RoleManager.ROLE_FINANCED_DEVICE_KIOSK.equals(roleName)) {
+                handleFinancedDeviceKioskRoleChange();
+                return;
+            }
+        }
+
+        private void handleDevicePolicyManagementRoleChange(UserHandle user) {
+            String newRoleHolder = getDeviceManagementRoleHolder(user);
             if (isDefaultRoleHolder(newRoleHolder)) {
                 Slogf.i(LOG_TAG,
                         "onRoleHoldersChanged: Default role holder is set, returning early");
@@ -21873,9 +21863,44 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
 
-        private String getRoleHolder() {
-            return DevicePolicyManagerService.this.getDevicePolicyManagementRoleHolderPackageName(
-                    mContext);
+        private void handleFinancedDeviceKioskRoleChange() {
+            if (!isDevicePolicyEngineEnabled()) {
+                return;
+            }
+            Slog.i(LOG_TAG, "Handling action " + ACTION_DEVICE_FINANCING_STATE_CHANGED);
+            Intent intent = new Intent(ACTION_DEVICE_FINANCING_STATE_CHANGED);
+            mInjector.binderWithCleanCallingIdentity(() -> {
+                for (UserInfo userInfo : mUserManager.getUsers()) {
+                    UserHandle user = userInfo.getUserHandle();
+                    broadcastExplicitIntentToRoleHolder(
+                            intent, RoleManager.ROLE_SYSTEM_SUPERVISION, user);
+                    broadcastExplicitIntentToRoleHolder(
+                            intent, RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT, user);
+                    ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(user.getIdentifier());
+                    if (admin == null) {
+                        continue;
+                    }
+                    if (!isProfileOwnerOfOrganizationOwnedDevice(
+                            admin.info.getComponent(), user.getIdentifier())
+                            && !isDeviceOwner(admin)
+                            && !(isProfileOwner(admin.info.getComponent(), user.getIdentifier())
+                            && admin.getUserHandle().isSystem())) {
+                        continue;
+                    }
+                    // Don't send the broadcast twice if the DPC is the same package as the
+                    // DMRH
+                    if (admin.info.getPackageName().equals(getDeviceManagementRoleHolder(user))) {
+                        continue;
+                    }
+                    broadcastExplicitIntentToPackage(
+                            intent, admin.info.getPackageName(), admin.getUserHandle());
+                }
+            });
+        }
+
+        private String getDeviceManagementRoleHolder(UserHandle user) {
+            return DevicePolicyManagerService.this.getRoleHolderPackageNameOnUser(
+                    mContext, RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT, user);
         }
 
         private boolean isDefaultRoleHolder(String packageName) {
@@ -21932,6 +21957,40 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return packageNameAndSignature.split(":");
             }
             return new String[]{packageNameAndSignature};
+        }
+    }
+
+    private void broadcastExplicitIntentToRoleHolder(
+            Intent intent, String role, UserHandle userHandle) {
+        String packageName = getRoleHolderPackageNameOnUser(mContext, role, userHandle);
+        if (packageName == null) {
+            return;
+        }
+        broadcastExplicitIntentToPackage(intent, packageName, userHandle);
+    }
+
+    private void broadcastExplicitIntentToPackage(
+            Intent intent, String packageName, UserHandle userHandle) {
+        int userId = userHandle.getIdentifier();
+        if (packageName == null) {
+            return;
+        }
+        Intent packageIntent = new Intent(intent)
+                .setPackage(packageName);
+        List<ResolveInfo> receivers = mContext.getPackageManager().queryBroadcastReceiversAsUser(
+                packageIntent,
+                PackageManager.ResolveInfoFlags.of(PackageManager.GET_RECEIVERS),
+                userId);
+        if (receivers.isEmpty()) {
+            Slog.i(LOG_TAG, "Found no receivers to handle intent " + intent
+                    + " in package " + packageName);
+            return;
+        }
+        for (ResolveInfo receiver : receivers) {
+            Intent componentIntent = new Intent(packageIntent)
+                    .setComponent(receiver.getComponentInfo().getComponentName())
+                    .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+            mContext.sendBroadcastAsUser(componentIntent, userHandle);
         }
     }
 

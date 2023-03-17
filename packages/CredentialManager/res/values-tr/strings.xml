@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Daha iyi hesap güvenliği"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Her anahtar, oluşturulduğu uygulama veya web sitesiyle özel olarak bağlantılı olduğu için sahte bir uygulamaya veya web sitesine hiçbir zaman yanlışlıkla giriş yapamazsınız. Ayrıca, sunucularda yalnızca ortak anahtarlar saklandığı için saldırıya uğramak daha zordur."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Sorunsuz geçiş"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Şifresiz bir geleceğe doğru ilerlerken şifreler, şifre anahtarlarıyla birlikte kullanılmaya devam edecektir."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g> kaydedileceği yeri seçin"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Bilgilerinizi kaydedip bir dahaki sefere daha hızlı oturum açmak için bir şifre yöneticisi seçin"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> için şifre anahtarı oluşturulsun mu?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> kaydedileceği yeri seçin"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Başka bir cihazda şifre anahtarı oluşturulsun mu?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Tüm oturum açma işlemlerinizde <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> kullanılsın mı?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> için bu şifre yöneticisi, şifrelerinizi ve şifre anahtarlarınızı saklayarak kolayca oturum açmanıza yardımcı olur"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Varsayılan olarak ayarla"</string>
     <string name="use_once" msgid="9027366575315399714">"Bir kez kullanın"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> şifre • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> şifre anahtarı"</string>
