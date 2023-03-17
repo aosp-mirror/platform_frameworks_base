@@ -1639,7 +1639,7 @@ package android.hardware.soundtrigger {
   }
 
   public static class SoundTrigger.RecognitionEvent {
-    ctor public SoundTrigger.RecognitionEvent(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[]);
+    ctor public SoundTrigger.RecognitionEvent(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[], long);
   }
 
 }
