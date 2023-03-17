@@ -21,14 +21,28 @@ package lockedregioncodeinjection;
 public class LockTarget {
     public static final LockTarget NO_TARGET = new LockTarget("", null, null);
 
+    // The lock which must be instrumented, in Java internal form (L<path>;).
     private final String targetDesc;
+    // The methods to be called when the lock is taken (released).  For non-scoped locks,
+    // these are fully qualified static methods.  For scoped locks, these are the
+    // unqualified names of a member method of the target lock.
     private final String pre;
     private final String post;
+    // If true, the pre and post methods are virtual on the target class.  The pre and post methods
+    // are both called while the lock is held.  If this field is false then the pre and post methods
+    // take no parameters and the post method is called after the lock is released.  This is legacy
+    // behavior.
+    private final boolean scoped;
 
-    public LockTarget(String targetDesc, String pre, String post) {
+    public LockTarget(String targetDesc, String pre, String post, boolean scoped) {
         this.targetDesc = targetDesc;
         this.pre = pre;
         this.post = post;
+        this.scoped = scoped;
+    }
+
+    public LockTarget(String targetDesc, String pre, String post) {
+        this(targetDesc, pre, post, false);
     }
 
     public String getTargetDesc() {
@@ -40,7 +54,11 @@ public class LockTarget {
     }
 
     public String getPreOwner() {
-        return pre.substring(0, pre.lastIndexOf('.'));
+        if (scoped) {
+            return targetDesc.substring(1, targetDesc.length() - 1);
+        } else {
+            return pre.substring(0, pre.lastIndexOf('.'));
+        }
     }
 
     public String getPreMethod() {
@@ -52,10 +70,23 @@ public class LockTarget {
     }
 
     public String getPostOwner() {
-        return post.substring(0, post.lastIndexOf('.'));
+        if (scoped) {
+            return targetDesc.substring(1, targetDesc.length() - 1);
+        } else {
+            return post.substring(0, post.lastIndexOf('.'));
+        }
     }
 
     public String getPostMethod() {
         return post.substring(post.lastIndexOf('.') + 1);
+    }
+
+    public boolean getScoped() {
+        return scoped;
+    }
+
+    @Override
+    public String toString() {
+        return targetDesc + ":" + pre + ":" + post;
     }
 }
