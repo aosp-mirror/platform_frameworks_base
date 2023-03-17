@@ -538,7 +538,7 @@ object Flags {
 
     // TODO(b/270987164): Tracking Bug
     @JvmField
-    val TRACKPAD_GESTURE_BACK = unreleasedFlag(1205, "trackpad_gesture_back", teamfood = true)
+    val TRACKPAD_GESTURE_FEATURES = unreleasedFlag(1205, "trackpad_gesture_features", teamfood = true)
 
     // TODO(b/263826204): Tracking Bug
     @JvmField
@@ -559,6 +559,10 @@ object Flags {
     @JvmField
     val WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM =
         unreleasedFlag(1209, "persist.wm.debug.predictive_back_qs_dialog_anim", teamfood = true)
+
+    // TODO(b/273800936): Tracking Bug
+    @JvmField
+    val TRACKPAD_GESTURE_COMMON = releasedFlag(1210, "trackpad_gesture_common")
 
     // 1300 - screenshots
     // TODO(b/254513155): Tracking Bug
