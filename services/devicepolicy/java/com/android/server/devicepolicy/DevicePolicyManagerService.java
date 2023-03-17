@@ -22741,9 +22741,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 "This policy can only be set by a profile owner on an organization-owned "
                         + "device.");
 
+        int parentUserId = getProfileParentId(caller.getUserId());
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getProfileOwnerLocked(caller.getUserId());
-            if (hasUserSetupCompleted(UserHandle.USER_SYSTEM) && !isAdminTestOnlyLocked(
+            if (hasUserSetupCompleted(parentUserId) && !isAdminTestOnlyLocked(
                     admin.info.getComponent(), caller.getUserId())) {
                 throw new IllegalStateException("Not allowed to apply this policy after setup");
             }
@@ -22765,7 +22766,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (policyType == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
             final long id = mInjector.binderClearCallingIdentity();
             try {
-                int parentUserId = getProfileParentId(caller.getUserId());
                 installOemDefaultDialerAndSmsApp(caller.getUserId());
                 updateTelephonyCrossProfileIntentFilters(parentUserId, caller.getUserId(), true);
             } finally {
