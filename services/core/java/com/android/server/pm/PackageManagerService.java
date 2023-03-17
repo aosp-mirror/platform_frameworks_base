@@ -197,6 +197,7 @@ import com.android.server.LockGuard;
 import com.android.server.PackageWatchdog;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
+import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.art.DexUseManagerLocal;
@@ -992,6 +993,32 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final SuspendPackageHelper mSuspendPackageHelper;
     private final DistractingPackageHelper mDistractingPackageHelper;
     private final StorageEventHelper mStorageEventHelper;
+
+    private static final boolean ENABLE_BOOST = true;
+
+    private static ThreadPriorityBooster sThreadPriorityBooster = new ThreadPriorityBooster(
+            Process.THREAD_PRIORITY_FOREGROUND, LockGuard.INDEX_PACKAGES);
+
+    /**
+     * Boost the priority of the thread before holding PM traced lock.
+     * @hide
+     */
+    public static void boostPriorityForPackageManagerTracedLockedSection() {
+        if (ENABLE_BOOST) {
+            sThreadPriorityBooster.boost();
+        }
+    }
+
+
+    /**
+     * Restore the priority of the thread after release the PM traced lock.
+     * @hide
+     */
+    public static void resetPriorityAfterPackageManagerTracedLockedSection() {
+        if (ENABLE_BOOST) {
+            sThreadPriorityBooster.reset();
+        }
+    }
 
     /**
      * Invalidate the package info cache, which includes updating the cached computer.

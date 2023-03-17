@@ -5721,7 +5721,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 legacyPermissionDataProvider,
                 @NonNull WatchedArrayMap<String, ? extends PackageStateInternal> packageStates,
                 @NonNull WatchedArrayMap<String, SharedUserSetting> sharedUsers,
-                @Nullable Handler pmHandler, @NonNull Object pmLock,
+                @Nullable Handler pmHandler, @NonNull PackageManagerTracedLock pmLock,
                 boolean sync) {
             synchronized (mLock) {
                 mAsyncHandler.removeMessages(userId);
