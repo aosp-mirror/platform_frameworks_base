@@ -1339,7 +1339,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }, ActivityManager.UID_OBSERVER_CACHED, 0, "android");
 
         // Kick off periodic health checks
-        checkHealthLocked();
+        mLocalHandler.sendEmptyMessage(MSG_CHECK_HEALTH);
     }
 
     @Override
