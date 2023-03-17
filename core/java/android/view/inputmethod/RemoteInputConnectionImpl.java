@@ -31,8 +31,9 @@ import android.annotation.Nullable;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.CancellationSignalBeamer;
 import android.os.Handler;
-import android.os.ICancellationSignal;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.os.Trace;
@@ -178,6 +179,8 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
     private final AtomicBoolean mIsCursorAnchorInfoMonitoring = new AtomicBoolean(false);
     private final AtomicBoolean mHasPendingImmediateCursorAnchorInfoUpdate =
             new AtomicBoolean(false);
+
+    private CancellationSignalBeamer.Receiver mBeamer;
 
     RemoteInputConnectionImpl(@NonNull Looper looper,
             @NonNull InputConnection inputConnection,
@@ -419,6 +422,22 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 }
             }
         });
+    }
+
+    @Override
+    public void cancelCancellationSignal(IBinder token) {
+        if (mBeamer == null) {
+            return;
+        }
+        mBeamer.cancel(token);
+    }
+
+    @Override
+    public void forgetCancellationSignal(IBinder token) {
+        if (mBeamer == null) {
+            return;
+        }
+        mBeamer.forget(token);
     }
 
     @Override
@@ -988,6 +1007,22 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
     public void performHandwritingGesture(
             InputConnectionCommandHeader header, ParcelableHandwritingGesture gestureContainer,
             ResultReceiver resultReceiver) {
+        final HandwritingGesture gesture = gestureContainer.get();
+        if (gesture instanceof CancellableHandwritingGesture) {
+            // For cancellable gestures, unbeam and save the CancellationSignal.
+            CancellableHandwritingGesture cancellableGesture =
+                    (CancellableHandwritingGesture) gesture;
+            cancellableGesture.unbeamCancellationSignal(getCancellationSignalBeamer());
+            if (cancellableGesture.getCancellationSignal() != null
+                    && cancellableGesture.getCancellationSignal().isCanceled()) {
+                // Send result for canceled operations.
+                if (resultReceiver != null) {
+                    resultReceiver.send(
+                            InputConnection.HANDWRITING_GESTURE_RESULT_CANCELLED, null);
+                }
+                return;
+            }
+        }
         dispatchWithTracing("performHandwritingGesture", () -> {
             if (header.mSessionId != mCurrentSessionId.get()) {
                 if (resultReceiver != null) {
@@ -1009,7 +1044,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
             // TODO(210039666): implement Cleaner to return HANDWRITING_GESTURE_RESULT_UNKNOWN if
             //  editor doesn't return any type.
             ic.performHandwritingGesture(
-                    gestureContainer.get(),
+                    gesture,
                     resultReceiver != null ? Runnable::run : null,
                     resultReceiver != null
                             ? (resultCode) -> resultReceiver.send(resultCode, null /* resultData */)
@@ -1021,10 +1056,11 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
     @Override
     public void previewHandwritingGesture(
             InputConnectionCommandHeader header, ParcelableHandwritingGesture gestureContainer,
-            ICancellationSignal transport) {
+            IBinder cancellationSignalToken) {
+        final CancellationSignal cancellationSignal =
+                cancellationSignalToken != null
+                        ? getCancellationSignalBeamer().unbeam(cancellationSignalToken) : null;
 
-        // TODO(b/254727073): Implement CancellationSignal receiver
-        final CancellationSignal cancellationSignal = CancellationSignal.fromTransport(transport);
         // Previews always use PreviewableHandwritingGesture but if incorrectly wrong class is
         // passed, ClassCastException will be sent back to caller.
         final PreviewableHandwritingGesture gesture =
@@ -1043,6 +1079,14 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
 
             ic.previewHandwritingGesture(gesture, cancellationSignal);
         });
+    }
+
+    private CancellationSignalBeamer.Receiver getCancellationSignalBeamer() {
+        if (mBeamer != null) {
+            return mBeamer;
+        }
+        mBeamer = new CancellationSignalBeamer.Receiver(true /* cancelOnSenderDeath */);
+        return mBeamer;
     }
 
     @Dispatching(cancellable = true)

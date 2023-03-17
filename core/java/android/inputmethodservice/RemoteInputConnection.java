@@ -34,7 +34,6 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
-import android.view.inputmethod.ParcelableHandwritingGesture;
 import android.view.inputmethod.PreviewableHandwritingGesture;
 import android.view.inputmethod.SurroundingText;
 import android.view.inputmethod.TextAttribute;
@@ -424,16 +423,18 @@ final class RemoteInputConnection implements InputConnection {
     public void performHandwritingGesture(
             @NonNull HandwritingGesture gesture, @Nullable @CallbackExecutor Executor executor,
             @Nullable IntConsumer consumer) {
-        mInvoker.performHandwritingGesture(ParcelableHandwritingGesture.of(gesture), executor,
-                consumer);
+        mInvoker.performHandwritingGesture(gesture, executor, consumer);
     }
 
     @AnyThread
     public boolean previewHandwritingGesture(
             @NonNull PreviewableHandwritingGesture gesture,
             @Nullable CancellationSignal cancellationSignal) {
-        return mInvoker.previewHandwritingGesture(ParcelableHandwritingGesture.of(gesture),
-                cancellationSignal);
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+            return false; // cancelled.
+        }
+
+        return mInvoker.previewHandwritingGesture(gesture, cancellationSignal);
     }
 
     @AnyThread
