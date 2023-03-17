@@ -1017,9 +1017,14 @@ public class AudioService extends IAudioService.Stub
 
         mSfxHelper = new SoundEffectsHelper(mContext, playerBase -> ignorePlayerLogs(playerBase));
 
-        final boolean headTrackingDefault = mContext.getResources().getBoolean(
+        final boolean binauralEnabledDefault = SystemProperties.getBoolean(
+                "ro.audio.spatializer_binaural_enabled_default", true);
+        final boolean transauralEnabledDefault = SystemProperties.getBoolean(
+                "ro.audio.spatializer_transaural_enabled_default", true);
+        final boolean headTrackingEnabledDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_spatial_audio_head_tracking_enabled_default);
-        mSpatializerHelper = new SpatializerHelper(this, mAudioSystem, headTrackingDefault);
+        mSpatializerHelper = new SpatializerHelper(this, mAudioSystem,
+                binauralEnabledDefault, transauralEnabledDefault, headTrackingEnabledDefault);
 
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator == null ? false : mVibrator.hasVibrator();

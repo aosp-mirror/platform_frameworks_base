@@ -56,7 +56,9 @@ public class SpatializerHelperTest {
         mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
 
         mSpatHelper = new SpatializerHelper(mMockAudioService, mSpyAudioSystem,
-                false /*headTrackingEnabledByDefault*/);
+                true /*binauralEnabledDefault*/,
+                true /*transauralEnabledDefault*/,
+                false /*headTrackingEnabledDefault*/);
     }
 
     /**
