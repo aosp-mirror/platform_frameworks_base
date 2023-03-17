@@ -35,6 +35,7 @@ import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_P
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -249,7 +250,7 @@ public class SplitTransitionTests extends ShellTestCase {
 
     @Test
     @UiThreadTest
-    public void testEnterRecents() {
+    public void testEnterRecentsAndCommit() {
         enterSplit();
 
         ActivityManager.RunningTaskInfo homeTask = new TestRunningTaskInfoBuilder()
@@ -258,27 +259,65 @@ public class SplitTransitionTests extends ShellTestCase {
                 .build();
 
         // Create a request to bring home forward
-        TransitionRequestInfo request = new TransitionRequestInfo(TRANSIT_TO_FRONT, homeTask, null);
+        TransitionRequestInfo request = new TransitionRequestInfo(TRANSIT_TO_FRONT, homeTask,
+                mock(RemoteTransition.class));
         IBinder transition = mock(IBinder.class);
         WindowContainerTransaction result = mStageCoordinator.handleRequest(transition, request);
-
-        assertTrue(result.isEmpty());
+        // Don't handle recents opening
+        assertNull(result);
 
         // make sure we haven't made any local changes yet (need to wait until transition is ready)
         assertTrue(mStageCoordinator.isSplitScreenVisible());
 
-        // simulate the transition
-        TransitionInfo info = new TransitionInfoBuilder(TRANSIT_TO_FRONT, 0)
-                .addChange(TRANSIT_TO_FRONT, homeTask)
-                .addChange(TRANSIT_TO_BACK, mMainChild)
-                .addChange(TRANSIT_TO_BACK, mSideChild)
-                .build();
+        // simulate the start of recents transition
         mMainStage.onTaskVanished(mMainChild);
         mSideStage.onTaskVanished(mSideChild);
-        mStageCoordinator.startAnimation(transition, info,
-                mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class),
-                mock(Transitions.TransitionFinishCallback.class));
+        mStageCoordinator.onRecentsInSplitAnimationStart(mock(SurfaceControl.Transaction.class));
+        assertTrue(mStageCoordinator.isSplitScreenVisible());
+
+        // Make sure it cleans-up if recents doesn't restore
+        WindowContainerTransaction commitWCT = new WindowContainerTransaction();
+        mStageCoordinator.onRecentsInSplitAnimationFinish(commitWCT,
+                mock(SurfaceControl.Transaction.class));
+        assertFalse(mStageCoordinator.isSplitScreenVisible());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testEnterRecentsAndRestore() {
+        enterSplit();
+
+        ActivityManager.RunningTaskInfo homeTask = new TestRunningTaskInfoBuilder()
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
+                .setActivityType(ACTIVITY_TYPE_HOME)
+                .build();
+
+        // Create a request to bring home forward
+        TransitionRequestInfo request = new TransitionRequestInfo(TRANSIT_TO_FRONT, homeTask,
+                mock(RemoteTransition.class));
+        IBinder transition = mock(IBinder.class);
+        WindowContainerTransaction result = mStageCoordinator.handleRequest(transition, request);
+        // Don't handle recents opening
+        assertNull(result);
+
+        // make sure we haven't made any local changes yet (need to wait until transition is ready)
+        assertTrue(mStageCoordinator.isSplitScreenVisible());
+
+        // simulate the start of recents transition
+        mMainStage.onTaskVanished(mMainChild);
+        mSideStage.onTaskVanished(mSideChild);
+        mStageCoordinator.onRecentsInSplitAnimationStart(mock(SurfaceControl.Transaction.class));
+        assertTrue(mStageCoordinator.isSplitScreenVisible());
+
+        // Make sure we remain in split after recents restores.
+        WindowContainerTransaction restoreWCT = new WindowContainerTransaction();
+        restoreWCT.reorder(mMainChild.token, true /* toTop */);
+        restoreWCT.reorder(mSideChild.token, true /* toTop */);
+        // simulate the restoreWCT being applied:
+        mMainStage.onTaskAppeared(mMainChild, mock(SurfaceControl.class));
+        mSideStage.onTaskAppeared(mSideChild, mock(SurfaceControl.class));
+        mStageCoordinator.onRecentsInSplitAnimationFinish(restoreWCT,
+                mock(SurfaceControl.Transaction.class));
         assertTrue(mStageCoordinator.isSplitScreenVisible());
     }
 

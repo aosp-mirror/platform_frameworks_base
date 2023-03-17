@@ -814,6 +814,13 @@ public final class JobStatus {
         return null;
     }
 
+    /** Returns the number of {@link JobWorkItem JobWorkItems} attached to this job. */
+    public int getWorkCount() {
+        final int pendingCount = pendingWork == null ? 0 : pendingWork.size();
+        final int executingCount = executingWork == null ? 0 : executingWork.size();
+        return pendingCount + executingCount;
+    }
+
     public boolean hasWorkLocked() {
         return (pendingWork != null && pendingWork.size() > 0) || hasExecutingWorkLocked();
     }

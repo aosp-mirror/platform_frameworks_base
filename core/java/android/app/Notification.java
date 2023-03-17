@@ -4634,9 +4634,9 @@ public class Notification implements Parcelable
          * Set whether this is an "ongoing" notification.
          *
          * Ongoing notifications cannot be dismissed by the user on locked devices, or by
-         * notification listeners, and some notifications  (device management, media) cannot be
-         * dismissed on unlocked devices, so your application or service must take
-         * care of canceling them.
+         * notification listeners, and some notifications (call, device management, media) cannot
+         * be dismissed on unlocked devices, so your application or service must take care of
+         * canceling them.
          *
          * They are typically used to indicate a background task that the user is actively engaged
          * with (e.g., playing music) or is pending in some way and therefore occupying the device
@@ -9163,10 +9163,7 @@ public class Notification implements Parcelable
          *                   {@code null}, in which case the output switcher will be disabled.
          *                   This intent should open an Activity or it will be ignored.
          * @return MediaStyle
-         *
-         * @hide
          */
-        @SystemApi
         @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL)
         @NonNull
         public MediaStyle setRemotePlaybackInfo(@NonNull CharSequence deviceName,

@@ -91,6 +91,8 @@ bool Properties::isHighEndGfx = true;
 bool Properties::isLowRam = false;
 bool Properties::isSystemOrPersistent = false;
 
+float Properties::maxHdrHeadroomOn8bit = 5.f;  // TODO: Refine this number
+
 StretchEffectBehavior Properties::stretchEffectBehavior = StretchEffectBehavior::ShaderHWUI;
 
 DrawingEnabled Properties::drawingEnabled = DrawingEnabled::NotInitialized;
@@ -149,6 +151,11 @@ bool Properties::load() {
     if (targetCpuTimePercentage <= 0 || targetCpuTimePercentage > 100) targetCpuTimePercentage = 70;
 
     enableWebViewOverlays = base::GetBoolProperty(PROPERTY_WEBVIEW_OVERLAYS_ENABLED, true);
+
+    auto hdrHeadroom = (float)atof(base::GetProperty(PROPERTY_8BIT_HDR_HEADROOM, "").c_str());
+    if (hdrHeadroom >= 1.f) {
+        maxHdrHeadroomOn8bit = std::min(hdrHeadroom, 100.f);
+    }
 
     // call isDrawingEnabled to force loading of the property
     isDrawingEnabled();

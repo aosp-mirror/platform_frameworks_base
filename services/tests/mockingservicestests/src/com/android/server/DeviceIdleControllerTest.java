@@ -50,7 +50,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -624,8 +623,7 @@ public class DeviceIdleControllerTest {
 
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyStateConditions(STATE_INACTIVE);
-        verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(mConstants.INACTIVE_TIMEOUT), eq(false));
+        verify(mDeviceIdleController).scheduleAlarmLocked(eq(mConstants.INACTIVE_TIMEOUT));
     }
 
     @Test
@@ -643,8 +641,7 @@ public class DeviceIdleControllerTest {
 
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyStateConditions(STATE_INACTIVE);
-        verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(mConstants.INACTIVE_TIMEOUT), eq(false));
+        verify(mDeviceIdleController).scheduleAlarmLocked(eq(mConstants.INACTIVE_TIMEOUT));
         // The device configuration doesn't require a motion sensor to proceed with idling.
         // This should be the case on TVs or other such devices. We should set an alarm to move
         // forward if the motion sensor is missing in this case.
@@ -669,8 +666,7 @@ public class DeviceIdleControllerTest {
 
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyStateConditions(STATE_INACTIVE);
-        verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(mConstants.INACTIVE_TIMEOUT), eq(false));
+        verify(mDeviceIdleController).scheduleAlarmLocked(eq(mConstants.INACTIVE_TIMEOUT));
         // The device configuration requires a motion sensor to proceed with idling,
         // so we should never set an alarm to move forward if the motion sensor is
         // missing in this case.
@@ -699,7 +695,7 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyStateConditions(STATE_INACTIVE);
         inOrder.verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(timeUntilAlarm + mConstants.INACTIVE_TIMEOUT), eq(false));
+                .scheduleAlarmLocked(eq(timeUntilAlarm + mConstants.INACTIVE_TIMEOUT));
 
         enterDeepState(STATE_ACTIVE);
         setQuickDozeEnabled(true);
@@ -709,7 +705,7 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
         inOrder.verify(mDeviceIdleController).scheduleAlarmLocked(
-                eq(timeUntilAlarm + mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
+                eq(timeUntilAlarm + mConstants.QUICK_DOZE_DELAY_TIMEOUT));
     }
 
     @Test
@@ -736,59 +732,56 @@ public class DeviceIdleControllerTest {
         setScreenOn(false);
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
         inOrder.verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
+                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT));
 
         enterDeepState(STATE_INACTIVE);
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
         inOrder.verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
+                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT));
 
         enterDeepState(STATE_IDLE_PENDING);
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
         inOrder.verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
+                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT));
 
         enterDeepState(STATE_SENSING);
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
         inOrder.verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
+                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT));
 
         enterDeepState(STATE_LOCATING);
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
         inOrder.verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
+                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT));
 
         // IDLE should stay as IDLE.
         enterDeepState(STATE_IDLE);
         // Clear out any alarm setting from the order before checking for this section.
-        inOrder.verify(mDeviceIdleController, atLeastOnce())
-                .scheduleAlarmLocked(anyLong(), anyBoolean());
+        inOrder.verify(mDeviceIdleController, atLeastOnce()).scheduleAlarmLocked(anyLong());
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_IDLE);
-        inOrder.verify(mDeviceIdleController, never()).scheduleAlarmLocked(anyLong(), anyBoolean());
+        inOrder.verify(mDeviceIdleController, never()).scheduleAlarmLocked(anyLong());
 
         // IDLE_MAINTENANCE should stay as IDLE_MAINTENANCE.
         enterDeepState(STATE_IDLE_MAINTENANCE);
         // Clear out any alarm setting from the order before checking for this section.
-        inOrder.verify(mDeviceIdleController, atLeastOnce())
-                .scheduleAlarmLocked(anyLong(), anyBoolean());
+        inOrder.verify(mDeviceIdleController, atLeastOnce()).scheduleAlarmLocked(anyLong());
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_IDLE_MAINTENANCE);
-        inOrder.verify(mDeviceIdleController, never()).scheduleAlarmLocked(anyLong(), anyBoolean());
+        inOrder.verify(mDeviceIdleController, never()).scheduleAlarmLocked(anyLong());
 
         // State is already QUICK_DOZE_DELAY. No work should be done.
         enterDeepState(STATE_QUICK_DOZE_DELAY);
         // Clear out any alarm setting from the order before checking for this section.
-        inOrder.verify(mDeviceIdleController, atLeastOnce())
-                .scheduleAlarmLocked(anyLong(), anyBoolean());
+        inOrder.verify(mDeviceIdleController, atLeastOnce()).scheduleAlarmLocked(anyLong());
         setQuickDozeEnabled(true);
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
-        inOrder.verify(mDeviceIdleController, never()).scheduleAlarmLocked(anyLong(), anyBoolean());
+        inOrder.verify(mDeviceIdleController, never()).scheduleAlarmLocked(anyLong());
     }
 
     @Test
@@ -2685,17 +2678,12 @@ public class DeviceIdleControllerTest {
         if (ret == mDeviceIdleController.SET_IDLE_FACTOR_RESULT_OK) {
             enterDeepState(STATE_IDLE);
             long now = SystemClock.elapsedRealtime();
-            long alarm = mDeviceIdleController.getNextAlarmTime();
             mDeviceIdleController.setIdleStartTimeForTest(
                     now - (long) (mConstants.IDLE_TIMEOUT * 0.6));
-            long newAlarm = mDeviceIdleController.getNextAlarmTime();
-            assertTrue("maintenance not reschedule IDLE_TIMEOUT * 0.6",
-                    newAlarm == alarm);
+            verifyStateConditions(STATE_IDLE);
             mDeviceIdleController.setIdleStartTimeForTest(
                     now - (long) (mConstants.IDLE_TIMEOUT * 1.2));
-            newAlarm = mDeviceIdleController.getNextAlarmTime();
-            assertTrue("maintenance not reschedule IDLE_TIMEOUT * 1.2",
-                    (newAlarm - now) < minuteInMillis);
+            verifyStateConditions(STATE_IDLE_MAINTENANCE);
             mDeviceIdleController.resetPreIdleTimeoutMode();
         }
     }

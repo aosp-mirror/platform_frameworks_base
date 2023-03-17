@@ -18,6 +18,7 @@ package android.hardware.input;
 
 import android.annotation.NonNull;
 import android.app.ActivityThread;
+import android.content.Context;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
 import android.hardware.lights.LightsManager;
@@ -30,22 +31,22 @@ import java.lang.ref.Reference;
 import java.util.List;
 
 /**
- * LightsManager manages an input device's lights {@link android.hardware.input.Light}.
+ * LightsManager manages an input device's lights {@link android.hardware.lights.Light}
  */
 class InputDeviceLightsManager extends LightsManager {
     private static final String TAG = "InputDeviceLightsManager";
     private static final boolean DEBUG = false;
 
-    private final InputManager mInputManager;
+    private final InputManagerGlobal mGlobal;
 
     // The input device ID.
     private final int mDeviceId;
     // Package name
     private final String mPackageName;
 
-    InputDeviceLightsManager(InputManager inputManager, int deviceId) {
-        super(ActivityThread.currentActivityThread().getSystemContext());
-        mInputManager = inputManager;
+    InputDeviceLightsManager(Context context, int deviceId) {
+        super(context);
+        mGlobal = InputManagerGlobal.getInstance();
         mDeviceId = deviceId;
         mPackageName = ActivityThread.currentPackageName();
     }
@@ -57,7 +58,7 @@ class InputDeviceLightsManager extends LightsManager {
      */
     @Override
     public @NonNull List<Light> getLights() {
-        return mInputManager.getLights(mDeviceId);
+        return mGlobal.getLights(mDeviceId);
     }
 
     /**
@@ -68,7 +69,7 @@ class InputDeviceLightsManager extends LightsManager {
     @Override
     public @NonNull LightState getLightState(@NonNull Light light) {
         Preconditions.checkNotNull(light);
-        return mInputManager.getLightState(mDeviceId, light);
+        return mGlobal.getLightState(mDeviceId, light);
     }
 
     /**
@@ -77,7 +78,7 @@ class InputDeviceLightsManager extends LightsManager {
     @Override
     public @NonNull LightsSession openSession() {
         final LightsSession session = new InputDeviceLightsSession();
-        mInputManager.openLightSession(mDeviceId, mPackageName, session.getToken());
+        mGlobal.openLightSession(mDeviceId, mPackageName, session.getToken());
         return session;
     }
 
@@ -113,7 +114,7 @@ class InputDeviceLightsManager extends LightsManager {
             Preconditions.checkNotNull(request);
             Preconditions.checkArgument(!mClosed);
 
-            mInputManager.requestLights(mDeviceId, request, getToken());
+            mGlobal.requestLights(mDeviceId, request, getToken());
         }
 
         /**
@@ -122,7 +123,7 @@ class InputDeviceLightsManager extends LightsManager {
         @Override
         public void close() {
             if (!mClosed) {
-                mInputManager.closeLightSession(mDeviceId, getToken());
+                mGlobal.closeLightSession(mDeviceId, getToken());
                 mClosed = true;
                 mCloseGuard.close();
             }

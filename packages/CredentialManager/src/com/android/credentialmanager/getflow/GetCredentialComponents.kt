@@ -250,7 +250,7 @@ fun PrimarySelectionCard(
                 leftButton = if (totalEntriesCount > 1) {
                     {
                         ActionButton(
-                            stringResource(R.string.get_dialog_use_saved_passkey_for),
+                            stringResource(R.string.get_dialog_title_sign_in_options),
                             onMoreOptionSelected
                         )
                     }

@@ -31,7 +31,7 @@ import java.io.IOException;
 
 /**
  * This class tracks changes for config/global/secure/system tables
- * on a per user basis and updates shared memory regions which
+ * on a per-user basis and updates shared memory regions which
  * client processes can read to determine if their local caches are
  * stale.
  */
@@ -196,7 +196,9 @@ final class GenerationRegistry {
         if (backingStore == null) {
             try {
                 if (mNumBackingStore >= NUM_MAX_BACKING_STORE) {
-                    Slog.e(LOG_TAG, "Error creating backing store - at capacity");
+                    if (DEBUG) {
+                        Slog.e(LOG_TAG, "Error creating backing store - at capacity");
+                    }
                     return null;
                 }
                 backingStore = new MemoryIntArray(MAX_BACKING_STORE_SIZE);
@@ -256,7 +258,9 @@ final class GenerationRegistry {
                             + " on user:" + SettingsState.getUserIdFromKey(key));
                 }
             } else {
-                Slog.e(LOG_TAG, "Could not allocate generation index");
+                if (DEBUG) {
+                    Slog.e(LOG_TAG, "Could not allocate generation index");
+                }
             }
         }
         return index;

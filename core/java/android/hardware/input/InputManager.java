@@ -33,21 +33,15 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.BatteryState;
 import android.hardware.SensorManager;
-import android.hardware.lights.Light;
-import android.hardware.lights.LightState;
 import android.hardware.lights.LightsManager;
-import android.hardware.lights.LightsRequest;
 import android.os.Binder;
 import android.os.Build;
-import android.os.CombinedVibration;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IVibratorStateListener;
 import android.os.InputEventInjectionSync;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
 import android.util.Log;
@@ -1380,7 +1374,7 @@ public final class InputManager {
      * @hide
      */
     public Vibrator getInputDeviceVibrator(int deviceId, int vibratorId) {
-        return new InputDeviceVibrator(this, deviceId, vibratorId);
+        return new InputDeviceVibrator(deviceId, vibratorId);
     }
 
     /**
@@ -1391,85 +1385,7 @@ public final class InputManager {
      */
     @NonNull
     public VibratorManager getInputDeviceVibratorManager(int deviceId) {
-        return new InputDeviceVibratorManager(InputManager.this, deviceId);
-    }
-
-    /*
-     * Get the list of device vibrators
-     * @return The list of vibrators IDs
-     */
-    int[] getVibratorIds(int deviceId) {
-        try {
-            return mIm.getVibratorIds(deviceId);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /*
-     * Perform vibration effect
-     */
-    void vibrate(int deviceId, VibrationEffect effect, IBinder token) {
-        try {
-            mIm.vibrate(deviceId, effect, token);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /*
-     * Perform combined vibration effect
-     */
-    void vibrate(int deviceId, CombinedVibration effect, IBinder token) {
-        try {
-            mIm.vibrateCombined(deviceId, effect, token);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /*
-     * Cancel an ongoing vibration
-     */
-    void cancelVibrate(int deviceId, IBinder token) {
-        try {
-            mIm.cancelVibrate(deviceId, token);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /*
-     * Check if input device is vibrating
-     */
-    boolean isVibrating(int deviceId)  {
-        try {
-            return mIm.isVibrating(deviceId);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Register input device vibrator state listener
-     */
-    boolean registerVibratorStateListener(int deviceId, IVibratorStateListener listener) {
-        try {
-            return mIm.registerVibratorStateListener(deviceId, listener);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Unregister input device vibrator state listener
-     */
-    boolean unregisterVibratorStateListener(int deviceId, IVibratorStateListener listener) {
-        try {
-            return mIm.unregisterVibratorStateListener(deviceId, listener);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return new InputDeviceVibratorManager(deviceId);
     }
 
     /**
@@ -1499,77 +1415,7 @@ public final class InputManager {
      */
     @NonNull
     public LightsManager getInputDeviceLightsManager(int deviceId) {
-        return new InputDeviceLightsManager(InputManager.this, deviceId);
-    }
-
-    /**
-     * Gets a list of light objects associated with an input device.
-     * @return The list of lights, never null.
-     */
-    @NonNull List<Light> getLights(int deviceId) {
-        try {
-            return mIm.getLights(deviceId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Returns the state of an input device light.
-     * @return the light state
-     */
-    @NonNull LightState getLightState(int deviceId, @NonNull Light light) {
-        try {
-            return mIm.getLightState(deviceId, light.getId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Request to modify the states of multiple lights.
-     *
-     * @param request the settings for lights that should change
-     */
-    void requestLights(int deviceId, @NonNull LightsRequest request, IBinder token) {
-        try {
-            List<Integer> lightIdList = request.getLights();
-            int[] lightIds = new int[lightIdList.size()];
-            for (int i = 0; i < lightIds.length; i++) {
-                lightIds[i] = lightIdList.get(i);
-            }
-            List<LightState> lightStateList = request.getLightStates();
-            mIm.setLightStates(deviceId, lightIds,
-                    lightStateList.toArray(new LightState[0]),
-                    token);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Open light session for input device manager
-     *
-     * @param token The token for the light session
-     */
-    void openLightSession(int deviceId, String opPkg, @NonNull IBinder token) {
-        try {
-            mIm.openLightSession(deviceId, opPkg, token);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Close light session
-     *
-     */
-    void closeLightSession(int deviceId, @NonNull IBinder token) {
-        try {
-            mIm.closeLightSession(deviceId, token);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return new InputDeviceLightsManager(getContext(), deviceId);
     }
 
     /**

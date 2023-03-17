@@ -26,7 +26,10 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLI
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_OWN_FOCUS;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -49,11 +52,13 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -67,12 +72,16 @@ import android.hardware.display.VirtualDisplay;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.InputConfig;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
+import android.view.IWindow;
 import android.view.IWindowSessionCallback;
+import android.view.InputChannel;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.Surface;
@@ -688,6 +697,102 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 .build();
         resultingArgs = mWm.getCaptureArgs(DEFAULT_DISPLAY, captureArgs);
         assertEquals(validRect, resultingArgs.mSourceCrop);
+    }
+
+    @Test
+    public void testGrantInputChannel_sanitizeSpyWindowForApplications() {
+        final Session session = mock(Session.class);
+        final int callingUid = Process.FIRST_APPLICATION_UID;
+        final int callingPid = 1234;
+        final SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        final IWindow window = mock(IWindow.class);
+        final IBinder windowToken = mock(IBinder.class);
+        when(window.asBinder()).thenReturn(windowToken);
+        final IBinder focusGrantToken = mock(IBinder.class);
+
+        final InputChannel inputChannel = new InputChannel();
+        assertThrows(IllegalArgumentException.class, () ->
+                mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY,
+                        surfaceControl, window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE,
+                        PRIVATE_FLAG_TRUSTED_OVERLAY, INPUT_FEATURE_SPY, TYPE_APPLICATION,
+                        null /* windowToken */, focusGrantToken, "TestInputChannel",
+                        inputChannel));
+    }
+
+    @Test
+    public void testGrantInputChannel_allowSpyWindowForInputMonitorPermission() {
+        final Session session = mock(Session.class);
+        final int callingUid = Process.SYSTEM_UID;
+        final int callingPid = 1234;
+        final SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        final IWindow window = mock(IWindow.class);
+        final IBinder windowToken = mock(IBinder.class);
+        when(window.asBinder()).thenReturn(windowToken);
+        final IBinder focusGrantToken = mock(IBinder.class);
+
+        final InputChannel inputChannel = new InputChannel();
+        mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY, surfaceControl,
+                window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY,
+                INPUT_FEATURE_SPY, TYPE_APPLICATION, null /* windowToken */, focusGrantToken,
+                "TestInputChannel", inputChannel);
+
+        verify(mTransaction).setInputWindowInfo(
+                eq(surfaceControl),
+                argThat(h -> (h.inputConfig & InputConfig.SPY) == InputConfig.SPY));
+    }
+
+    @Test
+    public void testUpdateInputChannel_sanitizeSpyWindowForApplications() {
+        final Session session = mock(Session.class);
+        final int callingUid = Process.FIRST_APPLICATION_UID;
+        final int callingPid = 1234;
+        final SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        final IWindow window = mock(IWindow.class);
+        final IBinder windowToken = mock(IBinder.class);
+        when(window.asBinder()).thenReturn(windowToken);
+        final IBinder focusGrantToken = mock(IBinder.class);
+
+        final InputChannel inputChannel = new InputChannel();
+        mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY, surfaceControl,
+                window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY,
+                0 /* inputFeatures */, TYPE_APPLICATION, null /* windowToken */, focusGrantToken,
+                "TestInputChannel", inputChannel);
+        verify(mTransaction).setInputWindowInfo(
+                eq(surfaceControl),
+                argThat(h -> (h.inputConfig & InputConfig.SPY) == 0));
+
+        assertThrows(IllegalArgumentException.class, () ->
+                mWm.updateInputChannel(inputChannel.getToken(), DEFAULT_DISPLAY, surfaceControl,
+                        FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY, INPUT_FEATURE_SPY,
+                        null /* region */));
+    }
+
+    @Test
+    public void testUpdateInputChannel_allowSpyWindowForInputMonitorPermission() {
+        final Session session = mock(Session.class);
+        final int callingUid = Process.SYSTEM_UID;
+        final int callingPid = 1234;
+        final SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        final IWindow window = mock(IWindow.class);
+        final IBinder windowToken = mock(IBinder.class);
+        when(window.asBinder()).thenReturn(windowToken);
+        final IBinder focusGrantToken = mock(IBinder.class);
+
+        final InputChannel inputChannel = new InputChannel();
+        mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY, surfaceControl,
+                window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY,
+                0 /* inputFeatures */, TYPE_APPLICATION, null /* windowToken */, focusGrantToken,
+                "TestInputChannel", inputChannel);
+        verify(mTransaction).setInputWindowInfo(
+                eq(surfaceControl),
+                argThat(h -> (h.inputConfig & InputConfig.SPY) == 0));
+
+        mWm.updateInputChannel(inputChannel.getToken(), DEFAULT_DISPLAY, surfaceControl,
+                FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY, INPUT_FEATURE_SPY,
+                null /* region */);
+        verify(mTransaction).setInputWindowInfo(
+                eq(surfaceControl),
+                argThat(h -> (h.inputConfig & InputConfig.SPY) == InputConfig.SPY));
     }
 
     private void setupActivityWithLaunchCookie(IBinder launchCookie, WindowContainerToken wct) {

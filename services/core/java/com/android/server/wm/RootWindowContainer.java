@@ -44,7 +44,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WALLPAPER;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
-import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.policy.PhoneWindowManager.SYSTEM_DIALOG_REASON_ASSIST;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
@@ -432,13 +431,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
     };
 
-    private static final Consumer<WindowState> sRemoveReplacedWindowsConsumer = w -> {
-        final ActivityRecord activity = w.mActivityRecord;
-        if (activity != null) {
-            activity.removeReplacedWindowIfNeeded(w);
-        }
-    };
-
     RootWindowContainer(WindowManagerService service) {
         super(service);
         mHandler = new MyHandler(service.mH.getLooper());
@@ -660,17 +652,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void closeSystemDialogs(String reason) {
         mCloseSystemDialogsReason = reason;
         forAllWindows(mCloseSystemDialogsConsumer, false /* traverseTopToBottom */);
-    }
-
-    void removeReplacedWindows() {
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, ">>> OPEN TRANSACTION removeReplacedWindows");
-        mWmService.openSurfaceTransaction();
-        try {
-            forAllWindows(sRemoveReplacedWindowsConsumer, true /* traverseTopToBottom */);
-        } finally {
-            mWmService.closeSurfaceTransaction("removeReplacedWindows");
-            ProtoLog.i(WM_SHOW_TRANSACTIONS, "<<< CLOSE TRANSACTION removeReplacedWindows");
-        }
     }
 
     boolean hasPendingLayoutChanges(WindowAnimator animator) {

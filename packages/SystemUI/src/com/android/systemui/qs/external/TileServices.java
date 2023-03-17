@@ -40,6 +40,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -74,6 +75,7 @@ public class TileServices extends IQSService.Stub {
     private final CommandQueue mCommandQueue;
     private final UserTracker mUserTracker;
     private final StatusBarIconController mStatusBarIconController;
+    private final PanelInteractor mPanelInteractor;
 
     private int mMaxBound = DEFAULT_MAX_BOUND;
 
@@ -85,7 +87,8 @@ public class TileServices extends IQSService.Stub {
             UserTracker userTracker,
             KeyguardStateController keyguardStateController,
             CommandQueue commandQueue,
-            StatusBarIconController statusBarIconController) {
+            StatusBarIconController statusBarIconController,
+            PanelInteractor panelInteractor) {
         mHost = host;
         mKeyguardStateController = keyguardStateController;
         mContext = mHost.getContext();
@@ -96,6 +99,7 @@ public class TileServices extends IQSService.Stub {
         mCommandQueue = commandQueue;
         mStatusBarIconController = statusBarIconController;
         mCommandQueue.addCallback(mRequestListeningCallback);
+        mPanelInteractor = panelInteractor;
     }
 
     public Context getContext() {
@@ -255,7 +259,7 @@ public class TileServices extends IQSService.Stub {
         if (customTile != null) {
             verifyCaller(customTile);
             customTile.onDialogShown();
-            mHost.forceCollapsePanels();
+            mPanelInteractor.forceCollapsePanels();
             Objects.requireNonNull(mServices.get(customTile)).setShowingDialog(true);
         }
     }
@@ -275,7 +279,7 @@ public class TileServices extends IQSService.Stub {
         CustomTile customTile = getTileForToken(token);
         if (customTile != null) {
             verifyCaller(customTile);
-            mHost.forceCollapsePanels();
+            mPanelInteractor.forceCollapsePanels();
         }
     }
 

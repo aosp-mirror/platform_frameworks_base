@@ -311,7 +311,7 @@ float CanvasContext::setColorMode(ColorMode mode) {
     }
     switch (mColorMode) {
         case ColorMode::Hdr:
-            return 3.f;  // TODO: Refine this number
+            return Properties::maxHdrHeadroomOn8bit;
         case ColorMode::Hdr10:
             return 10.f;
         default:

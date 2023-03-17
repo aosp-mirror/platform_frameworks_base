@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -41,6 +42,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -91,6 +93,8 @@ public class TileServicesTest extends SysuiTestCase {
     private TileLifecycleManager mTileLifecycleManager;
     @Mock
     private QSHost mQSHost;
+    @Mock
+    private PanelInteractor mPanelInteractor;
 
     @Before
     public void setUp() throws Exception {
@@ -107,7 +111,8 @@ public class TileServicesTest extends SysuiTestCase {
         Provider<Handler> provider = () -> new Handler(mTestableLooper.getLooper());
 
         mTileService = new TestTileServices(mQSHost, provider, mBroadcastDispatcher,
-                mUserTracker, mKeyguardStateController, mCommandQueue, mStatusBarIconController);
+                mUserTracker, mKeyguardStateController, mCommandQueue, mStatusBarIconController,
+                mPanelInteractor);
     }
 
     @After
@@ -222,13 +227,37 @@ public class TileServicesTest extends SysuiTestCase {
         verify(tile, never()).startActivityAndCollapse(pi);
     }
 
+    @Test
+    public void testOnStartActivityCollapsesPanel() {
+        CustomTile tile = mock(CustomTile.class);
+        ComponentName componentName = mock(ComponentName.class);
+        when(tile.getComponent()).thenReturn(componentName);
+        when(componentName.getPackageName()).thenReturn(this.getContext().getPackageName());
+        TileServiceManager manager = mTileService.getTileWrapper(tile);
+
+        mTileService.onStartActivity(manager.getToken());
+        verify(mPanelInteractor).forceCollapsePanels();
+    }
+
+    @Test
+    public void testOnShowDialogCollapsesPanel() {
+        CustomTile tile = mock(CustomTile.class);
+        ComponentName componentName = mock(ComponentName.class);
+        when(tile.getComponent()).thenReturn(componentName);
+        when(componentName.getPackageName()).thenReturn(this.getContext().getPackageName());
+        TileServiceManager manager = mTileService.getTileWrapper(tile);
+
+        mTileService.onShowDialog(manager.getToken());
+        verify(mPanelInteractor).forceCollapsePanels();
+    }
+
     private class TestTileServices extends TileServices {
         TestTileServices(QSHost host, Provider<Handler> handlerProvider,
                 BroadcastDispatcher broadcastDispatcher, UserTracker userTracker,
                 KeyguardStateController keyguardStateController, CommandQueue commandQueue,
-                StatusBarIconController statusBarIconController) {
+                StatusBarIconController statusBarIconController, PanelInteractor panelInteractor) {
             super(host, handlerProvider, broadcastDispatcher, userTracker, keyguardStateController,
-                    commandQueue, statusBarIconController);
+                    commandQueue, statusBarIconController, panelInteractor);
         }
 
         @Override
@@ -237,6 +266,8 @@ public class TileServicesTest extends SysuiTestCase {
             TileServiceManager manager = mock(TileServiceManager.class);
             mManagers.add(manager);
             when(manager.isLifecycleStarted()).thenReturn(true);
+            Binder b = new Binder();
+            when(manager.getToken()).thenReturn(b);
             return manager;
         }
     }

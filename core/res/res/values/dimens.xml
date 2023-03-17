@@ -356,7 +356,7 @@
     <dimen name="notification_headerless_margin_twoline">20dp</dimen>
 
     <!-- The height of each of the 1 or 2 lines in the headerless notification template -->
-    <dimen name="notification_headerless_line_height">24dp</dimen>
+    <dimen name="notification_headerless_line_height">24sp</dimen>
 
     <!-- vertical margin for the headerless notification content -->
     <dimen name="notification_headerless_min_height">56dp</dimen>

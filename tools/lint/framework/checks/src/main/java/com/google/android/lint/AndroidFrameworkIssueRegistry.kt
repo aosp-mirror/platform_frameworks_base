@@ -36,7 +36,6 @@ class AndroidFrameworkIssueRegistry : IssueRegistry() {
         CallingSettingsNonUserGetterMethodsDetector.ISSUE_NON_USER_GETTER_CALLED,
         SaferParcelChecker.ISSUE_UNSAFE_API_USAGE,
         PackageVisibilityDetector.ISSUE_PACKAGE_NAME_NO_PACKAGE_VISIBILITY_FILTERS,
-        RegisterReceiverFlagDetector.ISSUE_RECEIVER_EXPORTED_FLAG,
         PermissionMethodDetector.ISSUE_PERMISSION_METHOD_USAGE,
         PermissionMethodDetector.ISSUE_CAN_BE_PERMISSION_METHOD,
     )

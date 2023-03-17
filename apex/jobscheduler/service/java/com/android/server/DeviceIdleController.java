@@ -1970,7 +1970,7 @@ public class DeviceIdleController extends SystemService
                 } break;
                 case MSG_RESET_PRE_IDLE_TIMEOUT_FACTOR: {
                     updatePreIdleFactor();
-                    maybeDoImmediateMaintenance();
+                    maybeDoImmediateMaintenance("idle factor");
                 } break;
                 case MSG_REPORT_STATIONARY_STATUS: {
                     final DeviceIdleInternal.StationaryListener newListener =
@@ -3517,11 +3517,11 @@ public class DeviceIdleController extends SystemService
                     // doze alarm to after the upcoming AlarmClock alarm.
                     scheduleAlarmLocked(
                             mAlarmManager.getNextWakeFromIdleTime() - mInjector.getElapsedRealtime()
-                                    + mConstants.QUICK_DOZE_DELAY_TIMEOUT, false);
+                                    + mConstants.QUICK_DOZE_DELAY_TIMEOUT);
                 } else {
                     // Wait a small amount of time in case something (eg: background service from
                     // recently closed app) needs to finish running.
-                    scheduleAlarmLocked(mConstants.QUICK_DOZE_DELAY_TIMEOUT, false);
+                    scheduleAlarmLocked(mConstants.QUICK_DOZE_DELAY_TIMEOUT);
                 }
             } else if (mState == STATE_ACTIVE) {
                 moveToStateLocked(STATE_INACTIVE, "no activity");
@@ -3536,9 +3536,9 @@ public class DeviceIdleController extends SystemService
                     // alarm to after the upcoming AlarmClock alarm.
                     scheduleAlarmLocked(
                             mAlarmManager.getNextWakeFromIdleTime() - mInjector.getElapsedRealtime()
-                                    + delay, false);
+                                    + delay);
                 } else {
-                    scheduleAlarmLocked(delay, false);
+                    scheduleAlarmLocked(delay);
                 }
             }
         }
@@ -3753,7 +3753,7 @@ public class DeviceIdleController extends SystemService
                 if (shouldUseIdleTimeoutFactorLocked()) {
                     delay = (long) (mPreIdleFactor * delay);
                 }
-                scheduleAlarmLocked(delay, false);
+                scheduleAlarmLocked(delay);
                 moveToStateLocked(STATE_IDLE_PENDING, reason);
                 break;
             case STATE_IDLE_PENDING:
@@ -3779,7 +3779,7 @@ public class DeviceIdleController extends SystemService
             case STATE_SENSING:
                 cancelSensingTimeoutAlarmLocked();
                 moveToStateLocked(STATE_LOCATING, reason);
-                scheduleAlarmLocked(mConstants.LOCATING_TIMEOUT, false);
+                scheduleAlarmLocked(mConstants.LOCATING_TIMEOUT);
                 LocationManager locationManager = mInjector.getLocationManager();
                 if (locationManager != null
                         && locationManager.getProvider(LocationManager.NETWORK_PROVIDER) != null) {
@@ -3819,7 +3819,7 @@ public class DeviceIdleController extends SystemService
                 // Everything is in place to go into IDLE state.
             case STATE_IDLE_MAINTENANCE:
                 moveToStateLocked(STATE_IDLE, reason);
-                scheduleAlarmLocked(mNextIdleDelay, true);
+                scheduleAlarmLocked(mNextIdleDelay);
                 if (DEBUG) Slog.d(TAG, "Moved to STATE_IDLE. Next alarm in " + mNextIdleDelay +
                         " ms.");
                 mNextIdleDelay = (long)(mNextIdleDelay * mConstants.IDLE_FACTOR);
@@ -3842,7 +3842,7 @@ public class DeviceIdleController extends SystemService
                 mActiveIdleOpCount = 1;
                 mActiveIdleWakeLock.acquire();
                 moveToStateLocked(STATE_IDLE_MAINTENANCE, reason);
-                scheduleAlarmLocked(mNextIdlePendingDelay, false);
+                scheduleAlarmLocked(mNextIdlePendingDelay);
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_IDLE to STATE_IDLE_MAINTENANCE. " +
                         "Next alarm in " + mNextIdlePendingDelay + " ms.");
                 mMaintenanceStartTime = SystemClock.elapsedRealtime();
@@ -4013,19 +4013,18 @@ public class DeviceIdleController extends SystemService
                 if (Math.abs(delay - newDelay) < MIN_STATE_STEP_ALARM_CHANGE) {
                     return;
                 }
-                scheduleAlarmLocked(newDelay, false);
+                scheduleAlarmLocked(newDelay);
             }
         }
     }
 
-    private void maybeDoImmediateMaintenance() {
+    private void maybeDoImmediateMaintenance(String reason) {
         synchronized (this) {
             if (mState == STATE_IDLE) {
                 long duration = SystemClock.elapsedRealtime() - mIdleStartTime;
-                /* Let's trgger a immediate maintenance,
-                 * if it has been idle for a long time */
+                // Trigger an immediate maintenance window if it has been IDLE for long enough.
                 if (duration > mConstants.IDLE_TIMEOUT) {
-                    scheduleAlarmLocked(0, false);
+                    stepIdleStateLocked(reason);
                 }
             }
         }
@@ -4045,7 +4044,7 @@ public class DeviceIdleController extends SystemService
     void setIdleStartTimeForTest(long idleStartTime) {
         synchronized (this) {
             mIdleStartTime = idleStartTime;
-            maybeDoImmediateMaintenance();
+            maybeDoImmediateMaintenance("testing");
         }
     }
 
@@ -4224,8 +4223,9 @@ public class DeviceIdleController extends SystemService
     }
 
     @GuardedBy("this")
-    void scheduleAlarmLocked(long delay, boolean idleUntil) {
-        if (DEBUG) Slog.d(TAG, "scheduleAlarmLocked(" + delay + ", " + idleUntil + ")");
+    @VisibleForTesting
+    void scheduleAlarmLocked(long delay) {
+        if (DEBUG) Slog.d(TAG, "scheduleAlarmLocked(" + delay + ", " + stateToString(mState) + ")");
 
         if (mUseMotionSensor && mMotionSensor == null
                 && mState != STATE_QUICK_DOZE_DELAY
@@ -4241,7 +4241,7 @@ public class DeviceIdleController extends SystemService
             return;
         }
         mNextAlarmTime = SystemClock.elapsedRealtime() + delay;
-        if (idleUntil) {
+        if (mState == STATE_IDLE) {
             mAlarmManager.setIdleUntil(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     mNextAlarmTime, "DeviceIdleController.deep", mDeepAlarmListener, mHandler);
         } else if (mState == STATE_LOCATING) {

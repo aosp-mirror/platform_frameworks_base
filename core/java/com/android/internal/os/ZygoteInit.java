@@ -185,8 +185,13 @@ public class ZygoteInit {
     private static void preloadSharedLibraries() {
         Log.i(TAG, "Preloading shared libraries...");
         System.loadLibrary("android");
-        System.loadLibrary("compiler_rt");
         System.loadLibrary("jnigraphics");
+
+        // TODO(b/206676167): This library is only used for renderscript today. When renderscript is
+        // removed, this load can be removed as well.
+        if (!SystemProperties.getBoolean("config.disable_renderscript", false)) {
+            System.loadLibrary("compiler_rt");
+        }
     }
 
     native private static void nativePreloadAppProcessHALs();

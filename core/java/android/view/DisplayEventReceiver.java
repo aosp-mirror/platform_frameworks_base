@@ -146,7 +146,12 @@ public abstract class DisplayEventReceiver {
         mMessageQueue = null;
     }
 
-    static final class VsyncEventData {
+    /**
+     * Class to capture all inputs required for syncing events data.
+     *
+     * @hide
+     */
+    public static final class VsyncEventData {
         // The amount of frame timeline choices.
         // Must be in sync with VsyncEventData::kFrameTimelinesLength in
         // frameworks/native/libs/gui/include/gui/VsyncEventData.h. If they do not match, a runtime

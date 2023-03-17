@@ -69,10 +69,6 @@ public class WindowAnimator {
     SparseArray<DisplayContentsAnimator> mDisplayContentsAnimators = new SparseArray<>(2);
     private boolean mInitialized = false;
 
-    // When set to true the animator will go over all windows after an animation frame is posted and
-    // check if some got replaced and can be removed.
-    private boolean mRemoveReplacedWindows = false;
-
     private Choreographer mChoreographer;
 
     /**
@@ -217,11 +213,6 @@ public class WindowAnimator {
         mService.closeSurfaceTransaction("WindowAnimator");
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "<<< CLOSE TRANSACTION animate");
 
-        if (mRemoveReplacedWindows) {
-            root.removeReplacedWindows();
-            mRemoveReplacedWindows = false;
-        }
-
         mService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         executeAfterPrepareSurfacesRunnables();
 
@@ -284,10 +275,6 @@ public class WindowAnimator {
             mDisplayContentsAnimators.put(displayId, displayAnimator);
         }
         return displayAnimator;
-    }
-
-    void requestRemovalOfReplacedWindows(WindowState win) {
-        mRemoveReplacedWindows = true;
     }
 
     void scheduleAnimation() {

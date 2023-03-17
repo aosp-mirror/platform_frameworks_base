@@ -51,7 +51,7 @@ public final class SharedConnectivitySettingsState implements Parcelable {
         private boolean mInstantTetherEnabled;
         private Intent mInstantTetherSettingsIntent;
         private final Context mContext;
-        private Bundle mExtras;
+        private Bundle mExtras = Bundle.EMPTY;
 
         public Builder(@NonNull Context context) {
             mContext = context;
@@ -112,8 +112,7 @@ public final class SharedConnectivitySettingsState implements Parcelable {
     }
 
     private SharedConnectivitySettingsState(boolean instantTetherEnabled,
-            PendingIntent pendingIntent, Bundle extras) {
-
+            PendingIntent pendingIntent, @NonNull Bundle extras) {
         mInstantTetherEnabled = instantTetherEnabled;
         mInstantTetherSettingsPendingIntent = pendingIntent;
         mExtras = extras;

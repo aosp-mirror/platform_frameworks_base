@@ -232,11 +232,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly) {
-        mService.setWillReplaceWindows(appToken, childrenOnly);
-    }
-
-    @Override
     public boolean cancelDraw(IWindow window) {
         return mService.cancelDraw(this, window);
     }
@@ -862,7 +857,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public void grantInputChannel(int displayId, SurfaceControl surface,
             IWindow window, IBinder hostInputToken, int flags, int privateFlags, int type,
-            IBinder windowToken, IBinder focusGrantToken, String inputHandleName,
+            int inputFeatures, IBinder windowToken, IBinder focusGrantToken, String inputHandleName,
             InputChannel outInputChannel) {
         if (hostInputToken == null && !mCanAddInternalSystemWindow) {
             // Callers without INTERNAL_SYSTEM_WINDOW permission cannot grant input channel to
@@ -874,7 +869,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         try {
             mService.grantInputChannel(this, mUid, mPid, displayId, surface, window, hostInputToken,
                     flags, mCanAddInternalSystemWindow ? privateFlags : 0,
-                    type, windowToken, focusGrantToken, inputHandleName,
+                    type, inputFeatures, windowToken, focusGrantToken, inputHandleName,
                     outInputChannel);
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -883,11 +878,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void updateInputChannel(IBinder channelToken, int displayId, SurfaceControl surface,
-            int flags, int privateFlags, Region region) {
+            int flags, int privateFlags, int inputFeatures, Region region) {
         final long identity = Binder.clearCallingIdentity();
         try {
             mService.updateInputChannel(channelToken, displayId, surface, flags,
-                    mCanAddInternalSystemWindow ? privateFlags : 0, region);
+                    mCanAddInternalSystemWindow ? privateFlags : 0, inputFeatures, region);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

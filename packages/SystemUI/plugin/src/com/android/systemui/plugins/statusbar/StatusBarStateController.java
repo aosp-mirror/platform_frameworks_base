@@ -50,6 +50,13 @@ public interface StatusBarStateController {
     boolean isPulsing();
 
     /**
+     * Is device dreaming. This method is more inclusive than
+     * {@link android.service.dreams.IDreamManager.isDreaming}, as it will return true during the
+     * dream's wake-up phase.
+     */
+    boolean isDreaming();
+
+    /**
      * Adds a state listener
      */
     void addCallback(StateListener listener);

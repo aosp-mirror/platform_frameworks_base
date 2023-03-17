@@ -28,6 +28,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.util.ArraySet;
 
@@ -55,6 +56,8 @@ public class HotspotNetworkTest {
     private static final String HOTSPOT_SSID = "TEST_SSID";
     private static final String HOTSPOT_BSSID = "TEST _BSSID";
     private static final int[] HOTSPOT_SECURITY_TYPES = {SECURITY_TYPE_WEP, SECURITY_TYPE_EAP};
+    private static final String BUNDLE_KEY = "INT-KEY";
+    private static final int BUNDLE_VALUE = 1;
 
     private static final long DEVICE_ID_1 = 111L;
     private static final NetworkProviderInfo NETWORK_PROVIDER_INFO1 =
@@ -138,6 +141,7 @@ public class HotspotNetworkTest {
         assertThat(network.getHotspotSsid()).isEqualTo(HOTSPOT_SSID);
         assertThat(network.getHotspotBssid()).isEqualTo(HOTSPOT_BSSID);
         assertThat(network.getHotspotSecurityTypes()).containsExactlyElementsIn(securityTypes);
+        assertThat(network.getExtras().getInt(BUNDLE_KEY)).isEqualTo(BUNDLE_VALUE);
     }
 
     @Test
@@ -161,11 +165,18 @@ public class HotspotNetworkTest {
                 .setHostNetworkType(NETWORK_TYPE)
                 .setNetworkName(NETWORK_NAME)
                 .setHotspotSsid(HOTSPOT_SSID)
-                .setHotspotBssid(HOTSPOT_BSSID);
+                .setHotspotBssid(HOTSPOT_BSSID)
+                .setExtras(buildBundle());
         Arrays.stream(HOTSPOT_SECURITY_TYPES).forEach(builder::addHotspotSecurityType);
         if (withNetworkProviderInfo) {
             builder.setNetworkProviderInfo(NETWORK_PROVIDER_INFO);
         }
         return builder;
+    }
+
+    private Bundle buildBundle() {
+        Bundle bundle = new Bundle();
+        bundle.putInt(BUNDLE_KEY, BUNDLE_VALUE);
+        return bundle;
     }
 }

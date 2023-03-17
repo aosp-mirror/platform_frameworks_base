@@ -863,10 +863,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/263984287): Make this public API.
+    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION =
             "android.window.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION";
 
@@ -899,8 +897,6 @@ public interface WindowManager extends ViewManager {
      *     android:value="false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
     // TODO(b/263984287): Make this public API.
     String PROPERTY_COMPAT_ALLOW_SANDBOXING_VIEW_BOUNDS_APIS =
@@ -937,10 +933,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/263984287): Make this public API.
+    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_ENABLE_FAKE_FOCUS = "android.window.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS";
 
     /**
@@ -976,10 +970,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/263984287): Make this public API.
+    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION =
             "android.window.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION";
 
@@ -1023,10 +1015,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/263984287): Make this public API.
+    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH =
             "android.window.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH";
 
@@ -1073,17 +1063,28 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/263984287): Make this public API.
+    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE =
             "android.window.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE";
 
     /**
      * Application level {@link android.content.pm.PackageManager.Property PackageManager
      * .Property} for an app to inform the system that the app should be excluded from the
-     * compatibility override for orientation set by the device manufacturer.
+     * compatibility override for orientation set by the device manufacturer. When the orientation
+     * override is applied it can:
+     * <ul>
+     *   <li>Replace the specific orientation requested by the app with another selected by the
+             device manufacturer, e.g. replace undefined requested by the app with portrait.
+     *   <li>Always use an orientation selected by the device manufacturer.
+     *   <li>Do one of the above but only when camera connection is open.
+     * </ul>
+     *
+     * <p>This property is different from {@link PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION}
+     * (which is used to avoid orientation loops caused by the incorrect use of {@link
+     * android.app.Activity#setRequestedOrientation}) because this property overrides the app to an
+     * orientation selected by the device manufacturer rather than ignoring one of orientation
+     * requests coming from the app while respecting the previous one.
      *
      * <p>With this property set to {@code true} or unset, device manufacturers can override
      * orientation for the app using their discretion to improve display compatibility.
@@ -1099,10 +1100,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/263984287): Make this public API.
+    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE =
             "android.window.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE";
 
@@ -1144,10 +1143,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/263984287): Make this public API.
+    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE =
             "android.window.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE";
 
@@ -2815,7 +2812,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
-        public static final int PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED = 0x00000002;
+        public static final int PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED = 1 << 1;
 
         /**
          * By default, wallpapers are sent new offsets when the wallpaper is scrolled. Wallpapers
@@ -2826,7 +2823,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
-        public static final int PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS = 0x00000004;
+        public static final int PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS = 1 << 2;
 
         /**
          * When set {@link LayoutParams#TYPE_APPLICATION_OVERLAY} windows will stay visible, even if
@@ -2835,7 +2832,7 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         @RequiresPermission(permission.SYSTEM_APPLICATION_OVERLAY)
-        public static final int PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY = 0x00000008;
+        public static final int PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY = 1 << 3;
 
         /** In a multiuser system if this flag is set and the owner is a system process then this
          * window will appear on all user screens. This overrides the default behavior of window
@@ -2845,7 +2842,7 @@ public interface WindowManager extends ViewManager {
          * {@hide} */
         @SystemApi
         @RequiresPermission(permission.INTERNAL_SYSTEM_WINDOW)
-        public static final int SYSTEM_FLAG_SHOW_FOR_ALL_USERS = 0x00000010;
+        public static final int SYSTEM_FLAG_SHOW_FOR_ALL_USERS = 1 << 4;
 
         /**
          * Flag to allow this window to have unrestricted gesture exclusion.
@@ -2853,7 +2850,7 @@ public interface WindowManager extends ViewManager {
          * @see View#setSystemGestureExclusionRects(List)
          * @hide
          */
-        public static final int PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION = 0x00000020;
+        public static final int PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION = 1 << 5;
 
         /**
          * Never animate position changes of the window.
@@ -2862,20 +2859,20 @@ public interface WindowManager extends ViewManager {
          * {@hide}
          */
         @UnsupportedAppUsage
-        public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 0x00000040;
+        public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 1 << 6;
 
         /** Window flag: special flag to limit the size of the window to be
          * original size ([320x480] x density). Used to create window for applications
          * running under compatibility mode.
          *
          * {@hide} */
-        public static final int PRIVATE_FLAG_COMPATIBLE_WINDOW = 0x00000080;
+        public static final int PRIVATE_FLAG_COMPATIBLE_WINDOW = 1 << 7;
 
         /** Window flag: a special option intended for system dialogs.  When
          * this flag is set, the window will demand focus unconditionally when
          * it is created.
          * {@hide} */
-        public static final int PRIVATE_FLAG_SYSTEM_ERROR = 0x00000100;
+        public static final int PRIVATE_FLAG_SYSTEM_ERROR = 1 << 8;
 
         /**
          * Flag to indicate that the view hierarchy of the window can only be measured when
@@ -2884,14 +2881,14 @@ public interface WindowManager extends ViewManager {
          * views. This reduces the chances to perform measure.
          * {@hide}
          */
-        public static final int PRIVATE_FLAG_OPTIMIZE_MEASURE = 0x00000200;
+        public static final int PRIVATE_FLAG_OPTIMIZE_MEASURE = 1 << 9;
 
         /**
          * Flag that prevents the wallpaper behind the current window from receiving touch events.
          *
          * {@hide}
          */
-        public static final int PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS = 0x00000800;
+        public static final int PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS = 1 << 10;
 
         /**
          * Flag to force the status bar window to be visible all the time. If the bar is hidden when
@@ -2900,7 +2897,7 @@ public interface WindowManager extends ViewManager {
          *
          * {@hide}
          */
-        public static final int PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR = 0x00001000;
+        public static final int PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR = 1 << 11;
 
         /**
          * Flag to indicate that the window frame should be the requested frame adding the display
@@ -2910,7 +2907,7 @@ public interface WindowManager extends ViewManager {
          *
          * {@hide}
          */
-        public static final int PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT = 0x00002000;
+        public static final int PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT = 1 << 12;
 
         /**
          * Flag that will make window ignore app visibility and instead depend purely on the decor
@@ -2918,39 +2915,28 @@ public interface WindowManager extends ViewManager {
          * drawing after it launches an app.
          * @hide
          */
-        public static final int PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY = 0x00004000;
-
-        /**
-         * Flag to indicate that this window is not expected to be replaced across
-         * configuration change triggered activity relaunches. In general the WindowManager
-         * expects Windows to be replaced after relaunch, and thus it will preserve their surfaces
-         * until the replacement is ready to show in order to prevent visual glitch. However
-         * some windows, such as PopupWindows expect to be cleared across configuration change,
-         * and thus should hint to the WindowManager that it should not wait for a replacement.
-         * @hide
-         */
-        public static final int PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH = 0x00008000;
+        public static final int PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY = 1 << 13;
 
         /**
          * Flag to indicate that this child window should always be laid-out in the parent
          * frame regardless of the current windowing mode configuration.
          * @hide
          */
-        public static final int PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME = 0x00010000;
+        public static final int PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME = 1 << 14;
 
         /**
          * Flag to indicate that this window is always drawing the status bar background, no matter
          * what the other flags are.
          * @hide
          */
-        public static final int PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS = 0x00020000;
+        public static final int PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS = 1 << 15;
 
         /**
          * Flag to indicate that this window needs Sustained Performance Mode if
          * the device supports it.
          * @hide
          */
-        public static final int PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE = 0x00040000;
+        public static final int PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE = 1 << 16;
 
         /**
          * Flag to indicate that any window added by an application process that is of type
@@ -2961,7 +2947,7 @@ public interface WindowManager extends ViewManager {
          */
         @SystemApi
         @RequiresPermission(permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS)
-        public static final int SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 0x00080000;
+        public static final int SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 1 << 19;
 
         /**
          * Indicates that this window is the rounded corners overlay present on some
@@ -2969,7 +2955,7 @@ public interface WindowManager extends ViewManager {
          * screen magnification, and mirroring.
          * @hide
          */
-        public static final int PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY = 0x00100000;
+        public static final int PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY = 1 << 20;
 
         /**
          * Flag to indicate that this window will be excluded while computing the magnifiable region
@@ -2983,7 +2969,7 @@ public interface WindowManager extends ViewManager {
          * </p><p>
          * @hide
          */
-        public static final int PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION = 0x00200000;
+        public static final int PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION = 1 << 21;
 
         /**
          * Flag to prevent the window from being magnified by the accessibility magnifier.
@@ -2991,7 +2977,7 @@ public interface WindowManager extends ViewManager {
          * TODO(b/190623172): This is a temporary solution and need to find out another way instead.
          * @hide
          */
-        public static final int PRIVATE_FLAG_NOT_MAGNIFIABLE = 0x00400000;
+        public static final int PRIVATE_FLAG_NOT_MAGNIFIABLE = 1 << 22;
 
         /**
          * Flag to indicate that the status bar window is in a state such that it forces showing
@@ -3000,54 +2986,54 @@ public interface WindowManager extends ViewManager {
          * It only takes effects if this is set by {@link LayoutParams#TYPE_STATUS_BAR}.
          * @hide
          */
-        public static final int PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION = 0x00800000;
+        public static final int PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION = 1 << 23;
 
         /**
          * Flag to indicate that the window is color space agnostic, and the color can be
          * interpreted to any color space.
          * @hide
          */
-        public static final int PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC = 0x01000000;
+        public static final int PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC = 1 << 24;
 
         /**
          * Flag to request creation of a BLAST (Buffer as LayerState) Layer.
          * If not specified the client will receive a BufferQueue layer.
          * @hide
          */
-        public static final int PRIVATE_FLAG_USE_BLAST = 0x02000000;
+        public static final int PRIVATE_FLAG_USE_BLAST = 1 << 25;
 
         /**
          * Flag to indicate that the window is controlling the appearance of system bars. So we
          * don't need to adjust it by reading its system UI flags for compatibility.
          * @hide
          */
-        public static final int PRIVATE_FLAG_APPEARANCE_CONTROLLED = 0x04000000;
+        public static final int PRIVATE_FLAG_APPEARANCE_CONTROLLED = 1 << 26;
 
         /**
          * Flag to indicate that the window is controlling the behavior of system bars. So we don't
          * need to adjust it by reading its window flags or system UI flags for compatibility.
          * @hide
          */
-        public static final int PRIVATE_FLAG_BEHAVIOR_CONTROLLED = 0x08000000;
+        public static final int PRIVATE_FLAG_BEHAVIOR_CONTROLLED = 1 << 27;
 
         /**
          * Flag to indicate that the window is controlling how it fits window insets on its own.
          * So we don't need to adjust its attributes for fitting window insets.
          * @hide
          */
-        public static final int PRIVATE_FLAG_FIT_INSETS_CONTROLLED = 0x10000000;
+        public static final int PRIVATE_FLAG_FIT_INSETS_CONTROLLED = 1 << 28;
 
         /**
          * Flag to indicate that the window is a trusted overlay.
          * @hide
          */
-        public static final int PRIVATE_FLAG_TRUSTED_OVERLAY = 0x20000000;
+        public static final int PRIVATE_FLAG_TRUSTED_OVERLAY = 1 << 29;
 
         /**
          * Flag to indicate that the parent frame of a window should be inset by IME.
          * @hide
          */
-        public static final int PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME = 0x40000000;
+        public static final int PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME = 1 << 30;
 
         /**
          * Flag to indicate that we want to intercept and handle global drag and drop for all users.
@@ -3062,7 +3048,7 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         @RequiresPermission(permission.MANAGE_ACTIVITY_TASKS)
-        public static final int PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP = 0x80000000;
+        public static final int PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP = 1 << 31;
 
         /**
          * An internal annotation for flags that can be specified to {@link #softInputMode}.
@@ -3093,7 +3079,6 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
                 PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
                 PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
-                PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH,
                 PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
                 PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS,
                 PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
@@ -3168,10 +3153,6 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                         equals = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                         name = "FORCE_DECOR_VIEW_VISIBILITY"),
-                @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH,
-                        equals = PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH,
-                        name = "WILL_NOT_REPLACE_ON_RELAUNCH"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
                         equals = PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
@@ -3635,9 +3616,20 @@ public interface WindowManager extends ViewManager {
         /**
          * The preferred refresh rate for the window.
          * <p>
-         * This must be one of the supported refresh rates obtained for the display(s) the window
-         * is on. The selected refresh rate will be applied to the display's default mode.
+         * Before API 34, this must be one of the supported refresh rates obtained
+         * for the display(s) the window is on. The selected refresh rate will be
+         * applied to the display's default mode.
          * <p>
+         * Starting API 34, this value is not limited to the supported refresh rates
+         * obtained from the display(s) for the window: it can be any refresh rate
+         * the window intends to run at. Any refresh rate can be provided as the
+         * preferred window refresh rate. The OS will select the refresh rate that
+         * best matches the {@link #preferredRefreshRate}.
+         * <p>
+         * Setting this value is the equivalent of calling {@link Surface#setFrameRate} with (
+         *     preferred_frame_rate,
+         *     {@link Surface#FRAME_RATE_COMPATIBILITY_DEFAULT},
+         *     {@link Surface#CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS}).
          * This should be used in favor of {@link LayoutParams#preferredDisplayModeId} for
          * applications that want to specify the refresh rate, but do not want to specify a
          * preference for any other displayMode properties (e.g., resolution).

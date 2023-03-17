@@ -68,6 +68,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.service.voice.DetectorFailure;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetectionServiceFailure;
@@ -623,11 +624,9 @@ abstract class DetectorSession {
         mRemoteDetectionService = remoteDetectionService;
     }
 
-    void reportErrorLocked(int errorCode, @NonNull String errorMessage) {
+    void reportErrorLocked(@NonNull DetectorFailure detectorFailure) {
         try {
-            // TODO: Use instanceof(this) to get different detector to set the right error source.
-            mCallback.onDetectionFailure(
-                    new HotwordDetectionServiceFailure(errorCode, errorMessage));
+            mCallback.onDetectionFailure(detectorFailure);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to report onError status: " + e);
             if (getDetectorType() != HotwordDetector.DETECTOR_TYPE_VISUAL_QUERY_DETECTOR) {

@@ -628,14 +628,15 @@ void ASurfaceTransaction_setExtendedRangeBrightness(ASurfaceTransaction* aSurfac
     CHECK_NOT_NULL(aSurfaceControl);
 
     if (!isfinite(currentBufferRatio) || currentBufferRatio < 1.0f) {
-        ALOGE("Ignore setExtendedRangeBrightness, currentBufferRatio %f isn't finite or >= 1.0f",
-              currentBufferRatio);
+        LOG_ALWAYS_FATAL("setExtendedRangeBrightness, currentBufferRatio %f isn't finite or >= "
+                         "1.0f",
+                         currentBufferRatio);
         return;
     }
 
     if (!isfinite(desiredRatio) || desiredRatio < 1.0f) {
-        ALOGE("Ignore setExtendedRangeBrightness, desiredRatio %f isn't finite or >= 1.0f",
-              desiredRatio);
+        LOG_ALWAYS_FATAL("setExtendedRangeBrightness, desiredRatio %f isn't finite or >= 1.0f",
+                         desiredRatio);
         return;
     }
 

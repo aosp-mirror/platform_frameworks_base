@@ -68,6 +68,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.CallLayout;
@@ -1671,7 +1672,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             MetricsLogger metricsLogger,
             SmartReplyConstants smartReplyConstants,
             SmartReplyController smartReplyController,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            IStatusBarService statusBarService) {
         mEntry = entry;
         mAppName = appName;
         if (mMenuRow == null) {
@@ -1699,7 +1701,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     mPeopleNotificationIdentifier,
                     rivSubcomponentFactory,
                     smartReplyConstants,
-                    smartReplyController);
+                    smartReplyController,
+                    statusBarService);
         }
         mOnUserInteractionCallback = onUserInteractionCallback;
         mBubblesManagerOptional = bubblesManagerOptional;

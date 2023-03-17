@@ -136,14 +136,6 @@ void PointerController::move(float deltaX, float deltaY) {
     mCursorController.move(transformed.x, transformed.y);
 }
 
-void PointerController::setButtonState(int32_t buttonState) {
-    mCursorController.setButtonState(buttonState);
-}
-
-int32_t PointerController::getButtonState() const {
-    return mCursorController.getButtonState();
-}
-
 void PointerController::setPosition(float x, float y) {
     const int32_t displayId = mCursorController.getDisplayId();
     vec2 transformed;

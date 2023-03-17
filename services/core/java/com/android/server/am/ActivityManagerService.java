@@ -9351,7 +9351,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 String logcatSetting = Settings.Global.ERROR_LOGCAT_PREFIX + dropboxTag;
                 String maxBytesSetting = Settings.Global.MAX_ERROR_BYTES_PREFIX + dropboxTag;
-                int lines = Settings.Global.getInt(mContext.getContentResolver(), logcatSetting, 0);
+                int lines = Build.IS_USER
+                        ? 0
+                        : Settings.Global.getInt(mContext.getContentResolver(), logcatSetting, 0);
                 int dropboxMaxSize = Settings.Global.getInt(
                         mContext.getContentResolver(), maxBytesSetting, DROPBOX_DEFAULT_MAX_SIZE);
                 int maxDataFileSize = dropboxMaxSize - sb.length()

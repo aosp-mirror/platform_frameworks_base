@@ -20,7 +20,6 @@ import android.content.ContentResolver;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.service.dreams.IDreamManager;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -39,7 +38,6 @@ public class TestableNotificationInterruptStateProviderImpl
     TestableNotificationInterruptStateProviderImpl(
             ContentResolver contentResolver,
             PowerManager powerManager,
-            IDreamManager dreamManager,
             AmbientDisplayConfiguration ambientDisplayConfiguration,
             StatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
@@ -53,7 +51,6 @@ public class TestableNotificationInterruptStateProviderImpl
             UserTracker userTracker) {
         super(contentResolver,
                 powerManager,
-                dreamManager,
                 ambientDisplayConfiguration,
                 batteryController,
                 statusBarStateController,

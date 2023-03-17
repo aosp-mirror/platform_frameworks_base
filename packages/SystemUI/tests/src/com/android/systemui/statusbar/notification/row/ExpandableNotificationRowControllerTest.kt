@@ -21,6 +21,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
+import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FeatureFlags
@@ -93,6 +94,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val bubblesManager: BubblesManager = mock()
     private val dragController: ExpandableNotificationRowDragController = mock()
     private val dismissibilityProvider: NotificationDismissibilityProvider = mock()
+    private val statusBarService: IStatusBarService = mock()
 
     private lateinit var controller: ExpandableNotificationRowController
 
@@ -130,7 +132,8 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
                 peopleNotificationIdentifier,
                 Optional.of(bubblesManager),
                 dragController,
-                dismissibilityProvider
+                dismissibilityProvider,
+                statusBarService
             )
         whenever(view.childrenContainer).thenReturn(childrenContainer)
     }

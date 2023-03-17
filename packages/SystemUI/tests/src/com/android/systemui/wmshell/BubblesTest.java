@@ -343,7 +343,6 @@ public class BubblesTest extends SysuiTestCase {
         TestableNotificationInterruptStateProviderImpl interruptionStateProvider =
                 new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),
                         mock(PowerManager.class),
-                        mock(IDreamManager.class),
                         mock(AmbientDisplayConfiguration.class),
                         mock(StatusBarStateController.class),
                         mock(KeyguardStateController.class),
@@ -1246,6 +1245,24 @@ public class BubblesTest extends SysuiTestCase {
         // Show the menu
         stackView.showManageMenu(true);
         assertSysuiStates(true /* stackExpanded */, true /* mangeMenuExpanded */);
+        assertTrue(stackView.isManageMenuSettingsVisible());
+    }
+
+    @Test
+    public void testShowManageMenuChangesSysuiState_appBubble() {
+        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0);
+        assertTrue(mBubbleController.hasBubbles());
+
+        // Expand the stack
+        BubbleStackView stackView = mBubbleController.getStackView();
+        mBubbleData.setExpanded(true);
+        assertStackExpanded();
+        assertSysuiStates(true /* stackExpanded */, false /* mangeMenuExpanded */);
+
+        // Show the menu
+        stackView.showManageMenu(true);
+        assertSysuiStates(true /* stackExpanded */, true /* mangeMenuExpanded */);
+        assertFalse(stackView.isManageMenuSettingsVisible());
     }
 
     @Test

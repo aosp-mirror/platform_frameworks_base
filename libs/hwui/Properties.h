@@ -218,6 +218,8 @@ enum DebugLevel {
 
 #define PROPERTY_MEMORY_POLICY "debug.hwui.app_memory_policy"
 
+#define PROPERTY_8BIT_HDR_HEADROOM "debug.hwui.8bit_hdr_headroom"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -320,6 +322,8 @@ public:
     static bool isHighEndGfx;
     static bool isLowRam;
     static bool isSystemOrPersistent;
+
+    static float maxHdrHeadroomOn8bit;
 
     static StretchEffectBehavior getStretchEffectBehavior() {
         return stretchEffectBehavior;

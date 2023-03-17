@@ -79,7 +79,8 @@
             <NotificationTopLineView
                 android:id="@+id/notification_top_line"
                 android:layout_width="wrap_content"
-                android:layout_height="@dimen/notification_headerless_line_height"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/notification_headerless_line_height"
                 android:clipChildren="false"
                 android:theme="@style/Theme.DeviceDefault.Notification"
                 >

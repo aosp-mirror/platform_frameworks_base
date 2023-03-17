@@ -229,6 +229,7 @@ public class BubbleExpandedView extends LinearLayout {
                     options.setLaunchedFromBubble(true);
                     options.setPendingIntentBackgroundActivityStartMode(
                             MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+                    options.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
 
                     Intent fillInIntent = new Intent();
                     // Apply flags to make behaviour match documentLaunchMode=always.

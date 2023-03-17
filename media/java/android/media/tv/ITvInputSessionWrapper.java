@@ -280,7 +280,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             }
             case DO_NOTIFY_TV_MESSAGE: {
                 SomeArgs args = (SomeArgs) msg.obj;
-                mTvInputSessionImpl.onTvMessageReceived((String) args.arg1, (Bundle) args.arg2);
+                mTvInputSessionImpl.onTvMessageReceived((Integer) args.arg1, (Bundle) args.arg2);
                 break;
             }
             default: {

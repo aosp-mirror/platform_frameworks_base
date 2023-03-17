@@ -26,6 +26,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.util.leak.GarbageMonitor;
 
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public interface QSHost {
+public interface QSHost extends PanelInteractor {
     String TILES_SETTING = Settings.Secure.QS_TILES;
     int POSITION_AT_END = -1;
 
@@ -57,9 +58,6 @@ public interface QSHost {
     }
 
     void warn(String message, Throwable t);
-    void collapsePanels();
-    void forceCollapsePanels();
-    void openPanels();
     Context getContext();
     Context getUserContext();
     int getUserId();
