@@ -1420,7 +1420,7 @@ public abstract class NotificationListenerService extends Service {
         if (getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.P) {
             ArrayList<Person> people = notification.extras.getParcelableArrayList(
                     Notification.EXTRA_PEOPLE_LIST, android.app.Person.class);
-            if (people != null && people.isEmpty()) {
+            if (people != null && !people.isEmpty()) {
                 int size = people.size();
                 String[] peopleArray = new String[size];
                 for (int i = 0; i < size; i++) {
