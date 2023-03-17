@@ -251,7 +251,7 @@
     <alias name="courier new" to="serif-monospace" />
 
     <family name="casual">
-        <font weight="400" style="normal">ComingSoon.ttf</font>
+        <font weight="400" style="normal" postScriptName="ComingSoon-Regular">ComingSoon.ttf</font>
     </family>
 
     <family name="cursive">
