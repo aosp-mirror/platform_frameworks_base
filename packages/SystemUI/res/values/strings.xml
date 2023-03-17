@@ -2877,7 +2877,7 @@
     <string name="manage_users">Manage users</string>
 
     <!-- Toast shown when a notification does not support dragging to split [CHAR LIMIT=NONE] -->
-    <string name="drag_split_not_supported">This notification does not support dragging to Splitscreen.</string>
+    <string name="drag_split_not_supported">This notification does not support dragging to split screen</string>
 
     <!-- Content description for the Wi-Fi off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_wifi_off">Wi\u2011Fi unavailable</string>

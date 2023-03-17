@@ -162,12 +162,6 @@ object Flags {
     val CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES =
         releasedFlag(216, "customizable_lock_screen_quick_affordances")
 
-    /** Shows chipbar UI whenever the device is unlocked by ActiveUnlock (watch). */
-    // TODO(b/256513609): Tracking Bug
-    @JvmField
-    val ACTIVE_UNLOCK_CHIPBAR =
-        resourceBooleanFlag(217, R.bool.flag_active_unlock_chipbar, "active_unlock_chipbar")
-
     /**
      * Migrates control of the LightRevealScrim's reveal effect and amount from legacy code to the
      * new KeyguardTransitionRepository.
@@ -242,12 +236,21 @@ object Flags {
 
     // TODO(b/270223352): Tracking Bug
     @JvmField
-    val HIDE_SMARTSPACE_ON_DREAM_OVERLAY = unreleasedFlag(404, "hide_smartspace_on_dream_overlay")
+    val HIDE_SMARTSPACE_ON_DREAM_OVERLAY =
+        unreleasedFlag(
+            404,
+            "hide_smartspace_on_dream_overlay",
+            teamfood = true
+    )
 
     // TODO(b/271460958): Tracking Bug
     @JvmField
-    val SHOW_WEATHER_COMPLICATION_ON_DREAM_OVERLAY = unreleasedFlag(405,
-        "show_weather_complication_on_dream_overlay")
+    val SHOW_WEATHER_COMPLICATION_ON_DREAM_OVERLAY =
+        unreleasedFlag(
+            405,
+            "show_weather_complication_on_dream_overlay",
+            teamfood = true
+        )
 
     // 500 - quick settings
 
@@ -284,8 +287,7 @@ object Flags {
     /** Enables new QS Edit Mode visual refresh */
     // TODO(b/269787742): Tracking Bug
     @JvmField
-    val ENABLE_NEW_QS_EDIT_MODE =
-        unreleasedFlag(510, "enable_new_qs_edit_mode", teamfood = false)
+    val ENABLE_NEW_QS_EDIT_MODE = unreleasedFlag(510, "enable_new_qs_edit_mode", teamfood = false)
 
     // 600- status bar
 
@@ -668,8 +670,7 @@ object Flags {
 
     // 2600 - keyboard
     // TODO(b/259352579): Tracking Bug
-    @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT =
-            unreleasedFlag(2600, "shortcut_list_search_layout", teamfood = true)
+    @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT = releasedFlag(2600, "shortcut_list_search_layout")
 
     // TODO(b/259428678): Tracking Bug
     @JvmField
@@ -680,4 +681,9 @@ object Flags {
     @JvmField
     val LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION =
             unreleasedFlag(2602, "large_shade_granular_alpha_interpolation", teamfood = true)
+
+    // TODO(b/272805037): Tracking Bug
+    @JvmField
+    val ADVANCED_VPN_ENABLED = unreleasedFlag(2800, name = "AdvancedVpn__enable_feature",
+            namespace = "vpn", teamfood = false)
 }

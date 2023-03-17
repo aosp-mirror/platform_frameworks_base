@@ -968,10 +968,6 @@ package android.app {
     field public static final int SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY = 11; // 0xb
   }
 
-  public static class Notification.MediaStyle extends android.app.Notification.Style {
-    method @NonNull @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public android.app.Notification.MediaStyle setRemotePlaybackInfo(@NonNull CharSequence, @DrawableRes int, @Nullable android.app.PendingIntent);
-  }
-
   public static final class Notification.TvExtender implements android.app.Notification.Extender {
     ctor public Notification.TvExtender();
     ctor public Notification.TvExtender(android.app.Notification);
@@ -9984,6 +9980,7 @@ package android.net.wifi.sharedconnectivity.app {
   public final class HotspotNetwork implements android.os.Parcelable {
     method public int describeContents();
     method public long getDeviceId();
+    method @NonNull public android.os.Bundle getExtras();
     method public int getHostNetworkType();
     method @Nullable public String getHotspotBssid();
     method @NonNull public java.util.Set<java.lang.Integer> getHotspotSecurityTypes();
@@ -10003,6 +10000,7 @@ package android.net.wifi.sharedconnectivity.app {
     method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork.Builder addHotspotSecurityType(int);
     method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork build();
     method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork.Builder setDeviceId(long);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork.Builder setHostNetworkType(int);
     method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork.Builder setHotspotBssid(@NonNull String);
     method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork.Builder setHotspotSsid(@NonNull String);
@@ -10039,6 +10037,7 @@ package android.net.wifi.sharedconnectivity.app {
 
   public final class KnownNetwork implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public android.os.Bundle getExtras();
     method @Nullable public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo getNetworkProviderInfo();
     method public int getNetworkSource();
     method @NonNull public java.util.Set<java.lang.Integer> getSecurityTypes();
@@ -10054,6 +10053,7 @@ package android.net.wifi.sharedconnectivity.app {
     ctor public KnownNetwork.Builder();
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder addSecurityType(int);
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork build();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setNetworkProviderInfo(@Nullable android.net.wifi.sharedconnectivity.app.NetworkProviderInfo);
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setNetworkSource(int);
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setSsid(@NonNull String);
@@ -10085,6 +10085,7 @@ package android.net.wifi.sharedconnectivity.app {
     method @IntRange(from=0, to=3) public int getConnectionStrength();
     method @NonNull public String getDeviceName();
     method public int getDeviceType();
+    method @NonNull public android.os.Bundle getExtras();
     method @NonNull public String getModelName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.NetworkProviderInfo> CREATOR;
@@ -10103,6 +10104,7 @@ package android.net.wifi.sharedconnectivity.app {
     method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setConnectionStrength(@IntRange(from=0, to=3) int);
     method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setDeviceName(@NonNull String);
     method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setDeviceType(int);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setModelName(@NonNull String);
   }
 

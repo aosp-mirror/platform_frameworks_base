@@ -53,8 +53,6 @@ MouseCursorController::MouseCursorController(PointerControllerContext& context)
     mLocked.resolvedPointerType = PointerIconStyle::TYPE_NOT_SPECIFIED;
 
     mLocked.resourcesLoaded = false;
-
-    mLocked.buttonState = 0;
 }
 
 MouseCursorController::~MouseCursorController() {
@@ -93,22 +91,6 @@ void MouseCursorController::move(float deltaX, float deltaY) {
     std::scoped_lock lock(mLock);
 
     setPositionLocked(mLocked.pointerX + deltaX, mLocked.pointerY + deltaY);
-}
-
-void MouseCursorController::setButtonState(int32_t buttonState) {
-#if DEBUG_MOUSE_CURSOR_UPDATES
-    ALOGD("Set button state 0x%08x", buttonState);
-#endif
-    std::scoped_lock lock(mLock);
-
-    if (mLocked.buttonState != buttonState) {
-        mLocked.buttonState = buttonState;
-    }
-}
-
-int32_t MouseCursorController::getButtonState() const {
-    std::scoped_lock lock(mLock);
-    return mLocked.buttonState;
 }
 
 void MouseCursorController::setPosition(float x, float y) {

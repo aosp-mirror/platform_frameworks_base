@@ -351,7 +351,6 @@ public class QuickSettingsController {
         mFeatureFlags = featureFlags;
         mInteractionJankMonitor = interactionJankMonitor;
 
-        mShadeExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged);
         mLockscreenShadeTransitionController.addCallback(new LockscreenShadeTransitionCallback());
     }
 
@@ -878,8 +877,9 @@ public class QuickSettingsController {
         mCollapsedOnDown = collapsedOnDown;
     }
 
-    void setShadeExpandedHeight(float shadeExpandedHeight) {
-        mShadeExpandedHeight = shadeExpandedHeight;
+    void setShadeExpansion(float expandedHeight, float expandedFraction) {
+        mShadeExpandedHeight = expandedHeight;
+        mShadeExpandedFraction = expandedFraction;
     }
 
     @VisibleForTesting
@@ -1747,11 +1747,6 @@ public class QuickSettingsController {
                 break;
         }
         return false;
-    }
-
-    @VisibleForTesting
-    void onPanelExpansionChanged(ShadeExpansionChangeEvent event) {
-        mShadeExpandedFraction = event.getFraction();
     }
 
     /**
