@@ -29,6 +29,8 @@ import static com.android.systemui.accessibility.accessibilitymenu.Accessibility
 import static com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService.INTENT_TOGGLE_MENU;
 import static com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService.PACKAGE_NAME;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Instrumentation;
 import android.app.UiAutomation;
@@ -39,6 +41,7 @@ import android.content.IntentFilter;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
@@ -374,5 +377,27 @@ public class AccessibilityMenuServiceTest {
                 TIMEOUT_UI_CHANGE_S,
                 () -> sLastGlobalAction.compareAndSet(
                         GLOBAL_ACTION_TAKE_SCREENSHOT, NO_GLOBAL_ACTION));
+    }
+
+    @Test
+    public void testOnScreenLock_closesMenu() throws Throwable {
+        openMenu();
+        Context context = sInstrumentation.getTargetContext();
+        PowerManager powerManager = context.getSystemService(PowerManager.class);
+
+        assertThat(powerManager).isNotNull();
+        assertThat(powerManager.isInteractive()).isTrue();
+
+        sUiAutomation.performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN);
+        TestUtils.waitUntil("Screen did not become locked",
+                TIMEOUT_UI_CHANGE_S,
+                () -> !powerManager.isInteractive());
+
+        sUiAutomation.executeShellCommand("input keyevent KEYCODE_WAKEUP");
+        TestUtils.waitUntil("Screen did not wake up",
+                TIMEOUT_UI_CHANGE_S,
+                () -> powerManager.isInteractive());
+
+        assertThat(isMenuVisible()).isFalse();
     }
 }
