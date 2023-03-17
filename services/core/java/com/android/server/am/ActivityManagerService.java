@@ -99,7 +99,6 @@ import static android.os.Process.setThreadScheduler;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
-import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -108,7 +107,6 @@ import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_RE
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
@@ -353,7 +351,6 @@ import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -390,7 +387,6 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.os.Zygote;
-import com.android.internal.os.anr.AnrLatencyTracker;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
@@ -469,14 +465,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -487,18 +479,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class ActivityManagerService extends IActivityManager.Stub
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback, ActivityManagerGlobalLock {
@@ -535,8 +522,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     public static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES;
 
     static final String SYSTEM_USER_HOME_NEEDED = "ro.system_user_home_needed";
-
-    public static final String ANR_TRACE_DIR = "/data/anr";
 
     // Maximum number of receivers an app can register.
     private static final int MAX_RECEIVERS_ALLOWED_PER_APP = 1000;
@@ -598,10 +583,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     // the notification will not be legible to the user.
     private static final int MAX_BUGREPORT_TITLE_SIZE = 100;
     private static final int MAX_BUGREPORT_DESCRIPTION_SIZE = 150;
-
-    private static final int NATIVE_DUMP_TIMEOUT_MS =
-            2000 * Build.HW_TIMEOUT_MULTIPLIER; // 2 seconds;
-    private static final int JAVA_DUMP_MINIMUM_SIZE = 100; // 100 bytes.
 
     OomAdjuster mOomAdjuster;
 
@@ -3407,432 +3388,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!hasMemcg()) {
             FrameworkStatsLog.write(FrameworkStatsLog.APP_DIED, SystemClock.elapsedRealtime());
         }
-    }
-
-    /**
-     * If a stack trace dump file is configured, dump process stack traces.
-     * @param firstPids of dalvik VM processes to dump stack traces for first
-     * @param lastPids of dalvik VM processes to dump stack traces for last
-     * @param nativePids optional list of native pids to dump stack crawls
-     * @param logExceptionCreatingFile optional writer to which we log errors creating the file
-     * @param auxiliaryTaskExecutor executor to execute auxiliary tasks on
-     * @param latencyTracker the latency tracker instance of the current ANR.
-     */
-    public static File dumpStackTraces(ArrayList<Integer> firstPids,
-            ProcessCpuTracker processCpuTracker, SparseBooleanArray lastPids,
-            Future<ArrayList<Integer>> nativePidsFuture, StringWriter logExceptionCreatingFile,
-            @NonNull Executor auxiliaryTaskExecutor, AnrLatencyTracker latencyTracker) {
-        return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePidsFuture,
-                logExceptionCreatingFile, null, null, null, auxiliaryTaskExecutor, latencyTracker);
-    }
-
-    /**
-     * If a stack trace dump file is configured, dump process stack traces.
-     * @param firstPids of dalvik VM processes to dump stack traces for first
-     * @param lastPids of dalvik VM processes to dump stack traces for last
-     * @param nativePids optional list of native pids to dump stack crawls
-     * @param logExceptionCreatingFile optional writer to which we log errors creating the file
-     * @param subject optional line related to the error
-     * @param criticalEventSection optional lines containing recent critical events.
-     * @param auxiliaryTaskExecutor executor to execute auxiliary tasks on
-     * @param latencyTracker the latency tracker instance of the current ANR.
-     */
-    public static File dumpStackTraces(ArrayList<Integer> firstPids,
-            ProcessCpuTracker processCpuTracker, SparseBooleanArray lastPids,
-            Future<ArrayList<Integer>> nativePidsFuture, StringWriter logExceptionCreatingFile,
-            String subject, String criticalEventSection, @NonNull Executor auxiliaryTaskExecutor,
-            AnrLatencyTracker latencyTracker) {
-        return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePidsFuture,
-                logExceptionCreatingFile, null, subject, criticalEventSection,
-                auxiliaryTaskExecutor, latencyTracker);
-    }
-
-    /**
-     * @param firstPidEndOffset Optional, when it's set, it receives the start/end offset
-     *                        of the very first pid to be dumped.
-     */
-    /* package */ static File dumpStackTraces(ArrayList<Integer> firstPids,
-            ProcessCpuTracker processCpuTracker, SparseBooleanArray lastPids,
-            Future<ArrayList<Integer>> nativePidsFuture, StringWriter logExceptionCreatingFile,
-            AtomicLong firstPidEndOffset, String subject, String criticalEventSection,
-            @NonNull Executor auxiliaryTaskExecutor, AnrLatencyTracker latencyTracker) {
-        try {
-
-            if (latencyTracker != null) {
-                latencyTracker.dumpStackTracesStarted();
-            }
-
-            Slog.i(TAG, "dumpStackTraces pids=" + lastPids);
-
-            // Measure CPU usage as soon as we're called in order to get a realistic sampling
-            // of the top users at the time of the request.
-            Supplier<ArrayList<Integer>> extraPidsSupplier = processCpuTracker != null
-                    ? () -> getExtraPids(processCpuTracker, lastPids, latencyTracker) : null;
-            Future<ArrayList<Integer>> extraPidsFuture = null;
-            if (extraPidsSupplier != null) {
-                extraPidsFuture =
-                        CompletableFuture.supplyAsync(extraPidsSupplier, auxiliaryTaskExecutor);
-            }
-
-            final File tracesDir = new File(ANR_TRACE_DIR);
-
-            // NOTE: We should consider creating the file in native code atomically once we've
-            // gotten rid of the old scheme of dumping and lot of the code that deals with paths
-            // can be removed.
-            File tracesFile;
-            try {
-                tracesFile = createAnrDumpFile(tracesDir);
-            } catch (IOException e) {
-                Slog.w(TAG, "Exception creating ANR dump file:", e);
-                if (logExceptionCreatingFile != null) {
-                    logExceptionCreatingFile.append(
-                            "----- Exception creating ANR dump file -----\n");
-                    e.printStackTrace(new PrintWriter(logExceptionCreatingFile));
-                }
-                if (latencyTracker != null) {
-                    latencyTracker.anrSkippedDumpStackTraces();
-                }
-                return null;
-            }
-
-            if (subject != null || criticalEventSection != null) {
-                appendtoANRFile(tracesFile.getAbsolutePath(),
-                        (subject != null ? "Subject: " + subject + "\n\n" : "")
-                        + (criticalEventSection != null ? criticalEventSection : ""));
-            }
-
-            long firstPidEndPos = dumpStackTraces(
-                    tracesFile.getAbsolutePath(), firstPids, nativePidsFuture,
-                    extraPidsFuture, latencyTracker);
-            if (firstPidEndOffset != null) {
-                firstPidEndOffset.set(firstPidEndPos);
-            }
-            // Each set of ANR traces is written to a separate file and dumpstate will process
-            // all such files and add them to a captured bug report if they're recent enough.
-            maybePruneOldTraces(tracesDir);
-
-            return tracesFile;
-        } finally {
-            if (latencyTracker != null) {
-                latencyTracker.dumpStackTracesEnded();
-            }
-        }
-
-    }
-
-    @GuardedBy("ActivityManagerService.class")
-    private static SimpleDateFormat sAnrFileDateFormat;
-    static final String ANR_FILE_PREFIX = "anr_";
-
-    private static ArrayList<Integer> getExtraPids(ProcessCpuTracker processCpuTracker,
-            SparseBooleanArray lastPids, AnrLatencyTracker latencyTracker) {
-        if (latencyTracker != null) {
-            latencyTracker.processCpuTrackerMethodsCalled();
-        }
-        ArrayList<Integer> extraPids = new ArrayList<>();
-        processCpuTracker.init();
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException ignored) {
-        }
-
-        processCpuTracker.update();
-
-        // We'll take the stack crawls of just the top apps using CPU.
-        final int workingStatsNumber = processCpuTracker.countWorkingStats();
-        for (int i = 0; i < workingStatsNumber && extraPids.size() < 2; i++) {
-            ProcessCpuTracker.Stats stats = processCpuTracker.getWorkingStats(i);
-            if (lastPids.indexOfKey(stats.pid) >= 0) {
-                if (DEBUG_ANR) {
-                    Slog.d(TAG, "Collecting stacks for extra pid " + stats.pid);
-                }
-
-                extraPids.add(stats.pid);
-            } else {
-                Slog.i(TAG,
-                        "Skipping next CPU consuming process, not a java proc: "
-                        + stats.pid);
-            }
-        }
-        if (latencyTracker != null) {
-            latencyTracker.processCpuTrackerMethodsReturned();
-        }
-        return extraPids;
-    }
-
-    private static synchronized File createAnrDumpFile(File tracesDir) throws IOException {
-        if (sAnrFileDateFormat == null) {
-            sAnrFileDateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS");
-        }
-
-        final String formattedDate = sAnrFileDateFormat.format(new Date());
-        final File anrFile = new File(tracesDir, ANR_FILE_PREFIX + formattedDate);
-
-        if (anrFile.createNewFile()) {
-            FileUtils.setPermissions(anrFile.getAbsolutePath(), 0600, -1, -1); // -rw-------
-            return anrFile;
-        } else {
-            throw new IOException("Unable to create ANR dump file: createNewFile failed");
-        }
-    }
-
-    /**
-     * Prune all trace files that are more than a day old.
-     *
-     * NOTE: It might make sense to move this functionality to tombstoned eventually, along with a
-     * shift away from anr_XX and tombstone_XX to a more descriptive name. We do it here for now
-     * since it's the system_server that creates trace files for most ANRs.
-     */
-    private static void maybePruneOldTraces(File tracesDir) {
-        final File[] files = tracesDir.listFiles();
-        if (files == null) return;
-
-        final int max = SystemProperties.getInt("tombstoned.max_anr_count", 64);
-        final long now = System.currentTimeMillis();
-        try {
-            Arrays.sort(files, Comparator.comparingLong(File::lastModified).reversed());
-            for (int i = 0; i < files.length; ++i) {
-                if (i > max || (now - files[i].lastModified()) > DAY_IN_MILLIS) {
-                    if (!files[i].delete()) {
-                        Slog.w(TAG, "Unable to prune stale trace file: " + files[i]);
-                    }
-                }
-            }
-        } catch (IllegalArgumentException e) {
-            // The modification times changed while we were sorting. Bail...
-            // https://issuetracker.google.com/169836837
-            Slog.w(TAG, "tombstone modification times changed while sorting; not pruning", e);
-        }
-    }
-
-    /**
-     * Dump java traces for process {@code pid} to the specified file. If java trace dumping
-     * fails, a native backtrace is attempted. Note that the timeout {@code timeoutMs} only applies
-     * to the java section of the trace, a further {@code NATIVE_DUMP_TIMEOUT_MS} might be spent
-     * attempting to obtain native traces in the case of a failure. Returns the total time spent
-     * capturing traces.
-     */
-    private static long dumpJavaTracesTombstoned(int pid, String fileName, long timeoutMs) {
-        final long timeStart = SystemClock.elapsedRealtime();
-        int headerSize = writeUptimeStartHeaderForPid(pid, fileName);
-        boolean javaSuccess = Debug.dumpJavaBacktraceToFileTimeout(pid, fileName,
-                (int) (timeoutMs / 1000));
-        if (javaSuccess) {
-            // Check that something is in the file, actually. Try-catch should not be necessary,
-            // but better safe than sorry.
-            try {
-                long size = new File(fileName).length();
-                if ((size - headerSize) < JAVA_DUMP_MINIMUM_SIZE) {
-                    Slog.w(TAG, "Successfully created Java ANR file is empty!");
-                    javaSuccess = false;
-                }
-            } catch (Exception e) {
-                Slog.w(TAG, "Unable to get ANR file size", e);
-                javaSuccess = false;
-            }
-        }
-        if (!javaSuccess) {
-            Slog.w(TAG, "Dumping Java threads failed, initiating native stack dump.");
-            if (!Debug.dumpNativeBacktraceToFileTimeout(pid, fileName,
-                    (NATIVE_DUMP_TIMEOUT_MS / 1000))) {
-                Slog.w(TAG, "Native stack dump failed!");
-            }
-        }
-
-        return SystemClock.elapsedRealtime() - timeStart;
-    }
-
-    private static int appendtoANRFile(String fileName, String text) {
-        try (FileOutputStream fos = new FileOutputStream(fileName, true)) {
-            byte[] header = text.getBytes(StandardCharsets.UTF_8);
-            fos.write(header);
-            return header.length;
-        } catch (IOException e) {
-            Slog.w(TAG, "Exception writing to ANR dump file:", e);
-            return 0;
-        }
-    }
-
-    /*
-     * Writes a header containing the process id and the current system uptime.
-     */
-    private static int writeUptimeStartHeaderForPid(int pid, String fileName) {
-        return appendtoANRFile(fileName, "----- dumping pid: " + pid + " at "
-            + SystemClock.uptimeMillis() + "\n");
-    }
-
-
-    /**
-     * @return The end offset of the trace of the very first PID
-     */
-    public static long dumpStackTraces(String tracesFile,
-            ArrayList<Integer> firstPids, Future<ArrayList<Integer>> nativePidsFuture,
-            Future<ArrayList<Integer>> extraPidsFuture, AnrLatencyTracker latencyTracker) {
-
-        Slog.i(TAG, "Dumping to " + tracesFile);
-
-        // We don't need any sort of inotify based monitoring when we're dumping traces via
-        // tombstoned. Data is piped to an "intercept" FD installed in tombstoned so we're in full
-        // control of all writes to the file in question.
-
-        // We must complete all stack dumps within 20 seconds.
-        long remainingTime = 20 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
-
-        // As applications are usually interested with the ANR stack traces, but we can't share with
-        // them the stack traces other than their own stacks. So after the very first PID is
-        // dumped, remember the current file size.
-        long firstPidEnd = -1;
-
-        // First collect all of the stacks of the most important pids.
-        if (firstPids != null) {
-            if (latencyTracker != null) {
-                latencyTracker.dumpingFirstPidsStarted();
-            }
-
-            int num = firstPids.size();
-            for (int i = 0; i < num; i++) {
-                final int pid = firstPids.get(i);
-                // We don't copy ANR traces from the system_server intentionally.
-                final boolean firstPid = i == 0 && MY_PID != pid;
-                if (latencyTracker != null) {
-                    latencyTracker.dumpingPidStarted(pid);
-                }
-
-                Slog.i(TAG, "Collecting stacks for pid " + pid);
-                final long timeTaken = dumpJavaTracesTombstoned(pid, tracesFile,
-                                                                remainingTime);
-                if (latencyTracker != null) {
-                    latencyTracker.dumpingPidEnded();
-                }
-
-                remainingTime -= timeTaken;
-                if (remainingTime <= 0) {
-                    Slog.e(TAG, "Aborting stack trace dump (current firstPid=" + pid
-                            + "); deadline exceeded.");
-                    return firstPidEnd;
-                }
-
-                if (firstPid) {
-                    firstPidEnd = new File(tracesFile).length();
-                    // Full latency dump
-                    if (latencyTracker != null) {
-                        appendtoANRFile(tracesFile,
-                                latencyTracker.dumpAsCommaSeparatedArrayWithHeader());
-                    }
-                }
-                if (DEBUG_ANR) {
-                    Slog.d(TAG, "Done with pid " + firstPids.get(i) + " in " + timeTaken + "ms");
-                }
-            }
-            if (latencyTracker != null) {
-                latencyTracker.dumpingFirstPidsEnded();
-            }
-        }
-
-        // Next collect the stacks of the native pids
-        ArrayList<Integer> nativePids = collectPids(nativePidsFuture, "native pids");
-
-        Slog.i(TAG, "dumpStackTraces nativepids=" + nativePids);
-
-        if (nativePids != null) {
-            if (latencyTracker != null) {
-                latencyTracker.dumpingNativePidsStarted();
-            }
-            for (int pid : nativePids) {
-                Slog.i(TAG, "Collecting stacks for native pid " + pid);
-                final long nativeDumpTimeoutMs = Math.min(NATIVE_DUMP_TIMEOUT_MS, remainingTime);
-
-                if (latencyTracker != null) {
-                    latencyTracker.dumpingPidStarted(pid);
-                }
-                final long start = SystemClock.elapsedRealtime();
-                Debug.dumpNativeBacktraceToFileTimeout(
-                        pid, tracesFile, (int) (nativeDumpTimeoutMs / 1000));
-                final long timeTaken = SystemClock.elapsedRealtime() - start;
-                if (latencyTracker != null) {
-                    latencyTracker.dumpingPidEnded();
-                }
-                remainingTime -= timeTaken;
-                if (remainingTime <= 0) {
-                    Slog.e(TAG, "Aborting stack trace dump (current native pid=" + pid +
-                        "); deadline exceeded.");
-                    return firstPidEnd;
-                }
-
-                if (DEBUG_ANR) {
-                    Slog.d(TAG, "Done with native pid " + pid + " in " + timeTaken + "ms");
-                }
-            }
-            if (latencyTracker != null) {
-                latencyTracker.dumpingNativePidsEnded();
-            }
-        }
-
-        // Lastly, dump stacks for all extra PIDs from the CPU tracker.
-        ArrayList<Integer> extraPids = collectPids(extraPidsFuture, "extra pids");
-
-        if (extraPidsFuture != null) {
-            try {
-                extraPids = extraPidsFuture.get();
-            } catch (ExecutionException e) {
-                Slog.w(TAG, "Failed to collect extra pids", e.getCause());
-            } catch (InterruptedException e) {
-                Slog.w(TAG, "Interrupted while collecting extra pids", e);
-            }
-        }
-        Slog.i(TAG, "dumpStackTraces extraPids=" + extraPids);
-
-        if (extraPids != null) {
-            if (latencyTracker != null) {
-                latencyTracker.dumpingExtraPidsStarted();
-            }
-            for (int pid : extraPids) {
-                Slog.i(TAG, "Collecting stacks for extra pid " + pid);
-                if (latencyTracker != null) {
-                    latencyTracker.dumpingPidStarted(pid);
-                }
-                final long timeTaken = dumpJavaTracesTombstoned(pid, tracesFile, remainingTime);
-                if (latencyTracker != null) {
-                    latencyTracker.dumpingPidEnded();
-                }
-                remainingTime -= timeTaken;
-                if (remainingTime <= 0) {
-                    Slog.e(TAG, "Aborting stack trace dump (current extra pid=" + pid +
-                            "); deadline exceeded.");
-                    return firstPidEnd;
-                }
-
-                if (DEBUG_ANR) {
-                    Slog.d(TAG, "Done with extra pid " + pid + " in " + timeTaken + "ms");
-                }
-            }
-            if (latencyTracker != null) {
-                latencyTracker.dumpingExtraPidsEnded();
-            }
-        }
-        // Append the dumping footer with the current uptime
-        appendtoANRFile(tracesFile, "----- dumping ended at " + SystemClock.uptimeMillis() + "\n");
-        Slog.i(TAG, "Done dumping");
-
-        return firstPidEnd;
-    }
-
-    private static ArrayList<Integer> collectPids(Future<ArrayList<Integer>> pidsFuture,
-            String logName) {
-
-        ArrayList<Integer> pids = null;
-
-        if (pidsFuture == null) {
-            return pids;
-        }
-        try {
-            pids = pidsFuture.get();
-        } catch (ExecutionException e) {
-            Slog.w(TAG, "Failed to collect " + logName, e.getCause());
-        } catch (InterruptedException e) {
-            Slog.w(TAG, "Interrupted while collecting " + logName , e);
-        }
-        return pids;
     }
 
     @Override

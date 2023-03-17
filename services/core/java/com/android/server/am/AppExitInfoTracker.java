@@ -1153,7 +1153,7 @@ public final class AppExitInfoTracker {
         final ArraySet<String> allFiles = new ArraySet();
         final File[] files = mProcExitStoreDir.listFiles((f) -> {
             final String name = f.getName();
-            boolean trace = name.startsWith(ActivityManagerService.ANR_FILE_PREFIX)
+            boolean trace = name.startsWith(StackTracesDumpHelper.ANR_FILE_PREFIX)
                     && name.endsWith(APP_TRACE_FILE_SUFFIX);
             if (trace) {
                 allFiles.add(name);

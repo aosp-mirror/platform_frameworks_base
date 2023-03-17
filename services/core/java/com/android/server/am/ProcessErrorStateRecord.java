@@ -494,7 +494,7 @@ class ProcessErrorStateRecord {
         StringWriter tracesFileException = new StringWriter();
         // To hold the start and end offset to the ANR trace file respectively.
         final AtomicLong firstPidEndOffset = new AtomicLong(-1);
-        File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
+        File tracesFile = StackTracesDumpHelper.dumpStackTraces(firstPids,
                 isSilentAnr ? null : processCpuTracker, isSilentAnr ? null : lastPids,
                 nativePidsFuture, tracesFileException, firstPidEndOffset, annotation,
                 criticalEventLog, auxiliaryTaskExecutor, latencyTracker);
