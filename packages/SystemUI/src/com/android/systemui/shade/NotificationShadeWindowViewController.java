@@ -16,7 +16,7 @@
 
 package com.android.systemui.shade;
 
-import static com.android.systemui.flags.Flags.TRACKPAD_GESTURE_BACK;
+import static com.android.systemui.flags.Flags.TRACKPAD_GESTURE_COMMON;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.app.StatusBarManager;
@@ -96,7 +96,7 @@ public class NotificationShadeWindowViewController {
     private final NotificationInsetsController mNotificationInsetsController;
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     private final UdfpsOverlayInteractor mUdfpsOverlayInteractor;
-    private final boolean mIsTrackpadGestureBackEnabled;
+    private final boolean mIsTrackpadCommonEnabled;
     private GestureDetector mPulsingWakeupGestureHandler;
     private View mBrightnessMirror;
     private boolean mTouchActive;
@@ -172,7 +172,7 @@ public class NotificationShadeWindowViewController {
         mNotificationInsetsController = notificationInsetsController;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mUdfpsOverlayInteractor = udfpsOverlayInteractor;
-        mIsTrackpadGestureBackEnabled = featureFlags.isEnabled(TRACKPAD_GESTURE_BACK);
+        mIsTrackpadCommonEnabled = featureFlags.isEnabled(TRACKPAD_GESTURE_COMMON);
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -474,7 +474,7 @@ public class NotificationShadeWindowViewController {
         if (mTouchActive) {
             final long now = mClock.uptimeMillis();
             final MotionEvent event;
-            if (mIsTrackpadGestureBackEnabled) {
+            if (mIsTrackpadCommonEnabled) {
                 event = MotionEvent.obtain(mDownEvent);
                 event.setDownTime(now);
                 event.setAction(MotionEvent.ACTION_CANCEL);

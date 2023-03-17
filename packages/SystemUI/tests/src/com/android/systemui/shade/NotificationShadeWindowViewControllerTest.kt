@@ -127,7 +127,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             .thenReturn(emptyFlow<TransitionStep>())
 
         val featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.TRACKPAD_GESTURE_BACK, false)
+        featureFlags.set(Flags.TRACKPAD_GESTURE_COMMON, true)
+        featureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false)
         featureFlags.set(Flags.DUAL_SHADE, false)
 
         val inputProxy = MultiShadeInputProxy()
