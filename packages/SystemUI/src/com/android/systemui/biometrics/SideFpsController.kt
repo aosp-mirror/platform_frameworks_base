@@ -199,7 +199,7 @@ constructor(
             scope.launch {
                 alternateBouncerInteractor.isVisible.collect { isVisible: Boolean ->
                     if (isVisible) {
-                        show(SideFpsUiRequestSource.ALTERNATE_BOUNCER)
+                        show(SideFpsUiRequestSource.ALTERNATE_BOUNCER, REASON_AUTH_KEYGUARD)
                     } else {
                         hide(SideFpsUiRequestSource.ALTERNATE_BOUNCER)
                     }
@@ -440,13 +440,17 @@ private fun LottieAnimationView.addOverlayDynamicColor(
     @BiometricOverlayConstants.ShowReason reason: Int
 ) {
     fun update() {
-        val c = context.getColor(R.color.biometric_dialog_accent)
-        val chevronFill = context.getColor(R.color.sfps_chevron_fill)
         val isKeyguard = reason == REASON_AUTH_KEYGUARD
         if (isKeyguard) {
+            val color = context.getColor(R.color.numpad_key_color_secondary) // match bouncer color
+            val chevronFill =
+                com.android.settingslib.Utils.getColorAttrDefaultColor(
+                    context,
+                    android.R.attr.textColorPrimaryInverse
+                )
             for (key in listOf(".blue600", ".blue400")) {
                 addValueCallback(KeyPath(key, "**"), LottieProperty.COLOR_FILTER) {
-                    PorterDuffColorFilter(c, PorterDuff.Mode.SRC_ATOP)
+                    PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP)
                 }
             }
             addValueCallback(KeyPath(".black", "**"), LottieProperty.COLOR_FILTER) {
