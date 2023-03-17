@@ -156,6 +156,9 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     private ConstraintLayout mConstraintList;
     // Only present for self-managed association requests.
     private RelativeLayout mVendorHeader;
+    // A linearLayout for mButtonNotAllowMultipleDevices, user will press this layout instead
+    // of the button for accessibility.
+    private LinearLayout mNotAllowMultipleDevicesLayout;
 
     // The recycler view is only shown for multiple-device regular association request, after
     // at least one matching device is found.
@@ -327,10 +330,11 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mButtonAllow = findViewById(R.id.btn_positive);
         mButtonNotAllow = findViewById(R.id.btn_negative);
         mButtonNotAllowMultipleDevices = findViewById(R.id.btn_negative_multiple_devices);
+        mNotAllowMultipleDevicesLayout = findViewById(R.id.negative_multiple_devices_layout);
 
         mButtonAllow.setOnClickListener(this::onPositiveButtonClick);
         mButtonNotAllow.setOnClickListener(this::onNegativeButtonClick);
-        mButtonNotAllowMultipleDevices.setOnClickListener(this::onNegativeButtonClick);
+        mNotAllowMultipleDevicesLayout.setOnClickListener(this::onNegativeButtonClick);
 
         mVendorHeaderButton.setOnClickListener(this::onShowHelperDialog);
 
@@ -617,6 +621,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mButtonNotAllow.setVisibility(View.GONE);
         mDeviceListRecyclerView.setVisibility(View.VISIBLE);
         mButtonNotAllowMultipleDevices.setVisibility(View.VISIBLE);
+        mNotAllowMultipleDevicesLayout.setVisibility(View.VISIBLE);
         mConstraintList.setVisibility(View.VISIBLE);
         mMultipleDeviceSpinner.setVisibility(View.VISIBLE);
     }
