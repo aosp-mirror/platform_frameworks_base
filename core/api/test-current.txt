@@ -3601,6 +3601,11 @@ package android.view.displayhash {
 
 package android.view.inputmethod {
 
+  public abstract class CancellableHandwritingGesture extends android.view.inputmethod.HandwritingGesture {
+    ctor public CancellableHandwritingGesture();
+    method public void setCancellationSignal(@NonNull android.os.CancellationSignal);
+  }
+
   public abstract class HandwritingGesture {
     method @NonNull public static android.view.inputmethod.HandwritingGesture fromByteArray(@NonNull byte[]);
     method public final int getGestureType();
