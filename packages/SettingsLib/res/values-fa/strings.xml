@@ -268,7 +268,7 @@
     <string name="mock_location_app_set" msgid="4706722469342913843">"برنامه موقعیت مکانی ساختگی: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"شبکه"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"گواهینامه نمایش بی‌سیم"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏فعال کردن گزارش‌گیری طولانی Wi‑Fi"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏فعال کردن گزارش‌گیری مفصل Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏محدود کردن اسکن کردن Wi‑Fi"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"‏تصادفی‌سازی MAC غیرپایای Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"داده تلفن همراه همیشه فعال باشد"</string>
@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"نمایش مرزها، حاشیه‌ها و ویژگی‌های دیگر کلیپ."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"اجباری کردن چیدمان راست‌چین"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"اجباری کردن چیدمان راست‌چین صفحه برای همه زبان‌ها"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"نوار پیمایش شفاف"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"رنگ پس‌زمینه نوار پیمایش را به‌طور پیش‌فرض شفاف می‌کند"</string>
     <string name="window_blurs" msgid="6831008984828425106">"محو کردن در سطح پنجره"</string>
     <string name="force_msaa" msgid="4081288296137775550">"‏اجبار 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"‏فعال کردن 4X MSAA در برنامه‌های OpenGL ES 2.0"</string>
@@ -378,7 +380,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"‏پرداز زدن HWUI نمایه"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"‏فعال کردن لایه‌های اشکال‌زدایی GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏مجاز کردن بارگیری لایه‌های اشکال‌زدایی GPU برای برنامه‌های اشکا‌ل‌زدایی"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"فعال کردن گزارش طولانی فروشنده"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"فعال کردن گزارش‌گیری مفصل فروشنده"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"شامل گزارشات اشکال تکمیلی ورود به سیستم فروشنده ویژه دستگاه می‌شود که ممکن است دربرگیرنده اطلاعات خصوصی، استفاده بیشتر از باتری، و/یا استفاده بیشتر از فضای ذخیره‌سازی باشد."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"مقیاس پویانمایی پنجره"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"مقیاس پویانمایی انتقالی"</string>
@@ -679,4 +681,5 @@
     <item msgid="7728484337962740316">"انتقال به‌راست"</item>
     <item msgid="324200556467459329">"انتقال به‌بالا"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>٪"</string>
 </resources>
