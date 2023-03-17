@@ -82,6 +82,7 @@ import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.recents.RecentsTransitionHandler;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingSurface;
@@ -520,6 +521,9 @@ public abstract class WMShellBaseModule {
                         desktopModeTaskRepository, mainExecutor));
     }
 
+    @BindsOptionalOf
+    abstract RecentsTransitionHandler optionalRecentsTransitionHandler();
+
     //
     // Shell transitions
     //
@@ -803,6 +807,7 @@ public abstract class WMShellBaseModule {
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformComponents> freeformComponents,
             Optional<RecentTasksController> recentTasksOptional,
+            Optional<RecentsTransitionHandler> recentsTransitionHandlerOptional,
             Optional<OneHandedController> oneHandedControllerOptional,
             Optional<HideDisplayCutoutController> hideDisplayCutoutControllerOptional,
             Optional<ActivityEmbeddingController> activityEmbeddingOptional,
