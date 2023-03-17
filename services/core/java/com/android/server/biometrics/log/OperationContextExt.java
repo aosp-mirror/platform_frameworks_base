@@ -188,15 +188,8 @@ public class OperationContextExt {
     }
 
     /** {@link OperationContext#reason}. */
-    @OperationReason
     public byte getReason() {
         return mAidlContext.reason;
-    }
-
-    /** {@link OperationContext#wakeReason}. */
-    @WakeReason
-    public int getWakeReason() {
-        return mAidlContext.wakeReason;
     }
 
     /** If the screen is currently on. */
