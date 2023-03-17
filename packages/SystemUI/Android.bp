@@ -368,6 +368,7 @@ android_library {
     plugins: ["dagger2-compiler"],
     lint: {
         test: true,
+        extra_check_modules: ["SystemUILintChecker"],
     },
 }
 
