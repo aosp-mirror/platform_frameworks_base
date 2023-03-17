@@ -840,8 +840,9 @@ public class ConnectivityControllerTest {
         final JobStatus blue = createJobStatus(createJob()
                 .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1), 0)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY), UID_BLUE);
+        // Unmetered preference is disabled for now.
         assertFalse(red.getPreferUnmetered());
-        assertTrue(blue.getPreferUnmetered());
+        assertFalse(blue.getPreferUnmetered());
 
         controller.maybeStartTrackingJobLocked(red, null);
         controller.maybeStartTrackingJobLocked(blue, null);
@@ -895,7 +896,7 @@ public class ConnectivityControllerTest {
             generalCallback.onLost(meteredNet);
 
             assertTrue(red.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
-            assertFalse(red.getHasAccessToUnmetered());
+            assertTrue(red.getHasAccessToUnmetered());
 
             assertTrue(blue.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY));
             assertTrue(blue.getHasAccessToUnmetered());
