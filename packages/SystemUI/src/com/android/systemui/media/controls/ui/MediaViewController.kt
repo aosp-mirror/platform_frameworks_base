@@ -602,7 +602,11 @@ constructor(
                         tmpState
                     )
             }
-            logger.logMediaSize("setCurrentState", result.width, result.height)
+            logger.logMediaSize(
+                "setCurrentState (progress $transitionProgress)",
+                result.width,
+                result.height
+            )
             layoutController.setState(
                 result,
                 applyImmediately,
