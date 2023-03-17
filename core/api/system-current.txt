@@ -5967,6 +5967,7 @@ package android.hardware.soundtrigger {
     method @Nullable public android.media.AudioFormat getCaptureFormat();
     method public int getCaptureSession();
     method public byte[] getData();
+    method public long getHalEventReceivedMillis();
     method public boolean isCaptureAvailable();
   }
 
@@ -13042,6 +13043,7 @@ package android.service.voice {
     method @Nullable public android.media.AudioFormat getCaptureAudioFormat();
     method @Nullable public byte[] getData();
     method public int getDataFormat();
+    method public long getHalEventReceivedMillis();
     method @Nullable public android.service.voice.HotwordDetectedResult getHotwordDetectedResult();
     method @NonNull public java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra> getKeyphraseRecognitionExtras();
     method @Deprecated @Nullable public byte[] getTriggerAudio();
