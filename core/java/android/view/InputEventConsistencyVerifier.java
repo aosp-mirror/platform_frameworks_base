@@ -721,7 +721,7 @@ public final class InputEventConsistencyVerifier {
 
     private static void appendEvent(StringBuilder message, int index,
             InputEvent event, boolean unhandled) {
-        message.append(index).append(": sent at ").append(event.getEventTimeNano());
+        message.append(index).append(": sent at ").append(event.getEventTimeNanos());
         message.append(", ");
         if (unhandled) {
             message.append("(unhandled) ");
