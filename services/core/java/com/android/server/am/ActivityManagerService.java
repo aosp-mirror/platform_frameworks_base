@@ -18738,13 +18738,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void logFgsApiBegin(@ForegroundServiceApiType int apiType,
                 int uid, int pid) {
-            ActivityManagerService.this.logFgsApiBegin(apiType, uid, pid);
+            synchronized (this) {
+                mServices.logFgsApiBeginLocked(apiType, uid, pid);
+            }
         }
 
         @Override
         public void logFgsApiEnd(@ForegroundServiceApiType int apiType,
                 int uid, int pid) {
-            ActivityManagerService.this.logFgsApiEnd(apiType, uid, pid);
+            synchronized (this) {
+                mServices.logFgsApiEndLocked(apiType, uid, pid);
+            }
         }
 
         @Override
