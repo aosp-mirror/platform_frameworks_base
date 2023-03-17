@@ -1610,7 +1610,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 if (SystemProperties.getBoolean(
                         "persist.wm.debug.enable_pip_app_icon_overlay", true)) {
                     animator.setAppIconContentOverlay(
-                            mContext, currentBounds, mTaskInfo.topActivityInfo);
+                            mContext, currentBounds, mTaskInfo.topActivityInfo,
+                            mPipBoundsState.getLauncherState().getAppIconSizePx());
                 } else {
                     animator.setColorContentOverlay(mContext);
                 }
