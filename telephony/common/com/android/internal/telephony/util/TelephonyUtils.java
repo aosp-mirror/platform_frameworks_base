@@ -20,6 +20,7 @@ import static android.telephony.Annotation.DataState;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
@@ -255,15 +256,26 @@ public final class TelephonyUtils {
      * Show switch to managed profile dialog if subscription is associated with managed profile.
      *
      * @param context Context object
-     * @param subId   subscription id
+     * @param subId subscription id
+     * @param callingUid uid for the calling app
+     * @param callingPackage package name of the calling app
      */
-    public static void showErrorIfSubscriptionAssociatedWithManagedProfile(Context context,
-            int subId) {
+    public static void showSwitchToManagedProfileDialogIfAppropriate(Context context,
+            int subId, int callingUid, String callingPackage) {
         if (!isSwitchToManagedProfileDialogFlagEnabled()) {
             return;
         }
         final long token = Binder.clearCallingIdentity();
         try {
+            UserHandle callingUserHandle = UserHandle.getUserHandleForUid(callingUid);
+            // We only want to show this dialog, while user actually trying to send the message from
+            // a messaging app, in other cases this dialog don't make sense.
+            if (!TelephonyUtils.isUidForeground(context, callingUid)
+                    || !TelephonyUtils.isPackageSMSRoleHolderForUser(context, callingPackage,
+                    callingUserHandle)) {
+                return;
+            }
+
             SubscriptionManager subscriptionManager = context.getSystemService(
                     SubscriptionManager.class);
             UserHandle associatedUserHandle = subscriptionManager.getSubscriptionUserHandle(subId);
@@ -295,22 +307,25 @@ public final class TelephonyUtils {
                 "enable_switch_to_managed_profile_dialog", false);
     }
 
-    /**
-     * Check if the process with given uid is foreground.
-     *
-     * @param context context
-     * @param uid     the caller uid
-     * @return true if the process with uid is foreground, false otherwise.
-     */
-    public static boolean isUidForeground(Context context, int uid) {
-        final long token = Binder.clearCallingIdentity();
-        try {
-            ActivityManager am = context.getSystemService(ActivityManager.class);
-            boolean result = am != null && am.getUidImportance(uid)
-                    == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
-            return result;
-        } finally {
-            Binder.restoreCallingIdentity(token);
+    private static boolean isUidForeground(Context context, int uid) {
+        ActivityManager am = context.getSystemService(ActivityManager.class);
+        boolean result = am != null && am.getUidImportance(uid)
+                == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+        return result;
+    }
+
+    private static boolean isPackageSMSRoleHolderForUser(Context context, String callingPackage,
+            UserHandle user) {
+        RoleManager roleManager = context.getSystemService(RoleManager.class);
+        final List<String> smsRoleHolder = roleManager.getRoleHoldersAsUser(
+                RoleManager.ROLE_SMS, user);
+
+        // ROLE_SMS is an exclusive role per user, so there would just be one entry in the
+        // retuned list if not empty
+        if (!smsRoleHolder.isEmpty() && callingPackage.equals(smsRoleHolder.get(0))) {
+            return true;
         }
+        return false;
+
     }
 }

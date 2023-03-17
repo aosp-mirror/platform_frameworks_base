@@ -343,10 +343,8 @@ public class MmsServiceBroker extends SystemService {
             // Check if user is associated with the subscription
             if (!TelephonyPermissions.checkSubscriptionAssociatedWithUser(mContext, subId,
                     Binder.getCallingUserHandle())) {
-                if (TelephonyUtils.isUidForeground(mContext, Binder.getCallingUid())) {
-                    TelephonyUtils.showErrorIfSubscriptionAssociatedWithManagedProfile(mContext,
-                            subId);
-                }
+                TelephonyUtils.showSwitchToManagedProfileDialogIfAppropriate(mContext,
+                        subId, Binder.getCallingUid(), callingPkg);
                 return;
             }
 
