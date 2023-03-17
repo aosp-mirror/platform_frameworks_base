@@ -146,6 +146,8 @@ public class TransitionTracer {
                     transition.getSyncId());
         }
 
+        outputStream.write(com.android.server.wm.shell.Transition.TYPE, transition.mType);
+
         for (int i = 0; i < targets.size(); ++i) {
             final long changeToken = outputStream
                     .start(com.android.server.wm.shell.Transition.TARGETS);
