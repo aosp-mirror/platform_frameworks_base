@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
 import android.tools.common.datatypes.component.ComponentNameMatcher
@@ -42,7 +41,6 @@ abstract class EnterPipTransition(flicker: FlickerTest) : PipTransition(flicker)
     }
 
     /** Checks [pipApp] layer remains visible throughout the animation */
-    @FlakyTest(bugId = 271878066)
     @Presubmit
     @Test
     open fun pipAppLayerAlwaysVisible() {
