@@ -169,6 +169,7 @@ public final class CachedAppOptimizer {
     static final int COMPACT_SYSTEM_MSG = 2;
     static final int SET_FROZEN_PROCESS_MSG = 3;
     static final int REPORT_UNFREEZE_MSG = 4;
+    static final int COMPACT_NATIVE_MSG = 5;
 
     // When free swap falls below this percentage threshold any full (file + anon)
     // compactions will be downgraded to file only compactions to reduce pressure
@@ -729,6 +730,11 @@ public final class CachedAppOptimizer {
                             + app.mOptRecord.getReqCompactSource().name());
         }
         return false;
+    }
+
+    void compactNative(CompactProfile compactProfile, int pid) {
+        mCompactionHandler.sendMessage(mCompactionHandler.obtainMessage(
+                COMPACT_NATIVE_MSG, pid, compactProfile.ordinal()));
     }
 
     private AggregatedProcessCompactionStats getPerProcessAggregatedCompactStat(
@@ -1861,6 +1867,21 @@ public final class CachedAppOptimizer {
                     compactSystem();
                     long memFreedAfter = getMemoryFreedCompaction();
                     mSystemTotalMemFreed += memFreedAfter - memFreedBefore;
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    break;
+                }
+                case COMPACT_NATIVE_MSG: {
+                    int pid = msg.arg1;
+                    CompactProfile compactProfile = CompactProfile.values()[msg.arg2];
+                    Slog.d(TAG_AM,
+                            "Performing native compaction for pid=" + pid
+                                    + " type=" + compactProfile.name());
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "compactSystem");
+                    try {
+                        mProcessDependencies.performCompaction(compactProfile, pid);
+                    } catch (Exception e) {
+                        Slog.d(TAG_AM, "Failed compacting native pid= " + pid);
+                    }
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 }

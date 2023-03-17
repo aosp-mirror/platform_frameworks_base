@@ -1111,6 +1111,28 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 mInternal.mOomAdjuster.mCachedAppOptimizer.compactAllSystem();
             }
             pw.println("Finished system compaction");
+        } else if (op.equals("native")) {
+            op = getNextArgRequired();
+            isFullCompact = op.equals("full");
+            isSomeCompact = op.equals("some");
+            int pid;
+            String pidStr = getNextArgRequired();
+            try {
+                pid = Integer.parseInt(pidStr);
+            } catch (Exception e) {
+                getErrPrintWriter().println("Error: failed to parse '" + pidStr + "' as a PID");
+                return -1;
+            }
+            if (isFullCompact) {
+                mInternal.mOomAdjuster.mCachedAppOptimizer.compactNative(
+                        CachedAppOptimizer.CompactProfile.FULL, pid);
+            } else if (isSomeCompact) {
+                mInternal.mOomAdjuster.mCachedAppOptimizer.compactNative(
+                        CachedAppOptimizer.CompactProfile.SOME, pid);
+            } else {
+                getErrPrintWriter().println("Error: unknown compaction type '" + op + "'");
+                return -1;
+            }
         } else {
             getErrPrintWriter().println("Error: unknown compact command '" + op + "'");
             return -1;
@@ -4028,11 +4050,17 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --allow-background-activity-starts: The receiver may start activities");
             pw.println("          even if in the background.");
             pw.println("      --async: Send without waiting for the completion of the receiver.");
-            pw.println("  compact [some|full|system] <process_name> [--user <USER_ID>]");
-            pw.println("      Force process compaction.");
+            pw.println("  compact [some|full] <process_name> [--user <USER_ID>]");
+            pw.println("      Perform a single process compaction.");
             pw.println("      some: execute file compaction.");
             pw.println("      full: execute anon + file compaction.");
             pw.println("      system: system compaction.");
+            pw.println("  compact system");
+            pw.println("      Perform a full system compaction.");
+            pw.println("  compact native [some|full] <pid>");
+            pw.println("      Perform a native compaction for process with <pid>.");
+            pw.println("      some: execute file compaction.");
+            pw.println("      full: execute anon + file compaction.");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
             pw.println("          [--user <USER_ID> | current]");
             pw.println("          [--no-hidden-api-checks [--no-test-api-access]]");
