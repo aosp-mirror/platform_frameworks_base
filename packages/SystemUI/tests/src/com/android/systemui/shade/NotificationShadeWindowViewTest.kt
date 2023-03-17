@@ -26,13 +26,11 @@ import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
@@ -103,14 +101,12 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock
     private lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
-    @Mock private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock
     private lateinit var primaryBouncerToGoneTransitionViewModel:
         PrimaryBouncerToGoneTransitionViewModel
     @Captor
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
-    @Mock private lateinit var udfpsOverlayInteractor: UdfpsOverlayInteractor
 
     private lateinit var underTest: NotificationShadeWindowView
     private lateinit var controller: NotificationShadeWindowViewController
@@ -166,8 +162,6 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 pulsingGestureListener,
                 keyguardBouncerViewModel,
                 keyguardBouncerComponentFactory,
-                alternateBouncerInteractor,
-                udfpsOverlayInteractor,
                 keyguardTransitionInteractor,
                 primaryBouncerToGoneTransitionViewModel,
                 featureFlags,
@@ -207,8 +201,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
 
             // WHEN showing alt auth, not dozing, drag down helper doesn't want to intercept
             whenever(statusBarStateController.isDozing).thenReturn(false)
-            whenever(alternateBouncerInteractor.isVisibleState()).thenReturn(true)
-            whenever(udfpsOverlayInteractor.canInterceptTouchInUdfpsBounds(any())).thenReturn(true)
+            whenever(statusBarKeyguardViewManager.shouldInterceptTouchEvent(any())).thenReturn(true)
             whenever(dragDownHelper.onInterceptTouchEvent(any())).thenReturn(false)
 
             // THEN we should intercept touch
@@ -222,7 +215,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
 
             // WHEN not showing alt auth, not dozing, drag down helper doesn't want to intercept
             whenever(statusBarStateController.isDozing).thenReturn(false)
-            whenever(alternateBouncerInteractor.isVisibleState()).thenReturn(false)
+            whenever(statusBarKeyguardViewManager.shouldInterceptTouchEvent(any()))
+                .thenReturn(false)
             whenever(dragDownHelper.onInterceptTouchEvent(any())).thenReturn(false)
 
             // THEN we shouldn't intercept touch
@@ -236,7 +230,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
 
             // WHEN showing alt auth, not dozing, drag down helper doesn't want to intercept
             whenever(statusBarStateController.isDozing).thenReturn(false)
-            whenever(alternateBouncerInteractor.isVisibleState()).thenReturn(true)
+            whenever(statusBarKeyguardViewManager.onTouch(any())).thenReturn(true)
             whenever(dragDownHelper.onInterceptTouchEvent(any())).thenReturn(false)
 
             // THEN we should handle the touch
