@@ -2204,6 +2204,7 @@ public class IntentFilter implements Parcelable {
      * <p> Subsequent calls to this method  will override any previously set extras.
      *
      * @param extras The intent extras to match against.
+     * @hide
      */
     public final void setExtras(@NonNull PersistableBundle extras) {
         mExtras = extras;
@@ -2214,6 +2215,7 @@ public class IntentFilter implements Parcelable {
      *
      * @return the extras that were previously set using {@link #setExtras(PersistableBundle)} or
      *         an empty {@link PersistableBundle} object if no extras were set.
+     * @hide
      */
     public final @NonNull PersistableBundle getExtras() {
         return mExtras == null ? new PersistableBundle() : mExtras;

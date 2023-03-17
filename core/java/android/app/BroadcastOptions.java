@@ -889,6 +889,8 @@ public class BroadcastOptions extends ComponentOptions {
      * <p> If neither matching key using {@link #setDeliveryGroupMatchingKey(String, String)} nor
      * matching filter using this API is specified, then by default
      * {@link Intent#filterEquals(Intent)} will be used to identify the delivery group.
+     *
+     * @hide
      */
     @NonNull
     public BroadcastOptions setDeliveryGroupMatchingFilter(@NonNull IntentFilter matchingFilter) {
@@ -902,6 +904,7 @@ public class BroadcastOptions extends ComponentOptions {
      *
      * @return the {@link IntentFilter} object that was previously set using
      *         {@link #setDeliveryGroupMatchingFilter(IntentFilter)}.
+     * @hide
      */
     @Nullable
     public IntentFilter getDeliveryGroupMatchingFilter() {
@@ -911,6 +914,8 @@ public class BroadcastOptions extends ComponentOptions {
     /**
      * Clears the {@link IntentFilter} object that was previously set using
      * {@link #setDeliveryGroupMatchingFilter(IntentFilter)}.
+     *
+     * @hide
      */
     public void clearDeliveryGroupMatchingFilter() {
         mDeliveryGroupMatchingFilter = null;
