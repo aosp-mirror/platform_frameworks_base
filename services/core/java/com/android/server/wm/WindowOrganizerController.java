@@ -671,7 +671,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         }
 
-        final int prevWindowingMode = container.getWindowingMode();
+        final int prevWindowingMode = container.getRequestedOverrideWindowingMode();
         if (windowingMode > -1 && prevWindowingMode != windowingMode) {
             if (mService.isInLockTaskMode()
                     && WindowConfiguration.inMultiWindowMode(windowingMode)) {
