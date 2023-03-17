@@ -473,7 +473,7 @@ public:
         // actually cross thread boundaries here, make a copy so it's immutable proper
         if (bitmap && !bitmap->isImmutable()) {
             ATRACE_NAME("Copying mutable bitmap");
-            return SkImage::MakeFromBitmap(*bitmap);
+            return SkImages::RasterFromBitmap(*bitmap);
         }
         if (img->isTextureBacked()) {
             ATRACE_NAME("Readback of texture image");
@@ -493,7 +493,7 @@ public:
                 return sk_ref_sp(img);
             }
             bm.setImmutable();
-            return sk_image_factory::MakePinnableFromRasterBitmap(bm);
+            return SkImages::PinnableRasterFromBitmap(bm);
         }
         return sk_ref_sp(img);
     }

@@ -16,6 +16,8 @@
 
 #include "AutoBackendTextureRelease.h"
 
+#include <SkImage.h>
+#include <include/gpu/ganesh/SkImageGanesh.h>
 #include "renderthread/RenderThread.h"
 #include "utils/Color.h"
 #include "utils/PaintUtils.h"
@@ -83,10 +85,10 @@ void AutoBackendTextureRelease::makeImage(AHardwareBuffer* buffer,
     AHardwareBuffer_describe(buffer, &desc);
     SkColorType colorType = GrAHardwareBufferUtils::GetSkColorTypeFromBufferFormat(desc.format);
     // The following ref will be counteracted by Skia calling releaseProc, either during
-    // MakeFromTexture if there is a failure, or later when SkImage is discarded. It must
-    // be called before MakeFromTexture, otherwise Skia may remove HWUI's ref on failure.
+    // BorrowTextureFrom if there is a failure, or later when SkImage is discarded. It must
+    // be called before BorrowTextureFrom, otherwise Skia may remove HWUI's ref on failure.
     ref();
-    mImage = SkImage::MakeFromTexture(
+    mImage = SkImages::BorrowTextureFrom(
             context, mBackendTexture, kTopLeft_GrSurfaceOrigin, colorType, kPremul_SkAlphaType,
             uirenderer::DataSpaceToColorSpace(dataspace), releaseProc, this);
 }

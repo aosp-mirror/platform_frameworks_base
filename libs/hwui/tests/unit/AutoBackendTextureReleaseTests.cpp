@@ -46,7 +46,7 @@ RENDERTHREAD_TEST(AutoBackendTextureRelease, makeImage_invalid) {
 
     EXPECT_EQ(1, TestUtils::getUsageCount(textureRelease));
 
-    // SkImage::MakeFromTexture should fail if given null GrDirectContext.
+    // SkImages::BorrowTextureFrom should fail if given null GrDirectContext.
     textureRelease->makeImage(buffer, HAL_DATASPACE_UNKNOWN, /*context = */ nullptr);
 
     EXPECT_EQ(1, TestUtils::getUsageCount(textureRelease));

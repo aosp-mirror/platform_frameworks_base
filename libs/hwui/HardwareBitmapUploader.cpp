@@ -25,6 +25,7 @@
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkImage.h>
+#include <SkImageAndroid.h>
 #include <SkImageInfo.h>
 #include <SkRefCnt.h>
 #include <gui/TraceUtils.h>
@@ -262,7 +263,8 @@ private:
           }
 
           sk_sp<SkImage> image =
-              SkImage::MakeFromAHardwareBufferWithData(mGrContext.get(), bitmap.pixmap(), ahb);
+              SkImages::TextureFromAHardwareBufferWithData(mGrContext.get(), bitmap.pixmap(),
+                                                           ahb);
           mGrContext->submit(true);
 
           uploadSucceeded = (image.get() != nullptr);

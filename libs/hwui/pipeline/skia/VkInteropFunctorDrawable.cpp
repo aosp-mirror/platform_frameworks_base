@@ -34,6 +34,8 @@
 #include "utils/TimeUtils.h"
 
 #include <SkBlendMode.h>
+#include <SkImage.h>
+#include <SkImageAndroid.h>
 
 namespace android {
 namespace uirenderer {
