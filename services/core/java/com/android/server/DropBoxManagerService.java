@@ -311,14 +311,10 @@ public final class DropBoxManagerService extends SystemService {
             extrasMerger.setMergeStrategy(DropBoxManager.EXTRA_DROPPED_COUNT,
                     BundleMerger.STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD);
 
-            final String tag = intent.getStringExtra(DropBoxManager.EXTRA_TAG);
-            final IntentFilter matchingFilter = new IntentFilter(
-                    DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED);
-            matchingFilter.addExtra(DropBoxManager.EXTRA_TAG, tag);
-
             return BroadcastOptions.makeBasic()
                     .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MERGED)
-                    .setDeliveryGroupMatchingFilter(matchingFilter)
+                    .setDeliveryGroupMatchingKey(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED,
+                            intent.getStringExtra(DropBoxManager.EXTRA_TAG))
                     .setDeliveryGroupExtrasMerger(extrasMerger)
                     .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
                     .toBundle();
