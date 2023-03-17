@@ -745,6 +745,9 @@ public class TvView extends ViewGroup {
      */
     public void setTvMessageEnabled(@TvInputManager.TvMessageType int type,
             boolean enabled) {
+        if (mSession != null) {
+            mSession.setTvMessageEnabled(type, enabled);
+        }
     }
 
     @Override
