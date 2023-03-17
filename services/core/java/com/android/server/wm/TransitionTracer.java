@@ -18,14 +18,6 @@ package com.android.server.wm;
 
 import static android.os.Build.IS_USER;
 
-import static com.android.server.wm.shell.ChangeInfo.CHANGE_FLAGS;
-import static com.android.server.wm.shell.ChangeInfo.HAS_CHANGED;
-import static com.android.server.wm.shell.ChangeInfo.TRANSIT_MODE;
-import static com.android.server.wm.shell.ChangeInfo.WINDOWING_MODE;
-import static com.android.server.wm.shell.ChangeInfo.WINDOW_IDENTIFIER;
-import static com.android.server.wm.shell.TransitionInfoChange.LAYER_ID;
-import static com.android.server.wm.shell.TransitionInfoChange.MODE;
-import static com.android.server.wm.shell.TransitionState.CHANGE;
 import static com.android.server.wm.shell.TransitionTraceProto.MAGIC_NUMBER;
 import static com.android.server.wm.shell.TransitionTraceProto.MAGIC_NUMBER_H;
 import static com.android.server.wm.shell.TransitionTraceProto.MAGIC_NUMBER_L;
@@ -66,17 +58,57 @@ public class TransitionTracer {
 
     /**
      * Records key information about a transition that has been sent to Shell to be played.
+     * More information will be appended to the same proto object once the transition is finished or
+     * aborted.
+     * Transition information won't be added to the trace buffer until
+     * {@link #logFinishedTransition} or {@link #logAbortedTransition} is called for this
+     * transition.
+     *
      * @param transition The transition that has been sent to Shell.
      * @param targets Information about the target windows of the transition.
-     * @param createTimeNs System elapsed time (nanoseconds since boot including sleep time) at
- *                     which the transition to be recorded was created.
-     * @param sendTimeNs System elapsed time (nanoseconds since boot including sleep time) at which
-     * @param info
+     * @param info The TransitionInfo send over to Shell to execute the transition.
      */
     public void logSentTransition(Transition transition, ArrayList<ChangeInfo> targets,
-            long createTimeNs, long sendTimeNs, TransitionInfo info) {
-        mTraceBuffer.pushSentTransition(transition, targets, createTimeNs, sendTimeNs);
+            TransitionInfo info) {
+        // Dump the info to proto that will not be available when the transition finishes or
+        // is canceled
+        final ProtoOutputStream outputStream = transition.mLogger.mProtoOutputStream;
+        transition.mLogger.mProtoToken = outputStream
+                .start(com.android.server.wm.shell.TransitionTraceProto.FINISHED_TRANSITIONS);
+        outputStream.write(com.android.server.wm.shell.Transition.START_TRANSACTION_ID,
+                transition.getStartTransaction().getId());
+        outputStream.write(com.android.server.wm.shell.Transition.FINISH_TRANSACTION_ID,
+                transition.getFinishTransaction().getId());
+        dumpTransitionTargetsToProto(outputStream, transition, targets);
+
         logTransitionInfo(transition, info);
+    }
+
+    /**
+     * Completes the information dumped in {@link #logSentTransition} for a transition
+     * that has finished or aborted, and add the proto object to the trace buffer.
+     *
+     * @param transition The transition that has finished.
+     */
+    public void logFinishedTransition(Transition transition) {
+        // Dump the rest of the transition's info that wasn't dumped during logSentTransition
+        dumpFinishedTransitionToProto(transition.mLogger.mProtoOutputStream, transition);
+        transition.mLogger.mProtoOutputStream.end(transition.mLogger.mProtoToken);
+        mTraceBuffer.pushTransitionProto(transition.mLogger.mProtoOutputStream);
+    }
+
+    /**
+     * Same as {@link #logFinishedTransition} but don't add the transition to the trace buffer
+     * unless actively tracing.
+     *
+     * @param transition The transition that has been aborted
+     */
+    public void logAbortedTransition(Transition transition) {
+        // We don't care about aborted transitions unless actively tracing
+        if (!mActiveTracingEnabled) {
+            return;
+        }
+        logFinishedTransition(transition);
     }
 
     /**
@@ -87,7 +119,9 @@ public class TransitionTracer {
         if (!mActiveTracingEnabled) {
             return;
         }
-        mTraceBuffer.pushTransitionState(transition);
+        final ProtoOutputStream outputStream = new ProtoOutputStream();
+        dumpTransitionStateToProto(outputStream, transition);
+        mTraceBuffer.pushTransitionState(outputStream);
     }
 
     /**
@@ -99,171 +133,178 @@ public class TransitionTracer {
         if (!mActiveTracingEnabled) {
             return;
         }
-        mTraceBuffer.pushTransitionInfo(transition, info);
+        final ProtoOutputStream outputStream = new ProtoOutputStream();
+        dumpTransitionInfoToProto(outputStream, transition, info);
+        mTraceBuffer.pushTransitionInfo(outputStream);
+    }
+
+    private void dumpTransitionTargetsToProto(ProtoOutputStream outputStream,
+            Transition transition, ArrayList<ChangeInfo> targets) {
+        Trace.beginSection("TransitionTracer#dumpTransitionTargetsToProto");
+        if (mActiveTracingEnabled) {
+            outputStream.write(com.android.server.wm.shell.Transition.ID,
+                    transition.getSyncId());
+        }
+
+        for (int i = 0; i < targets.size(); ++i) {
+            final long changeToken = outputStream
+                    .start(com.android.server.wm.shell.Transition.TARGETS);
+
+            final Transition.ChangeInfo target = targets.get(i);
+
+            final int mode = target.getTransitMode(target.mContainer);
+            final int layerId;
+            if (target.mContainer.mSurfaceControl.isValid()) {
+                layerId = target.mContainer.mSurfaceControl.getLayerId();
+            } else {
+                layerId = -1;
+            }
+
+            outputStream.write(com.android.server.wm.shell.Target.MODE, mode);
+            outputStream.write(com.android.server.wm.shell.Target.LAYER_ID, layerId);
+
+            if (mActiveTracingEnabled) {
+                // What we use in the WM trace
+                final int windowId = System.identityHashCode(target.mContainer);
+                outputStream.write(com.android.server.wm.shell.Target.WINDOW_ID, windowId);
+            }
+
+            outputStream.end(changeToken);
+        }
+
+        Trace.endSection();
+    }
+
+    private void dumpFinishedTransitionToProto(
+            ProtoOutputStream outputStream,
+            Transition transition
+    ) {
+        Trace.beginSection("TransitionTracer#dumpFinishedTransitionToProto");
+
+        outputStream.write(com.android.server.wm.shell.Transition.CREATE_TIME_NS,
+                transition.mLogger.mCreateTimeNs);
+        outputStream.write(com.android.server.wm.shell.Transition.SEND_TIME_NS,
+                transition.mLogger.mSendTimeNs);
+        outputStream.write(com.android.server.wm.shell.Transition.FINISH_TIME_NS,
+                transition.mLogger.mFinishTimeNs);
+
+        Trace.endSection();
+    }
+
+    private void dumpTransitionStateToProto(ProtoOutputStream outputStream, Transition transition) {
+        Trace.beginSection("TransitionTracer#dumpTransitionStateToProto");
+
+        final long stateToken = outputStream
+                .start(com.android.server.wm.shell.TransitionTraceProto.TRANSITION_STATES);
+
+        outputStream.write(com.android.server.wm.shell.TransitionState.TIME_NS,
+                SystemClock.elapsedRealtimeNanos());
+        outputStream.write(com.android.server.wm.shell.TransitionState.TRANSITION_ID,
+                transition.getSyncId());
+        outputStream.write(com.android.server.wm.shell.TransitionState.TRANSITION_TYPE,
+                transition.mType);
+        outputStream.write(com.android.server.wm.shell.TransitionState.STATE,
+                transition.getState());
+        outputStream.write(com.android.server.wm.shell.TransitionState.FLAGS,
+                transition.getFlags());
+
+        for (int i = 0; i < transition.mChanges.size(); ++i) {
+            final WindowContainer window = transition.mChanges.keyAt(i);
+            final ChangeInfo changeInfo = transition.mChanges.valueAt(i);
+            dumpChangeInfoToProto(outputStream, window, changeInfo);
+        }
+
+        for (int i = 0; i < transition.mParticipants.size(); ++i) {
+            final WindowContainer window = transition.mParticipants.valueAt(i);
+            window.writeIdentifierToProto(outputStream,
+                    com.android.server.wm.shell.TransitionState.PARTICIPANTS);
+        }
+
+        outputStream.end(stateToken);
+        Trace.endSection();
+    }
+
+    private void dumpChangeInfoToProto(ProtoOutputStream outputStream, WindowContainer window,
+            ChangeInfo changeInfo) {
+        Trace.beginSection("TransitionTraceBuffer#writeChange");
+        final long changeEntryToken =
+                outputStream.start(com.android.server.wm.shell.TransitionState.CHANGE);
+
+        final int transitMode = changeInfo.getTransitMode(window);
+        final boolean hasChanged = changeInfo.hasChanged();
+        final int changeFlags = changeInfo.getChangeFlags(window);
+        final int windowingMode = changeInfo.mWindowingMode;
+
+        outputStream.write(com.android.server.wm.shell.ChangeInfo.TRANSIT_MODE, transitMode);
+        outputStream.write(com.android.server.wm.shell.ChangeInfo.HAS_CHANGED, hasChanged);
+        outputStream.write(com.android.server.wm.shell.ChangeInfo.CHANGE_FLAGS, changeFlags);
+        outputStream.write(com.android.server.wm.shell.ChangeInfo.WINDOWING_MODE, windowingMode);
+        window.writeIdentifierToProto(
+                outputStream, com.android.server.wm.shell.ChangeInfo.WINDOW_IDENTIFIER);
+
+        outputStream.end(changeEntryToken);
+        Trace.endSection();
+    }
+
+    private void dumpTransitionInfoToProto(ProtoOutputStream outputStream,
+            Transition transition, TransitionInfo info) {
+        Trace.beginSection("TransitionTracer#dumpTransitionInfoToProto");
+        final long transitionInfoToken = outputStream
+                .start(com.android.server.wm.shell.TransitionTraceProto.TRANSITION_INFO);
+
+        outputStream.write(com.android.server.wm.shell.TransitionInfo.TRANSITION_ID,
+                transition.getSyncId());
+        for (int i = 0; i < info.getChanges().size(); ++i) {
+            TransitionInfo.Change change = info.getChanges().get(i);
+            dumpTransitionInfoChangeToProto(outputStream, change);
+        }
+
+        outputStream.end(transitionInfoToken);
+        Trace.endSection();
+    }
+
+    private void dumpTransitionInfoChangeToProto(
+            ProtoOutputStream outputStream,
+            TransitionInfo.Change change
+    ) {
+        Trace.beginSection("TransitionTracer#dumpTransitionInfoChangeToProto");
+        final long changeEntryToken = outputStream
+                .start(com.android.server.wm.shell.TransitionInfo.CHANGE);
+
+        outputStream.write(com.android.server.wm.shell.TransitionInfoChange.LAYER_ID,
+                change.getLeash().getLayerId());
+        outputStream.write(com.android.server.wm.shell.TransitionInfoChange.MODE, change.getMode());
+
+        outputStream.end(changeEntryToken);
+        Trace.endSection();
     }
 
     private class TransitionTraceBuffer {
-        private final TraceBuffer mBuffer = new TraceBuffer(ALWAYS_ON_TRACING_CAPACITY);
+        private final TraceBuffer mTransitionBuffer = new TraceBuffer(ALWAYS_ON_TRACING_CAPACITY);
         private final TraceBuffer mStateBuffer = new TraceBuffer(ACTIVE_TRACING_BUFFER_CAPACITY);
         private final TraceBuffer mTransitionInfoBuffer =
                 new TraceBuffer(ACTIVE_TRACING_BUFFER_CAPACITY);
 
-        public void pushSentTransition(
-                Transition transition,
-                ArrayList<ChangeInfo> targets,
-                long createTimeNs,
-                long sendTimeNs
-        ) {
-            Trace.beginSection("TransitionTraceBuffer#pushSentTransition");
-            final ProtoOutputStream outputStream = new ProtoOutputStream();
-            final long transitionToken = outputStream
-                    .start(com.android.server.wm.shell.TransitionTraceProto.SENT_TRANSITIONS);
-
-            if (mActiveTracingEnabled) {
-                outputStream.write(com.android.server.wm.shell.Transition.ID,
-                        transition.getSyncId());
-            }
-
-            outputStream.write(com.android.server.wm.shell.Transition.START_TRANSACTION_ID,
-                    transition.getStartTransaction().getId());
-            outputStream.write(com.android.server.wm.shell.Transition.FINISH_TRANSACTION_ID,
-                    transition.getFinishTransaction().getId());
-
-            outputStream.write(com.android.server.wm.shell.Transition.CREATE_TIME_NS, createTimeNs);
-            outputStream.write(com.android.server.wm.shell.Transition.SEND_TIME_NS, sendTimeNs);
-
-            for (int i = 0; i < targets.size(); ++i) {
-                final long changeToken = outputStream
-                        .start(com.android.server.wm.shell.Transition.TARGETS);
-
-                final Transition.ChangeInfo target = targets.get(i);
-
-                final int mode = target.getTransitMode(target.mContainer);
-                final int layerId;
-                if (target.mContainer.mSurfaceControl.isValid()) {
-                    layerId = target.mContainer.mSurfaceControl.getLayerId();
-                } else {
-                    layerId = -1;
-                }
-
-                outputStream.write(com.android.server.wm.shell.Target.MODE, mode);
-                outputStream.write(com.android.server.wm.shell.Target.LAYER_ID, layerId);
-
-                if (mActiveTracingEnabled) {
-                    // What we use in the WM trace
-                    final int windowId = System.identityHashCode(target.mContainer);
-                    outputStream.write(com.android.server.wm.shell.Target.WINDOW_ID, windowId);
-                }
-
-                outputStream.end(changeToken);
-            }
-
-            outputStream.end(transitionToken);
-            mBuffer.add(outputStream);
-
-            Trace.endSection();
+        private void pushTransitionProto(ProtoOutputStream outputStream) {
+            mTransitionBuffer.add(outputStream);
         }
 
-        private void pushTransitionState(Transition transition) {
-            Trace.beginSection("TransitionTraceBuffer#pushTransitionState");
-            final ProtoOutputStream outputStream = new ProtoOutputStream();
-            final long stateToken = outputStream
-                    .start(com.android.server.wm.shell.TransitionTraceProto.TRANSITION_STATES);
-
-            outputStream.write(com.android.server.wm.shell.TransitionState.TIME_NS,
-                    SystemClock.elapsedRealtimeNanos());
-            outputStream.write(com.android.server.wm.shell.TransitionState.TRANSITION_ID,
-                    transition.getSyncId());
-            outputStream.write(com.android.server.wm.shell.TransitionState.TRANSITION_TYPE,
-                    transition.mType);
-            outputStream.write(com.android.server.wm.shell.TransitionState.STATE,
-                    transition.getState());
-            outputStream.write(com.android.server.wm.shell.TransitionState.FLAGS,
-                    transition.getFlags());
-
-            for (int i = 0; i < transition.mChanges.size(); ++i) {
-                final WindowContainer window = transition.mChanges.keyAt(i);
-                final ChangeInfo changeInfo = transition.mChanges.valueAt(i);
-                writeChange(outputStream, window, changeInfo);
-            }
-
-            for (int i = 0; i < transition.mChanges.size(); ++i) {
-                final WindowContainer window = transition.mChanges.keyAt(i);
-                final ChangeInfo changeInfo = transition.mChanges.valueAt(i);
-                writeChange(outputStream, window, changeInfo);
-            }
-
-            for (int i = 0; i < transition.mParticipants.size(); ++i) {
-                final WindowContainer window = transition.mParticipants.valueAt(i);
-                window.writeIdentifierToProto(outputStream,
-                        com.android.server.wm.shell.TransitionState.PARTICIPANTS);
-            }
-
-            outputStream.end(stateToken);
-
+        private void pushTransitionState(ProtoOutputStream outputStream) {
             mStateBuffer.add(outputStream);
-            Trace.endSection();
         }
 
-        private void pushTransitionInfo(Transition transition, TransitionInfo info) {
-            Trace.beginSection("TransitionTraceBuffer#pushTransitionInfo");
-            final ProtoOutputStream outputStream = new ProtoOutputStream();
-            final long transitionInfoToken = outputStream
-                    .start(com.android.server.wm.shell.TransitionTraceProto.TRANSITION_INFO);
-
-            outputStream.write(com.android.server.wm.shell.TransitionInfo.TRANSITION_ID,
-                    transition.getSyncId());
-            for (int i = 0; i < info.getChanges().size(); ++i) {
-                TransitionInfo.Change change = info.getChanges().get(i);
-                writeTransitionInfoChange(outputStream, change);
-            }
-
-            outputStream.end(transitionInfoToken);
+        private void pushTransitionInfo(ProtoOutputStream outputStream) {
             mTransitionInfoBuffer.add(outputStream);
-            Trace.endSection();
-        }
-
-        private void writeChange(ProtoOutputStream outputStream, WindowContainer window,
-                ChangeInfo changeInfo) {
-            Trace.beginSection("TransitionTraceBuffer#writeChange");
-            final long changeEntryToken = outputStream.start(CHANGE);
-
-            final int transitMode = changeInfo.getTransitMode(window);
-            final boolean hasChanged = changeInfo.hasChanged();
-            final int changeFlags = changeInfo.getChangeFlags(window);
-            final int windowingMode = changeInfo.mWindowingMode;
-
-            outputStream.write(TRANSIT_MODE, transitMode);
-            outputStream.write(HAS_CHANGED, hasChanged);
-            outputStream.write(CHANGE_FLAGS, changeFlags);
-            outputStream.write(WINDOWING_MODE, windowingMode);
-            window.writeIdentifierToProto(outputStream, WINDOW_IDENTIFIER);
-
-            outputStream.end(changeEntryToken);
-            Trace.endSection();
-        }
-
-        private void writeTransitionInfoChange(
-                ProtoOutputStream outputStream,
-                TransitionInfo.Change change
-        ) {
-            Trace.beginSection("TransitionTraceBuffer#writeTransitionInfoChange");
-            final long changeEntryToken = outputStream
-                    .start(com.android.server.wm.shell.TransitionInfo.CHANGE);
-
-            outputStream.write(LAYER_ID, change.getLeash().getLayerId());
-            outputStream.write(MODE, change.getMode());
-
-            outputStream.end(changeEntryToken);
-            Trace.endSection();
         }
 
         public void writeToFile(File file, ProtoOutputStream proto) throws IOException {
-            mBuffer.writeTraceToFile(file, proto);
+            mTransitionBuffer.writeTraceToFile(file, proto);
         }
 
         public void reset() {
-            mBuffer.resetBuffer();
+            mTransitionBuffer.resetBuffer();
+            mStateBuffer.resetBuffer();
+            mTransitionInfoBuffer.resetBuffer();
         }
     }
 
@@ -280,7 +321,7 @@ public class TransitionTracer {
         LogAndPrintln.i(pw, "Starting shell transition trace.");
         synchronized (mEnabledLock) {
             mActiveTracingEnabled = true;
-            mTraceBuffer.mBuffer.setCapacity(ACTIVE_TRACING_BUFFER_CAPACITY);
+            mTraceBuffer.mTransitionBuffer.setCapacity(ACTIVE_TRACING_BUFFER_CAPACITY);
             mTraceBuffer.reset();
         }
         Trace.endSection();
@@ -309,7 +350,8 @@ public class TransitionTracer {
         synchronized (mEnabledLock) {
             mActiveTracingEnabled = false;
             writeTraceToFileLocked(pw, outputFile);
-            mTraceBuffer.mBuffer.setCapacity(ALWAYS_ON_TRACING_CAPACITY);
+            mTraceBuffer.reset();
+            mTraceBuffer.mTransitionBuffer.setCapacity(ALWAYS_ON_TRACING_CAPACITY);
         }
         Trace.endSection();
     }
