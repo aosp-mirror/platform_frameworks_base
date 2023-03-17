@@ -808,7 +808,8 @@ public class PipTransition extends PipTransitionController {
                         "persist.wm.debug.enable_pip_app_icon_overlay", true)
                         && hasTopActivityInfo) {
                     animator.setAppIconContentOverlay(
-                            mContext, currentBounds, taskInfo.topActivityInfo);
+                            mContext, currentBounds, taskInfo.topActivityInfo,
+                            mPipBoundsState.getLauncherState().getAppIconSizePx());
                 } else {
                     animator.setColorContentOverlay(mContext);
                 }
