@@ -278,13 +278,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         setTransientLaunchToChanges(activity);
 
         if (restoreBelow != null) {
+            final Task transientRootTask = activity.getRootTask();
             // Collect all visible activities which can be occluded by the transient activity to
             // make sure they are in the participants so their visibilities can be updated when
             // finishing transition.
             ((WindowContainer<?>) restoreBelow.getParent()).forAllTasks(t -> {
                 if (t.isVisibleRequested() && !t.isAlwaysOnTop()
                         && !t.getWindowConfiguration().tasksAreFloating()) {
-                    if (t.isRootTask()) {
+                    if (t.isRootTask() && t != transientRootTask) {
                         mTransientHideTasks.add(t);
                     }
                     if (t.isLeafTask()) {
