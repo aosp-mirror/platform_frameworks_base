@@ -31,8 +31,7 @@
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Se încarcă rapid"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Se încarcă lent"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Încărcarea este optimizată pentru a proteja bateria"</string>
-    <!-- no translation found for keyguard_plugged_in_incompatible_charger (3687961801947819076) -->
-    <skip />
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problemă legată de accesoriul de încărcare"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Apasă pe Meniu pentru a debloca."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Rețea blocată"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Niciun card SIM"</string>
