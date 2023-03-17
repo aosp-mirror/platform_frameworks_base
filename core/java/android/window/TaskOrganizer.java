@@ -270,17 +270,24 @@ public class TaskOrganizer extends WindowOrganizer {
 
     /**
      * Controls whether ignore orientation request logic in {@link
-     * com.android.server.wm.DisplayArea} is disabled at runtime.
+     * com.android.server.wm.DisplayArea} is disabled at runtime and how to optionally map some
+     * requested orientation to others.
      *
-     * @param isDisabled when {@code true}, the system always ignores the value of {@link
-     *                   com.android.server.wm.DisplayArea#getIgnoreOrientationRequest} and app
-     *                   requested orientation is respected.
+     * @param isIgnoreOrientationRequestDisabled when {@code true}, the system always ignores the
+     *           value of  {@link com.android.server.wm.DisplayArea#getIgnoreOrientationRequest}
+     *           and app requested orientation is respected.
+     * @param fromOrientations The orientations we want to map to the correspondent orientations
+     *                        in toOrientation.
+     * @param toOrientations The orientations we map to the ones in fromOrientations at the same
+     *                       index
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public void setIsIgnoreOrientationRequestDisabled(boolean isDisabled) {
+    public void setOrientationRequestPolicy(boolean isIgnoreOrientationRequestDisabled,
+            @Nullable int[] fromOrientations, @Nullable int[] toOrientations) {
         try {
-            mTaskOrganizerController.setIsIgnoreOrientationRequestDisabled(isDisabled);
+            mTaskOrganizerController.setOrientationRequestPolicy(isIgnoreOrientationRequestDisabled,
+                    fromOrientations, toOrientations);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

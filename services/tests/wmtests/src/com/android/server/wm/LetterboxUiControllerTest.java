@@ -55,6 +55,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 
 import android.annotation.Nullable;
 import android.compat.testing.PlatformCompatChangeRule;
@@ -518,6 +519,16 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     }
 
     // overrideOrientationIfNeeded
+
+    @Test
+    public void testOverrideOrientationIfNeeded_mapInvokedOnRequest() throws Exception {
+        mController = new LetterboxUiController(mWm, mActivity);
+        spyOn(mWm);
+
+        mController.overrideOrientationIfNeeded(SCREEN_ORIENTATION_PORTRAIT);
+
+        verify(mWm).mapOrientationRequest(SCREEN_ORIENTATION_PORTRAIT);
+    }
 
     @Test
     @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT})
