@@ -1066,16 +1066,26 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     @NeverCompile
-    int runCompact(PrintWriter pw) {
+    int runCompact(PrintWriter pw) throws RemoteException {
         ProcessRecord app;
         String op = getNextArgRequired();
         boolean isFullCompact = op.equals("full");
         boolean isSomeCompact = op.equals("some");
         if (isFullCompact || isSomeCompact) {
             String processName = getNextArgRequired();
-            String uid = getNextArgRequired();
             synchronized (mInternal.mProcLock) {
-                app = mInternal.getProcessRecordLocked(processName, Integer.parseInt(uid));
+                // Default to current user
+                int userId = mInterface.getCurrentUserId();
+                String userOpt = getNextOption();
+                if (userOpt != null && "--user".equals(userOpt)) {
+                    int inputUserId = UserHandle.parseUserArg(getNextArgRequired());
+                    if (inputUserId != UserHandle.USER_CURRENT) {
+                        userId = inputUserId;
+                    }
+                }
+                final int uid =
+                        mInternal.getPackageManagerInternal().getPackageUid(processName, 0, userId);
+                app = mInternal.getProcessRecordLocked(processName, uid);
             }
             pw.println("Process record found pid: " + app.mPid);
             if (isFullCompact) {
@@ -4018,7 +4028,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --allow-background-activity-starts: The receiver may start activities");
             pw.println("          even if in the background.");
             pw.println("      --async: Send without waiting for the completion of the receiver.");
-            pw.println("  compact [some|full|system] <process_name> <Package UID>");
+            pw.println("  compact [some|full|system] <process_name> [--user <USER_ID>]");
             pw.println("      Force process compaction.");
             pw.println("      some: execute file compaction.");
             pw.println("      full: execute anon + file compaction.");
