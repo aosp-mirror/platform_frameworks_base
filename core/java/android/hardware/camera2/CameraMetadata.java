@@ -3285,6 +3285,7 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>Automatically select ON or OFF based on the system level preferences.</p>
      * @see CaptureRequest#CONTROL_AUTOFRAMING
+     * @hide
      */
     public static final int CONTROL_AUTOFRAMING_AUTO = 2;
 
