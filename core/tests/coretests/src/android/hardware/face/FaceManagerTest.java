@@ -112,7 +112,7 @@ public class FaceManagerTest {
         mCaptor.getValue().onAllAuthenticatorsRegistered(mProps);
         List<FaceSensorPropertiesInternal> actual = mFaceManager.getSensorPropertiesInternal();
 
-        assertThat(actual).isEqualTo(mProps);
+        assertThat(actual).containsExactlyElementsIn(mProps);
         verify(mService, never()).getSensorPropertiesInternal(any());
     }
 
