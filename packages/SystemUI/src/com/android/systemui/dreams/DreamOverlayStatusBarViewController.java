@@ -200,8 +200,6 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mStatusBarItemsProvider.addCallback(mStatusBarItemsProviderCallback);
 
         mDreamOverlayStateController.addCallback(mDreamOverlayStateCallback);
-
-        mTouchInsetSession.addViewToTracking(mView);
     }
 
     @Override
