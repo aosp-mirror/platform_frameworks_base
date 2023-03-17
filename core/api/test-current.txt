@@ -2035,6 +2035,7 @@ package android.net.wifi.sharedconnectivity.service {
 
   public abstract class SharedConnectivityService extends android.app.Service {
     method public void onBind();
+    method public final void setCountdownLatch(@Nullable java.util.concurrent.CountDownLatch);
   }
 
 }
