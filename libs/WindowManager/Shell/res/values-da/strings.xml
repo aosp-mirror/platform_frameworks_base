@@ -68,6 +68,8 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Flyt ned til højre"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Indstillinger for <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Afvis boble"</string>
+    <!-- no translation found for bubbles_dont_bubble (3216183855437329223) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Vis ikke samtaler i bobler"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chat ved hjælp af bobler"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Nye samtaler vises som svævende ikoner eller bobler. Tryk for at åbne boblen. Træk for at flytte den."</string>
