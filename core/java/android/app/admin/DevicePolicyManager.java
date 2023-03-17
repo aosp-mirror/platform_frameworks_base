@@ -15840,9 +15840,8 @@ public class DevicePolicyManager {
      * Called by a device owner or a profile owner or holder of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_APPS_CONTROL} to disable user
      * control over apps. User will not be able to clear app data or force-stop packages. When
-     * called by a device owner, applies to all users on the device. Starting from Android 13,
-     * packages with user control disabled are exempted from being put in the "restricted" App
-     * Standby Bucket.
+     * called by a device owner, applies to all users on the device. Packages with user control
+     * disabled are exempted from App Standby Buckets.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
      *               caller is not a device admin.
