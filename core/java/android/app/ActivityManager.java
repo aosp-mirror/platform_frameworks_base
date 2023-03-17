@@ -236,6 +236,133 @@ public class ActivityManager {
     final ArrayMap<OnUidImportanceListener, UidObserver> mImportanceListeners = new ArrayMap<>();
 
     /**
+     * Map of callbacks that have registered for {@link UidFrozenStateChanged} events.
+     * Will be called when a Uid has become frozen or unfrozen.
+     */
+    final ArrayMap<UidFrozenStateChangedCallback, Executor> mFrozenStateChangedCallbacks =
+             new ArrayMap<>();
+
+    private final IUidFrozenStateChangedCallback mFrozenStateChangedCallback =
+            new IUidFrozenStateChangedCallback.Stub() {
+            @Override
+            public void onUidFrozenStateChanged(int[] uids, int[] frozenStates) {
+                synchronized (mFrozenStateChangedCallbacks) {
+                    mFrozenStateChangedCallbacks.forEach((callback, executor) -> {
+                        executor.execute(
+                                () -> callback.onUidFrozenStateChanged(uids, frozenStates));
+                    });
+                }
+            }
+        };
+
+    /**
+     * Callback object for {@link #registerUidFrozenStateChangedCallback}
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public interface UidFrozenStateChangedCallback {
+        /**
+         * Indicates that the UID was frozen.
+         *
+         * @hide
+         */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        int UID_FROZEN_STATE_FROZEN = 1;
+
+        /**
+         * Indicates that the UID was unfrozen.
+         *
+         * @hide
+         */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        int UID_FROZEN_STATE_UNFROZEN = 2;
+
+        /**
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = false, prefix = {"UID_FROZEN_STATE_"}, value = {
+                UID_FROZEN_STATE_FROZEN,
+                UID_FROZEN_STATE_UNFROZEN,
+        })
+        public @interface UidFrozenState {}
+
+        /**
+         * @param uids The UIDs for which the frozen state has changed
+         * @param frozenStates Frozen state for each UID index, Will be set to
+         *               {@link UidFrozenStateChangedCallback#UID_FROZEN_STATE_FROZEN}
+         *               when the UID is frozen. When the UID is unfrozen,
+         *               {@link UidFrozenStateChangedCallback#UID_FROZEN_STATE_UNFROZEN}
+         *               will be set.
+         *
+         * @hide
+         */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        void onUidFrozenStateChanged(@NonNull int[] uids,
+                @NonNull @UidFrozenState int[] frozenStates);
+    }
+
+    /**
+     * Register a {@link UidFrozenStateChangedCallback} object to receive notification
+     * when a UID is frozen or unfrozen. Will throw an exception if the same
+     * callback object is registered more than once.
+     *
+     * @param executor The executor that the callback will be run from.
+     * @param callback The callback to be registered. Callbacks for previous frozen/unfrozen
+     *                 UID changes will not be delivered. Only changes in state from the point of
+     *                 registration onward will be reported.
+     * @throws IllegalStateException if the {@code callback} is already registered.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void registerUidFrozenStateChangedCallback(
+            @NonNull Executor executor,
+            @NonNull UidFrozenStateChangedCallback callback) {
+        synchronized (mFrozenStateChangedCallbacks) {
+            if (mFrozenStateChangedCallbacks.containsKey(callback)) {
+                throw new IllegalArgumentException("Callback already registered: " + callback);
+            }
+            mFrozenStateChangedCallbacks.put(callback, executor);
+            if (mFrozenStateChangedCallbacks.size() > 1) {
+                /* There's no need to register more than one binder interface */
+                return;
+            }
+
+            try {
+                getService().registerUidFrozenStateChangedCallback(mFrozenStateChangedCallback);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Unregister a {@link UidFrozenStateChangedCallback} callback.
+     * @param callback The callback to be unregistered.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void unregisterUidFrozenStateChangedCallback(
+            @NonNull UidFrozenStateChangedCallback callback) {
+        synchronized (mFrozenStateChangedCallbacks) {
+            mFrozenStateChangedCallbacks.remove(callback);
+            if (mFrozenStateChangedCallbacks.isEmpty()) {
+                try {
+                    getService().unregisterUidFrozenStateChangedCallback(
+                            mFrozenStateChangedCallback);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
+    }
+
+    /**
      * <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
      * <meta-data>}</a> name for a 'home' Activity that declares a package that is to be
      * uninstalled in lieu of the declaring one.  The package named here must be
