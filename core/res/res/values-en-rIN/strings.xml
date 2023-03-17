@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi Calling"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wi-Fi Call"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Off"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Call over Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Call over mobile network"</string>
@@ -1393,10 +1394,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Choose input method"</string>
     <string name="show_ime" msgid="6406112007347443383">"Keep it on screen while physical keyboard is active"</string>
     <string name="hardware" msgid="1800597768237606953">"Show virtual keyboard"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (5823199895322205589) -->
-    <skip />
-    <!-- no translation found for select_multiple_keyboards_layout_notification_title (6999491025126641938) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configure <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Configure physical keyboards"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Tap to select language and layout"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1721,8 +1720,7 @@
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Hearing devices"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Held volume keys. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> turned on."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Held volume keys. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> turned off."</string>
-    <!-- no translation found for accessibility_shortcut_spoken_feedback (3760999147597564314) -->
-    <skip />
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Release the volume keys. To turn on <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, press and hold both volume keys again for three seconds."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Choose a feature to use when you tap the Accessibility button:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with two fingers):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with three fingers):"</string>
@@ -2326,19 +2324,18 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> is using both displays to show content"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Device is too warm"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen is unavailable because your phone is getting too warm"</string>
+    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
+    <skip />
+    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
+    <skip />
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Turn off"</string>
-    <!-- no translation found for keyboard_layout_notification_selected_title (1202560174252421219) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_one_selected_message (4314216053129257197) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_two_selected_message (1876349944065922950) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_three_selected_message (280734264593115419) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_more_than_three_selected_message (1581834181578206937) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_multiple_selected_title (5242444914367024499) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_multiple_selected_message (6576533454124419202) -->
-    <skip />
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> configured"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Keyboard layout set to <xliff:g id="LAYOUT_1">%s</xliff:g>. Tap to change."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Keyboard layout set to <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Tap to change."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Keyboard layout set to <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Tap to change."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Keyboard layout set to <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Tap to change."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Physical keyboards configured"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Tap to view keyboards"</string>
 </resources>
