@@ -191,7 +191,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             Rect destBounds = mPipKeepClearAlgorithm.adjust(mPipBoundsState,
                     mPipBoundsAlgorithm);
             // only move if the bounds are actually different
-            if (destBounds != mPipBoundsState.getBounds()) {
+            if (!destBounds.equals(mPipBoundsState.getBounds())) {
                 if (mPipTransitionState.hasEnteredPip()) {
                     // if already in PiP, schedule separate animation
                     mPipTaskOrganizer.scheduleAnimateResizePip(destBounds,
