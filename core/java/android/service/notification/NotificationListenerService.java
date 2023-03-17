@@ -77,6 +77,7 @@ import java.util.Objects;
  * <pre>
  * &lt;service android:name=".NotificationListener"
  *          android:label="&#64;string/service_name"
+ *          android:exported="false"
  *          android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
  *     &lt;intent-filter>
  *         &lt;action android:name="android.service.notification.NotificationListenerService" />
