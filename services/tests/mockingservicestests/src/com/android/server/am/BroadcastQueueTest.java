@@ -53,6 +53,7 @@ import android.app.AppOpsManager;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
+import android.app.UidObserver;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
@@ -83,6 +84,7 @@ import android.util.proto.ProtoOutputStream;
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.server.AlarmManagerInternal;
 import com.android.server.DropBoxManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService.Injector;
@@ -153,11 +155,14 @@ public class BroadcastQueueTest {
     private PackageManagerInternal mPackageManagerInt;
     @Mock
     private UsageStatsManagerInternal mUsageStatsManagerInt;
+    @Mock
+    private AlarmManagerInternal mAlarmManagerInt;
 
     private ActivityManagerService mAms;
     private BroadcastQueue mQueue;
     BroadcastConstants mConstants;
     private BroadcastSkipPolicy mSkipPolicy;
+    private UidObserver mUidObserver;
 
     /**
      * Desired behavior of the next
@@ -204,6 +209,8 @@ public class BroadcastQueueTest {
         LocalServices.addService(DropBoxManagerInternal.class, mDropBoxManagerInt);
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInt);
+        LocalServices.removeServiceForTest(AlarmManagerInternal.class);
+        LocalServices.addService(AlarmManagerInternal.class, mAlarmManagerInt);
         doReturn(new ComponentName("", "")).when(mPackageManagerInt).getSystemUiServiceComponent();
         doNothing().when(mPackageManagerInt).setPackageStoppedState(any(), anyBoolean(), anyInt());
         doAnswer((invocation) -> {
@@ -281,6 +288,11 @@ public class BroadcastQueueTest {
         }).when(mAms).getProcessRecordLocked(any(), anyInt());
         doNothing().when(mAms).appNotResponding(any(), any());
 
+        doAnswer((invocation) -> {
+            mUidObserver = invocation.getArgument(0);
+            return null;
+        }).when(mAms).registerUidObserver(any(), anyInt(), anyInt(), any());
+
         mConstants = new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS);
         mConstants.TIMEOUT = 100;
         mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT = 0;
@@ -305,6 +317,8 @@ public class BroadcastQueueTest {
         } else {
             throw new UnsupportedOperationException();
         }
+
+        mQueue.start(mContext.getContentResolver());
     }
 
     @After
@@ -683,12 +697,22 @@ public class BroadcastQueueTest {
                 anyInt(), anyInt(), any());
     }
 
-    private void verifyScheduleRegisteredReceiver(ProcessRecord app,
+    private void verifyScheduleRegisteredReceiver(ProcessRecord app, Intent intent)
+            throws Exception {
+        verifyScheduleRegisteredReceiver(times(1), app, intent, UserHandle.USER_SYSTEM);
+    }
+
+    private void verifyScheduleRegisteredReceiver(VerificationMode mode, ProcessRecord app,
             Intent intent) throws Exception {
-        verify(app.getThread()).scheduleRegisteredReceiver(
+        verifyScheduleRegisteredReceiver(mode, app, intent, UserHandle.USER_SYSTEM);
+    }
+
+    private void verifyScheduleRegisteredReceiver(VerificationMode mode, ProcessRecord app,
+            Intent intent, int userId) throws Exception {
+        verify(app.getThread(), mode).scheduleRegisteredReceiver(
                 any(), argThat(filterEqualsIgnoringComponent(intent)),
                 anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
-                eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
+                eq(userId), anyInt(), anyInt(), any());
     }
 
     private void verifyScheduleRegisteredReceiver(VerificationMode mode, ProcessRecord app,
@@ -1933,5 +1957,50 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverOrangeApp = mAms.getProcessRecordLocked(PACKAGE_ORANGE,
                 getUidForPackage(PACKAGE_ORANGE));
         assertNull(receiverOrangeApp);
+    }
+
+    /**
+     * Verify broadcasts to runtime receivers in cached processes are deferred
+     * until that process leaves the cached state.
+     */
+    @Test
+    public void testDeferralPolicy_UntilActive() throws Exception {
+        // Legacy stack doesn't support deferral
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+        final ProcessRecord receiverYellowApp = makeActiveProcessRecord(PACKAGE_YELLOW);
+
+        receiverGreenApp.setCached(true);
+        receiverBlueApp.setCached(true);
+        receiverYellowApp.setCached(false);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final BroadcastOptions opts = BroadcastOptions.makeBasic()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, opts,
+                List.of(makeRegisteredReceiver(receiverGreenApp),
+                        makeRegisteredReceiver(receiverBlueApp),
+                        makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
+                        makeRegisteredReceiver(receiverYellowApp))));
+        waitForIdle();
+
+        // Green ignored since it's in cached state
+        verifyScheduleRegisteredReceiver(never(), receiverGreenApp, airplane);
+
+        // Blue delivered both since it has a manifest receiver
+        verifyScheduleReceiver(times(1), receiverBlueApp, airplane);
+        verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, airplane);
+
+        // Yellow delivered since it's not cached
+        verifyScheduleRegisteredReceiver(times(1), receiverYellowApp, airplane);
+
+        // Shift green to be active and confirm that deferred broadcast is delivered
+        receiverGreenApp.setCached(false);
+        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_GREEN), false);
+        waitForIdle();
+        verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, airplane);
     }
 }
