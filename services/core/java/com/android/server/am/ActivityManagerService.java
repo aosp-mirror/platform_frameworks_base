@@ -6527,8 +6527,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     @NonNull
     private BackgroundStartPrivileges getBackgroundStartPrivileges(int uid) {
         synchronized (mProcLock) {
+            final UidRecord uidRecord = mProcessList.getUidRecordLOSP(uid);
+            if (uidRecord == null) {
+                return BackgroundStartPrivileges.NONE;
+            }
             mGetBackgroundStartPrivilegesFunctor.prepare(uid);
-            mProcessList.forEachLruProcessesLOSP(false, mGetBackgroundStartPrivilegesFunctor);
+            uidRecord.forEachProcess(mGetBackgroundStartPrivilegesFunctor);
             return mGetBackgroundStartPrivilegesFunctor.getResult();
         }
     }
