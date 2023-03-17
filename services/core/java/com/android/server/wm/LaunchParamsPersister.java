@@ -263,8 +263,8 @@ class LaunchParamsPersister {
         boolean changed = !Objects.equals(params.mDisplayUniqueId, info.uniqueId);
         params.mDisplayUniqueId = info.uniqueId;
 
-        changed |= params.mWindowingMode != task.getWindowingMode();
-        params.mWindowingMode = task.getWindowingMode();
+        changed |= params.mWindowingMode != task.getTaskDisplayArea().getWindowingMode();
+        params.mWindowingMode = task.getTaskDisplayArea().getWindowingMode();
 
         if (task.mLastNonFullscreenBounds != null) {
             changed |= !Objects.equals(params.mBounds, task.mLastNonFullscreenBounds);
