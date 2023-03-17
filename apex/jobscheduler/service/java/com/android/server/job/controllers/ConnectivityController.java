@@ -1147,10 +1147,9 @@ public final class ConnectivityController extends RestrictingController implemen
 
         final boolean changed = jobStatus.setConnectivityConstraintSatisfied(nowElapsed, satisfied);
 
+        jobStatus.setHasAccessToUnmetered(satisfied && capabilities != null
+                && capabilities.hasCapability(NET_CAPABILITY_NOT_METERED));
         if (jobStatus.getPreferUnmetered()) {
-            jobStatus.setHasAccessToUnmetered(satisfied && capabilities != null
-                    && capabilities.hasCapability(NET_CAPABILITY_NOT_METERED));
-
             jobStatus.setFlexibilityConstraintSatisfied(nowElapsed,
                     mFlexibilityController.isFlexibilitySatisfiedLocked(jobStatus));
         }
