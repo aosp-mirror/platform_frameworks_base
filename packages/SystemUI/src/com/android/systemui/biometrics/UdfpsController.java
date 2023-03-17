@@ -617,9 +617,9 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         }
         logBiometricTouch(processedTouch.getEvent(), data);
 
-        // Always pilfer pointers that are within sensor area
-        if (isWithinSensorArea(mOverlay.getOverlayView(), event.getRawX(), event.getRawY(), true)) {
-            Log.d("Austin", "pilferTouch invalid overlap");
+        // Always pilfer pointers that are within sensor area or when alternate bouncer is showing
+        if (isWithinSensorArea(mOverlay.getOverlayView(), event.getRawX(), event.getRawY(), true)
+                || mAlternateBouncerInteractor.isVisibleState()) {
             mInputManager.pilferPointers(
                     mOverlay.getOverlayView().getViewRootImpl().getInputToken());
         }

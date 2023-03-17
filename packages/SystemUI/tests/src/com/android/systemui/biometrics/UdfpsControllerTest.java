@@ -1344,6 +1344,46 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onTouch_withNewTouchDetection_pilferPointerWhenAltBouncerShowing()
+            throws RemoteException {
+        final NormalizedTouchData touchData = new NormalizedTouchData(0, 0f, 0f, 0f, 0f, 0f, 0L,
+                0L);
+        final TouchProcessorResult processorResultUnchanged =
+                new TouchProcessorResult.ProcessedTouch(InteractionEvent.UNCHANGED,
+                        1 /* pointerId */, touchData);
+
+        // Enable new touch detection.
+        when(mFeatureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)).thenReturn(true);
+
+        // Configure UdfpsController to use FingerprintManager as opposed to AlternateTouchProvider.
+        initUdfpsController(mOpticalProps, false /* hasAlternateTouchProvider */);
+
+        // Configure UdfpsView to not accept the ACTION_DOWN event
+        when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(false);
+
+        // GIVEN that the alternate bouncer is showing and a11y touch exploration NOT enabled
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+
+        // WHEN ACTION_DOWN is received and touch is not within sensor
+        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
+                processorResultUnchanged);
+        MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
+        mBiometricExecutor.runAllReady();
+        downEvent.recycle();
+
+        // THEN the touch is pilfered
+        verify(mInputManager, times(1)).pilferPointers(any());
+    }
+
+    @Test
     public void onAodInterrupt_onAcquiredGood_fingerNoLongerDown() throws RemoteException {
         // GIVEN UDFPS overlay is showing
         mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
