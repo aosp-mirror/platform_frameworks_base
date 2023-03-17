@@ -32,6 +32,7 @@ import android.os.HandlerThread;
 import android.os.Process;
 import android.os.SystemClock;
 import android.util.IndentingPrintWriter;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
@@ -51,6 +52,7 @@ import java.io.PrintWriter;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
 /** Service to monitor CPU availability and usage. */
 public final class CpuMonitorService extends SystemService {
@@ -92,6 +94,8 @@ public final class CpuMonitorService extends SystemService {
     @GuardedBy("mLock")
     private final SparseArray<CpusetInfo> mCpusetInfosByCpuset;
     private final Runnable mMonitorCpuStats = this::monitorCpuStats;
+    private final NotifyCpuAvailabilityFunctor mNotifyCpuAvailabilityFunctor =
+            new NotifyCpuAvailabilityFunctor();
 
     @GuardedBy("mLock")
     private long mCurrentMonitoringIntervalMillis = DEFAULT_MONITORING_INTERVAL_MILLISECONDS;
@@ -115,7 +119,7 @@ public final class CpuMonitorService extends SystemService {
                     }
                 }
                 CpuAvailabilityCallbackInfo callbackInfo = new CpuAvailabilityCallbackInfo(config,
-                        executor);
+                        callback, executor);
                 mAvailabilityCallbackInfosByCallbacksByCpuset.add(config.cpuset, callback,
                         callbackInfo);
                 if (DEBUG) {
@@ -254,7 +258,7 @@ public final class CpuMonitorService extends SystemService {
                 CpusetInfo cpusetInfo = mCpusetInfosByCpuset.valueAt(i);
                 cpusetInfo.populateLatestCpuAvailabilityInfo(uptimeMillis,
                         mLatestAvailabilityDurationMillis);
-                // TODO(b/242722241): Check CPU availability against thresholds and notify clients.
+                checkClientThresholdsAndNotifyLocked(cpusetInfo);
             }
 
             // TODO(b/267500110): Detect heavy CPU load. On detecting heavy CPU load, increase
@@ -269,6 +273,41 @@ public final class CpuMonitorService extends SystemService {
             } else {
                 stopMonitoringCpuStatsLocked();
             }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void checkClientThresholdsAndNotifyLocked(CpusetInfo cpusetInfo) {
+        int prevAvailabilityPercent = cpusetInfo.getPrevCpuAvailabilityPercent();
+        CpuAvailabilityInfo latestAvailabilityInfo = cpusetInfo.getLatestCpuAvailabilityInfo();
+        ArrayMap<CpuMonitorInternal.CpuAvailabilityCallback,
+                CpuAvailabilityCallbackInfo> callbackMap =
+                mAvailabilityCallbackInfosByCallbacksByCpuset.get(cpusetInfo.cpuset);
+        if (latestAvailabilityInfo == null || prevAvailabilityPercent < 0
+                || callbackMap.isEmpty()) {
+            // When either the current or the previous CPU availability percents are
+            // missing, skip the current cpuset as there is not enough data to verify
+            // whether the CPU availability has crossed any monitoring threshold.
+            return;
+        }
+        for (int i = 0; i < callbackMap.size(); i++) {
+            CpuAvailabilityCallbackInfo callbackInfo = callbackMap.valueAt(i);
+            if (didCrossAnyThreshold(prevAvailabilityPercent,
+                    latestAvailabilityInfo.latestAvgAvailabilityPercent,
+                    callbackInfo.config.getThresholds())) {
+                asyncNotifyCpuAvailabilityToClient(latestAvailabilityInfo, callbackInfo);
+            }
+        }
+    }
+
+    private void asyncNotifyCpuAvailabilityToClient(CpuAvailabilityInfo availabilityInfo,
+            CpuAvailabilityCallbackInfo callbackInfo) {
+        if (callbackInfo.executor == null) {
+            mHandler.post(() -> mNotifyCpuAvailabilityFunctor.accept(callbackInfo.callback,
+                    availabilityInfo));
+        } else {
+            callbackInfo.executor.execute(() -> mNotifyCpuAvailabilityFunctor.accept(
+                    callbackInfo.callback, availabilityInfo));
         }
     }
 
@@ -306,21 +345,47 @@ public final class CpuMonitorService extends SystemService {
         return false;
     }
 
+    private static boolean didCrossAnyThreshold(int prevAvailabilityPercent,
+            int curAvailabilityPercent, IntArray thresholds) {
+        if (prevAvailabilityPercent == curAvailabilityPercent) {
+            return false;
+        }
+        for (int i = 0; i < thresholds.size(); i++) {
+            int threshold = thresholds.get(i);
+            // TODO(b/267500110): Identify whether or not the clients need to be notified when
+            //  the CPU availability jumps too frequently around the provided thresholds.
+            //  A. Should the client be notified twice - once when the availability reaches
+            //     the threshold and once when it moves away (increase/decrease) from the threshold
+            //     immediately?
+            //  B. Should there be some sort of rate-limiting to avoid notifying the client too
+            //     frequently? Should the client be able to config the rate-limit?
+            if (prevAvailabilityPercent < threshold && curAvailabilityPercent >= threshold) {
+                return true;
+            }
+            if (prevAvailabilityPercent >= threshold && curAvailabilityPercent < threshold) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static final class CpuAvailabilityCallbackInfo {
         public final CpuAvailabilityMonitoringConfig config;
+        public final CpuMonitorInternal.CpuAvailabilityCallback callback;
         @Nullable
         public final Executor executor;
 
         CpuAvailabilityCallbackInfo(CpuAvailabilityMonitoringConfig config,
-                @Nullable Executor executor) {
+                CpuMonitorInternal.CpuAvailabilityCallback callback, @Nullable Executor executor) {
             this.config = config;
+            this.callback = callback;
             this.executor = executor;
         }
 
         @Override
         public String toString() {
-            return "CpuAvailabilityCallbackInfo{" + "config=" + config + ", mExecutor=" + executor
-                    + '}';
+            return "CpuAvailabilityCallbackInfo{config = " + config + ", callback = " + callback
+                    + ", mExecutor = " + executor + '}';
         }
     }
 
@@ -375,6 +440,11 @@ public final class CpuMonitorService extends SystemService {
             currentSnapshot.appendCpuInfo(cpuInfo);
         }
 
+        @Nullable
+        public CpuAvailabilityInfo getLatestCpuAvailabilityInfo() {
+            return mLatestCpuAvailabilityInfo;
+        }
+
         public void populateLatestCpuAvailabilityInfo(long currentUptimeMillis,
                 long latestAvailabilityDurationMillis) {
             int numSnapshots = mSnapshotsByUptime.size();
@@ -405,6 +475,14 @@ public final class CpuMonitorService extends SystemService {
                     latestSnapshot.uptimeMillis, latestSnapshot.getAverageAvailableCpuFreqPercent(),
                     getCumulativeAvgAvailabilityPercent(earliestUptimeMillis),
                     latestAvailabilityDurationMillis);
+        }
+
+        public int getPrevCpuAvailabilityPercent() {
+            int numSnapshots = mSnapshotsByUptime.size();
+            if (numSnapshots < 2) {
+                return -1;
+            }
+            return mSnapshotsByUptime.valueAt(numSnapshots - 2).getAverageAvailableCpuFreqPercent();
         }
 
         private int getCumulativeAvgAvailabilityPercent(long earliestUptimeMillis) {
@@ -483,6 +561,15 @@ public final class CpuMonitorService extends SystemService {
                         + ", totalOnlineMaxCpuFreqKHz = " + totalOnlineMaxCpuFreqKHz
                         + ", totalOfflineMaxCpuFreqKHz = " + totalOfflineMaxCpuFreqKHz + '}';
             }
+        }
+    }
+
+    private static final class NotifyCpuAvailabilityFunctor implements
+            BiConsumer<CpuMonitorInternal.CpuAvailabilityCallback, CpuAvailabilityInfo> {
+        @Override
+        public void accept(CpuMonitorInternal.CpuAvailabilityCallback callback,
+                CpuAvailabilityInfo availabilityInfo) {
+            callback.onAvailabilityChanged(availabilityInfo);
         }
     }
 }
