@@ -607,7 +607,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             case UNCHANGED:
                 if (!isWithinSensorArea(mOverlay.getOverlayView(), event.getRawX(), event.getRawY(),
                         true) && mActivePointerId == MotionEvent.INVALID_POINTER_ID
-                        && event.getActionMasked() == MotionEvent.ACTION_DOWN
                         && mAlternateBouncerInteractor.isVisibleState()) {
                     // No pointer on sensor, forward to keyguard if alternateBouncer is visible
                     mKeyguardViewManager.onTouch(event);
