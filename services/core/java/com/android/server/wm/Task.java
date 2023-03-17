@@ -2244,10 +2244,11 @@ class Task extends TaskFragment {
             return;
         }
 
-        // Don't persist state if display isn't in freeform mode. Then the task will be launched
-        // back to its last state in a freeform display when it's launched in a freeform display
-        // next time.
-        if (getWindowConfiguration().getDisplayWindowingMode() != WINDOWING_MODE_FREEFORM) {
+        // Don't persist state if Task Display Area isn't in freeform mode. Then the task will be
+        // launched back to its last state in a freeform Task Display Area when it's launched in a
+        // freeform Task Display Area next time.
+        if (getTaskDisplayArea() == null
+                || getTaskDisplayArea().getWindowingMode() != WINDOWING_MODE_FREEFORM) {
             return;
         }
 
