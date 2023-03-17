@@ -177,42 +177,96 @@ public class QuickStepContract {
 
     public static String getSystemUiStateString(int flags) {
         StringJoiner str = new StringJoiner("|");
-        str.add((flags & SYSUI_STATE_SCREEN_PINNING) != 0 ? "screen_pinned" : "");
-        str.add((flags & SYSUI_STATE_OVERVIEW_DISABLED) != 0 ? "overview_disabled" : "");
-        str.add((flags & SYSUI_STATE_HOME_DISABLED) != 0 ? "home_disabled" : "");
-        str.add((flags & SYSUI_STATE_SEARCH_DISABLED) != 0 ? "search_disabled" : "");
-        str.add((flags & SYSUI_STATE_NAV_BAR_HIDDEN) != 0 ? "navbar_hidden" : "");
-        str.add((flags & SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED) != 0 ? "notif_visible" : "");
-        str.add((flags & SYSUI_STATE_QUICK_SETTINGS_EXPANDED) != 0 ? "qs_visible" : "");
-        str.add((flags & SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING) != 0 ? "keygrd_visible" : "");
-        str.add((flags & SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED) != 0
-                ? "keygrd_occluded" : "");
-        str.add((flags & SYSUI_STATE_BOUNCER_SHOWING) != 0 ? "bouncer_visible" : "");
-        str.add((flags & SYSUI_STATE_DIALOG_SHOWING) != 0 ? "dialog_showing" : "");
-        str.add((flags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0 ? "a11y_click" : "");
-        str.add((flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0 ? "a11y_long_click" : "");
-        str.add((flags & SYSUI_STATE_TRACING_ENABLED) != 0 ? "tracing" : "");
-        str.add((flags & SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED) != 0
-                ? "asst_gesture_constrain" : "");
-        str.add((flags & SYSUI_STATE_BUBBLES_EXPANDED) != 0 ? "bubbles_expanded" : "");
-        str.add((flags & SYSUI_STATE_ONE_HANDED_ACTIVE) != 0 ? "one_handed_active" : "");
-        str.add((flags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0
-                ? "allow_gesture" : "");
-        str.add((flags & SYSUI_STATE_IME_SHOWING) != 0 ? "ime_visible" : "");
-        str.add((flags & SYSUI_STATE_MAGNIFICATION_OVERLAP) != 0 ? "magnification_overlap" : "");
-        str.add((flags & SYSUI_STATE_IME_SWITCHER_SHOWING) != 0 ? "ime_switcher_showing" : "");
-        str.add((flags & SYSUI_STATE_DEVICE_DOZING) != 0 ? "device_dozing" : "");
-        str.add((flags & SYSUI_STATE_BACK_DISABLED) != 0 ? "back_disabled" : "");
-        str.add((flags & SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED) != 0
-                ? "bubbles_mange_menu_expanded" : "");
-        str.add((flags & SYSUI_STATE_IMMERSIVE_MODE) != 0 ? "immersive_mode" : "");
-        str.add((flags & SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING) != 0 ? "vis_win_showing" : "");
-        str.add((flags & SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE) != 0
-                ? "freeform_active_in_desktop_mode" : "");
-        str.add((flags & SYSUI_STATE_DEVICE_DREAMING) != 0 ? "device_dreaming" : "");
-        str.add("screen_"
-                + ((flags & SYSUI_STATE_SCREEN_TRANSITION) != 0 ? "turning_" : "")
-                + ((flags & SYSUI_STATE_SCREEN_ON) != 0 ? "on" : "off"));
+        if ((flags & SYSUI_STATE_SCREEN_PINNING) != 0) {
+            str.add("screen_pinned");
+        }
+        if ((flags & SYSUI_STATE_OVERVIEW_DISABLED) != 0) {
+            str.add("overview_disabled");
+        }
+        if ((flags & SYSUI_STATE_HOME_DISABLED) != 0) {
+            str.add("home_disabled");
+        }
+        if ((flags & SYSUI_STATE_SEARCH_DISABLED) != 0) {
+            str.add("search_disabled");
+        }
+        if ((flags & SYSUI_STATE_NAV_BAR_HIDDEN) != 0) {
+            str.add("navbar_hidden");
+        }
+        if ((flags & SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED) != 0) {
+            str.add("notif_visible");
+        }
+        if ((flags & SYSUI_STATE_QUICK_SETTINGS_EXPANDED) != 0) {
+            str.add("qs_visible");
+        }
+        if ((flags & SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING) != 0) {
+            str.add("keygrd_visible");
+        }
+        if ((flags & SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED) != 0) {
+            str.add("keygrd_occluded");
+        }
+        if ((flags & SYSUI_STATE_BOUNCER_SHOWING) != 0) {
+            str.add("bouncer_visible");
+        }
+        if ((flags & SYSUI_STATE_DIALOG_SHOWING) != 0) {
+            str.add("dialog_showing");
+        }
+        if ((flags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0) {
+            str.add("a11y_click");
+        }
+        if ((flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0) {
+            str.add("a11y_long_click");
+        }
+        if ((flags & SYSUI_STATE_TRACING_ENABLED) != 0) {
+            str.add("tracing");
+        }
+        if ((flags & SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED) != 0) {
+            str.add("asst_gesture_constrain");
+        }
+        if ((flags & SYSUI_STATE_BUBBLES_EXPANDED) != 0) {
+            str.add("bubbles_expanded");
+        }
+        if ((flags & SYSUI_STATE_ONE_HANDED_ACTIVE) != 0) {
+            str.add("one_handed_active");
+        }
+        if ((flags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0) {
+            str.add("allow_gesture");
+        }
+        if ((flags & SYSUI_STATE_IME_SHOWING) != 0) {
+            str.add("ime_visible");
+        }
+        if ((flags & SYSUI_STATE_MAGNIFICATION_OVERLAP) != 0) {
+            str.add("magnification_overlap");
+        }
+        if ((flags & SYSUI_STATE_IME_SWITCHER_SHOWING) != 0) {
+            str.add("ime_switcher_showing");
+        }
+        if ((flags & SYSUI_STATE_DEVICE_DOZING) != 0) {
+            str.add("device_dozing");
+        }
+        if ((flags & SYSUI_STATE_BACK_DISABLED) != 0) {
+            str.add("back_disabled");
+        }
+        if ((flags & SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED) != 0) {
+            str.add("bubbles_mange_menu_expanded");
+        }
+        if ((flags & SYSUI_STATE_IMMERSIVE_MODE) != 0) {
+            str.add("immersive_mode");
+        }
+        if ((flags & SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING) != 0) {
+            str.add("vis_win_showing");
+        }
+        if ((flags & SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE) != 0) {
+            str.add("freeform_active_in_desktop_mode");
+        }
+        if ((flags & SYSUI_STATE_DEVICE_DREAMING) != 0) {
+            str.add("device_dreaming");
+        }
+        if ((flags & SYSUI_STATE_SCREEN_TRANSITION) != 0) {
+            str.add("screen_transition");
+        }
+        if ((flags & SYSUI_STATE_SCREEN_ON) != 0) {
+            str.add("screen_on");
+        }
 
         return str.toString();
     }
