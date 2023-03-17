@@ -4439,7 +4439,6 @@ public class SubscriptionManager {
      *
      * @throws IllegalArgumentException if subscription is invalid.
      * @throws SecurityException if the caller doesn't have permissions required.
-     * @throws IllegalStateException if subscription service is not available.
      *
      * @hide
      */
@@ -4456,8 +4455,8 @@ public class SubscriptionManager {
             if (iSub != null) {
                 return iSub.isSubscriptionAssociatedWithUser(subscriptionId, userHandle);
             } else {
-                throw new IllegalStateException("[isSubscriptionAssociatedWithUser]: "
-                        + "subscription service unavailable");
+                Log.e(LOG_TAG, "[isSubscriptionAssociatedWithUser]: subscription service "
+                        + "unavailable");
             }
         } catch (RemoteException ex) {
             ex.rethrowAsRuntimeException();
@@ -4484,7 +4483,7 @@ public class SubscriptionManager {
             if (iSub != null) {
                 return iSub.getSubscriptionInfoListAssociatedWithUser(userHandle);
             } else {
-                throw new IllegalStateException("[getSubscriptionInfoListAssociatedWithUser]: "
+                Log.e(LOG_TAG, "[getSubscriptionInfoListAssociatedWithUser]: "
                         + "subscription service unavailable");
             }
         } catch (RemoteException ex) {
