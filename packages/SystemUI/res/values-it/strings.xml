@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Attiva USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Scopri di più"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Funzionalità Extend Unlock disattivata"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"è stata inviata un\'immagine"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Salvataggio screenshot…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Salvataggio screenshot nel profilo di lavoro…"</string>
@@ -871,7 +870,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# controllo aggiunto.}many{# controlli aggiunti.}other{# controlli aggiunti.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Rimosso"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Vuoi aggiungere <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
     <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vuoi rimuovere i controlli per l\'app <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Aggiunto ai preferiti"</string>
@@ -897,8 +896,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Vuoi visualizzare e controllare i dispositivi dalla schermata di blocco?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Puoi aggiungere impostazioni alla schermata di blocco per i tuoi dispositivi esterni.\n\nL\'app del tuo dispositivo potrebbe consentirti di controllare alcuni dispositivi senza dover sbloccare il tuo telefono o tablet.\n\nPuoi apportare modifiche in qualsiasi momento in Impostazioni."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Vuoi controllare i dispositivi dalla schermata di blocco?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Puoi controllare alcuni dispositivi senza sbloccare il telefono o il tablet. L\'app del dispositivo determina quali dispositivi possono essere controllati in questo modo."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"No, grazie"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Sì"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Il PIN contiene lettere o simboli"</string>

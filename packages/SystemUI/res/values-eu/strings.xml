@@ -871,7 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Kontrolatzeko # aukera gehitu da.}other{Kontrolatzeko # aukera gehitu dira.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Kenduta"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> gehitu nahi duzu?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
     <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> kontrolatzeko aukerak kendu nahi dituzu?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Gogokoetan dago"</string>
@@ -897,8 +897,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Gailuak pantaila blokeatuan ikusi eta kontrolatu nahi dituzu?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Kanpoko gailuak kontrolatzeko aukerak gehi ditzakezu pantaila blokeatuan.\n\nBaliteke telefonoa edo tableta desblokeatu gabe gailu batzuk kontrolatzeko baimena ematea gailuaren aplikazioak.\n\nAldaketak egiteko, joan Ezarpenak atalera."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Gailuak pantaila blokeatuan kontrolatu nahi dituzu?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Gailu batzuk telefonoa edo tableta desblokeatu gabe kontrola ditzakezu. Gailuaren aplikazioak zehaztuko du zein gailu kontrola daitezkeen modu horretan."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Ez, eskerrik asko"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Bai"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN kodeak hizkiak edo ikurrak ditu"</string>

@@ -834,8 +834,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Увећајте цео екран"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Увећајте део екрана"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Пређи"</string>
-    <!-- no translation found for magnification_open_settings_click_label (6151849212725923363) -->
-    <skip />
+    <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Отвори подешавања увећања"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Превуците угао да бисте променили величину"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Дозволи дијагонално скроловање"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Промени величину"</string>
@@ -845,8 +844,7 @@
     <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"Лева ручица"</string>
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Десна ручица"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Доња ручица"</string>
-    <!-- no translation found for accessibility_magnification_settings_panel_description (8174187340747846953) -->
-    <skip />
+    <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Подешавања увећања"</string>
     <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Величина лупе"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Зумирање"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Средње"</string>
@@ -873,7 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# контрола је додата.}one{# контрола је додата.}few{# контроле су додате.}other{# контрола је додато.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Уклоњено"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Желите ли да додате <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
     <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Желите да уклоните контроле за <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Означено је као омиљено"</string>
@@ -899,8 +897,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Желите ли да приказујете и контролишете уређаје са закључаног екрана?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Можете да додате контроле за спољне уређаје на закључани екран.\n\nАпликација на уређају може да вам омогући да контролишете неке уређаје без откључавања телефона или таблета.\n\nТо можете да промените кад год желите у Подешавањима."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Желите ли да контролишете уређаје са закључаног екрана?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Неке уређаје можете да контролишете без откључавања телефона или таблета. Апликација на уређају одређује који уређаји могу да се контролишу на овај начин."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Не, хвала"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Да"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN садржи слова или симболе"</string>

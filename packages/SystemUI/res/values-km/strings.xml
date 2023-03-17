@@ -871,7 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{បានបញ្ចូល​ការគ្រប់គ្រង #។}other{បានបញ្ចូល​ការគ្រប់គ្រង #។}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"បានដកចេញ"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"បញ្ចូល <xliff:g id="APPNAME">%s</xliff:g> ឬ?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
     <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"ដកការគ្រប់គ្រងសម្រាប់ <xliff:g id="APPNAME">%s</xliff:g> ចេញឬ?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"បានដាក់ជា​សំណព្វ"</string>
@@ -897,8 +897,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"បង្ហាញ និង​គ្រប់គ្រង​ឧបករណ៍ពី​អេក្រង់ចាក់សោឬ?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"អ្នកអាចបញ្ចូល​ការគ្រប់គ្រង​សម្រាប់ឧបករណ៍​ខាងក្រៅ​របស់អ្នក​ទៅក្នុងអេក្រង់​ចាក់សោបាន។\n\nកម្មវិធី​ឧបករណ៍​របស់អ្នក​អាចអនុញ្ញាតឱ្យអ្នក​គ្រប់គ្រង​ឧបករណ៍​មួយចំនួន ដោយមិនចាំបាច់​ដោះសោ​ទូរសព្ទ ឬ​ថេប្លេត​របស់អ្នក។\n\nអ្នកអាចធ្វើការផ្លាស់ប្ដូរ​បានគ្រប់ពេល​នៅក្នុង​ការកំណត់។"</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"គ្រប់គ្រង​ឧបករណ៍ពី​អេក្រង់ចាក់សោឬ?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"អ្នកអាចគ្រប់គ្រង​ឧបករណ៍​មួយចំនួន ដោយមិនចាំបាច់​ដោះសោ​ទូរសព្ទ ឬថេប្លេត​របស់អ្នក។ កម្មវិធី​ឧបករណ៍​របស់អ្នក​កំណត់ឧបករណ៍​ដែលអាចត្រូវបានគ្រប់គ្រង​តាមវិធីនេះ។"</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"ទេ អរគុណ"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"បាទ/ចាស"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"កូដ PIN មាន​អក្សរ ឬនិមិត្តសញ្ញា"</string>
