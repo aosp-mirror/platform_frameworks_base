@@ -699,6 +699,8 @@
 
     <style name="MediaPlayer.Recommendation.AlbumContainer.Updated">
         <item name="android:layout_width">@dimen/qs_media_rec_album_width</item>
+        <item name="android:minWidth">@dimen/qs_media_rec_album_width</item>
+        <item name="android:minHeight">@dimen/qs_media_rec_album_height_collapsed</item>
         <item name="android:background">@drawable/qs_media_light_source</item>
         <item name="android:layout_marginTop">@dimen/qs_media_info_spacing</item>
     </style>
