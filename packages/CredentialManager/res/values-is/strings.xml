@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Bætt reikningsöryggi"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Hver lykill er eingöngu tengdur forritinu eða vefsvæðinu sem hann var búinn til fyrir. Því er engin hætta á að þú skráir þig óvart inn á sviksamlegt forrit eða vefsvæði. Einnig er erfiðara að hakka þegar þjónar geyma aðeins opinbera lykla."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Snurðulaus skipti"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Við stefnum að framtíð án aðgangsorða en aðgangsorð verða áfram í boði samhliða aðgangslyklum"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Veldu hvar þú vilt vista <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Veldu aðgangsorðastjórnun til að vista upplýsingarnar og vera fljótari að skrá þig inn næst"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Viltu búa til aðgangslykil fyrir <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Vista <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> í"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Viltu búa til aðgangslykil í öðru tæki?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Nota <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> fyrir allar innskráningar?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Þessi aðgangsorðastjórnun fyrir <xliff:g id="USERNAME">%1$s</xliff:g> vistar aðgangsorð og aðgangslykla til að auðvelda þér að skrá þig inn"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Stilla sem sjálfgefið"</string>
     <string name="use_once" msgid="9027366575315399714">"Nota einu sinni"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> aðgangsorð • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> aðgangslyklar"</string>

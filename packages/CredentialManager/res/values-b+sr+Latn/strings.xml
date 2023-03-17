@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Poboljšana bezbednost naloga"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Svaki ključ je isključivo povezan sa aplikacijom ili veb-sajtom za koje je napravljen, pa nikad ne možete greškom da se prijavite u aplikaciju ili na veb-sajt koji služe za prevaru. Osim toga, sa serverima koji čuvaju samo javne ključeve hakovanje je mnogo teže."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Besprekoran prelaz"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Kako se krećemo ka budućnosti bez lozinki, lozinke će i dalje biti dostupne uz pristupne kodove"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Odaberite gde ćete sačuvati stavke <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Izaberite menadžera lozinki da biste sačuvali podatke i brže se prijavili sledeći put"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Želite da napravite pristupni kôd za: <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Sačuvaj stavku <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> u"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Želite da napravite pristupni kôd na drugom uređaju?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Želite da za sva prijavljivanja koristite: <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Ovaj menadžer lozinki za <xliff:g id="USERNAME">%1$s</xliff:g> će čuvati lozinke i pristupne kodove da biste se lako prijavljivali"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Podesi kao podrazumevano"</string>
     <string name="use_once" msgid="9027366575315399714">"Koristi jednom"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Lozinki: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Pristupnih kodova:<xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>

@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Павышаная бяспека ўліковага запісу"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Кожны ключ звязаны толькі з праграмай або вэб-сайтам, для якіх ён быў створаны, таму вы не зможаце памылкова ўвайсці ў праграму ці на вэб-сайт, створаныя ў мэтах махлярства. Акрамя таго, на серверах захоўваюцца толькі адкрытыя ключы, таму правесці ўзлом намнога складаней."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Плаўны пераход"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Хоць мы ўжо рухаемся ў бок будучыні без выкарыстання пароляў, яны па-ранейшаму застануцца даступнымі нароўні з ключамі доступу."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Выберыце, куды захаваць <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Выберыце менеджар пароляў, каб захаваць свае даныя і забяспечыць хуткі ўваход у наступныя разы"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Стварыце ключ доступу да праграмы \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Захаваць <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> сюды:"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Стварыць ключ доступу на іншай прыладзе?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Выкарыстоўваць папку \"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>\" для ўсіх спосабаў уваходу?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Каб вам было прасцей уваходзіць у сістэму, вашы паролі і ключы доступу будуць захоўвацца ў менеджары пароляў для <xliff:g id="USERNAME">%1$s</xliff:g>."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Выкарыстоўваць стандартна"</string>
     <string name="use_once" msgid="9027366575315399714">"Скарыстаць адзін раз"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Пароляў: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Ключоў доступу: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>

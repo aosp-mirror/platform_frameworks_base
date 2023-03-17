@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Vylepšené zabezpečení účtu"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Každý klíč je propojen výhradně s aplikací nebo webem, pro které byl vytvořen, takže se nikdy nemůžete omylem přihlásit k podvodné aplikaci nebo webu. Protože na serverech jsou uloženy pouze veřejné klíče, je hackování navíc mnohem obtížnější."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Bezproblémový přechod"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Ačkoliv směřujeme k budoucnosti bez hesel, vedle přístupových klíčů budou stále k dispozici i hesla"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Určete, kam ukládat <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Vyberte správce hesel k uložení svých údajů, abyste se příště mohli přihlásit rychleji"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vytvořit přístupový klíč pro aplikaci <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Uložit <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> do"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Vytvořit přístupový klíč v jiném zařízení?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Používat <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> pro všechna přihlášení?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Správce hesel pro účet <xliff:g id="USERNAME">%1$s</xliff:g> bude ukládat vaše hesla a přístupové klíče, abyste se mohli snadno přihlásit"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Nastavit jako výchozí"</string>
     <string name="use_once" msgid="9027366575315399714">"Použít jednou"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Hesla: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Přístupové klíče: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
