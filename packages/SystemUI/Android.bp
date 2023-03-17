@@ -177,6 +177,7 @@ android_library {
         "lottie",
         "LowLightDreamLib",
         "motion_tool_lib",
+        "renderscript_toolkit",
     ],
     manifest: "AndroidManifest.xml",
 
@@ -270,6 +271,7 @@ android_library {
         "WindowManager-Shell",
         "LowLightDreamLib",
         "motion_tool_lib",
+        "renderscript_toolkit",
         "androidx.core_core-animation-testing-nodeps",
     ],
 }
