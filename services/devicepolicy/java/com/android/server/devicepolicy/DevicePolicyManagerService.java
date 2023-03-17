@@ -3579,6 +3579,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.getPackageManagerInternal().setOwnerProtectedPackages(
                         targetUserId, protectedPackages));
+        mUsageStatsManagerInternal.setAdminProtectedPackages(new ArraySet(protectedPackages),
+                targetUserId);
     }
 
     void handleUnlockUser(int userId) {
