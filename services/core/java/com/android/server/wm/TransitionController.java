@@ -976,6 +976,8 @@ class TransitionController {
         WindowContainerTransaction mStartWCT;
         int mSyncId;
         TransitionInfo mInfo;
+        ProtoOutputStream mProtoOutputStream = new ProtoOutputStream();
+        long mProtoToken;
 
         private String buildOnSendLog() {
             StringBuilder sb = new StringBuilder("Sent Transition #").append(mSyncId)
