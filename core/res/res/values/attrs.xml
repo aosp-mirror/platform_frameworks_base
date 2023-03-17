@@ -1312,21 +1312,15 @@
         <!-- The container color of surface the most elevated, which replaces the previous surface
              variant. @hide -->
         <attr name="materialColorSurfaceContainerHighest" format="color"/>
-        <!-- A tonal variation of the on surface color that passes accessibility guidelines for
-             text/iconography when drawn on top of surface variant. @hide -->
+        <!-- undefined @hide -->
         <attr name="materialColorOnSurfaceVariant" format="color"/>
-        <!-- A color meant to be used in element outlines. @hide -->
+        <!-- undefined @hide -->
         <attr name="materialColorOutline" format="color"/>
-        <!-- A color meant to be used in element outlines on the surface-variant color. @hide -->
-        <attr name="materialColorOutlineVariant" format="color"/>
-        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
-             primary. @hide -->
+        <!-- undefined @hide -->
         <attr name="materialColorOnPrimary" format="color"/>
-        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
-             surface. @hide -->
+        <!-- undefined @hide -->
         <attr name="materialColorOnSurface" format="color"/>
-        <!-- The container color of surface, which replaces the previous surface at elevation level
-             2. @hide -->
+        <!-- undefined @hide -->
         <attr name="materialColorSurfaceContainer" format="color"/>
         <!-- The container color of surface, which replaces the previous surface at elevation level
              2. @hide -->

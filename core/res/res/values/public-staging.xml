@@ -269,20 +269,6 @@
     <public name="system_palette_key_color_tertiary_dark"/>
     <public name="system_palette_key_color_neutral_dark"/>
     <public name="system_palette_key_color_neutral_variant_dark"/>
-    <public name="system_primary_fixed" />
-    <public name="system_primary_fixed_dim" />
-    <public name="system_on_primary_fixed" />
-    <public name="system_on_primary_fixed_variant" />
-    <public name="system_secondary_fixed" />
-    <public name="system_secondary_fixed_dim" />
-    <public name="system_on_secondary_fixed" />
-    <public name="system_on_secondary_fixed_variant" />
-    <public name="system_tertiary_fixed" />
-    <public name="system_tertiary_fixed_dim" />
-    <public name="system_on_tertiary_fixed" />
-    <public name="system_on_tertiary_fixed_variant" />
-    <public name="system_outline_variant_light" />
-    <public name="system_outline_variant_dark" />
   </staging-public-group>
 
   <staging-public-group type="array" first-id="0x01c80000">
