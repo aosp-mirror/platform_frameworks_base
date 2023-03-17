@@ -2277,6 +2277,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
             if (userState.mEnabledServices.contains(componentName)
                     && !mUiAutomationManager.suppressingAccessibilityServicesLocked()) {
+                // Skip the enabling service disallowed by device admin policy.
+                if (!isAccessibilityTargetAllowed(componentName.getPackageName(),
+                        installedService.getResolveInfo().serviceInfo.applicationInfo.uid,
+                        userState.mUserId)) {
+                    Slog.d(LOG_TAG, "Skipping enabling service disallowed by device admin policy: "
+                            + componentName);
+                    disableAccessibilityServiceLocked(componentName, userState.mUserId);
+                    continue;
+                }
                 if (service == null) {
                     service = new AccessibilityServiceConnection(userState, mContext, componentName,
                             installedService, sIdCounter++, mMainHandler, mLock, mSecurityPolicy,
@@ -3889,32 +3898,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    @Override
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.QUERY_ADMIN_POLICY})
     public boolean isAccessibilityTargetAllowed(String packageName, int uid, int userId) {
-        final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        final List<String> permittedServices = dpm.getPermittedAccessibilityServices(userId);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+            final List<String> permittedServices = dpm.getPermittedAccessibilityServices(userId);
 
-        // permittedServices null means all accessibility services are allowed.
-        boolean allowed = permittedServices == null || permittedServices.contains(packageName);
-        if (allowed) {
-            final AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
-            final int mode = appOps.noteOpNoThrow(
-                    AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
-                    uid, packageName, /* attributionTag= */ null, /* message= */ null);
-            final boolean ecmEnabled = mContext.getResources().getBoolean(
-                    R.bool.config_enhancedConfirmationModeEnabled);
-            return !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED;
+            // permittedServices null means all accessibility services are allowed.
+            boolean allowed = permittedServices == null || permittedServices.contains(packageName);
+            if (allowed) {
+                final AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+                final int mode = appOps.noteOpNoThrow(
+                        AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
+                        uid, packageName, /* attributionTag= */ null, /* message= */ null);
+                final boolean ecmEnabled = mContext.getResources().getBoolean(
+                        R.bool.config_enhancedConfirmationModeEnabled);
+                return !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED;
+            }
+            return false;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
-        return false;
     }
 
-    @Override
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.QUERY_ADMIN_POLICY})
     public boolean sendRestrictedDialogIntent(String packageName, int uid, int userId) {
         // The accessibility service is allowed. Don't show the restricted dialog.
         if (isAccessibilityTargetAllowed(packageName, uid, userId)) {
