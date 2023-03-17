@@ -35,6 +35,7 @@ import android.app.IServiceConnection;
 import android.app.IStopUserCallback;
 import android.app.ITaskStackListener;
 import android.app.IUiAutomationConnection;
+import android.app.IUidFrozenStateChangedCallback;
 import android.app.IUidObserver;
 import android.app.IUserSwitchObserver;
 import android.app.Notification;
@@ -877,4 +878,7 @@ interface IActivityManager {
 
     /** Logs API state change to associate with an FGS, used for FGS Type Metrics */
     void logFgsApiStateChanged(int apiType, int state, int appUid, int appPid);
+
+    void registerUidFrozenStateChangedCallback(in IUidFrozenStateChangedCallback callback);
+    void unregisterUidFrozenStateChangedCallback(in IUidFrozenStateChangedCallback callback);
 }
