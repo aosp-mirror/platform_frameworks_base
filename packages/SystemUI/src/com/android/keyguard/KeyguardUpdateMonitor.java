@@ -1601,7 +1601,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             requestActiveUnlock(
                     ActiveUnlockConfig.ActiveUnlockRequestOrigin.ASSISTANT,
                     "assistant",
-                    false);
+                    /* dismissKeyguard */ true);
         }
     }
 

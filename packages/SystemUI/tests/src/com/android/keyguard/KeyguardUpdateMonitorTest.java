@@ -2245,6 +2245,26 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void assistantVisible_requestActiveUnlock() {
+        // GIVEN active unlock requests from the assistant are allowed
+        when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.ASSISTANT)).thenReturn(true);
+
+        // GIVEN should trigger active unlock
+        keyguardIsVisible();
+        keyguardNotGoingAway();
+        statusBarShadeIsNotLocked();
+        when(mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())).thenReturn(true);
+
+        // WHEN the assistant is visible
+        mKeyguardUpdateMonitor.setAssistantVisible(true);
+
+        // THEN request unlock with keyguard dismissal
+        verify(mTrustManager).reportUserRequestedUnlock(eq(KeyguardUpdateMonitor.getCurrentUser()),
+                eq(true));
+    }
+
+    @Test
     public void fingerprintFailure_requestActiveUnlock_dismissKeyguard()
             throws RemoteException {
         // GIVEN shouldTriggerActiveUnlock
