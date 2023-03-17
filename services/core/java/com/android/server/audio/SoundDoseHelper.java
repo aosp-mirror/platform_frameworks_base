@@ -732,6 +732,16 @@ public class SoundDoseHelper {
 
     private void initCsd() {
         if (!mEnableCsd) {
+            final ISoundDose soundDose = AudioSystem.getSoundDoseInterface(mSoundDoseCallback);
+            if (soundDose == null) {
+                Log.w(TAG,  "ISoundDose instance is null.");
+                return;
+            }
+            try {
+                soundDose.disableCsd();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot disable CSD", e);
+            }
             return;
         }
 
