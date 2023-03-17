@@ -51,6 +51,7 @@
         <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.READ_PRECISE_PHONE_STATE"/>
+        <permission name="android.permission.READ_WALLPAPER_INTERNAL"/>
         <permission name="android.permission.REAL_GET_TASKS"/>
         <permission name="android.permission.REQUEST_NETWORK_SCORES"/>
         <permission name="android.permission.RECEIVE_MEDIA_RESOURCE_USAGE"/>
