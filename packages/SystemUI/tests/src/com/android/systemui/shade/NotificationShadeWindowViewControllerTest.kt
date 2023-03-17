@@ -38,6 +38,7 @@ import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransition
 import com.android.systemui.multishade.data.remoteproxy.MultiShadeInputProxy
 import com.android.systemui.multishade.data.repository.MultiShadeRepository
 import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor
+import com.android.systemui.multishade.domain.interactor.MultiShadeMotionEventInteractor
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationInsetsController
@@ -67,8 +68,8 @@ import org.mockito.Mockito.anyFloat
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -129,6 +130,16 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
 
         val inputProxy = MultiShadeInputProxy()
         testScope = TestScope()
+        val multiShadeInteractor =
+            MultiShadeInteractor(
+                applicationScope = testScope.backgroundScope,
+                repository =
+                    MultiShadeRepository(
+                        applicationContext = context,
+                        inputProxy = inputProxy,
+                    ),
+                inputProxy = inputProxy,
+            )
         underTest =
             NotificationShadeWindowViewController(
                 lockscreenShadeTransitionController,
@@ -154,18 +165,15 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 keyguardTransitionInteractor,
                 primaryBouncerToGoneTransitionViewModel,
                 featureFlags,
+                { multiShadeInteractor },
+                FakeSystemClock(),
                 {
-                    MultiShadeInteractor(
+                    MultiShadeMotionEventInteractor(
+                        applicationContext = context,
                         applicationScope = testScope.backgroundScope,
-                        repository =
-                            MultiShadeRepository(
-                                applicationContext = context,
-                                inputProxy = inputProxy,
-                            ),
-                        inputProxy = inputProxy,
+                        interactor = multiShadeInteractor,
                     )
                 },
-                FakeSystemClock(),
             )
         underTest.setupExpandedStatusBar()
 
@@ -308,7 +316,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     fun shouldInterceptTouchEvent_statusBarKeyguardViewManagerShouldIntercept() {
         // down event should be intercepted by keyguardViewManager
         whenever(statusBarKeyguardViewManager.shouldInterceptTouchEvent(DOWN_EVENT))
-                .thenReturn(true)
+            .thenReturn(true)
 
         // Then touch should not be intercepted
         val shouldIntercept = interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)
