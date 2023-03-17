@@ -10022,6 +10022,21 @@ public final class Settings {
                 "emergency_gesture_sound_enabled";
 
         /**
+         * Whether the emergency gesture UI is currently showing.
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_GESTURE_UI_SHOWING = "emergency_gesture_ui_showing";
+
+        /**
+         * The last time the emergency gesture UI was started.
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_GESTURE_UI_LAST_STARTED_MILLIS =
+                "emergency_gesture_ui_last_started_millis";
+
+        /**
          * Whether the camera launch gesture to double tap the power button when the screen is off
          * should be disabled.
          *
@@ -15053,6 +15068,16 @@ public final class Settings {
          */
         public static final String EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS =
                 "emergency_gesture_tap_detection_min_time_ms";
+
+        /**
+         * The maximum duration in milliseconds for which the emergency gesture UI can stay
+         * "sticky", where the notification pull-down shade and navigation gestures/buttons are
+         *  temporarily disabled. The feature is disabled completely if the value is set to zero.
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_GESTURE_STICKY_UI_MAX_DURATION_MILLIS =
+                "emergency_gesture_sticky_ui_max_duration_millis";
 
         /**
          * Whether to enable automatic system server heap dumps. This only works on userdebug or
