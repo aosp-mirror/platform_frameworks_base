@@ -459,7 +459,10 @@ class ProcessErrorStateRecord {
                         // don't dump native PIDs for background ANRs unless
                         // it is the process of interest
                         String[] nativeProcs = null;
-                        if (isSilentAnr || onlyDumpSelf) {
+                        boolean isSystemApp = mApp.info.isSystemApp() || mApp.info.isSystemExt();
+                        // Do not collect system daemons dumps as this is not likely to be useful
+                        // for non-system apps.
+                        if (!isSystemApp || isSilentAnr || onlyDumpSelf) {
                             for (int i = 0; i < NATIVE_STACKS_OF_INTEREST.length; i++) {
                                 if (NATIVE_STACKS_OF_INTEREST[i].equals(mApp.processName)) {
                                     nativeProcs = new String[] { mApp.processName };
