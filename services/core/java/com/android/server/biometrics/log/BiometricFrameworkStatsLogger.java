@@ -16,21 +16,13 @@
 
 package com.android.server.biometrics.log;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricContextListener;
-import android.hardware.biometrics.common.AuthenticateReason;
-import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.OperationReason;
-import android.hardware.biometrics.common.WakeReason;
 import android.util.Slog;
 import android.view.Surface;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
-
-import java.util.stream.Stream;
 
 /**
  * Wrapper for {@link FrameworkStatsLog} to isolate the testable parts.
@@ -71,7 +63,7 @@ public class BiometricFrameworkStatsLogger {
                 orientationType(operationContext.getOrientation()),
                 foldType(operationContext.getFoldState()),
                 operationContext.getOrderAndIncrement(),
-                toProtoWakeReason(operationContext));
+                BiometricsProtoEnums.WAKE_REASON_UNKNOWN);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_AUTHENTICATED}. */
@@ -97,8 +89,7 @@ public class BiometricFrameworkStatsLogger {
                 orientationType(operationContext.getOrientation()),
                 foldType(operationContext.getFoldState()),
                 operationContext.getOrderAndIncrement(),
-                toProtoWakeReason(operationContext),
-                toProtoWakeReasonDetails(operationContext));
+                BiometricsProtoEnums.WAKE_REASON_UNKNOWN);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_AUTHENTICATED}. */
@@ -146,81 +137,7 @@ public class BiometricFrameworkStatsLogger {
                 orientationType(operationContext.getOrientation()),
                 foldType(operationContext.getFoldState()),
                 operationContext.getOrderAndIncrement(),
-                toProtoWakeReason(operationContext),
-                toProtoWakeReasonDetails(operationContext));
-    }
-
-    @VisibleForTesting
-    static int[] toProtoWakeReasonDetails(@NonNull OperationContextExt operationContext) {
-        final OperationContext ctx = operationContext.toAidlContext();
-        return Stream.of(toProtoWakeReasonDetails(ctx.authenticateReason))
-                .mapToInt(i -> i)
-                .filter(i -> i != BiometricsProtoEnums.DETAILS_UNKNOWN)
-                .toArray();
-    }
-
-    @VisibleForTesting
-    static int toProtoWakeReason(@NonNull OperationContextExt operationContext) {
-        @WakeReason final int reason = operationContext.getWakeReason();
-        switch (reason) {
-            case WakeReason.POWER_BUTTON:
-                return BiometricsProtoEnums.WAKE_REASON_POWER_BUTTON;
-            case WakeReason.GESTURE:
-                return BiometricsProtoEnums.WAKE_REASON_GESTURE;
-            case WakeReason.WAKE_KEY:
-                return BiometricsProtoEnums.WAKE_REASON_WAKE_KEY;
-            case WakeReason.WAKE_MOTION:
-                return BiometricsProtoEnums.WAKE_REASON_WAKE_MOTION;
-            case WakeReason.LID:
-                return BiometricsProtoEnums.WAKE_REASON_LID;
-            case WakeReason.DISPLAY_GROUP_ADDED:
-                return BiometricsProtoEnums.WAKE_REASON_DISPLAY_GROUP_ADDED;
-            case WakeReason.TAP:
-                return BiometricsProtoEnums.WAKE_REASON_TAP;
-            case WakeReason.LIFT:
-                return BiometricsProtoEnums.WAKE_REASON_LIFT;
-            case WakeReason.BIOMETRIC:
-                return BiometricsProtoEnums.WAKE_REASON_BIOMETRIC;
-            default:
-                return BiometricsProtoEnums.WAKE_REASON_UNKNOWN;
-        }
-    }
-
-    private static int toProtoWakeReasonDetails(@Nullable AuthenticateReason reason) {
-        if (reason != null) {
-            switch (reason.getTag()) {
-                case AuthenticateReason.faceAuthenticateReason:
-                    return toProtoWakeReasonDetailsFromFace(reason.getFaceAuthenticateReason());
-            }
-        }
-        return BiometricsProtoEnums.DETAILS_UNKNOWN;
-    }
-
-    private static int toProtoWakeReasonDetailsFromFace(@AuthenticateReason.Face int reason) {
-        switch (reason) {
-            case AuthenticateReason.Face.STARTED_WAKING_UP:
-                return BiometricsProtoEnums.DETAILS_FACE_STARTED_WAKING_UP;
-            case AuthenticateReason.Face.PRIMARY_BOUNCER_SHOWN:
-                return BiometricsProtoEnums.DETAILS_FACE_PRIMARY_BOUNCER_SHOWN;
-            case AuthenticateReason.Face.ASSISTANT_VISIBLE:
-                return BiometricsProtoEnums.DETAILS_FACE_ASSISTANT_VISIBLE;
-            case AuthenticateReason.Face.ALTERNATE_BIOMETRIC_BOUNCER_SHOWN:
-                return BiometricsProtoEnums.DETAILS_FACE_ALTERNATE_BIOMETRIC_BOUNCER_SHOWN;
-            case AuthenticateReason.Face.NOTIFICATION_PANEL_CLICKED:
-                return BiometricsProtoEnums.DETAILS_FACE_NOTIFICATION_PANEL_CLICKED;
-            case AuthenticateReason.Face.OCCLUDING_APP_REQUESTED:
-                return BiometricsProtoEnums.DETAILS_FACE_OCCLUDING_APP_REQUESTED;
-            case AuthenticateReason.Face.PICK_UP_GESTURE_TRIGGERED:
-                return BiometricsProtoEnums.DETAILS_FACE_PICK_UP_GESTURE_TRIGGERED;
-            case AuthenticateReason.Face.QS_EXPANDED:
-                return BiometricsProtoEnums.DETAILS_FACE_QS_EXPANDED;
-            case AuthenticateReason.Face.SWIPE_UP_ON_BOUNCER:
-                return BiometricsProtoEnums.DETAILS_FACE_SWIPE_UP_ON_BOUNCER;
-            case AuthenticateReason.Face.UDFPS_POINTER_DOWN:
-                return BiometricsProtoEnums.DETAILS_FACE_UDFPS_POINTER_DOWN;
-            default:
-                return BiometricsProtoEnums.DETAILS_UNKNOWN;
-        }
+                BiometricsProtoEnums.WAKE_REASON_UNKNOWN);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED}. */
