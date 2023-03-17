@@ -4125,6 +4125,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     KeyguardFingerprintListenModel.TABLE_HEADERS,
                     mFingerprintListenBuffer.toList()
             ).printTableData(pw);
+        } else if (mFpm != null && mFingerprintSensorProperties.isEmpty()) {
+            final int userId = mUserTracker.getUserId();
+            pw.println("  Fingerprint state (user=" + userId + ")");
+            pw.println("    mFingerprintSensorProperties.isEmpty="
+                    + mFingerprintSensorProperties.isEmpty());
+            pw.println("    mFpm.isHardwareDetected="
+                    + mFpm.isHardwareDetected());
+
+            new DumpsysTableLogger(
+                    "KeyguardFingerprintListen",
+                    KeyguardFingerprintListenModel.TABLE_HEADERS,
+                    mFingerprintListenBuffer.toList()
+            ).printTableData(pw);
         }
         if (mFaceManager != null && !mFaceSensorProperties.isEmpty()) {
             final int userId = mUserTracker.getUserId();
@@ -4154,6 +4167,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     "KeyguardFaceListen",
                     KeyguardFaceListenModel.TABLE_HEADERS,
                     mFaceListenBuffer.toList()
+            ).printTableData(pw);
+        } else if (mFaceManager != null && mFaceSensorProperties.isEmpty()) {
+            final int userId = mUserTracker.getUserId();
+            pw.println("  Face state (user=" + userId + ")");
+            pw.println("    mFaceSensorProperties.isEmpty="
+                    + mFaceSensorProperties.isEmpty());
+            pw.println("    mFaceManager.isHardwareDetected="
+                    + mFaceManager.isHardwareDetected());
+
+            new DumpsysTableLogger(
+                    "KeyguardFaceListen",
+                    KeyguardFingerprintListenModel.TABLE_HEADERS,
+                    mFingerprintListenBuffer.toList()
             ).printTableData(pw);
         }
 
