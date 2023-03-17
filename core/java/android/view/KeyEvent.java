@@ -2711,7 +2711,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @hide
      */
     @Override
-    public final long getEventTimeNano() {
+    public final long getEventTimeNanos() {
         return mEventTime;
     }
 
