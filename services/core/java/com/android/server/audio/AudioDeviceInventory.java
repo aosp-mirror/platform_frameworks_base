@@ -597,7 +597,13 @@ public class AudioDeviceInventory {
             if (wdcs.mState == AudioService.CONNECTION_STATE_DISCONNECTED
                     && AudioSystem.DEVICE_OUT_ALL_USB_SET.contains(
                             wdcs.mAttributes.getInternalType())) {
-                mDeviceBroker.dispatchPreferredMixerAttributesChangedCausedByDeviceRemoved(info);
+                if (info != null) {
+                    mDeviceBroker.dispatchPreferredMixerAttributesChangedCausedByDeviceRemoved(
+                            info);
+                } else {
+                    Log.e(TAG, "Didn't find AudioDeviceInfo to notify preferred mixer "
+                            + "attributes change for type=" + wdcs.mAttributes.getType());
+                }
             }
             sendDeviceConnectionIntent(type, wdcs.mState,
                     wdcs.mAttributes.getAddress(), wdcs.mAttributes.getName());
