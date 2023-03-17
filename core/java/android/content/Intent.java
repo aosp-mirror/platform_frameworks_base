@@ -5914,6 +5914,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * A Parcelable[] of {@link ChooserAction} objects to provide the Android Sharesheet with
      * app-specific actions to be presented to the user when invoking {@link #ACTION_CHOOSER}.
+     * You can provide as many as five custom actions.
      */
     public static final String EXTRA_CHOOSER_CUSTOM_ACTIONS =
             "android.intent.extra.CHOOSER_CUSTOM_ACTIONS";
