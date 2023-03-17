@@ -91,6 +91,13 @@ public class TransitionTracer {
      * @param transition The transition that has finished.
      */
     public void logFinishedTransition(Transition transition) {
+        if (transition.mLogger.mProtoToken == 0) {
+            // Transition finished but never sent, so open token never added
+            final ProtoOutputStream outputStream = transition.mLogger.mProtoOutputStream;
+            transition.mLogger.mProtoToken = outputStream
+                    .start(com.android.server.wm.shell.TransitionTraceProto.FINISHED_TRANSITIONS);
+        }
+
         // Dump the rest of the transition's info that wasn't dumped during logSentTransition
         dumpFinishedTransitionToProto(transition.mLogger.mProtoOutputStream, transition);
         transition.mLogger.mProtoOutputStream.end(transition.mLogger.mProtoToken);
