@@ -52,11 +52,6 @@ public final class CpuInfoReader {
     private static final String POLICY_DIR_PREFIX = "policy";
     private static final String RELATED_CPUS_FILE = "related_cpus";
     private static final String AFFECTED_CPUS_FILE = "affected_cpus";
-    // TODO(b/263154344): Avoid reading from cpuinfo_cur_freq because non-root users don't have
-    //  read permission for this file. The file permissions are set by the Kernel. Instead, read
-    //  the current frequency only from scaling_cur_freq.
-    private static final String CUR_CPUFREQ_FILE = "cpuinfo_cur_freq";
-    private static final String MAX_CPUFREQ_FILE = "cpuinfo_max_freq";
     private static final String CUR_SCALING_FREQ_FILE = "scaling_cur_freq";
     private static final String MAX_SCALING_FREQ_FILE = "scaling_max_freq";
     private static final String TIME_IN_STATE_FILE = "stats/time_in_state";
@@ -207,26 +202,16 @@ public final class CpuInfoReader {
                 Slogf.w(TAG, "Missing dynamic policy info for policy ID %d", policyId);
                 continue;
             }
-            long curFreqKHz = CpuInfo.MISSING_FREQUENCY;
-            long maxFreqKHz = CpuInfo.MISSING_FREQUENCY;
-            if (dynamicPolicyInfo.curCpuFreqPair.cpuFreqKHz != CpuInfo.MISSING_FREQUENCY
-                    && staticPolicyInfo.maxCpuFreqPair.cpuFreqKHz != CpuInfo.MISSING_FREQUENCY) {
-                curFreqKHz = dynamicPolicyInfo.curCpuFreqPair.cpuFreqKHz;
-                maxFreqKHz = staticPolicyInfo.maxCpuFreqPair.cpuFreqKHz;
-            } else if (dynamicPolicyInfo.curCpuFreqPair.scalingFreqKHz != CpuInfo.MISSING_FREQUENCY
-                    && staticPolicyInfo.maxCpuFreqPair.scalingFreqKHz
-                    != CpuInfo.MISSING_FREQUENCY) {
-                curFreqKHz = dynamicPolicyInfo.curCpuFreqPair.scalingFreqKHz;
-                maxFreqKHz = staticPolicyInfo.maxCpuFreqPair.scalingFreqKHz;
-            } else {
+            if (dynamicPolicyInfo.curCpuFreqKHz == CpuInfo.MISSING_FREQUENCY
+                    || staticPolicyInfo.maxCpuFreqKHz == CpuInfo.MISSING_FREQUENCY) {
                 Slogf.w(TAG, "Current and maximum CPU frequency information mismatch/missing for"
                         + " policy ID %d", policyId);
                 continue;
             }
-            if (curFreqKHz > maxFreqKHz) {
+            if (dynamicPolicyInfo.curCpuFreqKHz > staticPolicyInfo.maxCpuFreqKHz) {
                 Slogf.w(TAG, "Current CPU frequency (%d) is greater than maximum CPU frequency"
-                        + " (%d) for policy ID (%d). Skipping CPU frequency policy", curFreqKHz,
-                        maxFreqKHz, policyId);
+                        + " (%d) for policy ID (%d). Skipping CPU frequency policy",
+                        dynamicPolicyInfo.curCpuFreqKHz,  staticPolicyInfo.maxCpuFreqKHz, policyId);
                 continue;
             }
             for (int coreIdx = 0; coreIdx < staticPolicyInfo.relatedCpuCores.size(); coreIdx++) {
@@ -249,7 +234,7 @@ public final class CpuInfoReader {
                 if (dynamicPolicyInfo.affectedCpuCores.indexOf(relatedCpuCore) < 0) {
                     cpuInfoByCpus.append(relatedCpuCore, new CpuInfo(relatedCpuCore,
                             cpusetCategories, /* isOnline= */false, CpuInfo.MISSING_FREQUENCY,
-                            maxFreqKHz, CpuInfo.MISSING_FREQUENCY, usageStats));
+                            staticPolicyInfo.maxCpuFreqKHz, CpuInfo.MISSING_FREQUENCY, usageStats));
                     continue;
                 }
                 // If a CPU core is online, it must have the usage stats. When the usage stats is
@@ -260,8 +245,8 @@ public final class CpuInfoReader {
                     continue;
                 }
                 CpuInfo cpuInfo = new CpuInfo(relatedCpuCore, cpusetCategories, /* isOnline= */true,
-                        curFreqKHz, maxFreqKHz, dynamicPolicyInfo.avgTimeInStateCpuFreqKHz,
-                        usageStats);
+                        dynamicPolicyInfo.curCpuFreqKHz, staticPolicyInfo.maxCpuFreqKHz,
+                        dynamicPolicyInfo.avgTimeInStateCpuFreqKHz, usageStats);
                 cpuInfoByCpus.append(relatedCpuCore, cpuInfo);
                 if (DEBUG) {
                     Slogf.d(TAG, "Added %s for CPU core %d", cpuInfo, relatedCpuCore);
@@ -438,8 +423,8 @@ public final class CpuInfoReader {
         for (int i = 0; i < mCpuFreqPolicyDirsById.size(); i++) {
             int policyId = mCpuFreqPolicyDirsById.keyAt(i);
             File policyDir = mCpuFreqPolicyDirsById.valueAt(i);
-            FrequencyPair maxCpuFreqPair = readMaxCpuFrequency(policyDir);
-            if (maxCpuFreqPair.isEmpty()) {
+            long maxCpuFreqKHz = readCpuFreqKHz(new File(policyDir, MAX_SCALING_FREQ_FILE));
+            if (maxCpuFreqKHz == CpuInfo.MISSING_FREQUENCY) {
                 Slogf.w(TAG, "Missing max CPU frequency information at %s",
                         policyDir.getAbsolutePath());
                 continue;
@@ -451,7 +436,7 @@ public final class CpuInfoReader {
                         cpuCoresFile.getAbsolutePath());
                 continue;
             }
-            StaticPolicyInfo staticPolicyInfo = new StaticPolicyInfo(maxCpuFreqPair,
+            StaticPolicyInfo staticPolicyInfo = new StaticPolicyInfo(maxCpuFreqKHz,
                     relatedCpuCores);
             mStaticPolicyInfoById.append(policyId, staticPolicyInfo);
             if (DEBUG) {
@@ -461,18 +446,13 @@ public final class CpuInfoReader {
         }
     }
 
-    private FrequencyPair readMaxCpuFrequency(File policyDir) {
-        return new FrequencyPair(readCpuFreqKHz(new File(policyDir, MAX_CPUFREQ_FILE)),
-                readCpuFreqKHz(new File(policyDir, MAX_SCALING_FREQ_FILE)));
-    }
-
     private SparseArray<DynamicPolicyInfo> readDynamicPolicyInfo() {
         SparseArray<DynamicPolicyInfo> dynamicPolicyInfoById = new SparseArray<>();
         for (int i = 0; i < mCpuFreqPolicyDirsById.size(); i++) {
             int policyId = mCpuFreqPolicyDirsById.keyAt(i);
             File policyDir = mCpuFreqPolicyDirsById.valueAt(i);
-            FrequencyPair curCpuFreqPair = readCurrentCpuFrequency(policyDir);
-            if (curCpuFreqPair.isEmpty()) {
+            long curCpuFreqKHz = readCpuFreqKHz(new File(policyDir, CUR_SCALING_FREQ_FILE));
+            if (curCpuFreqKHz == CpuInfo.MISSING_FREQUENCY) {
                 Slogf.w(TAG, "Missing current frequency information at %s",
                         policyDir.getAbsolutePath());
                 continue;
@@ -484,7 +464,7 @@ public final class CpuInfoReader {
                 Slogf.e(TAG, "Failed to read CPU cores from %s", cpuCoresFile.getAbsolutePath());
                 continue;
             }
-            DynamicPolicyInfo dynamicPolicyInfo = new DynamicPolicyInfo(curCpuFreqPair,
+            DynamicPolicyInfo dynamicPolicyInfo = new DynamicPolicyInfo(curCpuFreqKHz,
                     avgTimeInStateCpuFreqKHz, affectedCpuCores);
             dynamicPolicyInfoById.append(policyId, dynamicPolicyInfo);
             if (DEBUG) {
@@ -493,11 +473,6 @@ public final class CpuInfoReader {
             }
         }
         return dynamicPolicyInfoById;
-    }
-
-    private FrequencyPair readCurrentCpuFrequency(File policyDir) {
-        return new FrequencyPair(readCpuFreqKHz(new File(policyDir, CUR_CPUFREQ_FILE)),
-                readCpuFreqKHz(new File(policyDir, CUR_SCALING_FREQ_FILE)));
     }
 
     private long readAvgTimeInStateCpuFrequency(int policyId, File policyDir) {
@@ -913,58 +888,37 @@ public final class CpuInfoReader {
         }
     }
 
-    private static final class FrequencyPair {
-        public final long cpuFreqKHz;
-        public final long scalingFreqKHz;
-
-        FrequencyPair(long cpuFreqKHz, long scalingFreqKHz) {
-            this.cpuFreqKHz = cpuFreqKHz;
-            this.scalingFreqKHz = scalingFreqKHz;
-        }
-
-        boolean isEmpty() {
-            return cpuFreqKHz == CpuInfo.MISSING_FREQUENCY
-                    && scalingFreqKHz == CpuInfo.MISSING_FREQUENCY;
-        }
-
-        @Override
-        public String toString() {
-            return "FrequencyPair{cpuFreqKHz = " + cpuFreqKHz + ", scalingFreqKHz = "
-                    + scalingFreqKHz + '}';
-        }
-    }
-
     private static final class StaticPolicyInfo {
-        public final FrequencyPair maxCpuFreqPair;
+        public final long maxCpuFreqKHz;
         public final IntArray relatedCpuCores;
 
-        StaticPolicyInfo(FrequencyPair maxCpuFreqPair, IntArray relatedCpuCores) {
-            this.maxCpuFreqPair = maxCpuFreqPair;
+        StaticPolicyInfo(long maxCpuFreqKHz, IntArray relatedCpuCores) {
+            this.maxCpuFreqKHz = maxCpuFreqKHz;
             this.relatedCpuCores = relatedCpuCores;
         }
 
         @Override
         public String toString() {
-            return "StaticPolicyInfo{maxCpuFreqPair = " + maxCpuFreqPair + ", relatedCpuCores = "
+            return "StaticPolicyInfo{maxCpuFreqKHz = " + maxCpuFreqKHz + ", relatedCpuCores = "
                     + relatedCpuCores + '}';
         }
     }
 
     private static final class DynamicPolicyInfo {
-        public final FrequencyPair curCpuFreqPair;
+        public final long curCpuFreqKHz;
         public final long avgTimeInStateCpuFreqKHz;
         public final IntArray affectedCpuCores;
 
-        DynamicPolicyInfo(FrequencyPair curCpuFreqPair, long avgTimeInStateCpuFreqKHz,
+        DynamicPolicyInfo(long curCpuFreqKHz, long avgTimeInStateCpuFreqKHz,
                 IntArray affectedCpuCores) {
-            this.curCpuFreqPair = curCpuFreqPair;
+            this.curCpuFreqKHz = curCpuFreqKHz;
             this.avgTimeInStateCpuFreqKHz = avgTimeInStateCpuFreqKHz;
             this.affectedCpuCores = affectedCpuCores;
         }
 
         @Override
         public String toString() {
-            return "DynamicPolicyInfo{curCpuFreqPair = " + curCpuFreqPair
+            return "DynamicPolicyInfo{curCpuFreqKHz = " + curCpuFreqKHz
                     + ", avgTimeInStateCpuFreqKHz = " + avgTimeInStateCpuFreqKHz
                     + ", affectedCpuCores = " + affectedCpuCores + '}';
         }
