@@ -871,7 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# ನಿಯಂತ್ರಣವನ್ನು ಸೇರಿಸಲಾಗಿದೆ.}one{# ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ.}other{# ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> ಅನ್ನು ಸೇರಿಸಬೇಕೆ?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
     <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> ಗಾಗಿ ನಿಯಂತ್ರಣಗಳನ್ನು ತೆಗೆದುಹಾಕಬೇಕೆ?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"ಮೆಚ್ಚಲಾಗಿರುವುದು"</string>
@@ -897,8 +897,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನಿಂದ ಸಾಧನಗಳನ್ನು ತೋರಿಸಬೇಕೇ ಹಾಗೂ ನಿಯಂತ್ರಿಸಬೇಕೇ?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಬಾಹ್ಯ ಸಾಧನಗಳಿಗಾಗಿ ನೀವು ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಬಹುದು.\n\nನಿಮ್ಮ ಫೋನ್ ಅಥವಾ ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡದೆಯೇ ನಿಮ್ಮ ಕೆಲವು ಸಾಧನಗಳನ್ನು ನಿಯಂತ್ರಿಸಲು ನಿಮ್ಮ ಸಾಧನ ಆ್ಯಪ್ ಅನುಮತಿಸಬಹುದು.\n\nಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ನೀವು ಯಾವಾಗ ಬೇಕಾದರೂ ಬದಲಾವಣೆಗಳನ್ನು ಮಾಡಬಹುದು."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನಿಂದ ಸಾಧನಗಳನ್ನು ನಿಯಂತ್ರಿಸಬೇಕೇ?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"ನಿಮ್ಮ ಫೋನ್ ಅಥವಾ ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡದೆಯೇ ನಿಮ್ಮ ಕೆಲವು ಸಾಧನಗಳನ್ನು ನೀವು ಕಂಟ್ರೋಲ್ ಮಾಡಬಹುದು. ಈ ವಿಧಾನದ ಮೂಲಕ ಯಾವ ಸಾಧನಗಳನ್ನು ಕಂಟ್ರೋಲ್ ಮಾಡಬಹುದು ಎಂಬುದನ್ನು ನಿಮ್ಮ ಸಾಧನದ ಆ್ಯಪ್ ನಿರ್ಧರಿಸುತ್ತದೆ."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"ಬೇಡ"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"ಹೌದು"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"ಪಿನ್ ಅಕ್ಷರಗಳು ಅಥವಾ ಸಂಕೇತಗಳನ್ನು ಒಳಗೊಂಡಿದೆ"</string>
