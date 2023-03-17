@@ -101,8 +101,8 @@ public interface RegisteredComplicationsModule {
     @Named(DREAM_MEDIA_ENTRY_LAYOUT_PARAMS)
     static ComplicationLayoutParams provideMediaEntryLayoutParams(@Main Resources res) {
         return new ComplicationLayoutParams(
-                res.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_width),
-                res.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_height),
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
                 ComplicationLayoutParams.POSITION_BOTTOM
                         | ComplicationLayoutParams.POSITION_START,
                 ComplicationLayoutParams.DIRECTION_END,
