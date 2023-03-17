@@ -5423,6 +5423,15 @@
     <permission android:name="android.permission.INSTALL_DPC_PACKAGES"
                 android:protectionLevel="signature|role" />
 
+    <!-- @SystemApi Allows an application to read resolved paths to the APKs (Base and any splits)
+         of a session based install.
+         <p>Not for use by third-party applications.
+         @hide
+    -->
+    <permission android:name="android.permission.READ_INSTALLED_SESSION_PATHS"
+                android:protectionLevel="signature|installer" />
+    <uses-permission android:name="android.permission.READ_INSTALLED_SESSION_PATHS" />
+
     <!-- Allows an application to use System Data Loaders.
          <p>Not for use by third-party applications.
          @hide

@@ -374,16 +374,15 @@ public class PackageInstallerActivity extends AlertActivity {
             final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID,
                     -1 /* defaultValue */);
             final SessionInfo info = mInstaller.getSessionInfo(sessionId);
-            final String resolvedBaseCodePath = intent.getStringExtra(
-                    PackageInstaller.EXTRA_RESOLVED_BASE_PATH);
-            if (info == null || !info.isSealed() || resolvedBaseCodePath == null) {
+            String resolvedPath = info.getResolvedBaseApkPath();
+            if (info == null || !info.isSealed() || resolvedPath == null) {
                 Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
                 finish();
                 return;
             }
 
             mSessionId = sessionId;
-            packageSource = Uri.fromFile(new File(resolvedBaseCodePath));
+            packageSource = Uri.fromFile(new File(resolvedPath));
             mOriginatingURI = null;
             mReferrerURI = null;
             mPendingUserActionReason = info.getPendingUserActionReason();

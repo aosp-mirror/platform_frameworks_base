@@ -1135,8 +1135,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.userId = userId;
             info.installerPackageName = mInstallSource.mInstallerPackageName;
             info.installerAttributionTag = mInstallSource.mInstallerAttributionTag;
-            info.resolvedBaseCodePath = (mResolvedBaseFile != null) ?
-                    mResolvedBaseFile.getAbsolutePath() : null;
+            if (mContext.checkCallingOrSelfPermission(
+                    Manifest.permission.READ_INSTALLED_SESSION_PATHS)
+                            == PackageManager.PERMISSION_GRANTED && mResolvedBaseFile != null) {
+                info.resolvedBaseCodePath = mResolvedBaseFile.getAbsolutePath();
+            } else {
+                info.resolvedBaseCodePath = null;
+            }
             info.progress = progress;
             info.sealed = mSealed;
             info.isCommitted = isCommitted();
@@ -2763,11 +2768,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         : PackageInstaller.ACTION_CONFIRM_INSTALL);
         intent.setPackage(mPm.getPackageInstallerPackageName());
         intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
-        synchronized (mLock) {
-            intent.putExtra(PackageInstaller.EXTRA_RESOLVED_BASE_PATH,
-                    mResolvedBaseFile != null ? mResolvedBaseFile.getAbsolutePath() : null);
-        }
-
         sendOnUserActionRequired(mContext, target, sessionId, intent);
     }
 
