@@ -43,8 +43,6 @@
     <dimen name="navigation_edge_panel_height">268dp</dimen>
     <!-- The threshold to drag to trigger the edge action -->
     <dimen name="navigation_edge_action_drag_threshold">16dp</dimen>
-    <!-- The drag distance to consider evaluating gesture -->
-    <dimen name="navigation_edge_action_min_distance_to_start_animation">24dp</dimen>
     <!-- The threshold to progress back animation for edge swipe -->
     <dimen name="navigation_edge_action_progress_threshold">412dp</dimen>
     <!-- The minimum display position of the arrow on the screen -->
@@ -58,8 +56,6 @@
 
     <!-- The thickness of the arrow -->
     <dimen name="navigation_edge_arrow_thickness">4dp</dimen>
-    <!-- The minimum delta needed to change direction / stop triggering back -->
-    <dimen name="navigation_edge_minimum_x_delta_for_switch">32dp</dimen>
 
     <!-- entry state -->
     <item name="navigation_edge_entry_scale" format="float" type="dimen">0.98</item>
