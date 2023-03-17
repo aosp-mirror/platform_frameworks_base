@@ -13116,12 +13116,14 @@ package android.service.voice {
     method public int describeContents();
     method public int getAudioChannel();
     method @NonNull public java.util.List<android.service.voice.HotwordAudioStream> getAudioStreams();
+    method public int getBackgroundAudioPower();
     method public int getConfidenceLevel();
     method @NonNull public android.service.voice.DetectedPhrase getDetectedPhrase();
     method @NonNull public android.os.PersistableBundle getExtras();
     method public int getHotwordDurationMillis();
     method public int getHotwordOffsetMillis();
     method @Deprecated public int getHotwordPhraseId();
+    method public static int getMaxBackgroundAudioPower();
     method public static int getMaxBundleSize();
     method @Deprecated public static int getMaxHotwordPhraseId();
     method public static int getMaxScore();
@@ -13132,6 +13134,7 @@ package android.service.voice {
     method public boolean isHotwordDetectionPersonalized();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int AUDIO_CHANNEL_UNSET = -1; // 0xffffffff
+    field public static final int BACKGROUND_AUDIO_POWER_UNSET = -1; // 0xffffffff
     field public static final int CONFIDENCE_LEVEL_HIGH = 5; // 0x5
     field public static final int CONFIDENCE_LEVEL_LOW = 1; // 0x1
     field public static final int CONFIDENCE_LEVEL_LOW_MEDIUM = 2; // 0x2
@@ -13151,6 +13154,7 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordDetectedResult build();
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setAudioChannel(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setAudioStreams(@NonNull java.util.List<android.service.voice.HotwordAudioStream>);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setBackgroundAudioPower(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setConfidenceLevel(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setDetectedPhrase(@NonNull android.service.voice.DetectedPhrase);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setExtras(@NonNull android.os.PersistableBundle);
