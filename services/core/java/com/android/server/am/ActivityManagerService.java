@@ -16408,7 +16408,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     public void dumpAllResources(ParcelFileDescriptor fd, PrintWriter pw) throws RemoteException {
         final ArrayList<ProcessRecord> processes = new ArrayList<>();
-        synchronized (mPidsSelfLocked) {
+        synchronized (this) {
             processes.addAll(mProcessList.getLruProcessesLOSP());
         }
         for (int i = 0, size = processes.size(); i < size; i++) {
