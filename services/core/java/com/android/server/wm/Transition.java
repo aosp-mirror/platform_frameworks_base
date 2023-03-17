@@ -829,6 +829,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
         mLogger.mFinishTimeNs = SystemClock.elapsedRealtimeNanos();
         mController.mLoggerHandler.post(mLogger::logOnFinish);
+        mController.mTransitionTracer.logFinishedTransition(this);
         // Close the transactions now. They were originally copied to Shell in case we needed to
         // apply them due to a remote failure. Since we don't need to apply them anymore, free them
         // immediately.
@@ -1045,6 +1046,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Aborting Transition: %d", mSyncId);
         mState = STATE_ABORT;
+        mController.mTransitionTracer.logAbortedTransition(this);
         // Syncengine abort will call through to onTransactionReady()
         mSyncEngine.abort(mSyncId);
         mController.dispatchLegacyAppTransitionCancelled();
@@ -1249,8 +1251,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         "Calling onTransitionReady: %s", info);
                 mLogger.mSendTimeNs = SystemClock.elapsedRealtimeNanos();
                 mLogger.mInfo = info;
-                mController.mTransitionTracer.logSentTransition(
-                        this, mTargets, mLogger.mCreateTimeNs, mLogger.mSendTimeNs, info);
+                mController.mTransitionTracer.logSentTransition(this, mTargets, info);
                 mController.getTransitionPlayer().onTransitionReady(
                         mToken, info, transaction, mFinishTransaction);
                 if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
