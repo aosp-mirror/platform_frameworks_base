@@ -17,6 +17,7 @@ package com.android.systemui.qs.tiles
 
 import android.content.Intent
 import android.os.Handler
+import android.os.HandlerExecutor
 import android.os.Looper
 import android.provider.Settings
 import android.view.View
@@ -38,6 +39,7 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SystemSettings
 import javax.inject.Inject
 
@@ -54,6 +56,7 @@ constructor(
     qsLogger: QSLogger,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val systemSettings: SystemSettings,
+    private val secureSettings: SecureSettings,
     private val featureFlags: FeatureFlags
 ) :
     QSTileImpl<QSTile.State?>(
@@ -78,7 +81,13 @@ constructor(
 
     override fun handleClick(view: View?) {
         mUiHandler.post {
-            val dialog: SystemUIDialog = FontScalingDialog(mContext, systemSettings)
+            val dialog: SystemUIDialog =
+                FontScalingDialog(
+                    mContext,
+                    systemSettings,
+                    secureSettings,
+                    HandlerExecutor(mHandler)
+                )
             if (view != null) {
                 dialogLaunchAnimator.showFromView(
                     dialog,
