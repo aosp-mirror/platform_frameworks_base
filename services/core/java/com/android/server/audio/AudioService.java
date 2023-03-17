@@ -7235,7 +7235,7 @@ public class AudioService extends IAudioService.Stub
         super.setDeviceVolumeBehavior_enforcePermission();
         // verify arguments
         Objects.requireNonNull(device);
-        AudioManager.enforceValidVolumeBehavior(deviceVolumeBehavior);
+        AudioManager.enforceSettableVolumeBehavior(deviceVolumeBehavior);
 
         sVolumeLogger.enqueue(new EventLogger.StringEvent("setDeviceVolumeBehavior: dev:"
                 + AudioSystem.getOutputDeviceName(device.getInternalType()) + " addr:"
