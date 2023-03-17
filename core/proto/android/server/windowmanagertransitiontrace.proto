@@ -36,8 +36,10 @@ message TransitionTraceProto {
     MAGIC_NUMBER_H = 0x45434152;  /* RACE (little-endian ASCII) */
   }
 
-  required fixed64 magic_number = 1;  /* Must be the first field, set to value in MagicNumber */
-  repeated Transition sent_transitions = 2;
+  // Must be the first field, set to value in MagicNumber
+  required fixed64 magic_number = 1;
+  // Transitions that don't have a finish time are considered aborted
+  repeated Transition finished_transitions = 2;
 
   // Additional debugging info only collected and dumped when explicitly requested to trace
   repeated TransitionState transition_states = 3;
@@ -50,7 +52,9 @@ message Transition {
   required uint64 finish_transaction_id = 3;
   required int64 create_time_ns = 4;
   required int64 send_time_ns = 5;
-  repeated Target targets = 6;
+  optional int64 finish_time_ns = 6; // consider aborted if not provided
+  required int32 type = 7;
+  repeated Target targets = 8;
 }
 
 message Target {
