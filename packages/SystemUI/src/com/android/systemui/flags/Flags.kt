@@ -214,6 +214,15 @@ object Flags {
             "lock_screen_long_press_enabled"
         )
 
+    /** Enables UI updates for AI wallpapers in the wallpaper picker. */
+    // TODO(b/267722622): Tracking Bug
+    @JvmField
+    val WALLPAPER_PICKER_UI_FOR_AIWP =
+            releasedFlag(
+                    229,
+                    "wallpaper_picker_ui_for_aiwp"
+            )
+
     /** Whether to inflate the bouncer view on a background thread. */
     // TODO(b/272091103): Tracking Bug
     @JvmField
