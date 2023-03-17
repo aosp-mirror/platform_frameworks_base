@@ -603,6 +603,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                     setKeyphraseRecognitionExtras(
                             Arrays.asList(keyphraseRecognitionEvent.keyphraseExtras));
                 }
+                setHalEventReceivedMillis(keyphraseRecognitionEvent.getHalEventReceivedMillis());
             }
 
             /**
@@ -950,7 +951,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                         new KeyphraseRecognitionEvent(status, soundModelHandle, captureAvailable,
                                 captureSession, captureDelayMs, capturePreambleMs, triggerInData,
                                 captureFormat, data, keyphraseRecognitionExtras.toArray(
-                                new KeyphraseRecognitionExtra[0])),
+                                new KeyphraseRecognitionExtra[0]), halEventReceivedMillis),
                         mInternalCallback);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
