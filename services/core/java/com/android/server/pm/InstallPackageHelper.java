@@ -4312,12 +4312,22 @@ final class InstallPackageHelper {
 
         // A new application appeared on /system, and we are seeing it for the first time.
         // Its also not updated as we don't have a copy of it on /data. So, scan it in a
-        // STOPPED state. Ignore if it's an APEX package since stopped state does not affect them.
+        // STOPPED state.
+        // We'll skip this step under the following conditions:
+        //   - It's "android"
+        //   - It's an APEX or overlay package since stopped state does not affect them.
+        //   - It is enumerated with a <initial-package-state> tag having the stopped attribute
+        //     set to false
         final boolean isApexPkg = (scanFlags & SCAN_AS_APEX) != 0;
-        if (mPm.mShouldStopSystemPackagesByDefault && scanSystemPartition
-                && !pkgAlreadyExists && !isApexPkg) {
+        if (mPm.mShouldStopSystemPackagesByDefault
+                && scanSystemPartition
+                && !pkgAlreadyExists
+                && !isApexPkg
+                && !parsedPackage.isOverlayIsStatic()
+        ) {
             String packageName = parsedPackage.getPackageName();
-            if (!mPm.mInitialNonStoppedSystemPackages.contains(packageName)) {
+            if (!mPm.mInitialNonStoppedSystemPackages.contains(packageName)
+                    && !"android".contentEquals(packageName)) {
                 scanFlags |= SCAN_AS_STOPPED_SYSTEM_APP;
             }
         }
