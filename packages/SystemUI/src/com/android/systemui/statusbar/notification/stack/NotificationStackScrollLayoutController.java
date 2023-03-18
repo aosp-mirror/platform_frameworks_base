@@ -827,18 +827,16 @@ public class NotificationStackScrollLayoutController {
 
     private boolean isInVisibleLocation(NotificationEntry entry) {
         ExpandableNotificationRow row = entry.getRow();
-        ExpandableViewState childViewState = row.getViewState();
-
-        if (childViewState == null) {
+        if (row == null) {
             return false;
         }
+
+        ExpandableViewState childViewState = row.getViewState();
         if ((childViewState.location & ExpandableViewState.VISIBLE_LOCATIONS) == 0) {
             return false;
         }
-        if (row.getVisibility() != View.VISIBLE) {
-            return false;
-        }
-        return true;
+
+        return row.getVisibility() == View.VISIBLE;
     }
 
     public boolean isViewAffectedBySwipe(ExpandableView expandableView) {

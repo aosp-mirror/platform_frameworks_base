@@ -32,8 +32,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.TaskSnapshot;
 
-import java.util.function.Supplier;
-
 /**
  * Represents the content overlay used during the entering PiP animation.
  */
@@ -176,9 +174,8 @@ public abstract class PipContentOverlay {
     /** A {@link PipContentOverlay} shows app icon on solid color background. */
     public static final class PipAppIconOverlay extends PipContentOverlay {
         private static final String TAG = PipAppIconOverlay.class.getSimpleName();
-        // Align with the practical / reasonable launcher:iconImageSize as in
-        // vendor/unbundled_google/packages/NexusLauncher/res/xml/device_profiles.xml
-        private static final int APP_ICON_SIZE_DP = 66;
+        // The maximum size for app icon in pixel.
+        private static final int MAX_APP_ICON_SIZE_DP = 72;
 
         private final Context mContext;
         private final int mAppIconSizePx;
@@ -188,14 +185,16 @@ public abstract class PipContentOverlay {
 
         private Bitmap mBitmap;
 
-        public PipAppIconOverlay(Context context, Rect appBounds, Supplier<Drawable> iconSupplier) {
+        public PipAppIconOverlay(Context context, Rect appBounds,
+                Drawable appIcon, int appIconSizePx) {
             mContext = context;
-            mAppIconSizePx = (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP, APP_ICON_SIZE_DP,
-                    context.getResources().getDisplayMetrics());
+            final int maxAppIconSizePx = (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP,
+                    MAX_APP_ICON_SIZE_DP, context.getResources().getDisplayMetrics());
+            mAppIconSizePx = Math.min(maxAppIconSizePx, appIconSizePx);
             mAppBounds = new Rect(appBounds);
             mBitmap = Bitmap.createBitmap(appBounds.width(), appBounds.height(),
                     Bitmap.Config.ARGB_8888);
-            prepareAppIconOverlay(iconSupplier);
+            prepareAppIconOverlay(appIcon);
             mLeash = new SurfaceControl.Builder(new SurfaceSession())
                     .setCallsite(TAG)
                     .setName(LAYER_NAME)
@@ -238,7 +237,7 @@ public abstract class PipContentOverlay {
             }
         }
 
-        private void prepareAppIconOverlay(Supplier<Drawable> iconSupplier) {
+        private void prepareAppIconOverlay(Drawable appIcon) {
             final Canvas canvas = new Canvas();
             canvas.setBitmap(mBitmap);
             final TypedArray ta = mContext.obtainStyledAttributes(new int[] {
@@ -252,7 +251,6 @@ public abstract class PipContentOverlay {
             } finally {
                 ta.recycle();
             }
-            final Drawable appIcon = iconSupplier.get();
             final Rect appIconBounds = new Rect(
                     mAppBounds.centerX() - mAppIconSizePx / 2,
                     mAppBounds.centerY() - mAppIconSizePx / 2,

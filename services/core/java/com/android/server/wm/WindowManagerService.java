@@ -234,6 +234,7 @@ import android.util.MergedConfiguration;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
@@ -623,6 +624,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** List of window currently causing non-system overlay windows to be hidden. */
     private ArrayList<WindowState> mHidingNonSystemOverlayWindows = new ArrayList<>();
+
+    /**
+     * In some cases (e.g. when {@link R.bool.config_reverseDefaultRotation} has value
+     * {@value true}) we need to map some orientation to others. This {@link SparseIntArray}
+     * contains the relation between the source orientation and the one to use.
+     */
+    private final SparseIntArray mOrientationMapping = new SparseIntArray();
 
     final AccessibilityController mAccessibilityController;
     private RecentsAnimationController mRecentsAnimationController;
@@ -4147,22 +4155,49 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Controls whether ignore orientation request logic in {@link DisplayArea} is disabled
-     * at runtime.
+     * at runtime and how to optionally map some requested orientations to others.
      *
      * <p>Note: this assumes that {@link #mGlobalLock} is held by the caller.
      *
-     * @param isDisabled when {@code true}, the system always ignores the value of {@link
-     *                   DisplayArea#getIgnoreOrientationRequest} and app requested orientation is
-     *                   respected.
+     * @param isIgnoreOrientationRequestDisabled when {@code true}, the system always ignores the
+     *                   value of {@link DisplayArea#getIgnoreOrientationRequest} and app requested
+     *                   orientation is respected.
+     * @param fromOrientations The orientations we want to map to the correspondent orientations
+     *                        in toOrientation.
+     * @param toOrientations The orientations we map to the ones in fromOrientations at  the same
+     *                       index
      */
-    void setIsIgnoreOrientationRequestDisabled(boolean isDisabled) {
-        if (isDisabled == mIsIgnoreOrientationRequestDisabled) {
+    void setOrientationRequestPolicy(boolean isIgnoreOrientationRequestDisabled,
+            @Nullable int[] fromOrientations, @Nullable int[] toOrientations) {
+        mOrientationMapping.clear();
+        if (fromOrientations != null && toOrientations != null
+                && fromOrientations.length == toOrientations.length) {
+            for (int i = 0; i < fromOrientations.length; i++) {
+                mOrientationMapping.put(fromOrientations[i], toOrientations[i]);
+            }
+        }
+        if (isIgnoreOrientationRequestDisabled == mIsIgnoreOrientationRequestDisabled) {
             return;
         }
-        mIsIgnoreOrientationRequestDisabled = isDisabled;
+        mIsIgnoreOrientationRequestDisabled = isIgnoreOrientationRequestDisabled;
         for (int i = mRoot.getChildCount() - 1; i >= 0; i--) {
             mRoot.getChildAt(i).onIsIgnoreOrientationRequestDisabledChanged();
         }
+    }
+
+    /**
+     * When {@link mIsIgnoreOrientationRequestDisabled} is {@value true} this method returns the
+     * orientation to use in place of the one in input. It returns the same requestedOrientation in
+     * input otherwise.
+     *
+     * @param requestedOrientation The orientation that can be mapped.
+     * @return The orientation to use in place of requestedOrientation.
+     */
+    int mapOrientationRequest(int requestedOrientation) {
+        if (!mIsIgnoreOrientationRequestDisabled) {
+            return requestedOrientation;
+        }
+        return mOrientationMapping.get(requestedOrientation, requestedOrientation);
     }
 
     /**

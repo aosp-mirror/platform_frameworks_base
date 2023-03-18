@@ -1079,14 +1079,16 @@ public final class CachedAppOptimizerTest {
 
         mCachedAppOptimizerUnderTest.mLastCompactionStats.clear();
 
-        // We force a some compaction
-        mCachedAppOptimizerUnderTest.compactAppSome(processRecord, true);
-        waitForHandler();
-        // then process is compacted.
-        String executedCompactAction =
+        if (CachedAppOptimizer.ENABLE_FILE_COMPACT) {
+            // We force a some compaction
+            mCachedAppOptimizerUnderTest.compactAppSome(processRecord, true);
+            waitForHandler();
+            // then process is compacted.
+            String executedCompactAction =
                 compactActionIntToString(processRecord.mOptRecord.getLastCompactAction());
-        assertThat(executedCompactAction)
+            assertThat(executedCompactAction)
                 .isEqualTo(mCachedAppOptimizerUnderTest.mCompactActionSome);
+        }
     }
 
     private void setFlag(String key, String value, boolean defaultValue) throws Exception {

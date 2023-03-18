@@ -191,7 +191,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             Rect destBounds = mPipKeepClearAlgorithm.adjust(mPipBoundsState,
                     mPipBoundsAlgorithm);
             // only move if the bounds are actually different
-            if (destBounds != mPipBoundsState.getBounds()) {
+            if (!destBounds.equals(mPipBoundsState.getBounds())) {
                 if (mPipTransitionState.hasEnteredPip()) {
                     // if already in PiP, schedule separate animation
                     mPipTaskOrganizer.scheduleAnimateResizePip(destBounds,
@@ -937,6 +937,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
     }
 
+    private void setLauncherAppIconSize(int iconSizePx) {
+        mPipBoundsState.getLauncherState().setAppIconSizePx(iconSizePx);
+    }
+
     private void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {
         mOnIsInPipStateChangedListener = callback;
         if (mOnIsInPipStateChangedListener != null) {
@@ -1285,26 +1289,26 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         public void stopSwipePipToHome(int taskId, ComponentName componentName,
                 Rect destinationBounds, SurfaceControl overlay) {
             executeRemoteCallWithTaskPermission(mController, "stopSwipePipToHome",
-                    (controller) -> {
-                        controller.stopSwipePipToHome(taskId, componentName, destinationBounds,
-                                overlay);
-                    });
+                    (controller) -> controller.stopSwipePipToHome(
+                            taskId, componentName, destinationBounds, overlay));
         }
 
         @Override
         public void setShelfHeight(boolean visible, int height) {
             executeRemoteCallWithTaskPermission(mController, "setShelfHeight",
-                    (controller) -> {
-                        controller.setShelfHeight(visible, height);
-                    });
+                    (controller) -> controller.setShelfHeight(visible, height));
         }
 
         @Override
         public void setLauncherKeepClearAreaHeight(boolean visible, int height) {
             executeRemoteCallWithTaskPermission(mController, "setLauncherKeepClearAreaHeight",
-                    (controller) -> {
-                        controller.setLauncherKeepClearAreaHeight(visible, height);
-                    });
+                    (controller) -> controller.setLauncherKeepClearAreaHeight(visible, height));
+        }
+
+        @Override
+        public void setLauncherAppIconSize(int iconSizePx) {
+            executeRemoteCallWithTaskPermission(mController, "setLauncherAppIconSize",
+                    (controller) -> controller.setLauncherAppIconSize(iconSizePx));
         }
 
         @Override
@@ -1322,9 +1326,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         @Override
         public void setPipAnimationTypeToAlpha() {
             executeRemoteCallWithTaskPermission(mController, "setPipAnimationTypeToAlpha",
-                    (controller) -> {
-                        controller.setPinnedStackAnimationType(ANIM_TYPE_ALPHA);
-                    });
+                    (controller) -> controller.setPinnedStackAnimationType(ANIM_TYPE_ALPHA));
         }
     }
 }
