@@ -173,16 +173,12 @@ constructor(
                 override fun show(
                     sensorId: Int,
                     @BiometricOverlayConstants.ShowReason reason: Int
-                ) {
-                    if (
-                        reason.isReasonToAutoShow(activityTaskManager) &&
-                            !context.isInRearDisplayMode()
-                    ) {
+                ) =
+                    if (reason.isReasonToAutoShow(activityTaskManager)) {
                         show(SideFpsUiRequestSource.AUTO_SHOW, reason)
                     } else {
                         hide(SideFpsUiRequestSource.AUTO_SHOW)
                     }
-                }
 
                 override fun hide(sensorId: Int) = hide(SideFpsUiRequestSource.AUTO_SHOW)
             }
