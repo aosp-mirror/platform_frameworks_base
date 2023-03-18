@@ -4038,8 +4038,7 @@
         android:description="@string/permdesc_setWallpaperHints"
         android:protectionLevel="normal" />
 
-    <!-- Allow the app to read the system wallpaper image without
-        holding the READ_EXTERNAL_STORAGE permission.
+    <!-- Allow the app to read the system and lock wallpaper images.
         <p>Not for use by third-party applications.
         @hide
         @SystemApi

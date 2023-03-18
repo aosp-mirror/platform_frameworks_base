@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+import static android.content.pm.PackageManager.DELETE_SUCCEEDED;
 import static android.content.pm.PackageManager.MATCH_KNOWN_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
@@ -339,7 +340,7 @@ final class DeletePackageHelper {
             packageInstallerService.onInstallerPackageDeleted(uninstalledPs.getAppId(), removeUser);
         }
 
-        return res ? PackageManager.DELETE_SUCCEEDED : PackageManager.DELETE_FAILED_INTERNAL_ERROR;
+        return res ? DELETE_SUCCEEDED : PackageManager.DELETE_FAILED_INTERNAL_ERROR;
     }
 
     /*
@@ -777,21 +778,30 @@ final class DeletePackageHelper {
                     returnCode = deletePackageX(internalPackageName, versionCode,
                             userId, deleteFlags, false /*removedBySystem*/);
 
-                    // Get a list of child user profiles and delete if package is
-                    // present in that profile.
-                    int[] childUserIds = mUserManagerInternal.getProfileIds(userId, true);
-                    int returnCodeOfChild;
-                    for (int childId : childUserIds) {
-                        if (childId == userId) continue;
-                        UserProperties userProperties = mUserManagerInternal
-                                .getUserProperties(childId);
-                        if (userProperties != null && userProperties.getDeleteAppWithParent()) {
-                            returnCodeOfChild = deletePackageX(internalPackageName, versionCode,
-                                    childId, deleteFlags, false /*removedBySystem*/);
-                            if (returnCodeOfChild != PackageManager.DELETE_SUCCEEDED) {
-                                Slog.w(TAG, "Package delete failed for user " + childId
-                                        + ", returnCode " + returnCodeOfChild);
-                                returnCode = PackageManager.DELETE_FAILED_FOR_CHILD_PROFILE;
+                    // Delete package in child only if successfully deleted in parent.
+                    if (returnCode == DELETE_SUCCEEDED && packageState != null) {
+                        // Get a list of child user profiles and delete if package is
+                        // present in that profile.
+                        int[] childUserIds = mUserManagerInternal.getProfileIds(userId, true);
+                        int returnCodeOfChild;
+                        for (int childId : childUserIds) {
+                            if (childId == userId) continue;
+
+                            // If package is not present in child then don't attempt to delete.
+                            if (!packageState.getUserStateOrDefault(childId).isInstalled()) {
+                                continue;
+                            }
+
+                            UserProperties userProperties = mUserManagerInternal
+                                    .getUserProperties(childId);
+                            if (userProperties != null && userProperties.getDeleteAppWithParent()) {
+                                returnCodeOfChild = deletePackageX(internalPackageName, versionCode,
+                                        childId, deleteFlags, false /*removedBySystem*/);
+                                if (returnCodeOfChild != DELETE_SUCCEEDED) {
+                                    Slog.w(TAG, "Package delete failed for user " + childId
+                                            + ", returnCode " + returnCodeOfChild);
+                                    returnCode = PackageManager.DELETE_FAILED_FOR_CHILD_PROFILE;
+                                }
                             }
                         }
                     }
@@ -809,7 +819,7 @@ final class DeletePackageHelper {
                             if (!ArrayUtils.contains(blockUninstallUserIds, userId1)) {
                                 returnCode = deletePackageX(internalPackageName, versionCode,
                                         userId1, userFlags, false /*removedBySystem*/);
-                                if (returnCode != PackageManager.DELETE_SUCCEEDED) {
+                                if (returnCode != DELETE_SUCCEEDED) {
                                     Slog.w(TAG, "Package delete failed for user " + userId1
                                             + ", returnCode " + returnCode);
                                 }

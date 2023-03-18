@@ -54,6 +54,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
@@ -282,6 +283,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     final Set<KeyguardViewManagerCallback> mCallbacks = new HashSet<>();
     private boolean mIsModernAlternateBouncerEnabled;
     private boolean mIsBackAnimationEnabled;
+    private final boolean mUdfpsNewTouchDetectionEnabled;
+    private final UdfpsOverlayInteractor mUdfpsOverlayInteractor;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private Runnable mKeyguardGoneCancelAction;
@@ -336,7 +339,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             PrimaryBouncerCallbackInteractor primaryBouncerCallbackInteractor,
             PrimaryBouncerInteractor primaryBouncerInteractor,
             BouncerView primaryBouncerView,
-            AlternateBouncerInteractor alternateBouncerInteractor) {
+            AlternateBouncerInteractor alternateBouncerInteractor,
+            UdfpsOverlayInteractor udfpsOverlayInteractor
+    ) {
         mContext = context;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
@@ -362,6 +367,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mIsBackAnimationEnabled =
                 featureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM);
+        mUdfpsNewTouchDetectionEnabled = featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION);
+        mUdfpsOverlayInteractor = udfpsOverlayInteractor;
     }
 
     @Override
@@ -1443,16 +1450,48 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     /**
+     * An opportunity for the AlternateBouncer to handle the touch instead of sending
+     * the touch to NPVC child views.
+     * @return true if the alternate bouncer should consime the touch and prevent it from
+     * going to its child views
+     */
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (shouldInterceptTouchEvent(event)
+                && !mUdfpsOverlayInteractor.isTouchWithinUdfpsArea(event)) {
+            onTouch(event);
+        }
+        return shouldInterceptTouchEvent(event);
+    }
+
+    /**
+     * Whether the touch should be intercepted by the AlternateBouncer before going to the
+     * notification shade's child views.
+     */
+    public boolean shouldInterceptTouchEvent(MotionEvent event) {
+        return mAlternateBouncerInteractor.isVisibleState();
+    }
+
+    /**
      * For any touches on the NPVC, show the primary bouncer if the alternate bouncer is currently
      * showing.
      */
     public boolean onTouch(MotionEvent event) {
-        boolean handledTouch = false;
-        if (event.getAction() == MotionEvent.ACTION_UP
-                && mAlternateBouncerInteractor.isVisibleState()
-                && mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()) {
-            showPrimaryBouncer(true);
-            handledTouch = true;
+        boolean handleTouch = shouldInterceptTouchEvent(event);
+        if (handleTouch) {
+            final boolean actionDown = event.getActionMasked() == MotionEvent.ACTION_DOWN;
+            final boolean actionDownThenUp = mAlternateBouncerInteractor.getReceivedDownTouch()
+                    && event.getActionMasked() == MotionEvent.ACTION_UP;
+            final boolean udfpsOverlayWillForwardEventsOutsideNotificationShade =
+                    mUdfpsNewTouchDetectionEnabled && mKeyguardUpdateManager.isUdfpsEnrolled();
+            final boolean actionOutsideShouldDismissAlternateBouncer =
+                    event.getActionMasked() == MotionEvent.ACTION_OUTSIDE
+                    && !udfpsOverlayWillForwardEventsOutsideNotificationShade;
+            if (actionDown) {
+                mAlternateBouncerInteractor.setReceivedDownTouch(true);
+            } else if ((actionDownThenUp || actionOutsideShouldDismissAlternateBouncer)
+                    && mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()) {
+                showPrimaryBouncer(true);
+            }
         }
 
         // Forward NPVC touches to callbacks in case they want to respond to touches
@@ -1460,7 +1499,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             callback.onTouch(event);
         }
 
-        return handledTouch;
+        return handleTouch;
     }
 
     /** Update keyguard position based on a tapped X coordinate. */

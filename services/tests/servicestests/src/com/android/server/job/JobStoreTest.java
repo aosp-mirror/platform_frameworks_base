@@ -728,6 +728,66 @@ public class JobStoreTest {
     }
 
     @Test
+    public void testPersistedPreferredBatteryNotLowConstraint() throws Exception {
+        JobInfo.Builder b = new Builder(8, mComponent)
+                .setPrefersBatteryNotLow(true)
+                .setPersisted(true);
+        JobStatus taskStatus =
+                JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null, null);
+
+        mTaskStoreUnderTest.add(taskStatus);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Battery-not-low constraint not persisted correctly.",
+                taskStatus.getJob().isPreferBatteryNotLow(),
+                loaded.getJob().isPreferBatteryNotLow());
+    }
+
+    @Test
+    public void testPersistedPreferredChargingConstraint() throws Exception {
+        JobInfo.Builder b = new Builder(8, mComponent)
+                .setPrefersCharging(true)
+                .setPersisted(true);
+        JobStatus taskStatus =
+                JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null, null);
+
+        mTaskStoreUnderTest.add(taskStatus);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Charging constraint not persisted correctly.",
+                taskStatus.getJob().isPreferCharging(),
+                loaded.getJob().isPreferCharging());
+    }
+
+    @Test
+    public void testPersistedPreferredDeviceIdleConstraint() throws Exception {
+        JobInfo.Builder b = new Builder(8, mComponent)
+                .setPrefersDeviceIdle(true)
+                .setPersisted(true);
+        JobStatus taskStatus =
+                JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null, null);
+
+        mTaskStoreUnderTest.add(taskStatus);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Idle constraint not persisted correctly.",
+                taskStatus.getJob().isPreferDeviceIdle(),
+                loaded.getJob().isPreferDeviceIdle());
+    }
+
+    @Test
     public void testJobWorkItems() throws Exception {
         JobWorkItem item1 = new JobWorkItem.Builder().build();
         item1.bumpDeliveryCount();

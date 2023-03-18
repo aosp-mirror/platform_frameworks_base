@@ -849,7 +849,7 @@ public final class NotificationPanelViewController implements Dumpable {
         mLayoutInflater = layoutInflater;
         mFeatureFlags = featureFlags;
         mAnimateBack = mFeatureFlags.isEnabled(Flags.WM_SHADE_ANIMATE_BACK_GESTURE);
-        mTrackpadGestureBack = mFeatureFlags.isEnabled(Flags.TRACKPAD_GESTURE_BACK);
+        mTrackpadGestureBack = mFeatureFlags.isEnabled(Flags.TRACKPAD_GESTURE_FEATURES);
         mFalsingCollector = falsingCollector;
         mPowerManager = powerManager;
         mWakeUpCoordinator = coordinator;
@@ -2805,6 +2805,7 @@ public final class NotificationPanelViewController implements Dumpable {
     public void setIsLaunchAnimationRunning(boolean running) {
         boolean wasRunning = mIsLaunchAnimationRunning;
         mIsLaunchAnimationRunning = running;
+        mCentralSurfaces.updateIsKeyguard();
         if (wasRunning != mIsLaunchAnimationRunning) {
             mShadeExpansionStateManager.notifyLaunchingActivityChanged(running);
         }
@@ -3860,6 +3861,10 @@ public final class NotificationPanelViewController implements Dumpable {
 
     public boolean isCollapsing() {
         return mClosing || mIsLaunchAnimationRunning;
+    }
+
+    public boolean isLaunchAnimationRunning() {
+        return mIsLaunchAnimationRunning;
     }
 
     public boolean isTracking() {

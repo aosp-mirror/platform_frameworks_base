@@ -151,7 +151,7 @@ public class MediaControlPanel {
     private static final float REC_MEDIA_COVER_SCALE_FACTOR = 1.25f;
     private static final float MEDIA_SCRIM_START_ALPHA = 0.25f;
     private static final float MEDIA_REC_SCRIM_START_ALPHA = 0.15f;
-    private static final float MEDIA_PLAYER_SCRIM_END_ALPHA = 0.9f;
+    private static final float MEDIA_PLAYER_SCRIM_END_ALPHA = 1.0f;
     private static final float MEDIA_REC_SCRIM_END_ALPHA = 1.0f;
 
     private static final Intent SETTINGS_INTENT = new Intent(ACTION_MEDIA_CONTROLS_SETTINGS);

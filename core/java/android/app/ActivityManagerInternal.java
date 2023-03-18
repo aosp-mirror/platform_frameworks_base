@@ -994,6 +994,16 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void logFgsApiEnd(int apiType, int uid, int pid);
 
+     /**
+     * Temporarily allow foreground service started by an uid to have while-in-use permission
+     * for durationMs.
+     *
+     * @param uid The UID of the app that starts the foreground service.
+     * @param durationMs elapsedRealTime duration in milliseconds.
+     * @hide
+     */
+    public abstract void tempAllowWhileInUsePermissionInFgs(int uid, long durationMs);
+
     /**
      * The list of the events about the {@link android.media.projection.IMediaProjection} itself.
      *

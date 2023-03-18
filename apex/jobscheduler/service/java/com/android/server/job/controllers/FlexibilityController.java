@@ -239,14 +239,14 @@ public final class FlexibilityController extends StateController {
         return !mFlexibilityEnabled
                 || mService.getUidBias(js.getSourceUid()) == JobInfo.BIAS_TOP_APP
                 || mService.isCurrentlyRunningLocked(js)
-                || getNumSatisfiedRequiredConstraintsLocked(js)
+                || getNumSatisfiedFlexibleConstraintsLocked(js)
                 >= js.getNumRequiredFlexibleConstraints();
     }
 
     @VisibleForTesting
     @GuardedBy("mLock")
-    int getNumSatisfiedRequiredConstraintsLocked(JobStatus js) {
-        return Integer.bitCount(mSatisfiedFlexibleConstraints)
+    int getNumSatisfiedFlexibleConstraintsLocked(JobStatus js) {
+        return Integer.bitCount(mSatisfiedFlexibleConstraints & js.getPreferredConstraintFlags())
                 + (js.getHasAccessToUnmetered() ? 1 : 0);
     }
 
@@ -651,7 +651,7 @@ public final class FlexibilityController extends StateController {
         static final String KEY_RESCHEDULED_JOB_DEADLINE_MS =
                 FC_CONFIG_PREFIX + "rescheduled_job_deadline_ms";
 
-        private static final boolean DEFAULT_FLEXIBILITY_ENABLED = false;
+        private static final boolean DEFAULT_FLEXIBILITY_ENABLED = true;
         @VisibleForTesting
         static final long DEFAULT_DEADLINE_PROXIMITY_LIMIT_MS = 15 * MINUTE_IN_MILLIS;
         @VisibleForTesting

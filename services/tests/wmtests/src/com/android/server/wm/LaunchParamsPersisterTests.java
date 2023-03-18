@@ -111,6 +111,7 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
         mDisplayUniqueId = "test:" + sNextUniqueId++;
         mTestDisplay = new TestDisplayContent.Builder(mAtm, 1000, 1500)
                 .setUniqueId(mDisplayUniqueId).build();
+        mTestDisplay.getDefaultTaskDisplayArea().setWindowingMode(TEST_WINDOWING_MODE);
         when(mRootWindowContainer.getDisplayContent(eq(mDisplayUniqueId)))
                 .thenReturn(mTestDisplay);
 

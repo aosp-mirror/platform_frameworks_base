@@ -590,7 +590,7 @@ public class InteractionJankMonitor {
             final Configuration config = builder.build();
             postEventLogToWorkerThread((unixNanos, elapsedNanos, realtimeNanos) -> {
                 EventLogTags.writeJankCujEventsBeginRequest(
-                        config.mCujType, unixNanos, elapsedNanos, realtimeNanos);
+                        config.mCujType, unixNanos, elapsedNanos, realtimeNanos, config.mTag);
             });
             final TrackerResult result = new TrackerResult();
             final boolean success = config.getHandler().runWithScissors(

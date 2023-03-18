@@ -33,7 +33,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.controls.ControlsServiceInfo;
 import com.android.systemui.controls.dagger.ControlsComponent;
@@ -157,14 +156,14 @@ public class DreamHomeControlsComplication implements Complication {
      * Contains values/logic associated with the dream complication view.
      */
     public static class DreamHomeControlsChipViewHolder implements ViewHolder {
-        private final View mView;
+        private final ImageView mView;
         private final ComplicationLayoutParams mLayoutParams;
         private final DreamHomeControlsChipViewController mViewController;
 
         @Inject
         DreamHomeControlsChipViewHolder(
                 DreamHomeControlsChipViewController dreamHomeControlsChipViewController,
-                @Named(DREAM_HOME_CONTROLS_CHIP_VIEW) View view,
+                @Named(DREAM_HOME_CONTROLS_CHIP_VIEW) ImageView view,
                 @Named(DREAM_HOME_CONTROLS_CHIP_LAYOUT_PARAMS) ComplicationLayoutParams layoutParams
         ) {
             mView = view;
@@ -174,7 +173,7 @@ public class DreamHomeControlsComplication implements Complication {
         }
 
         @Override
-        public View getView() {
+        public ImageView getView() {
             return mView;
         }
 
@@ -187,7 +186,7 @@ public class DreamHomeControlsComplication implements Complication {
     /**
      * Controls behavior of the dream complication.
      */
-    static class DreamHomeControlsChipViewController extends ViewController<View> {
+    static class DreamHomeControlsChipViewController extends ViewController<ImageView> {
         private static final String TAG = "DreamHomeControlsCtrl";
         private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -216,7 +215,7 @@ public class DreamHomeControlsComplication implements Complication {
 
         @Inject
         DreamHomeControlsChipViewController(
-                @Named(DREAM_HOME_CONTROLS_CHIP_VIEW) View view,
+                @Named(DREAM_HOME_CONTROLS_CHIP_VIEW) ImageView view,
                 ActivityStarter activityStarter,
                 Context context,
                 ControlsComponent controlsComponent,
@@ -231,10 +230,9 @@ public class DreamHomeControlsComplication implements Complication {
 
         @Override
         protected void onViewAttached() {
-            final ImageView chip = mView.findViewById(R.id.home_controls_chip);
-            chip.setImageResource(mControlsComponent.getTileImageId());
-            chip.setContentDescription(mContext.getString(mControlsComponent.getTileTitleId()));
-            chip.setOnClickListener(this::onClickHomeControls);
+            mView.setImageResource(mControlsComponent.getTileImageId());
+            mView.setContentDescription(mContext.getString(mControlsComponent.getTileTitleId()));
+            mView.setOnClickListener(this::onClickHomeControls);
         }
 
         @Override

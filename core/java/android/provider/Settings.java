@@ -10022,6 +10022,21 @@ public final class Settings {
                 "emergency_gesture_sound_enabled";
 
         /**
+         * Whether the emergency gesture UI is currently showing.
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_GESTURE_UI_SHOWING = "emergency_gesture_ui_showing";
+
+        /**
+         * The last time the emergency gesture UI was started.
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_GESTURE_UI_LAST_STARTED_MILLIS =
+                "emergency_gesture_ui_last_started_millis";
+
+        /**
          * Whether the camera launch gesture to double tap the power button when the screen is off
          * should be disabled.
          *
@@ -15055,6 +15070,16 @@ public final class Settings {
                 "emergency_gesture_tap_detection_min_time_ms";
 
         /**
+         * The maximum duration in milliseconds for which the emergency gesture UI can stay
+         * "sticky", where the notification pull-down shade and navigation gestures/buttons are
+         *  temporarily disabled. The feature is disabled completely if the value is set to zero.
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_GESTURE_STICKY_UI_MAX_DURATION_MILLIS =
+                "emergency_gesture_sticky_ui_max_duration_millis";
+
+        /**
          * Whether to enable automatic system server heap dumps. This only works on userdebug or
          * eng builds, not on user builds. This is set by the user and overrides the config value.
          * 1 means enable, 0 means disable.
@@ -18607,7 +18632,7 @@ public final class Settings {
          * The modes that can be used when disabling syncs to the 'config' settings.
          * @hide
          */
-        @IntDef(prefix = "DISABLE_SYNC_MODE_",
+        @IntDef(prefix = "SYNC_DISABLED_MODE_",
                 value = { SYNC_DISABLED_MODE_NONE, SYNC_DISABLED_MODE_PERSISTENT,
                         SYNC_DISABLED_MODE_UNTIL_REBOOT })
         @Retention(RetentionPolicy.SOURCE)
@@ -18617,23 +18642,36 @@ public final class Settings {
         /**
          * Sync is not disabled.
          *
+         * @deprecated use the constant in DeviceConfig
+         *
          * @hide
          */
-        public static final int SYNC_DISABLED_MODE_NONE = 0;
+        @Deprecated
+        public static final int SYNC_DISABLED_MODE_NONE = DeviceConfig.SYNC_DISABLED_MODE_NONE;
 
         /**
          * Disabling of Config bulk update / syncing is persistent, i.e. it survives a device
          * reboot.
+         *
+         * @deprecated use the constant in DeviceConfig
+         *
          * @hide
          */
-        public static final int SYNC_DISABLED_MODE_PERSISTENT = 1;
+        @Deprecated
+        public static final int SYNC_DISABLED_MODE_PERSISTENT =
+                DeviceConfig.SYNC_DISABLED_MODE_PERSISTENT;
 
         /**
          * Disabling of Config bulk update / syncing is not persistent, i.e. it will not survive a
          * device reboot.
+         *
+         * @deprecated use the constant in DeviceConfig
+         *
          * @hide
          */
-        public static final int SYNC_DISABLED_MODE_UNTIL_REBOOT = 2;
+        @Deprecated
+        public static final int SYNC_DISABLED_MODE_UNTIL_REBOOT =
+                DeviceConfig.SYNC_DISABLED_MODE_UNTIL_REBOOT;
 
         /**
          * The content:// style URL for the config table.

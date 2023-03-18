@@ -371,10 +371,11 @@ public class PipAnimationController {
                     new PipContentOverlay.PipSnapshotOverlay(snapshot, sourceRectHint));
         }
 
-        void setAppIconContentOverlay(Context context, Rect bounds, ActivityInfo activityInfo) {
+        void setAppIconContentOverlay(Context context, Rect bounds, ActivityInfo activityInfo,
+                int appIconSizePx) {
             reattachContentOverlay(
                     new PipContentOverlay.PipAppIconOverlay(context, bounds,
-                            () -> new IconProvider(context).getIcon(activityInfo)));
+                            new IconProvider(context).getIcon(activityInfo), appIconSizePx));
         }
 
         private void reattachContentOverlay(PipContentOverlay overlay) {
