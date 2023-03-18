@@ -40,12 +40,9 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"您尝试解锁手机后失败的次数已达 <xliff:g id="NUMBER">%d</xliff:g> 次。系统将移除此工作资料，而这将删除所有的工作资料数据。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"您已 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐号解锁平板电脑。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"您已 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐号解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
-    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (3726972508570143945) -->
-    <skip />
-    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (2929467060295094725) -->
-    <skip />
-    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (8582726566542997639) -->
-    <skip />
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"指纹传感器在电源按钮上。电源按钮是一个扁平按钮，位于平板电脑边缘凸起的音量按钮旁边。"</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"指纹传感器在电源按钮上。电源按钮是一个扁平按钮，位于设备边缘凸起的音量按钮旁边。"</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"指纹传感器在电源按钮上。电源按钮是一个扁平按钮，位于手机边缘凸起的音量按钮旁边。"</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"解锁手机即可查看更多选项"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"解锁平板电脑即可查看更多选项"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"解锁设备即可查看更多选项"</string>

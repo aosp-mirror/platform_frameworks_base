@@ -40,12 +40,9 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"<xliff:g id="NUMBER">%d</xliff:g> (na) beses mo nang sinubukang i-unlock ang telepono gamit ang maling password. Aalisin ang profile sa trabaho, na magiging dahilan para ma-delete ang lahat ng data sa profile."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"<xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses kang nagkamali sa pagguhit ng iyong pattern sa pag-unlock. Pagkatapos ng <xliff:g id="NUMBER_1">%2$d</xliff:g> pang hindi matagumpay na pagsubok, hihilingin sa iyong i-unlock ang tablet mo gamit ang isang email account.\n\n Subukan ulit sa loob ng <xliff:g id="NUMBER_2">%3$d</xliff:g> (na) segundo."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"<xliff:g id="NUMBER_0">%1$d</xliff:g> (na) beses kang nagkamali sa pagguhit ng iyong pattern sa pag-unlock. Pagkatapos ng <xliff:g id="NUMBER_1">%2$d</xliff:g> pang hindi matagumpay na pagsubok, hihilingin sa iyong i-unlock ang telepono mo gamit ang isang email account.\n\n Subukan ulit sa loob ng <xliff:g id="NUMBER_2">%3$d</xliff:g> (na) segundo."</string>
-    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (3726972508570143945) -->
-    <skip />
-    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (2929467060295094725) -->
-    <skip />
-    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (8582726566542997639) -->
-    <skip />
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"Nasa power button ang sensor para sa fingerprint. Ito ang flat na button sa tabi ng nakaangat na button ng volume sa gilid ng tablet."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"Nasa power button ang sensor para sa fingerprint. Ito ang flat na button sa tabi ng nakaangat na button ng volume sa gilid ng device."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"Nasa power button ang sensor para sa fingerprint. Ito ang flat na button sa tabi ng nakaangat na button ng volume sa gilid ng telepono."</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"I-unlock ang iyong telepono para sa higit pang opsyon"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"I-unlock ang iyong tablet para sa higit pang opsyon"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"I-unlock ang iyong device para sa higit pang opsyon"</string>

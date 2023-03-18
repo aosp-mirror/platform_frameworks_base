@@ -40,12 +40,9 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"तपाईंले <xliff:g id="NUMBER">%d</xliff:g> पटक गलत तरिकाले फोन अनलक गर्ने प्रयास गर्नुभएको छ। कार्य प्रोफाइललाई यसका सबै डेटा मेटिने गरी हटाइने छ।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"तपाईंले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक आफ्नो अनलक गर्ने ढाँचा गलत रूपमा कोर्नुभयो। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> पटक असफल प्रयास गरेपछि, तपाईंलाई एउटा इमेल खाता प्रयोग गरेर आफ्नो ट्याब्लेट अनलक गर्न आग्रह गरिने छ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"तपाईंले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक आफ्नो अनलक गर्ने ढाँचा गलत रूपमा कोर्नुभयो। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> पटक असफल प्रयास गरेपछि, तपाईंलाई एउटा इमेल खाता प्रयोग गरेर आफ्नो फोन अनलक गर्न आग्रह गरिने छ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
-    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (3726972508570143945) -->
-    <skip />
-    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (2929467060295094725) -->
-    <skip />
-    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (8582726566542997639) -->
-    <skip />
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"फिंगरप्रिन्ट सेन्सर पावर बटनमा हुन्छ। यो ट्याब्लेटको किनारामा रहेको थोरै उचालिएको भोल्युम बटनको छेउमा रहेको चेप्टो बटन नै पावर बटन हो।"</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"फिंगरप्रिन्ट सेन्सर पावर बटनमा हुन्छ। यो डिभाइसको किनारामा रहेको थोरै उचालिएको भोल्युम बटनको छेउमा रहेको चेप्टो बटन नै पावर बटन हो।"</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"फिंगरप्रिन्ट सेन्सर पावर बटनमा हुन्छ। यो फोनको किनारामा रहेको थोरै उचालिएको भोल्युम बटनको छेउमा रहेको चेप्टो बटन नै पावर बटन हो।"</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"थप विकल्पहरू हेर्न आफ्नो फोन अनलक गर्नुहोस्"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"थप विकल्पहरू हेर्न आफ्नो ट्याब्लेट अनलक गर्नुहोस्"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"थप विकल्पहरू हेर्न आफ्नो डिभाइस अनलक गर्नुहोस्"</string>

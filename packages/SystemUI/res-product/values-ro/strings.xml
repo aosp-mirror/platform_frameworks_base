@@ -40,12 +40,9 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Ai făcut <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a telefonului. Profilul de serviciu va fi eliminat, iar toate datele profilului vor fi șterse."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Ai desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, ți se va solicita să deblochezi tableta cu ajutorul unui cont de e-mail.\n\n Încearcă din nou peste <xliff:g id="NUMBER_2">%3$d</xliff:g> secunde."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Ai desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%1$d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, ți se va solicita să deblochezi telefonul cu ajutorul unui cont de e-mail.\n\n Încearcă din nou peste <xliff:g id="NUMBER_2">%3$d</xliff:g> secunde."</string>
-    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (3726972508570143945) -->
-    <skip />
-    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (2929467060295094725) -->
-    <skip />
-    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (8582726566542997639) -->
-    <skip />
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"Senzorul de amprentă se află pe butonul de pornire. Este butonul plat de lângă butonul de volum în relief de pe marginea tabletei."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"Senzorul de amprentă se află pe butonul de pornire. Este butonul plat de lângă butonul de volum în relief de pe marginea dispozitivului."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"Senzorul de amprentă se află pe butonul de pornire. Este butonul plat de lângă butonul de volum în relief de pe marginea telefonului."</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Deblochează telefonul pentru mai multe opțiuni"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Deblochează tableta pentru mai multe opțiuni"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Deblochează dispozitivul pentru mai multe opțiuni"</string>
