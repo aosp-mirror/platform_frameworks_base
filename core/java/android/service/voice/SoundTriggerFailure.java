@@ -22,6 +22,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,7 +36,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-public final class SoundTriggerFailure extends DetectorFailure {
+public final class SoundTriggerFailure implements Parcelable {
 
     /**
      * An error code which means an unknown error occurs.
@@ -72,12 +73,19 @@ public final class SoundTriggerFailure extends DetectorFailure {
     @Retention(RetentionPolicy.SOURCE)
     public @interface SoundTriggerErrorCode {}
 
+    private int mErrorCode = ERROR_CODE_UNKNOWN;
+    private String mErrorMessage = "Unknown";
+
     /**
      * @hide
      */
     @TestApi
     public SoundTriggerFailure(int errorCode, @NonNull String errorMessage) {
-        super(ERROR_SOURCE_TYPE_SOUND_TRIGGER, errorCode, errorMessage);
+        if (TextUtils.isEmpty(errorMessage)) {
+            throw new IllegalArgumentException("errorMessage is empty or null.");
+        }
+        mErrorCode = errorCode;
+        mErrorMessage = errorMessage;
     }
 
     /**
@@ -85,19 +93,30 @@ public final class SoundTriggerFailure extends DetectorFailure {
      */
     @SoundTriggerErrorCode
     public int getErrorCode() {
-        return super.getErrorCode();
+        return mErrorCode;
     }
 
-    @Override
+    /**
+     * Returns the error message.
+     */
+    @NonNull
+    public String getErrorMessage() {
+        return mErrorMessage;
+    }
+
+    /**
+     * Returns the suggested action.
+     */
+    @FailureSuggestedAction.FailureSuggestedActionDef
     public int getSuggestedAction() {
-        switch (getErrorCode()) {
+        switch (mErrorCode) {
             case ERROR_CODE_MODULE_DIED:
             case ERROR_CODE_UNEXPECTED_PREEMPTION:
-                return SUGGESTED_ACTION_RECREATE_DETECTOR;
+                return FailureSuggestedAction.RECREATE_DETECTOR;
             case ERROR_CODE_RECOGNITION_RESUME_FAILED:
-                return SUGGESTED_ACTION_RESTART_RECOGNITION;
+                return FailureSuggestedAction.RESTART_RECOGNITION;
             default:
-                return SUGGESTED_ACTION_NONE;
+                return FailureSuggestedAction.NONE;
         }
     }
 
@@ -108,7 +127,14 @@ public final class SoundTriggerFailure extends DetectorFailure {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
+        dest.writeInt(mErrorCode);
+        dest.writeString8(mErrorMessage);
+    }
+
+    @Override
+    public String toString() {
+        return "SoundTriggerFailure { errorCode = " + mErrorCode + ", errorMessage = "
+                + mErrorMessage + " }";
     }
 
     public static final @NonNull Parcelable.Creator<SoundTriggerFailure> CREATOR =
@@ -120,7 +146,7 @@ public final class SoundTriggerFailure extends DetectorFailure {
 
                 @Override
                 public SoundTriggerFailure createFromParcel(@NonNull Parcel in) {
-                    return (SoundTriggerFailure) DetectorFailure.CREATOR.createFromParcel(in);
+                    return new SoundTriggerFailure(in.readInt(), in.readString8());
                 }
             };
 }
