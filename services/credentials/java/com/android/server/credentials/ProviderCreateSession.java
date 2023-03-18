@@ -158,7 +158,7 @@ public final class ProviderCreateSession extends ProviderSession<
             // Store query phase exception for aggregation with final response
             mProviderException = (CreateCredentialException) exception;
         }
-        captureCandidateFailure();
+        captureCandidateFailureInMetrics();
         updateStatusAndInvokeCallback(toStatus(errorCode));
     }
 
@@ -179,24 +179,32 @@ public final class ProviderCreateSession extends ProviderSession<
         mProviderResponseDataHandler.addResponseContent(response.getCreateEntries(),
                 response.getRemoteCreateEntry());
         if (mProviderResponseDataHandler.isEmptyResponse(response)) {
-            gatheCandidateEntryMetrics(response);
+            gatherCandidateEntryMetrics(response);
             updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE);
         } else {
-            gatheCandidateEntryMetrics(response);
+            gatherCandidateEntryMetrics(response);
             updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED);
         }
     }
 
-    private void gatheCandidateEntryMetrics(BeginCreateCredentialResponse response) {
+    private void gatherCandidateEntryMetrics(BeginCreateCredentialResponse response) {
         try {
             var createEntries = response.getCreateEntries();
-            int numCreateEntries = createEntries == null ? 0 : createEntries.size();
-            // TODO confirm how to get types from slice
-            if (numCreateEntries > 0) {
+            int numRemoteEntry = MetricUtilities.ZERO;
+            if (response.getRemoteCreateEntry() != null) {
+                numRemoteEntry = MetricUtilities.UNIT;
+                mCandidatePhasePerProviderMetric.addEntry(EntryEnum.REMOTE_ENTRY);
+            }
+            int numCreateEntries =
+                    createEntries == null ? MetricUtilities.ZERO : createEntries.size();
+            if (numCreateEntries > MetricUtilities.ZERO) {
                 createEntries.forEach(c ->
                         mCandidatePhasePerProviderMetric.addEntry(EntryEnum.CREDENTIAL_ENTRY));
             }
-            mCandidatePhasePerProviderMetric.setNumEntriesTotal(numCreateEntries);
+            mCandidatePhasePerProviderMetric.setNumEntriesTotal(numCreateEntries + numRemoteEntry);
+            mCandidatePhasePerProviderMetric.setRemoteEntryCount(numRemoteEntry);
+            mCandidatePhasePerProviderMetric.setCredentialEntryCount(numCreateEntries);
+            mCandidatePhasePerProviderMetric.setCredentialEntryTypeCount(MetricUtilities.UNIT);
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
         }

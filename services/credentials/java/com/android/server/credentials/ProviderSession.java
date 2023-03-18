@@ -209,10 +209,8 @@ public abstract class ProviderSession<T, R>
         return mRemoteCredentialService;
     }
 
-    protected void captureCandidateFailure() {
+    protected void captureCandidateFailureInMetrics() {
         mCandidatePhasePerProviderMetric.setHasException(true);
-        // TODO(b/271135048) - this is a true exception, but what about the empty case?
-        // Add more nuance in next iteration.
     }
 
     /** Updates the status . */
@@ -225,7 +223,6 @@ public abstract class ProviderSession<T, R>
     private void updateCandidateMetric(Status status) {
         try {
             mCandidatePhasePerProviderMetric.setCandidateUid(mProviderSessionUid);
-            // TODO immediately update the candidate phase here to have more new data
             mCandidatePhasePerProviderMetric
                     .setQueryFinishTimeNanoseconds(System.nanoTime());
             if (isTerminatingStatus(status)) {

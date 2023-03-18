@@ -20,6 +20,9 @@ import android.util.Log;
 
 import com.android.server.credentials.MetricUtilities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The central chosen provider metric object that mimics our defined metric setup. This is used
  * in the final phase of the flow and emits final status metrics.
@@ -27,14 +30,13 @@ import com.android.server.credentials.MetricUtilities;
  * these data-types are available at different moments of the flow (and typically, one can feed
  * into the next).
  * TODO(b/270403549) - iterate on this in V3+
- * TODO(Immediately) - finalize V3 only types
  */
 public class ChosenProviderFinalPhaseMetric {
 
     // TODO(b/270403549) - applies elsewhere, likely removed or replaced w/ some hashed/count index
     private static final String TAG = "ChosenFinalPhaseMetric";
     // The session id associated with this API call, used to unite split emits
-    private long mSessionId = -1;
+    private int mSessionId = -1;
     // Reveals if the UI was returned, false by default
     private boolean mUiReturned = false;
     private int mChosenUid = -1;
@@ -52,6 +54,8 @@ public class ChosenProviderFinalPhaseMetric {
     // The first query timestamp, which upon emit is normalized to microseconds using the reference
     // start timestamp
     private long mQueryStartTimeNanoseconds = -1;
+    // The timestamp at query end, which upon emit will be normalized to microseconds with reference
+    private long mQueryEndTimeNanoseconds = -1;
     // The UI call timestamp, which upon emit will be normalized to microseconds using reference
     private long mUiCallStartTimeNanoseconds = -1;
     // The UI return timestamp, which upon emit will be normalized to microseconds using reference
@@ -63,8 +67,23 @@ public class ChosenProviderFinalPhaseMetric {
     // Other General Information, such as final api status, provider status, entry info, etc...
 
     private int mChosenProviderStatus = -1;
-    // TODO add remaining properties based on the Atom ; specifically, migrate the candidate
-    // Entry information, and store final status here
+    // Indicates if an exception was thrown by this provider, false by default
+    private boolean mHasException = false;
+    // Indicates the number of total entries available, defaults to -1. Not presently emitted, but
+    // left as a utility
+    private int mNumEntriesTotal = -1;
+    // The count of action entries from this provider, defaults to -1
+    private int mActionEntryCount = -1;
+    // The count of credential entries from this provider, defaults to -1
+    private int mCredentialEntryCount = -1;
+    // The *type-count* of the credential entries, defaults to -1
+    private int mCredentialEntryTypeCount = -1;
+    // The count of remote entries from this provider, defaults to -1
+    private int mRemoteEntryCount = -1;
+    // The count of authentication entries from this provider, defaults to -1
+    private int mAuthenticationEntryCount = -1;
+    // Gathered to pass on to chosen provider when required
+    private List<Integer> mAvailableEntries = new ArrayList<>();
 
 
     public ChosenProviderFinalPhaseMetric() {
@@ -159,6 +178,10 @@ public class ChosenProviderFinalPhaseMetric {
         mQueryStartTimeNanoseconds = queryStartTimeNanoseconds;
     }
 
+    public void setQueryEndTimeNanoseconds(long queryEndTimeNanoseconds) {
+        mQueryEndTimeNanoseconds = queryEndTimeNanoseconds;
+    }
+
     public void setUiCallStartTimeNanoseconds(long uiCallStartTimeNanoseconds) {
         this.mUiCallStartTimeNanoseconds = uiCallStartTimeNanoseconds;
     }
@@ -177,6 +200,10 @@ public class ChosenProviderFinalPhaseMetric {
 
     public long getQueryStartTimeNanoseconds() {
         return mQueryStartTimeNanoseconds;
+    }
+
+    public long getQueryEndTimeNanoseconds() {
+        return mQueryEndTimeNanoseconds;
     }
 
     public long getUiCallStartTimeNanoseconds() {
@@ -222,11 +249,11 @@ public class ChosenProviderFinalPhaseMetric {
 
     /* ----------- Session ID -------------- */
 
-    public void setSessionId(long sessionId) {
+    public void setSessionId(int sessionId) {
         mSessionId = sessionId;
     }
 
-    public long getSessionId() {
+    public int getSessionId() {
         return mSessionId;
     }
 
@@ -238,5 +265,96 @@ public class ChosenProviderFinalPhaseMetric {
 
     public boolean isUiReturned() {
         return mUiReturned;
+    }
+
+    /* -------------- Number of Entries ---------------- */
+
+    public void setNumEntriesTotal(int numEntriesTotal) {
+        mNumEntriesTotal = numEntriesTotal;
+    }
+
+    public int getNumEntriesTotal() {
+        return mNumEntriesTotal;
+    }
+
+    /* -------------- Count of Action Entries ---------------- */
+
+    public void setActionEntryCount(int actionEntryCount) {
+        mActionEntryCount = actionEntryCount;
+    }
+
+    public int getActionEntryCount() {
+        return mActionEntryCount;
+    }
+
+    /* -------------- Count of Credential Entries ---------------- */
+
+    public void setCredentialEntryCount(int credentialEntryCount) {
+        mCredentialEntryCount = credentialEntryCount;
+    }
+
+    public int getCredentialEntryCount() {
+        return mCredentialEntryCount;
+    }
+
+    /* -------------- Count of Credential Entry Types ---------------- */
+
+    public void setCredentialEntryTypeCount(int credentialEntryTypeCount) {
+        mCredentialEntryTypeCount = credentialEntryTypeCount;
+    }
+
+    public int getCredentialEntryTypeCount() {
+        return mCredentialEntryTypeCount;
+    }
+
+    /* -------------- Count of Remote Entries ---------------- */
+
+    public void setRemoteEntryCount(int remoteEntryCount) {
+        mRemoteEntryCount = remoteEntryCount;
+    }
+
+    public int getRemoteEntryCount() {
+        return mRemoteEntryCount;
+    }
+
+    /* -------------- Count of Authentication Entries ---------------- */
+
+    public void setAuthenticationEntryCount(int authenticationEntryCount) {
+        mAuthenticationEntryCount = authenticationEntryCount;
+    }
+
+    public int getAuthenticationEntryCount() {
+        return mAuthenticationEntryCount;
+    }
+
+    /* -------------- The Entries Gathered ---------------- */
+
+    /**
+     * Sets the collected list of entries from the candidate phase to be retrievable in the
+     * chosen phase in a semantically correct way.
+     */
+    public void setAvailableEntries(List<Integer> entries) {
+        this.mAvailableEntries = new ArrayList<>(entries); // no alias copy
+    }
+
+    /**
+     * Returns a list of the entries captured by this metric collector associated
+     * with a particular chosen provider.
+     *
+     * @return the full collection of entries encountered by the chosen provider during the
+     * candidate phase.
+     */
+    public List<Integer> getAvailableEntries() {
+        return new ArrayList<>(this.mAvailableEntries); // no alias copy
+    }
+
+    /* -------------- Has Exception ---------------- */
+
+    public void setHasException(boolean hasException) {
+        mHasException = hasException;
+    }
+
+    public boolean isHasException() {
+        return mHasException;
     }
 }
