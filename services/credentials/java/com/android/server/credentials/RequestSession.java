@@ -34,13 +34,12 @@ import android.service.credentials.CallingAppInfo;
 import android.util.Log;
 
 import com.android.internal.R;
-import com.android.server.credentials.metrics.ApiName;
-import com.android.server.credentials.metrics.ApiStatus;
 import com.android.server.credentials.metrics.CandidateBrowsingPhaseMetric;
 import com.android.server.credentials.metrics.CandidatePhaseMetric;
 import com.android.server.credentials.metrics.ChosenProviderFinalPhaseMetric;
 import com.android.server.credentials.metrics.EntryEnum;
 import com.android.server.credentials.metrics.InitialPhaseMetric;
+import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -185,7 +184,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
                     EntryEnum.getMetricCodeFromString(selection.getEntryKey()));
             browsingPhaseMetric.setProviderUid(providerSession.mCandidatePhasePerProviderMetric
                     .getCandidateUid());
-            this.mCandidateBrowsingPhaseMetric.add(new CandidateBrowsingPhaseMetric());
+            this.mCandidateBrowsingPhaseMetric.add(browsingPhaseMetric);
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
         }
@@ -209,16 +208,12 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         return false;
     }
 
-    protected void logApiCall(ApiName apiName, ApiStatus apiStatus) {
-        logApiCalled(apiName, apiStatus, mProviders, mCallingUid,
-                mChosenProviderFinalPhaseMetric);
-    }
-
     protected void logApiCall(ChosenProviderFinalPhaseMetric finalPhaseMetric,
-            List<CandidateBrowsingPhaseMetric> browsingPhaseMetrics) {
+            List<CandidateBrowsingPhaseMetric> browsingPhaseMetrics, int apiStatus) {
         // TODO (b/270403549) - this browsing phase object is fine but also have a new emit
         // For the returned types by authentication entries - i.e. a CandidatePhase During Browse
-        // TODO call MetricUtilities with new setup
+        // Possibly think of adding in more atoms for other APIs as well.
+        logApiCalled(finalPhaseMetric, browsingPhaseMetrics, apiStatus, ++mSequenceCounter);
     }
 
     protected boolean isSessionCancelled() {
@@ -266,8 +261,20 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         }
     }
 
+    protected void collectFinalPhaseMetricStatus(boolean hasException,
+            ProviderStatusForMetrics finalSuccess) {
+        mChosenProviderFinalPhaseMetric.setHasException(hasException);
+        mChosenProviderFinalPhaseMetric.setChosenProviderStatus(
+                finalSuccess.getMetricCode());
+    }
+
     /**
-     * Called by RequestSession's upon chosen metric determination.
+     * Called by RequestSession's upon chosen metric determination. It's expected that most bits
+     * are transferred here. However, certain new information, such as the selected provider's final
+     * exception bit, the framework to ui and back latency, or the ui response bit are set at other
+     * locations. Other information, such browsing metrics, api_status, and the sequence id count
+     * are combined together during the final emit moment with the actual and official
+     * {@link com.android.internal.util.FrameworkStatsLog} metric generation.
      *
      * @param componentName the componentName to associate with a provider
      */
@@ -286,10 +293,19 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
                     metric.getServiceBeganTimeNanoseconds());
             mChosenProviderFinalPhaseMetric.setQueryStartTimeNanoseconds(
                     metric.getStartQueryTimeNanoseconds());
+            mChosenProviderFinalPhaseMetric.setQueryEndTimeNanoseconds(metric
+                    .getQueryFinishTimeNanoseconds());
 
-            // TODO immediately update with the entry count numbers from the candidate metrics
-            // TODO immediately add the exception bit for candidates and providers
-
+            mChosenProviderFinalPhaseMetric.setNumEntriesTotal(metric.getNumEntriesTotal());
+            mChosenProviderFinalPhaseMetric.setCredentialEntryCount(metric
+                    .getCredentialEntryCount());
+            mChosenProviderFinalPhaseMetric.setCredentialEntryTypeCount(
+                    metric.getCredentialEntryTypeCount());
+            mChosenProviderFinalPhaseMetric.setActionEntryCount(metric.getActionEntryCount());
+            mChosenProviderFinalPhaseMetric.setRemoteEntryCount(metric.getRemoteEntryCount());
+            mChosenProviderFinalPhaseMetric.setAuthenticationEntryCount(
+                    metric.getAuthenticationEntryCount());
+            mChosenProviderFinalPhaseMetric.setAvailableEntries(metric.getAvailableEntries());
             mChosenProviderFinalPhaseMetric.setFinalFinishTimeNanoseconds(System.nanoTime());
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
