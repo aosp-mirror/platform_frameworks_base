@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"提升帳戶安全性"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"系統會為應用程式或網站建立專屬的對應金鑰，因此你不會意外登入詐欺性的應用程式或網站。此外，伺服器上只存放公開金鑰，因此可大幅降低駭客入侵的風險。"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"流暢轉換"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"即使現在已邁入無密碼時代，密碼仍可與密碼金鑰並用"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"選擇要將<xliff:g id="CREATETYPES">%1$s</xliff:g>存在哪裡"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"選取密碼管理工具並儲存資訊，下次就能更快登入"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"要為「<xliff:g id="APPNAME">%1$s</xliff:g>」建立密碼金鑰嗎？"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"選擇儲存<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>的位置"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"要在其他裝置上建立密碼金鑰嗎？"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"要將「<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>」用於所有的登入資訊嗎？"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> 的密碼管理工具會儲存密碼和密碼金鑰，協助你輕鬆登入"</string>
     <string name="set_as_default" msgid="4415328591568654603">"設為預設"</string>
     <string name="use_once" msgid="9027366575315399714">"單次使用"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> 個密碼 • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> 個密碼金鑰"</string>
