@@ -40,12 +40,9 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"Umejaribu kufungua simu mara <xliff:g id="NUMBER">%d</xliff:g> bila mafanikio. Wasifu wa kazini utaondolewa, hatua itakayofuta data yote ya wasifu."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"Umeweka mchoro usio sahihi wa kufungua skrini mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> zaidi bila mafanikio, utaombwa ufungue kompyuta yako kibao kwa kutumia akaunti ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"Umeweka mchoro usio sahihi wa kufungua skrini mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukikosea mara nyingine <xliff:g id="NUMBER_1">%2$d</xliff:g>, utaombwa ufungue simu yako kwa kutumia akaunti ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
-    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (3726972508570143945) -->
-    <skip />
-    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (2929467060295094725) -->
-    <skip />
-    <!-- no translation found for security_settings_sfps_enroll_find_sensor_message (8582726566542997639) -->
-    <skip />
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"Kitambuzi cha alama ya kidole kinapatikana kwenye kitufe cha kuwasha/kuzima. Ni kitufe bapa pembeni pa kitufe cha sauti kilichoinuka kwenye ukingo wa kompyuta kibao."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"Kitambuzi cha alama ya kidole kinapatikana kwenye kitufe cha kuwasha/kuzima. Ni kitufe bapa pembeni pa kitufe cha sauti kilichoinuka kwenye ukingo wa kifaa."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"Kitambuzi cha alama ya kidole kinapatikana kwenye kitufe cha kuwasha/kuzima. Ni kitufe bapa pembeni pa kitufe cha sauti kilichoinuka kwenye ukingo wa simu."</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Fungua simu yako ili upate chaguo zaidi"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Fungua kompyuta yako kibao ili upate chaguo zaidi"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Fungua kifaa chako ili upate chaguo zaidi"</string>

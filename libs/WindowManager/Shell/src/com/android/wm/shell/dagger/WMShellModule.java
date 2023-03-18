@@ -83,6 +83,7 @@ import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.recents.RecentsTransitionHandler;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
@@ -528,9 +529,20 @@ public abstract class WMShellModule {
             ShellInit shellInit,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
+            Optional<RecentsTransitionHandler> recentsTransitionHandler,
             Transitions transitions) {
         return new DefaultMixedHandler(shellInit, transitions, splitScreenOptional,
-                pipTouchHandlerOptional);
+                pipTouchHandlerOptional, recentsTransitionHandler);
+    }
+
+    @WMSingleton
+    @Provides
+    static RecentsTransitionHandler provideRecentsTransitionHandler(
+            ShellInit shellInit,
+            Transitions transitions,
+            Optional<RecentTasksController> recentTasksController) {
+        return new RecentsTransitionHandler(shellInit, transitions,
+                recentTasksController.orElse(null));
     }
 
     //

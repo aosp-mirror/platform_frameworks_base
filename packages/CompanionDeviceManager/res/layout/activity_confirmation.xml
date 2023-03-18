@@ -123,21 +123,30 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
                 android:gravity="bottom|end"
-                android:orientation="vertical"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="16dp">
 
                 <!-- Do NOT change the IDs of the buttons: they are referenced in CTS tests. -->
+                <LinearLayout
+                    android:id="@+id/negative_multiple_devices_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:visibility="gone">
 
-                <Button
-                    android:id="@+id/btn_negative_multiple_devices"
-                    style="@style/NegativeButtonMultipleDevices"
-                    android:textColor="?android:textColorPrimary"
-                    android:visibility="gone"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"
-                    android:text="@string/consent_no" />
+                    <Button
+                        android:id="@+id/btn_negative_multiple_devices"
+                        style="@style/NegativeButtonMultipleDevices"
+                        android:textColor="?android:textColorPrimary"
+                        android:visibility="gone"
+                        android:duplicateParentState="true"
+                        android:clickable="false"
+                        android:text="@string/consent_no" />
+
+                </LinearLayout>
+
             </LinearLayout>
 
         </LinearLayout>

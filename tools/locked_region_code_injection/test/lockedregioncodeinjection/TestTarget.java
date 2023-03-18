@@ -19,8 +19,17 @@ public class TestTarget {
   public static int invokeCount = 0;
   public static boolean nextUnboostThrows = false;
 
+  // If this is not null, then this is the lock under test.  The lock must not be held when boost()
+  // or unboost() are called.
+  public static Object mLock = null;
+  public static int boostCountLocked = 0;
+  public static int unboostCountLocked = 0;
+
   public static void boost() {
     boostCount++;
+    if (mLock != null && Thread.currentThread().holdsLock(mLock)) {
+      boostCountLocked++;
+    }
   }
 
   public static void unboost() {
@@ -29,6 +38,9 @@ public class TestTarget {
       throw new RuntimeException();
     }
     unboostCount++;
+    if (mLock != null && Thread.currentThread().holdsLock(mLock)) {
+      unboostCountLocked++;
+    }
   }
 
   public static void invoke() {

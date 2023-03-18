@@ -69,6 +69,8 @@ android_test {
         enabled: false,
     },
 
+    test_suites: ["device-tests"],
+
     platform_apis: true,
     certificate: "platform",
 

@@ -16,6 +16,7 @@
 
 package android.view.autofill;
 
+import static android.Manifest.permission.PROVIDE_OWN_AUTOFILL_SUGGESTIONS;
 import static android.service.autofill.FillRequest.FLAG_IME_SHOWING;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
@@ -34,6 +35,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -2223,8 +2225,14 @@ public final class AutofillManager {
      * @param executor specifies the thread upon which the callbacks will be invoked.
      * @param callback which handles autofill request to provide client's suggestions.
      */
+    @RequiresPermission(PROVIDE_OWN_AUTOFILL_SUGGESTIONS)
     public void setAutofillRequestCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull AutofillRequestCallback callback) {
+        if (mContext.checkSelfPermission(PROVIDE_OWN_AUTOFILL_SUGGESTIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires USE_APP_AUTOFILL permission!");
+        }
+
         synchronized (mLock) {
             mRequestCallbackExecutor = executor;
             mAutofillRequestCallback = callback;

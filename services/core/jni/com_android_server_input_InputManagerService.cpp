@@ -379,7 +379,7 @@ private:
     jobject mServiceObj;
     sp<Looper> mLooper;
 
-    Mutex mLock;
+    std::mutex mLock;
     struct Locked {
         // Display size information.
         std::vector<DisplayViewport> viewports{};
@@ -469,7 +469,7 @@ void NativeInputManager::dump(std::string& dump) {
         dump += StringPrintf(INDENT "Interactive: %s\n", toString(mInteractive.load()));
     }
     {
-        AutoMutex _l(mLock);
+        std::scoped_lock _l(mLock);
         dump += StringPrintf(INDENT "System UI Lights Out: %s\n",
                              toString(mLocked.systemUiLightsOut));
         dump += StringPrintf(INDENT "Pointer Speed: %" PRId32 "\n", mLocked.pointerSpeed);
@@ -532,7 +532,7 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
     }
 
     { // acquire lock
-        AutoMutex _l(mLock);
+        std::scoped_lock _l(mLock);
         mLocked.viewports = viewports;
         std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
         if (controller != nullptr) {
@@ -669,7 +669,7 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
     }
 
     { // acquire lock
-        AutoMutex _l(mLock);
+        std::scoped_lock _l(mLock);
 
         outConfig->pointerVelocityControlParameters.scale = exp2f(mLocked.pointerSpeed
                 * POINTER_SPEED_EXPONENT);
@@ -717,7 +717,7 @@ std::unordered_map<std::string, T> NativeInputManager::readMapFromInterleavedJav
 std::shared_ptr<PointerControllerInterface> NativeInputManager::obtainPointerController(
         int32_t /* deviceId */) {
     ATRACE_CALL();
-    AutoMutex _l(mLock);
+    std::scoped_lock _l(mLock);
 
     std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
     if (controller == nullptr) {
@@ -1065,7 +1065,7 @@ void NativeInputManager::setInputDispatchMode(bool enabled, bool frozen) {
 }
 
 void NativeInputManager::setSystemUiLightsOut(bool lightsOut) {
-    AutoMutex _l(mLock);
+    std::scoped_lock _l(mLock);
 
     if (mLocked.systemUiLightsOut != lightsOut) {
         mLocked.systemUiLightsOut = lightsOut;
@@ -1085,7 +1085,7 @@ void NativeInputManager::updateInactivityTimeoutLocked() REQUIRES(mLock) {
 
 void NativeInputManager::setPointerDisplayId(int32_t displayId) {
     { // acquire lock
-        AutoMutex _l(mLock);
+        std::scoped_lock _l(mLock);
 
         if (mLocked.pointerDisplayId == displayId) {
             return;
@@ -1101,7 +1101,7 @@ void NativeInputManager::setPointerDisplayId(int32_t displayId) {
 
 void NativeInputManager::setPointerSpeed(int32_t speed) {
     { // acquire lock
-        AutoMutex _l(mLock);
+        std::scoped_lock _l(mLock);
 
         if (mLocked.pointerSpeed == speed) {
             return;
@@ -1117,7 +1117,7 @@ void NativeInputManager::setPointerSpeed(int32_t speed) {
 
 void NativeInputManager::setPointerAcceleration(float acceleration) {
     { // acquire lock
-        AutoMutex _l(mLock);
+        std::scoped_lock _l(mLock);
 
         if (mLocked.pointerAcceleration == acceleration) {
             return;
@@ -1133,7 +1133,7 @@ void NativeInputManager::setPointerAcceleration(float acceleration) {
 
 void NativeInputManager::setTouchpadPointerSpeed(int32_t speed) {
     { // acquire lock
-        AutoMutex _l(mLock);
+        std::scoped_lock _l(mLock);
 
         if (mLocked.touchpadPointerSpeed == speed) {
             return;
@@ -1149,7 +1149,7 @@ void NativeInputManager::setTouchpadPointerSpeed(int32_t speed) {
 
 void NativeInputManager::setTouchpadNaturalScrollingEnabled(bool enabled) {
     { // acquire lock
-        AutoMutex _l(mLock);
+        std::scoped_lock _l(mLock);
 
         if (mLocked.touchpadNaturalScrollingEnabled == enabled) {
             return;
@@ -1165,7 +1165,7 @@ void NativeInputManager::setTouchpadNaturalScrollingEnabled(bool enabled) {
 
 void NativeInputManager::setTouchpadTapToClickEnabled(bool enabled) {
     { // acquire lock
-        AutoMutex _l(mLock);
+        std::scoped_lock _l(mLock);
 
         if (mLocked.touchpadTapToClickEnabled == enabled) {
             return;
@@ -1181,7 +1181,7 @@ void NativeInputManager::setTouchpadTapToClickEnabled(bool enabled) {
 
 void NativeInputManager::setTouchpadRightClickZoneEnabled(bool enabled) {
     { // acquire lock
-        AutoMutex _l(mLock);
+        std::scoped_lock _l(mLock);
 
         if (mLocked.touchpadRightClickZoneEnabled == enabled) {
             return;
@@ -1197,7 +1197,7 @@ void NativeInputManager::setTouchpadRightClickZoneEnabled(bool enabled) {
 
 void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) {
     { // acquire lock
-        AutoMutex _l(mLock);
+        std::scoped_lock _l(mLock);
 
         auto it = mLocked.disabledInputDevices.find(deviceId);
         bool currentlyEnabled = it == mLocked.disabledInputDevices.end();
@@ -1215,7 +1215,7 @@ void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) 
 
 void NativeInputManager::setShowTouches(bool enabled) {
     { // acquire lock
-        AutoMutex _l(mLock);
+        std::scoped_lock _l(mLock);
 
         if (mLocked.showTouches == enabled) {
             return;
@@ -1243,7 +1243,7 @@ void NativeInputManager::reloadCalibration() {
 }
 
 void NativeInputManager::setPointerIconType(PointerIconStyle iconId) {
-    AutoMutex _l(mLock);
+    std::scoped_lock _l(mLock);
     std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
     if (controller != nullptr) {
         controller->updatePointerIcon(iconId);
@@ -1251,7 +1251,7 @@ void NativeInputManager::setPointerIconType(PointerIconStyle iconId) {
 }
 
 void NativeInputManager::reloadPointerIcons() {
-    AutoMutex _l(mLock);
+    std::scoped_lock _l(mLock);
     std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
     if (controller != nullptr) {
         controller->reloadPointerResources();
@@ -1259,7 +1259,7 @@ void NativeInputManager::reloadPointerIcons() {
 }
 
 void NativeInputManager::setCustomPointerIcon(const SpriteIcon& icon) {
-    AutoMutex _l(mLock);
+    std::scoped_lock _l(mLock);
     std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
     if (controller != nullptr) {
         controller->setCustomPointerIcon(icon);
@@ -1522,7 +1522,7 @@ void NativeInputManager::onPointerDownOutsideFocus(const sp<IBinder>& touchedTok
 
 void NativeInputManager::setPointerCapture(const PointerCaptureRequest& request) {
     { // acquire lock
-        AutoMutex _l(mLock);
+        std::scoped_lock _l(mLock);
 
         if (mLocked.pointerCaptureRequest == request) {
             return;
@@ -1633,7 +1633,7 @@ std::optional<std::string> NativeInputManager::getBluetoothAddress(int32_t devic
 
 void NativeInputManager::setStylusButtonMotionEventsEnabled(bool enabled) {
     { // acquire lock
-        AutoMutex _l(mLock);
+        std::scoped_lock _l(mLock);
 
         if (mLocked.stylusButtonMotionEventsEnabled == enabled) {
             return;
@@ -1657,7 +1657,7 @@ bool NativeInputManager::isPerDisplayTouchModeEnabled() {
 }
 
 FloatPoint NativeInputManager::getMouseCursorPosition() {
-    AutoMutex _l(mLock);
+    std::scoped_lock _l(mLock);
     const auto pc = mLocked.pointerController.lock();
     if (!pc) return {AMOTION_EVENT_INVALID_CURSOR_POSITION, AMOTION_EVENT_INVALID_CURSOR_POSITION};
 

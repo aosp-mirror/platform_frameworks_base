@@ -870,7 +870,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# control added.}other{# controls added.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Removed"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Add <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g>can choose which controls and content show here."</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> can choose which controls and content show here."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Remove controls for <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Favorited"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Favorited, position <xliff:g id="NUMBER">%d</xliff:g>"</string>

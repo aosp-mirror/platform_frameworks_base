@@ -2325,6 +2325,12 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> mindkét kijelzőt használja a tartalmak megjelenítésére"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Az eszköz túl meleg"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"A Két képernyő funkció nem áll rendelkezésre, mert a telefon melegedni kezdett"</string>
+    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
+    <skip />
+    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
+    <skip />
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Kikapcsolás"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> beállítva"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"A billentyűzetkiosztás a következőre van beállítva: <xliff:g id="LAYOUT_1">%s</xliff:g>. A módosításhoz koppintson."</string>

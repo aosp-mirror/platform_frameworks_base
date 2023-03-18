@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.graphics.PointF;
 import android.os.CancellationSignal;
+import android.os.CancellationSignalBeamer;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.widget.TextView;
@@ -39,10 +40,9 @@ import java.util.Objects;
  * {@link CancellationSignal#setOnCancelListener(CancellationSignal.OnCancelListener)} obtained from
  * {@link #getCancellationSignal()}.
  */
-public final class InsertModeGesture extends HandwritingGesture implements Parcelable {
+public final class InsertModeGesture extends CancellableHandwritingGesture implements Parcelable {
 
     private PointF mPoint;
-    private CancellationSignal mCancellationSignal;
 
     private InsertModeGesture(PointF point, String fallbackText,
             CancellationSignal cancellationSignal) {
@@ -56,6 +56,7 @@ public final class InsertModeGesture extends HandwritingGesture implements Parce
         mType = GESTURE_TYPE_INSERT_MODE;
         mFallbackText = source.readString8();
         mPoint = source.readTypedObject(PointF.CREATOR);
+        mCancellationSignalToken = source.readStrongBinder();
     }
 
     /**
@@ -64,6 +65,7 @@ public final class InsertModeGesture extends HandwritingGesture implements Parce
      * {@link CancellationSignal#cancel()} and toolkit can receive cancel using
      * {@link CancellationSignal#setOnCancelListener(CancellationSignal.OnCancelListener)}.
      */
+    @Override
     @NonNull
     public CancellationSignal getCancellationSignal() {
         return mCancellationSignal;
@@ -183,5 +185,6 @@ public final class InsertModeGesture extends HandwritingGesture implements Parce
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mFallbackText);
         dest.writeTypedObject(mPoint, flags);
+        dest.writeStrongBinder(CancellationSignalBeamer.Sender.beamFromScope(mCancellationSignal));
     }
 }

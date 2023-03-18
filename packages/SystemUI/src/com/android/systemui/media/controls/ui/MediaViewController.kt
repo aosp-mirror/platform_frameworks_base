@@ -89,6 +89,9 @@ constructor(
                 R.id.turbulence_noise_view,
                 R.id.touch_ripple_view,
             )
+
+        // Sizing view id for recommendation card view.
+        val recSizingViewId = R.id.sizing_view
     }
 
     /** A listener when the current dimensions of the player change */
@@ -176,7 +179,21 @@ constructor(
                         // Layout dimensions are possibly changing, so we need to update them. (at
                         // least on large screen devices)
                         lastOrientation = newOrientation
-                        loadLayoutForType(type)
+                        // Update the height of media controls for the expanded layout. it is needed
+                        // for large screen devices.
+                        if (type == TYPE.PLAYER) {
+                            backgroundIds.forEach { id ->
+                                expandedLayout.getConstraint(id).layout.mHeight =
+                                    context.resources.getDimensionPixelSize(
+                                        R.dimen.qs_media_session_height_expanded
+                                    )
+                            }
+                        } else {
+                            expandedLayout.getConstraint(recSizingViewId).layout.mHeight =
+                                context.resources.getDimensionPixelSize(
+                                    R.dimen.qs_media_session_height_expanded
+                                )
+                        }
                     }
                 }
             }

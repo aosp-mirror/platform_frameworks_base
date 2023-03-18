@@ -605,4 +605,7 @@ interface IDevicePolicyManager {
     void setOverrideKeepProfilesRunning(boolean enabled);
 
     boolean triggerDevicePolicyEngineMigration(boolean forceMigration);
+
+    boolean isDeviceFinanced(String callerPackageName);
+    String getFinancedDeviceKioskRoleHolder(String callerPackageName);
 }

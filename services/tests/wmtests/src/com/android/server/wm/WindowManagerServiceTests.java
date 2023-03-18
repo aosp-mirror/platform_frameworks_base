@@ -117,6 +117,20 @@ public class WindowManagerServiceTests extends WindowTestsBase {
             ADD_TRUSTED_DISPLAY);
 
     @Test
+    public void testIsRequestedOrientationMapped() {
+        mWm.setOrientationRequestPolicy(/* isIgnoreOrientationRequestDisabled*/ true,
+                /* fromOrientations */ new int[]{1}, /* toOrientations */ new int[]{2});
+        assertThat(mWm.mapOrientationRequest(1)).isEqualTo(2);
+        assertThat(mWm.mapOrientationRequest(3)).isEqualTo(3);
+
+        // Mapping disabled
+        mWm.setOrientationRequestPolicy(/* isIgnoreOrientationRequestDisabled*/ false,
+                /* fromOrientations */ null, /* toOrientations */ null);
+        assertThat(mWm.mapOrientationRequest(1)).isEqualTo(1);
+        assertThat(mWm.mapOrientationRequest(3)).isEqualTo(3);
+    }
+
+    @Test
     public void testAddWindowToken() {
         IBinder token = mock(IBinder.class);
         mWm.addWindowToken(token, TYPE_TOAST, mDisplayContent.getDisplayId(), null /* options */);

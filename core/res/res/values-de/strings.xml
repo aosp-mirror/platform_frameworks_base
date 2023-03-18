@@ -1257,7 +1257,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps werden gestartet..."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Start wird abgeschlossen..."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um deinen Fingerabdruck einzurichten."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Zum Beenden der Einrichtung Bildschirm deaktivieren"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Zum Beenden Bildschirm deaktivieren"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Deaktivieren"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Mit der Fingerabdruckprüfung fortfahren?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um mit deinem Fingerabdruck deine Identität zu bestätigen."</string>
@@ -2325,6 +2325,12 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> nutzt zum Anzeigen von Inhalten beide Displays"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Gerät ist zu warm"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen ist nicht verfügbar, weil dein Smartphone zu warm ist"</string>
+    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
+    <skip />
+    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
+    <skip />
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Deaktivieren"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> konfiguriert"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Tastaturlayout festgelegt auf <xliff:g id="LAYOUT_1">%s</xliff:g>. Zum Ändern tippen."</string>

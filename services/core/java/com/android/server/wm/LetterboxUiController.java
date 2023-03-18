@@ -447,6 +447,10 @@ final class LetterboxUiController {
 
     @ScreenOrientation
     int overrideOrientationIfNeeded(@ScreenOrientation int candidate) {
+        // In some cases (e.g. Kids app) we need to map the candidate orientation to some other
+        // orientation.
+        candidate = mActivityRecord.mWmService.mapOrientationRequest(candidate);
+
         if (FALSE.equals(mBooleanPropertyAllowOrientationOverride)) {
             return candidate;
         }

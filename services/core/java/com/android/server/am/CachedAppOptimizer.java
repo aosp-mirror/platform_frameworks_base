@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_FROZEN;
+import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_UNFROZEN;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_COMPACTION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FREEZER;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
@@ -66,8 +69,6 @@ public final class CachedAppOptimizer {
     // Flags stored in the DeviceConfig API.
     @VisibleForTesting static final String KEY_USE_COMPACTION = "use_compaction";
     @VisibleForTesting static final String KEY_USE_FREEZER = "use_freezer";
-    @VisibleForTesting static final String KEY_COMPACT_ACTION_1 = "compact_action_1";
-    @VisibleForTesting static final String KEY_COMPACT_ACTION_2 = "compact_action_2";
     @VisibleForTesting static final String KEY_COMPACT_THROTTLE_1 = "compact_throttle_1";
     @VisibleForTesting static final String KEY_COMPACT_THROTTLE_2 = "compact_throttle_2";
     @VisibleForTesting static final String KEY_COMPACT_THROTTLE_3 = "compact_throttle_3";
@@ -99,15 +100,6 @@ public final class CachedAppOptimizer {
     private static final int RSS_ANON_INDEX = 2;
     private static final int RSS_SWAP_INDEX = 3;
 
-    // Phenotype sends int configurations and we map them to the strings we'll use on device,
-    // preventing a weird string value entering the kernel.
-    private static final int COMPACT_ACTION_NONE = 0;
-    private static final int COMPACT_ACTION_FILE = 1;
-    private static final int COMPACT_ACTION_ANON = 2;
-    private static final int COMPACT_ACTION_ALL = 3;
-
-    private static final String COMPACT_ACTION_STRING[] = {"", "file", "anon", "all"};
-
     // Keeps these flags in sync with services/core/jni/com_android_server_am_CachedAppOptimizer.cpp
     private static final int COMPACT_ACTION_FILE_FLAG = 1;
     private static final int COMPACT_ACTION_ANON_FLAG = 2;
@@ -117,11 +109,11 @@ public final class CachedAppOptimizer {
 
     private static final int FREEZE_BINDER_TIMEOUT_MS = 100;
 
+    @VisibleForTesting static final boolean ENABLE_FILE_COMPACT = false;
+
     // Defaults for phenotype flags.
     @VisibleForTesting static final Boolean DEFAULT_USE_COMPACTION = true;
     @VisibleForTesting static final Boolean DEFAULT_USE_FREEZER = true;
-    @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_2 = COMPACT_ACTION_ALL;
-    @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_1 = COMPACT_ACTION_FILE;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_1 = 5_000;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_2 = 10_000;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_3 = 500;
@@ -156,22 +148,15 @@ public final class CachedAppOptimizer {
     @VisibleForTesting
     interface ProcessDependencies {
         long[] getRss(int pid);
-        void performCompaction(CompactAction action, int pid) throws IOException;
+        void performCompaction(CompactProfile action, int pid) throws IOException;
     }
 
     // This indicates the compaction we want to perform
     public enum CompactProfile {
-        SOME, // File compaction
-        FULL // File+anon compaction
-    }
-
-    // Low level actions that can be performed for compaction
-    // currently determined by the compaction profile
-    public enum CompactAction {
         NONE, // No compaction
-        FILE, // File+anon compaction
-        ANON,
-        ALL
+        SOME, // File compaction
+        ANON, // Anon compaction
+        FULL // File+anon compaction
     }
 
     // This indicates the process OOM memory state that initiated the compaction request
@@ -187,6 +172,8 @@ public final class CachedAppOptimizer {
     static final int COMPACT_SYSTEM_MSG = 2;
     static final int SET_FROZEN_PROCESS_MSG = 3;
     static final int REPORT_UNFREEZE_MSG = 4;
+    static final int COMPACT_NATIVE_MSG = 5;
+    static final int UID_FROZEN_STATE_CHANGED_MSG = 6;
 
     // When free swap falls below this percentage threshold any full (file + anon)
     // compactions will be downgraded to file only compactions to reduce pressure
@@ -240,9 +227,6 @@ public final class CachedAppOptimizer {
                         for (String name : properties.getKeyset()) {
                             if (KEY_USE_COMPACTION.equals(name)) {
                                 updateUseCompaction();
-                            } else if (KEY_COMPACT_ACTION_1.equals(name)
-                                    || KEY_COMPACT_ACTION_2.equals(name)) {
-                                updateCompactionActions();
                             } else if (KEY_COMPACT_THROTTLE_1.equals(name)
                                     || KEY_COMPACT_THROTTLE_2.equals(name)
                                     || KEY_COMPACT_THROTTLE_3.equals(name)
@@ -313,12 +297,6 @@ public final class CachedAppOptimizer {
     final Object mPhenotypeFlagLock = new Object();
 
     // Configured by phenotype. Updates from the server take effect immediately.
-    @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting
-    volatile CompactAction mCompactActionSome = compactActionIntToAction(DEFAULT_COMPACT_ACTION_1);
-    @GuardedBy("mPhenotypeFlagLock")
-    @VisibleForTesting
-    volatile CompactAction mCompactActionFull = compactActionIntToAction(DEFAULT_COMPACT_ACTION_2);
     @GuardedBy("mPhenotypeFlagLock")
     @VisibleForTesting volatile long mCompactThrottleSomeSome = DEFAULT_COMPACT_THROTTLE_1;
     @GuardedBy("mPhenotypeFlagLock")
@@ -542,7 +520,6 @@ public final class CachedAppOptimizer {
                 CACHED_APP_FREEZER_ENABLED_URI, false, mSettingsObserver);
         synchronized (mPhenotypeFlagLock) {
             updateUseCompaction();
-            updateCompactionActions();
             updateCompactionThrottles();
             updateCompactStatsdSampleRate();
             updateFreezerStatsdSampleRate();
@@ -587,8 +564,6 @@ public final class CachedAppOptimizer {
         pw.println("CachedAppOptimizer settings");
         synchronized (mPhenotypeFlagLock) {
             pw.println("  " + KEY_USE_COMPACTION + "=" + mUseCompaction);
-            pw.println("  " + KEY_COMPACT_ACTION_1 + "=" + mCompactActionSome);
-            pw.println("  " + KEY_COMPACT_ACTION_2 + "=" + mCompactActionFull);
             pw.println("  " + KEY_COMPACT_THROTTLE_1 + "=" + mCompactThrottleSomeSome);
             pw.println("  " + KEY_COMPACT_THROTTLE_2 + "=" + mCompactThrottleSomeFull);
             pw.println("  " + KEY_COMPACT_THROTTLE_3 + "=" + mCompactThrottleFullSome);
@@ -761,19 +736,9 @@ public final class CachedAppOptimizer {
         return false;
     }
 
-    private CompactAction resolveCompactActionForProfile(CompactProfile profile) {
-        CompactAction action;
-        switch (profile) {
-            case SOME:
-                action = CompactAction.FILE;
-                break;
-            case FULL:
-                action = CompactAction.ALL;
-                break;
-            default:
-                action = CompactAction.NONE;
-        }
-        return action;
+    void compactNative(CompactProfile compactProfile, int pid) {
+        mCompactionHandler.sendMessage(mCompactionHandler.obtainMessage(
+                COMPACT_NATIVE_MSG, pid, compactProfile.ordinal()));
     }
 
     private AggregatedProcessCompactionStats getPerProcessAggregatedCompactStat(
@@ -1051,18 +1016,6 @@ public final class CachedAppOptimizer {
     }
 
     @GuardedBy("mPhenotypeFlagLock")
-    private void updateCompactionActions() {
-        int compactAction1 = DeviceConfig.getInt(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                KEY_COMPACT_ACTION_1, DEFAULT_COMPACT_ACTION_1);
-
-        int compactAction2 = DeviceConfig.getInt(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                KEY_COMPACT_ACTION_2, DEFAULT_COMPACT_ACTION_2);
-
-        mCompactActionSome = compactActionIntToAction(compactAction1);
-        mCompactActionFull = compactActionIntToAction(compactAction2);
-    }
-
-    @GuardedBy("mPhenotypeFlagLock")
     private void updateCompactionThrottles() {
         boolean useThrottleDefaults = false;
         // TODO: improve efficiency by calling DeviceConfig only once for all flags.
@@ -1235,14 +1188,6 @@ public final class CachedAppOptimizer {
         return true;
     }
 
-    static CompactAction compactActionIntToAction(int action) {
-        if (action < 0 || action >= CompactAction.values().length) {
-            return CompactAction.NONE;
-        }
-
-        return CompactAction.values()[action];
-    }
-
     // This will ensure app will be out of the freezer for at least mFreezerDebounceTimeout.
     @GuardedBy("mAm")
     void unfreezeTemporarily(ProcessRecord app, @OomAdjuster.OomAdjReason int reason) {
@@ -1285,6 +1230,13 @@ public final class CachedAppOptimizer {
             if (DEBUG_FREEZER) {
                 Slog.d(TAG_AM, "Cancel freezing " + pid + " " + app.processName);
             }
+        }
+
+        UidRecord uidRec = app.getUidRecord();
+        if (uidRec.isFrozen()) {
+            uidRec.setFrozen(false);
+            mFreezeHandler.removeMessages(UID_FROZEN_STATE_CHANGED_MSG, app);
+            reportOneUidFrozenStateChanged(app.uid, false);
         }
 
         opt.setFreezerOverride(false);
@@ -1416,6 +1368,13 @@ public final class CachedAppOptimizer {
                 opt.setPendingFreeze(false);
             }
 
+            UidRecord uidRec = app.getUidRecord();
+            if (uidRec != null && uidRec.isFrozen()) {
+                uidRec.setFrozen(false);
+                mFreezeHandler.removeMessages(UID_FROZEN_STATE_CHANGED_MSG, app);
+                reportOneUidFrozenStateChanged(app.uid, false);
+            }
+
             mFrozenProcesses.delete(app.getPid());
         }
     }
@@ -1475,8 +1434,10 @@ public final class CachedAppOptimizer {
 
         if (oldAdj <= ProcessList.PERCEPTIBLE_APP_ADJ
                 && (newAdj == ProcessList.PREVIOUS_APP_ADJ || newAdj == ProcessList.HOME_APP_ADJ)) {
-            // Perform a minor compaction when a perceptible app becomes the prev/home app
-            compactApp(app, CompactProfile.SOME, CompactSource.APP, false);
+            if (ENABLE_FILE_COMPACT) {
+                // Perform a minor compaction when a perceptible app becomes the prev/home app
+                compactApp(app, CompactProfile.SOME, CompactSource.APP, false);
+            }
         } else if (oldAdj < ProcessList.CACHED_APP_MIN_ADJ
                 && newAdj >= ProcessList.CACHED_APP_MIN_ADJ
                 && newAdj <= ProcessList.CACHED_APP_MAX_ADJ) {
@@ -1486,20 +1447,34 @@ public final class CachedAppOptimizer {
     }
 
     /**
-     * Applies a compaction downgrade when swap is low.
+     * Computes the final compaction profile to be used which depends on compaction
+     * features enabled and swap usage.
      */
-    CompactProfile downgradeCompactionIfRequired(CompactProfile profile) {
-        // Downgrade compaction under swap memory pressure
+    CompactProfile resolveCompactionProfile(CompactProfile profile) {
         if (profile == CompactProfile.FULL) {
             double swapFreePercent = getFreeSwapPercent();
+            // Downgrade compaction under swap memory pressure
             if (swapFreePercent < COMPACT_DOWNGRADE_FREE_SWAP_THRESHOLD) {
                 profile = CompactProfile.SOME;
+
                 ++mTotalCompactionDowngrades;
                 if (DEBUG_COMPACTION) {
                     Slog.d(TAG_AM,
-                            "Downgraded compaction to file only due to low swap."
+                            "Downgraded compaction to "+ profile +" due to low swap."
                                     + " Swap Free% " + swapFreePercent);
                 }
+            }
+        }
+
+        if (!ENABLE_FILE_COMPACT) {
+            if (profile == CompactProfile.SOME) {
+                profile = CompactProfile.NONE;
+            } else if (profile == CompactProfile.FULL) {
+                profile = CompactProfile.ANON;
+            }
+            if (DEBUG_COMPACTION) {
+                Slog.d(TAG_AM,
+                        "Final compaction profile "+ profile +" due to file compact disabled");
             }
         }
 
@@ -1733,7 +1708,6 @@ public final class CachedAppOptimizer {
                     ProcessRecord proc;
                     final ProcessCachedOptimizerRecord opt;
                     int pid;
-                    CompactAction resolvedAction;
                     final String name;
                     CompactProfile lastCompactProfile;
                     long lastCompactTime;
@@ -1811,17 +1785,24 @@ public final class CachedAppOptimizer {
                     }
 
                     CompactProfile resolvedProfile =
-                            downgradeCompactionIfRequired(requestedProfile);
-                    resolvedAction = resolveCompactActionForProfile(resolvedProfile);
+                            resolveCompactionProfile(requestedProfile);
+                    if (resolvedProfile == CompactProfile.NONE) {
+                        // No point on issuing compaction call as we don't want to compact.
+                        if (DEBUG_COMPACTION) {
+                            Slog.d(TAG_AM, "Resolved no compaction for "+ name +
+                                    " requested profile="+requestedProfile);
+                        }
+                        return;
+                    }
 
                     try {
                         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                                "Compact " + resolvedAction.name() + ": " + name
+                                "Compact " + resolvedProfile.name() + ": " + name
                                         + " lastOomAdjReason: " + oomAdjReason
                                         + " source: " + compactSource.name());
                         long zramUsedKbBefore = getUsedZramMemory();
                         long startCpuTime = threadCpuTimeNs();
-                        mProcessDependencies.performCompaction(resolvedAction, pid);
+                        mProcessDependencies.performCompaction(resolvedProfile, pid);
                         long endCpuTime = threadCpuTimeNs();
                         long[] rssAfter = mProcessDependencies.getRss(pid);
                         long end = SystemClock.uptimeMillis();
@@ -1877,7 +1858,7 @@ public final class CachedAppOptimizer {
                                 return;
                         }
                         EventLog.writeEvent(EventLogTags.AM_COMPACT, pid, name,
-                                resolvedAction.name(), rssBefore[RSS_TOTAL_INDEX],
+                                resolvedProfile.name(), rssBefore[RSS_TOTAL_INDEX],
                                 rssBefore[RSS_FILE_INDEX], rssBefore[RSS_ANON_INDEX],
                                 rssBefore[RSS_SWAP_INDEX], deltaTotalRss, deltaFileRss,
                                 deltaAnonRss, deltaSwapRss, time, lastCompactProfile.name(),
@@ -1907,8 +1888,35 @@ public final class CachedAppOptimizer {
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 }
+                case COMPACT_NATIVE_MSG: {
+                    int pid = msg.arg1;
+                    CompactProfile compactProfile = CompactProfile.values()[msg.arg2];
+                    Slog.d(TAG_AM,
+                            "Performing native compaction for pid=" + pid
+                                    + " type=" + compactProfile.name());
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "compactSystem");
+                    try {
+                        mProcessDependencies.performCompaction(compactProfile, pid);
+                    } catch (Exception e) {
+                        Slog.d(TAG_AM, "Failed compacting native pid= " + pid);
+                    }
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    break;
+                }
             }
         }
+    }
+
+    private void reportOneUidFrozenStateChanged(int uid, boolean frozen) {
+        final int[] uids = new int[1];
+        final int[] frozenStates = new int[1];
+
+        uids[0] = uid;
+        frozenStates[0] = frozen ? UID_FROZEN_STATE_FROZEN : UID_FROZEN_STATE_UNFROZEN;
+
+        Slog.d(TAG_AM, "reportOneUidFrozenStateChanged uid " + uid + " frozen = " + frozen);
+
+        mAm.reportUidFrozenStateChanged(uids, frozenStates);
     }
 
     private final class FreezeHandler extends Handler implements
@@ -1950,6 +1958,10 @@ public final class CachedAppOptimizer {
                     int reason = obj.second;
 
                     reportUnfreeze(pid, frozenDuration, processName, reason);
+                    break;
+                case UID_FROZEN_STATE_CHANGED_MSG:
+                    ProcessRecord proc = (ProcessRecord) msg.obj;
+                    reportOneUidFrozenStateChanged(proc.uid, true);
                     break;
                 default:
                     return;
@@ -2036,6 +2048,13 @@ public final class CachedAppOptimizer {
 
                 unfrozenDuration = opt.getFreezeUnfreezeTime() - unfreezeTime;
                 frozen = opt.isFrozen();
+
+                final UidRecord uidRec = proc.getUidRecord();
+                if (frozen && uidRec.areAllProcessesFrozen()) {
+                    uidRec.setFrozen(true);
+                    mFreezeHandler.sendMessage(mFreezeHandler.obtainMessage(
+                            UID_FROZEN_STATE_CHANGED_MSG, proc));
+                }
             }
 
             if (!frozen) {
@@ -2170,14 +2189,14 @@ public final class CachedAppOptimizer {
 
         // Compact process.
         @Override
-        public void performCompaction(CompactAction action, int pid) throws IOException {
+        public void performCompaction(CompactProfile profile, int pid) throws IOException {
             mPidCompacting = pid;
-            if (action == CompactAction.ALL) {
-                    compactProcess(pid, COMPACT_ACTION_FILE_FLAG | COMPACT_ACTION_ANON_FLAG);
-            } else if (action == CompactAction.FILE) {
-                    compactProcess(pid, COMPACT_ACTION_FILE_FLAG);
-            } else if (action == CompactAction.ANON) {
-                    compactProcess(pid, COMPACT_ACTION_ANON_FLAG);
+            if (profile == CompactProfile.FULL) {
+                compactProcess(pid, COMPACT_ACTION_FILE_FLAG | COMPACT_ACTION_ANON_FLAG);
+            } else if (profile == CompactProfile.SOME) {
+                compactProcess(pid, COMPACT_ACTION_FILE_FLAG);
+            } else if (profile == CompactProfile.ANON) {
+                compactProcess(pid, COMPACT_ACTION_ANON_FLAG);
             }
             mPidCompacting = -1;
         }

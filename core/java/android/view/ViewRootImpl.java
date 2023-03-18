@@ -417,7 +417,8 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mUseBLASTAdapter;
     private boolean mForceDisableBLAST;
 
-    private boolean mFastScrollSoundEffectsEnabled;
+    /** lazily-initialized in getAudioManager() */
+    private boolean mFastScrollSoundEffectsEnabled = false;
 
     /**
      * Signals that compatibility booleans have been initialized according to
@@ -1028,8 +1029,6 @@ public final class ViewRootImpl implements ViewParent,
 
         loadSystemProperties();
         mImeFocusController = new ImeFocusController(this);
-        AudioManager audioManager = mContext.getSystemService(AudioManager.class);
-        mFastScrollSoundEffectsEnabled = audioManager.areNavigationRepeatSoundEffectsEnabled();
 
         mScrollCaptureRequestTimeout = SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS;
         mOnBackInvokedDispatcher = new WindowOnBackInvokedDispatcher(context);
@@ -8340,6 +8339,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         if (mAudioManager == null) {
             mAudioManager = (AudioManager) mView.getContext().getSystemService(Context.AUDIO_SERVICE);
+            mFastScrollSoundEffectsEnabled = mAudioManager.areNavigationRepeatSoundEffectsEnabled();
         }
         return mAudioManager;
     }
@@ -9171,7 +9171,7 @@ public final class ViewRootImpl implements ViewParent,
      * Represents a pending input event that is waiting in a queue.
      *
      * Input events are processed in serial order by the timestamp specified by
-     * {@link InputEvent#getEventTimeNano()}.  In general, the input dispatcher delivers
+     * {@link InputEvent#getEventTimeNanos()}.  In general, the input dispatcher delivers
      * one input event to the application at a time and waits for the application
      * to finish handling it before delivering the next one.
      *
@@ -9361,7 +9361,7 @@ public final class ViewRootImpl implements ViewParent,
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.traceBegin(Trace.TRACE_TAG_VIEW, "deliverInputEvent src=0x"
                     + Integer.toHexString(q.mEvent.getSource()) + " eventTimeNano="
-                    + q.mEvent.getEventTimeNano() + " id=0x"
+                    + q.mEvent.getEventTimeNanos() + " id=0x"
                     + Integer.toHexString(q.mEvent.getId()));
         }
         try {

@@ -2128,7 +2128,7 @@ public final class TvInputManagerService extends SystemService {
         public void notifyTvMessage(IBinder sessionToken, int type, Bundle data, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                    userId, "timeShiftEnablePositionTracking");
+                    userId, "notifyTvmessage");
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
@@ -2136,7 +2136,28 @@ public final class TvInputManagerService extends SystemService {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId)
                                 .notifyTvMessage(type, data);
                     } catch (RemoteException | SessionNotFoundException e) {
-                        Slog.e(TAG, "error in timeShiftEnablePositionTracking", e);
+                        Slog.e(TAG, "error in notifyTvMessage", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void setTvMessageEnabled(IBinder sessionToken, int type, boolean enabled,
+                int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "setTvMessageEnabled");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .setTvMessageEnabled(type, enabled);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in setTvMessageEnabled", e);
                     }
                 }
             } finally {

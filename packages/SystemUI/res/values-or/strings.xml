@@ -871,7 +871,8 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{#ଟି ନିୟନ୍ତ୍ରଣ ଯୋଗ କରାଯାଇଛି।}other{#ଟି ନିୟନ୍ତ୍ରଣ ଯୋଗ କରାଯାଇଛି।}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"କାଢ଼ି ଦିଆଯାଇଛି"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g>କୁ ଯୋଗ କରିବେ?"</string>
-    <string name="controls_panel_authorization" msgid="4665218066461350247">"ଏଠାରେ କେଉଁ ନିୟନ୍ତ୍ରଣ ଏବଂ ବିଷୟବସ୍ତୁ ଦେଖାଯିବ ତାହା <xliff:g id="APPNAME">%s</xliff:g> ବାଛିପାରିବ।"</string>
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
+    <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> ପାଇଁ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକୁ କାଢ଼ି ଦେବେ?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"ପସନ୍ଦ କରାଯାଇଛି"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"ପସନ୍ଦ କରାଯାଇଛି, ସ୍ଥିତି <xliff:g id="NUMBER">%d</xliff:g>"</string>

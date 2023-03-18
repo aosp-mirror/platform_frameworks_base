@@ -19,7 +19,6 @@ package com.android.server.am;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 
 import static com.android.server.am.ActivityManagerService.Injector;
-import static com.android.server.am.CachedAppOptimizer.compactActionIntToAction;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -155,12 +154,6 @@ public final class CachedAppOptimizerTest {
         synchronized (mCachedAppOptimizerUnderTest.mPhenotypeFlagLock) {
             assertThat(mCachedAppOptimizerUnderTest.useCompaction()).isEqualTo(
                     CachedAppOptimizer.DEFAULT_USE_COMPACTION);
-            assertThat(mCachedAppOptimizerUnderTest.mCompactActionSome)
-                    .isEqualTo(
-                            compactActionIntToAction(CachedAppOptimizer.DEFAULT_COMPACT_ACTION_1));
-            assertThat(mCachedAppOptimizerUnderTest.mCompactActionFull)
-                    .isEqualTo(
-                            compactActionIntToAction(CachedAppOptimizer.DEFAULT_COMPACT_ACTION_2));
             assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleSomeSome).isEqualTo(
                     CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_1);
             assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleSomeFull).isEqualTo(
@@ -209,12 +202,6 @@ public final class CachedAppOptimizerTest {
         assertThat(CachedAppOptimizer.DEFAULT_USE_COMPACTION).isTrue();
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 CachedAppOptimizer.KEY_USE_COMPACTION, "true", false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                CachedAppOptimizer.KEY_COMPACT_ACTION_1,
-                Integer.toString((CachedAppOptimizer.DEFAULT_COMPACT_ACTION_1 + 1 % 4) + 1), false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                CachedAppOptimizer.KEY_COMPACT_ACTION_2,
-                Integer.toString((CachedAppOptimizer.DEFAULT_COMPACT_ACTION_2 + 1 % 4) + 1), false);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 CachedAppOptimizer.KEY_COMPACT_THROTTLE_1,
                 Long.toString(CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_1 + 1), false);
@@ -266,12 +253,6 @@ public final class CachedAppOptimizerTest {
         assertThat(mCachedAppOptimizerUnderTest.useCompaction()).isTrue();
         assertThat(mCachedAppOptimizerUnderTest.mCachedAppOptimizerThread.isAlive()).isTrue();
 
-        assertThat(mCachedAppOptimizerUnderTest.mCompactActionSome)
-                .isEqualTo(compactActionIntToAction(
-                        (CachedAppOptimizer.DEFAULT_COMPACT_ACTION_1 + 1 % 4) + 1));
-        assertThat(mCachedAppOptimizerUnderTest.mCompactActionFull)
-                .isEqualTo(compactActionIntToAction(
-                        (CachedAppOptimizer.DEFAULT_COMPACT_ACTION_2 + 1 % 4) + 1));
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleSomeSome).isEqualTo(
                 CachedAppOptimizer.DEFAULT_COMPACT_THROTTLE_1 + 1);
         assertThat(mCachedAppOptimizerUnderTest.mCompactThrottleSomeFull).isEqualTo(
@@ -401,72 +382,6 @@ public final class CachedAppOptimizerTest {
 
         // DeviceConfig treats invalid value as false
         assertThat(mCachedAppOptimizerUnderTest.useFreezer()).isFalse();
-    }
-
-    @Test
-    public void compactAction_listensToDeviceConfigChanges() throws InterruptedException {
-        mCachedAppOptimizerUnderTest.init();
-
-        // When we override new values for the compaction action with reasonable values...
-
-        // There are four possible values for compactAction[Some|Full].
-        for (int i = 1; i < 5; i++) {
-            mCountDown = new CountDownLatch(2);
-            int expectedSome = (CachedAppOptimizer.DEFAULT_COMPACT_ACTION_1 + i) % 4 + 1;
-            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                    CachedAppOptimizer.KEY_COMPACT_ACTION_1, Integer.toString(expectedSome), false);
-            int expectedFull = (CachedAppOptimizer.DEFAULT_COMPACT_ACTION_2 + i) % 4 + 1;
-            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                    CachedAppOptimizer.KEY_COMPACT_ACTION_2, Integer.toString(expectedFull), false);
-            assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
-
-            // Then the updates are reflected in the flags.
-            synchronized (mCachedAppOptimizerUnderTest.mPhenotypeFlagLock) {
-                assertThat(mCachedAppOptimizerUnderTest.mCompactActionSome)
-                        .isEqualTo(compactActionIntToAction(expectedSome));
-                assertThat(mCachedAppOptimizerUnderTest.mCompactActionFull)
-                        .isEqualTo(compactActionIntToAction(expectedFull));
-            }
-        }
-    }
-
-    @Test
-    public void compactAction_listensToDeviceConfigChangesBadValues() throws InterruptedException {
-        mCachedAppOptimizerUnderTest.init();
-
-        // When we override new values for the compaction action with bad values ...
-        mCountDown = new CountDownLatch(2);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                CachedAppOptimizer.KEY_COMPACT_ACTION_1, "foo", false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                CachedAppOptimizer.KEY_COMPACT_ACTION_2, "foo", false);
-        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
-
-        synchronized (mCachedAppOptimizerUnderTest.mPhenotypeFlagLock) {
-            // Then the default values are reflected in the flag
-            assertThat(mCachedAppOptimizerUnderTest.mCompactActionSome)
-                    .isEqualTo(
-                            compactActionIntToAction(CachedAppOptimizer.DEFAULT_COMPACT_ACTION_1));
-            assertThat(mCachedAppOptimizerUnderTest.mCompactActionFull)
-                    .isEqualTo(
-                            compactActionIntToAction(CachedAppOptimizer.DEFAULT_COMPACT_ACTION_2));
-        }
-
-        mCountDown = new CountDownLatch(2);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                CachedAppOptimizer.KEY_COMPACT_ACTION_1, "", false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                CachedAppOptimizer.KEY_COMPACT_ACTION_2, "", false);
-        assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
-
-        synchronized (mCachedAppOptimizerUnderTest.mPhenotypeFlagLock) {
-            assertThat(mCachedAppOptimizerUnderTest.mCompactActionSome)
-                    .isEqualTo(
-                            compactActionIntToAction(CachedAppOptimizer.DEFAULT_COMPACT_ACTION_1));
-            assertThat(mCachedAppOptimizerUnderTest.mCompactActionFull)
-                    .isEqualTo(
-                            compactActionIntToAction(CachedAppOptimizer.DEFAULT_COMPACT_ACTION_2));
-        }
     }
 
     @Test
@@ -1108,14 +1023,17 @@ public final class CachedAppOptimizerTest {
 
         mCachedAppOptimizerUnderTest.mLastCompactionStats.clear();
 
-        // We force a some compaction
-        mCachedAppOptimizerUnderTest.compactApp(processRecord,
-                CachedAppOptimizer.CompactProfile.SOME, CachedAppOptimizer.CompactSource.APP, true);
-        waitForHandler();
-        // then process is compacted.
-        CachedAppOptimizer.CompactProfile executedCompactProfile =
-                processRecord.mOptRecord.getLastCompactProfile();
-        assertThat(executedCompactProfile).isEqualTo(CachedAppOptimizer.CompactProfile.SOME);
+        if (CachedAppOptimizer.ENABLE_FILE_COMPACT) {
+            // We force a some compaction
+            mCachedAppOptimizerUnderTest.compactApp(processRecord,
+                    CachedAppOptimizer.CompactProfile.SOME, CachedAppOptimizer.CompactSource.APP,
+                    true);
+            waitForHandler();
+            // then process is compacted.
+            CachedAppOptimizer.CompactProfile executedCompactProfile =
+                    processRecord.mOptRecord.getLastCompactProfile();
+            assertThat(executedCompactProfile).isEqualTo(CachedAppOptimizer.CompactProfile.SOME);
+        }
     }
 
     private void setFlag(String key, String value, boolean defaultValue) throws Exception {
@@ -1192,7 +1110,7 @@ public final class CachedAppOptimizerTest {
         }
 
         @Override
-        public void performCompaction(CachedAppOptimizer.CompactAction action, int pid)
+        public void performCompaction(CachedAppOptimizer.CompactProfile profile, int pid)
                 throws IOException {
             mRss = mRssAfterCompaction;
         }

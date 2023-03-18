@@ -1328,7 +1328,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 synchronized (mService) {
                     BroadcastProcessQueue leaf = mProcessQueues.get(uid);
                     while (leaf != null) {
-                        leaf.setProcessCached(cached);
+                        // Update internal state by refreshing values previously
+                        // read from any known running process
+                        leaf.setProcess(leaf.app);
                         updateQueueDeferred(leaf);
                         updateRunnableList(leaf);
                         leaf = leaf.processNameNext;

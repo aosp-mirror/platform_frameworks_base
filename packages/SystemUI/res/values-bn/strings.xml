@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"ইউএসবি চালু করুন"</string>
     <string name="learn_more" msgid="4690632085667273811">"আরও জানুন"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"স্ক্রিনশট নিন"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"এক্সটেন্ড আনলকের সুবিধা বন্ধ করা আছে"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"একটি ছবি পাঠানো হয়েছে"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"অফিস প্রোফাইলে স্ক্রিনশট সেভ করা হচ্ছে…"</string>
@@ -871,7 +870,8 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{#টি কন্ট্রোল যোগ করা হয়েছে।}one{#টি কন্ট্রোল যোগ করা হয়েছে।}other{#টি কন্ট্রোল যোগ করা হয়েছে।}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"সরানো হয়েছে"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> যোগ করবেন?"</string>
-    <string name="controls_panel_authorization" msgid="4665218066461350247">"এখানে কোন কন্ট্রোল ও কন্টেন্ট দেখানো হবে তা <xliff:g id="APPNAME">%s</xliff:g> বেছে নিতে পারবে।"</string>
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
+    <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g>-এর জন্য নিয়ন্ত্রণ সরিয়ে দেবেন?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"পছন্দসই হিসেবে চিহ্নিত করেছেন"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"পছন্দসই হিসেবে চিহ্নিত করেছেন, অবস্থান <xliff:g id="NUMBER">%d</xliff:g>"</string>

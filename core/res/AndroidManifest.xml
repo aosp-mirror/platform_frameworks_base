@@ -4038,8 +4038,7 @@
         android:description="@string/permdesc_setWallpaperHints"
         android:protectionLevel="normal" />
 
-    <!-- Allow the app to read the system wallpaper image without
-        holding the READ_EXTERNAL_STORAGE permission.
+    <!-- Allow the app to read the system and lock wallpaper images.
         <p>Not for use by third-party applications.
         @hide
         @SystemApi
@@ -7434,6 +7433,13 @@
          <p>Protection level: internal|role
     -->
     <permission android:name="android.permission.EXECUTE_APP_ACTION"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to display its suggestions using the autofill framework.
+         <p>For now, this permission is only granted to the Browser application.
+         <p>Protection level: internal|role
+    -->
+    <permission android:name="android.permission.PROVIDE_OWN_AUTOFILL_SUGGESTIONS"
                 android:protectionLevel="internal|role" />
 
     <!-- @SystemApi Allows an application to create virtual devices in VirtualDeviceManager.

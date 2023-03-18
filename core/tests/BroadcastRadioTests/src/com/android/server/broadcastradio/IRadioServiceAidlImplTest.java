@@ -24,7 +24,6 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,7 +34,6 @@ import android.hardware.radio.ICloseHandle;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.ServiceManager;
 
@@ -58,7 +56,6 @@ public final class IRadioServiceAidlImplTest extends ExtendedRadioMockitoTestCas
             "android.hardware.broadcastradio.IBroadcastRadio/amfm";
     private static final String DAB_SERVICE_NAME =
             "android.hardware.broadcastradio.IBroadcastRadio/dab";
-    private static final int TARGET_SDK_VERSION = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
     private IRadioServiceAidlImpl mAidlImpl;
 
@@ -86,7 +83,7 @@ public final class IRadioServiceAidlImplTest extends ExtendedRadioMockitoTestCas
         doNothing().when(mServiceMock).enforcePolicyAccess();
 
         when(mHalMock.listModules()).thenReturn(List.of(mModuleMock));
-        when(mHalMock.openSession(anyInt(), any(), anyBoolean(), any(), eq(TARGET_SDK_VERSION)))
+        when(mHalMock.openSession(anyInt(), any(), anyBoolean(), any()))
                 .thenReturn(mTunerMock);
         when(mHalMock.addAnnouncementListener(any(), any())).thenReturn(mICloseHandle);
 
@@ -118,7 +115,7 @@ public final class IRadioServiceAidlImplTest extends ExtendedRadioMockitoTestCas
     @Test
     public void openTuner_forAidlImpl() throws Exception {
         ITuner tuner = mAidlImpl.openTuner(/* moduleId= */ 0, mBandConfigMock,
-                /* withAudio= */ true, mTunerCallbackMock, TARGET_SDK_VERSION);
+                /* withAudio= */ true, mTunerCallbackMock);
 
         assertWithMessage("Tuner opened in AIDL HAL")
                 .that(tuner).isEqualTo(mTunerMock);
@@ -128,7 +125,7 @@ public final class IRadioServiceAidlImplTest extends ExtendedRadioMockitoTestCas
     public void openTuner_withNullCallbackForAidlImpl_fails() throws Exception {
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
                 () -> mAidlImpl.openTuner(/* moduleId= */ 0, mBandConfigMock,
-                        /* withAudio= */ true, /* callback= */ null, TARGET_SDK_VERSION));
+                        /* withAudio= */ true, /* callback= */ null));
 
         assertWithMessage("Exception for opening tuner with null callback")
                 .that(thrown).hasMessageThat().contains("Callback must not be null");

@@ -1257,6 +1257,7 @@ package android.app.admin {
     method @Nullable public CharSequence getDeviceOwnerOrganizationName();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.UserHandle getDeviceOwnerUser();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public android.app.admin.DevicePolicyState getDevicePolicyState();
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public String getFinancedDeviceKioskRoleHolder();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_ADMIN_POLICY}) public java.util.List<java.lang.String> getPermittedAccessibilityServices(int);
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_ADMIN_POLICY}) public java.util.List<java.lang.String> getPermittedInputMethodsForCurrentUser();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public java.util.List<android.os.UserHandle> getPolicyManagedProfiles(@NonNull android.os.UserHandle);
@@ -5966,6 +5967,7 @@ package android.hardware.soundtrigger {
     method @Nullable public android.media.AudioFormat getCaptureFormat();
     method public int getCaptureSession();
     method public byte[] getData();
+    method public long getHalEventReceivedMillis();
     method public boolean isCaptureAvailable();
   }
 
@@ -13041,6 +13043,7 @@ package android.service.voice {
     method @Nullable public android.media.AudioFormat getCaptureAudioFormat();
     method @Nullable public byte[] getData();
     method public int getDataFormat();
+    method public long getHalEventReceivedMillis();
     method @Nullable public android.service.voice.HotwordDetectedResult getHotwordDetectedResult();
     method @NonNull public java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra> getKeyphraseRecognitionExtras();
     method @Deprecated @Nullable public byte[] getTriggerAudio();
@@ -13107,12 +13110,14 @@ package android.service.voice {
     method public int describeContents();
     method public int getAudioChannel();
     method @NonNull public java.util.List<android.service.voice.HotwordAudioStream> getAudioStreams();
+    method public int getBackgroundAudioPower();
     method public int getConfidenceLevel();
     method @NonNull public android.service.voice.DetectedPhrase getDetectedPhrase();
     method @NonNull public android.os.PersistableBundle getExtras();
     method public int getHotwordDurationMillis();
     method public int getHotwordOffsetMillis();
     method @Deprecated public int getHotwordPhraseId();
+    method public static int getMaxBackgroundAudioPower();
     method public static int getMaxBundleSize();
     method @Deprecated public static int getMaxHotwordPhraseId();
     method public static int getMaxScore();
@@ -13123,6 +13128,7 @@ package android.service.voice {
     method public boolean isHotwordDetectionPersonalized();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int AUDIO_CHANNEL_UNSET = -1; // 0xffffffff
+    field public static final int BACKGROUND_AUDIO_POWER_UNSET = -1; // 0xffffffff
     field public static final int CONFIDENCE_LEVEL_HIGH = 5; // 0x5
     field public static final int CONFIDENCE_LEVEL_LOW = 1; // 0x1
     field public static final int CONFIDENCE_LEVEL_LOW_MEDIUM = 2; // 0x2
@@ -13142,6 +13148,7 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordDetectedResult build();
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setAudioChannel(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setAudioStreams(@NonNull java.util.List<android.service.voice.HotwordAudioStream>);
+    method @NonNull public android.service.voice.HotwordDetectedResult.Builder setBackgroundAudioPower(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setConfidenceLevel(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setDetectedPhrase(@NonNull android.service.voice.DetectedPhrase);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setExtras(@NonNull android.os.PersistableBundle);

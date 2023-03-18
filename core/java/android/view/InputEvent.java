@@ -207,7 +207,7 @@ public abstract class InputEvent implements Parcelable {
      *
      * @hide
      */
-    public abstract long getEventTimeNano();
+    public abstract long getEventTimeNanos();
 
     /**
      * Marks the input event as being canceled.
