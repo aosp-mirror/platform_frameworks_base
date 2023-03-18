@@ -58,12 +58,14 @@ private const val MIN_DURATION_ACTIVE_AFTER_INACTIVE_ANIMATION = 130L
 private const val MIN_DURATION_CANCELLED_ANIMATION = 200L
 private const val MIN_DURATION_COMMITTED_ANIMATION = 120L
 private const val MIN_DURATION_INACTIVE_BEFORE_FLUNG_ANIMATION = 50L
+private const val MIN_DURATION_FLING_ANIMATION = 160L
 
 private const val MIN_DURATION_ENTRY_TO_ACTIVE_CONSIDERED_AS_FLING = 100L
 private const val MIN_DURATION_INACTIVE_TO_ACTIVE_CONSIDERED_AS_FLING = 400L
 
 private const val FAILSAFE_DELAY_MS = 350L
-private const val POP_ON_FLING_DELAY = 140L
+private const val POP_ON_FLING_DELAY = 50L
+private const val POP_ON_FLING_SCALE = 3f
 
 internal val VIBRATE_ACTIVATED_EFFECT =
         VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
@@ -230,7 +232,12 @@ class BackPanelController internal constructor(
                 updateArrowState(GestureState.GONE)
             }
 
-    private val playAnimationThenSetGoneOnAlphaEnd = Runnable { playAnimationThenSetGoneEnd() }
+    private val onAlphaEndSetGoneStateListener = DelayedOnAnimationEndListener(mainHandler, 0L) {
+        updateRestingArrowDimens()
+        if (!mView.addAnimationEndListener(mView.backgroundAlpha, onEndSetGoneStateListener)) {
+            scheduleFailsafe()
+        }
+    }
 
     // Minimum of the screen's width or the predefined threshold
     private var fullyStretchedThreshold = 0f
@@ -357,7 +364,7 @@ class BackPanelController internal constructor(
         mView.cancelAnimations()
         mainHandler.removeCallbacks(onEndSetCommittedStateListener.runnable)
         mainHandler.removeCallbacks(onEndSetGoneStateListener.runnable)
-        mainHandler.removeCallbacks(playAnimationThenSetGoneOnAlphaEnd)
+        mainHandler.removeCallbacks(onAlphaEndSetGoneStateListener.runnable)
     }
 
     /**
@@ -509,7 +516,7 @@ class BackPanelController internal constructor(
         val maxYOffset = (mView.height - params.entryIndicator.backgroundDimens.height) / 2f
         val rubberbandAmount = 15f
         val yProgress = MathUtils.saturate(yTranslation / (maxYOffset * rubberbandAmount))
-        val yPosition = params.translationInterpolator.getInterpolation(yProgress) *
+        val yPosition = params.verticalTranslationInterpolator.getInterpolation(yProgress) *
                 maxYOffset *
                 sign(yOffset)
         mView.animateVertically(yPosition)
@@ -520,10 +527,9 @@ class BackPanelController internal constructor(
      * the arrow is fully stretched (between 0.0 - 1.0f)
      */
     private fun fullScreenProgress(xTranslation: Float): Float {
-        return MathUtils.saturate(
-                (xTranslation - previousXTranslationOnActiveOffset) /
-                        (fullyStretchedThreshold - previousXTranslationOnActiveOffset)
-        )
+        val progress = abs((xTranslation - previousXTranslationOnActiveOffset) /
+                (fullyStretchedThreshold - previousXTranslationOnActiveOffset))
+        return MathUtils.saturate(progress)
     }
 
     /**
@@ -540,7 +546,7 @@ class BackPanelController internal constructor(
 
     private fun stretchActiveBackIndicator(progress: Float) {
         mView.setStretch(
-                horizontalTranslationStretchAmount = params.translationInterpolator
+                horizontalTranslationStretchAmount = params.horizontalTranslationInterpolator
                         .getInterpolation(progress),
                 arrowStretchAmount = params.arrowAngleInterpolator.getInterpolation(progress),
                 backgroundWidthStretchAmount = params.activeWidthInterpolator
@@ -637,20 +643,6 @@ class BackPanelController internal constructor(
         val isPastFlingVelocityThreshold =
                 flingVelocity > ViewConfiguration.get(context).scaledMinimumFlingVelocity
         return flingDistance > minFlingDistance && isPastFlingVelocityThreshold
-    }
-
-    private fun playHorizontalAnimationThen(onEnd: DelayedOnAnimationEndListener) {
-        updateRestingArrowDimens()
-        if (!mView.addAnimationEndListener(mView.horizontalTranslation, onEnd)) {
-            scheduleFailsafe()
-        }
-    }
-
-    private fun playAnimationThenSetGoneEnd() {
-        updateRestingArrowDimens()
-        if (!mView.addAnimationEndListener(mView.backgroundAlpha, onEndSetGoneStateListener)) {
-            scheduleFailsafe()
-        }
     }
 
     private fun playWithBackgroundWidthAnimation(
@@ -912,18 +904,25 @@ class BackPanelController internal constructor(
                 updateRestingArrowDimens()
             }
             GestureState.FLUNG -> {
-                mainHandler.postDelayed(POP_ON_FLING_DELAY) { mView.popScale(1.9f) }
-                playHorizontalAnimationThen(onEndSetCommittedStateListener)
+                mainHandler.postDelayed(POP_ON_FLING_DELAY) { mView.popScale(POP_ON_FLING_SCALE) }
+                updateRestingArrowDimens()
+                mainHandler.postDelayed(onEndSetCommittedStateListener.runnable,
+                        MIN_DURATION_FLING_ANIMATION)
             }
             GestureState.COMMITTED -> {
+                // In most cases, animating between states is handled via `updateRestingArrowDimens`
+                // which plays an animation immediately upon state change. Some animations however
+                // occur after a delay upon state change and these animations may be independent
+                // or non-sequential from the state change animation. `postDelayed` is used to
+                // manually play these kinds of animations in parallel.
                 if (previousState == GestureState.FLUNG) {
-                    playAnimationThenSetGoneEnd()
+                    updateRestingArrowDimens()
+                    mainHandler.postDelayed(onEndSetGoneStateListener.runnable,
+                            MIN_DURATION_COMMITTED_ANIMATION)
                 } else {
-                    mView.popScale(3f)
-                    mainHandler.postDelayed(
-                            playAnimationThenSetGoneOnAlphaEnd,
-                            MIN_DURATION_COMMITTED_ANIMATION
-                    )
+                    mView.popScale(POP_ON_FLING_SCALE)
+                    mainHandler.postDelayed(onAlphaEndSetGoneStateListener.runnable,
+                            MIN_DURATION_COMMITTED_ANIMATION)
                 }
             }
             GestureState.CANCELLED -> {
