@@ -2,7 +2,7 @@ BasedOnStyle: Google
 
 AccessModifierOffset: -4
 AlignOperands: false
-AllowShortFunctionsOnASingleLine: Inline
+AllowShortFunctionsOnASingleLine: Empty
 AlwaysBreakBeforeMultilineStrings: false
 ColumnLimit: 100
 CommentPragmas: NOLINT:.*
