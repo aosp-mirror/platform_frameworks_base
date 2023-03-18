@@ -289,7 +289,7 @@
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ: บิตต่อตัวอย่าง"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"โหมดช่องสัญญาณเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ: โหมดช่องสัญญาณ"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"ตัวแปลงรหัสเสียงบลูทูธที่ใช้ LDAC: คุณภาพการเล่น"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"ตัวแปลงสัญญาณเสียงบลูทูธที่ใช้ LDAC: คุณภาพการเล่น"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"ทริกเกอร์การเลือกตัวแปลงรหัส LDAC\nเสียงบลูทูธ: คุณภาพการเล่น"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"สตรีมมิง: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"DNS ส่วนตัว"</string>

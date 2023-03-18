@@ -268,7 +268,7 @@
     <string name="mock_location_app_set" msgid="4706722469342913843">"برنامه موقعیت مکانی ساختگی: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"شبکه"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"گواهینامه نمایش بی‌سیم"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏فعال کردن گزارش‌گیری طولانی Wi‑Fi"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏فعال کردن گزارش‌گیری مفصل Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏محدود کردن اسکن کردن Wi‑Fi"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"‏تصادفی‌سازی MAC غیرپایای Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"داده تلفن همراه همیشه فعال باشد"</string>
@@ -380,7 +380,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"‏پرداز زدن HWUI نمایه"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"‏فعال کردن لایه‌های اشکال‌زدایی GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏مجاز کردن بارگیری لایه‌های اشکال‌زدایی GPU برای برنامه‌های اشکا‌ل‌زدایی"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"فعال کردن گزارش طولانی فروشنده"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"فعال کردن گزارش‌گیری مفصل فروشنده"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"شامل گزارشات اشکال تکمیلی ورود به سیستم فروشنده ویژه دستگاه می‌شود که ممکن است دربرگیرنده اطلاعات خصوصی، استفاده بیشتر از باتری، و/یا استفاده بیشتر از فضای ذخیره‌سازی باشد."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"مقیاس پویانمایی پنجره"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"مقیاس پویانمایی انتقالی"</string>
