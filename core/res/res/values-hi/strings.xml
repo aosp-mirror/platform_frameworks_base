@@ -2325,6 +2325,12 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>, कॉन्टेंट दिखाने के लिए दोनों डिसप्ले का इस्तेमाल कर रहा है"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"आपका फ़ोन बहुत गर्म हो गया है"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ड्यूअल स्क्रीन की सुविधा अभी उपलब्ध नहीं है, क्योंकि आपका फ़ोन बहुत गर्म हो रहा है"</string>
+    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
+    <skip />
+    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
+    <skip />
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"बंद करें"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> कॉन्फ़िगर किया गया"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"कीबोर्ड का लेआउट <xliff:g id="LAYOUT_1">%s</xliff:g> पर सेट कर दिया गया है. बदलने के लिए टैप करें."</string>
