@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"อินเทอร์เฟซผู้ใช้ของระบบ"</string>
+    <string name="app_label" msgid="4811759950673118541">"UI ของระบบ"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"เปิดโหมดประหยัดแบตเตอรี่ใช่ไหม"</string>
     <string name="battery_low_description" msgid="3282977755476423966">"คุณมีแบตเตอรี่เหลืออยู่ <xliff:g id="PERCENTAGE">%s</xliff:g> โหมดประหยัดแบตเตอรี่จะเปิดธีมมืด จำกัดกิจกรรมในเบื้องหลัง และหน่วงเวลาการแจ้งเตือน"</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"โหมดประหยัดแบตเตอรี่จะเปิดธีมมืด จำกัดกิจกรรมในเบื้องหลัง และหน่วงเวลาการแจ้งเตือน"</string>
