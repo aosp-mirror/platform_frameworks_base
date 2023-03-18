@@ -259,7 +259,7 @@ constructor(
                 largeTimeListener?.update(shouldTimeListenerRun)
             }
 
-            override fun onTimeFormatChanged(timeFormat: String) {
+            override fun onTimeFormatChanged(timeFormat: String?) {
                 clock?.events?.onTimeFormatChanged(DateFormat.is24HourFormat(context))
             }
 
