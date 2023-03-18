@@ -262,9 +262,10 @@ public class JobSchedulerServiceTest {
         ConnectivityController connectivityController = mService.getConnectivityController();
         spyOn(connectivityController);
         mService.mConstants.RUNTIME_MIN_GUARANTEE_MS = 10 * MINUTE_IN_MILLIS;
+        mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS = 2 * HOUR_IN_MILLIS;
         mService.mConstants.RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_BUFFER_FACTOR = 1.5f;
         mService.mConstants.RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS = HOUR_IN_MILLIS;
-        mService.mConstants.RUNTIME_UI_DATA_TRANSFER_LIMIT_MS = 6 * HOUR_IN_MILLIS;
+        mService.mConstants.RUNTIME_UI_LIMIT_MS = 6 * HOUR_IN_MILLIS;
 
         assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
                 mService.getMinJobExecutionGuaranteeMs(ejMax));
@@ -283,9 +284,9 @@ public class JobSchedulerServiceTest {
         // Permission isn't granted, so it should just be treated as a regular job.
         assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMinJobExecutionGuaranteeMs(jobUIDT));
+
         grantRunUserInitiatedJobsPermission(true); // With permission
-        assertEquals(mService.mConstants.RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS,
-                mService.getMinJobExecutionGuaranteeMs(jobUIDT));
+        mService.mConstants.RUNTIME_USE_DATA_ESTIMATES_FOR_LIMITS = true;
         doReturn(ConnectivityController.UNKNOWN_TIME)
                 .when(connectivityController).getEstimatedTransferTimeMs(any());
         assertEquals(mService.mConstants.RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS,
@@ -294,16 +295,20 @@ public class JobSchedulerServiceTest {
                 .when(connectivityController).getEstimatedTransferTimeMs(any());
         assertEquals(mService.mConstants.RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS,
                 mService.getMinJobExecutionGuaranteeMs(jobUIDT));
-        doReturn(mService.mConstants.RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS * 2)
+        final long estimatedTransferTimeMs =
+                mService.mConstants.RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS * 2;
+        doReturn(estimatedTransferTimeMs)
                 .when(connectivityController).getEstimatedTransferTimeMs(any());
-        assertEquals(
-                (long) (mService.mConstants.RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS
-                        * 2 * mService.mConstants
-                                .RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_BUFFER_FACTOR),
+        assertEquals((long) (estimatedTransferTimeMs
+                        * mService.mConstants.RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_BUFFER_FACTOR),
                 mService.getMinJobExecutionGuaranteeMs(jobUIDT));
-        doReturn(mService.mConstants.RUNTIME_UI_DATA_TRANSFER_LIMIT_MS * 2)
+        doReturn(mService.mConstants.RUNTIME_UI_LIMIT_MS * 2)
                 .when(connectivityController).getEstimatedTransferTimeMs(any());
-        assertEquals(mService.mConstants.RUNTIME_UI_DATA_TRANSFER_LIMIT_MS,
+        assertEquals(mService.mConstants.RUNTIME_UI_LIMIT_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUIDT));
+
+        mService.mConstants.RUNTIME_USE_DATA_ESTIMATES_FOR_LIMITS = false;
+        assertEquals(mService.mConstants.RUNTIME_MIN_UI_GUARANTEE_MS,
                 mService.getMinJobExecutionGuaranteeMs(jobUIDT));
     }
 
@@ -325,7 +330,7 @@ public class JobSchedulerServiceTest {
                 .when(quotaController).getMaxJobExecutionTimeMsLocked(any());
 
         grantRunUserInitiatedJobsPermission(true);
-        assertEquals(mService.mConstants.RUNTIME_UI_DATA_TRANSFER_LIMIT_MS,
+        assertEquals(mService.mConstants.RUNTIME_UI_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUIDT));
         grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,

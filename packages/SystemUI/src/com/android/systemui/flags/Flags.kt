@@ -214,6 +214,15 @@ object Flags {
             "lock_screen_long_press_enabled"
         )
 
+    /** Enables UI updates for AI wallpapers in the wallpaper picker. */
+    // TODO(b/267722622): Tracking Bug
+    @JvmField
+    val WALLPAPER_PICKER_UI_FOR_AIWP =
+            releasedFlag(
+                    229,
+                    "wallpaper_picker_ui_for_aiwp"
+            )
+
     /** Whether to inflate the bouncer view on a background thread. */
     // TODO(b/272091103): Tracking Bug
     @JvmField
@@ -531,7 +540,7 @@ object Flags {
 
     // TODO(b/270987164): Tracking Bug
     @JvmField
-    val TRACKPAD_GESTURE_BACK = unreleasedFlag(1205, "trackpad_gesture_back", teamfood = true)
+    val TRACKPAD_GESTURE_FEATURES = releasedFlag(1205, "trackpad_gesture_features")
 
     // TODO(b/263826204): Tracking Bug
     @JvmField
@@ -552,6 +561,10 @@ object Flags {
     @JvmField
     val WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM =
         unreleasedFlag(1209, "persist.wm.debug.predictive_back_qs_dialog_anim", teamfood = true)
+
+    // TODO(b/273800936): Tracking Bug
+    @JvmField
+    val TRACKPAD_GESTURE_COMMON = releasedFlag(1210, "trackpad_gesture_common")
 
     // 1300 - screenshots
     // TODO(b/254513155): Tracking Bug

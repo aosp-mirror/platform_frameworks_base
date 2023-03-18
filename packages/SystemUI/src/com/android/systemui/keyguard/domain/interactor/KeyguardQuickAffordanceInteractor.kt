@@ -414,6 +414,10 @@ constructor(
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_MONOCHROMATIC_THEME,
                 value = featureFlags.isEnabled(Flags.MONOCHROMATIC_THEME)
+            ),
+            KeyguardPickerFlag(
+                name = Contract.FlagsTable.FLAG_NAME_WALLPAPER_PICKER_UI_FOR_AIWP,
+                value = featureFlags.isEnabled(Flags.WALLPAPER_PICKER_UI_FOR_AIWP)
             )
         )
     }

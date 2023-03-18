@@ -27,6 +27,7 @@ import android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.UserHandle
 import android.os.UserManager
 import android.util.Log
 import androidx.annotation.VisibleForTesting
@@ -100,6 +101,14 @@ constructor(
     fun showNoteTask(
         entryPoint: NoteTaskEntryPoint,
     ) {
+        showNoteTaskAsUser(entryPoint, userTracker.userHandle)
+    }
+
+    /** A variant of [showNoteTask] which launches note task in the given [user]. */
+    fun showNoteTaskAsUser(
+        entryPoint: NoteTaskEntryPoint,
+        user: UserHandle,
+    ) {
         if (!isEnabled) return
 
         val bubbles = optionalBubbles.getOrNull() ?: return
@@ -113,7 +122,7 @@ constructor(
         // note task when the screen is locked.
         if (
             isKeyguardLocked &&
-                devicePolicyManager.areKeyguardShortcutsDisabled(userId = userTracker.userId)
+                devicePolicyManager.areKeyguardShortcutsDisabled(userId = user.identifier)
         ) {
             logDebug { "Enterprise policy disallows launching note app when the screen is locked." }
             return
@@ -126,7 +135,7 @@ constructor(
         // TODO(b/266686199): We should handle when app not available. For now, we log.
         val intent = createNoteIntent(info)
         try {
-            logDebug { "onShowNoteTask - start: $info" }
+            logDebug { "onShowNoteTask - start: $info on user#${user.identifier}" }
             when (info.launchMode) {
                 is NoteTaskLaunchMode.AppBubble -> {
                     bubbles.showOrHideAppBubble(intent, userTracker.userHandle)
@@ -134,7 +143,7 @@ constructor(
                     logDebug { "onShowNoteTask - opened as app bubble: $info" }
                 }
                 is NoteTaskLaunchMode.Activity -> {
-                    context.startActivityAsUser(intent, userTracker.userHandle)
+                    context.startActivityAsUser(intent, user)
                     eventLogger.logNoteTaskOpened(info)
                     logDebug { "onShowNoteTask - opened as activity: $info" }
                 }

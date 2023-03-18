@@ -156,20 +156,51 @@ public final class TvInputManager {
             "android.media.tv.TvInputManager.stream_id";
 
     /**
+     * This value for {@link #TV_MESSAGE_KEY_GROUP_ID} denotes that the message doesn't
+     * belong to any group.
+     */
+    public static final long TV_MESSAGE_GROUP_ID_NONE = -1;
+
+    /**
+     * This constant is used as a {@link Bundle} key for TV messages. This is used to
+     * optionally identify messages that belong together, such as headers and bodies
+     * of the same event. For messages that do not have a group, this value
+     * should be {@link #TV_MESSAGE_GROUP_ID_NONE}.
+     *
+     * <p> As -1 is a reserved value, -1 should not be used as a valid groupId.
+     *
+     * <p> Type: long
+     */
+    public static final String TV_MESSAGE_KEY_GROUP_ID =
+            "android.media.tv.TvInputManager.group_id";
+
+    /**
+     * This is a subtype for TV messages that can be potentially found as a value
+     * at {@link #TV_MESSAGE_KEY_SUBTYPE}. It identifies the subtype of the message
+     * as the watermarking format ATSC A/335.
+     */
+    public static final String TV_MESSAGE_SUBTYPE_WATERMARKING_A335 = "ATSC A/335";
+
+    /**
+     * This is a subtype for TV messages that can be potentially found as a value
+     * at {@link #TV_MESSAGE_KEY_SUBTYPE}. It identifies the subtype of the message
+     * as the CC format CTA 608-E.
+     */
+    public static final String TV_MESSAGE_SUBTYPE_CC_608E = "CTA 608-E";
+
+    /**
      * This constant is used as a {@link Bundle} key for TV messages. The value of the key
      * identifies the subtype of the data, such as the format of the CC data. The format
      * found at this key can then be used to identify how to parse the data at
      * {@link #TV_MESSAGE_KEY_RAW_DATA}.
      *
-     * To parse the raw data bsed on the subtype, please refer to the official documentation of the
-     * concerning subtype. For example, for the subtype "ATSC A/335" for watermarking, the
-     * document for A/335 from the ATSC standard details how this data is formatted.
-     *
-     * Some other examples of common formats include:
-     * <ul>
-     *     <li>Watermarking - ATSC A/336</li>
-     *     <li>Closed Captioning - CTA 608-E</li>
-     * </ul>
+     * <p> To parse the raw data based on the subtype, please refer to the official
+     * documentation of the concerning subtype. For example, for the subtype
+     * {@link #TV_MESSAGE_SUBTYPE_WATERMARKING_A335}, the document for A/335 from the ATSC
+     * standard details how this data is formatted. Similarly, the subtype
+     * {@link #TV_MESSAGE_SUBTYPE_CC_608E} is documented in the ANSI/CTA standard for
+     * 608-E. These subtypes are examples of common formats for their respective uses
+     * and other subtypes may exist.
      *
      * <p> Type: String
      */
@@ -178,7 +209,7 @@ public final class TvInputManager {
 
     /**
      * This constant is used as a {@link Bundle} key for TV messages. The value of the key
-     * stores the raw data contained in this TV Message. The format of this data is determined
+     * stores the raw data contained in this TV message. The format of this data is determined
      * by the format defined by the subtype, found using the key at
      * {@link #TV_MESSAGE_KEY_SUBTYPE}. See {@link #TV_MESSAGE_KEY_SUBTYPE} for more
      * information on how to parse this data.
@@ -839,6 +870,7 @@ public final class TvInputManager {
          * @param type The type of message received, such as {@link #TV_MESSAGE_TYPE_WATERMARK}
          * @param data The raw data of the message. The bundle keys are:
          *             {@link TvInputManager#TV_MESSAGE_KEY_STREAM_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_GROUP_ID},
          *             {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE},
          *             {@link TvInputManager#TV_MESSAGE_KEY_RAW_DATA}.
          *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
@@ -3273,9 +3305,20 @@ public final class TvInputManager {
         /**
          * Sends TV messages to the service for testing purposes
          */
-        public void notifyTvMessage(@NonNull @TvMessageType int type, @NonNull Bundle data) {
+        public void notifyTvMessage(int type, Bundle data) {
             try {
                 mService.notifyTvMessage(mToken, type, data, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Sets whether the TV message of the specific type should be enabled.
+         */
+        public void setTvMessageEnabled(int type, boolean enabled) {
+            try {
+                mService.setTvMessageEnabled(mToken, type, enabled, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

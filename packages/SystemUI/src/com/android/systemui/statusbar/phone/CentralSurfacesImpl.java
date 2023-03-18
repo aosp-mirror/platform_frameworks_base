@@ -1052,6 +1052,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 // The light reveal scrim should always be fully revealed by the time the keyguard
                 // is done going away. Double check that this is true.
                 if (!mKeyguardStateController.isKeyguardGoingAway()) {
+                    updateIsKeyguard();
+
                     if (mLightRevealScrim.getRevealAmount() != 1f) {
                         Log.e(TAG, "Keyguard is done going away, but someone left the light reveal "
                                 + "scrim at reveal amount: " + mLightRevealScrim.getRevealAmount());
@@ -2943,6 +2945,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 showKeyguardImpl();
             }
         } else {
+            final boolean isLaunchingOrGoingAway =
+                    mNotificationPanelViewController.isLaunchAnimationRunning()
+                            || mKeyguardStateController.isKeyguardGoingAway();
+
             // During folding a foldable device this might be called as a result of
             // 'onScreenTurnedOff' call for the inner display.
             // In this case:
@@ -2954,7 +2960,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             if (!mScreenOffAnimationController.isKeyguardHideDelayed()
                     // If we're animating occluded, there's an activity launching over the keyguard
                     // UI. Wait to hide it until after the animation concludes.
-                    && !mKeyguardViewMediator.isOccludeAnimationPlaying()) {
+                    && !mKeyguardViewMediator.isOccludeAnimationPlaying()
+                    // If we're occluded, but playing an animation (launch or going away animations)
+                    // the keyguard is visible behind the animation.
+                    && !(mKeyguardStateController.isOccluded() && isLaunchingOrGoingAway)) {
+                    // If we're going away and occluded, it means we are launching over the
+                    // unsecured keyguard, which will subsequently go away. Wait to hide it until
+                    // after the animation concludes to avoid the lockscreen UI changing into the
+                    // shade UI behind the launch animation.
                 return hideKeyguardImpl(forceStateChange);
             }
         }

@@ -257,6 +257,7 @@ public class SettingsBackupTest {
                     Settings.Global.EMERGENCY_AFFORDANCE_NEEDED,
                     Settings.Global.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS,
                     Settings.Global.EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS,
+                    Settings.Global.EMERGENCY_GESTURE_STICKY_UI_MAX_DURATION_MILLIS,
                     Settings.Global.EMULATE_DISPLAY_CUTOUT,
                     Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
                     Settings.Global.ENABLE_CACHE_QUOTA_CALCULATION,
@@ -718,6 +719,8 @@ public class SettingsBackupTest {
                  Settings.Secure.DOCKED_CLOCK_FACE,
                  Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                  Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
+                 Settings.Secure.EMERGENCY_GESTURE_UI_SHOWING,
+                 Settings.Secure.EMERGENCY_GESTURE_UI_LAST_STARTED_MILLIS,
                  Settings.Secure.ENABLED_INPUT_METHODS,  // Intentionally removed in P
                  Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT,
                  Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,

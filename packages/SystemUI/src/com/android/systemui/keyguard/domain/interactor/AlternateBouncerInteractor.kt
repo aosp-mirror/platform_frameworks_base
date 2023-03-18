@@ -46,6 +46,7 @@ constructor(
     var legacyAlternateBouncer: LegacyAlternateBouncer? = null
     var legacyAlternateBouncerVisibleTime: Long = NOT_VISIBLE
 
+    var receivedDownTouch = false
     val isVisible: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
 
     /**
@@ -79,6 +80,7 @@ constructor(
      * @return true if the alternate bouncer was newly hidden, else false.
      */
     fun hide(): Boolean {
+        receivedDownTouch = false
         return if (isModernAlternateBouncerEnabled) {
             val wasAlternateBouncerVisible = isVisibleState()
             bouncerRepository.setAlternateVisible(false)

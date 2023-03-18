@@ -77,6 +77,7 @@ import java.util.Objects;
  * <pre>
  * &lt;service android:name=".NotificationListener"
  *          android:label="&#64;string/service_name"
+ *          android:exported="false"
  *          android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
  *     &lt;intent-filter>
  *         &lt;action android:name="android.service.notification.NotificationListenerService" />
@@ -1420,7 +1421,7 @@ public abstract class NotificationListenerService extends Service {
         if (getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.P) {
             ArrayList<Person> people = notification.extras.getParcelableArrayList(
                     Notification.EXTRA_PEOPLE_LIST, android.app.Person.class);
-            if (people != null && people.isEmpty()) {
+            if (people != null && !people.isEmpty()) {
                 int size = people.size();
                 String[] peopleArray = new String[size];
                 for (int i = 0; i < size; i++) {

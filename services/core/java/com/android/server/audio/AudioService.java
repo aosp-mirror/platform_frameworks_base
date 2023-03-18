@@ -1745,7 +1745,9 @@ public class AudioService extends IAudioService.Stub
         mSoundDoseHelper.reset();
 
         // Restore rotation information.
-        RotationHelper.forceUpdate();
+        if (mMonitorRotation) {
+            RotationHelper.forceUpdate();
+        }
 
         onIndicateSystemReady();
         // indicate the end of reconfiguration phase to audio HAL
@@ -7235,7 +7237,7 @@ public class AudioService extends IAudioService.Stub
         super.setDeviceVolumeBehavior_enforcePermission();
         // verify arguments
         Objects.requireNonNull(device);
-        AudioManager.enforceValidVolumeBehavior(deviceVolumeBehavior);
+        AudioManager.enforceSettableVolumeBehavior(deviceVolumeBehavior);
 
         sVolumeLogger.enqueue(new EventLogger.StringEvent("setDeviceVolumeBehavior: dev:"
                 + AudioSystem.getOutputDeviceName(device.getInternalType()) + " addr:"
@@ -10471,16 +10473,16 @@ public class AudioService extends IAudioService.Stub
 
     @Override
     @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
-    public float getRs2Value() {
-        super.getRs2Value_enforcePermission();
-        return mSoundDoseHelper.getRs2Value();
+    public float getOutputRs2UpperBound() {
+        super.getOutputRs2UpperBound_enforcePermission();
+        return mSoundDoseHelper.getOutputRs2UpperBound();
     }
 
     @Override
     @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
-    public void setRs2Value(float rs2Value) {
-        super.setRs2Value_enforcePermission();
-        mSoundDoseHelper.setRs2Value(rs2Value);
+    public void setOutputRs2UpperBound(float rs2Value) {
+        super.setOutputRs2UpperBound_enforcePermission();
+        mSoundDoseHelper.setOutputRs2UpperBound(rs2Value);
     }
 
     @Override

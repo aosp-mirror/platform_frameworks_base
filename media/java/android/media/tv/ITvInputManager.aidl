@@ -120,6 +120,7 @@ interface ITvInputManager {
 
     // For TV Message
     void notifyTvMessage(in IBinder sessionToken, int type, in Bundle data, int userId);
+    void setTvMessageEnabled(in IBinder sessionToken, int type, boolean enabled, int userId);
 
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();

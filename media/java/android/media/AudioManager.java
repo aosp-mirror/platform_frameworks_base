@@ -6251,7 +6251,6 @@ public class AudioManager {
      * Volume behavior for an audio device where no software attenuation is applied, and
      *     the volume is kept synchronized between the host and the device itself through a
      *     device-specific protocol such as BT AVRCP.
-     * @see #setDeviceVolumeBehavior(AudioDeviceAttributes, int)
      */
     @SystemApi
     public static final int DEVICE_VOLUME_BEHAVIOR_ABSOLUTE = 3;
@@ -6262,7 +6261,6 @@ public class AudioManager {
      *     device-specific protocol (such as for hearing aids), based on the audio mode (e.g.
      *     normal vs in phone call).
      * @see #setMode(int)
-     * @see #setDeviceVolumeBehavior(AudioDeviceAttributes, int)
      */
     @SystemApi
     public static final int DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE = 4;
@@ -6272,6 +6270,11 @@ public class AudioManager {
      * A variant of {@link #DEVICE_VOLUME_BEHAVIOR_ABSOLUTE} where the host cannot reliably set
      * the volume percentage of the audio device. Specifically, {@link #setStreamVolume} will have
      * no effect, or an unreliable effect.
+     *
+     * {@link #DEVICE_VOLUME_BEHAVIOR_FULL} will be returned instead by
+     * {@link #getDeviceVolumeBehavior} for target SDK versions before U.
+     *
+     * @see #RETURN_DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY
      */
     @SystemApi
     public static final int DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY = 5;
@@ -6313,18 +6316,27 @@ public class AudioManager {
     public @interface AbsoluteDeviceVolumeBehavior {}
 
     /**
+     * Volume behaviors that can be set with {@link #setDeviceVolumeBehavior}.
      * @hide
-     * Throws IAE on an invalid volume behavior value
+     */
+    @IntDef({
+        DEVICE_VOLUME_BEHAVIOR_VARIABLE,
+        DEVICE_VOLUME_BEHAVIOR_FULL,
+        DEVICE_VOLUME_BEHAVIOR_FIXED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SettableDeviceVolumeBehavior {}
+
+    /**
+     * @hide
+     * Throws IAE on a non-settable volume behavior value
      * @param volumeBehavior behavior value to check
      */
-    public static void enforceValidVolumeBehavior(int volumeBehavior) {
+    public static void enforceSettableVolumeBehavior(int volumeBehavior) {
         switch (volumeBehavior) {
             case DEVICE_VOLUME_BEHAVIOR_VARIABLE:
             case DEVICE_VOLUME_BEHAVIOR_FULL:
             case DEVICE_VOLUME_BEHAVIOR_FIXED:
-            case DEVICE_VOLUME_BEHAVIOR_ABSOLUTE:
-            case DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE:
-            case DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY:
                 return;
             default:
                 throw new IllegalArgumentException("Illegal volume behavior " + volumeBehavior);
@@ -6334,11 +6346,8 @@ public class AudioManager {
     /**
      * @hide
      * Sets the volume behavior for an audio output device.
-     * @see #DEVICE_VOLUME_BEHAVIOR_VARIABLE
-     * @see #DEVICE_VOLUME_BEHAVIOR_FULL
-     * @see #DEVICE_VOLUME_BEHAVIOR_FIXED
-     * @see #DEVICE_VOLUME_BEHAVIOR_ABSOLUTE
-     * @see #DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE
+     *
+     * @see SettableDeviceVolumeBehavior
      * @param device the device to be affected
      * @param deviceVolumeBehavior one of the device behaviors
      */
@@ -6348,10 +6357,10 @@ public class AudioManager {
             Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED
     })
     public void setDeviceVolumeBehavior(@NonNull AudioDeviceAttributes device,
-            @DeviceVolumeBehavior int deviceVolumeBehavior) {
+            @SettableDeviceVolumeBehavior int deviceVolumeBehavior) {
         // verify arguments (validity of device type is enforced in server)
         Objects.requireNonNull(device);
-        enforceValidVolumeBehavior(deviceVolumeBehavior);
+        enforceSettableVolumeBehavior(deviceVolumeBehavior);
         // communicate with service
         final IAudioService service = getService();
         try {
@@ -6752,7 +6761,7 @@ public class AudioManager {
 
     /**
      * @hide
-     * Lower media volume to RS1
+     * Lower media volume to RS1 interval
      */
     public void lowerVolumeToRs1() {
         try {
@@ -6764,13 +6773,13 @@ public class AudioManager {
 
     /**
      * @hide
-     * @return the RS2 value used for momentary exposure warnings
+     * @return the RS2 upper bound used for momentary exposure warnings
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public float getRs2Value() {
         try {
-            return getService().getRs2Value();
+            return getService().getOutputRs2UpperBound();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -6778,13 +6787,13 @@ public class AudioManager {
 
     /**
      * @hide
-     * Sets the RS2 value used for momentary exposure warnings
+     * Sets the RS2 upper bound used for momentary exposure warnings
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void setRs2Value(float rs2Value) {
         try {
-            getService().setRs2Value(rs2Value);
+            getService().setOutputRs2UpperBound(rs2Value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

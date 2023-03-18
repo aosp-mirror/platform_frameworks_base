@@ -121,6 +121,7 @@ public final class CameraManager {
      * System property for allowing the above
      * @hide
      */
+    @TestApi
     public static final String LANDSCAPE_TO_PORTRAIT_PROP =
             "camera.enable_landscape_to_portrait";
 
@@ -622,6 +623,16 @@ public final class CameraManager {
     @NonNull
     public CameraCharacteristics getCameraCharacteristics(@NonNull String cameraId)
             throws CameraAccessException {
+        return getCameraCharacteristics(cameraId, shouldOverrideToPortrait(mContext));
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public CameraCharacteristics getCameraCharacteristics(@NonNull String cameraId,
+            boolean overrideToPortrait) throws CameraAccessException {
         CameraCharacteristics characteristics = null;
         if (CameraManagerGlobal.sCameraServiceDisabled) {
             throw new IllegalArgumentException("No cameras available on device");
@@ -635,7 +646,6 @@ public final class CameraManager {
             try {
                 Size displaySize = getDisplaySize();
 
-                boolean overrideToPortrait = shouldOverrideToPortrait(mContext);
                 CameraMetadataNative info = cameraService.getCameraCharacteristics(cameraId,
                         mContext.getApplicationInfo().targetSdkVersion, overrideToPortrait);
                 try {
@@ -727,7 +737,7 @@ public final class CameraManager {
      */
     private CameraDevice openCameraDeviceUserAsync(String cameraId,
             CameraDevice.StateCallback callback, Executor executor, final int uid,
-            final int oomScoreOffset) throws CameraAccessException {
+            final int oomScoreOffset, boolean overrideToPortrait) throws CameraAccessException {
         CameraCharacteristics characteristics = getCameraCharacteristics(cameraId);
         CameraDevice device = null;
         Map<String, CameraCharacteristics> physicalIdsToChars =
@@ -755,7 +765,6 @@ public final class CameraManager {
                         "Camera service is currently unavailable");
                 }
 
-                boolean overrideToPortrait = shouldOverrideToPortrait(mContext);
                 cameraUser = cameraService.connectDevice(callbacks, cameraId,
                     mContext.getOpPackageName(), mContext.getAttributionTag(), uid,
                     oomScoreOffset, mContext.getApplicationInfo().targetSdkVersion,
@@ -891,6 +900,43 @@ public final class CameraManager {
     }
 
     /**
+     * Open a connection to a camera with the given ID. Also specify overrideToPortrait for testing.
+     *
+     * @param cameraId
+     *             The unique identifier of the camera device to open
+     * @param handler
+     *             The handler on which the callback should be invoked, or
+     *             {@code null} to use the current thread's {@link android.os.Looper looper}.
+     * @param callback
+     *             The callback which is invoked once the camera is opened
+     * @param overrideToPortrait
+     *             Whether to apply the landscape to portrait override, using rotate and crop.
+     *
+     * @throws CameraAccessException if the camera is disabled by device policy,
+     * has been disconnected, or is being used by a higher-priority camera API client.
+     *
+     * @throws IllegalArgumentException if cameraId, the callback or the executor was null,
+     * or the cameraId does not match any currently or previously available
+     * camera device.
+     *
+     * @throws SecurityException if the application does not have permission to
+     * access the camera
+     *
+     * @see #getCameraIdList
+     * @see android.app.admin.DevicePolicyManager#setCameraDisabled
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.CAMERA)
+    public void openCamera(@NonNull String cameraId, boolean overrideToPortrait,
+            @Nullable Handler handler,
+            @NonNull final CameraDevice.StateCallback callback) throws CameraAccessException {
+        openCameraForUid(cameraId, callback, CameraDeviceImpl.checkAndWrapHandler(handler),
+                         USE_CALLING_UID, /*oomScoreOffset*/0, overrideToPortrait);
+    }
+
+    /**
      * Open a connection to a camera with the given ID.
      *
      * <p>The behavior of this method matches that of
@@ -994,7 +1040,8 @@ public final class CameraManager {
             throw new IllegalArgumentException(
                     "oomScoreOffset < 0, cannot increase priority of camera client");
         }
-        openCameraForUid(cameraId, callback, executor, USE_CALLING_UID, oomScoreOffset);
+        openCameraForUid(cameraId, callback, executor, USE_CALLING_UID, oomScoreOffset,
+                shouldOverrideToPortrait(mContext));
     }
 
     /**
@@ -1016,7 +1063,8 @@ public final class CameraManager {
      */
     public void openCameraForUid(@NonNull String cameraId,
             @NonNull final CameraDevice.StateCallback callback, @NonNull Executor executor,
-            int clientUid, int oomScoreOffset) throws CameraAccessException {
+            int clientUid, int oomScoreOffset, boolean overrideToPortrait)
+            throws CameraAccessException {
 
         if (cameraId == null) {
             throw new IllegalArgumentException("cameraId was null");
@@ -1027,7 +1075,8 @@ public final class CameraManager {
             throw new IllegalArgumentException("No cameras available on device");
         }
 
-        openCameraDeviceUserAsync(cameraId, callback, executor, clientUid, oomScoreOffset);
+        openCameraDeviceUserAsync(cameraId, callback, executor, clientUid, oomScoreOffset,
+                overrideToPortrait);
     }
 
     /**
@@ -1048,7 +1097,8 @@ public final class CameraManager {
     public void openCameraForUid(@NonNull String cameraId,
             @NonNull final CameraDevice.StateCallback callback, @NonNull Executor executor,
             int clientUid) throws CameraAccessException {
-            openCameraForUid(cameraId, callback, executor, clientUid, /*oomScoreOffset*/0);
+        openCameraForUid(cameraId, callback, executor, clientUid, /*oomScoreOffset*/0,
+                shouldOverrideToPortrait(mContext));
     }
 
     /**
@@ -1191,17 +1241,32 @@ public final class CameraManager {
      * @hide
      */
     public static boolean shouldOverrideToPortrait(@Nullable Context context) {
+        PackageManager packageManager = null;
+        String packageName = null;
+
+        if (context != null) {
+            packageManager = context.getPackageManager();
+            packageName = context.getOpPackageName();
+        }
+
+        return shouldOverrideToPortrait(packageManager, packageName);
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public static boolean shouldOverrideToPortrait(@Nullable PackageManager packageManager,
+                                                   @Nullable String packageName) {
         if (!CameraManagerGlobal.sLandscapeToPortrait) {
             return false;
         }
 
-        if (context != null) {
-            PackageManager packageManager = context.getPackageManager();
-
+        if (packageManager != null && packageName != null) {
             try {
                 return packageManager.getProperty(
                         PackageManager.PROPERTY_COMPAT_OVERRIDE_LANDSCAPE_TO_PORTRAIT,
-                        context.getOpPackageName()).getBoolean();
+                        packageName).getBoolean();
             } catch (PackageManager.NameNotFoundException e) {
                 // No such property
             }

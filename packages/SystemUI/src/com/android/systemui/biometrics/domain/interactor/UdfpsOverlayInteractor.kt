@@ -37,12 +37,12 @@ class UdfpsOverlayInteractor
 @Inject
 constructor(private val authController: AuthController, @Application scope: CoroutineScope) {
 
-    /** Whether a touch should be intercepted or allowed to pass to the UdfpsOverlay */
-    fun canInterceptTouchInUdfpsBounds(ev: MotionEvent): Boolean {
+    /** Whether a touch is within the under-display fingerprint sensor area */
+    fun isTouchWithinUdfpsArea(ev: MotionEvent): Boolean {
         val isUdfpsEnrolled = authController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser())
-        val isWithinUdfpsOverlayBounds =
+        val isWithinOverlayBounds =
             udfpsOverlayParams.value.overlayBounds.contains(ev.rawX.toInt(), ev.rawY.toInt())
-        return !isUdfpsEnrolled || !isWithinUdfpsOverlayBounds
+        return isUdfpsEnrolled && isWithinOverlayBounds
     }
 
     /** Returns the current udfpsOverlayParams */

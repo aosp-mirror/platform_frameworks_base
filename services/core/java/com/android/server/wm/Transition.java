@@ -278,13 +278,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         setTransientLaunchToChanges(activity);
 
         if (restoreBelow != null) {
+            final Task transientRootTask = activity.getRootTask();
             // Collect all visible activities which can be occluded by the transient activity to
             // make sure they are in the participants so their visibilities can be updated when
             // finishing transition.
             ((WindowContainer<?>) restoreBelow.getParent()).forAllTasks(t -> {
                 if (t.isVisibleRequested() && !t.isAlwaysOnTop()
                         && !t.getWindowConfiguration().tasksAreFloating()) {
-                    if (t.isRootTask()) {
+                    if (t.isRootTask() && t != transientRootTask) {
                         mTransientHideTasks.add(t);
                     }
                     if (t.isLeafTask()) {
@@ -828,6 +829,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
         mLogger.mFinishTimeNs = SystemClock.elapsedRealtimeNanos();
         mController.mLoggerHandler.post(mLogger::logOnFinish);
+        mController.mTransitionTracer.logFinishedTransition(this);
         // Close the transactions now. They were originally copied to Shell in case we needed to
         // apply them due to a remote failure. Since we don't need to apply them anymore, free them
         // immediately.
@@ -1044,6 +1046,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Aborting Transition: %d", mSyncId);
         mState = STATE_ABORT;
+        mController.mTransitionTracer.logAbortedTransition(this);
         // Syncengine abort will call through to onTransactionReady()
         mSyncEngine.abort(mSyncId);
         mController.dispatchLegacyAppTransitionCancelled();
@@ -1107,12 +1110,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // needs to be updated for STATE_ABORT.
         commitVisibleActivities(transaction);
 
+        // Fall-back to the default display if there isn't one participating.
+        final DisplayContent primaryDisplay = !mTargetDisplays.isEmpty() ? mTargetDisplays.get(0)
+                : mController.mAtm.mRootWindowContainer.getDefaultDisplay();
+
         if (mState == STATE_ABORT) {
             mController.abort(this);
-            // Fall-back to the default display if there isn't one participating.
-            final DisplayContent dc = !mTargetDisplays.isEmpty() ? mTargetDisplays.get(0)
-                    : mController.mAtm.mRootWindowContainer.getDefaultDisplay();
-            dc.getPendingTransaction().merge(transaction);
+            primaryDisplay.getPendingTransaction().merge(transaction);
             mSyncId = -1;
             mOverrideOptions = null;
             cleanUpInternal();
@@ -1124,6 +1128,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mFinishTransaction = mController.mAtm.mWindowManager.mTransactionFactory.get();
         mController.moveToPlaying(this);
 
+        // Flags must be assigned before calculateTransitionInfo. Otherwise it won't take effect.
+        if (primaryDisplay.isKeyguardLocked()) {
+            mFlags |= TRANSIT_FLAG_KEYGUARD_LOCKED;
+        }
         // Check whether the participants were animated from back navigation.
         final boolean markBackAnimated = mController.mAtm.mBackNavigationController
                 .containsBackAnimationTargets(this);
@@ -1137,9 +1145,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final DisplayContent dc = mController.mAtm.mRootWindowContainer.getDisplayContent(
                     info.getRoot(i).getDisplayId());
             mTargetDisplays.add(dc);
-            if (dc.isKeyguardLocked()) {
-                mFlags |= TRANSIT_FLAG_KEYGUARD_LOCKED;
-            }
         }
 
         if (markBackAnimated) {
@@ -1246,8 +1251,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         "Calling onTransitionReady: %s", info);
                 mLogger.mSendTimeNs = SystemClock.elapsedRealtimeNanos();
                 mLogger.mInfo = info;
-                mController.mTransitionTracer.logSentTransition(
-                        this, mTargets, mLogger.mCreateTimeNs, mLogger.mSendTimeNs, info);
+                mController.mTransitionTracer.logSentTransition(this, mTargets, info);
                 mController.getTransitionPlayer().onTransitionReady(
                         mToken, info, transaction, mFinishTransaction);
                 if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {

@@ -86,6 +86,7 @@ public class PipBoundsState {
     private int mStashedState = STASH_TYPE_NONE;
     private int mStashOffset;
     private @Nullable PipReentryState mPipReentryState;
+    private final LauncherState mLauncherState = new LauncherState();
     private final @Nullable PipSizeSpecHandler mPipSizeSpecHandler;
     private @Nullable ComponentName mLastPipComponentName;
     private final @NonNull MotionBoundsState mMotionBoundsState = new MotionBoundsState();
@@ -482,6 +483,10 @@ public class PipBoundsState {
         mOnPipExclusionBoundsChangeCallbacks.remove(onPipExclusionBoundsChangeCallback);
     }
 
+    public LauncherState getLauncherState() {
+        return mLauncherState;
+    }
+
     /** Source of truth for the current bounds of PIP that may be in motion. */
     public static class MotionBoundsState {
         /** The bounds used when PIP is in motion (e.g. during a drag or animation) */
@@ -531,6 +536,25 @@ public class PipBoundsState {
             pw.println(prefix + MotionBoundsState.class.getSimpleName());
             pw.println(innerPrefix + "mBoundsInMotion=" + mBoundsInMotion);
             pw.println(innerPrefix + "mAnimatingToBounds=" + mAnimatingToBounds);
+        }
+    }
+
+    /** Data class for Launcher state. */
+    public static final class LauncherState {
+        private int mAppIconSizePx;
+
+        public void setAppIconSizePx(int appIconSizePx) {
+            mAppIconSizePx = appIconSizePx;
+        }
+
+        public int getAppIconSizePx() {
+            return mAppIconSizePx;
+        }
+
+        void dump(PrintWriter pw, String prefix) {
+            final String innerPrefix = prefix + "    ";
+            pw.println(prefix + LauncherState.class.getSimpleName());
+            pw.println(innerPrefix + "getAppIconSizePx=" + getAppIconSizePx());
         }
     }
 
@@ -587,6 +611,7 @@ public class PipBoundsState {
         } else {
             mPipReentryState.dump(pw, innerPrefix);
         }
+        mLauncherState.dump(pw, innerPrefix);
         mMotionBoundsState.dump(pw, innerPrefix);
     }
 }
