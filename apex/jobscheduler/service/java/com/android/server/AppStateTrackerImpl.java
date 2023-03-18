@@ -429,7 +429,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
         /**
          * Called when a uid goes into cached, so its alarms using a listener should be removed.
          */
-        public void removeListenerAlarmsForCachedUid(int uid) {
+        public void handleUidCachedChanged(int uid, boolean cached) {
         }
     }
 
@@ -870,9 +870,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
         }
 
         public void onUidCachedChanged(int uid, boolean cached) {
-            if (cached) {
-                obtainMessage(MSG_ON_UID_CACHED, uid, 0).sendToTarget();
-            }
+            obtainMessage(MSG_ON_UID_CACHED, uid, cached ? 1 : 0).sendToTarget();
         }
 
         @Override
@@ -969,14 +967,14 @@ public class AppStateTrackerImpl implements AppStateTracker {
                     }
                     return;
                 case MSG_ON_UID_CACHED:
-                    handleUidCached(msg.arg1);
+                    handleUidCached(msg.arg1, (msg.arg2 != 0));
                     return;
             }
         }
 
-        private void handleUidCached(int uid) {
+        private void handleUidCached(int uid, boolean cached) {
             for (Listener l : cloneListeners()) {
-                l.removeListenerAlarmsForCachedUid(uid);
+                l.handleUidCachedChanged(uid, cached);
             }
         }
 
