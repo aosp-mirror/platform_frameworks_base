@@ -626,23 +626,27 @@ public class LatencyTracker {
 
         void begin(@NonNull Runnable timeoutAction) {
             mStartRtc = SystemClock.elapsedRealtime();
-            Trace.asyncTraceBegin(TRACE_TAG_APP, traceName(), 0);
+            Trace.asyncTraceForTrackBegin(TRACE_TAG_APP, traceName(), traceName(), 0);
 
             // start counting timeout.
-            mTimeoutRunnable = timeoutAction;
+            mTimeoutRunnable = () -> {
+                Trace.instantForTrack(TRACE_TAG_APP, traceName(), "timeout");
+                timeoutAction.run();
+            };
             BackgroundThread.getHandler()
                     .postDelayed(mTimeoutRunnable, TimeUnit.SECONDS.toMillis(15));
         }
 
         void end() {
             mEndRtc = SystemClock.elapsedRealtime();
-            Trace.asyncTraceEnd(TRACE_TAG_APP, traceName(), 0);
+            Trace.asyncTraceForTrackEnd(TRACE_TAG_APP, traceName(), 0);
             BackgroundThread.getHandler().removeCallbacks(mTimeoutRunnable);
             mTimeoutRunnable = null;
         }
 
         void cancel() {
-            Trace.asyncTraceEnd(TRACE_TAG_APP, traceName(), 0);
+            Trace.instantForTrack(TRACE_TAG_APP, traceName(), "cancel");
+            Trace.asyncTraceForTrackEnd(TRACE_TAG_APP, traceName(), 0);
             BackgroundThread.getHandler().removeCallbacks(mTimeoutRunnable);
             mTimeoutRunnable = null;
         }
