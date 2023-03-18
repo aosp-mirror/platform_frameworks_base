@@ -19,7 +19,6 @@ package com.android.systemui.screenshot;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
-import static com.android.systemui.flags.Flags.SCREENSHOT_WORK_PROFILE_POLICY;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
@@ -469,16 +468,12 @@ public class ScreenshotController {
         }
 
         prepareAnimation(screenshot.getScreenBounds(), showFlash, () -> {
-            if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
-                mMessageContainerController.onScreenshotTaken(screenshot);
-            }
+            mMessageContainerController.onScreenshotTaken(screenshot);
         });
 
-        if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
-            mScreenshotView.badgeScreenshot(mContext.getPackageManager().getUserBadgedIcon(
-                    mContext.getDrawable(R.drawable.overlay_badge_background),
-                    screenshot.getUserHandle()));
-        }
+        mScreenshotView.badgeScreenshot(mContext.getPackageManager().getUserBadgedIcon(
+                mContext.getDrawable(R.drawable.overlay_badge_background),
+                screenshot.getUserHandle()));
         mScreenshotView.setScreenshot(screenshot);
 
         if (mFlags.isEnabled(Flags.SCREENSHOT_METADATA) && screenshot.getTaskId() >= 0) {
@@ -503,8 +498,7 @@ public class ScreenshotController {
 
     void prepareViewForNewScreenshot(ScreenshotData screenshot, String oldPackageName) {
         withWindowAttached(() -> {
-            if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)
-                    && mUserManager.isManagedProfile(screenshot.getUserHandle().getIdentifier())) {
+            if (mUserManager.isManagedProfile(screenshot.getUserHandle().getIdentifier())) {
                 mScreenshotView.announceForAccessibility(mContext.getResources().getString(
                         R.string.screenshot_saving_work_profile_title));
             } else {
@@ -636,9 +630,7 @@ public class ScreenshotController {
         // Inflate the screenshot layout
         mScreenshotView = (ScreenshotView)
                 LayoutInflater.from(mContext).inflate(R.layout.screenshot, null);
-        if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
-            mMessageContainerController.setView(mScreenshotView);
-        }
+        mMessageContainerController.setView(mScreenshotView);
         mScreenshotView.addOnAttachStateChangeListener(
                 new View.OnAttachStateChangeListener() {
                     @Override
@@ -736,8 +728,7 @@ public class ScreenshotController {
     private void saveScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,
             Insets screenInsets, ComponentName topComponent, boolean showFlash, UserHandle owner) {
         withWindowAttached(() -> {
-            if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)
-                    && mUserManager.isManagedProfile(owner.getIdentifier())) {
+            if (mUserManager.isManagedProfile(owner.getIdentifier())) {
                 mScreenshotView.announceForAccessibility(mContext.getResources().getString(
                         R.string.screenshot_saving_work_profile_title));
             } else {
@@ -789,15 +780,11 @@ public class ScreenshotController {
 
         attachWindow();
         prepareAnimation(screenRect, showFlash, () -> {
-            if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
-                mMessageContainerController.onScreenshotTaken(owner);
-            }
+            mMessageContainerController.onScreenshotTaken(owner);
         });
 
-        if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
-            mScreenshotView.badgeScreenshot(mContext.getPackageManager().getUserBadgedIcon(
-                    mContext.getDrawable(R.drawable.overlay_badge_background), owner));
-        }
+        mScreenshotView.badgeScreenshot(mContext.getPackageManager().getUserBadgedIcon(
+                mContext.getDrawable(R.drawable.overlay_badge_background), owner));
         mScreenshotView.setScreenshot(mScreenBitmap, screenInsets);
         if (DEBUG_WINDOW) {
             Log.d(TAG, "setContentView: " + mScreenshotView);
@@ -1270,8 +1257,7 @@ public class ScreenshotController {
                     R.string.screenshot_failed_to_save_text);
         } else {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED, 0, mPackageName);
-            if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)
-                    && mUserManager.isManagedProfile(imageData.owner.getIdentifier())) {
+            if (mUserManager.isManagedProfile(imageData.owner.getIdentifier())) {
                 mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED_TO_WORK_PROFILE, 0,
                         mPackageName);
             }
@@ -1279,13 +1265,8 @@ public class ScreenshotController {
     }
 
     private boolean isUserSetupComplete(UserHandle owner) {
-        if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
-            return Settings.Secure.getInt(mContext.createContextAsUser(owner, 0)
-                    .getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
-        } else {
-            return Settings.Secure.getInt(mContext.getContentResolver(),
-                    SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
-        }
+        return Settings.Secure.getInt(mContext.createContextAsUser(owner, 0)
+                .getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
     }
 
     /**
