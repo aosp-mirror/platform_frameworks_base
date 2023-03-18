@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
-import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerServiceUtils.getPackageManagerLocal;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
@@ -245,7 +244,7 @@ public class AppDataHelper {
                 }
             }
 
-            if (!useArtService()) { // ART Service handles this on demand instead.
+            if (!DexOptHelper.useArtService()) { // ART Service handles this on demand instead.
                 // Prepare the application profiles only for upgrades and
                 // first boot (so that we don't repeat the same operation at
                 // each boot).
@@ -591,7 +590,7 @@ public class AppDataHelper {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
-        if (useArtService()) {
+        if (DexOptHelper.useArtService()) {
             destroyAppProfilesWithArtService(pkg);
         } else {
             try {
@@ -637,7 +636,7 @@ public class AppDataHelper {
     }
 
     private void destroyAppProfilesLeafLIF(AndroidPackage pkg) {
-        if (useArtService()) {
+        if (DexOptHelper.useArtService()) {
             destroyAppProfilesWithArtService(pkg);
         } else {
             try {
@@ -651,6 +650,15 @@ public class AppDataHelper {
     }
 
     private void destroyAppProfilesWithArtService(AndroidPackage pkg) {
+        if (!DexOptHelper.artManagerLocalIsInitialized()) {
+            // This function may get called while PackageManagerService is constructed (via e.g.
+            // InitAppsHelper.initSystemApps), and ART Service hasn't yet been started then (it
+            // requires a registered PackageManagerLocal instance). We can skip clearing any stale
+            // app profiles in this case, because ART Service and the runtime will ignore stale or
+            // otherwise invalid ref and cur profiles.
+            return;
+        }
+
         try (PackageManagerLocal.FilteredSnapshot snapshot =
                         getPackageManagerLocal().withFilteredSnapshot()) {
             try {
