@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ক্লিপ বাউন্ড, মার্জিন ইত্যাদি দেখান"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL লেআউট দিকনির্দেশ জোর দিন"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"সমস্ত স্থানের জন্য RTL এ স্ক্রিন লেআউট দিকনির্দেশে জোর দেয়"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"স্বচ্ছ নেভিগেশন বার"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"ডিফল্ট হিসেবে, নেভিগেশন বারের ব্যাকগ্রাউন্ড কালার স্বচ্ছ রাখুন"</string>
     <string name="window_blurs" msgid="6831008984828425106">"উইন্ডো-লেভেল অস্পষ্ট করার সুবিধা চালু করুন"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA-এ জোর দিন"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 অ্যাপের মধ্যে 4x MSAA চালু করুন"</string>
@@ -679,4 +681,5 @@
     <item msgid="7728484337962740316">"ডানদিকে সরান"</item>
     <item msgid="324200556467459329">"উপরে সরান"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>
