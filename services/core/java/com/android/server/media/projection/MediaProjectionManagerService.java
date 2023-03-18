@@ -67,7 +67,7 @@ import java.util.Map;
  * The {@link MediaProjectionManagerService} manages the creation and lifetime of MediaProjections,
  * as well as the capabilities they grant. Any service using MediaProjection tokens as permission
  * grants <b>must</b> validate the token before use by calling {@link
- * IMediaProjectionService#isCurrentProjection}.
+ * IMediaProjectionManager#isCurrentProjection}.
  */
 public final class MediaProjectionManagerService extends SystemService
         implements Watchdog.Monitor {
