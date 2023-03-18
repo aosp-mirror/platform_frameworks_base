@@ -871,7 +871,8 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# కంట్రోల్ జోడించబడింది.}other{# కంట్రోల్స్ జోడించబడ్డాయి.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"తీసివేయబడింది"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g>ను జోడించాలా?"</string>
-    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> ఇక్కడ ఏ కంట్రోల్స్, కంటెంట్ కనిపించాలో ఎంచుకోగలదు."</string>
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
+    <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> కోసం కంట్రోల్స్‌ను తీసివేయాలా?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"ఇష్టమైనదిగా గుర్తు పెట్టబడింది"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"<xliff:g id="NUMBER">%d</xliff:g>వ స్థానంలో ఇష్టమైనదిగా గుర్తు పెట్టబడింది"</string>

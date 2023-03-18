@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Attiva USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Scopri di più"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Funzionalità Extend Unlock disattivata"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"è stata inviata un\'immagine"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Salvataggio screenshot…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Salvataggio screenshot nel profilo di lavoro…"</string>
@@ -871,7 +870,8 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# controllo aggiunto.}many{# controlli aggiunti.}other{# controlli aggiunti.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Rimosso"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Vuoi aggiungere <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <string name="controls_panel_authorization" msgid="4665218066461350247">"L\'app <xliff:g id="APPNAME">%s</xliff:g> potrà scegliere quali controlli e contenuti visualizzare qui."</string>
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
+    <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vuoi rimuovere i controlli per l\'app <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Aggiunto ai preferiti"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Preferito, posizione <xliff:g id="NUMBER">%d</xliff:g>"</string>

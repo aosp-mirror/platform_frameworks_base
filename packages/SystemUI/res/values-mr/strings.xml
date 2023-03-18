@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB सुरू करा"</string>
     <string name="learn_more" msgid="4690632085667273811">"अधिक जाणून घ्या"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"स्क्रीनशॉट"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"एक्स्टेंड अनलॉक बंद केले आहे"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"इमेज पाठवली आहे"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"स्क्रीनशॉट सेव्ह करत आहे…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"कार्य प्रोफाइलवर स्क्रीनशॉट सेव्ह करत आहे…"</string>
@@ -871,7 +870,8 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# नियंत्रण जोडले आहे.}other{# नियंत्रणे जोडली आहेत.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"काढून टाकले"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> जोडायचे आहे का?"</string>
-    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> हे येथे कोणती नियंत्रणे आणि आशय दाखवावा ते निवडू शकते."</string>
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
+    <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> साठी नियंत्रणे काढून टाकायची आहेत का?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"आवडले"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"आवडले, स्थान <xliff:g id="NUMBER">%d</xliff:g>"</string>
