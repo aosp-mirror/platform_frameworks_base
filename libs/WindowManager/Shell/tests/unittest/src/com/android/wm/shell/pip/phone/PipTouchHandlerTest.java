@@ -175,6 +175,7 @@ public class PipTouchHandlerTest extends ShellTestCase {
 
     @Test
     public void updateMovementBounds_withImeAdjustment_movesPip() {
+        mPipTouchHandler.setEnablePipKeepClearAlgorithm(false);
         mFromImeAdjustment = true;
         mPipTouchHandler.onImeVisibilityChanged(true /* imeVisible */, mImeHeight);
 
