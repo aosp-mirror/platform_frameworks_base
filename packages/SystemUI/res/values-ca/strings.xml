@@ -225,7 +225,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Gira la pantalla automàticament"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Ubicació"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accés a la càmera"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Accés al micròfon"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Accés al micro"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponible"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloquejat"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Dispositiu multimèdia"</string>
