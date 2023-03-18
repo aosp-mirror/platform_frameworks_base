@@ -834,8 +834,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Palielināt visu ekrānu"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Palielināt ekrāna daļu"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Pārslēgt"</string>
-    <!-- no translation found for magnification_open_settings_click_label (6151849212725923363) -->
-    <skip />
+    <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Atvērt palielinājuma iestatījumus"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Velciet stūri, lai mainītu izmērus"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Atļaut ritināšanu pa diagonāli"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Mainīt lielumu"</string>
@@ -845,8 +844,7 @@
     <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"Kreisais turis"</string>
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Labais turis"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Apakšdaļas turis"</string>
-    <!-- no translation found for accessibility_magnification_settings_panel_description (8174187340747846953) -->
-    <skip />
+    <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Palielinājuma iestatījumi"</string>
     <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Lupas lielums"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Tālummainīt"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Vidējs"</string>
@@ -873,7 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Pievienota # vadīkla.}zero{Pievienotas # vadīklas.}one{Pievienota # vadīkla.}other{Pievienotas # vadīklas.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Noņemta"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Vai pievienot lietotni <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
     <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vai noņemt vadīklas lietotnei <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Pievienota izlasei"</string>
@@ -899,8 +897,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Vai skatīt un kontrolēt ierīces no bloķēšanas ekrāna?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Varat pievienot bloķēšanas ekrānam vadīklas, ar kurām kontrolēt savas ārējās ierīces.\n\nJūsu ierīces lietotne var ļaut jums kontrolēt dažas ierīces, neatbloķējot tālruni vai planšetdatoru.\n\nVarat jebkurā laikā veikt izmaiņas iestatījumos."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Vai kontrolēt ierīces no bloķēšanas ekrāna?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Varat kontrolēt noteiktas ierīces, neatbloķējot tālruni vai planšetdatoru. Jūsu ierīces lietotne nosaka, kuras ierīces varat šādi kontrolēt."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Nē, paldies"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Jā"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN ietver burtus vai simbolus."</string>
