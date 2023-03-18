@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Mayor seguridad para las cuentas"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Cada llave está vinculada exclusivamente con el sitio web o la app para la que fue creada, por lo que nunca podrás acceder por error a una app o sitio web fraudulentos. Además, como los servidores solo guardan claves públicas, hackearlas es mucho más difícil."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Transición fluida"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"A medida que avanzamos hacia un futuro sin contraseñas, estas seguirán estando disponibles junto a las llaves de acceso"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Elige dónde guardar tus <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecciona un administrador de contraseñas para guardar tu información y acceder más rápido la próxima vez"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"¿Quieres crear una llave de acceso para <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Guardar <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> en"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"¿Quieres crear una llave de acceso en otro dispositivo?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"¿Quieres usar <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> para todos tus accesos?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Este administrador de contraseñas para <xliff:g id="USERNAME">%1$s</xliff:g> almacenará tus contraseñas y llaves de acceso para ayudarte a acceder fácilmente"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Establecer como predeterminado"</string>
     <string name="use_once" msgid="9027366575315399714">"Usar una vez"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> contraseñas • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> llaves de acceso"</string>

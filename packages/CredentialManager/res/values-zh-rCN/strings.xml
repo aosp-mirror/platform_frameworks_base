@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"提升了帐号安全性"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"每个密钥都是专为特定应用或网站创建的，且仅与各自对应的网站或应用关联，因此您绝不会错误地登录任何欺诈性应用或网站。另外，由于服务器只保留公钥，黑客入侵的难度会大大增加。"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"无缝转换"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"我们正在迈向一个无密码的未来，但在此过程中，密码仍会与通行密钥并存"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"选择保存<xliff:g id="CREATETYPES">%1$s</xliff:g>的位置"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"请选择一款密码管理工具来保存您的信息，以便下次更快地登录"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"要为“<xliff:g id="APPNAME">%1$s</xliff:g>”创建通行密钥吗？"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"将<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>保存到"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"在其他设备上创建通行密钥？"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"将“<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>”用于您的所有登录信息？"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"此 <xliff:g id="USERNAME">%1$s</xliff:g> 密码管理工具将会存储您的密码和通行密钥，帮助您轻松登录"</string>
     <string name="set_as_default" msgid="4415328591568654603">"设为默认项"</string>
     <string name="use_once" msgid="9027366575315399714">"使用一次"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> 个密码 • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> 个通行密钥"</string>

@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Forbedret kontosikkerhet"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Hver nøkkel er eksklusivt tilknyttet appen eller nettstedet den er laget for. Dermed kan du aldri logge på falske apper eller nettsteder ved et uhell. Og siden tjenerne bare har offentlige nøkler, blir det mye vanskeligere å hacke deg."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Sømløs overgang"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Vi går mot en fremtid uten passord, men passord fortsetter å være tilgjengelige ved siden av tilgangsnøkler"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Velg hvor du vil lagre <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Velg et verktøy for passordlagring for å lagre informasjonen din og logge på raskere neste gang"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vil du opprette en tilgangsnøkkel for <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Lagre <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> i"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Vil du opprette en tilgangsnøkkel på en annen enhet?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Vil du bruke <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> for alle pålogginger?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Dette verktøyet for passordlagring for <xliff:g id="USERNAME">%1$s</xliff:g> lagrer passord og tilgangsnøkler, så det blir lett å logge på"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Angi som standard"</string>
     <string name="use_once" msgid="9027366575315399714">"Bruk én gang"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> passord • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> tilgangsnøkler"</string>

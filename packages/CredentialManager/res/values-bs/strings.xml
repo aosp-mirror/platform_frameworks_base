@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Poboljšana sigurnost računa"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Svaki ključ je isključivo povezan s aplikacijom ili web lokacijom za koju je kreiran, tako da se nikada ne možete greškom prijaviti u prevarantsku aplikaciju ili na prevarantsku web lokaciju. Osim toga, hakiranje je puno teže zahvaljujući serverima koji čuvaju samo javne ključeve."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Neometani prijelaz"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Kako idemo u smjeru budućnosti bez zaporki, one će i dalje biti dostupne uz pristupne ključeve"</string>
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Kako se krećemo prema budućnosti bez lozinki, lozinke će i dalje biti dostupne uz pristupne ključeve"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Odaberite gdje će se pohranjivati <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Odaberite upravitelja lozinki da sačuvate svoje informacije i brže se prijavite sljedeći put"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Kreirati pristupni ključ za aplikaciju <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -35,7 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Sačuvaj <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> na"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Kreirati pristupni ključ na drugom uređaju?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Koristiti uslugu <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> za sve vaše prijave?"</string>
-    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Upravitelj zaporki za korisničko ime <xliff:g id="USERNAME">%1$s</xliff:g> pohranit će vaše zaporke i pristupne ključeve radi jednostavnije prijave"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Ovaj upravitelj lozinki za <xliff:g id="USERNAME">%1$s</xliff:g> će pohraniti vaše lozinke i pristupne ključeve da vam olakša prijavu"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Postavi kao zadano"</string>
     <string name="use_once" msgid="9027366575315399714">"Koristi jednom"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Broj lozinki: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Broj pristupnih ključeva: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
