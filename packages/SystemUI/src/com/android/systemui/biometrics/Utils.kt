@@ -36,7 +36,6 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.R
 import java.lang.annotation.Retention
 import java.lang.annotation.RetentionPolicy
 
@@ -119,6 +118,3 @@ object Utils {
     @IntDef(CREDENTIAL_PIN, CREDENTIAL_PATTERN, CREDENTIAL_PASSWORD)
     internal annotation class CredentialType
 }
-
-fun Context.isInRearDisplayMode(): Boolean = resources.getIntArray(
-        com.android.internal.R.array.config_rearDisplayDeviceStates).isNotEmpty()
