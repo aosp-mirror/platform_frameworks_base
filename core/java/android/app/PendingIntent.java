@@ -892,10 +892,8 @@ public final class PendingIntent implements Parcelable {
      * @param options Additional options the caller would like to provide to modify the
      * sending behavior.  May be built from an {@link ActivityOptions} to apply to an
      * activity start.
-     *
-     * @hide
      */
-    public void send(Bundle options) throws CanceledException {
+    public void send(@Nullable Bundle options) throws CanceledException {
         send(null, 0, null, null, null, null, options);
     }
 
