@@ -1809,7 +1809,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     private boolean cancelJobsForUid(int uid, boolean includeSourceApp,
             boolean namespaceOnly, @Nullable String namespace,
             @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
-        if (uid == Process.SYSTEM_UID) {
+        // Non-null system namespace means the cancelling is limited to the namespace
+        // and won't cause issues for the system at large.
+        if (uid == Process.SYSTEM_UID && (!namespaceOnly || namespace == null)) {
             Slog.wtfStack(TAG, "Can't cancel all jobs for system uid");
             return false;
         }
