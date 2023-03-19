@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Omogući USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Saznajte više"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Snimak ekrana"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Produljivanje otključavanja onemogućeno"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"je poslao/la sliku"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Spašavanje snimka ekrana..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Pohranjivanje snimka ekrana na radni profil…"</string>
@@ -834,7 +833,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Uvećavanje prikaza preko cijelog ekrana"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Uvećavanje dijela ekrana"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Prekidač"</string>
-    <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Otvori postavke povećavanja"</string>
+    <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Otvori postavke uvećavanja"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Prevucite ugao da promijenite veličinu"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Dozvoli dijagonalno klizanje"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Promijeni veličinu"</string>
@@ -844,7 +843,7 @@
     <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"Lijeva ručica"</string>
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Desna ručica"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Donja ručica"</string>
-    <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Postavke povećavanja"</string>
+    <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Postavke uvećavanja"</string>
     <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Veličina povećala"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Zumiranje"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Srednje"</string>
@@ -871,7 +870,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Dodana je # kontrola.}one{Dodana je # kontrola.}few{Dodane su # kontrole.}other{Dodano je # kontrola.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Uklonjeno"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Dodati aplikaciju <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
     <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Ukloniti kontrole za aplikaciju <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Dodano u omiljeno"</string>
@@ -897,8 +896,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Prikazati uređaje i kontrolirati njima sa zaključanog ekrana?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Na zaključani ekran možete dodati kontrole za eksterne uređaje.\n\nAplikacija vašeg uređaja vam može omogućiti da kontrolirate određene uređaje bez otključavanja telefona ili tableta.\n\nPromjene možete izvršiti bilo kada u Postavkama."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Kontrolirati uređaje sa zaključanog ekrana?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Neke uređaje možete kontrolirati bez otključavanja telefona ili tableta. Aplikacija uređaja određuje koji se uređaji mogu kontrolirati na ovaj način."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Ne, hvala"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Da"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN sadrži slova ili simbole"</string>

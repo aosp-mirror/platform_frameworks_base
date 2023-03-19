@@ -385,9 +385,11 @@ class BroadcastProcessQueue {
     public void setProcess(@Nullable ProcessRecord app) {
         this.app = app;
         if (app != null) {
+            setProcessCached(app.isCached());
             setProcessInstrumented(app.getActiveInstrumentation() != null);
             setProcessPersistent(app.isPersistent());
         } else {
+            setProcessCached(false);
             setProcessInstrumented(false);
             setProcessPersistent(false);
         }

@@ -465,7 +465,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     final int launchedFromPid; // always the pid who started the activity.
     final int launchedFromUid; // always the uid who started the activity.
     final String launchedFromPackage; // always the package who started the activity.
-    final @Nullable String launchedFromFeatureId; // always the feature in launchedFromPackage
+    @Nullable
+    final String launchedFromFeatureId; // always the feature in launchedFromPackage
     private final int mLaunchSourceType; // original launch source type
     final Intent intent;    // the original intent that generated us
     final String shortComponentName; // the short component name of the intent
@@ -731,7 +732,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /**
      * Solely for reporting to ActivityMetricsLogger. Just tracks whether, the last time this
-     * Actiivty was part of a syncset, all windows were ready by the time the sync was ready (vs.
+     * Activity was part of a syncset, all windows were ready by the time the sync was ready (vs.
      * only the top-occluding ones). The assumption here is if some were not ready, they were
      * covered with starting-window/splash-screen.
      */
@@ -4743,6 +4744,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception thrown sending result to " + this, e);
             }
+            // We return here to ensure that result for media projection setup is not stored as a
+            // pending result after being scheduled. This is to prevent this stored result being
+            // sent again when the destination component is resumed.
+            return;
         }
 
         addResultLocked(null /* from */, resultWho, requestCode, resultCode, data);
@@ -4750,7 +4755,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /**
      * Provides a lifecycle item for the current stat. Only to be used when force sending an
-     * activity result (as part of MeidaProjection setup). Does not support the following states:
+     * activity result (as part of MediaProjection setup). Does not support the following states:
      * {@link State#INITIALIZING}, {@link State#RESTARTING_PROCESS},
      * {@link State#FINISHING}, {@link State#DESTROYING}, {@link State#DESTROYED}. It does not make
      * sense to force send a result to an activity in these states. Does not support

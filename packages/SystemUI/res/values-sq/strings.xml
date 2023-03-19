@@ -834,8 +834,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Zmadho ekranin e plotë"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Zmadho një pjesë të ekranit"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Ndërro"</string>
-    <!-- no translation found for magnification_open_settings_click_label (6151849212725923363) -->
-    <skip />
+    <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Hap cilësimet e zmadhimit"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Zvarrit këndin për të ndryshuar përmasat"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Lejo lëvizjen diagonale"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Ndrysho përmasat"</string>
@@ -845,8 +844,7 @@
     <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"Doreza e majtë"</string>
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Doreza e djathtë"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Doreza e poshtme"</string>
-    <!-- no translation found for accessibility_magnification_settings_panel_description (8174187340747846953) -->
-    <skip />
+    <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Cilësimet e zmadhimit"</string>
     <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Përmasa e zmadhimit"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Zmadho"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Mesatar"</string>
@@ -873,7 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{U shtua # kontroll.}other{U shtuan # kontrolle.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"E hequr"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Të shtohet <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
     <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Të hiqen kontrollet për <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"E shtuar te të preferuarat"</string>
@@ -899,8 +897,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Të shfaqen dhe të kontrollohen pajisjet nga ekrani i kyçjes?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Mund të shtosh kontrolle për pajisjet e tua të jashtme në ekranin e kyçjes.\n\nAplikacioni në pajisjen tënde mund të të lejojë të kontrollosh disa pajisje pa shkyçur telefonin apo tabletin.\n\nMund të bësh ndryshime në çdo kohë te \"Cilësimet\"."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Të kontrollohen pajisjet nga ekrani i kyçjes?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Mund të kontrollosh disa pajisje pa shkyçur telefonin apo tabletin tënd. Aplikacioni për pajisjen tënde përcakton se cilat pajisje mund të kontrollohen në këtë mënyrë."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Jo, faleminderit"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Po"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Kodi PIN përmban shkronja ose simbole"</string>

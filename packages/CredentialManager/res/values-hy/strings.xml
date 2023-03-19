@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Հաշվի բարելավված անվտանգություն"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Յուրաքանչյուր բանալի բացառապես կապված է հավելվածի կամ կայքի հետ, որի համար այն ստեղծվել է, ուստի դուք երբեք չեք կարող սխալմամբ մուտք գործել կեղծ հավելված կամ կայք։ Բացի այդ՝ սերվերներում պահվում են միայն բաց բանալիներ, ինչը զգալիորեն դժվարացնում է կոտրումը։"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Սահուն անցում"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Թեև մենք առանց գաղտնաբառերի ապագայի ճանապարհին ենք, դրանք դեռ հասանելի կլինեն անցաբառերի հետ մեկտեղ"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Նշեք, թե որտեղ եք ուզում պահել ձեր <xliff:g id="CREATETYPES">%1$s</xliff:g>ը"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Ընտրեք գաղտնաբառերի կառավարիչ՝ ձեր տեղեկությունները պահելու և հաջորդ անգամ ավելի արագ մուտք գործելու համար"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Ստեղծե՞լ անցաբառ «<xliff:g id="APPNAME">%1$s</xliff:g>» հավելվածի համար"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Պահել <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>ն այստեղ՝"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Ստեղծե՞լ անցաբառ այլ սարքում"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Միշտ մուտք գործե՞լ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> հավելվածի միջոցով"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Այս գաղտնաբառերի կառավարչում <xliff:g id="USERNAME">%1$s</xliff:g> օգտատերը կկարողանա պահել իր գաղտնաբառերն ու անցաբառերը, որպեսզի հետագայում ավելի արագ մուտք գործի հաշիվ"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Նշել որպես կանխադրված"</string>
     <string name="use_once" msgid="9027366575315399714">"Օգտագործել մեկ անգամ"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> գաղտնաբառ • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> անցաբառ"</string>

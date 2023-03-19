@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Parempi tilin tietoturva"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Kukin avain yhdistetään vain sovellukseen tai sivustoon, jota varten se on luotu, joten et voi koskaan kirjautua vilpilliseen sovellukseen tai sivustolle vahingossa. Lisäksi palvelimet säilyttävät vain julkisia avaimia, mikä tekee hakkeroinnista paljon vaikeampaa."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Saumaton siirtymä"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Kehitys kulkee kohti salasanatonta tulevaisuutta, mutta salasanat ovat edelleen käytettävissä avainkoodien ohella"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Valitse, minne <xliff:g id="CREATETYPES">%1$s</xliff:g> tallennetaan"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Valitse salasanojen ylläpitotyökalu, niin voit tallentaa tietosi ja kirjautua ensi kerralla nopeammin sisään"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Luodaanko avainkoodi (<xliff:g id="APPNAME">%1$s</xliff:g>)?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Tallenna <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> tänne:"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Luodaanko avainkoodi toisella laitteella?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Otetaanko <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> käyttöön kaikissa sisäänkirjautumisissa?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Tämä salasanojen ylläpitotyökalu, jota <xliff:g id="USERNAME">%1$s</xliff:g> käyttää, tallentaa salasanat ja avainkoodit, jotta voit kirjautua helposti sisään"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Aseta oletukseksi"</string>
     <string name="use_once" msgid="9027366575315399714">"Käytä kerran"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> salasanaa • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> avainkoodia"</string>

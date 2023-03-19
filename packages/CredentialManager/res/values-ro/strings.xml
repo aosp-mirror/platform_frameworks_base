@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Securitate îmbunătățită a contului"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Fiecare cheie este conectată în mod exclusiv cu aplicația sau site-ul pentru care a fost creată, prin urmare nu te poți conecta niciodată din greșeală la o aplicație sau un site fraudulos. În plus, întrucât pe servere sunt stocate doar chei publice, hackingul este mult mai dificil."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Tranziție fluidă"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Ne îndreptăm spre un viitor fără parole, în care parolele vor fi disponibile pe lângă cheile de acces"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Alege unde dorești să salvezi <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selectează un manager de parole pentru a salva informațiile și a te conecta mai rapid data viitoare"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Creezi o cheie de acces pentru <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Salvează <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> în"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Creezi cheia de acces pe alt dispozitiv?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Folosești <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> pentru toate conectările?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Managerul de parole pentru <xliff:g id="USERNAME">%1$s</xliff:g> îți va stoca parolele și cheile de acces, pentru a te ajuta să te conectezi cu ușurință"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Setează ca prestabilite"</string>
     <string name="use_once" msgid="9027366575315399714">"Folosește o dată"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> parole • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> chei de acces"</string>

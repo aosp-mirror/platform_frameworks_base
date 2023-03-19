@@ -871,7 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{נוסף אמצעי בקרה אחד (#).}one{נוספו # אמצעי בקרה.}two{נוספו # אמצעי בקרה.}other{נוספו # אמצעי בקרה.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"הוסר"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"להוסיף את <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
     <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"להסיר את אמצעי הבקרה של <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"סומן כמועדף"</string>
@@ -897,8 +897,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"להציג מכשירים ולאפשר שליטה בהם במסך הנעילה?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"ניתן להוסיף למסך הנעילה אמצעי בקרה למכשירים החיצוניים.\n\nיכול להיות שהאפליקציה של המכשיר תאפשר לך לשלוט בחלק מהמכשירים בלי לבטל את הנעילה של הטלפון או הטאבלט.\n\nאפשר לבצע שינויים בכל שלב בהגדרות."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"לאפשר שליטה במכשירים במסך הנעילה?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"אפשר לשלוט בחלק מהמכשירים בלי לבטל את הנעילה של הטלפון או הטאבלט. המכשירים שניתן לשלוט בהם באופן הזה נקבעים באפליקציה לניהול מכשיר המשני."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"לא תודה"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"כן"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"קוד האימות מכיל אותיות או סמלים"</string>

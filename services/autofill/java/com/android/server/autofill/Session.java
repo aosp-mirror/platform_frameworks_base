@@ -16,6 +16,7 @@
 
 package com.android.server.autofill;
 
+import static android.Manifest.permission.PROVIDE_OWN_AUTOFILL_SUGGESTIONS;
 import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
 import static android.service.autofill.AutofillService.EXTRA_FILL_RESPONSE;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_DIALOG;
@@ -72,6 +73,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
@@ -1286,8 +1288,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mSessionFlags = new SessionFlags();
             mSessionFlags.mAugmentedAutofillOnly = forAugmentedAutofillOnly;
             mSessionFlags.mInlineSupportedByService = mService.isInlineSuggestionsEnabledLocked();
-            mSessionFlags.mClientSuggestionsEnabled =
-                    (mFlags & FLAG_ENABLED_CLIENT_SUGGESTIONS) != 0;
+            if (mContext.checkCallingPermission(PROVIDE_OWN_AUTOFILL_SUGGESTIONS)
+                    == PackageManager.PERMISSION_GRANTED) {
+                mSessionFlags.mClientSuggestionsEnabled =
+                        (mFlags & FLAG_ENABLED_CLIENT_SUGGESTIONS) != 0;
+            }
             setClientLocked(client);
         }
 
@@ -4346,8 +4351,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 for (int j = 0; j < fieldIds.size(); j++) {
                     final AutofillId id = fieldIds.get(j);
-                    if (trackedViews == null || !trackedViews.contains(id)) {
-                        fillableIds = ArrayUtils.add(fillableIds, id);
+                    if (id != null) {
+                        if (trackedViews == null || !trackedViews.contains(id)) {
+                            fillableIds = ArrayUtils.add(fillableIds, id);
+                        }
                     }
                 }
             }

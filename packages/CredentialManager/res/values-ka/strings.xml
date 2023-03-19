@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"ანგარიშის გაუმჯობესებული უსაფრთხოება"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"თითოეული გასაღები დაკავშირებულია მხოლოდ აპთან ან ვებსაიტთან, რომელთათვისაც ის შეიქმნა, ამიტომაც შემთხვევით ვერასდროს შეხვალთ თაღლითურ აპში თუ ვებსაიტზე. ამასთანავე, სერვერები ინახავს მხოლოდ საჯარო გასაღებებს, რაც ართულებს გატეხვის ალბათობას."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"დაუბრკოლებელი გადასვლა"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"უპაროლო მომავალში პაროლები კვლავ ხელმისაწვდომი იქნება, წვდომის გასაღებებთან ერთად"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"აირჩიეთ სად შეინახოთ თქვენი <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"აირჩიეთ პაროლების მმართველი თქვენი ინფორმაციის შესანახად, რომ მომავალში უფრო სწრაფად შეხვიდეთ."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"შექმნით წვდომის გასაღებს <xliff:g id="APPNAME">%1$s</xliff:g> აპისთვის?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>-ის შენახვა"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"გსურთ პაროლის შექმნა სხვა მოწყობილობაში?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"გსურთ, გამოიყენოთ<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> სისტემაში ყველა შესვლისთვის?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"მოცემული პაროლების მმართველი <xliff:g id="USERNAME">%1$s</xliff:g>-ისთვის შეინახავს თქვენს პაროლებს და წვდომის გასაღებს, რომლებიც დაგეხმარებათ სისტემაში მარტივად შესვლაში"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ნაგულისხმევად დაყენება"</string>
     <string name="use_once" msgid="9027366575315399714">"ერთხელ გამოყენება"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> პაროლები • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> წვდომის გასაღებები"</string>

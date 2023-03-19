@@ -647,14 +647,17 @@ public class MediaControlPanel {
                     } else {
                         mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
                         if (device.getIntent() != null) {
-                            if (device.getIntent().isActivity()) {
-                                mActivityStarter.startActivity(
-                                        device.getIntent().getIntent(), true);
+                            PendingIntent deviceIntent = device.getIntent();
+                            boolean showOverLockscreen = mKeyguardStateController.isShowing()
+                                    && mActivityIntentHelper.wouldPendingShowOverLockscreen(
+                                        deviceIntent, mLockscreenUserManager.getCurrentUserId());
+                            if (deviceIntent.isActivity() && !showOverLockscreen) {
+                                mActivityStarter.postStartActivityDismissingKeyguard(deviceIntent);
                             } else {
                                 try {
                                     BroadcastOptions options = BroadcastOptions.makeBasic();
                                     options.setInteractive(true);
-                                    device.getIntent().send(options.toBundle());
+                                    deviceIntent.send(options.toBundle());
                                 } catch (PendingIntent.CanceledException e) {
                                     Log.e(TAG, "Device pending intent was canceled");
                                 }
@@ -1373,7 +1376,8 @@ public class MediaControlPanel {
                         itemIndex
                 );
             } else {
-                mediaCoverImageView.setImageIcon(recommendation.getIcon());
+                mediaCoverImageView.post(
+                        () -> mediaCoverImageView.setImageIcon(recommendation.getIcon()));
             }
 
             // Set up the media item's click listener if applicable.

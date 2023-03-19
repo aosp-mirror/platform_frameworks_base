@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"ပိုကောင်းသော အကောင့်လုံခြုံရေး"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"ကီးတစ်ခုစီကို ၎င်းအတွက် ပြုလုပ်ထားသော အက်ပ် (သို့) ဝဘ်ဆိုက်နှင့် သီးသန့်လင့်ခ်ချိတ်ထားသဖြင့် လိမ်လည်သော အက်ပ် (သို့) ဝဘ်ဆိုက်သို့ မည်သည့်အခါတွင်မှ မှားယွင်း၍ လက်မှတ်ထိုးဝင်နိုင်မည်မဟုတ်ပါ။ ထို့အပြင် ဆာဗာသီးသန့် သိမ်းထားသော အများသုံးကီးများကို ဟက်လုပ်ရန် ပိုခက်ခဲသည်။"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"အလိုအလျောက် ကူးပြောင်းခြင်း"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"စကားဝှက်မသုံးသော အနာဂတ်ဆီသို့ ရှေ့ဆက်ရာတွင် လျှို့ဝှက်ကီးများနှင့်အတူ စကားဝှက်များကို ဆက်လက်သုံးနိုင်မည်"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"သင်၏ <xliff:g id="CREATETYPES">%1$s</xliff:g> သိမ်းရန်နေရာ ရွေးခြင်း"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"သင့်အချက်အလက်သိမ်းပြီး နောက်တစ်ကြိမ်၌ ပိုမိုမြန်ဆန်စွာ လက်မှတ်ထိုးဝင်ရန် စကားဝှက်မန်နေဂျာကို ရွေးပါ"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> အတွက် လျှို့ဝှက်ကီးပြုလုပ်မလား။"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> သိမ်းမည့်နေရာ"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"အခြားစက်ပစ္စည်းတွင် လျှို့ဝှက်ကီး ပြုလုပ်မလား။"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"သင်၏လက်မှတ်ထိုးဝင်မှု အားလုံးအတွက် <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> သုံးမလား။"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"သင်အလွယ်တကူ လက်မှတ်ထိုးဝင်နိုင်ရန် <xliff:g id="USERNAME">%1$s</xliff:g> အတွက် ဤစကားဝှက်မန်နေဂျာက စကားဝှက်နှင့် လျှို့ဝှက်ကီးများကို သိမ်းမည်"</string>
     <string name="set_as_default" msgid="4415328591568654603">"မူရင်းအဖြစ် သတ်မှတ်ရန်"</string>
     <string name="use_once" msgid="9027366575315399714">"တစ်ကြိမ်သုံးရန်"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"စကားဝှက် <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ခု • လျှို့ဝှက်ကီး <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> ခု"</string>

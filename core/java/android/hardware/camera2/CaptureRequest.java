@@ -2532,7 +2532,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <ul>
      *   <li>{@link #CONTROL_AUTOFRAMING_OFF OFF}</li>
      *   <li>{@link #CONTROL_AUTOFRAMING_ON ON}</li>
-     *   <li>{@link #CONTROL_AUTOFRAMING_AUTO AUTO}</li>
      * </ul>
      *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
@@ -2545,7 +2544,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see #CONTROL_AUTOFRAMING_OFF
      * @see #CONTROL_AUTOFRAMING_ON
-     * @see #CONTROL_AUTOFRAMING_AUTO
      */
     @PublicKey
     @NonNull
