@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"הצגת גבולות אזור, שוליים וכדומה"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"אילוץ כיוון פריסה מימין לשמאל"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"אילוץ של כיוון פריסת מסך מימין לשמאל עבור כל השפות בכל המקומות"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"סרגל ניווט שקוף"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"צבע הרקע של סרגל הניווט יהיה שקוף כברירת מחדל"</string>
     <string name="window_blurs" msgid="6831008984828425106">"אישור טשטושים ברמת החלון"</string>
     <string name="force_msaa" msgid="4081288296137775550">"‏אילוץ הפעלת 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"‏הפעלת 4x MSAA ביישומי OpenGL ES 2.0"</string>
@@ -679,4 +681,5 @@
     <item msgid="7728484337962740316">"הזזה ימינה"</item>
     <item msgid="324200556467459329">"הזזה למעלה"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"%% <xliff:g id="PERCENTAGE">%1$d</xliff:g>"</string>
 </resources>

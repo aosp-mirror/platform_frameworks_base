@@ -219,10 +219,18 @@ public class SoundTriggerTest extends InstrumentationTestCase {
 
     @SmallTest
     public void testRecognitionEventParcelUnparcel_noData() throws Exception {
-        RecognitionEvent re = new RecognitionEvent(SoundTrigger.RECOGNITION_STATUS_SUCCESS, 1,
-                true, 2, 3, 4, false, null, null);
+        RecognitionEvent re = new RecognitionEvent(SoundTrigger.RECOGNITION_STATUS_SUCCESS,
+                1 /* soundModelHandle */,
+                true /* captureAvailable */,
+                2 /* captureSession */,
+                3 /* captureDelayMs */,
+                4 /* capturePreambleMs */,
+                false /* triggerInData */,
+                null /* captureFormat */,
+                null /* data */,
+                12345678 /* halEventReceivedMillis */);
 
-        // Write to a parcel
+                // Write to a parcel
         Parcel parcel = Parcel.obtain();
         re.writeToParcel(parcel, 0);
 
@@ -236,10 +244,18 @@ public class SoundTriggerTest extends InstrumentationTestCase {
 
     @SmallTest
     public void testRecognitionEventParcelUnparcel_zeroData() throws Exception {
-        RecognitionEvent re = new RecognitionEvent(SoundTrigger.RECOGNITION_STATUS_FAILURE, 1,
-                true, 2, 3, 4, false, null, new byte[1]);
+        RecognitionEvent re = new RecognitionEvent(SoundTrigger.RECOGNITION_STATUS_FAILURE,
+                1 /* soundModelHandle */,
+                true /* captureAvailable */,
+                2 /* captureSession */,
+                3 /* captureDelayMs */,
+                4 /* capturePreambleMs */,
+                false /* triggerInData */,
+                null /* captureFormat */,
+                new byte[1] /* data */,
+                12345678 /* halEventReceivedMillis */);
 
-        // Write to a parcel
+                // Write to a parcel
         Parcel parcel = Parcel.obtain();
         re.writeToParcel(parcel, 0);
 
@@ -255,10 +271,18 @@ public class SoundTriggerTest extends InstrumentationTestCase {
     public void testRecognitionEventParcelUnparcel_largeData() throws Exception {
         byte[] data = new byte[200 * 1024];
         mRandom.nextBytes(data);
-        RecognitionEvent re = new RecognitionEvent(SoundTrigger.RECOGNITION_STATUS_ABORT, 1,
-                false, 2, 3, 4, false, null, data);
+        RecognitionEvent re = new RecognitionEvent(SoundTrigger.RECOGNITION_STATUS_ABORT,
+                1 /* soundModelHandle */,
+                false /* captureAvailable */,
+                2 /* captureSession */,
+                3 /* captureDelayMs */,
+                4 /* capturePreambleMs */,
+                false /* triggerInData */,
+                null /* captureFormat */,
+                data,
+                12345678 /* halEventReceivedMillis */);
 
-        // Write to a parcel
+                // Write to a parcel
         Parcel parcel = Parcel.obtain();
         re.writeToParcel(parcel, 0);
 
@@ -274,14 +298,20 @@ public class SoundTriggerTest extends InstrumentationTestCase {
     public void testRecognitionEventParcelUnparcel_largeAudioData() throws Exception {
         byte[] data = new byte[200 * 1024];
         mRandom.nextBytes(data);
-        RecognitionEvent re = new RecognitionEvent(SoundTrigger.RECOGNITION_STATUS_ABORT, 1,
-                false, 2, 3, 4, true,
-                (new AudioFormat.Builder())
-                .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
-                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                .setSampleRate(16000)
-                .build(),
-                data);
+        RecognitionEvent re = new RecognitionEvent(SoundTrigger.RECOGNITION_STATUS_ABORT,
+                1 /* soundModelHandle */,
+                false /* captureAvailable */,
+                2 /* captureSession */,
+                3 /* captureDelayMs */,
+                4 /* capturePreambleMs */,
+                true /* triggerInData */,
+                new AudioFormat.Builder()
+                        .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .setSampleRate(16000)
+                        .build(),
+                data,
+                12345678 /* halEventReceivedMillis */);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -298,7 +328,17 @@ public class SoundTriggerTest extends InstrumentationTestCase {
     @SmallTest
     public void testKeyphraseRecognitionEventParcelUnparcel_noKeyphrases() throws Exception {
         KeyphraseRecognitionEvent re = new KeyphraseRecognitionEvent(
-                SoundTrigger.RECOGNITION_STATUS_SUCCESS, 1, true, 2, 3, 4, false, null, null, null);
+                SoundTrigger.RECOGNITION_STATUS_SUCCESS,
+                1 /* soundModelHandle */,
+                true /* captureAvailable */,
+                2 /* captureSession */,
+                3 /* captureDelayMs */,
+                4 /* capturePreambleMs */,
+                false /* triggerInData */,
+                null /* captureFormat */,
+                null /* data */,
+                null /* keyphraseExtras */,
+                12345678 /* halEventReceivedMillis */);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -317,8 +357,17 @@ public class SoundTriggerTest extends InstrumentationTestCase {
     public void testKeyphraseRecognitionEventParcelUnparcel_zeroData() throws Exception {
         KeyphraseRecognitionExtra[] kpExtra = new KeyphraseRecognitionExtra[0];
         KeyphraseRecognitionEvent re = new KeyphraseRecognitionEvent(
-                SoundTrigger.RECOGNITION_STATUS_FAILURE, 2, true, 2, 3, 4, false, null, new byte[1],
-                kpExtra);
+                SoundTrigger.RECOGNITION_STATUS_FAILURE,
+                2 /* soundModelHandle */,
+                true /* captureAvailable */,
+                2 /* captureSession */,
+                3 /* captureDelayMs */,
+                4 /* capturePreambleMs */,
+                false /* triggerInData */,
+                null /* captureFormat */,
+                new byte[1] /* data */,
+                kpExtra,
+                12345678 /* halEventReceivedMillis */);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();
@@ -353,8 +402,17 @@ public class SoundTriggerTest extends InstrumentationTestCase {
                 new ConfidenceLevel[0]);
 
         KeyphraseRecognitionEvent re = new KeyphraseRecognitionEvent(
-                SoundTrigger.RECOGNITION_STATUS_FAILURE, 1, true, 2, 3, 4, false, null, data,
-                kpExtra);
+                SoundTrigger.RECOGNITION_STATUS_FAILURE,
+                1 /* soundModelHandle */,
+                true /* captureAvailable */,
+                2 /* captureSession */,
+                3 /* captureDelayMs */,
+                4 /* capturePreambleMs */,
+                false /* triggerInData */,
+                null /* captureFormat */,
+                data,
+                kpExtra,
+                12345678 /* halEventReceivedMillis */);
 
         // Write to a parcel
         Parcel parcel = Parcel.obtain();

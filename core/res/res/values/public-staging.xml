@@ -269,6 +269,8 @@
     <public name="system_palette_key_color_tertiary_dark"/>
     <public name="system_palette_key_color_neutral_dark"/>
     <public name="system_palette_key_color_neutral_variant_dark"/>
+    <public name="system_outline_variant_light" />
+    <public name="system_outline_variant_dark" />
   </staging-public-group>
 
   <staging-public-group type="array" first-id="0x01c80000">

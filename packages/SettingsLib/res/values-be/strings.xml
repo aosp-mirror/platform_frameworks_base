@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Паказаць межы абрэзкі, палі і г. д."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Прымусовая раскладка справа налева"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Прымусовая раскладка экрана справа налева для ўсіх рэгіянальных налад"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Празрыстая панэль навігацыі"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Стандартна зрабіць фонавы колер панэлі навігацыі празрыстым"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Размываць на ўзроўні акна"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Прымусовае выкананне 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Уключыць 4x MSAA у праграмах з OpenGL ES 2.0"</string>
@@ -679,4 +681,5 @@
     <item msgid="7728484337962740316">"Перамясціць управа"</item>
     <item msgid="324200556467459329">"Перамясціць уверх"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

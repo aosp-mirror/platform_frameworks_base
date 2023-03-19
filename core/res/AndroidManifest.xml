@@ -7435,6 +7435,13 @@
     <permission android:name="android.permission.EXECUTE_APP_ACTION"
                 android:protectionLevel="internal|role" />
 
+    <!-- Allows an application to display its suggestions using the autofill framework.
+         <p>For now, this permission is only granted to the Browser application.
+         <p>Protection level: internal|role
+    -->
+    <permission android:name="android.permission.PROVIDE_OWN_AUTOFILL_SUGGESTIONS"
+                android:protectionLevel="internal|role" />
+
     <!-- @SystemApi Allows an application to create virtual devices in VirtualDeviceManager.
          @hide -->
     <permission android:name="android.permission.CREATE_VIRTUAL_DEVICE"

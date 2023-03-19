@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"بہتر کردہ اکاؤنٹ کی سیکیورٹی"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"ہر کلید خصوصی طور پر اس ایپ یا ویب سائٹ سے منسلک ہے جس کے لیے اسے تخلیق کیا گیا تھا، اس لیے آپ کبھی بھی غلطی سے کسی پر فریب ایپ یا ویب سائٹ میں سائن ان نہیں کر سکتے ہیں۔ اس کے علاوہ، چونکہ سرورز صرف عوامی کلید رکھتے ہیں، اس لیے ہیکنگ بہت مشکل ہے۔"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"آسان ٹرانزیشن"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"چونکہ ہم بغیر پاس ورڈ والے مستقبل کی طرف جا رہے ہیں اس کے باوجود پاس ورڈز پاس کیز کے ساتھ ہی دستیاب ہوں گے"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"منتخب کریں کہ آپ کی <xliff:g id="CREATETYPES">%1$s</xliff:g> کو کہاں محفوظ کرنا ہے"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"اپنی معلومات کو محفوظ کرنے اور اگلی بار تیزی سے سائن ان کرنے کے لیے پاس ورڈ مینیجر منتخب کریں"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> کے لیے پاس کی تخلیق کریں؟"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> کو اس میں محفوظ کریں"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"کسی دوسرے آلے میں پاس کی تخلیق کریں؟"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"اپنے سبھی سائن انز کے لیے <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> کا استعمال کریں؟"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"آسانی سے سائن ان کرنے میں آپ کی مدد کرنے کے لیے یہ پاس ورڈ مینیجر <xliff:g id="USERNAME">%1$s</xliff:g> کے لیے آپ کے پاس ورڈز اور پاس کیز کو اسٹور کرے گا"</string>
     <string name="set_as_default" msgid="4415328591568654603">"بطور ڈیفالٹ سیٹ کریں"</string>
     <string name="use_once" msgid="9027366575315399714">"ایک بار استعمال کریں"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> پاس ورڈز • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> پاس کیز"</string>

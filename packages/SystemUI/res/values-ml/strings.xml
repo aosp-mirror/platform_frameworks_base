@@ -834,8 +834,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"സ്ക്രീൻ പൂർണ്ണമായും മാഗ്നിഫൈ ചെയ്യുക"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"സ്‌ക്രീനിന്റെ ഭാഗം മാഗ്നിഫൈ ചെയ്യുക"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"മാറുക"</string>
-    <!-- no translation found for magnification_open_settings_click_label (6151849212725923363) -->
-    <skip />
+    <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"മാഗ്നിഫിക്കേഷൻ ക്രമീകരണം തുറക്കുക"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"വലുപ്പം മാറ്റാൻ മൂല വലിച്ചിടുക"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"ഡയഗണൽ സ്‌ക്രോളിംഗ് അനുവദിക്കുക"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"വലുപ്പം മാറ്റുക"</string>
@@ -845,8 +844,7 @@
     <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"ഇടത് ഹാൻഡിൽ"</string>
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"വലത് ഹാൻഡിൽ"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"ചുവടെയുള്ള ഹാൻഡിൽ"</string>
-    <!-- no translation found for accessibility_magnification_settings_panel_description (8174187340747846953) -->
-    <skip />
+    <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"മാഗ്നിഫിക്കേഷൻ ക്രമീകരണം"</string>
     <string name="accessibility_magnifier_size" msgid="3038755600030422334">"മാഗ്നിഫയർ വലുപ്പം"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"സൂം ചെയ്യുക"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"ഇടത്തരം"</string>
@@ -873,7 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# നിയന്ത്രണം ചേർത്തു.}other{# നിയന്ത്രണങ്ങൾ ചേർത്തു.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"നീക്കം ചെയ്‌തു"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> ചേർക്കണോ?"</string>
-    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
     <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> എന്നതിനുള്ള നിയന്ത്രണങ്ങൾ നീക്കം ചെയ്യണോ?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"പ്രിയപ്പെട്ടതാക്കി"</string>
@@ -899,8 +897,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"ലോക്ക് സ്‌ക്രീനിൽ നിന്ന് ഉപകരണങ്ങൾ കാണിക്കുകയും നിയന്ത്രിക്കുകയും ചെയ്യണോ?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"നിങ്ങളുടെ ബാഹ്യ ഉപകരണങ്ങൾക്കുള്ള നിയന്ത്രണങ്ങൾ ലോക്ക് സ്‌ക്രീനിലേക്ക് ചേർക്കാനാകും.\n\nനിങ്ങളുടെ ഫോണോ ടാബ്‌ലെറ്റോ അൺലോക്ക് ചെയ്യാതെ ചില ഉപകരണങ്ങൾ നിയന്ത്രിക്കാൻ നിങ്ങളുടെ ഉപകരണ ആപ്പ് അനുവദിച്ചേക്കും.\n\nനിങ്ങൾക്ക് ക്രമീകരണത്തിൽ ഏതുസമയത്തും മാറ്റങ്ങൾ വരുത്താം."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"ലോക്ക് സ്‌ക്രീനിൽ നിന്ന് ഉപകരണങ്ങൾ നിയന്ത്രിക്കണോ?"</string>
-    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
-    <skip />
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"നിങ്ങളുടെ ഫോണോ ടാബ്‌ലെറ്റോ അൺലോക്ക് ചെയ്യാതെ ചില ഉപകരണങ്ങൾ നിയന്ത്രിക്കാം. ഏതൊക്കെ ഉപകരണങ്ങൾ ഈ രീതിയിൽ നിയന്ത്രിക്കാൻ കഴിയുമെന്ന് നിങ്ങളുടെ ഉപകരണ ആപ്പ് നിർണ്ണയിക്കുന്നു."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"വേണ്ട, നന്ദി"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"ഉവ്വ്"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"പിന്നിൽ അക്ഷരങ്ങളോ ചിഹ്നങ്ങളോ അടങ്ങിയിരിക്കുന്നു"</string>

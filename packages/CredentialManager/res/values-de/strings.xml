@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Verbesserte Kontosicherheit"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Jeder Schlüssel ist ausschließlich mit der App oder Website verknüpft, für die er erstellt wurde. Du kannst dich also nicht aus Versehen bei einer betrügerischen App oder Website anmelden. Da auf Servern nur öffentliche Schlüssel verwaltet werden, wird das Hacking außerdem erheblich erschwert."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Nahtlose Umstellung"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Auch wenn wir uns auf eine passwortlose Zukunft zubewegen, werden neben Passkeys weiter Passwörter verfügbar sein"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Wähle aus, wo deine <xliff:g id="CREATETYPES">%1$s</xliff:g> gespeichert werden sollen"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Du kannst einen Passwortmanager auswählen, um deine Anmeldedaten zu speichern, damit du dich nächstes Mal schneller anmelden kannst"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Passkey für <xliff:g id="APPNAME">%1$s</xliff:g> erstellen?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> speichern unter"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Passkey auf einem anderen Gerät erstellen?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> für alle Anmeldungen verwenden?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Mit diesem Passwortmanager für <xliff:g id="USERNAME">%1$s</xliff:g> werden deine Passwörter und Passkeys gespeichert, damit du dich problemlos anmelden kannst"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Als Standard festlegen"</string>
     <string name="use_once" msgid="9027366575315399714">"Einmal verwenden"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> Passwörter • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> Passkeys"</string>

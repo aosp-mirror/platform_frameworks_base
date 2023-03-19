@@ -63,13 +63,17 @@
     <item msgid="6336372935919715515">"Filtrlar yoniq"</item>
     <item msgid="2779123106632690576">"Yoniq"</item>
   </string-array>
-    <!-- no translation found for bt_hci_snoop_log_filters_entries:0 (195768089203590086) -->
-    <!-- no translation found for bt_hci_snoop_log_filters_entries:1 (2776218217644557831) -->
-    <!-- no translation found for bt_hci_snoop_log_filters_entries:2 (8163235976612675092) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:0 (3961868665260627524) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:1 (2505973306504851132) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:2 (5883011000629613855) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:3 (1051534112762023603) -->
+  <string-array name="bt_hci_snoop_log_filters_entries">
+    <item msgid="195768089203590086">"Faqat ACL sarlavhalari qolsin"</item>
+    <item msgid="2776218217644557831">"A2DP media paketlarni filtrlash"</item>
+    <item msgid="8163235976612675092">"RFCOMM kanalini filtrlash"</item>
+  </string-array>
+  <string-array name="bt_hci_snoop_log_profile_filter_entries">
+    <item msgid="3961868665260627524">"Faolsizlantirish"</item>
+    <item msgid="2505973306504851132">"Qatorni harflar bilan toʻldiring"</item>
+    <item msgid="5883011000629613855">"Faqat sarlavha qolsin"</item>
+    <item msgid="1051534112762023603">"Butunlay olib tashlash"</item>
+  </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (asosiy)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>

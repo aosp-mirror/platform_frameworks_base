@@ -1582,19 +1582,19 @@ class ActivityStarter {
             }
         }
         if (isTransientLaunch) {
-            if (forceTransientTransition && newTransition != null) {
-                newTransition.collect(mLastStartActivityRecord);
-                newTransition.collect(mPriorAboveTask);
+            if (forceTransientTransition) {
+                transitionController.collect(mLastStartActivityRecord);
+                transitionController.collect(mPriorAboveTask);
             }
             // `started` isn't guaranteed to be the actual relevant activity, so we must wait
             // until after we launched to identify the relevant activity.
             transitionController.setTransientLaunch(mLastStartActivityRecord, mPriorAboveTask);
-            if (forceTransientTransition && newTransition != null) {
+            if (forceTransientTransition) {
                 final DisplayContent dc = mLastStartActivityRecord.getDisplayContent();
                 // update wallpaper target to TransientHide
                 dc.mWallpaperController.adjustWallpaperWindows();
                 // execute transition because there is no change
-                newTransition.setReady(dc, true /* ready */);
+                transitionController.setReady(dc, true /* ready */);
             }
         }
         if (!userLeaving) {

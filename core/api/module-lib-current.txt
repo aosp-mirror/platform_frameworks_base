@@ -18,8 +18,16 @@ package android.app {
 
   public class ActivityManager {
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void addHomeVisibilityListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.HomeVisibilityListener);
+    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void registerUidFrozenStateChangedCallback(@NonNull java.util.concurrent.Executor, @NonNull android.app.ActivityManager.UidFrozenStateChangedCallback);
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void removeHomeVisibilityListener(@NonNull android.app.HomeVisibilityListener);
+    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void unregisterUidFrozenStateChangedCallback(@NonNull android.app.ActivityManager.UidFrozenStateChangedCallback);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
+  }
+
+  public static interface ActivityManager.UidFrozenStateChangedCallback {
+    method public void onUidFrozenStateChanged(@NonNull int[], @NonNull int[]);
+    field public static final int UID_FROZEN_STATE_FROZEN = 1; // 0x1
+    field public static final int UID_FROZEN_STATE_UNFROZEN = 2; // 0x2
   }
 
   public class AppOpsManager {

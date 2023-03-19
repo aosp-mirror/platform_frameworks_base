@@ -1328,7 +1328,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 synchronized (mService) {
                     BroadcastProcessQueue leaf = mProcessQueues.get(uid);
                     while (leaf != null) {
-                        leaf.setProcessCached(cached);
+                        // Update internal state by refreshing values previously
+                        // read from any known running process
+                        leaf.setProcess(leaf.app);
                         updateQueueDeferred(leaf);
                         updateRunnableList(leaf);
                         leaf = leaf.processNameNext;
@@ -1339,7 +1341,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }, ActivityManager.UID_OBSERVER_CACHED, 0, "android");
 
         // Kick off periodic health checks
-        checkHealthLocked();
+        mLocalHandler.sendEmptyMessage(MSG_CHECK_HEALTH);
     }
 
     @Override

@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Подобрена сигурност на профила"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Всеки ключ е свързан само с приложението или уебсайта, за които е създаден. Затова не е възможно да влезете в измамно приложение или уебсайт по погрешка. Освен това сървърите съхраняват само публичните ключове, което значително затруднява опитите за хакерство."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Безпроблемен преход"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Паролите ще продължат да са налице заедно с кодовете за достъп по пътя ни към бъдеще без пароли"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Изберете къде да запазите своите <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Изберете мениджър на пароли, в който да се запазят данните ви, така че следващия път да влезете по-бързо в профила си"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Да се създаде ли код за достъп за <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Запазване на <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> във:"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Искате ли да създадете код за достъп на друго устройство?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Да се използва ли <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> за всичките ви данни за вход?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Мениджърът на пароли за <xliff:g id="USERNAME">%1$s</xliff:g> ще съхранява вашите пароли и кодове за достъп, за да влизате лесно в профила си"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Задаване като основно"</string>
     <string name="use_once" msgid="9027366575315399714">"Еднократно използване"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> пароли • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> кода за достъп"</string>

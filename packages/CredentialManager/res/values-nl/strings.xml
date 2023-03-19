@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Verbeterde accountbeveiliging"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Elke sleutel is exclusief gekoppeld aan de app of website waarvoor deze is gemaakt. Je kunt dus nooit per ongeluk inloggen bij een bedrieglijke app of website. Bovendien bewaren servers alleen openbare sleutels, wat hacken een stuk lastiger maakt."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Naadloze overgang"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"We zijn op weg naar een wachtwoordloze toekomst, maar naast toegangssleutels kun je nog steeds gebruikmaken van wachtwoorden."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Kies waar je je <xliff:g id="CREATETYPES">%1$s</xliff:g> wilt opslaan"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecteer een wachtwoordmanager om je informatie op te slaan en de volgende keer sneller in te loggen"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Toegangssleutel maken voor <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> opslaan in"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Toegangssleutel maken op een ander apparaat?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> elke keer gebruiken als je inlogt?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Deze wachtwoordmanager voor <xliff:g id="USERNAME">%1$s</xliff:g> slaat je wachtwoorden en toegangssleutels op zodat je makkelijk kunt inloggen"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Instellen als standaard"</string>
     <string name="use_once" msgid="9027366575315399714">"Eén keer gebruiken"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> wachtwoorden • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> toegangssleutels"</string>

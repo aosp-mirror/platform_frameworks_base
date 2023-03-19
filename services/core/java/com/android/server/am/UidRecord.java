@@ -151,6 +151,14 @@ public final class UidRecord {
     @GuardedBy("mService")
     private int mLastReportedChange;
 
+    /**
+     * This indicates whether the entire Uid is frozen or not.
+     * It is used by CachedAppOptimizer to avoid sending multiple
+     * UID_FROZEN_STATE_UNFROZEN messages on process unfreeze.
+     */
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    private boolean mUidIsFrozen;
+
     public UidRecord(int uid, ActivityManagerService service) {
         mUid = uid;
         mService = service;
@@ -311,6 +319,32 @@ public final class UidRecord {
             }
         }
         return null;
+    }
+
+    /**
+     * @return true if all processes in the Uid are frozen, false otherwise.
+     */
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    public boolean areAllProcessesFrozen() {
+        for (int i = mProcRecords.size() - 1; i >= 0; i--) {
+            final ProcessRecord app = mProcRecords.valueAt(i);
+            final ProcessCachedOptimizerRecord opt = app.mOptRecord;
+
+            if (!opt.isFrozen()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    public void setFrozen(boolean frozen) {
+        mUidIsFrozen = frozen;
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    public boolean isFrozen() {
+        return mUidIsFrozen;
     }
 
     @GuardedBy({"mService", "mProcLock"})

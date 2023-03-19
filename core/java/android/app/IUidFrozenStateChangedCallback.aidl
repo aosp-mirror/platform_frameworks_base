@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
-package android.service.voice;
+package android.app;
 
-parcelable DetectedPhrase;
+/** {@hide} */
+oneway interface IUidFrozenStateChangedCallback {
+    /**
+     * Report a new frozen state for the Uid list.
+     */
+    void onUidFrozenStateChanged(in int[] uids, in int[] frozenStates);
+}

@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_FROZEN;
+import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_UNFROZEN;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_COMPACTION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FREEZER;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
@@ -170,6 +173,7 @@ public final class CachedAppOptimizer {
     static final int SET_FROZEN_PROCESS_MSG = 3;
     static final int REPORT_UNFREEZE_MSG = 4;
     static final int COMPACT_NATIVE_MSG = 5;
+    static final int UID_FROZEN_STATE_CHANGED_MSG = 6;
 
     // When free swap falls below this percentage threshold any full (file + anon)
     // compactions will be downgraded to file only compactions to reduce pressure
@@ -1228,6 +1232,13 @@ public final class CachedAppOptimizer {
             }
         }
 
+        UidRecord uidRec = app.getUidRecord();
+        if (uidRec.isFrozen()) {
+            uidRec.setFrozen(false);
+            mFreezeHandler.removeMessages(UID_FROZEN_STATE_CHANGED_MSG, app);
+            reportOneUidFrozenStateChanged(app.uid, false);
+        }
+
         opt.setFreezerOverride(false);
         if (pid == 0 || !opt.isFrozen()) {
             return;
@@ -1355,6 +1366,13 @@ public final class CachedAppOptimizer {
                 // Remove pending DO_FREEZE message
                 mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
                 opt.setPendingFreeze(false);
+            }
+
+            UidRecord uidRec = app.getUidRecord();
+            if (uidRec != null && uidRec.isFrozen()) {
+                uidRec.setFrozen(false);
+                mFreezeHandler.removeMessages(UID_FROZEN_STATE_CHANGED_MSG, app);
+                reportOneUidFrozenStateChanged(app.uid, false);
             }
 
             mFrozenProcesses.delete(app.getPid());
@@ -1889,6 +1907,18 @@ public final class CachedAppOptimizer {
         }
     }
 
+    private void reportOneUidFrozenStateChanged(int uid, boolean frozen) {
+        final int[] uids = new int[1];
+        final int[] frozenStates = new int[1];
+
+        uids[0] = uid;
+        frozenStates[0] = frozen ? UID_FROZEN_STATE_FROZEN : UID_FROZEN_STATE_UNFROZEN;
+
+        Slog.d(TAG_AM, "reportOneUidFrozenStateChanged uid " + uid + " frozen = " + frozen);
+
+        mAm.reportUidFrozenStateChanged(uids, frozenStates);
+    }
+
     private final class FreezeHandler extends Handler implements
             ProcLocksReader.ProcLocksReaderCallback {
         private FreezeHandler() {
@@ -1928,6 +1958,10 @@ public final class CachedAppOptimizer {
                     int reason = obj.second;
 
                     reportUnfreeze(pid, frozenDuration, processName, reason);
+                    break;
+                case UID_FROZEN_STATE_CHANGED_MSG:
+                    ProcessRecord proc = (ProcessRecord) msg.obj;
+                    reportOneUidFrozenStateChanged(proc.uid, true);
                     break;
                 default:
                     return;
@@ -2014,6 +2048,13 @@ public final class CachedAppOptimizer {
 
                 unfrozenDuration = opt.getFreezeUnfreezeTime() - unfreezeTime;
                 frozen = opt.isFrozen();
+
+                final UidRecord uidRec = proc.getUidRecord();
+                if (frozen && uidRec.areAllProcessesFrozen()) {
+                    uidRec.setFrozen(true);
+                    mFreezeHandler.sendMessage(mFreezeHandler.obtainMessage(
+                            UID_FROZEN_STATE_CHANGED_MSG, proc));
+                }
             }
 
             if (!frozen) {

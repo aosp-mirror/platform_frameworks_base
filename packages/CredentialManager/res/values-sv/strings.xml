@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Förbättrad kontosäkerhet"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Varje nyckel är exklusivt länkad till appen eller webbplatsen den skapades för, så du kan aldrig logga in i en bedräglig app eller webbplats av misstag. Hackning blir dessutom mycket svårare eftersom servrar bara behåller offentliga nycklar."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"En sömlös övergång"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Medan vi beger oss mot en lösenordslös framtid kommer lösenord fortfarande att vara tillgängliga utöver nycklar"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Välj var du vill spara <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Välj en lösenordshanterare för att spara dina uppgifter och logga in snabbare nästa gång"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vill du skapa en nyckel för <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Spara <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> i"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Vill du skapa en nyckel på en annan enhet?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Vill du använda <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> för alla dina inloggningar?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Den här lösenordshanteraren för <xliff:g id="USERNAME">%1$s</xliff:g> sparar dina lösenord och nycklar för att underlätta inloggning"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Ange som standard"</string>
     <string name="use_once" msgid="9027366575315399714">"Använd en gång"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> lösenord • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> nycklar"</string>

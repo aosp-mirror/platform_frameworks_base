@@ -140,6 +140,8 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"การโทรผ่าน Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ปิด"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"โทรผ่าน Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"โทรผ่านเครือข่ายมือถือ"</string>
@@ -1393,10 +1395,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"เลือกวิธีการป้อนข้อมูล"</string>
     <string name="show_ime" msgid="6406112007347443383">"เปิดทิ้งไว้บนหน้าจอในระหว่างใช้งานแป้นพิมพ์จริง"</string>
     <string name="hardware" msgid="1800597768237606953">"แสดงแป้นพิมพ์เสมือน"</string>
-    <!-- no translation found for select_keyboard_layout_notification_title (5823199895322205589) -->
-    <skip />
-    <!-- no translation found for select_multiple_keyboards_layout_notification_title (6999491025126641938) -->
-    <skip />
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"กำหนดค่า <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"กำหนดค่าแป้นพิมพ์จริง"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"แตะเพื่อเลือกภาษาและรูปแบบ"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
@@ -1721,8 +1721,7 @@
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"เครื่องช่วยฟัง"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว เปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว ปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
-    <!-- no translation found for accessibility_shortcut_spoken_feedback (3760999147597564314) -->
-    <skip />
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ปล่อยปุ่มปรับระดับเสียง หากต้องการเปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ให้กดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มค้างไว้อีกครั้งเป็นเวลา 3 วินาที"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"เลือกฟีเจอร์ที่จะใช้เมื่อคุณแตะปุ่มการช่วยเหลือพิเศษดังต่อไปนี้"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"เลือกฟีเจอร์ที่จะใช้กับท่าทางสัมผัสการช่วยเหลือพิเศษ (ใช้ 2 นิ้วเลื่อนขึ้นจากด้านล่างของหน้าจอ) ดังต่อไปนี้"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"เลือกฟีเจอร์ที่จะใช้กับท่าทางสัมผัสการช่วยเหลือพิเศษ (ใช้ 3 นิ้วเลื่อนขึ้นจากด้านล่างของหน้าจอ) ดังต่อไปนี้"</string>
@@ -2326,19 +2325,18 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังใช้จอแสดงผลทั้งสองจอเพื่อแสดงเนื้อหา"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"อุปกรณ์ร้อนเกินไป"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"หน้าจอคู่ไม่พร้อมให้ใช้งานเนื่องจากโทรศัพท์ของคุณร้อนเกินไป"</string>
+    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
+    <skip />
+    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
+    <skip />
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ปิด"</string>
-    <!-- no translation found for keyboard_layout_notification_selected_title (1202560174252421219) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_one_selected_message (4314216053129257197) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_two_selected_message (1876349944065922950) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_three_selected_message (280734264593115419) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_more_than_three_selected_message (1581834181578206937) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_multiple_selected_title (5242444914367024499) -->
-    <skip />
-    <!-- no translation found for keyboard_layout_notification_multiple_selected_message (6576533454124419202) -->
-    <skip />
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"กำหนดค่า <xliff:g id="DEVICE_NAME">%s</xliff:g> แล้ว"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"ตั้งค่ารูปแบบแป้นพิมพ์เป็นภาษา<xliff:g id="LAYOUT_1">%s</xliff:g> แตะเพื่อเปลี่ยน"</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"ตั้งค่ารูปแบบแป้นพิมพ์เป็นภาษา<xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> แตะเพื่อเปลี่ยน"</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"ตั้งค่ารูปแบบแป้นพิมพ์เป็นภาษา<xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> แตะเพื่อเปลี่ยน"</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"ตั้งค่ารูปแบบแป้นพิมพ์เป็นภาษา<xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… แตะเพื่อเปลี่ยน"</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"กำหนดค่าแป้นพิมพ์จริงแล้ว"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"แตะเพื่อดูแป้นพิมพ์"</string>
 </resources>

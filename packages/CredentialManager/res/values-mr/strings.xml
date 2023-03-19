@@ -20,8 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"सुधारित खाते सुरक्षा"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"प्रत्येक की ज्यांच्यासाठी बनवली आहे फक्त त्या अ‍ॅप किंवा वेबसाइटसोबत लिंक केलेली असते, ज्यमुळे तुम्ही कधीच कपटपूर्ण अ‍ॅप किंवा वेबसाइटवर चुकूनही साइन इन करणार नाही. तसेच, सर्व्हर फक्त सार्वजनिक की स्टोअर करत असल्यामुळे, हॅक करणे खूप अवघड आहे."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"अखंड संक्रमण"</string>
-    <!-- no translation found for seamless_transition_detail (3440478759491650823) -->
-    <skip />
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"पासवर्ड न वापरणाऱ्या भविष्यात पुढे जाताना, पासवर्ड तरीही पासकीच्या बरोबरीने उपलब्ध असतील"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"तुमची <xliff:g id="CREATETYPES">%1$s</xliff:g> कुठे सेव्ह करायची ते निवडा"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"तुमची माहिती सेव्ह करण्यासाठी आणि पुढच्या वेळी जलद साइन इन करण्याकरिता Password Manager निवडा"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> साठी पासकी तयार करायची का?"</string>
@@ -36,8 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> येथे सेव्ह करा"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"दुसऱ्या डिव्हाइसमध्ये पासकी तयार करायची का?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"तुमच्या सर्व साइन-इन साठी <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>वापरायचे का?"</string>
-    <!-- no translation found for use_provider_for_all_description (1998772715863958997) -->
-    <skip />
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"तुम्हाला सहजरीत्या साइन इन करण्यात मदत करण्यासाठी हा <xliff:g id="USERNAME">%1$s</xliff:g> चा पासवर्ड व्यवस्थापक तुमचे पासवर्ड आणि पासकी स्टोअर करेल"</string>
     <string name="set_as_default" msgid="4415328591568654603">"डिफॉल्ट म्हणून सेट करा"</string>
     <string name="use_once" msgid="9027366575315399714">"एकदा वापरा"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> पासवर्ड • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> पासकी"</string>

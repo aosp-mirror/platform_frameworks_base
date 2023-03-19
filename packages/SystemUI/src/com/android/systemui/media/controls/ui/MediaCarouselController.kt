@@ -225,8 +225,10 @@ constructor(
         object : KeyguardUpdateMonitorCallback() {
             override fun onStrongAuthStateChanged(userId: Int) {
                 if (keyguardUpdateMonitor.isUserInLockdown(userId)) {
+                    debugLogger.logCarouselHidden()
                     hideMediaCarousel()
                 } else if (keyguardUpdateMonitor.isUserUnlocked(userId)) {
+                    debugLogger.logCarouselVisible()
                     showMediaCarousel()
                 }
             }
@@ -298,7 +300,7 @@ constructor(
                     receivedSmartspaceCardLatency: Int,
                     isSsReactivated: Boolean
                 ) {
-                    debugLogger.logMediaLoaded(key)
+                    debugLogger.logMediaLoaded(key, data.active)
                     if (addOrUpdatePlayer(key, oldKey, data, isSsReactivated)) {
                         // Log card received if a new resumable media card is added
                         MediaPlayerData.getMediaPlayer(key)?.let {
