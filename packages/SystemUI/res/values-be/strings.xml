@@ -807,7 +807,8 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Дададзены # элемент кіравання.}one{Дададзена # элемента кіравання.}few{Дададзена # элементы кіравання.}many{Дададзена # элементаў кіравання.}other{Дададзена # элемента кіравання.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Выдалена"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Дадаць праграму \"<xliff:g id="APPNAME">%s</xliff:g>\"?"</string>
-    <string name="controls_panel_authorization" msgid="4665218066461350247">"У праграме \"<xliff:g id="APPNAME">%s</xliff:g>\" можна выбраць налады і змесціва, якія будуць тут паказвацца."</string>
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
+    <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Выдаліць налады для <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Дададзена ў абранае"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Дададзена ў абранае, пазіцыя <xliff:g id="NUMBER">%d</xliff:g>"</string>

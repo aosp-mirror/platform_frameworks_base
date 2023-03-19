@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4811759950673118541">"อินเทอร์เฟซผู้ใช้ของระบบ"</string>
+    <string name="app_label" msgid="4811759950673118541">"UI ของระบบ"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"เปิดโหมดประหยัดแบตเตอรี่ใช่ไหม"</string>
     <string name="battery_low_description" msgid="3282977755476423966">"คุณมีแบตเตอรี่เหลืออยู่ <xliff:g id="PERCENTAGE">%s</xliff:g> โหมดประหยัดแบตเตอรี่จะเปิดธีมมืด จำกัดกิจกรรมในเบื้องหลัง และหน่วงเวลาการแจ้งเตือน"</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"โหมดประหยัดแบตเตอรี่จะเปิดธีมมืด จำกัดกิจกรรมในเบื้องหลัง และหน่วงเวลาการแจ้งเตือน"</string>
@@ -807,7 +807,8 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{เพิ่มตัวควบคุม # ตัวแล้ว}other{เพิ่มตัวควบคุม # ตัวแล้ว}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"นำออกแล้ว"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"เพิ่ม <xliff:g id="APPNAME">%s</xliff:g> ไหม"</string>
-    <string name="controls_panel_authorization" msgid="4665218066461350247">"<xliff:g id="APPNAME">%s</xliff:g> สามารถเลือกตัวควบคุมและเนื้อหาที่จะปรากฏขึ้นที่นี่"</string>
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
+    <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"นำการควบคุมสำหรับ <xliff:g id="APPNAME">%s</xliff:g> ออกไหม"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"ตั้งเป็นรายการโปรดแล้ว"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"ตั้งเป็นรายการโปรดแล้ว โดยอยู่ลำดับที่ <xliff:g id="NUMBER">%d</xliff:g>"</string>
