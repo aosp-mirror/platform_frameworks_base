@@ -217,8 +217,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     NotificationPanelViewController getNotificationPanelViewController();
 
-    ViewGroup getBouncerContainer();
-
     /** Get the Keyguard Message Area that displays auth messages. */
     AuthKeyguardMessageArea getKeyguardMessageArea();
 

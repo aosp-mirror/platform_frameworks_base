@@ -197,13 +197,6 @@ public class NotificationShadeWindowViewController {
     }
 
     /**
-     * @return Location where to place the KeyguardBouncer
-     */
-    public ViewGroup getBouncerContainer() {
-        return mView.findViewById(R.id.keyguard_bouncer_container);
-    }
-
-    /**
      * @return Location where to place the KeyguardMessageArea
      */
     public AuthKeyguardMessageArea getKeyguardMessageArea() {

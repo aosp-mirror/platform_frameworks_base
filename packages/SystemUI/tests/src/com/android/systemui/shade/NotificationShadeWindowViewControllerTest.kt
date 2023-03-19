@@ -63,13 +63,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.anyFloat
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -322,14 +321,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         val shouldIntercept = interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)
         assertThat(shouldIntercept).isTrue()
     }
-
-    @Test
-    fun testGetBouncerContainer() =
-        testScope.runTest {
-            Mockito.clearInvocations(view)
-            underTest.bouncerContainer
-            verify(view).findViewById<ViewGroup>(R.id.keyguard_bouncer_container)
-        }
 
     @Test
     fun testGetKeyguardMessageArea() =
