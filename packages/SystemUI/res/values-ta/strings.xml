@@ -807,7 +807,8 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# கட்டுப்பாடு சேர்க்கப்பட்டது.}other{# கட்டுப்பாடுகள் சேர்க்கப்பட்டன.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"அகற்றப்பட்டது"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> ஆப்ஸைச் சேர்க்கவா?"</string>
-    <string name="controls_panel_authorization" msgid="4665218066461350247">"இங்கே எந்தெந்தக் கட்டுப்பாடுகளும் உள்ளடக்கமும் காட்டப்பட வேண்டும் என்பதை <xliff:g id="APPNAME">%s</xliff:g> ஆப்ஸால் தேர்வுசெய்ய முடியும்."</string>
+    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
+    <skip />
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> ஆப்ஸுக்கான கட்டுப்பாடுகளை அகற்றவா?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"பிடித்தவற்றில் சேர்க்கப்பட்டது"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"பிடித்தவற்றில் சேர்க்கப்பட்டது, நிலை <xliff:g id="NUMBER">%d</xliff:g>"</string>

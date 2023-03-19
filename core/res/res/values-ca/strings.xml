@@ -1511,7 +1511,7 @@
     <string name="next_button_label" msgid="6040209156399907780">"Següent"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"Omet"</string>
     <string name="no_matches" msgid="6472699895759164599">"No s\'ha trobat cap coincidència"</string>
-    <string name="find_on_page" msgid="5400537367077438198">"Troba-ho a la pàgina"</string>
+    <string name="find_on_page" msgid="5400537367077438198">"Cerca a la pàgina"</string>
     <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# coincidència}many{# de {total}}other{# de {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Fet"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"S\'està esborrant l\'emmagatzematge compartit…"</string>

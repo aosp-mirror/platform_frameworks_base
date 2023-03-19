@@ -1356,7 +1356,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Не требуется разрешений"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"это может стоить вам денег!"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"ОК"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Зарядка устройства через USB…"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Зарядка устройства через USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Зарядка устройства через USB…"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Передача файлов через USB включена"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Режим PTP включен"</string>
