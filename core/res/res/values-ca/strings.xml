@@ -1503,7 +1503,7 @@
     <string name="next_button_label" msgid="6040209156399907780">"Següent"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"Omet"</string>
     <string name="no_matches" msgid="6472699895759164599">"No s\'ha trobat cap coincidència"</string>
-    <string name="find_on_page" msgid="5400537367077438198">"Troba-ho a la pàgina"</string>
+    <string name="find_on_page" msgid="5400537367077438198">"Cerca a la pàgina"</string>
     <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# coincidència}many{# de {total}}other{# de {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Fet"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"S\'està esborrant l\'emmagatzematge compartit…"</string>
@@ -1900,7 +1900,7 @@
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="2836276258480904434">"Port perifèric USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"Més opcions"</string>
-    <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"Tanca el menú addicional"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"Tanca el menú de desbordament"</string>
     <string name="maximize_button_text" msgid="4258922519914732645">"Maximitza"</string>
     <string name="close_button_text" msgid="10603510034455258">"Tanca"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
