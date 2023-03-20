@@ -333,6 +333,19 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    public void disable_hasOngoingCallButAlsoHun_chipHidden() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        when(mOngoingCallController.hasOngoingCall()).thenReturn(true);
+        when(mHeadsUpAppearanceController.shouldBeVisible()).thenReturn(true);
+
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        assertEquals(View.GONE,
+                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+    }
+
+    @Test
     public void disable_ongoingCallEnded_chipHidden() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
