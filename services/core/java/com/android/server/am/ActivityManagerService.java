@@ -167,6 +167,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.PermissionMethod;
 import android.annotation.PermissionName;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityClient;
@@ -7773,10 +7774,15 @@ public class ActivityManagerService extends IActivityManager.Stub
      *
      * @param callback remote callback object to be registered
      */
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    @Override
     public void registerUidFrozenStateChangedCallback(
             @NonNull IUidFrozenStateChangedCallback callback) {
+        enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                "registerUidFrozenStateChangedCallback()");
+        Preconditions.checkNotNull(callback, "callback cannot be null");
         synchronized (mUidFrozenStateChangedCallbackList) {
-            boolean registered = mUidFrozenStateChangedCallbackList.register(callback);
+            final boolean registered = mUidFrozenStateChangedCallbackList.register(callback);
             if (!registered) {
                 Slog.w(TAG, "Failed to register with RemoteCallbackList!");
             }
@@ -7788,8 +7794,13 @@ public class ActivityManagerService extends IActivityManager.Stub
      *
      * @param callback remote callback object to be unregistered
      */
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    @Override
     public void unregisterUidFrozenStateChangedCallback(
             @NonNull IUidFrozenStateChangedCallback callback) {
+        enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                "unregisterUidFrozenStateChangedCallback()");
+        Preconditions.checkNotNull(callback, "callback cannot be null");
         synchronized (mUidFrozenStateChangedCallbackList) {
             mUidFrozenStateChangedCallbackList.unregister(callback);
         }
