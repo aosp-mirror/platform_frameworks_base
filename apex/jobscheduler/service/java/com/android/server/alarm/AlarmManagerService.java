@@ -4285,10 +4285,25 @@ public class AlarmManagerService extends SystemService {
         }
     }
 
-    boolean lookForPackageLocked(String packageName) {
-        final ArrayList<Alarm> allAlarms = mAlarmStore.asList();
-        for (final Alarm alarm : allAlarms) {
-            if (alarm.matches(packageName)) {
+    @GuardedBy("mLock")
+    boolean lookForPackageLocked(String packageName, int uid) {
+        // This is called extremely rarely, e.g. when the user opens the force-stop page in settings
+        // so the loops using an iterator should be fine.
+        for (final Alarm alarm : mAlarmStore.asList()) {
+            if (alarm.matches(packageName) && alarm.creatorUid == uid) {
+                return true;
+            }
+        }
+        final ArrayList<Alarm> alarmsForUid = mPendingBackgroundAlarms.get(uid);
+        if (alarmsForUid != null) {
+            for (final Alarm alarm : alarmsForUid) {
+                if (alarm.matches(packageName)) {
+                    return true;
+                }
+            }
+        }
+        for (final Alarm alarm : mPendingNonWakeupAlarms) {
+            if (alarm.matches(packageName) && alarm.creatorUid == uid) {
                 return true;
             }
         }
@@ -5269,7 +5284,7 @@ public class AlarmManagerService extends SystemService {
                     case Intent.ACTION_QUERY_PACKAGE_RESTART:
                         pkgList = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
                         for (String packageName : pkgList) {
-                            if (lookForPackageLocked(packageName)) {
+                            if (lookForPackageLocked(packageName, uid)) {
                                 setResultCode(Activity.RESULT_OK);
                                 return;
                             }
