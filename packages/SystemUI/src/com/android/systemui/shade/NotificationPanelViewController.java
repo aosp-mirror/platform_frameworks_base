@@ -5015,9 +5015,13 @@ public final class NotificationPanelViewController implements Dumpable {
             captureValues(transitionValues);
         }
 
+        @Nullable
         @Override
-        public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
-                TransitionValues endValues) {
+        public Animator createAnimator(ViewGroup sceneRoot, @Nullable TransitionValues startValues,
+                @Nullable TransitionValues endValues) {
+            if (startValues == null || endValues == null) {
+                return null;
+            }
             ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
 
             Rect from = (Rect) startValues.values.get(PROP_BOUNDS);
