@@ -398,6 +398,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         pw.println("  mFaceAuthEnabled: " + mFaceAuthEnabled);
         pw.println("  isKeyguardFadingAway: " + isKeyguardFadingAway());
         pw.println("  isKeyguardGoingAway: " + isKeyguardGoingAway());
+        pw.println("  isLaunchTransitionFadingAway: " + isLaunchTransitionFadingAway());
     }
 
     private class UpdateMonitorCallback extends KeyguardUpdateMonitorCallback {
