@@ -1005,6 +1005,37 @@ public class AppProfiler {
             mBgHandler.obtainMessage(BgHandler.MEMORY_PRESSURE_CHANGED, mLastMemoryLevel, memFactor)
                     .sendToTarget();
         }
+
+        if (mService.mConstants.USE_MODERN_TRIM) {
+            // Modern trim is not sent based on lowmem state
+            // Dispatch UI_HIDDEN to processes that need it
+            mService.mProcessList.forEachLruProcessesLOSP(true, app -> {
+                final ProcessProfileRecord profile = app.mProfile;
+                final IApplicationThread thread;
+                final ProcessStateRecord state = app.mState;
+                if (state.hasProcStateChanged()) {
+                    state.setProcStateChanged(false);
+                }
+                int procState = app.mState.getCurProcState();
+                if (((procState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+                        && procState < ActivityManager.PROCESS_STATE_CACHED_ACTIVITY)
+                        || app.mState.isSystemNoUi()) && app.mProfile.hasPendingUiClean()) {
+                    // If this application is now in the background and it
+                    // had done UI, then give it the special trim level to
+                    // have it free UI resources.
+                    if ((thread = app.getThread()) != null) {
+                        try {
+                            thread.scheduleTrimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
+                            app.mProfile.setPendingUiClean(false);
+                        } catch (RemoteException e) {
+
+                        }
+                    }
+                }
+            });
+            return false;
+        }
+
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
         boolean allChanged;

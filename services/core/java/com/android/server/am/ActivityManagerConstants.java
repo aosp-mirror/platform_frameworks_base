@@ -151,6 +151,7 @@ final class ActivityManagerConstants extends ContentObserver {
 
     static final String KEY_USE_TIERED_CACHED_ADJ = "use_tiered_cached_adj";
     static final String KEY_TIERED_CACHED_ADJ_DECAY_TIME = "tiered_cached_adj_decay_time";
+    static final String KEY_USE_MODERN_TRIM = "use_modern_trim";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 1024;
     private static final boolean DEFAULT_PRIORITIZE_ALARM_BROADCASTS = true;
@@ -211,6 +212,8 @@ final class ActivityManagerConstants extends ContentObserver {
 
     private static final boolean DEFAULT_USE_TIERED_CACHED_ADJ = false;
     private static final long DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME = 60 * 1000;
+
+    private static final boolean DEFAULT_USE_MODERN_TRIM = false;
 
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
@@ -1052,6 +1055,9 @@ final class ActivityManagerConstants extends ContentObserver {
     /** @see #KEY_TIERED_CACHED_ADJ_DECAY_TIME */
     public long TIERED_CACHED_ADJ_DECAY_TIME = DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME;
 
+    /** @see #KEY_USE_MODERN_TRIM */
+    public boolean USE_MODERN_TRIM = DEFAULT_USE_MODERN_TRIM;
+
     private final OnPropertiesChangedListener mOnDeviceConfigChangedListener =
             new OnPropertiesChangedListener() {
                 @Override
@@ -1226,6 +1232,9 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_USE_TIERED_CACHED_ADJ:
                             case KEY_TIERED_CACHED_ADJ_DECAY_TIME:
                                 updateUseTieredCachedAdj();
+                                break;
+                            case KEY_USE_MODERN_TRIM:
+                                updateUseModernTrim();
                                 break;
                             default:
                                 updateFGSPermissionEnforcementFlagsIfNecessary(name);
@@ -1989,6 +1998,13 @@ final class ActivityManagerConstants extends ContentObserver {
             DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
             KEY_TIERED_CACHED_ADJ_DECAY_TIME,
             DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME);
+    }
+
+    private void updateUseModernTrim() {
+        USE_MODERN_TRIM = DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+            KEY_USE_MODERN_TRIM,
+            DEFAULT_USE_MODERN_TRIM);
     }
 
     private void updateFGSPermissionEnforcementFlagsIfNecessary(@NonNull String name) {
