@@ -28,15 +28,13 @@ import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -53,48 +51,26 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var connectivitySlots: ConnectivitySlots
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var logger: ConnectivityInputLogger
-    private lateinit var scope: CoroutineScope
+    private lateinit var testScope: TestScope
     @Mock private lateinit var tunerService: TunerService
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        scope = CoroutineScope(IMMEDIATE)
-
-        underTest =
-            ConnectivityRepositoryImpl(
-                connectivitySlots,
-                context,
-                dumpManager,
-                logger,
-                scope,
-                tunerService,
-            )
-    }
-
-    @After
-    fun tearDown() {
-        scope.cancel()
+        testScope = TestScope(UnconfinedTestDispatcher())
+        createAndSetRepo()
     }
 
     @Test
     fun forceHiddenSlots_initiallyGetsDefault() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             setUpEthernetWifiMobileSlotNames()
             context
                 .getOrCreateTestableResources()
                 .addOverride(DEFAULT_HIDDEN_ICONS_RESOURCE, arrayOf(SLOT_WIFI, SLOT_ETHERNET))
             // Re-create our [ConnectivityRepositoryImpl], since it fetches
             // config_statusBarIconsToExclude when it's first constructed
-            underTest =
-                ConnectivityRepositoryImpl(
-                    connectivitySlots,
-                    context,
-                    dumpManager,
-                    logger,
-                    scope,
-                    tunerService,
-                )
+            createAndSetRepo()
 
             var latest: Set<ConnectivitySlot>? = null
             val job = underTest.forceHiddenSlots.onEach { latest = it }.launchIn(this)
@@ -106,7 +82,7 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun forceHiddenSlots_slotNamesAdded_flowHasSlots() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             setUpEthernetWifiMobileSlotNames()
 
             var latest: Set<ConnectivitySlot>? = null
@@ -121,7 +97,7 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun forceHiddenSlots_wrongKey_doesNotUpdate() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             setUpEthernetWifiMobileSlotNames()
 
             var latest: Set<ConnectivitySlot>? = null
@@ -141,22 +117,14 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun forceHiddenSlots_slotNamesAddedThenNull_flowHasDefault() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             setUpEthernetWifiMobileSlotNames()
             context
                 .getOrCreateTestableResources()
                 .addOverride(DEFAULT_HIDDEN_ICONS_RESOURCE, arrayOf(SLOT_WIFI, SLOT_ETHERNET))
             // Re-create our [ConnectivityRepositoryImpl], since it fetches
             // config_statusBarIconsToExclude when it's first constructed
-            underTest =
-                ConnectivityRepositoryImpl(
-                    connectivitySlots,
-                    context,
-                    dumpManager,
-                    logger,
-                    scope,
-                    tunerService,
-                )
+            createAndSetRepo()
 
             var latest: Set<ConnectivitySlot>? = null
             val job = underTest.forceHiddenSlots.onEach { latest = it }.launchIn(this)
@@ -177,7 +145,7 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun forceHiddenSlots_someInvalidSlotNames_flowHasValidSlotsOnly() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Set<ConnectivitySlot>? = null
             val job = underTest.forceHiddenSlots.onEach { latest = it }.launchIn(this)
 
@@ -193,7 +161,7 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun forceHiddenSlots_someEmptySlotNames_flowHasValidSlotsOnly() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             setUpEthernetWifiMobileSlotNames()
 
             var latest: Set<ConnectivitySlot>? = null
@@ -210,7 +178,7 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun forceHiddenSlots_allInvalidOrEmptySlotNames_flowHasEmpty() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Set<ConnectivitySlot>? = null
             val job = underTest.forceHiddenSlots.onEach { latest = it }.launchIn(this)
 
@@ -231,7 +199,7 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun forceHiddenSlots_newSubscriberGetsCurrentValue() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             setUpEthernetWifiMobileSlotNames()
 
             var latest1: Set<ConnectivitySlot>? = null
@@ -252,6 +220,18 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
             job2.cancel()
         }
 
+    private fun createAndSetRepo() {
+        underTest =
+            ConnectivityRepositoryImpl(
+                connectivitySlots,
+                context,
+                dumpManager,
+                logger,
+                testScope.backgroundScope,
+                tunerService,
+            )
+    }
+
     private fun getTunable(): TunerService.Tunable {
         val callbackCaptor = argumentCaptor<TunerService.Tunable>()
         Mockito.verify(tunerService).addTunable(callbackCaptor.capture(), any())
@@ -269,6 +249,5 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
         private const val SLOT_ETHERNET = "ethernet"
         private const val SLOT_WIFI = "wifi"
         private const val SLOT_MOBILE = "mobile"
-        private val IMMEDIATE = Dispatchers.Main.immediate
     }
 }
