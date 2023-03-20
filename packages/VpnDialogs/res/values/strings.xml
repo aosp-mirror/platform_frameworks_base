@@ -89,4 +89,32 @@
          without any consequences. [CHAR LIMIT=20] -->
     <string name="dismiss">Dismiss</string>
 
+    <!-- Malicious VPN apps may provide very long labels or cunning HTML to trick the system dialogs
+         into displaying what they want. The system will attempt to sanitize the label, and if the
+         label is deemed dangerous, then this string is used instead. The first argument is the
+         first 30 characters of the label, and the second argument is the package name of the app.
+         Example : Normally a VPN app may be called "My VPN app" in which case the dialog will read
+         "My VPN app wants to set up a VPN connection...". If the label is very long, then, this
+         will be used to show "VerylongVPNlabel… (com.my.vpn.app) wants to set up a VPN
+         connection...". For this case, the code will refer to sanitized_vpn_label_with_ellipsis.
+    -->
+    <string name="sanitized_vpn_label_with_ellipsis">
+        <xliff:g id="sanitized_vpn_label_with_ellipsis" example="My VPN app">%1$s</xliff:g>… (
+        <xliff:g id="sanitized_vpn_label_with_ellipsis" example="com.my.vpn.app">%2$s</xliff:g>)
+    </string>
+
+    <!-- Malicious VPN apps may provide very long labels or cunning HTML to trick the system dialogs
+         into displaying what they want. The system will attempt to sanitize the label, and if the
+         label is deemed dangerous, then this string is used instead. The first argument is the
+         label, and the second argument is the package name of the app.
+         Example : Normally a VPN app may be called "My VPN app" in which case the dialog will read
+         "My VPN app wants to set up a VPN connection...". If the VPN label contains HTML tag but
+         the length is not very long, the dialog will show "VpnLabelWith&lt;br&gt;HtmlTag
+         (com.my.vpn.app) wants to set up a VPN connection...". For this case, the code will refer
+         to sanitized_vpn_label.
+    -->
+    <string name="sanitized_vpn_label">
+        <xliff:g id="sanitized_vpn_label" example="My VPN app">%1$s</xliff:g> (
+        <xliff:g id="sanitized_vpn_label" example="com.my.vpn.app">%2$s</xliff:g>)
+    </string>
 </resources>
