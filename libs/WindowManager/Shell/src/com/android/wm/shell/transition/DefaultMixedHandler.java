@@ -272,13 +272,18 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
                 info.getChanges().remove(i);
             }
         }
+        Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
+            --mixed.mInFlightSubAnimations;
+            mixed.joinFinishArgs(wct, wctCB);
+            if (mixed.mInFlightSubAnimations > 0) return;
+            mActiveTransitions.remove(mixed);
+            finishCallback.onTransitionFinished(mixed.mFinishWCT, wctCB);
+        };
         if (pipChange == null) {
             if (mixed.mLeftoversHandler != null) {
+                mixed.mInFlightSubAnimations = 1;
                 if (mixed.mLeftoversHandler.startAnimation(mixed.mTransition,
-                        info, startTransaction, finishTransaction, (wct, wctCB) -> {
-                            mActiveTransitions.remove(mixed);
-                            finishCallback.onTransitionFinished(wct, wctCB);
-                        })) {
+                        info, startTransaction, finishTransaction, finishCB)) {
                     return true;
                 }
             }
@@ -287,13 +292,6 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
         }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Splitting PIP into a separate"
                         + " animation because remote-animation likely doesn't support it");
-        Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
-            --mixed.mInFlightSubAnimations;
-            mixed.joinFinishArgs(wct, wctCB);
-            if (mixed.mInFlightSubAnimations > 0) return;
-            mActiveTransitions.remove(mixed);
-            finishCallback.onTransitionFinished(mixed.mFinishWCT, wctCB);
-        };
         // Split the transition into 2 parts: the pip part and the rest.
         mixed.mInFlightSubAnimations = 2;
         // make a new startTransaction because pip's startEnterAnimation "consumes" it so
