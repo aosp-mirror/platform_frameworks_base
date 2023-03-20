@@ -4482,6 +4482,12 @@
     <permission android:name="android.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- Allows specifying candidate credential providers to be queried in Credential Manager
+    get flows, or to be preferred as a default in the Credential Manager create flows.
+     <p>Protection level: normal -->
+    <permission android:name="android.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS"
+                android:protectionLevel="normal" />
+
     <!-- Allows a browser to invoke credential manager APIs on behalf of another RP.
         <p>Protection level: normal -->
     <permission android:name="android.permission.CREDENTIAL_MANAGER_SET_ORIGIN"
