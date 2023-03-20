@@ -3279,7 +3279,7 @@ final class InstallPackageHelper {
         final RemovePackageHelper removePackageHelper = new RemovePackageHelper(mPm);
         removePackageHelper.removePackage(stubPkg, true /*chatty*/);
         try {
-            return scanSystemPackageTracedLI(scanFile, parseFlags, scanFlags, null);
+            return initPackageTracedLI(scanFile, parseFlags, scanFlags);
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to install compressed system package:" + stubPkg.getPackageName(),
                     e);
@@ -3410,8 +3410,7 @@ final class InstallPackageHelper {
                         | ParsingPackageUtils.PARSE_MUST_BE_APK
                         | ParsingPackageUtils.PARSE_IS_SYSTEM_DIR;
         @PackageManagerService.ScanFlags int scanFlags = mPm.getSystemPackageScanFlags(codePath);
-        final AndroidPackage pkg = scanSystemPackageTracedLI(
-                codePath, parseFlags, scanFlags, null);
+        final AndroidPackage pkg = initPackageTracedLI(codePath, parseFlags, scanFlags);
 
         synchronized (mPm.mLock) {
             PackageSetting pkgSetting = mPm.mSettings.getPackageLPr(pkg.getPackageName());
@@ -3591,7 +3590,7 @@ final class InstallPackageHelper {
                 try {
                     final File codePath = new File(pkg.getPath());
                     synchronized (mPm.mInstallLock) {
-                        scanSystemPackageTracedLI(codePath, 0, scanFlags, null);
+                        initPackageTracedLI(codePath, 0, scanFlags);
                     }
                 } catch (PackageManagerException e) {
                     Slog.e(TAG, "Failed to parse updated, ex-system package: "
@@ -3734,12 +3733,6 @@ final class InstallPackageHelper {
             String errorMsg = null;
 
             if (throwable == null) {
-                // TODO(b/194319951): move lower in the scan chain
-                // Static shared libraries have synthetic package names
-                if (parseResult.parsedPackage.isStaticSharedLibrary()) {
-                    PackageManagerService.renameStaticSharedLibraryPackage(
-                            parseResult.parsedPackage);
-                }
                 try {
                     addForInitLI(parseResult.parsedPackage, parseFlags, scanFlags,
                             new UserHandle(UserHandle.USER_SYSTEM), apexInfo);
@@ -3804,8 +3797,8 @@ final class InstallPackageHelper {
 
             try {
                 synchronized (mPm.mInstallLock) {
-                    final AndroidPackage newPkg = scanSystemPackageTracedLI(
-                            scanFile, reparseFlags, rescanFlags, null);
+                    final AndroidPackage newPkg = initPackageTracedLI(
+                            scanFile, reparseFlags, rescanFlags);
                     // We rescanned a stub, add it to the list of stubbed system packages
                     if (newPkg.isStub()) {
                         stubSystemApps.add(packageName);
@@ -3819,28 +3812,26 @@ final class InstallPackageHelper {
     }
 
     /**
-     *  Traces a package scan.
-     *  @see #scanSystemPackageLI(File, int, int, UserHandle)
+     *  Traces a package scan and registers it with the system.
+     *  @see #initPackageLI(File, int, int)
      */
     @GuardedBy("mPm.mInstallLock")
-    public AndroidPackage scanSystemPackageTracedLI(File scanFile, final int parseFlags,
-            int scanFlags, @Nullable ApexManager.ActiveApexInfo apexInfo)
+    public AndroidPackage initPackageTracedLI(File scanFile, final int parseFlags, int scanFlags)
             throws PackageManagerException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage [" + scanFile.toString() + "]");
         try {
-            return scanSystemPackageLI(scanFile, parseFlags, scanFlags, apexInfo);
+            return initPackageLI(scanFile, parseFlags, scanFlags);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
     }
 
     /**
-     *  Scans a package and returns the newly parsed package.
+     *  Scans a package, registers it with the system and returns the newly parsed package.
      *  Returns {@code null} in case of errors and the error code is stored in mLastScanError
      */
     @GuardedBy("mPm.mInstallLock")
-    private AndroidPackage scanSystemPackageLI(File scanFile, int parseFlags, int scanFlags,
-            @Nullable ApexManager.ActiveApexInfo apexInfo)
+    private AndroidPackage initPackageLI(File scanFile, int parseFlags, int scanFlags)
             throws PackageManagerException {
         if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanFile);
 
@@ -3852,13 +3843,8 @@ final class InstallPackageHelper {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
 
-        // Static shared libraries have synthetic package names
-        if (parsedPackage.isStaticSharedLibrary()) {
-            PackageManagerService.renameStaticSharedLibraryPackage(parsedPackage);
-        }
-
         return addForInitLI(parsedPackage, parseFlags, scanFlags,
-                new UserHandle(UserHandle.USER_SYSTEM), apexInfo);
+                new UserHandle(UserHandle.USER_SYSTEM), null);
     }
 
     /**
@@ -3882,6 +3868,10 @@ final class InstallPackageHelper {
             throws PackageManagerException {
         PackageSetting disabledPkgSetting;
         synchronized (mPm.mLock) {
+            // Static shared libraries have synthetic package names
+            if (activeApexInfo == null && parsedPackage.isStaticSharedLibrary()) {
+                PackageManagerService.renameStaticSharedLibraryPackage(parsedPackage);
+            }
             disabledPkgSetting =
                     mPm.mSettings.getDisabledSystemPkgLPr(parsedPackage.getPackageName());
             if (activeApexInfo != null && disabledPkgSetting != null) {
