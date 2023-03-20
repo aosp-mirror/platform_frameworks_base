@@ -17,11 +17,6 @@
 package com.android.wm.shell.recents;
 
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.IApplicationThread;
-import android.app.PendingIntent;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.IRecentsAnimationRunner;
 
 import com.android.wm.shell.recents.IRecentTasksListener;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
@@ -50,10 +45,4 @@ interface IRecentTasks {
      * Gets the set of running tasks.
      */
     RunningTaskInfo[] getRunningTasks(int maxNum) = 4;
-
-    /**
-     * Starts a recents transition.
-     */
-    oneway void startRecentsTransition(in PendingIntent intent, in Intent fillIn, in Bundle options,
-                    IApplicationThread appThread, IRecentsAnimationRunner listener) = 5;
 }

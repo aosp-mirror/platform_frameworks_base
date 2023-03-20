@@ -43,7 +43,6 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.recents.RecentsTransitionHandler;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.splitscreen.StageCoordinator;
 import com.android.wm.shell.sysui.ShellInit;
@@ -56,12 +55,10 @@ import java.util.Optional;
  * A handler for dealing with transitions involving multiple other handlers. For example: an
  * activity in split-screen going into PiP.
  */
-public class DefaultMixedHandler implements Transitions.TransitionHandler,
-        RecentsTransitionHandler.RecentsMixedHandler {
+public class DefaultMixedHandler implements Transitions.TransitionHandler {
 
     private final Transitions mPlayer;
     private PipTransitionController mPipHandler;
-    private RecentsTransitionHandler mRecentsHandler;
     private StageCoordinator mSplitHandler;
 
     private static class MixedTransition {
@@ -125,8 +122,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
 
     public DefaultMixedHandler(@NonNull ShellInit shellInit, @NonNull Transitions player,
             Optional<SplitScreenController> splitScreenControllerOptional,
-            Optional<PipTouchHandler> pipTouchHandlerOptional,
-            Optional<RecentsTransitionHandler> recentsHandlerOptional) {
+            Optional<PipTouchHandler> pipTouchHandlerOptional) {
         mPlayer = player;
         if (Transitions.ENABLE_SHELL_TRANSITIONS && pipTouchHandlerOptional.isPresent()
                 && splitScreenControllerOptional.isPresent()) {
@@ -137,10 +133,6 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                 mPlayer.addHandler(this);
                 if (mSplitHandler != null) {
                     mSplitHandler.setMixedHandler(this);
-                }
-                mRecentsHandler = recentsHandlerOptional.orElse(null);
-                if (mRecentsHandler != null) {
-                    mRecentsHandler.addMixer(this);
                 }
             }, this);
         }
@@ -206,29 +198,6 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             return handler.second;
         }
         return null;
-    }
-
-    @Override
-    public Transitions.TransitionHandler handleRecentsRequest(WindowContainerTransaction outWCT) {
-        if (mRecentsHandler != null && mSplitHandler.isSplitActive()) {
-            return this;
-        }
-        return null;
-    }
-
-    @Override
-    public void setRecentsTransition(IBinder transition) {
-        if (mSplitHandler.isSplitActive()) {
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a recents request while "
-                    + "Split-Screen is active, so treat it as Mixed.");
-            final MixedTransition mixed = new MixedTransition(
-                    MixedTransition.TYPE_RECENTS_DURING_SPLIT, transition);
-            mixed.mLeftoversHandler = mRecentsHandler;
-            mActiveTransitions.add(mixed);
-        } else {
-            throw new IllegalStateException("Accepted a recents transition but don't know how to"
-                    + " handle it");
-        }
     }
 
     private TransitionInfo subCopy(@NonNull TransitionInfo info,
@@ -593,8 +562,6 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         if (mixed.mType == MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT) {
             mPipHandler.onTransitionConsumed(transition, aborted, finishT);
         } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_SPLIT) {
-            mixed.mLeftoversHandler.onTransitionConsumed(transition, aborted, finishT);
-        } else if (mixed.mType == MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE) {
             mixed.mLeftoversHandler.onTransitionConsumed(transition, aborted, finishT);
         }
     }
