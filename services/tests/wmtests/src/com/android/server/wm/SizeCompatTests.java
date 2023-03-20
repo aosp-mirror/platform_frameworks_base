@@ -108,7 +108,6 @@ import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -2027,7 +2026,7 @@ public class SizeCompatTests extends WindowTestsBase {
         float expectedAspectRatio = 1f * displayWidth / getExpectedSplitSize(displayHeight);
         final Rect afterBounds = activity.getBounds();
         final float afterAspectRatio = (float) (afterBounds.height()) / afterBounds.width();
-        Assert.assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
+        assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
     }
 
     @Test
@@ -2052,7 +2051,7 @@ public class SizeCompatTests extends WindowTestsBase {
         float expectedAspectRatio = 1f * displayHeight / getExpectedSplitSize(displayWidth);
         final Rect afterBounds = activity.getBounds();
         final float afterAspectRatio = (float) (afterBounds.height()) / afterBounds.width();
-        Assert.assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
+        assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
     }
 
     @Test
@@ -2078,7 +2077,7 @@ public class SizeCompatTests extends WindowTestsBase {
         float expectedAspectRatio = 1f * displayWidth / getExpectedSplitSize(displayHeight);
         final Rect afterBounds = activity.getBounds();
         final float afterAspectRatio = (float) (afterBounds.width()) / afterBounds.height();
-        Assert.assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
+        assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
     }
 
     @Test
@@ -2104,7 +2103,89 @@ public class SizeCompatTests extends WindowTestsBase {
         float expectedAspectRatio = 1f * displayHeight / getExpectedSplitSize(displayWidth);
         final Rect afterBounds = activity.getBounds();
         final float afterAspectRatio = (float) (afterBounds.width()) / afterBounds.height();
-        Assert.assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
+        assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_TO_ALIGN_WITH_SPLIT_SCREEN})
+    public void testOverrideSplitScreenAspectRatio_splitScreenActivityInPortrait_notLetterboxed() {
+        mAtm.mDevEnableNonResizableMultiWindow = true;
+        final int screenWidth = 1800;
+        final int screenHeight = 1000;
+        setUpDisplaySizeWithApp(screenWidth, screenHeight);
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
+
+        activity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        // Simulate real display with top insets.
+        final int topInset = 30;
+        activity.mDisplayContent.getWindowConfiguration()
+                .setAppBounds(0, topInset, screenWidth, screenHeight);
+
+        final TestSplitOrganizer organizer =
+                new TestSplitOrganizer(mAtm, activity.getDisplayContent());
+        // Move activity to split screen which takes half of the screen.
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        organizer.mPrimary.setBounds(0, 0, getExpectedSplitSize(screenWidth), screenHeight);
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, activity.getWindowingMode());
+
+        // Unresizable portrait-only activity.
+        prepareUnresizable(activity, 3f, SCREEN_ORIENTATION_PORTRAIT);
+
+        // Activity should have the aspect ratio of a split screen activity and occupy exactly one
+        // half of the screen, so there is no letterbox
+        float expectedAspectRatio = 1f * screenHeight / getExpectedSplitSize(screenWidth);
+        final Rect afterBounds = activity.getBounds();
+        final float afterAspectRatio = (float) (afterBounds.height()) / afterBounds.width();
+        assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
+        assertFalse(activity.areBoundsLetterboxed());
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_TO_ALIGN_WITH_SPLIT_SCREEN})
+    public void testOverrideSplitScreenAspectRatio_splitScreenActivityInLandscape_notLetterboxed() {
+        mAtm.mDevEnableNonResizableMultiWindow = true;
+        final int screenWidth = 1000;
+        final int screenHeight = 1800;
+        setUpDisplaySizeWithApp(screenWidth, screenHeight);
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
+
+        activity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        // Simulate real display with top insets.
+        final int leftInset = 30;
+        activity.mDisplayContent.getWindowConfiguration()
+                .setAppBounds(leftInset, 0, screenWidth, screenHeight);
+
+        final TestSplitOrganizer organizer =
+                new TestSplitOrganizer(mAtm, activity.getDisplayContent());
+        // Move activity to split screen which takes half of the screen.
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        organizer.mPrimary.setBounds(0, 0, screenWidth, getExpectedSplitSize(screenHeight));
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, activity.getWindowingMode());
+
+        // Unresizable landscape-only activity.
+        prepareUnresizable(activity, 3f, SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Activity should have the aspect ratio of a split screen activity and occupy exactly one
+        // half of the screen, so there is no letterbox
+        float expectedAspectRatio = 1f * screenWidth / getExpectedSplitSize(screenHeight);
+        final Rect afterBounds = activity.getBounds();
+        final float afterAspectRatio = (float) (afterBounds.width()) / afterBounds.height();
+        assertEquals(expectedAspectRatio, afterAspectRatio, 0.001f);
+        assertFalse(activity.areBoundsLetterboxed());
     }
 
     @Test
