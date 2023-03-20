@@ -40,7 +40,7 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        progressProvider = PhysicsBasedUnfoldTransitionProgressProvider(foldStateProvider)
+        progressProvider = PhysicsBasedUnfoldTransitionProgressProvider(context, foldStateProvider)
         progressProvider.addCallback(listener)
     }
 
