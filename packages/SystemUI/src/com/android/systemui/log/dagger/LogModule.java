@@ -152,6 +152,14 @@ public class LogModule {
         return factory.create("QSLog", 700 /* maxSize */, false /* systrace */);
     }
 
+    /** Provides a logging buffer for logs related to Quick Settings configuration. */
+    @Provides
+    @SysUISingleton
+    @QSConfigLog
+    public static LogBuffer provideQSConfigLogBuffer(LogBufferFactory factory) {
+        return factory.create("QSConfigLog", 100 /* maxSize */, true /* systrace */);
+    }
+
     /** Provides a logging buffer for {@link com.android.systemui.broadcast.BroadcastDispatcher} */
     @Provides
     @SysUISingleton
