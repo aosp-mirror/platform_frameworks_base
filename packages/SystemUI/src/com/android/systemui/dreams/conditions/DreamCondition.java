@@ -15,6 +15,7 @@
  */
 package com.android.systemui.dreams.conditions;
 
+import android.app.DreamManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +31,7 @@ import javax.inject.Inject;
  */
 public class DreamCondition extends Condition {
     private final Context mContext;
+    private final DreamManager mDreamManager;
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -39,8 +41,10 @@ public class DreamCondition extends Condition {
     };
 
     @Inject
-    public DreamCondition(Context context) {
+    public DreamCondition(Context context,
+            DreamManager dreamManager) {
         mContext = context;
+        mDreamManager = dreamManager;
     }
 
     private void processIntent(Intent intent) {
@@ -62,8 +66,8 @@ public class DreamCondition extends Condition {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_DREAMING_STARTED);
         filter.addAction(Intent.ACTION_DREAMING_STOPPED);
-        final Intent stickyIntent = mContext.registerReceiver(mReceiver, filter);
-        processIntent(stickyIntent);
+        mContext.registerReceiver(mReceiver, filter);
+        updateCondition(mDreamManager.isDreaming());
     }
 
     @Override
