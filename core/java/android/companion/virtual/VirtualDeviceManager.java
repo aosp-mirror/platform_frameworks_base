@@ -545,8 +545,13 @@ public final class VirtualDeviceManager {
                 @VirtualDisplayFlag int flags,
                 @Nullable @CallbackExecutor Executor executor,
                 @Nullable VirtualDisplay.Callback callback) {
+            // Currently this just use the device ID, which means all of the virtual displays
+            // created using the same virtual device will have the same name if they use this
+            // deprecated API. The name should only be used for informational purposes, and not for
+            // identifying the display in code.
+            String virtualDisplayName =  "VirtualDevice_" + getDeviceId();
             VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
-                    getVirtualDisplayName(), width, height, densityDpi)
+                    virtualDisplayName, width, height, densityDpi)
                     .setFlags(flags);
             if (surface != null) {
                 builder.setSurface(surface);
@@ -853,18 +858,6 @@ public final class VirtualDeviceManager {
         public void setShowPointerIcon(boolean showPointerIcon) {
             try {
                 mVirtualDevice.setShowPointerIcon(showPointerIcon);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-
-        private String getVirtualDisplayName() {
-            try {
-                // Currently this just use the device ID, which means all of the virtual displays
-                // created using the same virtual device will have the same name. The name should
-                // only be used for informational purposes, and not for identifying the display in
-                // code.
-                return "VirtualDevice_" + mVirtualDevice.getDeviceId();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
