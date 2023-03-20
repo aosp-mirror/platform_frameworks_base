@@ -53,6 +53,7 @@ fun MultiShade(
     modifier: Modifier = Modifier,
 ) {
     val isScrimEnabled: Boolean by viewModel.isScrimEnabled.collectAsState()
+    val scrimAlpha: Float by viewModel.scrimAlpha.collectAsState()
 
     // TODO(b/273298030): find a different way to get the height constraint from its parent.
     BoxWithConstraints(modifier = modifier) {
@@ -61,7 +62,7 @@ fun MultiShade(
         Scrim(
             modifier = Modifier.fillMaxSize(),
             remoteTouch = viewModel::onScrimTouched,
-            alpha = { viewModel.scrimAlpha.value },
+            alpha = { scrimAlpha },
             isScrimEnabled = isScrimEnabled,
         )
         Shade(

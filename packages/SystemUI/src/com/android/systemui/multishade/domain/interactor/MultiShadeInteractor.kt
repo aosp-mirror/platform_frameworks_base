@@ -23,6 +23,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.multishade.data.model.MultiShadeInteractionModel
 import com.android.systemui.multishade.data.remoteproxy.MultiShadeInputProxy
 import com.android.systemui.multishade.data.repository.MultiShadeRepository
+import com.android.systemui.multishade.shared.math.isZero
 import com.android.systemui.multishade.shared.model.ProxiedInputModel
 import com.android.systemui.multishade.shared.model.ShadeConfig
 import com.android.systemui.multishade.shared.model.ShadeId
@@ -62,6 +63,10 @@ constructor(
                 shadeModels.maxOfOrNull { it.expansion } ?: 0f
             }
         }
+
+    /** Whether any shade is expanded, even a little bit. */
+    val isAnyShadeExpanded: Flow<Boolean> =
+        maxShadeExpansion.map { maxExpansion -> !maxExpansion.isZero() }.distinctUntilChanged()
 
     /**
      * A _processed_ version of the proxied input flow.
