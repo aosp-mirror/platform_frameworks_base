@@ -415,8 +415,12 @@ final class InputMonitor {
                 if (mInputFocus != recentsAnimationInputConsumer.mWindowHandle.token) {
                     requestFocus(recentsAnimationInputConsumer.mWindowHandle.token,
                             recentsAnimationInputConsumer.mName);
+                }
+                if (mDisplayContent.mInputMethodWindow != null
+                        && mDisplayContent.mInputMethodWindow.isVisible()) {
                     // Hiding IME/IME icon when recents input consumer gain focus.
-                    if (!mDisplayContent.isImeAttachedToApp()) {
+                    final boolean isImeAttachedToApp = mDisplayContent.isImeAttachedToApp();
+                    if (!isImeAttachedToApp) {
                         // Hiding IME if IME window is not attached to app since it's not proper to
                         // snapshot Task with IME window to animate together in this case.
                         final InputMethodManagerInternal inputMethodManagerInternal =
@@ -424,6 +428,14 @@ final class InputMonitor {
                         if (inputMethodManagerInternal != null) {
                             inputMethodManagerInternal.hideCurrentInputMethod(
                                     SoftInputShowHideReason.HIDE_RECENTS_ANIMATION);
+                        }
+                        // Ensure removing the IME snapshot when the app no longer to show on the
+                        // task snapshot (also taking the new task snaphot to update the overview).
+                        final ActivityRecord app = mDisplayContent.getImeInputTarget() != null
+                                ? mDisplayContent.getImeInputTarget().getActivityRecord() : null;
+                        if (app != null) {
+                            mDisplayContent.removeImeSurfaceImmediately();
+                            mDisplayContent.mAtmService.takeTaskSnapshot(app.getTask().mTaskId);
                         }
                     } else {
                         // Disable IME icon explicitly when IME attached to the app in case
