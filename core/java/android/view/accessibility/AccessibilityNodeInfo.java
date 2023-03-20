@@ -136,6 +136,8 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final long LEASHED_NODE_ID = makeNodeId(LEASHED_ITEM_ID,
             AccessibilityNodeProvider.HOST_VIEW_ID);
 
+    // Prefetch flags.
+
     /**
      * Prefetching strategy that prefetches the ancestors of the requested node.
      * <p> Ancestors will be prefetched before siblings and descendants.
@@ -146,7 +148,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see AccessibilityService#getRootInActiveWindow(int)
      * @see AccessibilityEvent#getSource(int)
      */
-    public static final int FLAG_PREFETCH_ANCESTORS = 0x00000001;
+    public static final int FLAG_PREFETCH_ANCESTORS = 1 /* << 0 */;
 
     /**
      * Prefetching strategy that prefetches the siblings of the requested node.
@@ -155,7 +157,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @see #FLAG_PREFETCH_ANCESTORS for where to use these flags.
      */
-    public static final int FLAG_PREFETCH_SIBLINGS = 0x00000002;
+    public static final int FLAG_PREFETCH_SIBLINGS = 1 << 1;
 
     /**
      * Prefetching strategy that prefetches the descendants in a hybrid depth first and breadth
@@ -167,7 +169,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @see #FLAG_PREFETCH_ANCESTORS for where to use these flags.
      */
-    public static final int FLAG_PREFETCH_DESCENDANTS_HYBRID = 0x00000004;
+    public static final int FLAG_PREFETCH_DESCENDANTS_HYBRID = 1 << 2;
 
     /**
      * Prefetching strategy that prefetches the descendants of the requested node depth-first.
@@ -177,7 +179,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @see #FLAG_PREFETCH_ANCESTORS for where to use these flags.
      */
-    public static final int FLAG_PREFETCH_DESCENDANTS_DEPTH_FIRST = 0x00000008;
+    public static final int FLAG_PREFETCH_DESCENDANTS_DEPTH_FIRST = 1 << 3;
 
     /**
      * Prefetching strategy that prefetches the descendants of the requested node breadth-first.
@@ -187,7 +189,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @see #FLAG_PREFETCH_ANCESTORS for where to use these flags.
      */
-    public static final int FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST = 0x00000010;
+    public static final int FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST = 1 << 4;
 
     /**
      * Prefetching flag that specifies prefetching should not be interrupted by a request to
@@ -195,7 +197,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @see #FLAG_PREFETCH_ANCESTORS for where to use these flags.
      */
-    public static final int FLAG_PREFETCH_UNINTERRUPTIBLE = 0x00000020;
+    public static final int FLAG_PREFETCH_UNINTERRUPTIBLE = 1 << 5;
 
     /** @hide */
     public static final int FLAG_PREFETCH_MASK = 0x0000003f;
@@ -210,6 +212,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int MAX_NUMBER_OF_PREFETCHED_NODES = 50;
 
     /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "FLAG_PREFETCH" }, value = {
             FLAG_PREFETCH_ANCESTORS,
             FLAG_PREFETCH_SIBLINGS,
@@ -218,26 +221,27 @@ public class AccessibilityNodeInfo implements Parcelable {
             FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST,
             FLAG_PREFETCH_UNINTERRUPTIBLE
     })
-    @Retention(RetentionPolicy.SOURCE)
     public @interface PrefetchingStrategy {}
+
+    // Service flags.
 
     /**
      * @see AccessibilityServiceInfo#FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
      * @hide
      */
-    public static final int FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS = 0x00000080;
+    public static final int FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS = 1 << 7;
 
     /**
      * @see AccessibilityServiceInfo#FLAG_REPORT_VIEW_IDS
      * @hide
      */
-    public static final int FLAG_SERVICE_REQUESTS_REPORT_VIEW_IDS = 0x00000100;
+    public static final int FLAG_SERVICE_REQUESTS_REPORT_VIEW_IDS = 1 << 8;
 
     /**
      * @see AccessibilityServiceInfo#isAccessibilityTool()
      * @hide
      */
-    public static final int FLAG_SERVICE_IS_ACCESSIBILITY_TOOL = 0x00000200;
+    public static final int FLAG_SERVICE_IS_ACCESSIBILITY_TOOL = 1 << 9;
 
     /** @hide */
     public static final int FLAG_REPORT_MASK =
@@ -250,46 +254,46 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Action that gives input focus to the node.
      */
-    public static final int ACTION_FOCUS =  0x00000001;
+    public static final int ACTION_FOCUS =  1 /* << 0 */;
 
     /**
      * Action that clears input focus of the node.
      */
-    public static final int ACTION_CLEAR_FOCUS = 0x00000002;
+    public static final int ACTION_CLEAR_FOCUS = 1 << 1;
 
     /**
      * Action that selects the node.
      */
-    public static final int ACTION_SELECT = 0x00000004;
+    public static final int ACTION_SELECT = 1 << 2;
 
     /**
      * Action that deselects the node.
      */
-    public static final int ACTION_CLEAR_SELECTION = 0x00000008;
+    public static final int ACTION_CLEAR_SELECTION = 1 << 3;
 
     /**
      * Action that clicks on the node info.
      *
      * See {@link AccessibilityAction#ACTION_CLICK}
      */
-    public static final int ACTION_CLICK = 0x00000010;
+    public static final int ACTION_CLICK = 1 << 4;
 
     /**
      * Action that long clicks on the node.
      *
      * <p>It does not support coordinate information for anchoring.</p>
      */
-    public static final int ACTION_LONG_CLICK = 0x00000020;
+    public static final int ACTION_LONG_CLICK = 1 << 5;
 
     /**
      * Action that gives accessibility focus to the node.
      */
-    public static final int ACTION_ACCESSIBILITY_FOCUS = 0x00000040;
+    public static final int ACTION_ACCESSIBILITY_FOCUS = 1 << 6;
 
     /**
      * Action that clears accessibility focus of the node.
      */
-    public static final int ACTION_CLEAR_ACCESSIBILITY_FOCUS = 0x00000080;
+    public static final int ACTION_CLEAR_ACCESSIBILITY_FOCUS = 1 << 7;
 
     /**
      * Action that requests to go to the next entity in this node's text
@@ -321,7 +325,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see #MOVEMENT_GRANULARITY_PARAGRAPH
      * @see #MOVEMENT_GRANULARITY_PAGE
      */
-    public static final int ACTION_NEXT_AT_MOVEMENT_GRANULARITY = 0x00000100;
+    public static final int ACTION_NEXT_AT_MOVEMENT_GRANULARITY = 1 << 8;
 
     /**
      * Action that requests to go to the previous entity in this node's text
@@ -354,7 +358,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see #MOVEMENT_GRANULARITY_PARAGRAPH
      * @see #MOVEMENT_GRANULARITY_PAGE
      */
-    public static final int ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY = 0x00000200;
+    public static final int ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY = 1 << 9;
 
     /**
      * Action to move to the next HTML element of a given type. For example, move
@@ -369,7 +373,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * </code></pre></p>
      * </p>
      */
-    public static final int ACTION_NEXT_HTML_ELEMENT = 0x00000400;
+    public static final int ACTION_NEXT_HTML_ELEMENT = 1 << 10;
 
     /**
      * Action to move to the previous HTML element of a given type. For example, move
@@ -384,32 +388,32 @@ public class AccessibilityNodeInfo implements Parcelable {
      * </code></pre></p>
      * </p>
      */
-    public static final int ACTION_PREVIOUS_HTML_ELEMENT = 0x00000800;
+    public static final int ACTION_PREVIOUS_HTML_ELEMENT = 1 << 11;
 
     /**
      * Action to scroll the node content forward.
      */
-    public static final int ACTION_SCROLL_FORWARD = 0x00001000;
+    public static final int ACTION_SCROLL_FORWARD = 1 << 12;
 
     /**
      * Action to scroll the node content backward.
      */
-    public static final int ACTION_SCROLL_BACKWARD = 0x00002000;
+    public static final int ACTION_SCROLL_BACKWARD = 1 << 13;
 
     /**
      * Action to copy the current selection to the clipboard.
      */
-    public static final int ACTION_COPY = 0x00004000;
+    public static final int ACTION_COPY = 1 << 14;
 
     /**
      * Action to paste the current clipboard content.
      */
-    public static final int ACTION_PASTE = 0x00008000;
+    public static final int ACTION_PASTE = 1 << 15;
 
     /**
      * Action to cut the current selection and place it to the clipboard.
      */
-    public static final int ACTION_CUT = 0x00010000;
+    public static final int ACTION_CUT = 1 << 16;
 
     /**
      * Action to set the selection. Performing this action with no arguments
@@ -430,22 +434,22 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @see #ACTION_ARGUMENT_SELECTION_START_INT
      * @see #ACTION_ARGUMENT_SELECTION_END_INT
      */
-    public static final int ACTION_SET_SELECTION = 0x00020000;
+    public static final int ACTION_SET_SELECTION = 1 << 17;
 
     /**
      * Action to expand an expandable node.
      */
-    public static final int ACTION_EXPAND = 0x00040000;
+    public static final int ACTION_EXPAND = 1 << 18;
 
     /**
      * Action to collapse an expandable node.
      */
-    public static final int ACTION_COLLAPSE = 0x00080000;
+    public static final int ACTION_COLLAPSE = 1 << 19;
 
     /**
      * Action to dismiss a dismissable node.
      */
-    public static final int ACTION_DISMISS = 0x00100000;
+    public static final int ACTION_DISMISS = 1 << 20;
 
     /**
      * Action that sets the text of the node. Performing the action without argument, using <code>
@@ -462,7 +466,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   info.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
      * </code></pre></p>
      */
-    public static final int ACTION_SET_TEXT = 0x00200000;
+    public static final int ACTION_SET_TEXT = 1 << 21;
 
     /** @hide */
     public static final int LAST_LEGACY_STANDARD_ACTION = ACTION_SET_TEXT;
@@ -472,7 +476,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     private static final int ACTION_TYPE_MASK = 0xFF000000;
 
-    // Action arguments
+    // Action arguments.
 
     /**
      * Argument for which movement granularity to be used when traversing the node text.
@@ -678,7 +682,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final String ACTION_ARGUMENT_DIRECTION_INT =
             "android.view.accessibility.action.ARGUMENT_DIRECTION_INT";
 
-    // Focus types
+    // Focus types.
 
     /**
      * The input focus.
@@ -690,32 +694,34 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public static final int FOCUS_ACCESSIBILITY = 2;
 
-    // Movement granularities
+    // Movement granularities.
 
     /**
      * Movement granularity bit for traversing the text of a node by character.
      */
-    public static final int MOVEMENT_GRANULARITY_CHARACTER = 0x00000001;
+    public static final int MOVEMENT_GRANULARITY_CHARACTER = 1 /* << 0 */;
 
     /**
      * Movement granularity bit for traversing the text of a node by word.
      */
-    public static final int MOVEMENT_GRANULARITY_WORD = 0x00000002;
+    public static final int MOVEMENT_GRANULARITY_WORD = 1 << 1;
 
     /**
      * Movement granularity bit for traversing the text of a node by line.
      */
-    public static final int MOVEMENT_GRANULARITY_LINE = 0x00000004;
+    public static final int MOVEMENT_GRANULARITY_LINE = 1 << 2;
 
     /**
      * Movement granularity bit for traversing the text of a node by paragraph.
      */
-    public static final int MOVEMENT_GRANULARITY_PARAGRAPH = 0x00000008;
+    public static final int MOVEMENT_GRANULARITY_PARAGRAPH = 1 << 3;
 
     /**
      * Movement granularity bit for traversing the text of a node by page.
      */
-    public static final int MOVEMENT_GRANULARITY_PAGE = 0x00000010;
+    public static final int MOVEMENT_GRANULARITY_PAGE = 1 << 4;
+
+    // Extra data arguments.
 
     /**
      * Key used to request and locate extra data for text character location. This key requests that
@@ -782,53 +788,53 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     // Boolean attributes.
 
-    private static final int BOOLEAN_PROPERTY_CHECKABLE = 0x00000001;
+    private static final int BOOLEAN_PROPERTY_CHECKABLE = 1 /* << 0 */;
 
-    private static final int BOOLEAN_PROPERTY_CHECKED = 0x00000002;
+    private static final int BOOLEAN_PROPERTY_CHECKED = 1 << 1;
 
-    private static final int BOOLEAN_PROPERTY_FOCUSABLE = 0x00000004;
+    private static final int BOOLEAN_PROPERTY_FOCUSABLE = 1 << 2;
 
-    private static final int BOOLEAN_PROPERTY_FOCUSED = 0x00000008;
+    private static final int BOOLEAN_PROPERTY_FOCUSED = 1 << 3;
 
-    private static final int BOOLEAN_PROPERTY_SELECTED = 0x00000010;
+    private static final int BOOLEAN_PROPERTY_SELECTED = 1 << 4;
 
-    private static final int BOOLEAN_PROPERTY_CLICKABLE = 0x00000020;
+    private static final int BOOLEAN_PROPERTY_CLICKABLE = 1 << 5;
 
-    private static final int BOOLEAN_PROPERTY_LONG_CLICKABLE = 0x00000040;
+    private static final int BOOLEAN_PROPERTY_LONG_CLICKABLE = 1 << 6;
 
-    private static final int BOOLEAN_PROPERTY_ENABLED = 0x00000080;
+    private static final int BOOLEAN_PROPERTY_ENABLED = 1 << 7;
 
-    private static final int BOOLEAN_PROPERTY_PASSWORD = 0x00000100;
+    private static final int BOOLEAN_PROPERTY_PASSWORD = 1 << 8;
 
-    private static final int BOOLEAN_PROPERTY_SCROLLABLE = 0x00000200;
+    private static final int BOOLEAN_PROPERTY_SCROLLABLE = 1 << 9;
 
-    private static final int BOOLEAN_PROPERTY_ACCESSIBILITY_FOCUSED = 0x00000400;
+    private static final int BOOLEAN_PROPERTY_ACCESSIBILITY_FOCUSED = 1 << 10;
 
-    private static final int BOOLEAN_PROPERTY_VISIBLE_TO_USER = 0x00000800;
+    private static final int BOOLEAN_PROPERTY_VISIBLE_TO_USER = 1 << 11;
 
-    private static final int BOOLEAN_PROPERTY_EDITABLE = 0x00001000;
+    private static final int BOOLEAN_PROPERTY_EDITABLE = 1 << 12;
 
-    private static final int BOOLEAN_PROPERTY_OPENS_POPUP = 0x00002000;
+    private static final int BOOLEAN_PROPERTY_OPENS_POPUP = 1 << 13;
 
-    private static final int BOOLEAN_PROPERTY_DISMISSABLE = 0x00004000;
+    private static final int BOOLEAN_PROPERTY_DISMISSABLE = 1 << 14;
 
-    private static final int BOOLEAN_PROPERTY_MULTI_LINE = 0x00008000;
+    private static final int BOOLEAN_PROPERTY_MULTI_LINE = 1 << 15;
 
-    private static final int BOOLEAN_PROPERTY_CONTENT_INVALID = 0x00010000;
+    private static final int BOOLEAN_PROPERTY_CONTENT_INVALID = 1 << 16;
 
-    private static final int BOOLEAN_PROPERTY_CONTEXT_CLICKABLE = 0x00020000;
+    private static final int BOOLEAN_PROPERTY_CONTEXT_CLICKABLE = 1 << 17;
 
-    private static final int BOOLEAN_PROPERTY_IMPORTANCE = 0x0040000;
+    private static final int BOOLEAN_PROPERTY_IMPORTANCE = 1 << 18;
 
-    private static final int BOOLEAN_PROPERTY_SCREEN_READER_FOCUSABLE = 0x0080000;
+    private static final int BOOLEAN_PROPERTY_SCREEN_READER_FOCUSABLE = 1 << 19;
 
-    private static final int BOOLEAN_PROPERTY_IS_SHOWING_HINT = 0x0100000;
+    private static final int BOOLEAN_PROPERTY_IS_SHOWING_HINT = 1 << 20;
 
-    private static final int BOOLEAN_PROPERTY_IS_HEADING = 0x0200000;
+    private static final int BOOLEAN_PROPERTY_IS_HEADING = 1 << 21;
 
-    private static final int BOOLEAN_PROPERTY_IS_TEXT_ENTRY_KEY = 0x0400000;
+    private static final int BOOLEAN_PROPERTY_IS_TEXT_ENTRY_KEY = 1 << 22;
 
-    private static final int BOOLEAN_PROPERTY_IS_TEXT_SELECTABLE = 0x0800000;
+    private static final int BOOLEAN_PROPERTY_IS_TEXT_SELECTABLE = 1 << 23;
 
     private static final int BOOLEAN_PROPERTY_REQUEST_INITIAL_ACCESSIBILITY_FOCUS = 1 << 24;
 

@@ -107,81 +107,82 @@ public class AccessibilityServiceInfo implements Parcelable {
      * Capability: This accessibility service can retrieve the active window content.
      * @see android.R.styleable#AccessibilityService_canRetrieveWindowContent
      */
-    public static final int CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT = 0x00000001;
+    public static final int CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT = 1 /* << 0 */;
 
     /**
      * Capability: This accessibility service can request touch exploration mode in which
      * touched items are spoken aloud and the UI can be explored via gestures.
      * @see android.R.styleable#AccessibilityService_canRequestTouchExplorationMode
      */
-    public static final int CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION = 0x00000002;
+    public static final int CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION = 1 << 1;
 
     /**
      * @deprecated No longer used
      */
-    public static final int CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 0x00000004;
+    @Deprecated
+    public static final int CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 1 << 2;
 
     /**
      * Capability: This accessibility service can request to filter the key event stream.
      * @see android.R.styleable#AccessibilityService_canRequestFilterKeyEvents
      */
-    public static final int CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS = 0x00000008;
+    public static final int CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS = 1 << 3;
 
     /**
      * Capability: This accessibility service can control display magnification.
      * @see android.R.styleable#AccessibilityService_canControlMagnification
      */
-    public static final int CAPABILITY_CAN_CONTROL_MAGNIFICATION = 0x00000010;
+    public static final int CAPABILITY_CAN_CONTROL_MAGNIFICATION = 1 << 4;
 
     /**
      * Capability: This accessibility service can perform gestures.
      * @see android.R.styleable#AccessibilityService_canPerformGestures
      */
-    public static final int CAPABILITY_CAN_PERFORM_GESTURES = 0x00000020;
+    public static final int CAPABILITY_CAN_PERFORM_GESTURES = 1 << 5;
 
     /**
      * Capability: This accessibility service can capture gestures from the fingerprint sensor
      * @see android.R.styleable#AccessibilityService_canRequestFingerprintGestures
      */
-    public static final int CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES = 0x00000040;
+    public static final int CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES = 1 << 6;
 
     /**
      * Capability: This accessibility service can take screenshot.
      * @see android.R.styleable#AccessibilityService_canTakeScreenshot
      */
-    public static final int CAPABILITY_CAN_TAKE_SCREENSHOT = 0x00000080;
+    public static final int CAPABILITY_CAN_TAKE_SCREENSHOT = 1 << 7;
 
     private static SparseArray<CapabilityInfo> sAvailableCapabilityInfos;
 
     /**
      * Denotes spoken feedback.
      */
-    public static final int FEEDBACK_SPOKEN = 0x0000001;
+    public static final int FEEDBACK_SPOKEN = 1 /* << 0 */;
 
     /**
      * Denotes haptic feedback.
      */
-    public static final int FEEDBACK_HAPTIC =  0x0000002;
+    public static final int FEEDBACK_HAPTIC =  1 << 1;
 
     /**
      * Denotes audible (not spoken) feedback.
      */
-    public static final int FEEDBACK_AUDIBLE = 0x0000004;
+    public static final int FEEDBACK_AUDIBLE = 1 << 2;
 
     /**
      * Denotes visual feedback.
      */
-    public static final int FEEDBACK_VISUAL = 0x0000008;
+    public static final int FEEDBACK_VISUAL = 1 << 3;
 
     /**
      * Denotes generic feedback.
      */
-    public static final int FEEDBACK_GENERIC = 0x0000010;
+    public static final int FEEDBACK_GENERIC = 1 << 4;
 
     /**
      * Denotes braille feedback.
      */
-    public static final int FEEDBACK_BRAILLE = 0x0000020;
+    public static final int FEEDBACK_BRAILLE = 1 << 5;
 
     /**
      * Mask for all feedback types.
@@ -200,7 +201,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * Default service is invoked only if no package specific one exists. In case of
      * more than one package specific service only the earlier registered is notified.
      */
-    public static final int DEFAULT = 0x0000001;
+    public static final int DEFAULT = 1 /* << 0 */;
 
     /**
      * If this flag is set the system will regard views that are not important
@@ -230,7 +231,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * elements.
      * </p>
      */
-    public static final int FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 0x0000002;
+    public static final int FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 1 << 1;
 
     /**
      * This flag requests that the system gets into touch exploration mode.
@@ -258,12 +259,13 @@ public class AccessibilityServiceInfo implements Parcelable {
      * </p>
      * @see android.R.styleable#AccessibilityService_canRequestTouchExplorationMode
      */
-    public static final int FLAG_REQUEST_TOUCH_EXPLORATION_MODE = 0x0000004;
+    public static final int FLAG_REQUEST_TOUCH_EXPLORATION_MODE = 1 << 2;
 
     /**
      * @deprecated No longer used
      */
-    public static final int FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 0x00000008;
+    @Deprecated
+    public static final int FLAG_REQUEST_ENHANCED_WEB_ACCESSIBILITY = 1 << 3;
 
     /**
      * This flag requests that the {@link AccessibilityNodeInfo}s obtained
@@ -272,7 +274,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * form "package:id/name", for example "foo.bar:id/my_list", and it is
      * useful for UI test automation. This flag is not set by default.
      */
-    public static final int FLAG_REPORT_VIEW_IDS = 0x00000010;
+    public static final int FLAG_REPORT_VIEW_IDS = 1 << 4;
 
     /**
      * This flag requests from the system to filter key events. If this flag
@@ -287,7 +289,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * </p>
      * @see android.R.styleable#AccessibilityService_canRequestFilterKeyEvents
      */
-    public static final int FLAG_REQUEST_FILTER_KEY_EVENTS = 0x00000020;
+    public static final int FLAG_REQUEST_FILTER_KEY_EVENTS = 1 << 5;
 
     /**
      * This flag indicates to the system that the accessibility service wants
@@ -308,14 +310,14 @@ public class AccessibilityServiceInfo implements Parcelable {
      * </p>
      * @see android.R.styleable#AccessibilityService_canRetrieveWindowContent
      */
-    public static final int FLAG_RETRIEVE_INTERACTIVE_WINDOWS = 0x00000040;
+    public static final int FLAG_RETRIEVE_INTERACTIVE_WINDOWS = 1 << 6;
 
     /**
      * This flag requests that all audio tracks system-wide with
      * {@link android.media.AudioAttributes#USAGE_ASSISTANCE_ACCESSIBILITY} be controlled by the
      * {@link android.media.AudioManager#STREAM_ACCESSIBILITY} volume.
      */
-    public static final int FLAG_ENABLE_ACCESSIBILITY_VOLUME = 0x00000080;
+    public static final int FLAG_ENABLE_ACCESSIBILITY_VOLUME = 1 << 7;
 
      /**
      * This flag indicates to the system that the accessibility service requests that an
@@ -326,7 +328,7 @@ public class AccessibilityServiceInfo implements Parcelable {
       *   accessibility service metadata file. Otherwise, it will be ignored.
       * </p>
      */
-    public static final int FLAG_REQUEST_ACCESSIBILITY_BUTTON = 0x00000100;
+    public static final int FLAG_REQUEST_ACCESSIBILITY_BUTTON = 1 << 8;
 
     /**
      * This flag requests that all fingerprint gestures be sent to the accessibility service.
@@ -341,13 +343,13 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see android.R.styleable#AccessibilityService_canRequestFingerprintGestures
      * @see AccessibilityService#getFingerprintGestureController()
      */
-    public static final int FLAG_REQUEST_FINGERPRINT_GESTURES = 0x00000200;
+    public static final int FLAG_REQUEST_FINGERPRINT_GESTURES = 1 << 9;
 
     /**
      * This flag requests that accessibility shortcut warning dialog has spoken feedback when
      * dialog is shown.
      */
-    public static final int FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK = 0x00000400;
+    public static final int FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK = 1 << 10;
 
     /**
      * This flag requests that when {@link #FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is enabled,
@@ -357,7 +359,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @see #FLAG_REQUEST_TOUCH_EXPLORATION_MODE
      */
-    public static final int FLAG_SERVICE_HANDLES_DOUBLE_TAP = 0x0000800;
+    public static final int FLAG_SERVICE_HANDLES_DOUBLE_TAP = 1 << 11;
 
     /**
      * This flag requests that when when {@link #FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is enabled,
@@ -367,7 +369,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @see #FLAG_REQUEST_TOUCH_EXPLORATION_MODE
      */
-    public static final int FLAG_REQUEST_MULTI_FINGER_GESTURES = 0x0001000;
+    public static final int FLAG_REQUEST_MULTI_FINGER_GESTURES = 1 << 12;
 
     /**
      * This flag requests that when when {@link #FLAG_REQUEST_MULTI_FINGER_GESTURES} is enabled,
@@ -378,7 +380,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @see #FLAG_REQUEST_TOUCH_EXPLORATION_MODE
      */
-    public static final int FLAG_REQUEST_2_FINGER_PASSTHROUGH = 0x0002000;
+    public static final int FLAG_REQUEST_2_FINGER_PASSTHROUGH = 1 << 13;
 
     /**
      * This flag requests that when when {@link #FLAG_REQUEST_TOUCH_EXPLORATION_MODE} is enabled, a
@@ -392,7 +394,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @see #FLAG_REQUEST_TOUCH_EXPLORATION_MODE
      */
-    public static final int FLAG_SEND_MOTION_EVENTS = 0x0004000;
+    public static final int FLAG_SEND_MOTION_EVENTS = 1 << 14;
 
     /**
      * This flag makes the AccessibilityService an input method editor with a subset of input
@@ -401,10 +403,10 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @see AccessibilityService#getInputMethod()
      */
-    public static final int FLAG_INPUT_METHOD_EDITOR = 0x0008000;
+    public static final int FLAG_INPUT_METHOD_EDITOR = 1 << 15;
 
     /** {@hide} */
-    public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
+    public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 1 << 16;
 
     /**
      * The event types an {@link AccessibilityService} is interested in.
