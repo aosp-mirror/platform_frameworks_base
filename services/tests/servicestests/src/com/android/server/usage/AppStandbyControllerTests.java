@@ -232,7 +232,6 @@ public class AppStandbyControllerTests {
         long mElapsedRealtime;
         boolean mIsAppIdleEnabled = true;
         boolean mIsCharging;
-        boolean mIsRestrictedBucketEnabled = true;
         List<String> mNonIdleWhitelistApps = new ArrayList<>();
         boolean mDisplayOn;
         DisplayManager.DisplayListener mDisplayListener;
@@ -313,11 +312,6 @@ public class AppStandbyControllerTests {
 
         @Override
         void updatePowerWhitelistCache() {
-        }
-
-        @Override
-        boolean isRestrictedBucketEnabled() {
-            return mIsRestrictedBucketEnabled;
         }
 
         @Override
@@ -1351,50 +1345,6 @@ public class AppStandbyControllerTests {
         mInjector.mElapsedRealtime += 10 * MINUTE_MS;
         mController.checkIdleStates(USER_ID);
         assertBucket(STANDBY_BUCKET_RESTRICTED);
-    }
-
-    @Test
-    @FlakyTest(bugId = 185169504)
-    public void testRestrictedBucketDisabled() throws Exception {
-        mInjector.mIsRestrictedBucketEnabled = false;
-        // Get the controller to read the new value. Capturing the ContentObserver isn't possible
-        // at the moment.
-        mController.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
-
-        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
-        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
-
-        // Nothing should be able to put it into the RESTRICTED bucket.
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_TIMEOUT);
-        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_PREDICTED);
-        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_FORCED_BY_SYSTEM);
-        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_FORCED_BY_USER);
-        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
-    }
-
-    @Test
-    @FlakyTest(bugId = 185169504)
-    public void testRestrictedBucket_EnabledToDisabled() throws Exception {
-        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
-        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_FORCED_BY_SYSTEM);
-        assertBucket(STANDBY_BUCKET_RESTRICTED);
-
-        mInjector.mIsRestrictedBucketEnabled = false;
-        // Get the controller to read the new value. Capturing the ContentObserver isn't possible
-        // at the moment.
-        mController.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
-
-        mController.checkIdleStates(USER_ID);
-        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
     }
 
     @Test
