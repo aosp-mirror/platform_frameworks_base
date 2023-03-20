@@ -38,6 +38,7 @@ import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_SESSION_COMMITTED_PREMATURELY;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_UNKNOWN_REASON;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_CHANGED;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_FOCUSED_BEFORE_FILL_DIALOG_RESPONSE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_FOCUS_CHANGED;
 import static com.android.server.autofill.Helper.sVerbose;
 
@@ -71,6 +72,7 @@ public final class PresentationStatsEventLogger {
     @IntDef(prefix = {"NOT_SHOWN_REASON"}, value = {
             NOT_SHOWN_REASON_ANY_SHOWN,
             NOT_SHOWN_REASON_VIEW_FOCUS_CHANGED,
+            NOT_SHOWN_REASON_VIEW_FOCUSED_BEFORE_FILL_DIALOG_RESPONSE,
             NOT_SHOWN_REASON_VIEW_CHANGED,
             NOT_SHOWN_REASON_ACTIVITY_FINISHED,
             NOT_SHOWN_REASON_REQUEST_TIMEOUT,
@@ -86,6 +88,8 @@ public final class PresentationStatsEventLogger {
             AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__ANY_SHOWN;
     public static final int NOT_SHOWN_REASON_VIEW_FOCUS_CHANGED =
             AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_FOCUS_CHANGED;
+    public static final int NOT_SHOWN_REASON_VIEW_FOCUSED_BEFORE_FILL_DIALOG_RESPONSE =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_FOCUSED_BEFORE_FILL_DIALOG_RESPONSE;
     public static final int NOT_SHOWN_REASON_VIEW_CHANGED =
             AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_CHANGED;
     public static final int NOT_SHOWN_REASON_ACTIVITY_FINISHED =
@@ -142,7 +146,7 @@ public final class PresentationStatsEventLogger {
     }
 
     public void maybeSetAvailableCount(@Nullable List<Dataset> datasetList,
-            AutofillId currentViewId) {
+                                       AutofillId currentViewId) {
         mEventInternal.ifPresent(event -> {
             int availableCount = getDatasetCountForAutofillId(datasetList, currentViewId);
             event.mAvailableCount = availableCount;
@@ -151,7 +155,7 @@ public final class PresentationStatsEventLogger {
     }
 
     public void maybeSetCountShown(@Nullable List<Dataset> datasetList,
-            AutofillId currentViewId) {
+                                   AutofillId currentViewId) {
         mEventInternal.ifPresent(event -> {
             int countShown = getDatasetCountForAutofillId(datasetList, currentViewId);
             event.mCountShown = countShown;
@@ -162,7 +166,7 @@ public final class PresentationStatsEventLogger {
     }
 
     private static int getDatasetCountForAutofillId(@Nullable List<Dataset> datasetList,
-            AutofillId currentViewId) {
+                                                    AutofillId currentViewId) {
         int availableCount = 0;
         if (datasetList != null) {
             for (int i = 0; i < datasetList.size(); i++) {
@@ -225,10 +229,34 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    public void maybeSetSelectedDatasetId(int selectedDatasetId) {
+        mEventInternal.ifPresent(event -> {
+            event.mSelectedDatasetId = selectedDatasetId;
+        });
+    }
+
+    public void maybeSetDialogDismissed(boolean dialogDismissed) {
+        mEventInternal.ifPresent(event -> {
+            event.mDialogDismissed = dialogDismissed;
+        });
+    }
+
+    public void maybeSetNegativeCtaButtonClicked(boolean negativeCtaButtonClicked) {
+        mEventInternal.ifPresent(event -> {
+            event.mNegativeCtaButtonClicked = negativeCtaButtonClicked;
+        });
+    }
+
+    public void maybeSetPositiveCtaButtonClicked(boolean positiveCtaButtonClicked) {
+        mEventInternal.ifPresent(event -> {
+            event.mPositiveCtaButtonClicked = positiveCtaButtonClicked;
+        });
+    }
+
     public void maybeSetInlinePresentationAndSuggestionHostUid(Context context, int userId) {
         mEventInternal.ifPresent(event -> {
             event.mDisplayPresentationType =
-                AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__INLINE;
+                    AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__INLINE;
             String imeString = Settings.Secure.getStringForUser(context.getContentResolver(),
                     Settings.Secure.DEFAULT_INPUT_METHOD, userId);
             if (TextUtils.isEmpty(imeString)) {
@@ -290,7 +318,11 @@ public final class PresentationStatsEventLogger {
                     + " mFillRequestSentTimestampMs=" + event.mFillRequestSentTimestampMs
                     + " mFillResponseReceivedTimestampMs=" + event.mFillResponseReceivedTimestampMs
                     + " mSuggestionSentTimestampMs=" + event.mSuggestionSentTimestampMs
-                    + " mSuggestionPresentedTimestampMs=" + event.mSuggestionPresentedTimestampMs);
+                    + " mSuggestionPresentedTimestampMs=" + event.mSuggestionPresentedTimestampMs
+                    + " mSelectedDatasetId=" + event.mSelectedDatasetId
+                    + " mDialogDismissed=" + event.mDialogDismissed
+                    + " mNegativeCtaButtonClicked=" + event.mNegativeCtaButtonClicked
+                    + " mPositiveCtaButtonClicked=" + event.mPositiveCtaButtonClicked);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -316,11 +348,10 @@ public final class PresentationStatsEventLogger {
                 event.mFillResponseReceivedTimestampMs,
                 event.mSuggestionSentTimestampMs,
                 event.mSuggestionPresentedTimestampMs,
-                //TODO(b/265051751): add new framework logging.
-                /* selected_dataset_id= */ 0,
-                /* dialog_dismissed= */ false,
-                /* negative_cta_button_clicked= */ false,
-                /* positive_cta_button_clicked= */ false);
+                event.mSelectedDatasetId,
+                event.mDialogDismissed,
+                event.mNegativeCtaButtonClicked,
+                event.mPositiveCtaButtonClicked);
         mEventInternal = Optional.empty();
     }
 
@@ -341,6 +372,10 @@ public final class PresentationStatsEventLogger {
         int mFillResponseReceivedTimestampMs;
         int mSuggestionSentTimestampMs;
         int mSuggestionPresentedTimestampMs;
+        int mSelectedDatasetId = -1;
+        boolean mDialogDismissed = false;
+        boolean mNegativeCtaButtonClicked = false;
+        boolean mPositiveCtaButtonClicked = false;
 
         PresentationStatsEventInternal() {}
     }
