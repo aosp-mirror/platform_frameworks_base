@@ -235,6 +235,11 @@ object Flags {
     @JvmField
     val ASYNC_INFLATE_BOUNCER = unreleasedFlag(229, "async_inflate_bouncer", teamfood = true)
 
+    /** Whether to inflate the bouncer view on a background thread. */
+    // TODO(b/273341787): Tracking Bug
+    @JvmField
+    val PREVENT_BYPASS_KEYGUARD = unreleasedFlag(230, "prevent_bypass_keyguard")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
@@ -665,7 +670,7 @@ object Flags {
 
     // 2300 - stylus
     @JvmField
-    val TRACK_STYLUS_EVER_USED = unreleasedFlag(2300, "track_stylus_ever_used", teamfood = true)
+    val TRACK_STYLUS_EVER_USED = releasedFlag(2300, "track_stylus_ever_used")
     @JvmField val ENABLE_STYLUS_CHARGING_UI = unreleasedFlag(2301, "enable_stylus_charging_ui")
     @JvmField
     val ENABLE_USI_BATTERY_NOTIFICATIONS = unreleasedFlag(2302, "enable_usi_battery_notifications")
@@ -693,6 +698,12 @@ object Flags {
     @JvmField
     val ENABLE_DARK_VIGNETTE_WHEN_FOLDING =
         unreleasedFlag(2700, "enable_dark_vignette_when_folding")
+
+    // TODO(b/265764985): Tracking Bug
+    @Keep
+    @JvmField
+    val ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS =
+        unreleasedFlag(2701, "enable_unfold_status_bar_animations")
 
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")

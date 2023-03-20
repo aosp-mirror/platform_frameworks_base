@@ -62,6 +62,7 @@ import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsReposi
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -98,7 +99,6 @@ class SideFpsControllerTest : SysuiTestCase() {
 
     @JvmField @Rule var rule = MockitoJUnit.rule()
 
-    @Mock lateinit var keyguardStateController: KeyguardStateController
     @Mock lateinit var layoutInflater: LayoutInflater
     @Mock lateinit var fingerprintManager: FingerprintManager
     @Mock lateinit var windowManager: WindowManager
@@ -138,7 +138,8 @@ class SideFpsControllerTest : SysuiTestCase() {
         keyguardBouncerRepository = FakeKeyguardBouncerRepository()
         alternateBouncerInteractor =
             AlternateBouncerInteractor(
-                keyguardStateController,
+                mock(StatusBarStateController::class.java),
+                mock(KeyguardStateController::class.java),
                 keyguardBouncerRepository,
                 FakeBiometricSettingsRepository(),
                 FakeDeviceEntryFingerprintAuthRepository(),

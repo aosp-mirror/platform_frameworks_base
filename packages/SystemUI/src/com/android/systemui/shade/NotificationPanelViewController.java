@@ -3556,7 +3556,13 @@ public final class NotificationPanelViewController implements Dumpable {
                             : (mKeyguardStateController.canDismissLockScreen()
                                     ? UNLOCK : BOUNCER_UNLOCK);
 
-            fling(vel, expand, isFalseTouch(x, y, interactionType));
+            // don't fling while in keyguard to avoid jump in shade expand animation;
+            // touch has been intercepted already so flinging here is redundant
+            if (mBarState == KEYGUARD && mExpandedFraction >= 1.0) {
+                mShadeLog.d("NPVC endMotionEvent - skipping fling on keyguard");
+            } else {
+                fling(vel, expand, isFalseTouch(x, y, interactionType));
+            }
             onTrackingStopped(expand);
             mUpdateFlingOnLayout = expand && mPanelClosedOnDown && !mHasLayoutedSinceDown;
             if (mUpdateFlingOnLayout) {
@@ -5015,9 +5021,13 @@ public final class NotificationPanelViewController implements Dumpable {
             captureValues(transitionValues);
         }
 
+        @Nullable
         @Override
-        public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
-                TransitionValues endValues) {
+        public Animator createAnimator(ViewGroup sceneRoot, @Nullable TransitionValues startValues,
+                @Nullable TransitionValues endValues) {
+            if (startValues == null || endValues == null) {
+                return null;
+            }
             ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
 
             Rect from = (Rect) startValues.values.get(PROP_BOUNDS);
