@@ -699,5 +699,5 @@ object Flags {
     // TODO(b/272805037): Tracking Bug
     @JvmField
     val ADVANCED_VPN_ENABLED = unreleasedFlag(2800, name = "AdvancedVpn__enable_feature",
-            namespace = "vpn", teamfood = false)
+            namespace = "vpn", teamfood = true)
 }
