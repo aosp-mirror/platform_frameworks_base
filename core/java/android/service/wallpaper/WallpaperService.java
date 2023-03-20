@@ -1430,7 +1430,7 @@ public abstract class WallpaperService extends Service {
                     com.android.internal.R.dimen.config_wallpaperDimAmount);
             mWallpaperDimAmount = mDefaultDimAmount;
             mPreviousWallpaperDimAmount = mWallpaperDimAmount;
-            mDisplayState = mDisplay.getState();
+            mDisplayState = mDisplay.getCommittedState();
             mDisplayInstallOrientation = mDisplay.getInstallOrientation();
 
             if (DEBUG) Log.v(TAG, "onCreate(): " + this);
@@ -1521,7 +1521,8 @@ public abstract class WallpaperService extends Service {
                 return;
             }
             if (!mDestroyed) {
-                mDisplayState = mDisplay == null ? Display.STATE_UNKNOWN : mDisplay.getState();
+                mDisplayState = mDisplay == null ? Display.STATE_UNKNOWN :
+                        mDisplay.getCommittedState();
                 boolean visible = mVisible && mDisplayState != Display.STATE_OFF;
                 if (mReportedVisible != visible) {
                     mReportedVisible = visible;
