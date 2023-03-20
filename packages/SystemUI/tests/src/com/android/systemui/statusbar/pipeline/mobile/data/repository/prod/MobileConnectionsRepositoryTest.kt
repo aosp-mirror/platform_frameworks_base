@@ -38,7 +38,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
@@ -668,75 +667,83 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun mobileConnectivity_default() {
-        assertThat(underTest.defaultMobileNetworkConnectivity.value)
-            .isEqualTo(MobileConnectivityModel(isConnected = false, isValidated = false))
+    fun mobileIsDefault_startsAsFalse() {
+        assertThat(underTest.mobileIsDefault.value).isFalse()
     }
 
     @Test
-    fun mobileConnectivity_isConnected_isValidated() =
+    fun mobileIsDefault_capsHaveCellular_isDefault() =
         runBlocking(IMMEDIATE) {
-            val caps = createCapabilities(connected = true, validated = true)
+            val caps =
+                mock<NetworkCapabilities>().also {
+                    whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                }
 
-            var latest: MobileConnectivityModel? = null
-            val job =
-                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+            var latest: Boolean? = null
+            val job = underTest.mobileIsDefault.onEach { latest = it }.launchIn(this)
 
             getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
 
-            assertThat(latest)
-                .isEqualTo(MobileConnectivityModel(isConnected = true, isValidated = true))
+            assertThat(latest).isTrue()
 
             job.cancel()
         }
 
     @Test
-    fun mobileConnectivity_isConnected_isNotValidated() =
+    fun mobileIsDefault_capsDoNotHaveCellular_isNotDefault() =
         runBlocking(IMMEDIATE) {
-            val caps = createCapabilities(connected = true, validated = false)
+            val caps =
+                mock<NetworkCapabilities>().also {
+                    whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(false)
+                }
 
-            var latest: MobileConnectivityModel? = null
-            val job =
-                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+            var latest: Boolean? = null
+            val job = underTest.mobileIsDefault.onEach { latest = it }.launchIn(this)
 
             getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
 
-            assertThat(latest)
-                .isEqualTo(MobileConnectivityModel(isConnected = true, isValidated = false))
+            assertThat(latest).isFalse()
 
             job.cancel()
         }
 
     @Test
-    fun mobileConnectivity_isNotConnected_isNotValidated() =
-        runBlocking(IMMEDIATE) {
-            val caps = createCapabilities(connected = false, validated = false)
+    fun defaultConnectionIsValidated_startsAsFalse() {
+        assertThat(underTest.defaultConnectionIsValidated.value).isFalse()
+    }
 
-            var latest: MobileConnectivityModel? = null
-            val job =
-                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+    @Test
+    fun defaultConnectionIsValidated_capsHaveValidated_isValidated() =
+        runBlocking(IMMEDIATE) {
+            val caps =
+                mock<NetworkCapabilities>().also {
+                    whenever(it.hasCapability(NET_CAPABILITY_VALIDATED)).thenReturn(true)
+                }
+
+            var latest: Boolean? = null
+            val job = underTest.defaultConnectionIsValidated.onEach { latest = it }.launchIn(this)
 
             getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
 
-            assertThat(latest)
-                .isEqualTo(MobileConnectivityModel(isConnected = false, isValidated = false))
+            assertThat(latest).isTrue()
 
             job.cancel()
         }
 
-    /** In practice, I don't think this state can ever happen (!connected, validated) */
     @Test
-    fun mobileConnectivity_isNotConnected_isValidated() =
+    fun defaultConnectionIsValidated_capsHaveNotValidated_isNotValidated() =
         runBlocking(IMMEDIATE) {
-            val caps = createCapabilities(connected = false, validated = true)
+            val caps =
+                mock<NetworkCapabilities>().also {
+                    whenever(it.hasCapability(NET_CAPABILITY_VALIDATED)).thenReturn(false)
+                }
 
-            var latest: MobileConnectivityModel? = null
-            val job =
-                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+            var latest: Boolean? = null
+            val job = underTest.defaultConnectionIsValidated.onEach { latest = it }.launchIn(this)
 
             getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
 
-            assertThat(latest).isEqualTo(MobileConnectivityModel(false, true))
+            assertThat(latest).isFalse()
 
             job.cancel()
         }
@@ -858,12 +865,6 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             assertThat(latest).isEqualTo(null)
 
             job.cancel()
-        }
-
-    private fun createCapabilities(connected: Boolean, validated: Boolean): NetworkCapabilities =
-        mock<NetworkCapabilities>().also {
-            whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(connected)
-            whenever(it.hasCapability(NET_CAPABILITY_VALIDATED)).thenReturn(validated)
         }
 
     private fun getDefaultNetworkCallback(): ConnectivityManager.NetworkCallback {

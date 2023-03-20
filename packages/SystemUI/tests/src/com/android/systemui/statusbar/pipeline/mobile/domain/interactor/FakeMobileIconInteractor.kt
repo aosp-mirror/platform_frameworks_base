@@ -40,7 +40,7 @@ class FakeMobileIconInteractor(
             )
         )
 
-    override val isConnected = MutableStateFlow(true)
+    override val mobileIsDefault = MutableStateFlow(true)
 
     private val _iconGroup = MutableStateFlow<SignalIcon.MobileIconGroup>(TelephonyIcons.THREE_G)
     override val networkTypeIconGroup = _iconGroup

@@ -60,7 +60,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
                 mobileIconsInteractor.activeDataConnectionHasDataEnabled,
                 mobileIconsInteractor.alwaysShowDataRatIcon,
                 mobileIconsInteractor.alwaysUseCdmaLevel,
-                mobileIconsInteractor.defaultMobileNetworkConnectivity,
+                mobileIconsInteractor.mobileIsDefault,
                 mobileIconsInteractor.defaultMobileIconMapping,
                 mobileIconsInteractor.defaultMobileIconGroup,
                 mobileIconsInteractor.defaultDataSubId,

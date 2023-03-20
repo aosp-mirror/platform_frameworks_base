@@ -46,7 +46,6 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.dagger.MobileSummaryLog
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
@@ -262,15 +261,18 @@ constructor(
             ?: createRepositoryForSubId(subId).also { subIdRepositoryCache[subId] = it }
 
     @SuppressLint("MissingPermission")
-    override val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel> =
+    private val defaultMobileNetworkConnectivity: StateFlow<DefaultConnectionModel> =
         conflatedCallbackFlow {
                 val callback =
                     object : NetworkCallback(FLAG_INCLUDE_LOCATION_INFO) {
                         override fun onLost(network: Network) {
                             logger.logOnLost(network, isDefaultNetworkCallback = true)
-                            // Send a disconnected model when lost. Maybe should create a sealed
-                            // type or null here?
-                            trySend(MobileConnectivityModel())
+                            trySend(
+                                DefaultConnectionModel(
+                                    mobileIsDefault = false,
+                                    defaultConnectionIsValidated = false,
+                                )
+                            )
                         }
 
                         override fun onCapabilitiesChanged(
@@ -283,9 +285,10 @@ constructor(
                                 isDefaultNetworkCallback = true,
                             )
                             trySend(
-                                MobileConnectivityModel(
-                                    isConnected = caps.hasTransport(TRANSPORT_CELLULAR),
-                                    isValidated = caps.hasCapability(NET_CAPABILITY_VALIDATED),
+                                DefaultConnectionModel(
+                                    mobileIsDefault = caps.hasTransport(TRANSPORT_CELLULAR),
+                                    defaultConnectionIsValidated =
+                                    caps.hasCapability(NET_CAPABILITY_VALIDATED),
                                 )
                             )
                         }
@@ -296,12 +299,31 @@ constructor(
                 awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
             }
             .distinctUntilChanged()
+            .stateIn(scope, SharingStarted.WhileSubscribed(), DefaultConnectionModel())
+
+    override val mobileIsDefault: StateFlow<Boolean> =
+        defaultMobileNetworkConnectivity
+            .map { it.mobileIsDefault }
+            .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogger,
-                columnPrefix = "$LOGGING_PREFIX.defaultConnection",
-                initialValue = MobileConnectivityModel(),
+                columnPrefix = "",
+                columnName = "mobileIsDefault",
+                initialValue = false,
             )
-            .stateIn(scope, SharingStarted.WhileSubscribed(), MobileConnectivityModel())
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val defaultConnectionIsValidated: StateFlow<Boolean> =
+        defaultMobileNetworkConnectivity
+            .map { it.defaultConnectionIsValidated }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogger,
+                columnPrefix = "",
+                columnName = "defaultConnectionIsValidated",
+                initialValue = false,
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     /**
      * Flow that tracks the active mobile data subscriptions. Emits `true` whenever the active data
@@ -384,6 +406,11 @@ constructor(
             isOpportunistic = isOpportunistic,
             groupUuid = groupUuid,
         )
+
+    private data class DefaultConnectionModel(
+        val mobileIsDefault: Boolean = false,
+        val defaultConnectionIsValidated: Boolean = false,
+    )
 
     companion object {
         private const val LOGGING_PREFIX = "Repo"
