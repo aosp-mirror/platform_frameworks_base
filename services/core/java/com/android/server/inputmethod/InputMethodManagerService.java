@@ -2003,7 +2003,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public InputMethodInfo getCurrentInputMethodInfoAsUser(@UserIdInt int userId) {
         if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(
+            mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
         synchronized (ImfLock.class) {
@@ -2017,7 +2017,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     public List<InputMethodInfo> getInputMethodList(@UserIdInt int userId,
             @DirectBootAwareness int directBootAwareness) {
         if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(
+            mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
         synchronized (ImfLock.class) {
@@ -2040,7 +2040,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public List<InputMethodInfo> getEnabledInputMethodList(@UserIdInt int userId) {
         if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(
+            mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
         synchronized (ImfLock.class) {
@@ -2062,7 +2062,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public boolean isStylusHandwritingAvailableAsUser(@UserIdInt int userId) {
         if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(
+            mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
 
@@ -2158,7 +2158,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(String imiId,
             boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId) {
         if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
 
         synchronized (ImfLock.class) {
@@ -3634,7 +3635,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             int unverifiedTargetSdkVersion, @UserIdInt int userId,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
 
             if (editorInfo == null || editorInfo.targetInputMethodUser == null
                     || editorInfo.targetInputMethodUser.getIdentifier() != userId) {
@@ -4115,7 +4117,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public InputMethodSubtype getLastInputMethodSubtype(@UserIdInt int userId) {
         if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
         synchronized (ImfLock.class) {
             if (mSettings.getCurrentUserId() == userId) {
@@ -4133,7 +4136,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes,
             @UserIdInt int userId) {
         if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
         final int callingUid = Binder.getCallingUid();
 
@@ -4186,7 +4190,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     public void setExplicitlyEnabledInputMethodSubtypes(String imeId,
             @NonNull int[] subtypeHashCodes, @UserIdInt int userId) {
         if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
         final int callingUid = Binder.getCallingUid();
         final ComponentName imeComponentName =
@@ -5412,7 +5417,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public InputMethodSubtype getCurrentInputMethodSubtype(@UserIdInt int userId) {
         if (UserHandle.getCallingUserId() != userId) {
-            mContext.enforceCallingPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         }
         synchronized (ImfLock.class) {
             if (mSettings.getCurrentUserId() == userId) {
