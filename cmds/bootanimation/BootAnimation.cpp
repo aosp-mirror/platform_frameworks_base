@@ -460,6 +460,7 @@ public:
 
 EGLConfig BootAnimation::getEglConfig(const EGLDisplay& display) {
     const EGLint attribs[] = {
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
         EGL_RED_SIZE,   8,
         EGL_GREEN_SIZE, 8,
         EGL_BLUE_SIZE,  8,
