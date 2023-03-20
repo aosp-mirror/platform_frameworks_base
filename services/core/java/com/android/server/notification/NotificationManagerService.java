@@ -7803,7 +7803,8 @@ public class NotificationManagerService extends SystemService {
      */
     @GuardedBy("mNotificationLock")
     @VisibleForTesting
-    protected boolean isVisuallyInterruptive(NotificationRecord old, NotificationRecord r) {
+    protected boolean isVisuallyInterruptive(@Nullable NotificationRecord old,
+            @NonNull NotificationRecord r) {
         // Ignore summary updates because we don't display most of the information.
         if (r.getSbn().isGroup() && r.getSbn().getNotification().isGroupSummary()) {
             if (DEBUG_INTERRUPTIVENESS) {
@@ -7819,14 +7820,6 @@ public class NotificationManagerService extends SystemService {
                         +  r.getKey() + " is interruptive: new notification");
             }
             return true;
-        }
-
-        if (r == null) {
-            if (DEBUG_INTERRUPTIVENESS) {
-                Slog.v(TAG, "INTERRUPTIVENESS: "
-                        +  r.getKey() + " is not interruptive: null");
-            }
-            return false;
         }
 
         Notification oldN = old.getSbn().getNotification();
@@ -7882,6 +7875,14 @@ public class NotificationManagerService extends SystemService {
             if (DEBUG_INTERRUPTIVENESS) {
                 Slog.v(TAG, "INTERRUPTIVENESS: "
                     +  r.getKey() + " is interruptive: completed progress");
+            }
+            return true;
+        }
+
+        if (Notification.areIconsDifferent(oldN, newN)) {
+            if (DEBUG_INTERRUPTIVENESS) {
+                Slog.v(TAG, "INTERRUPTIVENESS: "
+                        +  r.getKey() + " is interruptive: icons differ");
             }
             return true;
         }

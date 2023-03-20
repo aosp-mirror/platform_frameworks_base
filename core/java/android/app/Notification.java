@@ -3269,6 +3269,43 @@ public class Notification implements Parcelable
     /**
      * @hide
      */
+    public static boolean areIconsDifferent(Notification first, Notification second) {
+        return areIconsMaybeDifferent(first.getSmallIcon(), second.getSmallIcon())
+                || areIconsMaybeDifferent(first.getLargeIcon(), second.getLargeIcon());
+    }
+
+    /**
+     * Note that we aren't actually comparing the contents of the bitmaps here; this is only a
+     * cursory inspection. We will not return false negatives, but false positives are likely.
+     */
+    private static boolean areIconsMaybeDifferent(Icon a, Icon b) {
+        if (a == b) {
+            return false;
+        }
+        if (a == null || b == null) {
+            return true;
+        }
+        if (a.sameAs(b)) {
+            return false;
+        }
+        final int aType = a.getType();
+        if (aType != b.getType()) {
+            return true;
+        }
+        if (aType == Icon.TYPE_BITMAP || aType == Icon.TYPE_ADAPTIVE_BITMAP) {
+            final Bitmap aBitmap = a.getBitmap();
+            final Bitmap bBitmap = b.getBitmap();
+            return aBitmap.getWidth() != bBitmap.getWidth()
+                    || aBitmap.getHeight() != bBitmap.getHeight()
+                    || aBitmap.getConfig() != bBitmap.getConfig()
+                    || aBitmap.getGenerationId() != bBitmap.getGenerationId();
+        }
+        return true;
+    }
+
+    /**
+     * @hide
+     */
     public static boolean areStyledNotificationsVisiblyDifferent(Builder first, Builder second) {
         if (first.getStyle() == null) {
             return second.getStyle() != null;
@@ -7643,8 +7680,6 @@ public class Notification implements Parcelable
 
         /**
          * @hide
-         * Note that we aren't actually comparing the contents of the bitmaps here, so this
-         * is only doing a cursory inspection. Bitmaps of equal size will appear the same.
          */
         @Override
         public boolean areNotificationsVisiblyDifferent(Style other) {
@@ -7652,32 +7687,7 @@ public class Notification implements Parcelable
                 return true;
             }
             BigPictureStyle otherS = (BigPictureStyle) other;
-            return areIconsObviouslyDifferent(getBigPicture(), otherS.getBigPicture());
-        }
-
-        private static boolean areIconsObviouslyDifferent(Icon a, Icon b) {
-            if (a == b) {
-                return false;
-            }
-            if (a == null || b == null) {
-                return true;
-            }
-            if (a.sameAs(b)) {
-                return false;
-            }
-            final int aType = a.getType();
-            if (aType != b.getType()) {
-                return true;
-            }
-            if (aType == Icon.TYPE_BITMAP || aType == Icon.TYPE_ADAPTIVE_BITMAP) {
-                final Bitmap aBitmap = a.getBitmap();
-                final Bitmap bBitmap = b.getBitmap();
-                return aBitmap.getWidth() != bBitmap.getWidth()
-                        || aBitmap.getHeight() != bBitmap.getHeight()
-                        || aBitmap.getConfig() != bBitmap.getConfig()
-                        || aBitmap.getGenerationId() != bBitmap.getGenerationId();
-            }
-            return true;
+            return areIconsMaybeDifferent(getBigPicture(), otherS.getBigPicture());
         }
     }
 
