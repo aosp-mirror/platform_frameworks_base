@@ -16,20 +16,34 @@
 
 package com.android.systemui.volume;
 
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
+
 import android.annotation.StringRes;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.os.CountDownTimer;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.messages.nano.SystemMessageProto;
+import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.util.NotificationChannels;
+import com.android.systemui.util.concurrency.DelayableExecutor;
+
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
 
 /**
  * A class that implements the four Computed Sound Dose-related warnings defined in {@link AudioManager}:
@@ -53,34 +67,58 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
  * communication between the native audio framework that implements the dose computation and the
  * audio service.
  */
-public abstract class CsdWarningDialog extends SystemUIDialog
+public class CsdWarningDialog extends SystemUIDialog
         implements DialogInterface.OnDismissListener, DialogInterface.OnClickListener {
 
     private static final String TAG = Util.logTag(CsdWarningDialog.class);
 
     private static final int KEY_CONFIRM_ALLOWED_AFTER_MS = 1000; // milliseconds
     // time after which action is taken when the user hasn't ack'd or dismissed the dialog
-    private static final int NO_ACTION_TIMEOUT_MS = 5000;
+    public static final int NO_ACTION_TIMEOUT_MS = 5000;
 
     private final Context mContext;
     private final AudioManager mAudioManager;
     private final @AudioManager.CsdWarning int mCsdWarning;
     private final Object mTimerLock = new Object();
+
     /**
      * Timer to keep track of how long the user has before an action (here volume reduction) is
      * taken on their behalf.
      */
     @GuardedBy("mTimerLock")
-    private final CountDownTimer mNoUserActionTimer;
+    private Runnable mNoUserActionRunnable;
+    private Runnable mCancelScheduledNoUserActionRunnable = null;
+
+    private final DelayableExecutor mDelayableExecutor;
+    private NotificationManager mNotificationManager;
+    private Runnable mOnCleanup;
 
     private long mShowTime;
 
-    public CsdWarningDialog(@AudioManager.CsdWarning int csdWarning, Context context,
-            AudioManager audioManager) {
+    /**
+     * To inject dependencies and allow for easier testing
+     */
+    @AssistedFactory
+    public interface Factory {
+        /**
+         * Create a dialog object
+         */
+        CsdWarningDialog create(int csdWarning, Runnable onCleanup);
+    }
+
+    @AssistedInject
+    public CsdWarningDialog(@Assisted @AudioManager.CsdWarning int csdWarning, Context context,
+            AudioManager audioManager, NotificationManager notificationManager,
+            @Background DelayableExecutor delayableExecutor, @Assisted Runnable onCleanup) {
         super(context);
         mCsdWarning = csdWarning;
         mContext = context;
         mAudioManager = audioManager;
+        mNotificationManager = notificationManager;
+        mOnCleanup = onCleanup;
+
+        mDelayableExecutor = delayableExecutor;
+
         getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
         setShowForAllUsers(true);
         setMessage(mContext.getString(getStringForWarning(csdWarning)));
@@ -95,25 +133,24 @@ public abstract class CsdWarningDialog extends SystemUIDialog
                 Context.RECEIVER_EXPORTED_UNAUDITED);
 
         if (csdWarning == AudioManager.CSD_WARNING_DOSE_REACHED_1X) {
-            mNoUserActionTimer = new CountDownTimer(NO_ACTION_TIMEOUT_MS, NO_ACTION_TIMEOUT_MS) {
-                @Override
-                public void onTick(long millisUntilFinished) { }
-
-                @Override
-                public void onFinish() {
-                    if (mCsdWarning == AudioManager.CSD_WARNING_DOSE_REACHED_1X) {
-                        // unlike on the 5x dose repeat, level is only reduced to RS1
-                        // when the warning is not acknowledged quick enough
-                        mAudioManager.lowerVolumeToRs1();
-                    }
+            mNoUserActionRunnable = () -> {
+                if (mCsdWarning == AudioManager.CSD_WARNING_DOSE_REACHED_1X) {
+                    // unlike on the 5x dose repeat, level is only reduced to RS1 when the warning
+                    // is not acknowledged quickly enough
+                    mAudioManager.lowerVolumeToRs1();
+                    sendNotification();
                 }
             };
         } else {
-            mNoUserActionTimer = null;
+            mNoUserActionRunnable = null;
         }
     }
 
-    protected abstract void cleanUp();
+    private void cleanUp() {
+        if (mOnCleanup != null) {
+            mOnCleanup.run();
+        }
+    }
 
     // NOT overriding onKeyDown as we're not allowing a dismissal on any key other than
     // VOLUME_DOWN, and for this, we don't need to track if it's the start of a new
@@ -153,12 +190,9 @@ public abstract class CsdWarningDialog extends SystemUIDialog
         super.onStart();
         mShowTime = System.currentTimeMillis();
         synchronized (mTimerLock) {
-            if (mNoUserActionTimer != null) {
-                new Thread(() -> {
-                    synchronized (mTimerLock) {
-                        mNoUserActionTimer.start();
-                    }
-                }).start();
+            if (mNoUserActionRunnable != null) {
+                mCancelScheduledNoUserActionRunnable = mDelayableExecutor.executeDelayed(
+                        mNoUserActionRunnable, NO_ACTION_TIMEOUT_MS);
             }
         }
     }
@@ -166,8 +200,8 @@ public abstract class CsdWarningDialog extends SystemUIDialog
     @Override
     protected void onStop() {
         synchronized (mTimerLock) {
-            if (mNoUserActionTimer != null) {
-                mNoUserActionTimer.cancel();
+            if (mCancelScheduledNoUserActionRunnable != null) {
+                mCancelScheduledNoUserActionRunnable.run();
             }
         }
     }
@@ -211,5 +245,33 @@ public abstract class CsdWarningDialog extends SystemUIDialog
         }
         Log.e(TAG, "Invalid CSD warning event " + csdWarning, new Exception());
         return com.android.internal.R.string.csd_dose_reached_warning;
+    }
+
+
+    /**
+     * In case user did not respond to the dialog, they still need to know volume was lowered.
+     */
+    private void sendNotification() {
+        Intent intent = new Intent(Settings.ACTION_SOUND_SETTINGS);
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent,
+                FLAG_IMMUTABLE);
+
+        String text = mContext.getString(R.string.csd_system_lowered_text);
+        String title = mContext.getString(R.string.csd_lowered_title);
+
+        Notification.Builder builder =
+                new Notification.Builder(mContext, NotificationChannels.ALERTS)
+                        .setSmallIcon(R.drawable.hearing)
+                        .setContentTitle(title)
+                        .setContentText(text)
+                        .setContentIntent(pendingIntent)
+                        .setStyle(new Notification.BigTextStyle().bigText(text))
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .setLocalOnly(true)
+                        .setAutoCancel(true)
+                        .setCategory(Notification.CATEGORY_SYSTEM);
+
+        mNotificationManager.notify(SystemMessageProto.SystemMessage.NOTE_CSD_LOWER_AUDIO,
+                builder.build());
     }
 }
