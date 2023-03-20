@@ -16,8 +16,12 @@
 
 package com.android.systemui.qs.logging
 
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import android.content.res.Configuration.Orientation
 import android.service.quicksettings.Tile
 import android.view.View
+import com.android.systemui.log.dagger.QSConfigLog
 import com.android.systemui.log.dagger.QSLog
 import com.android.systemui.plugins.log.ConstantStringsLogger
 import com.android.systemui.plugins.log.ConstantStringsLoggerImpl
@@ -32,8 +36,12 @@ import javax.inject.Inject
 
 private const val TAG = "QSLog"
 
-class QSLogger @Inject constructor(@QSLog private val buffer: LogBuffer) :
-    ConstantStringsLogger by ConstantStringsLoggerImpl(buffer, TAG) {
+class QSLogger
+@Inject
+constructor(
+    @QSLog private val buffer: LogBuffer,
+    @QSConfigLog private val configChangedBuffer: LogBuffer,
+) : ConstantStringsLogger by ConstantStringsLoggerImpl(buffer, TAG) {
 
     fun logException(@CompileTimeConstant logMsg: String, ex: Exception) {
         buffer.log(TAG, ERROR, {}, { logMsg }, exception = ex)
@@ -264,19 +272,28 @@ class QSLogger @Inject constructor(@QSLog private val buffer: LogBuffer) :
     }
 
     fun logOnConfigurationChanged(
-        lastOrientation: Int,
-        newOrientation: Int,
+        @Orientation oldOrientation: Int,
+        @Orientation newOrientation: Int,
+        newShouldUseSplitShade: Boolean,
+        oldShouldUseSplitShade: Boolean,
         containerName: String
     ) {
-        buffer.log(
+        configChangedBuffer.log(
             TAG,
             DEBUG,
             {
                 str1 = containerName
-                int1 = lastOrientation
+                int1 = oldOrientation
                 int2 = newOrientation
+                bool1 = oldShouldUseSplitShade
+                bool2 = newShouldUseSplitShade
             },
-            { "configuration change: $str1 orientation was $int1, now $int2" }
+            {
+                "config change: " +
+                    "$str1 orientation=${toOrientationString(int2)} " +
+                    "(was ${toOrientationString(int1)}), " +
+                    "splitShade=$bool2 (was $bool1)"
+            }
         )
     }
 
@@ -351,5 +368,13 @@ class QSLogger @Inject constructor(@QSLog private val buffer: LogBuffer) :
             View.GONE -> "GONE"
             else -> "undefined"
         }
+    }
+}
+
+private inline fun toOrientationString(@Orientation orientation: Int): String {
+    return when (orientation) {
+        ORIENTATION_LANDSCAPE -> "land"
+        ORIENTATION_PORTRAIT -> "port"
+        else -> "undefined"
     }
 }
