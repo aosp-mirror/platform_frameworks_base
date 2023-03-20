@@ -39,8 +39,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -166,6 +168,42 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
         bouncerRepository.setAlternateVisible(false)
 
         assertFalse(underTest.hide())
+        assertFalse(bouncerRepository.alternateBouncerVisible.value)
+    }
+
+    @Test
+    fun onUnlockedIsFalse_doesNotHide() {
+        // GIVEN alternate bouncer is showing
+        bouncerRepository.setAlternateVisible(true)
+
+        val keyguardStateControllerCallbackCaptor =
+            ArgumentCaptor.forClass(KeyguardStateController.Callback::class.java)
+        verify(keyguardStateController).addCallback(keyguardStateControllerCallbackCaptor.capture())
+
+        // WHEN isUnlocked=false
+        givenCanShowAlternateBouncer()
+        whenever(keyguardStateController.isUnlocked).thenReturn(false)
+        keyguardStateControllerCallbackCaptor.value.onUnlockedChanged()
+
+        // THEN the alternate bouncer is still visible
+        assertTrue(bouncerRepository.alternateBouncerVisible.value)
+    }
+
+    @Test
+    fun onUnlockedChangedIsTrue_hide() {
+        // GIVEN alternate bouncer is showing
+        bouncerRepository.setAlternateVisible(true)
+
+        val keyguardStateControllerCallbackCaptor =
+            ArgumentCaptor.forClass(KeyguardStateController.Callback::class.java)
+        verify(keyguardStateController).addCallback(keyguardStateControllerCallbackCaptor.capture())
+
+        // WHEN isUnlocked=true
+        givenCanShowAlternateBouncer()
+        whenever(keyguardStateController.isUnlocked).thenReturn(true)
+        keyguardStateControllerCallbackCaptor.value.onUnlockedChanged()
+
+        // THEN the alternate bouncer is hidden
         assertFalse(bouncerRepository.alternateBouncerVisible.value)
     }
 
