@@ -51,6 +51,7 @@ import android.view.accessibility.IAccessibilityInteractionConnection;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.accessibility.AccessibilitySecurityPolicy.AccessibilityUserManager;
+import com.android.server.utils.Slogf;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
@@ -59,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class provides APIs for accessibility manager to manage {@link AccessibilityWindowInfo}s and
@@ -67,6 +69,7 @@ import java.util.List;
 public class AccessibilityWindowManager {
     private static final String LOG_TAG = "AccessibilityWindowManager";
     private static final boolean DEBUG = false;
+    private static final boolean VERBOSE = false;
 
     private static int sNextWindowId;
 
@@ -209,6 +212,9 @@ public class AccessibilityWindowManager {
          * Constructor for DisplayWindowsObserver.
          */
         DisplayWindowsObserver(int displayId) {
+            if (DEBUG) {
+                Slogf.d(LOG_TAG, "Creating DisplayWindowsObserver for displayId %d", displayId);
+            }
             mDisplayId = displayId;
         }
 
@@ -430,18 +436,38 @@ public class AccessibilityWindowManager {
             synchronized (mLock) {
                 updateWindowsByWindowAttributesLocked(windows);
                 if (DEBUG) {
-                    Slog.i(LOG_TAG, "Display Id = " + mDisplayId);
-                    Slog.i(LOG_TAG, "Windows changed: " + windows);
+                    Slogf.i(LOG_TAG, "mDisplayId=%d, topFocusedDisplayId=%d, currentUserId=%d, "
+                            + "visibleBgUsers=%s", mDisplayId, topFocusedDisplayId,
+                            mAccessibilityUserManager.getCurrentUserIdLocked(),
+                            mAccessibilityUserManager.getVisibleUserIdsLocked());
+                    if (VERBOSE) {
+                        Slogf.i(LOG_TAG, "%d windows changed: %s ", windows.size(), windows);
+                    } else {
+                        List<String> windowsInfo = windows.stream()
+                                .map(w -> "{displayId=" + w.displayId + ", title=" + w.title + "}")
+                                .collect(Collectors.toList());
+                        Slogf.i(LOG_TAG, "%d windows changed: %s", windows.size(), windowsInfo);
+                    }
                 }
                 if (shouldUpdateWindowsLocked(forceSend, windows)) {
                     mTopFocusedDisplayId = topFocusedDisplayId;
                     mTopFocusedWindowToken = topFocusedWindowToken;
+                    if (DEBUG) {
+                        Slogf.d(LOG_TAG, "onWindowsForAccessibilityChanged(): updating windows for "
+                                + "display %d and token %s",
+                                topFocusedDisplayId, topFocusedWindowToken);
+                    }
                     cacheWindows(windows);
                     // Lets the policy update the focused and active windows.
                     updateWindowsLocked(mAccessibilityUserManager.getCurrentUserIdLocked(),
                             windows);
                     // Someone may be waiting for the windows - advertise it.
                     mLock.notifyAll();
+                }
+                else if (DEBUG) {
+                    Slogf.d(LOG_TAG, "onWindowsForAccessibilityChanged(): NOT updating windows for "
+                            + "display %d and token %s",
+                            topFocusedDisplayId, topFocusedWindowToken);
                 }
             }
         }
@@ -472,6 +498,12 @@ public class AccessibilityWindowManager {
             }
 
             final int windowCount = windows.size();
+            if (VERBOSE) {
+                Slogf.v(LOG_TAG,
+                        "shouldUpdateWindowsLocked(): mDisplayId=%d, windowCount=%d, "
+                        + "mCachedWindowInfos.size()=%d, windows.size()=%d", mDisplayId,
+                        windowCount, mCachedWindowInfos.size(), windows.size());
+            }
             // We computed the windows and if they changed notify the client.
             if (mCachedWindowInfos.size() != windowCount) {
                 // Different size means something changed.
@@ -1274,7 +1306,7 @@ public class AccessibilityWindowManager {
      */
     @Nullable
     public RemoteAccessibilityConnection getConnectionLocked(int userId, int windowId) {
-        if (DEBUG) {
+        if (VERBOSE) {
             Slog.i(LOG_TAG, "Trying to get interaction connection to windowId: " + windowId);
         }
         RemoteAccessibilityConnection connection = mGlobalInteractionConnections.get(windowId);
