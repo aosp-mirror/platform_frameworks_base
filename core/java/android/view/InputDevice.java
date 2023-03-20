@@ -1183,8 +1183,10 @@ public final class InputDevice implements Parcelable {
      */
     @NonNull
     public LightsManager getLightsManager() {
-        if (mLightsManager == null) {
-            mLightsManager = InputManager.getInstance().getInputDeviceLightsManager(mId);
+        synchronized (mMotionRanges) {
+            if (mLightsManager == null) {
+                mLightsManager = InputManager.getInstance().getInputDeviceLightsManager(mId);
+            }
         }
         return mLightsManager;
     }
