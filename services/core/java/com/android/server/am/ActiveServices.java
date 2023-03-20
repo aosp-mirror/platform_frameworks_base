@@ -6640,8 +6640,9 @@ public final class ActiveServices {
                     mAm.mHandler.removeCallbacks(mLastAnrDumpClearer);
                     mAm.mHandler.postDelayed(mLastAnrDumpClearer,
                             LAST_ANR_LIFETIME_DURATION_MSECS);
-                    String anrMessage = "executing service " + timeout.shortInstanceName;
-                    timeoutRecord = TimeoutRecord.forServiceExec(anrMessage);
+                    long waitedMillis = now - timeout.executingStart;
+                    timeoutRecord = TimeoutRecord.forServiceExec(timeout.shortInstanceName,
+                            waitedMillis);
                 } else {
                     Message msg = mAm.mHandler.obtainMessage(
                             ActivityManagerService.SERVICE_TIMEOUT_MSG);
