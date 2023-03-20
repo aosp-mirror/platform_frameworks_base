@@ -849,7 +849,7 @@ final class LetterboxUiController {
         int dividerInsets =
                 getResources().getDimensionPixelSize(R.dimen.docked_stack_divider_insets);
         int dividerSize = dividerWindowWidth - dividerInsets * 2;
-        final Rect bounds = new Rect(displayContent.getBounds());
+        final Rect bounds = new Rect(displayContent.getWindowConfiguration().getAppBounds());
         if (bounds.width() >= bounds.height()) {
             bounds.inset(/* dx */ dividerSize / 2, /* dy */ 0);
             bounds.right = bounds.centerX();
@@ -1504,7 +1504,7 @@ final class LetterboxUiController {
     }
 
     private void inheritConfiguration(ActivityRecord firstOpaque) {
-        // To avoid wrong behaviour, we're not forcing a specific aspet ratio to activities
+        // To avoid wrong behaviour, we're not forcing a specific aspect ratio to activities
         // which are not already providing one (e.g. permission dialogs) and presumably also
         // not resizable.
         if (mActivityRecord.getMinAspectRatio() != UNDEFINED_ASPECT_RATIO) {
