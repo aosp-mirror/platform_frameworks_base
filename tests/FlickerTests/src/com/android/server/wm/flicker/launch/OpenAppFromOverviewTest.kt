@@ -19,7 +19,6 @@ package com.android.server.wm.flicker.launch
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import android.tools.device.flicker.annotation.FlickerServiceCompatible
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -44,6 +43,7 @@ import org.junit.runners.Parameterized
  *     Relaunch an app [testApp] by selecting it in the overview screen, and wait animation to
  *     complete (only this action is traced)
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
@@ -55,7 +55,6 @@ import org.junit.runners.Parameterized
  * ```
  */
 @RequiresDevice
-@FlickerServiceCompatible
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
