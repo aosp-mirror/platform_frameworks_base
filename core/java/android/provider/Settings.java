@@ -14788,23 +14788,6 @@ public final class Settings {
                 "adaptive_battery_management_enabled";
 
         /**
-         * Whether or not apps are allowed into the
-         * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED} bucket.
-         * Type: int (0 for false, 1 for true)
-         * Default: {@value #DEFAULT_ENABLE_RESTRICTED_BUCKET}
-         *
-         * @hide
-         */
-        @Readable
-        public static final String ENABLE_RESTRICTED_BUCKET = "enable_restricted_bucket";
-
-        /**
-         * @see #ENABLE_RESTRICTED_BUCKET
-         * @hide
-         */
-        public static final int DEFAULT_ENABLE_RESTRICTED_BUCKET = 1;
-
-        /**
          * Whether or not app auto restriction is enabled. When it is enabled, settings app will
          * auto restrict the app if it has bad behavior (e.g. hold wakelock for long time).
          *
