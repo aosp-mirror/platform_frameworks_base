@@ -24,6 +24,7 @@ import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
+import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -2951,21 +2952,27 @@ public final class Call {
 
         for(String key : bundle.keySet()) {
             if (key != null) {
-                final Object value = bundle.get(key);
-                final Object newValue = newBundle.get(key);
                 if (!newBundle.containsKey(key)) {
                     return false;
                 }
-                if (value instanceof Bundle && newValue instanceof Bundle) {
-                    if (!areBundlesEqual((Bundle) value, (Bundle) newValue)) {
+                // In case new call extra contains non-framework class objects, return false to
+                // force update the call extra
+                try {
+                    final Object value = bundle.get(key);
+                    final Object newValue = newBundle.get(key);
+                    if (value instanceof Bundle && newValue instanceof Bundle) {
+                        if (!areBundlesEqual((Bundle) value, (Bundle) newValue)) {
+                            return false;
+                        }
+                    }
+                    if (value instanceof byte[] && newValue instanceof byte[]) {
+                        if (!Arrays.equals((byte[]) value, (byte[]) newValue)) {
+                            return false;
+                        }
+                    } else if (!Objects.equals(value, newValue)) {
                         return false;
                     }
-                }
-                if (value instanceof byte[] && newValue instanceof byte[]) {
-                    if (!Arrays.equals((byte[]) value, (byte[]) newValue)) {
-                        return false;
-                    }
-                } else if (!Objects.equals(value, newValue)) {
+                } catch (BadParcelableException e) {
                     return false;
                 }
             }
