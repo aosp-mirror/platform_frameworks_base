@@ -470,6 +470,7 @@ public class ClipboardService extends SystemService {
                     callingPackage);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.SET_CLIP_SOURCE)
         @Override
         public void setPrimaryClipAsPackage(
                 ClipData clip,
@@ -478,8 +479,7 @@ public class ClipboardService extends SystemService {
                 @UserIdInt int userId,
                 int deviceId,
                 String sourcePackage) {
-            getContext().enforceCallingOrSelfPermission(Manifest.permission.SET_CLIP_SOURCE,
-                    "Requires SET_CLIP_SOURCE permission");
+            setPrimaryClipAsPackage_enforcePermission();
             checkAndSetPrimaryClip(clip, callingPackage, attributionTag, userId, deviceId,
                     sourcePackage);
         }
@@ -765,11 +765,11 @@ public class ClipboardService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.SET_CLIP_SOURCE)
         @Override
         public String getPrimaryClipSource(
                 String callingPackage, String attributionTag, int userId, int deviceId) {
-            getContext().enforceCallingOrSelfPermission(Manifest.permission.SET_CLIP_SOURCE,
-                    "Requires SET_CLIP_SOURCE permission");
+            getPrimaryClipSource_enforcePermission();
             final int intendingUid = getIntendingUid(callingPackage, userId);
             final int intendingUserId = UserHandle.getUserId(intendingUid);
             final int intendingDeviceId = getIntendingDeviceId(deviceId, intendingUid);

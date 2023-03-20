@@ -1150,10 +1150,10 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.READ_SYNC_STATS)
     @Override
     public boolean isSyncActive(Account account, String authority, ComponentName cname) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
-                "no permission to read the sync stats");
+        isSyncActive_enforcePermission();
 
         final int callingUid = Binder.getCallingUid();
         final int userId = UserHandle.getCallingUserId();
@@ -1254,11 +1254,11 @@ public final class ContentService extends IContentService.Stub {
         return isSyncPendingAsUser(account, authority, cname, UserHandle.getCallingUserId());
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.READ_SYNC_STATS)
     @Override
     public boolean isSyncPendingAsUser(Account account, String authority, ComponentName cname,
                                        int userId) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
-                "no permission to read the sync stats");
+        isSyncPendingAsUser_enforcePermission();
         enforceCrossUserPermission(userId,
                 "no permission to retrieve the sync settings for user " + userId);
 

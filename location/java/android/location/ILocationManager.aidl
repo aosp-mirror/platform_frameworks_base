@@ -98,12 +98,16 @@ interface ILocationManager
     void addGnssAntennaInfoListener(in IGnssAntennaInfoListener listener, String packageName, @nullable String attributionTag, String listenerId);
     void removeGnssAntennaInfoListener(in IGnssAntennaInfoListener listener);
 
+    @EnforcePermission("INTERACT_ACROSS_USERS")
     void addProviderRequestListener(in IProviderRequestListener listener);
     void removeProviderRequestListener(in IProviderRequestListener listener);
 
     int getGnssBatchSize();
+    @EnforcePermission("LOCATION_HARDWARE")
     void startGnssBatch(long periodNanos, in ILocationListener listener, String packageName, @nullable String attributionTag, String listenerId);
+    @EnforcePermission("LOCATION_HARDWARE")
     void flushGnssBatch();
+    @EnforcePermission("LOCATION_HARDWARE")
     void stopGnssBatch();
 
     boolean hasProvider(String provider);
@@ -111,7 +115,9 @@ interface ILocationManager
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);
     String getBestProvider(in Criteria criteria, boolean enabledOnly);
     ProviderProperties getProviderProperties(String provider);
+    @EnforcePermission("READ_DEVICE_CONFIG")
     boolean isProviderPackage(@nullable String provider, String packageName, @nullable String attributionTag);
+    @EnforcePermission("READ_DEVICE_CONFIG")
     List<String> getProviderPackages(String provider);
 
     @EnforcePermission("LOCATION_HARDWARE")

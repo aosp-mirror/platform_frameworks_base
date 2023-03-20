@@ -389,13 +389,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return oneTimePermissionUserManager;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS)
     @Override
     public void startOneTimePermissionSession(String packageName, @UserIdInt int userId,
             long timeoutMillis, long revokeAfterKilledDelayMillis) {
-        mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS,
-                "Must hold " + Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS
-                        + " to register permissions as one time.");
+        startOneTimePermissionSession_enforcePermission();
         Objects.requireNonNull(packageName);
 
         final long token = Binder.clearCallingIdentity();

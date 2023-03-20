@@ -39,14 +39,17 @@ interface IMediaProjectionManager {
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     MediaProjectionInfo getActiveProjectionInfo();
 
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     void stopActiveProjection();
 
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     void notifyActiveProjectionCapturedContentResized(int width, int height);
 
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
                 + ".permission.MANAGE_MEDIA_PROJECTION)")
     void notifyActiveProjectionCapturedContentVisibilityChanged(boolean isVisible);

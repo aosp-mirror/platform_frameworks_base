@@ -59,6 +59,7 @@ interface IPackageInstaller {
     void installExistingPackage(String packageName, int installFlags, int installReason,
             in IntentSender statusReceiver, int userId, in List<String> whiteListedPermissions);
 
+    @EnforcePermission("INSTALL_PACKAGES")
     void setPermissionsResult(int sessionId, boolean accepted);
 
     void bypassNextStagedInstallerCheck(boolean value);

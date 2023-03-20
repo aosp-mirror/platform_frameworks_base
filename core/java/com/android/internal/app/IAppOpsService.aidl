@@ -81,12 +81,19 @@ interface IAppOpsService {
     void getHistoricalOpsFromDiskRaw(int uid, String packageName, String attributionTag,
             in List<String> ops, int historyFlags, int filter, long beginTimeMillis,
             long endTimeMillis, int flags, in RemoteCallback callback);
+    @EnforcePermission("MANAGE_APPOPS")
     void offsetHistory(long duration);
+    @EnforcePermission("MANAGE_APPOPS")
     void setHistoryParameters(int mode, long baseSnapshotInterval, int compressionStep);
+    @EnforcePermission("MANAGE_APPOPS")
     void addHistoricalOps(in AppOpsManager.HistoricalOps ops);
+    @EnforcePermission("MANAGE_APPOPS")
     void resetHistoryParameters();
+    @EnforcePermission("MANAGE_APPOPS")
     void resetPackageOpsNoHistory(String packageName);
+    @EnforcePermission("MANAGE_APPOPS")
     void clearHistory();
+    @EnforcePermission("MANAGE_APPOPS")
     void rebootHistory(long offlineDurationMillis);
     List<AppOpsManager.PackageOps> getUidOps(int uid, in int[] ops);
     void setUidMode(int code, int uid, int mode);

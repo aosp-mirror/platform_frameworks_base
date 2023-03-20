@@ -594,10 +594,10 @@ public class AmbientContextManagerService extends
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT)
         @Override
         public void unregisterObserver(String callingPackage) {
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
+            unregisterObserver_enforcePermission();
             assertCalledByPackageOwner(callingPackage);
 
             synchronized (mLock) {

@@ -2458,13 +2458,11 @@ public class AudioService extends IAudioService.Stub
         return true;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.WRITE_SETTINGS)
     /** @see AudioManager#setEncodedSurroundMode(int) */
     @Override
     public boolean setEncodedSurroundMode(@AudioManager.EncodedSurroundOutputMode int mode) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.WRITE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Missing WRITE_SETTINGS permission");
-        }
+        setEncodedSurroundMode_enforcePermission();
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -7475,15 +7473,13 @@ public class AudioService extends IAudioService.Stub
     public @interface BtProfile {}
 
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.BLUETOOTH_STACK)
     /**
      * See AudioManager.handleBluetoothActiveDeviceChanged(...)
      */
     public void handleBluetoothActiveDeviceChanged(BluetoothDevice newDevice,
             BluetoothDevice previousDevice, @NonNull BluetoothProfileConnectionInfo info) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.BLUETOOTH_STACK)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Bluetooth is the only caller allowed");
-        }
+        handleBluetoothActiveDeviceChanged_enforcePermission();
         if (info == null) {
             throw new IllegalArgumentException("Illegal null BluetoothProfileConnectionInfo for"
                     + " device " + previousDevice + " -> " + newDevice);
@@ -10417,9 +10413,10 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.REMOTE_AUDIO_PLAYBACK)
     @Override
     public void setRingtonePlayer(IRingtonePlayer player) {
-        mContext.enforceCallingOrSelfPermission(REMOTE_AUDIO_PLAYBACK, null);
+        setRingtonePlayer_enforcePermission();
         mRingtonePlayer = player;
     }
 

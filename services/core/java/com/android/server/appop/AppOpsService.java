@@ -5611,10 +5611,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_APPOPS)
     @Override
     public void resetPackageOpsNoHistory(@NonNull String packageName) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APPOPS,
-                "resetPackageOpsNoHistory");
+        resetPackageOpsNoHistory_enforcePermission();
         synchronized (AppOpsService.this) {
             final int uid = mPackageManagerInternal.getPackageUid(packageName, 0,
                     UserHandle.getCallingUserId());
@@ -5633,52 +5633,52 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_APPOPS)
     @Override
     public void setHistoryParameters(@AppOpsManager.HistoricalMode int mode,
             long baseSnapshotInterval, int compressionStep) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APPOPS,
-                "setHistoryParameters");
+        setHistoryParameters_enforcePermission();
         // Must not hold the appops lock
         mHistoricalRegistry.setHistoryParameters(mode, baseSnapshotInterval, compressionStep);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_APPOPS)
     @Override
     public void offsetHistory(long offsetMillis) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APPOPS,
-                "offsetHistory");
+        offsetHistory_enforcePermission();
         // Must not hold the appops lock
         mHistoricalRegistry.offsetHistory(offsetMillis);
         mHistoricalRegistry.offsetDiscreteHistory(offsetMillis);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_APPOPS)
     @Override
     public void addHistoricalOps(HistoricalOps ops) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APPOPS,
-                "addHistoricalOps");
+        addHistoricalOps_enforcePermission();
         // Must not hold the appops lock
         mHistoricalRegistry.addHistoricalOps(ops);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_APPOPS)
     @Override
     public void resetHistoryParameters() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APPOPS,
-                "resetHistoryParameters");
+        resetHistoryParameters_enforcePermission();
         // Must not hold the appops lock
         mHistoricalRegistry.resetHistoryParameters();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_APPOPS)
     @Override
     public void clearHistory() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APPOPS,
-                "clearHistory");
+        clearHistory_enforcePermission();
         // Must not hold the appops lock
         mHistoricalRegistry.clearAllHistory();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_APPOPS)
     @Override
     public void rebootHistory(long offlineDurationMillis) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APPOPS,
-                "rebootHistory");
+        rebootHistory_enforcePermission();
 
         Preconditions.checkArgument(offlineDurationMillis >= 0);
 

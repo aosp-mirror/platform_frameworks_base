@@ -112,14 +112,19 @@ interface IWindowManager
     void getInitialDisplaySize(int displayId, out Point size);
     @UnsupportedAppUsage
     void getBaseDisplaySize(int displayId, out Point size);
+    @EnforcePermission("WRITE_SECURE_SETTINGS")
     void setForcedDisplaySize(int displayId, int width, int height);
+    @EnforcePermission("WRITE_SECURE_SETTINGS")
     void clearForcedDisplaySize(int displayId);
     @UnsupportedAppUsage
     int getInitialDisplayDensity(int displayId);
     int getBaseDisplayDensity(int displayId);
     int getDisplayIdByUniqueId(String uniqueId);
+    @EnforcePermission("WRITE_SECURE_SETTINGS")
     void setForcedDisplayDensityForUser(int displayId, int density, int userId);
+    @EnforcePermission("WRITE_SECURE_SETTINGS")
     void clearForcedDisplayDensityForUser(int displayId, int userId);
+    @EnforcePermission("WRITE_SECURE_SETTINGS")
     void setForcedDisplayScalingMode(int displayId, int mode); // 0 = auto, 1 = disable
 
     // These can only be called when holding the MANAGE_APP_TOKENS permission.
@@ -159,6 +164,7 @@ interface IWindowManager
      * @param shellRootLayer The container's layer. See WindowManager#ShellRootLayer.
      * @return a SurfaceControl to add things to.
      */
+    @EnforcePermission("MANAGE_APP_TOKENS")
     SurfaceControl addShellRoot(int displayId, IWindow client, int shellRootLayer);
 
     /**
@@ -167,6 +173,7 @@ interface IWindowManager
      *
      * @param target The IWindow that accessibility service interfaces with.
      */
+    @EnforcePermission("MANAGE_APP_TOKENS")
     void setShellRootAccessibilityWindow(int displayId, int shellRootLayer, IWindow target);
 
     /**
@@ -197,6 +204,7 @@ interface IWindowManager
     void disableKeyguard(IBinder token, String tag, int userId);
     /** @deprecated use Activity.setShowWhenLocked instead. */
     void reenableKeyguard(IBinder token, int userId);
+    @EnforcePermission("DISABLE_KEYGUARD")
     void exitKeyguardSecurely(IOnKeyguardExitResult callback);
     @UnsupportedAppUsage
     boolean isKeyguardLocked();
@@ -417,6 +425,7 @@ interface IWindowManager
     /**
      * Called by System UI to enable or disable haptic feedback on the navigation bar buttons.
      */
+    @EnforcePermission("STATUS_BAR")
     @UnsupportedAppUsage
     void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled);
 
@@ -504,6 +513,7 @@ interface IWindowManager
     /**
      * Return the touch region for the current IME window, or an empty region if there is none.
      */
+    @EnforcePermission("RESTRICTED_VR_ACCESS")
     Region getCurrentImeTouchRegion();
 
     /**
@@ -713,6 +723,7 @@ interface IWindowManager
      * When in multi-window mode, the provided displayWindowInsetsController will control insets
      * animations.
      */
+    @EnforcePermission("MANAGE_APP_TOKENS")
     void setDisplayWindowInsetsController(
             int displayId, in IDisplayWindowInsetsController displayWindowInsetsController);
 
@@ -720,6 +731,7 @@ interface IWindowManager
      * Called when a remote process updates the requested visibilities of insets on a display window
      * container.
      */
+    @EnforcePermission("MANAGE_APP_TOKENS")
     void updateDisplayWindowRequestedVisibleTypes(int displayId, int requestedVisibleTypes);
 
     /**

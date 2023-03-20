@@ -28,6 +28,7 @@ import android.content.IOnPrimaryClipChangedListener;
 interface IClipboard {
     void setPrimaryClip(in ClipData clip, String callingPackage, String attributionTag, int userId,
             int deviceId);
+    @EnforcePermission("SET_CLIP_SOURCE")
     void setPrimaryClipAsPackage(in ClipData clip, String callingPackage, String attributionTag,
             int userId, int deviceId, String sourcePackage);
     void clearPrimaryClip(String callingPackage, String attributionTag, int userId, int deviceId);
@@ -46,6 +47,7 @@ interface IClipboard {
     boolean hasClipboardText(String callingPackage, String attributionTag, int userId,
             int deviceId);
 
+    @EnforcePermission("SET_CLIP_SOURCE")
     String getPrimaryClipSource(String callingPackage, String attributionTag, int userId,
             int deviceId);
 

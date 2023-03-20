@@ -4261,6 +4261,7 @@ public class NotificationManagerService extends SystemService {
             return getActiveNotificationsWithAttribution(callingPkg, null);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
         /**
          * System-only API for getting a list of current (i.e. not cleared) notifications.
          *
@@ -4271,9 +4272,7 @@ public class NotificationManagerService extends SystemService {
         public StatusBarNotification[] getActiveNotificationsWithAttribution(String callingPkg,
                 String callingAttributionTag) {
             // enforce() will ensure the calling uid has the correct permission
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.ACCESS_NOTIFICATIONS,
-                    "NotificationManagerService.getActiveNotifications");
+            getActiveNotificationsWithAttribution_enforcePermission();
 
             ArrayList<StatusBarNotification> tmp = new ArrayList<>();
             int uid = Binder.getCallingUid();
@@ -4389,6 +4388,7 @@ public class NotificationManagerService extends SystemService {
                     includeSnoozed);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
         /**
          * System-only API for getting a list of recent (cleared, no longer shown) notifications.
          */
@@ -4397,9 +4397,7 @@ public class NotificationManagerService extends SystemService {
         public StatusBarNotification[] getHistoricalNotificationsWithAttribution(String callingPkg,
                 String callingAttributionTag, int count, boolean includeSnoozed) {
             // enforce() will ensure the calling uid has the correct permission
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.ACCESS_NOTIFICATIONS,
-                    "NotificationManagerService.getHistoricalNotifications");
+            getHistoricalNotificationsWithAttribution_enforcePermission();
 
             StatusBarNotification[] tmp = null;
             int uid = Binder.getCallingUid();
@@ -4415,6 +4413,7 @@ public class NotificationManagerService extends SystemService {
             return tmp;
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
         /**
          * System-only API for getting a list of historical notifications. May contain multiple days
          * of notifications.
@@ -4425,9 +4424,7 @@ public class NotificationManagerService extends SystemService {
         public NotificationHistory getNotificationHistory(String callingPkg,
                 String callingAttributionTag) {
             // enforce() will ensure the calling uid has the correct permission
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.ACCESS_NOTIFICATIONS,
-                    "NotificationManagerService.getNotificationHistory");
+            getNotificationHistory_enforcePermission();
             int uid = Binder.getCallingUid();
 
             // noteOp will check to make sure the callingPkg matches the uid

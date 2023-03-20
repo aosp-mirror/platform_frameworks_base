@@ -1185,12 +1185,11 @@ public final class DeviceStateManagerService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CONTROL_DEVICE_STATE)
         @Override // Binder call
         public void onStateRequestOverlayDismissed(boolean shouldCancelRequest) {
 
-            getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
-                    "CONTROL_DEVICE_STATE permission required to control the state request "
-                            + "overlay");
+            onStateRequestOverlayDismissed_enforcePermission();
 
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
