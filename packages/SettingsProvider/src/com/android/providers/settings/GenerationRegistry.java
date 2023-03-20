@@ -50,10 +50,6 @@ final class GenerationRegistry {
     @GuardedBy("mLock")
     private final ArrayMap<Integer, ArrayMap<String, Integer>> mKeyToIndexMapMap = new ArrayMap<>();
 
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    // Maximum number of backing stores allowed
-    static final int NUM_MAX_BACKING_STORE = 8;
-
     @GuardedBy("mLock")
     private int mNumBackingStore = 0;
 
@@ -65,8 +61,24 @@ final class GenerationRegistry {
     // The generation number is only increased when a new non-predefined setting is inserted
     private static final String DEFAULT_MAP_KEY_FOR_UNSET_SETTINGS = "";
 
-    public GenerationRegistry(Object lock) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    // Minimum number of backing stores; supports 3 users
+    static final int MIN_NUM_BACKING_STORE = 8;
+    // Maximum number of backing stores; supports 18 users
+    static final int MAX_NUM_BACKING_STORE = 38;
+
+    private final int mMaxNumBackingStore;
+
+    GenerationRegistry(Object lock, int maxNumUsers) {
         mLock = lock;
+        // Add some buffer to maxNumUsers to accommodate corner cases when the actual number of
+        // users in the system exceeds the limit
+        maxNumUsers = maxNumUsers + 2;
+        // Number of backing stores needed for N users is (N + N + 1 + 1) = N * 2 + 2
+        // N Secure backing stores and N System backing stores, 1 Config and 1 Global for all users
+        // However, we always make sure that at least 3 users and at most 18 users are supported.
+        mMaxNumBackingStore = Math.min(Math.max(maxNumUsers * 2 + 2, MIN_NUM_BACKING_STORE),
+                MAX_NUM_BACKING_STORE);
     }
 
     /**
@@ -195,7 +207,7 @@ final class GenerationRegistry {
         }
         if (backingStore == null) {
             try {
-                if (mNumBackingStore >= NUM_MAX_BACKING_STORE) {
+                if (mNumBackingStore >= mMaxNumBackingStore) {
                     if (DEBUG) {
                         Slog.e(LOG_TAG, "Error creating backing store - at capacity");
                     }
@@ -274,5 +286,10 @@ final class GenerationRegistry {
             }
         }
         return -1;
+    }
+
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    int getMaxNumBackingStores() {
+        return mMaxNumBackingStore;
     }
 }
