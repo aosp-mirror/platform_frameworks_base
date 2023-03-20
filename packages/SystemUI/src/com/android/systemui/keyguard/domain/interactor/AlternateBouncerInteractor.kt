@@ -49,6 +49,17 @@ constructor(
     var receivedDownTouch = false
     val isVisible: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
 
+    private val keyguardStateControllerCallback: KeyguardStateController.Callback =
+        object : KeyguardStateController.Callback {
+            override fun onUnlockedChanged() {
+                maybeHide()
+            }
+        }
+
+    init {
+        keyguardStateController.addCallback(keyguardStateControllerCallback)
+    }
+
     /**
      * Sets the correct bouncer states to show the alternate bouncer if it can show.
      *
@@ -126,6 +137,12 @@ constructor(
                 MIN_VISIBILITY_DURATION_UNTIL_TOUCHES_DISMISS_ALTERNATE_BOUNCER_MS
         } else {
             systemClock.uptimeMillis() - legacyAlternateBouncerVisibleTime > 200
+        }
+    }
+
+    private fun maybeHide() {
+        if (isVisibleState() && !canShowAlternateBouncerForFingerprint()) {
+            hide()
         }
     }
 
