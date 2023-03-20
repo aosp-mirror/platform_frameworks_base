@@ -17,6 +17,7 @@
 package android.telephony.satellite;
 
 import android.annotation.NonNull;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * A callback class for monitoring satellite position update and datagram transfer state change
@@ -30,6 +31,7 @@ public interface SatelliteTransmissionUpdateCallback {
      *
      * @param pointingInfo The pointing info containing the satellite location.
      */
+    @UnsupportedAppUsage
     void onSatellitePositionChanged(@NonNull PointingInfo pointingInfo);
 
     /**
@@ -39,6 +41,7 @@ public interface SatelliteTransmissionUpdateCallback {
      * @param sendPendingCount The number of datagrams that are currently being sent.
      * @param errorCode If datagram transfer failed, the reason for failure.
      */
+    @UnsupportedAppUsage
     void onSendDatagramStateChanged(
             @SatelliteManager.SatelliteDatagramTransferState int state, int sendPendingCount,
             @SatelliteManager.SatelliteError int errorCode);
@@ -50,6 +53,7 @@ public interface SatelliteTransmissionUpdateCallback {
      * @param receivePendingCount The number of datagrams that are currently pending to be received.
      * @param errorCode If datagram transfer failed, the reason for failure.
      */
+    @UnsupportedAppUsage
     void onReceiveDatagramStateChanged(
             @SatelliteManager.SatelliteDatagramTransferState int state, int receivePendingCount,
             @SatelliteManager.SatelliteError int errorCode);

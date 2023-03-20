@@ -16,6 +16,8 @@
 
 package android.telephony.satellite;
 
+import android.compat.annotation.UnsupportedAppUsage;
+
 /**
  * A callback class for monitoring satellite provision state change events.
  *
@@ -28,5 +30,6 @@ public interface SatelliteProvisionStateCallback {
      * @param provisioned The new provision state. {@code true} means satellite is provisioned
      *                    {@code false} means satellite is not provisioned.
      */
+    @UnsupportedAppUsage
     void onSatelliteProvisionStateChanged(boolean provisioned);
 }
