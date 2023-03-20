@@ -11276,7 +11276,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     RoleManager.ROLE_DIALER, packageName, 0, UserHandle.of(callerUserId),
                     AsyncTask.THREAD_POOL_EXECUTOR, callback);
             try {
-                future.get(5, TimeUnit.SECONDS);
+                future.get(20, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
                 throw new IllegalArgumentException("Timeout when setting the app as the dialer", e);
             } catch (ExecutionException e) {
