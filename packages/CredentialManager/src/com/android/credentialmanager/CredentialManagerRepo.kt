@@ -467,19 +467,19 @@ class CredentialManagerRepo(
             GetCredentialRequest.Builder(
                 Bundle()
             ).addCredentialOption(
-                CredentialOption(
+                CredentialOption.Builder(
                     passwordOption.type,
                     passwordOption.requestData,
                     passwordOption.candidateQueryData,
-                    passwordOption.isSystemProviderRequired
-                )
+                ).setIsSystemProviderRequired(passwordOption.isSystemProviderRequired)
+                .build()
             ).addCredentialOption(
-                CredentialOption(
+                CredentialOption.Builder(
                     passkeyOption.type,
                     passkeyOption.requestData,
                     passkeyOption.candidateQueryData,
-                    passkeyOption.isSystemProviderRequired
-                )
+                ).setIsSystemProviderRequired(passkeyOption.isSystemProviderRequired)
+                .build()
             ).build(),
             "com.google.android.youtube"
         )
