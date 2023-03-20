@@ -31,6 +31,7 @@ import static android.net.ipsec.ike.IkeSessionParams.ESP_IP_VERSION_AUTO;
 import static android.os.PowerWhitelistManager.REASON_VPN;
 import static android.os.UserHandle.PER_USER_RANGE;
 import static android.telephony.CarrierConfigManager.KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT;
+import static android.telephony.CarrierConfigManager.KEY_PREFERRED_IKE_PROTOCOL_INT;
 
 import static com.android.net.module.util.NetworkStackConstants.IPV6_MIN_MTU;
 import static com.android.server.vcn.util.PersistableBundleUtils.STRING_DESERIALIZER;
@@ -269,6 +270,42 @@ public class Vpn {
     @VisibleForTesting
     static final int DEFAULT_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT = 5 * 60;
 
+    /**
+     *  Prefer using {@link IkeSessionParams.ESP_IP_VERSION_AUTO} and
+     *  {@link IkeSessionParams.ESP_ENCAP_TYPE_AUTO} for ESP packets.
+     *
+     *  This is one of the possible customization values for
+     *  CarrierConfigManager.KEY_PREFERRED_IKE_PROTOCOL_INT.
+     */
+    @VisibleForTesting
+    public static final int PREFERRED_IKE_PROTOCOL_AUTO = 0;
+    /**
+     *  Prefer using {@link IkeSessionParams.ESP_IP_VERSION_IPV4} and
+     *  {@link IkeSessionParams.ESP_ENCAP_TYPE_UDP} for ESP packets.
+     *
+     *  This is one of the possible customization values for
+     *  CarrierConfigManager.KEY_PREFERRED_IKE_PROTOCOL_INT.
+     */
+    @VisibleForTesting
+    public static final int PREFERRED_IKE_PROTOCOL_IPV4_UDP = 40;
+    /**
+     *  Prefer using {@link IkeSessionParams.ESP_IP_VERSION_IPV6} and
+     *  {@link IkeSessionParams.ESP_ENCAP_TYPE_UDP} for ESP packets.
+     *
+     *  Do not use this value for production code. Its numeric value will change in future versions.
+     */
+    @VisibleForTesting
+    public static final int PREFERRED_IKE_PROTOCOL_IPV6_UDP = 60;
+    /**
+     *  Prefer using {@link IkeSessionParams.ESP_IP_VERSION_IPV6} and
+     *  {@link IkeSessionParams.ESP_ENCAP_TYPE_NONE} for ESP packets.
+     *
+     *  This is one of the possible customization values for
+     *  CarrierConfigManager.KEY_PREFERRED_IKE_PROTOCOL_INT.
+     */
+    @VisibleForTesting
+    public static final int PREFERRED_IKE_PROTOCOL_IPV6_ESP = 61;
+
     // TODO: create separate trackers for each unique VPN to support
     // automated reconnection
 
@@ -326,12 +363,13 @@ public class Vpn {
     private final LocalLog mVpnManagerEvents = new LocalLog(MAX_EVENTS_LOGS);
 
     /**
-     * Cached Map of <subscription ID, keepalive delay ms> since retrieving the PersistableBundle
+     * Cached Map of <subscription ID, CarrierConfigInfo> since retrieving the PersistableBundle
      * and the target value from CarrierConfigManager is somewhat expensive as it has hundreds of
      * fields. This cache is cleared when the carrier config changes to ensure data freshness.
      */
     @GuardedBy("this")
-    private final SparseArray<Integer> mCachedKeepalivePerSubId = new SparseArray<>();
+    private final SparseArray<CarrierConfigInfo> mCachedCarrierConfigInfoPerSubId =
+            new SparseArray<>();
 
     /**
      * Whether to keep the connection active after rebooting, or upgrading or reinstalling. This
@@ -376,6 +414,28 @@ public class Vpn {
 
     interface RetryScheduler {
         void checkInterruptAndDelay(boolean sleepLonger) throws InterruptedException;
+    }
+
+    private static class CarrierConfigInfo {
+        public final String mccMnc;
+        public final int keepaliveDelayMs;
+        public final int encapType;
+        public final int ipVersion;
+
+        CarrierConfigInfo(String mccMnc, int keepaliveDelayMs,
+                int encapType,
+                int ipVersion) {
+            this.mccMnc = mccMnc;
+            this.keepaliveDelayMs = keepaliveDelayMs;
+            this.encapType = encapType;
+            this.ipVersion = ipVersion;
+        }
+
+        @Override
+        public String toString() {
+            return "CarrierConfigInfo(" + mccMnc + ") [keepaliveDelayMs=" + keepaliveDelayMs
+                    + ", encapType=" + encapType + ", ipVersion=" + ipVersion + "]";
+        }
     }
 
     @VisibleForTesting
@@ -2923,7 +2983,7 @@ public class Vpn {
                     public void onCarrierConfigChanged(int slotIndex, int subId, int carrierId,
                             int specificCarrierId) {
                         synchronized (Vpn.this) {
-                            mCachedKeepalivePerSubId.remove(subId);
+                            mCachedCarrierConfigInfoPerSubId.remove(subId);
 
                             // Ignore stale runner.
                             if (mVpnRunner != Vpn.IkeV2VpnRunner.this) return;
@@ -3388,47 +3448,105 @@ public class Vpn {
         }
 
         private int guessEspIpVersionForNetwork() {
-            // TODO : guess the IP version based on carrier if auto IP version selection is enabled
-            return ESP_IP_VERSION_AUTO;
+            final CarrierConfigInfo carrierconfig = getCarrierConfig();
+            final int ipVersion = (carrierconfig != null)
+                    ? carrierconfig.ipVersion : ESP_IP_VERSION_AUTO;
+            if (carrierconfig != null) {
+                Log.d(TAG, "Get customized IP version(" + ipVersion + ") on SIM("
+                        + carrierconfig.mccMnc + ")");
+            }
+            return ipVersion;
         }
 
         private int guessEspEncapTypeForNetwork() {
-            // TODO : guess the ESP encap type based on carrier if auto IP version selection is
-            // enabled
-            return ESP_ENCAP_TYPE_AUTO;
+            final CarrierConfigInfo carrierconfig = getCarrierConfig();
+            final int encapType = (carrierconfig != null)
+                    ? carrierconfig.encapType : ESP_ENCAP_TYPE_AUTO;
+            if (carrierconfig != null) {
+                Log.d(TAG, "Get customized encap type(" + encapType + ") on SIM("
+                        + carrierconfig.mccMnc + ")");
+            }
+            return encapType;
         }
 
         private int guessNattKeepaliveTimerForNetwork() {
+            final CarrierConfigInfo carrierconfig = getCarrierConfig();
+            final int natKeepalive = (carrierconfig != null)
+                    ? carrierconfig.keepaliveDelayMs : AUTOMATIC_KEEPALIVE_DELAY_SECONDS;
+            if (carrierconfig != null) {
+                Log.d(TAG, "Get customized keepalive(" + natKeepalive + ") on SIM("
+                        + carrierconfig.mccMnc + ")");
+            }
+            return natKeepalive;
+        }
+
+        private CarrierConfigInfo getCarrierConfig() {
             final int subId = getCellSubIdForNetworkCapabilities(mUnderlyingNetworkCapabilities);
             if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
                 Log.d(TAG, "Underlying network is not a cellular network");
-                return AUTOMATIC_KEEPALIVE_DELAY_SECONDS;
+                return null;
             }
 
             synchronized (Vpn.this) {
-                if (mCachedKeepalivePerSubId.contains(subId)) {
-                    Log.d(TAG, "Get cached keepalive config");
-                    return mCachedKeepalivePerSubId.get(subId);
+                if (mCachedCarrierConfigInfoPerSubId.contains(subId)) {
+                    Log.d(TAG, "Get cached config");
+                    return mCachedCarrierConfigInfoPerSubId.get(subId);
                 }
-
-                final TelephonyManager perSubTm = mTelephonyManager.createForSubscriptionId(subId);
-                if (perSubTm.getSimApplicationState() != TelephonyManager.SIM_STATE_LOADED) {
-                    Log.d(TAG, "SIM card is not ready on sub " + subId);
-                    return AUTOMATIC_KEEPALIVE_DELAY_SECONDS;
-                }
-
-                final PersistableBundle carrierConfig =
-                        mCarrierConfigManager.getConfigForSubId(subId);
-                if (!CarrierConfigManager.isConfigForIdentifiedCarrier(carrierConfig)) {
-                    return AUTOMATIC_KEEPALIVE_DELAY_SECONDS;
-                }
-
-                final int natKeepalive =
-                        carrierConfig.getInt(KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT);
-                mCachedKeepalivePerSubId.put(subId, natKeepalive);
-                Log.d(TAG, "Get customized keepalive=" + natKeepalive);
-                return natKeepalive;
             }
+
+            final TelephonyManager perSubTm = mTelephonyManager.createForSubscriptionId(subId);
+            if (perSubTm.getSimApplicationState() != TelephonyManager.SIM_STATE_LOADED) {
+                Log.d(TAG, "SIM card is not ready on sub " + subId);
+                return null;
+            }
+
+            final PersistableBundle carrierConfig =
+                    mCarrierConfigManager.getConfigForSubId(subId);
+            if (!CarrierConfigManager.isConfigForIdentifiedCarrier(carrierConfig)) {
+                return null;
+            }
+
+            final int natKeepalive =
+                    carrierConfig.getInt(KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT);
+            final int preferredIpPortocol =
+                    carrierConfig.getInt(KEY_PREFERRED_IKE_PROTOCOL_INT);
+            final String mccMnc = perSubTm.getSimOperator(subId);
+            final CarrierConfigInfo info =
+                    buildCarrierConfigInfo(mccMnc, natKeepalive, preferredIpPortocol);
+            synchronized (Vpn.this) {
+                mCachedCarrierConfigInfoPerSubId.put(subId, info);
+            }
+
+            return info;
+        }
+
+        private CarrierConfigInfo buildCarrierConfigInfo(String mccMnc,
+                int natKeepalive, int preferredIpPortocol) {
+            final int ipVersion;
+            final int encapType;
+            switch (preferredIpPortocol) {
+                case PREFERRED_IKE_PROTOCOL_AUTO:
+                    ipVersion = IkeSessionParams.ESP_IP_VERSION_AUTO;
+                    encapType = IkeSessionParams.ESP_ENCAP_TYPE_AUTO;
+                    break;
+                case PREFERRED_IKE_PROTOCOL_IPV4_UDP:
+                    ipVersion = IkeSessionParams.ESP_IP_VERSION_IPV4;
+                    encapType = IkeSessionParams.ESP_ENCAP_TYPE_UDP;
+                    break;
+                case PREFERRED_IKE_PROTOCOL_IPV6_UDP:
+                    ipVersion = IkeSessionParams.ESP_IP_VERSION_IPV6;
+                    encapType = IkeSessionParams.ESP_ENCAP_TYPE_UDP;
+                    break;
+                case PREFERRED_IKE_PROTOCOL_IPV6_ESP:
+                    ipVersion = IkeSessionParams.ESP_IP_VERSION_IPV6;
+                    encapType = IkeSessionParams.ESP_ENCAP_TYPE_NONE;
+                    break;
+                default:
+                    ipVersion = IkeSessionParams.ESP_IP_VERSION_AUTO;
+                    encapType = IkeSessionParams.ESP_ENCAP_TYPE_AUTO;
+                    break;
+            }
+            return new CarrierConfigInfo(mccMnc, natKeepalive, encapType, ipVersion);
         }
 
         boolean maybeMigrateIkeSession(@NonNull Network underlyingNetwork) {
@@ -4884,7 +5002,7 @@ public class Vpn {
                     pw.println("Reset session scheduled");
                 }
             }
-            pw.println("mCachedKeepalivePerSubId=" + mCachedKeepalivePerSubId);
+            pw.println("mCachedCarrierConfigInfoPerSubId=" + mCachedCarrierConfigInfoPerSubId);
 
             pw.println("mUnderlyNetworkChanges (most recent first):");
             pw.increaseIndent();
