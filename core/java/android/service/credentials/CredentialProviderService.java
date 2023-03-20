@@ -156,7 +156,43 @@ public abstract class CredentialProviderService extends Service {
 
     private static final String TAG = "CredProviderService";
 
+    /**
+     * The list of capabilities exposed by a credential provider.
+     *
+     * @deprecated Replaced with {@link android.service.credentials#SERVICE_META_DATA}
+     */
+    @Deprecated
     public static final String CAPABILITY_META_DATA_KEY = "android.credentials.capabilities";
+
+     /**
+      * Name under which a Credential Provider service component publishes information
+      * about itself.  This meta-data must reference an XML resource containing
+      * an
+      * <code>&lt;{@link android.R.styleable#CredentialProvider credential-provider}&gt;</code>
+      * tag.
+      *
+      * For example (AndroidManifest.xml):
+      * <code>
+      * <meta-data
+      *         android:name="android.credentials.provider"
+      *          android:resource="@xml/provider"/>
+      * </code>
+      *
+      * For example (xml/provider.xml):
+      * <code>
+      * <credential-provider xmlns:android="http://schemas.android.com/apk/res/android"
+      *       android:settingsSubtitle="@string/providerSubtitle">
+      *      <capabilities>
+      *          <capability>@string/passwords</capability>
+      *          <capability>@string/passkeys</capability>
+      *      </capabilities>
+      *      <string name="passwords">android.credentials.TYPE_PASSWORD_CREDENTIAL</string>
+      *      <string name="passkeys">android.credentials.TYPE_PUBLIC_KEY_CREDENTIAL</string>
+      *  </credential-provider>
+      * </code>
+      */
+    public static final String SERVICE_META_DATA = "android.credentials.provider";
+
 
     /** @hide */
     public static final String TEST_SYSTEM_PROVIDER_META_DATA_KEY =
