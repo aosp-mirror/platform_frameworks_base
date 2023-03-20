@@ -56,7 +56,6 @@ import android.service.voice.HotwordDetector;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.ISandboxedDetectionService;
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
-import android.service.voice.UnknownFailure;
 import android.service.voice.VisualQueryDetectionService;
 import android.service.voice.VisualQueryDetectionServiceFailure;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
@@ -786,8 +785,8 @@ final class HotwordDetectionConnection {
                         VisualQueryDetectionServiceFailure.ERROR_CODE_BINDING_DIED,
                         "Detection service is dead."));
             } else {
-                detectorSession.reportErrorLocked(new UnknownFailure(
-                        "Detection service is dead with unknown detection service type."));
+                detectorSession.reportErrorLocked(
+                        "Detection service is dead with unknown detection service type.");
             }
         }
 
@@ -804,8 +803,8 @@ final class HotwordDetectionConnection {
                         VisualQueryDetectionServiceFailure.ERROR_CODE_BIND_FAILURE,
                         "Bind detection service failure."));
             } else {
-                detectorSession.reportErrorLocked(new UnknownFailure(
-                        "Bind detection service failure with unknown detection service type."));
+                detectorSession.reportErrorLocked(
+                        "Bind detection service failure with unknown detection service type.");
             }
         }
     }
