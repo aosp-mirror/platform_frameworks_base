@@ -17,6 +17,7 @@
 package android.telephony.satellite;
 
 import android.annotation.NonNull;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -33,6 +34,7 @@ public final class PointingInfo implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public PointingInfo(float satelliteAzimuthDegrees, float satelliteElevationDegrees) {
         mSatelliteAzimuthDegrees = satelliteAzimuthDegrees;
         mSatelliteElevationDegrees = satelliteElevationDegrees;

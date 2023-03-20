@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -82,6 +83,7 @@ public class SatelliteManager {
      * @param context The context the SatelliteManager belongs to.
      * @hide
      */
+    @UnsupportedAppUsage
     public SatelliteManager(@Nullable Context context) {
         this(context, SubscriptionManager.DEFAULT_SUBSCRIPTION_ID);
     }
@@ -127,6 +129,7 @@ public class SatelliteManager {
      * {@link #requestIsSatelliteEnabled(Executor, OutcomeReceiver)}.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String KEY_SATELLITE_ENABLED = "satellite_enabled";
 
     /**
@@ -134,6 +137,7 @@ public class SatelliteManager {
      * {@link #requestIsDemoModeEnabled(Executor, OutcomeReceiver)}.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String KEY_DEMO_MODE_ENABLED = "demo_mode_enabled";
 
     /**
@@ -141,6 +145,7 @@ public class SatelliteManager {
      * {@link #requestIsSatelliteSupported(Executor, OutcomeReceiver)}.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String KEY_SATELLITE_SUPPORTED = "satellite_supported";
 
     /**
@@ -148,6 +153,7 @@ public class SatelliteManager {
      * {@link #requestSatelliteCapabilities(Executor, OutcomeReceiver)}.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String KEY_SATELLITE_CAPABILITIES = "satellite_capabilities";
 
     /**
@@ -155,6 +161,7 @@ public class SatelliteManager {
      * {@link #requestIsSatelliteProvisioned(Executor, OutcomeReceiver)}.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String KEY_SATELLITE_PROVISIONED = "satellite_provisioned";
 
     /**
@@ -162,6 +169,7 @@ public class SatelliteManager {
      * {@link #requestIsSatelliteCommunicationAllowedForCurrentLocation(Executor, OutcomeReceiver)}.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String KEY_SATELLITE_COMMUNICATION_ALLOWED =
             "satellite_communication_allowed";
 
@@ -170,6 +178,7 @@ public class SatelliteManager {
      * {@link #requestTimeForNextSatelliteVisibility(Executor, OutcomeReceiver)}.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final String KEY_SATELLITE_NEXT_VISIBILITY = "satellite_next_visibility";
 
     /**
@@ -340,6 +349,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void requestSatelliteEnabled(boolean enableSatellite, boolean enableDemoMode,
             @NonNull @CallbackExecutor Executor executor,
             @SatelliteError @NonNull Consumer<Integer> resultListener) {
@@ -382,6 +392,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void requestIsSatelliteEnabled(@NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
         Objects.requireNonNull(executor);
@@ -436,6 +447,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void requestIsDemoModeEnabled(@NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
         Objects.requireNonNull(executor);
@@ -488,6 +500,7 @@ public class SatelliteManager {
      *
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
+    @UnsupportedAppUsage
     public void requestIsSatelliteSupported(@NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
         Objects.requireNonNull(executor);
@@ -541,6 +554,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void requestSatelliteCapabilities(@NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<SatelliteCapabilities, SatelliteException> callback) {
         Objects.requireNonNull(executor);
@@ -707,6 +721,7 @@ public class SatelliteManager {
      */
     public static final int DATAGRAM_TYPE_LOCATION_SHARING = 2;
 
+    /** @hide */
     @IntDef(prefix = "DATAGRAM_TYPE_", value = {
             DATAGRAM_TYPE_UNKNOWN,
             DATAGRAM_TYPE_SOS_MESSAGE,
@@ -732,6 +747,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void startSatelliteTransmissionUpdates(@NonNull @CallbackExecutor Executor executor,
             @SatelliteError @NonNull Consumer<Integer> resultListener,
             @NonNull SatelliteTransmissionUpdateCallback callback) {
@@ -801,6 +817,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void stopSatelliteTransmissionUpdates(
             @NonNull SatelliteTransmissionUpdateCallback callback,
             @NonNull @CallbackExecutor Executor executor,
@@ -856,6 +873,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void provisionSatelliteService(@NonNull String token, @NonNull String regionId,
             @Nullable CancellationSignal cancellationSignal,
             @NonNull @CallbackExecutor Executor executor,
@@ -895,7 +913,7 @@ public class SatelliteManager {
      * {@link SatelliteProvisionStateCallback#onSatelliteProvisionStateChanged(boolean)}
      * should report as deprovisioned.
      * For provisioning satellite service, refer to
-     * {@link #provisionSatelliteService(String, CancellationSignal, Executor, Consumer)}.
+     * {@link #provisionSatelliteService(String, String, CancellationSignal, Executor, Consumer)}
      *
      * @param token The token of the device/subscription to be deprovisioned.
      * @param resultListener Listener for the {@link SatelliteError} result of the operation.
@@ -904,6 +922,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void deprovisionSatelliteService(@NonNull String token,
             @NonNull @CallbackExecutor Executor executor,
             @SatelliteError @NonNull Consumer<Integer> resultListener) {
@@ -943,6 +962,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     @SatelliteError public int registerForSatelliteProvisionStateChanged(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull SatelliteProvisionStateCallback callback) {
@@ -985,6 +1005,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void unregisterForSatelliteProvisionStateChanged(
             @NonNull SatelliteProvisionStateCallback callback) {
         Objects.requireNonNull(callback);
@@ -1023,6 +1044,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void requestIsSatelliteProvisioned(@NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
         Objects.requireNonNull(executor);
@@ -1074,6 +1096,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     @SatelliteError public int registerForSatelliteModemStateChanged(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull SatelliteStateCallback callback) {
@@ -1113,6 +1136,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void unregisterForSatelliteModemStateChanged(@NonNull SatelliteStateCallback callback) {
         Objects.requireNonNull(callback);
         ISatelliteStateCallback internalCallback = sSatelliteStateCallbackMap.remove(callback);
@@ -1147,6 +1171,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     @SatelliteError public int registerForSatelliteDatagram(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull SatelliteDatagramCallback callback) {
@@ -1190,6 +1215,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void unregisterForSatelliteDatagram(@NonNull SatelliteDatagramCallback callback) {
         Objects.requireNonNull(callback);
         ISatelliteDatagramCallback internalCallback =
@@ -1227,6 +1253,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void pollPendingSatelliteDatagrams(@NonNull @CallbackExecutor Executor executor,
             @SatelliteError @NonNull Consumer<Integer> resultListener) {
         Objects.requireNonNull(executor);
@@ -1279,6 +1306,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void sendSatelliteDatagram(@DatagramType int datagramType,
             @NonNull SatelliteDatagram datagram, boolean needFullScreenPointingUI,
             @NonNull @CallbackExecutor Executor executor,
@@ -1324,6 +1352,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void requestIsSatelliteCommunicationAllowedForCurrentLocation(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
@@ -1381,6 +1410,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @UnsupportedAppUsage
     public void requestTimeForNextSatelliteVisibility(@NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Duration, SatelliteException> callback) {
         Objects.requireNonNull(executor);
