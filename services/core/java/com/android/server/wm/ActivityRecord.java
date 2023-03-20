@@ -8362,6 +8362,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * requested in the config or via an ADB command. For more context see {@link
      * LetterboxUiController#getHorizontalPositionMultiplier(Configuration)} and
      * {@link LetterboxUiController#getVerticalPositionMultiplier(Configuration)}
+     * <p>
+     * Note that this is the final step that can change the resolved bounds. After this method
+     * is called, the position of the bounds will be moved to app space as sandboxing if the
+     * activity has a size compat scale.
      */
     private void updateResolvedBoundsPosition(Configuration newParentConfiguration) {
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
@@ -8423,6 +8427,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Since bounds has changed, the configuration needs to be computed accordingly.
         getTaskFragment().computeConfigResourceOverrides(resolvedConfig, newParentConfiguration);
+
+        // The position of configuration bounds were calculated in screen space because that is
+        // easier to resolve the relative position in parent container. However, if the activity is
+        // scaled, the position should follow the scale because the configuration will be sent to
+        // the client which is expected to be in a scaled environment.
+        if (mSizeCompatScale != 1f) {
+            final int screenPosX = resolvedBounds.left;
+            final int screenPosY = resolvedBounds.top;
+            final int dx = (int) (screenPosX / mSizeCompatScale + 0.5f) - screenPosX;
+            final int dy = (int) (screenPosY / mSizeCompatScale + 0.5f) - screenPosY;
+            offsetBounds(resolvedConfig, dx, dy);
+        }
     }
 
     void recomputeConfiguration() {
