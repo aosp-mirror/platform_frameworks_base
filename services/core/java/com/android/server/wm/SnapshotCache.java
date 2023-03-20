@@ -25,13 +25,13 @@ import java.io.PrintWriter;
  * Base class for an app snapshot cache
  * @param <TYPE> The basic type, either Task or ActivityRecord
  */
-abstract class AbsAppSnapshotCache<TYPE extends WindowContainer> {
+abstract class SnapshotCache<TYPE extends WindowContainer> {
     protected final WindowManagerService mService;
     protected final String mName;
     protected final ArrayMap<ActivityRecord, Integer> mAppIdMap = new ArrayMap<>();
     protected final ArrayMap<Integer, CacheEntry> mRunningCache = new ArrayMap<>();
 
-    AbsAppSnapshotCache(WindowManagerService service, String name) {
+    SnapshotCache(WindowManagerService service, String name) {
         mService = service;
         mName = name;
     }
