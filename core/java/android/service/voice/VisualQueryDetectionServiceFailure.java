@@ -22,6 +22,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -33,7 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-public final class VisualQueryDetectionServiceFailure extends DetectorFailure {
+public final class VisualQueryDetectionServiceFailure implements Parcelable {
 
     /**
      * An error code which means an unknown error occurs.
@@ -79,12 +80,19 @@ public final class VisualQueryDetectionServiceFailure extends DetectorFailure {
     @Retention(RetentionPolicy.SOURCE)
     public @interface VisualQueryDetectionServiceErrorCode {}
 
+    private int mErrorCode = ERROR_CODE_UNKNOWN;
+    private String mErrorMessage = "Unknown";
+
     /**
      * @hide
      */
     @TestApi
     public VisualQueryDetectionServiceFailure(int errorCode, @NonNull String errorMessage) {
-        super(ERROR_SOURCE_TYPE_VISUAL_QUERY_DETECTION, errorCode, errorMessage);
+        if (TextUtils.isEmpty(errorMessage)) {
+            throw new IllegalArgumentException("errorMessage is empty or null.");
+        }
+        mErrorCode = errorCode;
+        mErrorMessage = errorMessage;
     }
 
     /**
@@ -92,21 +100,32 @@ public final class VisualQueryDetectionServiceFailure extends DetectorFailure {
      */
     @VisualQueryDetectionServiceErrorCode
     public int getErrorCode() {
-        return super.getErrorCode();
+        return mErrorCode;
     }
 
-    @Override
+    /**
+     * Returns the error message.
+     */
+    @NonNull
+    public String getErrorMessage() {
+        return mErrorMessage;
+    }
+
+    /**
+     * Returns the suggested action.
+     */
+    @FailureSuggestedAction.FailureSuggestedActionDef
     public int getSuggestedAction() {
-        switch (getErrorCode()) {
+        switch (mErrorCode) {
             case ERROR_CODE_BIND_FAILURE:
             case ERROR_CODE_BINDING_DIED:
             case ERROR_CODE_ILLEGAL_ATTENTION_STATE:
             case ERROR_CODE_REMOTE_EXCEPTION:
-                return SUGGESTED_ACTION_RECREATE_DETECTOR;
+                return FailureSuggestedAction.RECREATE_DETECTOR;
             case ERROR_CODE_ILLEGAL_STREAMING_STATE:
-                return SUGGESTED_ACTION_RESTART_RECOGNITION;
+                return FailureSuggestedAction.RESTART_RECOGNITION;
             default:
-                return SUGGESTED_ACTION_NONE;
+                return FailureSuggestedAction.NONE;
         }
     }
 
@@ -117,7 +136,14 @@ public final class VisualQueryDetectionServiceFailure extends DetectorFailure {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
+        dest.writeInt(mErrorCode);
+        dest.writeString8(mErrorMessage);
+    }
+
+    @Override
+    public String toString() {
+        return "VisualQueryDetectionServiceFailure { errorCode = " + mErrorCode
+                + ", errorMessage = " + mErrorMessage + " }";
     }
 
     public static final @NonNull Parcelable.Creator<VisualQueryDetectionServiceFailure> CREATOR =
@@ -129,8 +155,7 @@ public final class VisualQueryDetectionServiceFailure extends DetectorFailure {
 
                 @Override
                 public VisualQueryDetectionServiceFailure createFromParcel(@NonNull Parcel in) {
-                    DetectorFailure detectorFailure = DetectorFailure.CREATOR.createFromParcel(in);
-                    return (VisualQueryDetectionServiceFailure) detectorFailure;
+                    return new VisualQueryDetectionServiceFailure(in.readInt(), in.readString8());
                 }
             };
 }
