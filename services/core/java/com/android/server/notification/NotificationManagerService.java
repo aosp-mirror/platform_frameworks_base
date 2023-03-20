@@ -6829,7 +6829,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         // Ensure MediaStyle has correct permissions for remote device extras
-        if (notification.isStyle(Notification.MediaStyle.class)) {
+        if (notification.isStyle(Notification.MediaStyle.class)
+                || notification.isStyle(Notification.DecoratedMediaCustomViewStyle.class)) {
             int hasMediaContentControlPermission = getContext().checkPermission(
                     android.Manifest.permission.MEDIA_CONTENT_CONTROL, -1, notificationUid);
             if (hasMediaContentControlPermission != PERMISSION_GRANTED) {

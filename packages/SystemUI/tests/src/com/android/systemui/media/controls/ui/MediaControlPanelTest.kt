@@ -2350,6 +2350,48 @@ public class MediaControlPanelTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun outputSwitcher_hasCustomIntent_openOverLockscreen() {
+        // When the device for a media player has an intent that opens over lockscreen
+        val pendingIntent = mock(PendingIntent::class.java)
+        whenever(pendingIntent.isActivity).thenReturn(true)
+        whenever(keyguardStateController.isShowing).thenReturn(true)
+        whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any())).thenReturn(true)
+
+        val customDevice = device.copy(intent = pendingIntent)
+        val dataWithDevice = mediaData.copy(device = customDevice)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(dataWithDevice, KEY)
+
+        // When the user taps on the output switcher,
+        seamless.callOnClick()
+
+        // Then we send the pending intent as is, without modifying the original intent
+        verify(pendingIntent).send(any(Bundle::class.java))
+        verify(pendingIntent, never()).getIntent()
+    }
+
+    @Test
+    fun outputSwitcher_hasCustomIntent_requiresUnlock() {
+        // When the device for a media player has an intent that cannot open over lockscreen
+        val pendingIntent = mock(PendingIntent::class.java)
+        whenever(pendingIntent.isActivity).thenReturn(true)
+        whenever(keyguardStateController.isShowing).thenReturn(true)
+        whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any()))
+            .thenReturn(false)
+
+        val customDevice = device.copy(intent = pendingIntent)
+        val dataWithDevice = mediaData.copy(device = customDevice)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(dataWithDevice, KEY)
+
+        // When the user taps on the output switcher,
+        seamless.callOnClick()
+
+        // Then we request keyguard dismissal
+        verify(activityStarter).postStartActivityDismissingKeyguard(eq(pendingIntent))
+    }
+
     private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener =
         withArgCaptor {
             verify(seekBarViewModel).setScrubbingChangeListener(capture())
