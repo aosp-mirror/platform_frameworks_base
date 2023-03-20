@@ -234,7 +234,7 @@ public class ActivityManager {
      * Map of callbacks that have registered for {@link UidFrozenStateChanged} events.
      * Will be called when a Uid has become frozen or unfrozen.
      */
-    final ArrayMap<UidFrozenStateChangedCallback, Executor> mFrozenStateChangedCallbacks =
+    private final ArrayMap<UidFrozenStateChangedCallback, Executor> mFrozenStateChangedCallbacks =
              new ArrayMap<>();
 
     private final IUidFrozenStateChangedCallback mFrozenStateChangedCallback =
@@ -284,6 +284,8 @@ public class ActivityManager {
         public @interface UidFrozenState {}
 
         /**
+         * Notify the client that the frozen states of an array of UIDs have changed.
+         *
          * @param uids The UIDs for which the frozen state has changed
          * @param frozenStates Frozen state for each UID index, Will be set to
          *               {@link UidFrozenStateChangedCallback#UID_FROZEN_STATE_FROZEN}
@@ -316,9 +318,11 @@ public class ActivityManager {
     public void registerUidFrozenStateChangedCallback(
             @NonNull Executor executor,
             @NonNull UidFrozenStateChangedCallback callback) {
+        Preconditions.checkNotNull(executor, "executor cannot be null");
+        Preconditions.checkNotNull(callback, "callback cannot be null");
         synchronized (mFrozenStateChangedCallbacks) {
             if (mFrozenStateChangedCallbacks.containsKey(callback)) {
-                throw new IllegalArgumentException("Callback already registered: " + callback);
+                throw new IllegalStateException("Callback already registered: " + callback);
             }
             mFrozenStateChangedCallbacks.put(callback, executor);
             if (mFrozenStateChangedCallbacks.size() > 1) {
@@ -344,6 +348,7 @@ public class ActivityManager {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void unregisterUidFrozenStateChangedCallback(
             @NonNull UidFrozenStateChangedCallback callback) {
+        Preconditions.checkNotNull(callback, "callback cannot be null");
         synchronized (mFrozenStateChangedCallbacks) {
             mFrozenStateChangedCallbacks.remove(callback);
             if (mFrozenStateChangedCallbacks.isEmpty()) {
