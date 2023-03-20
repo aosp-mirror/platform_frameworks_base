@@ -53,7 +53,7 @@ option java_package com.android.server.am
 30037 am_process_start_timeout (User|1|5),(PID|1|5),(UID|1|5),(Process Name|3)
 
 # Unhandled exception
-30039 am_crash (User|1|5),(PID|1|5),(Process Name|3),(Flags|1|5),(Exception|3),(Message|3),(File|3),(Line|1|5)
+30039 am_crash (User|1|5),(PID|1|5),(Process Name|3),(Flags|1|5),(Exception|3),(Message|3),(File|3),(Line|1|5),(Recoverable|1|5)
 # Log.wtf() called
 30040 am_wtf (User|1|5),(PID|1|5),(Process Name|3),(Flags|1|5),(Tag|3),(Message|3)
 

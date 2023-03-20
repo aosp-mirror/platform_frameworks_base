@@ -8405,13 +8405,16 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        boolean recoverable = eventType.equals("native_recoverable_crash");
+
         EventLogTags.writeAmCrash(Binder.getCallingPid(),
                 UserHandle.getUserId(Binder.getCallingUid()), processName,
                 r == null ? -1 : r.info.flags,
                 crashInfo.exceptionClassName,
                 crashInfo.exceptionMessage,
                 crashInfo.throwFileName,
-                crashInfo.throwLineNumber);
+                crashInfo.throwLineNumber,
+                recoverable ? 1 : 0);
 
         int processClassEnum = processName.equals("system_server") ? ServerProtoEnums.SYSTEM_SERVER
                 : (r != null) ? r.getProcessClassEnum()
@@ -8479,7 +8482,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 eventType, r, processName, null, null, null, null, null, null, crashInfo,
                 new Float(loadingProgress), incrementalMetrics, null);
 
-        mAppErrors.crashApplication(r, crashInfo);
+        // For GWP-ASan recoverable crashes, don't make the app crash (the whole point of
+        // 'recoverable' is that the app doesn't crash). Normally, for nonrecoreable native crashes,
+        // debuggerd will terminate the process, but there's a backup where ActivityManager will
+        // also kill it. Avoid that.
+        if (!recoverable) {
+            mAppErrors.crashApplication(r, crashInfo);
+        }
     }
 
     public void handleApplicationStrictModeViolation(
