@@ -1643,7 +1643,7 @@ public final class AutofillManager {
                     mForAugmentedAutofillOnly = false;
                 }
 
-                if ((flags & FLAG_SUPPORTS_FILL_DIALOG) != 0) {
+                if ((flags & FLAG_SUPPORTS_FILL_DIALOG) != 0 && view != null) {
                     flags |= FLAG_RESET_FILL_DIALOG_STATE;
                 }
 
@@ -2948,8 +2948,10 @@ public final class AutofillManager {
                         mFillableIds = new ArraySet<>(fillableIds.length);
                     }
                     for (AutofillId id : fillableIds) {
-                        id.resetSessionId();
-                        mFillableIds.add(id);
+                        if (id != null) {
+                            id.resetSessionId();
+                            mFillableIds.add(id);
+                        }
                     }
                 }
 
@@ -2974,8 +2976,10 @@ public final class AutofillManager {
                 }
                 if (trackedIds != null) {
                     for (AutofillId id : trackedIds) {
-                        id.resetSessionId();
-                        allFillableIds.add(id);
+                        if (id != null) {
+                            id.resetSessionId();
+                            allFillableIds.add(id);
+                        }
                     }
                 }
 

@@ -1260,6 +1260,36 @@ public final class Dataset implements Parcelable {
             return mFieldIds.size() - 1;
         }
 
+        private void createFromParcel(
+                @Nullable AutofillId id, @Nullable String datatype,
+                @Nullable AutofillValue value, @Nullable RemoteViews presentation,
+                @Nullable InlinePresentation inlinePresentation,
+                @Nullable InlinePresentation tooltip,
+                @Nullable DatasetFieldFilter filter,
+                @Nullable RemoteViews dialogPresentation) {
+            if (id != null) {
+                final int existingIdx = mFieldIds.indexOf(id);
+                if (existingIdx >= 0) {
+                    mFieldValues.set(existingIdx, value);
+                    mFieldPresentations.set(existingIdx, presentation);
+                    mFieldDialogPresentations.set(existingIdx, dialogPresentation);
+                    mFieldInlinePresentations.set(existingIdx, inlinePresentation);
+                    mFieldInlineTooltipPresentations.set(existingIdx, tooltip);
+                    mFieldFilters.set(existingIdx, filter);
+                    return;
+                }
+            }
+            mFieldIds.add(id);
+            mAutofillDatatypes.add(datatype);
+            mFieldValues.add(value);
+            mFieldPresentations.add(presentation);
+            mFieldDialogPresentations.add(dialogPresentation);
+            mFieldInlinePresentations.add(inlinePresentation);
+            mFieldInlineTooltipPresentations.add(tooltip);
+            mFieldFilters.add(filter);
+            return;
+        }
+
         /**
          * Creates a new {@link Dataset} instance.
          *
@@ -1391,37 +1421,20 @@ public final class Dataset implements Parcelable {
                 builder.setContent(ids.get(0), fieldContent);
             }
             final int inlinePresentationsSize = inlinePresentations.size();
-
-            if (ids.size() == 0 && autofillDatatypes.size() > 0) {
-                for (int i = 0; i < autofillDatatypes.size(); i++) {
-                    final String datatype = autofillDatatypes.get(i);
-                    final AutofillValue value = values.get(i);
-                    final RemoteViews fieldPresentation = presentations.get(i);
-                    final RemoteViews fieldDialogPresentation = dialogPresentations.get(i);
-                    final InlinePresentation fieldInlinePresentation =
-                            i < inlinePresentationsSize ? inlinePresentations.get(i) : null;
-                    final InlinePresentation fieldInlineTooltipPresentation =
-                            i < inlinePresentationsSize ? inlineTooltipPresentations.get(i) : null;
-                    final DatasetFieldFilter filter = filters.get(i);
-                    builder.setLifeTheUniverseAndEverything(
-                            datatype, value, fieldPresentation, fieldInlinePresentation,
-                            fieldInlineTooltipPresentation, filter, fieldDialogPresentation);
-                }
-            } else {
-                for (int i = 0; i < ids.size(); i++) {
-                    final AutofillId id = ids.get(i);
-                    final AutofillValue value = values.get(i);
-                    final RemoteViews fieldPresentation = presentations.get(i);
-                    final RemoteViews fieldDialogPresentation = dialogPresentations.get(i);
-                    final InlinePresentation fieldInlinePresentation =
-                            i < inlinePresentationsSize ? inlinePresentations.get(i) : null;
-                    final InlinePresentation fieldInlineTooltipPresentation =
-                            i < inlinePresentationsSize ? inlineTooltipPresentations.get(i) : null;
-                    final DatasetFieldFilter filter = filters.get(i);
-                    builder.setLifeTheUniverseAndEverything(id, value, fieldPresentation,
-                            fieldInlinePresentation, fieldInlineTooltipPresentation, filter,
-                            fieldDialogPresentation);
-                }
+            for (int i = 0; i < ids.size(); i++) {
+                final AutofillId id = ids.get(i);
+                final String datatype = autofillDatatypes.get(i);
+                final AutofillValue value = values.get(i);
+                final RemoteViews fieldPresentation = presentations.get(i);
+                final RemoteViews fieldDialogPresentation = dialogPresentations.get(i);
+                final InlinePresentation fieldInlinePresentation =
+                        i < inlinePresentationsSize ? inlinePresentations.get(i) : null;
+                final InlinePresentation fieldInlineTooltipPresentation =
+                        i < inlinePresentationsSize ? inlineTooltipPresentations.get(i) : null;
+                final DatasetFieldFilter filter = filters.get(i);
+                builder.createFromParcel(id, datatype, value, fieldPresentation,
+                        fieldInlinePresentation, fieldInlineTooltipPresentation, filter,
+                        fieldDialogPresentation);
             }
             builder.setAuthentication(authentication);
             builder.setId(datasetId);
