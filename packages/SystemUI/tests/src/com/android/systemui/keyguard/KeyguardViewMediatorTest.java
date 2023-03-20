@@ -66,6 +66,8 @@ import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
@@ -142,6 +144,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     private @Mock CentralSurfaces mCentralSurfaces;
 
+    private FakeFeatureFlags mFeatureFlags;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -160,6 +164,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mColorExtractor, mDumpManager, mKeyguardStateController,
                 mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager,
                 mShadeWindowLogger);
+        mFeatureFlags = new FakeFeatureFlags();
+
 
         DejankUtils.setImmediate(true);
 
@@ -515,6 +521,28 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         verify(mStatusBarKeyguardViewManager, never()).reset(anyBoolean());
     }
 
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void testNotStartingKeyguardWhenFlagIsDisabled() {
+        mViewMediator.setShowingLocked(false);
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+
+        mFeatureFlags.set(Flags.LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING, false);
+        mViewMediator.onDreamingStarted();
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void testStartingKeyguardWhenFlagIsEnabled() {
+        mViewMediator.setShowingLocked(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+
+        mFeatureFlags.set(Flags.LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING, true);
+        mViewMediator.onDreamingStarted();
+        assertTrue(mViewMediator.isShowingAndNotOccluded());
+    }
+
     private void createAndStartViewMediator() {
         mViewMediator = new KeyguardViewMediator(
                 mContext,
@@ -545,7 +573,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 () -> mShadeController,
                 () -> mNotificationShadeWindowController,
                 () -> mActivityLaunchAnimator,
-                () -> mScrimController);
+                () -> mScrimController,
+                mFeatureFlags);
         mViewMediator.start();
 
         mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);

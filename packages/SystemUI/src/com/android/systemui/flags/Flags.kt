@@ -132,6 +132,11 @@ object Flags {
     // TODO(b/254512676): Tracking Bug
     @JvmField val LOCKSCREEN_CUSTOM_CLOCKS = releasedFlag(207, "lockscreen_custom_clocks")
 
+    // TODO(b/275694445): Tracking Bug
+    @JvmField
+    val LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING = unreleasedFlag(208,
+        "lockscreen_without_secure_lock_when_dreaming")
+
     /**
      * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
      * the digits when the clock moves.
