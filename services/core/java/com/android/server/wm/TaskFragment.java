@@ -458,6 +458,22 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 && organizer.asBinder().equals(mTaskFragmentOrganizer.asBinder());
     }
 
+    /**
+     * Returns the process of organizer if this TaskFragment is organized and the activity lives in
+     * a different process than the organizer.
+     */
+    @Nullable
+    private WindowProcessController getOrganizerProcessIfDifferent(@Nullable ActivityRecord r) {
+        if ((r == null || mTaskFragmentOrganizerProcessName == null)
+                || (mTaskFragmentOrganizerProcessName.equals(r.processName)
+                && mTaskFragmentOrganizerUid == r.getUid())) {
+            // No organizer or the process is the same.
+            return null;
+        }
+        return mAtmService.getProcessController(mTaskFragmentOrganizerProcessName,
+                mTaskFragmentOrganizerUid);
+    }
+
     void setAnimationParams(@NonNull TaskFragmentAnimationParams animationParams) {
         mAnimationParams = animationParams;
     }
@@ -814,6 +830,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             }
             setResumedActivity(record, reason + " - onActivityStateChanged");
             mTaskSupervisor.mRecentTasks.add(record.getTask());
+        }
+
+        // Update the process state for the organizer process if the activity is in a different
+        // process in case the organizer process may not have activity state change in its process.
+        final WindowProcessController hostProcess = getOrganizerProcessIfDifferent(record);
+        if (hostProcess != null) {
+            mTaskSupervisor.onProcessActivityStateChanged(hostProcess, false /* forceBatch */);
+            hostProcess.updateProcessInfo(false /* updateServiceConnectionActivities */,
+                    true /* activityChange */, true /* updateOomAdj */,
+                    false /* addPendingTopUid */);
         }
     }
 
@@ -1942,6 +1968,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             addingActivity.inHistory = true;
             task.onDescendantActivityAdded(taskHadActivity, activityType, addingActivity);
         }
+
+        final WindowProcessController hostProcess = getOrganizerProcessIfDifferent(addingActivity);
+        if (hostProcess != null) {
+            hostProcess.addEmbeddedActivity(addingActivity);
+        }
     }
 
     @Override
@@ -2757,13 +2788,17 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     void removeChild(WindowContainer child, boolean removeSelfIfPossible) {
         super.removeChild(child);
+        final ActivityRecord r = child.asActivityRecord();
         if (BackNavigationController.isScreenshotEnabled()) {
             //TODO(b/207481538) Remove once the infrastructure to support per-activity screenshot is
             // implemented
-            ActivityRecord r = child.asActivityRecord();
             if (r != null) {
                 mBackScreenshots.remove(r.mActivityComponent.flattenToString());
             }
+        }
+        final WindowProcessController hostProcess = getOrganizerProcessIfDifferent(r);
+        if (hostProcess != null) {
+            hostProcess.removeEmbeddedActivity(r);
         }
         if (removeSelfIfPossible && shouldRemoveSelfOnLastChildRemoval() && !hasChild()) {
             removeImmediately("removeLastChild " + child);

@@ -398,6 +398,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     public void testOnActivityReparentedToTask_activityNotInOrganizerProcess_useTemporaryToken() {
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
+        final WindowProcessController organizerProc = mSystemServicesTestRule.addProcess(
+                "pkg.organizer", DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME, pid, uid);
         mTaskFragment.setTaskFragmentOrganizer(mOrganizer.getOrganizerToken(), uid,
                 DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME);
         mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
@@ -436,6 +438,15 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // The temporary token can only be used once.
         assertNull(mController.getReparentActivityFromTemporaryToken(mIOrganizer,
                 change.getActivityToken()));
+
+        // The organizer process should also have visible state by the visible activity in a
+        // different process.
+        activity.setVisibleRequested(true);
+        activity.setState(ActivityRecord.State.RESUMED, "test");
+        assertTrue(organizerProc.hasVisibleActivities());
+        activity.setVisibleRequested(false);
+        activity.setState(ActivityRecord.State.STOPPED, "test");
+        assertFalse(organizerProc.hasVisibleActivities());
     }
 
     @Test
