@@ -295,11 +295,18 @@ public final class ShutdownCheckPoints {
         @Nullable
         String getProcessName() {
             try {
-                List<ActivityManager.RunningAppProcessInfo> runningProcesses =
-                        mActivityManager.getRunningAppProcesses();
-                for (ActivityManager.RunningAppProcessInfo processInfo : runningProcesses) {
-                    if (processInfo.pid == mCallerProcessId) {
-                        return processInfo.processName;
+                List<ActivityManager.RunningAppProcessInfo> runningProcesses = null;
+                if (mActivityManager != null) {
+                    runningProcesses = mActivityManager.getRunningAppProcesses();
+                } else {
+                    Slog.v(TAG, "No ActivityManager available to find process name with pid="
+                            + mCallerProcessId);
+                }
+                if (runningProcesses != null) {
+                    for (ActivityManager.RunningAppProcessInfo processInfo : runningProcesses) {
+                        if (processInfo.pid == mCallerProcessId) {
+                            return processInfo.processName;
+                        }
                     }
                 }
             } catch (RemoteException e) {
