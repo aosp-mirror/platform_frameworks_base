@@ -42,7 +42,6 @@ import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
-import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
