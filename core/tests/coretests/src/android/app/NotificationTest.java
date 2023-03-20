@@ -63,7 +63,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
-import android.app.Notification.CallStyle;
 import android.content.Context;
 import android.content.Intent;
 import android.content.LocusId;
@@ -1036,6 +1035,69 @@ public class NotificationTest {
                 new Notification.TvExtender(before).getChannelId());
         Assert.assertEquals(Color.RED, new Notification.CarExtender(before).getColor());
         Assert.assertEquals("dismiss", new Notification.WearableExtender(before).getDismissalId());
+    }
+
+    @Test
+    public void areIconsDifferent_sameSmallIcon_false() {
+        Notification n1 = new Notification.Builder(mContext, "test").setSmallIcon(1).build();
+        Notification n2 = new Notification.Builder(mContext, "test").setSmallIcon(1).build();
+
+        assertThat(Notification.areIconsDifferent(n1, n2)).isFalse();
+    }
+
+    @Test
+    public void areIconsDifferent_differentSmallIcon_true() {
+        Notification n1 = new Notification.Builder(mContext, "test").setSmallIcon(1).build();
+        Notification n2 = new Notification.Builder(mContext, "test").setSmallIcon(2).build();
+
+        assertThat(Notification.areIconsDifferent(n1, n2)).isTrue();
+    }
+
+    @Test
+    public void areIconsDifferent_sameLargeIcon_false() {
+        Icon icon1 = Icon.createWithContentUri("uri");
+        Icon icon2 = Icon.createWithContentUri("uri");
+        Notification n1 = new Notification.Builder(mContext, "test")
+                .setSmallIcon(1).setLargeIcon(icon1).build();
+        Notification n2 = new Notification.Builder(mContext, "test")
+                .setSmallIcon(1).setLargeIcon(icon2).build();
+
+        // Note that this will almost certainly not happen for Icons created from Bitmaps, since
+        // their serialization/deserialization of Bitmaps (app -> system_process) results in a
+        // different getGenerationId() value. :(
+        assertThat(Notification.areIconsDifferent(n1, n2)).isFalse();
+    }
+
+    @Test
+    public void areIconsDifferent_differentLargeIcon_true() {
+        Icon icon1 = Icon.createWithContentUri("uri1");
+        Icon icon2 = Icon.createWithContentUri("uri2");
+        Notification n1 = new Notification.Builder(mContext, "test")
+                .setSmallIcon(1).setLargeIcon(icon1).build();
+        Notification n2 = new Notification.Builder(mContext, "test")
+                .setSmallIcon(2).setLargeIcon(icon2).build();
+
+        assertThat(Notification.areIconsDifferent(n1, n2)).isTrue();
+    }
+
+    @Test
+    public void areIconsDifferent_addedLargeIcon_true() {
+        Icon icon = Icon.createWithContentUri("uri");
+        Notification n1 = new Notification.Builder(mContext, "test").setSmallIcon(1).build();
+        Notification n2 = new Notification.Builder(mContext, "test")
+                .setSmallIcon(2).setLargeIcon(icon).build();
+
+        assertThat(Notification.areIconsDifferent(n1, n2)).isTrue();
+    }
+
+    @Test
+    public void areIconsDifferent_removedLargeIcon_true() {
+        Icon icon = Icon.createWithContentUri("uri");
+        Notification n1 = new Notification.Builder(mContext, "test")
+                .setSmallIcon(1).setLargeIcon(icon).build();
+        Notification n2 = new Notification.Builder(mContext, "test").setSmallIcon(2).build();
+
+        assertThat(Notification.areIconsDifferent(n1, n2)).isTrue();
     }
 
     @Test
