@@ -1646,6 +1646,79 @@ public class BroadcastQueueTest {
     }
 
     /**
+     * Verify prioritized receivers work as expected with deferrable broadcast - broadcast to
+     * app in cached state should be deferred and the rest should be delivered as per the priority
+     * order.
+     */
+    @Test
+    public void testPrioritized_withDeferrableBroadcasts() throws Exception {
+        // Legacy stack doesn't support deferral
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+        final ProcessRecord receiverYellowApp = makeActiveProcessRecord(PACKAGE_YELLOW);
+        final ProcessRecord receiverOrangeApp = makeActiveProcessRecord(PACKAGE_ORANGE);
+
+        receiverGreenApp.setCached(true);
+        receiverBlueApp.setCached(true);
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        final BroadcastOptions opts = BroadcastOptions.makeBasic()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
+        final List receivers = List.of(
+                makeRegisteredReceiver(callerApp, 10),
+                makeRegisteredReceiver(receiverGreenApp, 9),
+                makeRegisteredReceiver(receiverBlueApp, 8),
+                makeRegisteredReceiver(receiverYellowApp, 8),
+                makeRegisteredReceiver(receiverOrangeApp, 7)
+        );
+        enqueueBroadcast(makeBroadcastRecord(timeTick, callerApp, opts, receivers));
+        waitForIdle();
+
+        // Green ignored since it's in cached state
+        verifyScheduleRegisteredReceiver(never(), receiverGreenApp, timeTick);
+        // Blue ignored since it's in cached state
+        verifyScheduleRegisteredReceiver(never(), receiverBlueApp, timeTick);
+
+        final IApplicationThread redThread = mAms.getProcessRecordLocked(PACKAGE_RED,
+                getUidForPackage(PACKAGE_RED)).getThread();
+        final IApplicationThread yellowThread = mAms.getProcessRecordLocked(PACKAGE_YELLOW,
+                getUidForPackage(PACKAGE_YELLOW)).getThread();
+        final IApplicationThread orangeThread = mAms.getProcessRecordLocked(PACKAGE_ORANGE,
+                getUidForPackage(PACKAGE_ORANGE)).getThread();
+
+        // Verify apps that are not in cached state will receive the broadcast in the order
+        // we expect.
+        final InOrder inOrder = inOrder(redThread, yellowThread, orangeThread);
+        inOrder.verify(redThread).scheduleRegisteredReceiver(
+                any(), argThat(filterEqualsIgnoringComponent(timeTick)),
+                anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+                eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
+        inOrder.verify(yellowThread).scheduleRegisteredReceiver(
+                any(), argThat(filterEqualsIgnoringComponent(timeTick)),
+                anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+                eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
+        inOrder.verify(orangeThread).scheduleRegisteredReceiver(
+                any(), argThat(filterEqualsIgnoringComponent(timeTick)),
+                anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+                eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
+
+        // Shift blue to be active and confirm that deferred broadcast is delivered
+        receiverBlueApp.setCached(false);
+        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_BLUE), false);
+        waitForIdle();
+        verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, timeTick);
+
+        // Shift green to be active and confirm that deferred broadcast is delivered
+        receiverGreenApp.setCached(false);
+        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_GREEN), false);
+        waitForIdle();
+        verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, timeTick);
+    }
+
+    /**
      * Verify that we handle replacing a pending broadcast.
      */
     @Test
