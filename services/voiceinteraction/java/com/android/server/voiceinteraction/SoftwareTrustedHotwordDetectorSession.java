@@ -17,6 +17,8 @@
 package com.android.server.voiceinteraction;
 
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_MICROPHONE;
+import static android.service.voice.HotwordDetectionServiceFailure.ERROR_CODE_ON_DETECTED_SECURITY_EXCEPTION;
+import static android.service.voice.HotwordDetectionServiceFailure.ERROR_CODE_ON_DETECTED_STREAM_COPY_FAILURE;
 
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_DETECTED_EXCEPTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION;
@@ -128,9 +130,10 @@ final class SoftwareTrustedHotwordDetectorSession extends DetectorSession {
                                 METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION,
                                 mVoiceInteractionServiceUid);
                         try {
-                            mSoftwareCallback.onError(new HotwordDetectionServiceFailure(
-                                    CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION,
-                                    "Security exception occurs in #onDetected method."));
+                            mSoftwareCallback.onHotwordDetectionServiceFailure(
+                                    new HotwordDetectionServiceFailure(
+                                            ERROR_CODE_ON_DETECTED_SECURITY_EXCEPTION,
+                                            "Security exception occurs in #onDetected method."));
                         } catch (RemoteException e1) {
                             notifyOnDetectorRemoteException();
                             HotwordMetricsLogger.writeDetectorEvent(
@@ -149,9 +152,10 @@ final class SoftwareTrustedHotwordDetectorSession extends DetectorSession {
                         Slog.w(TAG, "Ignoring #onDetected due to a IOException", e);
                         // TODO: Write event
                         try {
-                            mSoftwareCallback.onError(new HotwordDetectionServiceFailure(
-                                    CALLBACK_ONDETECTED_STREAM_COPY_ERROR,
-                                    "Copy audio stream failure."));
+                            mSoftwareCallback.onHotwordDetectionServiceFailure(
+                                    new HotwordDetectionServiceFailure(
+                                            ERROR_CODE_ON_DETECTED_STREAM_COPY_FAILURE,
+                                            "Copy audio stream failure."));
                         } catch (RemoteException e1) {
                             notifyOnDetectorRemoteException();
                             HotwordMetricsLogger.writeDetectorEvent(
