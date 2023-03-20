@@ -57,6 +57,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.Icon;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -1034,8 +1035,9 @@ public class BubbleController implements ConfigurationChangeListener {
      *
      * @param intent the intent to display in the bubble expanded view.
      * @param user the {@link UserHandle} of the user to start this activity for.
+     * @param icon the {@link Icon} to use for the bubble view.
      */
-    public void showOrHideAppBubble(Intent intent, UserHandle user) {
+    public void showOrHideAppBubble(Intent intent, UserHandle user, @Nullable Icon icon) {
         if (intent == null || intent.getPackage() == null) {
             Log.w(TAG, "App bubble failed to show, invalid intent: " + intent
                     + ((intent != null) ? " with package: " + intent.getPackage() : " "));
@@ -1063,7 +1065,7 @@ public class BubbleController implements ConfigurationChangeListener {
             }
         } else {
             // App bubble does not exist, lets add and expand it
-            Bubble b = new Bubble(intent, user, mMainExecutor);
+            Bubble b = new Bubble(intent, user, icon, mMainExecutor);
             b.setShouldAutoExpand(true);
             inflateAndAdd(b, /* suppressFlyout= */ true, /* showInShade= */ false);
         }
@@ -1871,9 +1873,9 @@ public class BubbleController implements ConfigurationChangeListener {
         }
 
         @Override
-        public void showOrHideAppBubble(Intent intent, UserHandle user) {
+        public void showOrHideAppBubble(Intent intent, UserHandle user, @Nullable Icon icon) {
             mMainExecutor.execute(
-                    () -> BubbleController.this.showOrHideAppBubble(intent, user));
+                    () -> BubbleController.this.showOrHideAppBubble(intent, user, icon));
         }
 
         @Override
