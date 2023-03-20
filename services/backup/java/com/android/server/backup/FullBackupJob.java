@@ -24,6 +24,7 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.SparseArray;
 
@@ -52,12 +53,14 @@ public class FullBackupJob extends JobService {
         JobInfo.Builder builder = new JobInfo.Builder(getJobIdForUserId(userId), sIdleService);
         final BackupManagerConstants constants = userBackupManagerService.getConstants();
         synchronized (constants) {
-            builder.setRequiresDeviceIdle(true)
-                    .setRequiredNetworkType(constants.getFullBackupRequiredNetworkType())
+            builder.setRequiredNetworkType(constants.getFullBackupRequiredNetworkType())
                     .setRequiresCharging(constants.getFullBackupRequireCharging());
         }
         if (minDelay > 0) {
             builder.setMinimumLatency(minDelay);
+        }
+        if (!ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            builder.setRequiresDeviceIdle(true);
         }
 
         Bundle extraInfo = new Bundle();
