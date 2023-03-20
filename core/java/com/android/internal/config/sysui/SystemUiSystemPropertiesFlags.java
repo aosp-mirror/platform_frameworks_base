@@ -74,6 +74,9 @@ public class SystemUiSystemPropertiesFlags {
         public static final Flag OTP_REDACTION =
                 devFlag("persist.sysui.notification.otp_redaction");
 
+        /** Gating the removal of sorting-notifications-by-interruptiveness. */
+        public static final Flag NO_SORT_BY_INTERRUPTIVENESS =
+                devFlag("persist.sysui.notification.no_sort_by_interruptiveness");
     }
 
     //// == End of flags.  Everything below this line is the implementation. == ////
