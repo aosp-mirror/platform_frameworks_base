@@ -100,6 +100,9 @@ public class AccessibilityWindowManager {
     // The top focused display and window token updated with the callback of window lists change.
     private int mTopFocusedDisplayId;
     private IBinder mTopFocusedWindowToken;
+
+    // The non-proxy display that most recently had top focus.
+    private int mLastNonProxyTopFocusedDisplayId;
     // The display has the accessibility focused window currently.
     private int mAccessibilityFocusedDisplayId = Display.INVALID_DISPLAY;
 
@@ -434,6 +437,9 @@ public class AccessibilityWindowManager {
                 }
                 if (shouldUpdateWindowsLocked(forceSend, windows)) {
                     mTopFocusedDisplayId = topFocusedDisplayId;
+                    if (!isProxyed(topFocusedDisplayId)) {
+                        mLastNonProxyTopFocusedDisplayId = topFocusedDisplayId;
+                    }
                     mTopFocusedWindowToken = topFocusedWindowToken;
                     cacheWindows(windows);
                     // Lets the policy update the focused and active windows.
@@ -1106,6 +1112,21 @@ public class AccessibilityWindowManager {
             return true;
         }
         return false;
+    }
+
+    private boolean isProxyed(int displayId) {
+        final DisplayWindowsObserver observer = mDisplayWindowsObservers.get(displayId);
+        return (observer != null && observer.mIsProxy);
+    }
+
+    void moveNonProxyTopFocusedDisplayToTopIfNeeded() {
+        if (mHasProxy
+                && (mLastNonProxyTopFocusedDisplayId != mTopFocusedDisplayId)) {
+            mWindowManagerInternal.moveDisplayToTopIfAllowed(mLastNonProxyTopFocusedDisplayId);
+        }
+    }
+    int getLastNonProxyTopFocusedDisplayId() {
+        return mLastNonProxyTopFocusedDisplayId;
     }
 
     /**
