@@ -398,7 +398,8 @@ public class DozeMachine {
         }
         if ((mState == State.DOZE_AOD_PAUSED || mState == State.DOZE_AOD_PAUSING
                 || mState == State.DOZE_AOD || mState == State.DOZE
-                || mState == State.DOZE_AOD_DOCKED) && requestedState == State.DOZE_PULSE_DONE) {
+                || mState == State.DOZE_AOD_DOCKED || mState == State.DOZE_SUSPEND_TRIGGERS)
+                && requestedState == State.DOZE_PULSE_DONE) {
             Log.i(TAG, "Dropping pulse done because current state is already done: " + mState);
             return mState;
         }
