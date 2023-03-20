@@ -689,8 +689,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // changes the orientation.
     private final PowerManager.WakeLock mScreenFrozenLock;
 
-    final SnapshotPersistQueue mSnapshotPersistQueue;
     final TaskSnapshotController mTaskSnapshotController;
+    final SnapshotController mSnapshotController;
 
     final BlurController mBlurController;
     final TaskFpsCallbackController mTaskFpsCallbackController;
@@ -1200,8 +1200,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mSyncEngine = new BLASTSyncEngine(this);
 
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
-        mSnapshotPersistQueue = new SnapshotPersistQueue();
-        mTaskSnapshotController = new TaskSnapshotController(this, mSnapshotPersistQueue);
+        mSnapshotController = new SnapshotController(this);
+        mTaskSnapshotController = mSnapshotController.mTaskSnapshotController;
 
         mWindowTracing = WindowTracing.createDefaultAndStartLooper(this,
                 Choreographer.getInstance());
@@ -5141,7 +5141,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mSystemReady = true;
         mPolicy.systemReady();
         mRoot.forAllDisplayPolicies(DisplayPolicy::systemReady);
-        mSnapshotPersistQueue.systemReady();
+        mSnapshotController.systemReady();
         mHasWideColorGamutSupport = queryWideColorGamutSupport();
         mHasHdrSupport = queryHdrSupport();
         UiThread.getHandler().post(mSettingsObserver::loadSettings);
@@ -6685,7 +6685,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println();
 
         mInputManagerCallback.dump(pw, "  ");
-        mTaskSnapshotController.dump(pw, "  ");
+        mSnapshotController.dump(pw, " ");
         if (mAccessibilityController.hasCallbacks()) {
             mAccessibilityController.dump(pw, "  ");
         }
