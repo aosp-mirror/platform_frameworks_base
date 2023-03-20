@@ -1205,6 +1205,8 @@ public class ActivityRecordTests extends WindowTestsBase {
                     any(ClientTransaction.class));
         } catch (RemoteException ignored) {
         }
+
+        assertNull(targetActivity.results);
     }
 
     @Test
