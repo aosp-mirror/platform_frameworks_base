@@ -25,6 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo.Companion.DEFAULT_ICON_TINT
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -140,6 +141,7 @@ class MediaTttUtilsTest : SysuiTestCase() {
                 context.getString(R.string.media_transfer_receiver_content_description_unknown_app)
             )
         assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Resource(R.drawable.ic_cast))
+        assertThat(iconInfo.tint).isEqualTo(DEFAULT_ICON_TINT)
     }
 
     @Test
@@ -232,40 +234,40 @@ class MediaTttUtilsTest : SysuiTestCase() {
     fun iconInfo_toTintedIcon_loaded() {
         val contentDescription = ContentDescription.Loaded("test")
         val drawable = context.getDrawable(R.drawable.ic_cake)!!
-        val tintAttr = android.R.attr.textColorTertiary
+        val tint = R.color.GM2_blue_500
 
         val iconInfo =
             IconInfo(
                 contentDescription,
                 MediaTttIcon.Loaded(drawable),
-                tintAttr,
+                tint,
                 isAppIcon = false,
             )
 
         val tinted = iconInfo.toTintedIcon()
 
         assertThat(tinted.icon).isEqualTo(Icon.Loaded(drawable, contentDescription))
-        assertThat(tinted.tintAttr).isEqualTo(tintAttr)
+        assertThat(tinted.tint).isEqualTo(tint)
     }
 
     @Test
     fun iconInfo_toTintedIcon_resource() {
         val contentDescription = ContentDescription.Loaded("test")
         val drawableRes = R.drawable.ic_cake
-        val tintAttr = android.R.attr.textColorTertiary
+        val tint = R.color.GM2_blue_500
 
         val iconInfo =
             IconInfo(
                 contentDescription,
                 MediaTttIcon.Resource(drawableRes),
-                tintAttr,
+                tint,
                 isAppIcon = false
             )
 
         val tinted = iconInfo.toTintedIcon()
 
         assertThat(tinted.icon).isEqualTo(Icon.Resource(drawableRes, contentDescription))
-        assertThat(tinted.tintAttr).isEqualTo(tintAttr)
+        assertThat(tinted.tint).isEqualTo(tint)
     }
 }
 
