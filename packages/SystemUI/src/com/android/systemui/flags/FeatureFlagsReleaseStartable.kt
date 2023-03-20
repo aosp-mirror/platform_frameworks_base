@@ -18,8 +18,6 @@ package com.android.systemui.flags
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.util.InitializationChecker
-import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
@@ -31,9 +29,6 @@ class FeatureFlagsReleaseStartable
 constructor(
     dumpManager: DumpManager,
     featureFlags: FeatureFlags,
-    private val initializationChecker: InitializationChecker,
-    private val restartDozeListener: RestartDozeListener,
-    private val delayableExecutor: DelayableExecutor
 ) : CoreStartable {
 
     init {
@@ -42,12 +37,7 @@ constructor(
         }
     }
 
-    override fun start() {
-        if (initializationChecker.initializeComponents()) {
-            restartDozeListener.init()
-            delayableExecutor.executeDelayed({ restartDozeListener.maybeRestartSleep() }, 1000)
-        }
-    }
+    override fun start() {}
 }
 
 @Module
