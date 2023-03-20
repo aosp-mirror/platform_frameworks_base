@@ -179,6 +179,10 @@ constructor(
     fun logDefaultMobileIconGroup(group: SignalIcon.MobileIconGroup) {
         buffer.log(TAG, LogLevel.INFO, { str1 = group.name }, { "defaultMobileIconGroup: $str1" })
     }
+
+    fun logOnSubscriptionsChanged() {
+        buffer.log(TAG, LogLevel.INFO, {}, { "onSubscriptionsChanged" })
+    }
 }
 
 private const val TAG = "MobileInputLog"
