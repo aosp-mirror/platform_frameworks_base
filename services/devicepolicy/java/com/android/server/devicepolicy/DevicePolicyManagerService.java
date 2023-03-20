@@ -11780,22 +11780,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(canManageUsers(caller) || canQueryAdminPolicy(caller));
 
-        // Move AccessibilityManager out of lock to prevent potential deadlock
-        final List<AccessibilityServiceInfo> installedServices;
-        long id = mInjector.binderClearCallingIdentity();
-        try {
-            UserInfo user = getUserInfo(userId);
-            if (user.isManagedProfile()) {
-                userId = user.profileGroupId;
-            }
-            installedServices = withAccessibilityManager(userId,
-                    AccessibilityManager::getInstalledAccessibilityServiceList);
-        } finally {
-            mInjector.binderRestoreCallingIdentity(id);
-        }
+        List<String> result = null;
 
         synchronized (getLockObject()) {
-            List<String> result = null;
             // If we have multiple profiles we return the intersection of the
             // permitted lists. This can happen in cases where we have a device
             // and profile owner.
@@ -11817,9 +11804,22 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                 }
             }
+        }
 
-            // If we have a permitted list add all system accessibility services.
-            if (result != null) {
+        // If we have a permitted list add all system accessibility services.
+        if (result != null) {
+            long id = mInjector.binderClearCallingIdentity();
+            try {
+                UserInfo user = getUserInfo(userId);
+                if (user.isManagedProfile()) {
+                    userId = user.profileGroupId;
+                }
+                // Move AccessibilityManager out of {@link getLockObject} to prevent potential
+                // deadlock.
+                final List<AccessibilityServiceInfo> installedServices =
+                        withAccessibilityManager(userId,
+                                AccessibilityManager::getInstalledAccessibilityServiceList);
+
                 if (installedServices != null) {
                     for (AccessibilityServiceInfo service : installedServices) {
                         ServiceInfo serviceInfo = service.getResolveInfo().serviceInfo;
@@ -11829,10 +11829,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         }
                     }
                 }
+            } finally {
+                mInjector.binderRestoreCallingIdentity(id);
             }
-
-            return result;
         }
+
+        return result;
     }
 
     @Override
