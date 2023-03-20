@@ -685,6 +685,12 @@ object Flags {
     val ENABLE_DARK_VIGNETTE_WHEN_FOLDING =
         unreleasedFlag(2700, "enable_dark_vignette_when_folding")
 
+    // TODO(b/265764985): Tracking Bug
+    @Keep
+    @JvmField
+    val ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS =
+        unreleasedFlag(2701, "enable_unfold_status_bar_animations")
+
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")
 
