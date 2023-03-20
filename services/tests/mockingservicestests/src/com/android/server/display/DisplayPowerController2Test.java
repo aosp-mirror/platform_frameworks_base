@@ -31,13 +31,10 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
@@ -48,18 +45,18 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.os.test.TestLooper;
 import android.provider.Settings;
+import android.testing.TestableContext;
 import android.util.FloatProperty;
 import android.view.Display;
 import android.view.DisplayInfo;
 
-import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.server.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.display.RampAnimator.DualRampAnimator;
@@ -72,12 +69,12 @@ import com.android.server.testutils.OffsettableClock;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
@@ -95,11 +92,9 @@ public final class DisplayPowerController2Test {
     private static final String SECOND_FOLLOWER_UNIQUE_DISPLAY_ID = "unique_id_789";
     private static final float PROX_SENSOR_MAX_RANGE = 5;
 
-    private MockitoSession mSession;
     private OffsettableClock mClock;
     private TestLooper mTestLooper;
     private Handler mHandler;
-    private Context mContextSpy;
     private DisplayPowerControllerHolder mHolder;
     private Sensor mProxSensor;
 
@@ -116,40 +111,38 @@ public final class DisplayPowerController2Test {
     @Mock
     private PowerManager mPowerManagerMock;
     @Mock
-    private Resources mResourcesMock;
-    @Mock
     private ColorDisplayService.ColorDisplayServiceInternal mCdsiMock;
 
     @Captor
     private ArgumentCaptor<SensorEventListener> mSensorEventListenerCaptor;
 
+    @Rule
+    public final TestableContext mContext = new TestableContext(
+            InstrumentationRegistry.getInstrumentation().getContext());
+
+    @Rule
+    public final ExtendedMockitoRule mExtendedMockitoRule =
+            new ExtendedMockitoRule.Builder(this)
+                    .setStrictness(Strictness.LENIENT)
+                    .spyStatic(SystemProperties.class)
+                    .spyStatic(BatteryStatsService.class)
+                    .build();
+
     @Before
     public void setUp() throws Exception {
-        mSession = ExtendedMockito.mockitoSession()
-                .initMocks(this)
-                .strictness(Strictness.LENIENT)
-                .spyStatic(SystemProperties.class)
-                .spyStatic(LocalServices.class)
-                .spyStatic(BatteryStatsService.class)
-                .spyStatic(Settings.System.class)
-                .startMocking();
-        mContextSpy = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         mClock = new OffsettableClock.Stopped();
         mTestLooper = new TestLooper(mClock::now);
         mHandler = new Handler(mTestLooper.getLooper());
-        addLocalServiceMock(WindowManagerPolicy.class, mWindowManagerPolicyMock);
 
-        when(mContextSpy.getSystemService(eq(PowerManager.class))).thenReturn(mPowerManagerMock);
-        when(mContextSpy.getResources()).thenReturn(mResourcesMock);
+        addLocalServiceMock(WindowManagerPolicy.class, mWindowManagerPolicyMock);
+        addLocalServiceMock(ColorDisplayService.ColorDisplayServiceInternal.class,
+                mCdsiMock);
+
+        mContext.addMockSystemService(PowerManager.class, mPowerManagerMock);
 
         doAnswer((Answer<Void>) invocationOnMock -> null).when(() ->
                 SystemProperties.set(anyString(), any()));
-        doAnswer((Answer<ColorDisplayService.ColorDisplayServiceInternal>) invocationOnMock ->
-                mCdsiMock).when(() -> LocalServices.getService(
-                ColorDisplayService.ColorDisplayServiceInternal.class));
         doAnswer((Answer<Void>) invocationOnMock -> null).when(BatteryStatsService::getService);
-        doAnswer((Answer<Boolean>) invocationOnMock -> true).when(() ->
-                Settings.System.putFloatForUser(any(), any(), anyFloat(), anyInt()));
 
         setUpSensors();
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
@@ -157,8 +150,8 @@ public final class DisplayPowerController2Test {
 
     @After
     public void tearDown() {
-        mSession.finishMocking();
         LocalServices.removeServiceForTest(WindowManagerPolicy.class);
+        LocalServices.removeServiceForTest(ColorDisplayService.ColorDisplayServiceInternal.class);
     }
 
     @Test
@@ -419,11 +412,9 @@ public final class DisplayPowerController2Test {
 
     @Test
     public void testDisplayBrightnessFollowers_AutomaticBrightness() {
-        doAnswer((Answer<Integer>) invocationOnMock ->
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC)
-                .when(() -> Settings.System.getIntForUser(any(ContentResolver.class),
-                        eq(Settings.System.SCREEN_BRIGHTNESS_MODE), anyInt(),
-                        eq(UserHandle.USER_CURRENT)));
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
         final float brightness = 0.4f;
         final float nits = 300;
         final float ambientLux = 3000;
@@ -540,11 +531,9 @@ public final class DisplayPowerController2Test {
 
     @Test
     public void testSetScreenOffBrightnessSensorEnabled_DisplayIsOff() {
-        doAnswer((Answer<Integer>) invocationOnMock ->
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC)
-                .when(() -> Settings.System.getIntForUser(any(ContentResolver.class),
-                        eq(Settings.System.SCREEN_BRIGHTNESS_MODE), anyInt(),
-                        eq(UserHandle.USER_CURRENT)));
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         dpr.policy = DisplayPowerRequest.POLICY_OFF;
@@ -575,17 +564,14 @@ public final class DisplayPowerController2Test {
 
     @Test
     public void testSetScreenOffBrightnessSensorEnabled_DisplayIsInDoze() {
-        doAnswer((Answer<Integer>) invocationOnMock ->
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC)
-                .when(() -> Settings.System.getIntForUser(any(ContentResolver.class),
-                        eq(Settings.System.SCREEN_BRIGHTNESS_MODE), anyInt(),
-                        eq(UserHandle.USER_CURRENT)));
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         dpr.policy = DisplayPowerRequest.POLICY_DOZE;
-        when(mResourcesMock.getBoolean(
-                com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing))
-                .thenReturn(true);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, true);
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
@@ -613,11 +599,9 @@ public final class DisplayPowerController2Test {
 
     @Test
     public void testSetScreenOffBrightnessSensorDisabled_AutoBrightnessIsDisabled() {
-        doAnswer((Answer<Integer>) invocationOnMock ->
-                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL)
-                .when(() -> Settings.System.getIntForUser(any(ContentResolver.class),
-                        eq(Settings.System.SCREEN_BRIGHTNESS_MODE), anyInt(),
-                        eq(UserHandle.USER_CURRENT)));
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         dpr.policy = DisplayPowerRequest.POLICY_OFF;
@@ -630,11 +614,9 @@ public final class DisplayPowerController2Test {
 
     @Test
     public void testSetScreenOffBrightnessSensorDisabled_DisplayIsDisabled() {
-        doAnswer((Answer<Integer>) invocationOnMock ->
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC)
-                .when(() -> Settings.System.getIntForUser(any(ContentResolver.class),
-                        eq(Settings.System.SCREEN_BRIGHTNESS_MODE), anyInt(),
-                        eq(UserHandle.USER_CURRENT)));
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID, /* isEnabled= */ false);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
@@ -687,9 +669,9 @@ public final class DisplayPowerController2Test {
     public void testBrightnessNitsPersistWhenDisplayDeviceChanges() {
         float brightness = 0.3f;
         float nits = 500;
-        when(mResourcesMock.getBoolean(
-                com.android.internal.R.bool.config_persistBrightnessNitsForDefaultDisplay))
-                .thenReturn(true);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_persistBrightnessNitsForDefaultDisplay,
+                true);
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
         when(mHolder.automaticBrightnessController.convertToNits(brightness)).thenReturn(nits);
 
@@ -809,7 +791,7 @@ public final class DisplayPowerController2Test {
         setUpDisplay(displayId, uniqueId, display, device, config, isEnabled);
 
         final DisplayPowerController2 dpc = new DisplayPowerController2(
-                mContextSpy, injector, mDisplayPowerCallbacksMock, mHandler,
+                mContext, injector, mDisplayPowerCallbacksMock, mHandler,
                 mSensorManagerMock, mDisplayBlankerMock, display,
                 mBrightnessTrackerMock, brightnessSetting, () -> {},
                 hbmMetadata, /* bootCompleted= */ false);
