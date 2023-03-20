@@ -2489,6 +2489,57 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void unfoldFromPostureChange_requestActiveUnlock_forceDismissKeyguard()
+            throws RemoteException {
+        // GIVEN shouldTriggerActiveUnlock
+        keyguardIsVisible();
+        when(mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())).thenReturn(true);
+
+        // GIVEN active unlock triggers on wakeup
+        when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE))
+                .thenReturn(true);
+
+        // GIVEN an unfold should force dismiss the keyguard
+        when(mActiveUnlockConfig.shouldWakeupForceDismissKeyguard(
+                PowerManager.WAKE_REASON_UNFOLD_DEVICE)).thenReturn(true);
+
+        // WHEN device posture changes to unfold
+        deviceInPostureStateOpened();
+        mTestableLooper.processAllMessages();
+
+        // THEN request unlock with a keyguard dismissal
+        verify(mTrustManager).reportUserRequestedUnlock(eq(KeyguardUpdateMonitor.getCurrentUser()),
+                eq(true));
+    }
+
+
+    @Test
+    public void unfoldFromPostureChange_requestActiveUnlock_noDismissKeyguard()
+            throws RemoteException {
+        // GIVEN shouldTriggerActiveUnlock on wake from UNFOLD_DEVICE
+        keyguardIsVisible();
+        when(mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())).thenReturn(true);
+
+        // GIVEN active unlock triggers on wakeup
+        when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE))
+                .thenReturn(true);
+
+        // GIVEN an unfold should NOT force dismiss the keyguard
+        when(mActiveUnlockConfig.shouldWakeupForceDismissKeyguard(
+                PowerManager.WAKE_REASON_UNFOLD_DEVICE)).thenReturn(false);
+
+        // WHEN device posture changes to unfold
+        deviceInPostureStateOpened();
+        mTestableLooper.processAllMessages();
+
+        // THEN request unlock WITHOUT a keyguard dismissal
+        verify(mTrustManager).reportUserRequestedUnlock(eq(KeyguardUpdateMonitor.getCurrentUser()),
+                eq(false));
+    }
+
+    @Test
     public void detectFingerprint_onTemporaryLockoutReset_authenticateFingerprint() {
         ArgumentCaptor<FingerprintManager.LockoutResetCallback> fpLockoutResetCallbackCaptor =
                 ArgumentCaptor.forClass(FingerprintManager.LockoutResetCallback.class);
