@@ -199,10 +199,29 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public static final int FLAG_PREFETCH_UNINTERRUPTIBLE = 1 << 5;
 
-    /** @hide */
-    public static final int FLAG_PREFETCH_MASK = 0x0000003f;
+    /**
+     * Mask for {@link PrefetchingStrategy} all types.
+     *
+     * @see #FLAG_PREFETCH_ANCESTORS
+     * @see #FLAG_PREFETCH_SIBLINGS
+     * @see #FLAG_PREFETCH_DESCENDANTS_HYBRID
+     * @see #FLAG_PREFETCH_DESCENDANTS_DEPTH_FIRST
+     * @see #FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST
+     * @see #FLAG_PREFETCH_UNINTERRUPTIBLE
+     *
+     * @hide
+     */
+    public static final int FLAG_PREFETCH_MASK = 0x0000003F;
 
-    /** @hide */
+    /**
+     * Mask for {@link PrefetchingStrategy} that includes only descendants-related strategies.
+     *
+     * @see #FLAG_PREFETCH_DESCENDANTS_HYBRID
+     * @see #FLAG_PREFETCH_DESCENDANTS_DEPTH_FIRST
+     * @see #FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST
+     *
+     * @hide
+     */
     public static final int FLAG_PREFETCH_DESCENDANTS_MASK = 0x0000001C;
 
     /**
@@ -243,7 +262,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public static final int FLAG_SERVICE_IS_ACCESSIBILITY_TOOL = 1 << 9;
 
-    /** @hide */
+    /**
+     * Mask for all types of additional view data exposed to services.
+     *
+     * @hide
+     */
     public static final int FLAG_REPORT_MASK =
             FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS
                     | FLAG_SERVICE_REQUESTS_REPORT_VIEW_IDS
@@ -472,9 +495,22 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final int LAST_LEGACY_STANDARD_ACTION = ACTION_SET_TEXT;
 
     /**
-     * Mask to see if the value is larger than the largest ACTION_ constant
+     * Mask to verify if a given value is a combination of the existing ACTION_ constants.
+     *
+     * The smallest possible action is 1, and the largest is 1 << 21, or {@link ACTION_SET_TEXT}. A
+     * node can have any combination of actions present, so a node's max action int is:
+     *
+     *   0000 0000 0011 1111 1111 1111 1111 1111
+     *
+     * Therefore, if an action has any of the following bits flipped, it will be invalid:
+     *
+     *   1111 1111 11-- ---- ---- ---- ---- ----
+     *
+     * This can be represented in hexadecimal as 0xFFC00000.
+     *
+     * @see AccessibilityNodeInfo#addAction(int)
      */
-    private static final int ACTION_TYPE_MASK = 0xFF000000;
+    private static final int INVALID_ACTIONS_MASK = 0xFFC00000;
 
     // Action arguments.
 
@@ -752,7 +788,7 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Integer argument specifying the end index of the requested text location data. Must be
-     * positive and no larger than {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH}.
+     * positive and no larger than {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_MAX_LENGTH}.
      *
      * @see #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
      */
@@ -1536,7 +1572,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void addAction(int action) {
         enforceNotSealed();
 
-        if ((action & ACTION_TYPE_MASK) != 0) {
+        if ((action & INVALID_ACTIONS_MASK) != 0) {
             throw new IllegalArgumentException("Action is not a combination of the standard " +
                     "actions: " + action);
         }
@@ -6521,7 +6557,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         /**
          * @see android.os.Parcelable.Creator
          */
-        public static final @android.annotation.NonNull Parcelable.Creator<TouchDelegateInfo> CREATOR =
+        public static final @NonNull Parcelable.Creator<TouchDelegateInfo> CREATOR =
                 new Parcelable.Creator<TouchDelegateInfo>() {
             @Override
             public TouchDelegateInfo createFromParcel(Parcel parcel) {
@@ -6693,7 +6729,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * @see android.os.Parcelable.Creator
      */
-    public static final @android.annotation.NonNull Parcelable.Creator<AccessibilityNodeInfo> CREATOR =
+    public static final @NonNull Parcelable.Creator<AccessibilityNodeInfo> CREATOR =
             new Parcelable.Creator<AccessibilityNodeInfo>() {
         @Override
         public AccessibilityNodeInfo createFromParcel(Parcel parcel) {
