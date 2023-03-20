@@ -24,12 +24,12 @@ import static android.media.MediaRouter2Utils.getOriginalId;
 import static android.media.MediaRouter2Utils.getProviderId;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+import static com.android.server.media.MediaFeatureFlagManager.FEATURE_SCANNING_MINIMUM_PACKAGE_IMPORTANCE;
 
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -92,15 +92,11 @@ class MediaRouter2ServiceImpl {
     //       in MediaRouter2, remove this constant and replace the usages with the real request IDs.
     private static final long DUMMY_REQUEST_ID = -1;
 
-    private static final String MEDIA_BETTER_TOGETHER_NAMESPACE = "media_better_together";
-
-    private static final String KEY_SCANNING_PACKAGE_MINIMUM_IMPORTANCE =
-            "scanning_package_minimum_importance";
-
-    private static int sPackageImportanceForScanning = DeviceConfig.getInt(
-            MEDIA_BETTER_TOGETHER_NAMESPACE,
-            /* name */ KEY_SCANNING_PACKAGE_MINIMUM_IMPORTANCE,
-            /* defaultValue */ IMPORTANCE_FOREGROUND_SERVICE);
+    private static int sPackageImportanceForScanning =
+            MediaFeatureFlagManager.getInstance()
+                    .getInt(
+                            FEATURE_SCANNING_MINIMUM_PACKAGE_IMPORTANCE,
+                            IMPORTANCE_FOREGROUND_SERVICE);
 
     private final Context mContext;
     private final UserManagerInternal mUserManagerInternal;
@@ -156,9 +152,8 @@ class MediaRouter2ServiceImpl {
 
         mContext.registerReceiver(mScreenOnOffReceiver, screenOnOffIntentFilter);
 
-        DeviceConfig.addOnPropertiesChangedListener(MEDIA_BETTER_TOGETHER_NAMESPACE,
-                ActivityThread.currentApplication().getMainExecutor(),
-                this::onDeviceConfigChange);
+        MediaFeatureFlagManager.getInstance()
+                .addOnPropertiesChangedListener(this::onDeviceConfigChange);
     }
 
     // Start of methods that implement MediaRouter2 operations.
@@ -1002,9 +997,11 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        Slog.i(TAG, TextUtils.formatSimple(
-                "setSessionVolumeWithRouter2 | router: %d, session: %s, volume: %d",
-                routerRecord.mRouterId,  uniqueSessionId, volume));
+        Slog.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "setSessionVolumeWithRouter2 | router: %d, session: %s, volume: %d",
+                        routerRecord.mRouterId, uniqueSessionId, volume));
 
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::setSessionVolumeOnHandler,
@@ -1021,9 +1018,11 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        Slog.i(TAG, TextUtils.formatSimple(
-                "releaseSessionWithRouter2 | router: %d, session: %s",
-                routerRecord.mRouterId,  uniqueSessionId));
+        Slog.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "releaseSessionWithRouter2 | router: %d, session: %s",
+                        routerRecord.mRouterId, uniqueSessionId));
 
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::releaseSessionOnHandler,
@@ -1100,8 +1099,11 @@ class MediaRouter2ServiceImpl {
             // TODO: UserRecord <-> routerRecord, why do they reference each other?
             // How about removing mUserRecord from routerRecord?
             routerRecord.mUserRecord.mHandler.sendMessage(
-                    obtainMessage(UserHandler::notifyDiscoveryPreferenceChangedToManager,
-                        routerRecord.mUserRecord.mHandler, routerRecord, manager));
+                    obtainMessage(
+                            UserHandler::notifyDiscoveryPreferenceChangedToManager,
+                            routerRecord.mUserRecord.mHandler,
+                            routerRecord,
+                            manager));
         }
 
         userRecord.mHandler.sendMessage(
@@ -1381,9 +1383,10 @@ class MediaRouter2ServiceImpl {
     // End of locked methods that are used by both MediaRouter2 and MediaRouter2Manager.
 
     private void onDeviceConfigChange(@NonNull DeviceConfig.Properties properties) {
-        sPackageImportanceForScanning = properties.getInt(
-                /* name */ KEY_SCANNING_PACKAGE_MINIMUM_IMPORTANCE,
-                /* defaultValue */ IMPORTANCE_FOREGROUND_SERVICE);
+        sPackageImportanceForScanning =
+                properties.getInt(
+                        /* name */ FEATURE_SCANNING_MINIMUM_PACKAGE_IMPORTANCE,
+                        /* defaultValue */ IMPORTANCE_FOREGROUND_SERVICE);
     }
 
     static long toUniqueRequestId(int requesterId, int originalRequestId) {
@@ -1734,10 +1737,10 @@ class MediaRouter2ServiceImpl {
             }
             boolean isUidRelevant;
             synchronized (service.mLock) {
-                isUidRelevant = mUserRecord.mRouterRecords.stream().anyMatch(
-                        router -> router.mUid == uid)
-                        | mUserRecord.mManagerRecords.stream().anyMatch(
-                            manager -> manager.mUid == uid);
+                isUidRelevant =
+                        mUserRecord.mRouterRecords.stream().anyMatch(router -> router.mUid == uid)
+                                | mUserRecord.mManagerRecords.stream()
+                                        .anyMatch(manager -> manager.mUid == uid);
             }
             if (isUidRelevant) {
                 sendMessage(PooledLambda.obtainMessage(
@@ -2400,7 +2403,7 @@ class MediaRouter2ServiceImpl {
         private static void notifyRoutesUpdatedToRouterRecords(
                 @NonNull List<RouterRecord> routerRecords,
                 @NonNull List<MediaRoute2Info> routes) {
-            for (RouterRecord routerRecord: routerRecords) {
+            for (RouterRecord routerRecord : routerRecords) {
                 List<MediaRoute2Info> filteredRoutes = getFilteredRoutesForPackageName(routes,
                         routerRecord.mPackageName);
                 try {
@@ -2412,15 +2415,15 @@ class MediaRouter2ServiceImpl {
         }
 
         /**
-         * Filters list of routes to return only public routes or routes provided by
-         * the same package name or routes containing this package name in its allow list.
+         * Filters list of routes to return only public routes or routes provided by the same
+         * package name or routes containing this package name in its allow list.
+         *
          * @param routes initial list of routes to be filtered.
          * @param packageName router's package name to filter routes for it.
          * @return only the routes that this package name is allowed to see.
          */
         private static List<MediaRoute2Info> getFilteredRoutesForPackageName(
-                @NonNull List<MediaRoute2Info> routes,
-                @NonNull String packageName) {
+                @NonNull List<MediaRoute2Info> routes, @NonNull String packageName) {
             List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
             for (MediaRoute2Info route : routes) {
                 if (route.isVisibleTo(packageName)) {
@@ -2609,11 +2612,15 @@ class MediaRouter2ServiceImpl {
                             .map(record -> record.mDiscoveryPreference)
                             .collect(Collectors.toList());
                 } else {
-                    discoveryPreferences = routerRecords.stream().filter(record ->
-                            service.mActivityManager.getPackageImportance(record.mPackageName)
-                                    <= sPackageImportanceForScanning)
-                            .map(record -> record.mDiscoveryPreference)
-                            .collect(Collectors.toList());
+                    discoveryPreferences =
+                            routerRecords.stream()
+                                    .filter(
+                                            record ->
+                                                    service.mActivityManager.getPackageImportance(
+                                                                    record.mPackageName)
+                                                            <= sPackageImportanceForScanning)
+                                    .map(record -> record.mDiscoveryPreference)
+                                    .collect(Collectors.toList());
                 }
             }
 
@@ -2658,6 +2665,7 @@ class MediaRouter2ServiceImpl {
             return null;
         }
     }
+
     static final class SessionCreationRequest {
         public final RouterRecord mRouterRecord;
         public final long mUniqueRequestId;
