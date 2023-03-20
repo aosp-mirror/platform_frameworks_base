@@ -453,9 +453,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     protected int adjustDisableFlags(int state) {
         boolean headsUpVisible =
                 mStatusBarFragmentComponent.getHeadsUpAppearanceController().shouldBeVisible();
-        if (headsUpVisible) {
-            state |= DISABLE_CLOCK;
-        }
 
         if (!mKeyguardStateController.isLaunchTransitionFadingAway()
                 && !mKeyguardStateController.isKeyguardFadingAway()
@@ -470,6 +467,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         if (mOngoingCallController.hasOngoingCall()) {
             state &= ~DISABLE_ONGOING_CALL_CHIP;
         } else {
+            state |= DISABLE_ONGOING_CALL_CHIP;
+        }
+
+        if (headsUpVisible) {
+            // Disable everything on the left side of the status bar, since the app name for the
+            // heads up notification appears there instead.
+            state |= DISABLE_CLOCK;
             state |= DISABLE_ONGOING_CALL_CHIP;
         }
 
