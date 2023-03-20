@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2022 The Android Open Source Project
+  ~ Copyright (C) 2023 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.wm.shell.compatui.letterboxedu.LetterboxEduDialogLayout
+<com.android.wm.shell.compatui.LetterboxEduDialogLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     style="@style/LetterboxDialog">
@@ -78,13 +78,13 @@
                     android:orientation="horizontal"
                     android:paddingTop="48dp">
 
-                    <com.android.wm.shell.compatui.letterboxedu.LetterboxEduDialogActionLayout
+                    <com.android.wm.shell.compatui.LetterboxEduDialogActionLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:icon="@drawable/letterbox_education_ic_reposition"
                         app:text="@string/letterbox_education_reposition_text"/>
 
-                    <com.android.wm.shell.compatui.letterboxedu.LetterboxEduDialogActionLayout
+                    <com.android.wm.shell.compatui.LetterboxEduDialogActionLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart=
@@ -118,4 +118,4 @@
 
     </FrameLayout>
 
-</com.android.wm.shell.compatui.letterboxedu.LetterboxEduDialogLayout>
+</com.android.wm.shell.compatui.LetterboxEduDialogLayout>
