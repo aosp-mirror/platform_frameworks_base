@@ -321,7 +321,7 @@ public class AppTransitionController {
             mService.mSurfaceAnimationRunner.continueStartingAnimations();
         }
 
-        mService.mTaskSnapshotController.onTransitionStarting(mDisplayContent);
+        mService.mSnapshotController.onTransitionStarting(mDisplayContent);
 
         mDisplayContent.mOpeningApps.clear();
         mDisplayContent.mClosingApps.clear();
