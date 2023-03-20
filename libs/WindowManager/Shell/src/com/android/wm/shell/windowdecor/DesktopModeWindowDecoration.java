@@ -38,6 +38,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.window.WindowContainerTransaction;
@@ -70,6 +71,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private RelayoutParams mRelayoutParams = new RelayoutParams();
     private final int mCaptionMenuHeightId = R.dimen.freeform_decor_caption_menu_height;
+    private final int mCaptionMenuHeightWithoutWindowingControlsId =
+            R.dimen.freeform_decor_caption_menu_height_no_windowing_controls;
     private final WindowDecoration.RelayoutResult<WindowDecorLinearLayout> mResult =
             new WindowDecoration.RelayoutResult<>();
 
@@ -242,11 +245,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final View fullscreen = menu.findViewById(R.id.fullscreen_button);
         fullscreen.setOnClickListener(mOnCaptionButtonClickListener);
         final View desktop = menu.findViewById(R.id.desktop_button);
-        if (DesktopModeStatus.isProto2Enabled()) {
-            desktop.setOnClickListener(mOnCaptionButtonClickListener);
-        } else if (DesktopModeStatus.isProto1Enabled()) {
-            desktop.setVisibility(View.GONE);
-        }
+        desktop.setOnClickListener(mOnCaptionButtonClickListener);
+        final ViewGroup windowingBtns = menu.findViewById(R.id.windowing_mode_buttons);
+        windowingBtns.setVisibility(DesktopModeStatus.isProto1Enabled() ? View.GONE : View.VISIBLE);
         final View split = menu.findViewById(R.id.split_screen_button);
         split.setOnClickListener(mOnCaptionButtonClickListener);
         final View close = menu.findViewById(R.id.close_button);
@@ -367,7 +368,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final int captionWidth = mTaskInfo.getConfiguration()
                 .windowConfiguration.getBounds().width();
         final int menuWidth = loadDimensionPixelSize(resources, mHandleMenuWidthId);
-        final int menuHeight = loadDimensionPixelSize(resources, mCaptionMenuHeightId);
+        // The windowing controls are disabled in proto1.
+        final int menuHeight = loadDimensionPixelSize(resources, DesktopModeStatus.isProto1Enabled()
+                ? mCaptionMenuHeightWithoutWindowingControlsId : mCaptionMenuHeightId);
         final int shadowRadius = loadDimensionPixelSize(resources, mHandleMenuShadowRadiusId);
         final int cornerRadius = loadDimensionPixelSize(resources, mHandleMenuCornerRadiusId);
 
