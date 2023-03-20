@@ -6094,7 +6094,7 @@
     <bool name="config_settingsHelpLinksEnabled">false</bool>
 
     <!-- Whether or not to enable the lock screen entry point for the QR code scanner. -->
-    <bool name="config_enableQrCodeScannerOnLockScreen">false</bool>
+    <bool name="config_enableQrCodeScannerOnLockScreen">true</bool>
 
     <!-- Default component for QR code scanner -->
     <string name="config_defaultQrCodeComponent"></string>
