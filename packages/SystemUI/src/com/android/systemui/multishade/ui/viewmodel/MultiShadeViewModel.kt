@@ -26,7 +26,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -87,10 +86,7 @@ class MultiShadeViewModel(
                 when (shadeConfig) {
                     // In the dual shade configuration, the scrim is enabled when the expansion is
                     // greater than zero on any one of the shades.
-                    is ShadeConfig.DualShadeConfig ->
-                        interactor.maxShadeExpansion
-                            .map { expansion -> expansion > 0 }
-                            .distinctUntilChanged()
+                    is ShadeConfig.DualShadeConfig -> interactor.isAnyShadeExpanded
                     // No scrim in the single shade configuration.
                     is ShadeConfig.SingleShadeConfig -> flowOf(false)
                 }
