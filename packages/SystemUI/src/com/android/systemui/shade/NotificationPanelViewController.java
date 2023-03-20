@@ -2897,15 +2897,7 @@ public final class NotificationPanelViewController implements Dumpable {
         mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
         mHeadsUpTouchHelper = new HeadsUpTouchHelper(headsUpManager,
                 mNotificationStackScrollLayoutController.getHeadsUpCallback(),
-                NotificationPanelViewController.this);
-    }
-
-    public void setTrackedHeadsUp(ExpandableNotificationRow pickedChild) {
-        if (pickedChild != null) {
-            updateTrackingHeadsUp(pickedChild);
-            mExpandingFromHeadsUp = true;
-        }
-        // otherwise we update the state when the expansion is finished
+                new HeadsUpNotificationViewControllerImpl());
     }
 
     private void onClosingFinished() {
@@ -2953,7 +2945,8 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     /** Called when a HUN is dragged up or down to indicate the starting height for shade motion. */
-    public void setHeadsUpDraggingStartingHeight(int startHeight) {
+    @VisibleForTesting
+    void setHeadsUpDraggingStartingHeight(int startHeight) {
         mHeadsUpStartHeight = startHeight;
         float scrimMinFraction;
         if (mSplitShadeEnabled) {
@@ -2985,10 +2978,6 @@ public final class NotificationPanelViewController implements Dumpable {
         mMinFraction = minFraction;
         mDepthController.setPanelPullDownMinFraction(mMinFraction);
         mScrimController.setPanelScrimMinFraction(mMinFraction);
-    }
-
-    public void clearNotificationEffects() {
-        mCentralSurfaces.clearNotificationEffects();
     }
 
     private boolean isPanelVisibleBecauseOfHeadsUp() {
@@ -5140,6 +5129,33 @@ public final class NotificationPanelViewController implements Dumpable {
         @Override
         public String[] getTransitionProperties() {
             return TRANSITION_PROPERTIES;
+        }
+    }
+
+    private final class HeadsUpNotificationViewControllerImpl implements
+            HeadsUpTouchHelper.HeadsUpNotificationViewController {
+        @Override
+        public void setHeadsUpDraggingStartingHeight(int startHeight) {
+            NotificationPanelViewController.this.setHeadsUpDraggingStartingHeight(startHeight);
+        }
+
+        @Override
+        public void setTrackedHeadsUp(ExpandableNotificationRow pickedChild) {
+            if (pickedChild != null) {
+                updateTrackingHeadsUp(pickedChild);
+                mExpandingFromHeadsUp = true;
+            }
+            // otherwise we update the state when the expansion is finished
+        }
+
+        @Override
+        public void startExpand(float x, float y, boolean startTracking, float expandedHeight) {
+            startExpandMotion(x, y, startTracking, expandedHeight);
+        }
+
+        @Override
+        public void clearNotificationEffects() {
+            mCentralSurfaces.clearNotificationEffects();
         }
     }
 
