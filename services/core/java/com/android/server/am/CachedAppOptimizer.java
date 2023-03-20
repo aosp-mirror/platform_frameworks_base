@@ -1914,7 +1914,9 @@ public final class CachedAppOptimizer {
         uids[0] = uid;
         frozenStates[0] = frozen ? UID_FROZEN_STATE_FROZEN : UID_FROZEN_STATE_UNFROZEN;
 
-        Slog.d(TAG_AM, "reportOneUidFrozenStateChanged uid " + uid + " frozen = " + frozen);
+        if (DEBUG_FREEZER) {
+            Slog.d(TAG_AM, "reportOneUidFrozenStateChanged uid " + uid + " frozen = " + frozen);
+        }
 
         mAm.reportUidFrozenStateChanged(uids, frozenStates);
     }
