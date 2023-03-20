@@ -62,6 +62,16 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
         )
     }
 
+    fun logActiveUnlockRequestSkippedForWakeReasonDueToFaceConfig(wakeReason: Int) {
+        logBuffer.log(
+            "ActiveUnlock",
+            DEBUG,
+            { int1 = wakeReason },
+            { "Skip requesting active unlock from wake reason that doesn't trigger face auth" +
+                    " reason=${PowerManager.wakeReasonToString(int1)}" }
+        )
+    }
+
     fun logAuthInterruptDetected(active: Boolean) {
         logBuffer.log(TAG, DEBUG, { bool1 = active }, { "onAuthInterruptDetected($bool1)" })
     }
