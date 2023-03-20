@@ -685,11 +685,11 @@ public final class AutofillManager {
 
     // If a package is fully denied, then all views that marked as not
     // important for autofill will not trigger fill request
-    private boolean mIsPackageFullyDeniedForAutofillForUnimportantView = false;
+    private boolean mIsPackageFullyDeniedForAutofill = false;
 
     // If a package is partially denied, autofill manager will check whether
     // current activity is in deny set to decide whether to trigger fill request
-    private boolean mIsPackagePartiallyDeniedForAutofillForUnimportantView = false;
+    private boolean mIsPackagePartiallyDeniedForAutofill = false;
 
     // A deny set read from device config
     private Set<String> mDeniedActivitiySet = new ArraySet<>();
@@ -874,15 +874,15 @@ public final class AutofillManager {
 
         final String packageName = mContext.getPackageName();
 
-        mIsPackageFullyDeniedForAutofillForUnimportantView =
-            isPackageFullyDeniedForAutofillForUnimportantView(denyListString, packageName);
+        mIsPackageFullyDeniedForAutofill =
+            isPackageFullyDeniedForAutofill(denyListString, packageName);
 
-        if (!mIsPackageFullyDeniedForAutofillForUnimportantView) {
-            mIsPackagePartiallyDeniedForAutofillForUnimportantView =
-                isPackagePartiallyDeniedForAutofillForUnimportantView(denyListString, packageName);
+        if (!mIsPackageFullyDeniedForAutofill) {
+            mIsPackagePartiallyDeniedForAutofill =
+                isPackagePartiallyDeniedForAutofill(denyListString, packageName);
         }
 
-        if (mIsPackagePartiallyDeniedForAutofillForUnimportantView) {
+        if (mIsPackagePartiallyDeniedForAutofill) {
             setDeniedActivitySetWithDenyList(denyListString, packageName);
         }
     }
@@ -897,6 +897,15 @@ public final class AutofillManager {
     }
 
     /**
+     * Whether to trigger fill request on not important views that passes heuristic check
+     *
+     * @hide
+     */
+    public boolean isTriggerFillRequestOnUnimportantViewEnabled() {
+        return mIsTriggerFillRequestOnUnimportantViewEnabled;
+    }
+
+    /**
      * Whether view passes the imeAction check
      *
      * @hide
@@ -904,13 +913,13 @@ public final class AutofillManager {
     public boolean isPassingImeActionCheck(EditText editText) {
         final int actionId = editText.getImeOptions();
         if (mNonAutofillableImeActionIdSet.contains(String.valueOf(actionId))) {
-            // TODO: add a log to indicate what has filtered out the view
+            Log.d(TAG, "view not autofillable - not passing ime action check");
             return false;
         }
         return true;
     }
 
-    private boolean isPackageFullyDeniedForAutofillForUnimportantView(
+    private boolean isPackageFullyDeniedForAutofill(
             @NonNull String denyListString, @NonNull String packageName) {
         // If "PackageName:;" is in the string, then it means the package name is in denylist
         // and there are no activities specified under it. That means the package is fully
@@ -918,7 +927,7 @@ public final class AutofillManager {
         return denyListString.indexOf(packageName + ":;") != -1;
     }
 
-    private boolean isPackagePartiallyDeniedForAutofillForUnimportantView(
+    private boolean isPackagePartiallyDeniedForAutofill(
             @NonNull String denyListString, @NonNull String packageName) {
         // This check happens after checking package is not fully denied. If "PackageName:" instead
         // is in denylist, then it means there are specific activities to be denied. So the package
@@ -966,17 +975,16 @@ public final class AutofillManager {
     }
 
     /**
-     * Check whether autofill is denied for current activity or package. Used when a view is marked
-     * as not important for autofill, if current activity or package is denied, then the view won't
-     * trigger fill request.
+     * Check whether autofill is denied for current activity or package. If current activity or
+     * package is denied, then the view won't trigger fill request.
      *
      * @hide
      */
-    public final boolean isActivityDeniedForAutofillForUnimportantView() {
-        if (mIsPackageFullyDeniedForAutofillForUnimportantView) {
+    public boolean isActivityDeniedForAutofill() {
+        if (mIsPackageFullyDeniedForAutofill) {
             return true;
         }
-        if (mIsPackagePartiallyDeniedForAutofillForUnimportantView) {
+        if (mIsPackagePartiallyDeniedForAutofill) {
             final AutofillClient client = getClient();
             if (client == null) {
                 return false;
@@ -990,25 +998,34 @@ public final class AutofillManager {
     }
 
     /**
-     * Check whether view matches autofill-able heuristics
+     * Check heuristics and other rules to determine if view is autofillable
+     *
+     * Note: this function should be only called only when autofill for all apps is turned on. The
+     * calling method needs to check the corresponding flag to make sure that before calling into
+     * this function.
      *
      * @hide
      */
-    public final boolean isMatchingAutofillableHeuristicsForNotImportantViews(@NonNull View view) {
-        if (!mIsTriggerFillRequestOnUnimportantViewEnabled) {
+    public boolean isAutofillable(View view) {
+        if (isActivityDeniedForAutofill()) {
+            Log.d(TAG, "view is not autofillable - activity denied for autofill");
             return false;
         }
 
-        // TODO: remove the autofill type check when this function is applied on both important and
-        // not important views.
-        // This check is needed here because once the view type check is lifted, addiditional
-        // unimportant views will be added to the assist structure which may cuase system health
-        // regression (viewGroup#populateChidlrenForAutofill() calls this function to decide whether
-        // to include child view)
+        // Duplicate the autofill type check here because ViewGroup will call this function to
+        // decide whether to include view in assist structure.
+        // Also keep the autofill type check inside View#IsAutofillable() to serve as an early out
+        // or if other functions need to call it.
         if (view.getAutofillType() == View.AUTOFILL_TYPE_NONE) return false;
 
         if (view instanceof EditText) {
             return isPassingImeActionCheck((EditText) view);
+        }
+
+        // Skip view type check if view is important for autofill or
+        // shouldEnableAutofillOnAllViewTypes flag is turned on
+        if (view.isImportantForAutofill() || mShouldEnableAutofillOnAllViewTypes) {
+            return true;
         }
 
         if (view instanceof CheckBox
@@ -1019,9 +1036,8 @@ public final class AutofillManager {
             return true;
         }
 
-        return mShouldEnableAutofillOnAllViewTypes;
+        return false;
     }
-
 
     /**
      * @hide

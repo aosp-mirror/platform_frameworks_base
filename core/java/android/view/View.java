@@ -163,7 +163,6 @@ import android.view.translation.ViewTranslationCallback;
 import android.view.translation.ViewTranslationRequest;
 import android.view.translation.ViewTranslationResponse;
 import android.widget.Checkable;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
 import android.window.OnBackInvokedDispatcher;
@@ -10340,24 +10339,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Check whether current activity / package is in denylist.If it's in the denylist,
-     * then the views marked as not important for autofill are not eligible for autofill.
+     * Check whether current activity / package is in autofill denylist.
+     *
+     * Called by viewGroup#populateChildrenForAutofill() to determine whether to include view in
+     * assist structure
      */
     final boolean isActivityDeniedForAutofillForUnimportantView() {
         final AutofillManager afm = getAutofillManager();
-        // keep behavior same with denylist feature not enabled
-        if (afm == null) return true;
-        return afm.isActivityDeniedForAutofillForUnimportantView();
+        if (afm == null) return false;
+        return afm.isActivityDeniedForAutofill();
     }
 
     /**
      * Check whether current view matches autofillable heuristics
+     *
+     * Called by viewGroup#populateChildrenForAutofill() to determine whether to include view in
+     * assist structure
      */
     final boolean isMatchingAutofillableHeuristics() {
         final AutofillManager afm = getAutofillManager();
-        // keep default behavior
         if (afm == null) return false;
-        return afm.isMatchingAutofillableHeuristicsForNotImportantViews(this);
+        // check the flag to see if trigger fill request on not important views is enabled
+        return afm.isTriggerFillRequestOnUnimportantViewEnabled()
+            ? afm.isAutofillable(this) : false;
     }
 
     private boolean isAutofillable() {
@@ -10373,39 +10377,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return false;
         }
 
-        // Experiment imeAction heuristic on important views. If the important view doesn't pass
-        // heuristic check, also check augmented autofill in case augmented autofill is enabled
-        // for the activity
-        // TODO: refactor to have both important views and not important views use the same
-        // heuristic check
-        if (isImportantForAutofill()
-            && afm.isTriggerFillRequestOnFilteredImportantViewsEnabled()
-            && this instanceof EditText
-            && !afm.isPassingImeActionCheck((EditText) this)
-            && !notifyAugmentedAutofillIfNeeded(afm)) {
-            // TODO: add a log to indicate what has filtered out the view
+        // Check whether view is not part of an activity. If it's not, return false.
+        if (getAutofillViewId() <= LAST_APP_AUTOFILL_ID) {
             return false;
         }
 
-        if (!isImportantForAutofill()) {
-            // If view matches heuristics and is not denied, it will be treated same as view that's
-            // important for autofill
-            if (afm.isMatchingAutofillableHeuristicsForNotImportantViews(this)
-                    && !afm.isActivityDeniedForAutofillForUnimportantView()) {
-                return getAutofillViewId() > LAST_APP_AUTOFILL_ID;
-            }
-            // View is not important for "regular" autofill, so we must check if Augmented Autofill
-            // is enabled for the activity
-            if (!notifyAugmentedAutofillIfNeeded(afm)){
-                return false;
-            }
+        // If view is important and filter important view flag is turned on, or view is not
+        // important and trigger fill request on not important view flag is turned on, then use
+        // AutofillManager.isAutofillable() to decide whether view is autofillable instead.
+        if ((isImportantForAutofill() && afm.isTriggerFillRequestOnFilteredImportantViewsEnabled())
+                || (!isImportantForAutofill()
+                    && afm.isTriggerFillRequestOnUnimportantViewEnabled())) {
+            return afm.isAutofillable(this) ? true : notifyAugmentedAutofillIfNeeded(afm);
         }
 
-        return getAutofillViewId() > LAST_APP_AUTOFILL_ID;
+        // If the previous condition is not met, fall back to the previous way to trigger fill
+        // request based on autofill importance instead.
+        return isImportantForAutofill() ? true : notifyAugmentedAutofillIfNeeded(afm);
     }
 
-    /** @hide **/
-    public boolean notifyAugmentedAutofillIfNeeded(AutofillManager afm) {
+    private boolean notifyAugmentedAutofillIfNeeded(AutofillManager afm) {
         final AutofillOptions options = mContext.getAutofillOptions();
         if (options == null || !options.isAugmentedAutofillEnabled(mContext)) {
             return false;
