@@ -608,6 +608,10 @@ public final class VirtualDeviceManager {
                 mVirtualAudioDevice.close();
                 mVirtualAudioDevice = null;
             }
+            if (mVirtualCameraDevice != null) {
+                mVirtualCameraDevice.close();
+                mVirtualCameraDevice = null;
+            }
         }
 
         /**
