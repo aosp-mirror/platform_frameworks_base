@@ -399,7 +399,8 @@ class BroadcastProcessQueue {
      * Update if this process is in the "cached" state, typically signaling that
      * broadcast dispatch should be paused or delayed.
      */
-    public void setProcessCached(boolean cached) {
+    @VisibleForTesting
+    void setProcessCached(boolean cached) {
         if (mProcessCached != cached) {
             mProcessCached = cached;
             invalidateRunnableAt();
