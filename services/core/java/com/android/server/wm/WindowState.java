@@ -2049,16 +2049,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /**
      * Like isOnScreen(), but we don't return true if the window is part
-     * of a transition that has not yet been started.
+     * of a transition but has not yet started animating.
      */
     boolean isReadyForDisplay() {
-        if (mToken.waitingToShow && getDisplayContent().mAppTransition.isTransitionSet()) {
+        if (!mHasSurface || mDestroying || !isVisibleByPolicy()) {
+            return false;
+        }
+        if (mToken.waitingToShow && getDisplayContent().mAppTransition.isTransitionSet()
+                && !isAnimating(TRANSITION | PARENTS, ANIMATION_TYPE_APP_TRANSITION)) {
             return false;
         }
         final boolean parentAndClientVisible = !isParentWindowHidden()
                 && mViewVisibility == View.VISIBLE && mToken.isVisible();
-        return mHasSurface && isVisibleByPolicy() && !mDestroying
-                && (parentAndClientVisible || isAnimating(TRANSITION | PARENTS));
+        return parentAndClientVisible || isAnimating(TRANSITION | PARENTS, ANIMATION_TYPE_ALL);
     }
 
     boolean isFullyTransparent() {
