@@ -129,7 +129,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
     public boolean execute(@Nullable VersionedPackage failedPackage,
             @FailureReasons int rollbackReason, int mitigationCount) {
         if (rollbackReason == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH) {
-            mHandler.post(this::rollbackAll);
+            mHandler.post(() -> rollbackAll(rollbackReason));
             return true;
         }
 
@@ -141,7 +141,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
             }
             mHandler.post(() -> rollbackPackage(rollback, failedPackage, rollbackReason));
         } else if (mitigationCount > 1) {
-            mHandler.post(this::rollbackAll);
+            mHandler.post(() -> rollbackAll(rollbackReason));
         }
 
         // Assume rollbacks executed successfully
@@ -478,7 +478,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
     }
 
     @WorkerThread
-    private void rollbackAll() {
+    private void rollbackAll(@FailureReasons int rollbackReason) {
         assertInWorkerThread();
         RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
         List<RollbackInfo> rollbacks = rollbackManager.getAvailableRollbacks();
@@ -497,7 +497,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
 
         for (RollbackInfo rollback : rollbacks) {
             VersionedPackage sample = rollback.getPackages().get(0).getVersionRolledBackFrom();
-            rollbackPackage(rollback, sample, PackageWatchdog.FAILURE_REASON_NATIVE_CRASH);
+            rollbackPackage(rollback, sample, rollbackReason);
         }
     }
 }
