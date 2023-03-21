@@ -105,10 +105,14 @@ class MobileConnectionRepositoryImpl(
      * The reason we need to do this is because TelephonyManager limits the number of registered
      * listeners per-process, so we don't want to create a new listener for every callback.
      *
-     * A note on the design for back pressure here: We use the [coalesce] operator here to change
-     * the backpressure strategy to store exactly the last callback event of _each type_ here, as
-     * opposed to the default strategy which is to drop the oldest event (regardless of type). This
-     * means that we should never miss any single event as long as the flow has been started.
+     * A note on the design for back pressure here: We don't control _which_ telephony callback
+     * comes in first, since we register every relevant bit of information as a batch. E.g., if a
+     * downstream starts collecting on a field which is backed by
+     * [TelephonyCallback.ServiceStateListener], it's not possible for us to guarantee that _that_
+     * callback comes in -- the first callback could very well be
+     * [TelephonyCallback.DataActivityListener], which would promptly be dropped if we didn't keep
+     * it tracked. We use the [scan] operator here to track the most recent callback of _each type_
+     * here. See [TelephonyCallbackState] to see how the callbacks are stored.
      */
     private val callbackEvents: StateFlow<TelephonyCallbackState> = run {
         val initial = TelephonyCallbackState()
