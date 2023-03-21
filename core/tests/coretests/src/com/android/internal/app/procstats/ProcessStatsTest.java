@@ -186,4 +186,19 @@ public class ProcessStatsTest extends TestCase {
                         eq(0),
                         eq(APP_1_PROCESS_NAME));
     }
+
+    @SmallTest
+    public void testSafelyResetClearsProcessInUidState() throws Exception {
+        ProcessStats processStats = new ProcessStats();
+        ProcessState processState =
+                processStats.getProcessStateLocked(
+                        APP_1_PACKAGE_NAME, APP_1_UID, APP_1_VERSION, APP_1_PROCESS_NAME);
+        processState.makeActive();
+        UidState uidState = processStats.mUidStates.get(APP_1_UID);
+        assertTrue(uidState.isInUse());
+        processState.makeInactive();
+        uidState.resetSafely(NOW_MS);
+        processState.makeActive();
+        assertFalse(uidState.isInUse());
+    }
 }
