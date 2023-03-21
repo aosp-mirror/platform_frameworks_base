@@ -142,6 +142,12 @@ class PermissionService(
         userManagerInternal = LocalServices.getService(UserManagerInternal::class.java)
         userManagerService = UserManagerService.getInstance()
 
+        // The package info cache is the cache for package and permission information.
+        // Disable the package info and package permission caches locally but leave the
+        // checkPermission cache active.
+        PackageManager.invalidatePackageInfoCache();
+        PermissionManager.disablePackageNamePermissionCache();
+
         handlerThread = ServiceThread(LOG_TAG, Process.THREAD_PRIORITY_BACKGROUND, true)
             .apply { start() }
         handler = Handler(handlerThread.looper)
