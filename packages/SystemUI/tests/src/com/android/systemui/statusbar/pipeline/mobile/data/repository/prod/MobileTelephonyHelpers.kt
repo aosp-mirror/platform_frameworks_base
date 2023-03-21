@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 import android.telephony.CellSignalStrengthCdma
 import android.telephony.SignalStrength
 import android.telephony.TelephonyCallback
+import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyManager
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -47,6 +48,12 @@ object MobileTelephonyHelpers {
 
         return signalStrength
     }
+
+    fun telephonyDisplayInfo(networkType: Int, overrideNetworkType: Int) =
+        mock<TelephonyDisplayInfo>().also {
+            whenever(it.networkType).thenReturn(networkType)
+            whenever(it.overrideNetworkType).thenReturn(overrideNetworkType)
+        }
 
     inline fun <reified T> getTelephonyCallbackForType(mockTelephonyManager: TelephonyManager): T {
         val cbs = getTelephonyCallbacks(mockTelephonyManager).filterIsInstance<T>()
