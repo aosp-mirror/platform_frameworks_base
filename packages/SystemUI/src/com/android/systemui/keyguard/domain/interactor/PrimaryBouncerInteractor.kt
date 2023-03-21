@@ -95,8 +95,7 @@ constructor(
     }
 
     val keyguardAuthenticated: Flow<Boolean> = repository.keyguardAuthenticated.filterNotNull()
-    val show: Flow<Unit> = repository.primaryBouncerShow.filter { it }.map {}
-    val hide: Flow<Unit> = repository.primaryBouncerShow.filter { !it }.map {}
+    val isShowing: Flow<Boolean> = repository.primaryBouncerShow
     val startingToHide: Flow<Unit> = repository.primaryBouncerStartingToHide.filter { it }.map {}
     val isBackButtonEnabled: Flow<Boolean> = repository.isBackButtonEnabled.filterNotNull()
     val showMessage: Flow<BouncerShowMessageModel> = repository.showMessage.filterNotNull()
