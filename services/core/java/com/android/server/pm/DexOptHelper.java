@@ -99,6 +99,8 @@ import java.util.function.Predicate;
 public final class DexOptHelper {
     private static final long SEVEN_DAYS_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000;
 
+    private static boolean sArtManagerLocalIsInitialized = false;
+
     private final PackageManagerService mPm;
 
     // Start time for the boot dexopt in performPackageDexOptUpgradeIfNeeded when ART Service is
@@ -1035,6 +1037,7 @@ public final class DexOptHelper {
         artManager.addDexoptDoneCallback(false /* onlyIncludeUpdates */, Runnable::run,
                 pm.getDexOptHelper().new DexoptDoneHandler());
         LocalManagerRegistry.addManager(ArtManagerLocal.class, artManager);
+        sArtManagerLocalIsInitialized = true;
 
         // Schedule the background job when boot is complete. This decouples us from when
         // JobSchedulerService is initialized.
@@ -1045,6 +1048,15 @@ public final class DexOptHelper {
                 artManager.scheduleBackgroundDexoptJob();
             }
         }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+    }
+
+    /**
+     * Returns true if an {@link ArtManagerLocal} instance has been created.
+     *
+     * Avoid this function if at all possible, because it may hide initialization order problems.
+     */
+    public static boolean artManagerLocalIsInitialized() {
+        return sArtManagerLocalIsInitialized;
     }
 
     /**
