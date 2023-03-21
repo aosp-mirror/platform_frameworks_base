@@ -52,6 +52,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -1079,7 +1080,8 @@ public final class BroadcastQueueModernImplTest {
                 eq(getUidForPackage(PACKAGE_GREEN)), anyInt(), eq(Intent.ACTION_TIME_TICK),
                 eq(BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST),
                 eq(BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD),
-                anyLong(), anyLong(), anyLong(), anyInt(), anyString(), anyString()), times(1));
+                anyLong(), anyLong(), anyLong(), anyInt(), nullable(String.class), anyString()),
+                times(1));
     }
 
     private Intent createPackageChangedIntent(int uid, List<String> componentNameList) {
