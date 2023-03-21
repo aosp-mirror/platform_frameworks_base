@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
@@ -296,8 +297,11 @@ final class InputMonitor {
                 // be applied using the SurfaceControl hierarchy from the Organizer. This means
                 // we need to make sure that these changes in crop are reflected in the input
                 // windows, and so ensure this flag is set so that the input crop always reflects
-                // the surface hierarchy.
-                useSurfaceBoundsAsTouchRegion = true;
+                // the surface hierarchy. However, we only want to set this when the client did
+                // not already provide a touchable region, so that we don't ignore the one provided.
+                if (w.mTouchableInsets != TOUCHABLE_INSETS_REGION) {
+                    useSurfaceBoundsAsTouchRegion = true;
+                }
 
                 if (w.mAttrs.isModal()) {
                     TaskFragment parent = w.getTaskFragment();
