@@ -22,6 +22,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 
+import android.annotation.Nullable;
 import android.database.ContentObserver;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -458,6 +459,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mView.setClock(clock, mStatusBarStateController.getState());
     }
 
+    @Nullable
     private ClockController getClock() {
         return mClockEventController.getClock();
     }
@@ -510,7 +512,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     /** Gets the animations for the current clock. */
+    @Nullable
     public ClockAnimations getClockAnimations() {
-        return getClock().getAnimations();
+        ClockController clock = getClock();
+        return clock == null ? null : clock.getAnimations();
     }
 }
