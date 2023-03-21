@@ -2296,7 +2296,9 @@ pid_t zygote::ForkCommon(JNIEnv* env, bool is_system_server,
     // region shared with the child process we reduce the number of pages that
     // transition to the private-dirty state when malloc adjusts the meta-data
     // on each of the pages it is managing after the fork.
-    mallopt(M_PURGE, 0);
+    if (mallopt(M_PURGE_ALL, 0) != 1) {
+      mallopt(M_PURGE, 0);
+    }
   }
 
   pid_t pid = fork();
