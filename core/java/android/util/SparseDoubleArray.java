@@ -50,7 +50,7 @@ public class SparseDoubleArray implements Cloneable {
 
     /** Creates a new SparseDoubleArray containing no mappings. */
     public SparseDoubleArray() {
-        this(10);
+        this(0);
     }
 
     /**
