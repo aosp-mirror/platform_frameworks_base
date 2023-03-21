@@ -41,17 +41,3 @@ java_library {
         "mockito-target-extended-minus-junit4",
     ],
 }
-
-java_test_host {
-    name: "frameworks-base-android-os-unittests",
-    srcs: [
-        ":framework-android-os-unit-testable-src",
-        "java/android/os/test/DdmSyncStateTest.java",
-    ],
-    static_libs: [
-        "junit",
-    ],
-    test_options: {
-        unit_test: true,
-    },
-}
