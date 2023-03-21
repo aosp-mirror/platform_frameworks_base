@@ -256,6 +256,7 @@ public class TakeScreenshotService extends Service {
             Consumer<Uri> uriConsumer, RequestCallback callback) {
         mUiEventLogger.log(ScreenshotEvent.getScreenshotSource(screenshot.getSource()), 0,
                 screenshot.getPackageNameString());
+        Log.d(TAG, "Screenshot request: " + screenshot);
         mScreenshot.handleScreenshot(screenshot, uriConsumer, callback);
     }
 
