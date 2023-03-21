@@ -33,6 +33,8 @@ class PackageVerificationState {
     private final SparseBooleanArray mRequiredVerifierUids;
     private final SparseBooleanArray mUnrespondedRequiredVerifierUids;
 
+    private final SparseBooleanArray mExtendedTimeoutUids;
+
     private boolean mSufficientVerificationComplete;
 
     private boolean mSufficientVerificationPassed;
@@ -40,8 +42,6 @@ class PackageVerificationState {
     private boolean mRequiredVerificationComplete;
 
     private boolean mRequiredVerificationPassed;
-
-    private boolean mExtendedTimeout;
 
     private boolean mIntegrityVerificationComplete;
 
@@ -54,9 +54,9 @@ class PackageVerificationState {
         mSufficientVerifierUids = new SparseBooleanArray();
         mRequiredVerifierUids = new SparseBooleanArray();
         mUnrespondedRequiredVerifierUids = new SparseBooleanArray();
+        mExtendedTimeoutUids = new SparseBooleanArray();
         mRequiredVerificationComplete = false;
         mRequiredVerificationPassed = true;
-        mExtendedTimeout = false;
     }
 
     VerifyingSession getVerifyingSession() {
@@ -88,14 +88,27 @@ class PackageVerificationState {
         return mSufficientVerifierUids.get(uid, false);
     }
 
+    void setVerifierResponseOnTimeout(int uid, int code) {
+        if (!checkRequiredVerifierUid(uid)) {
+            return;
+        }
+
+        // Timeout, not waiting for the sufficient verifiers anymore.
+        mSufficientVerifierUids.clear();
+
+        // Only if unresponded.
+        if (mUnrespondedRequiredVerifierUids.get(uid, false)) {
+            setVerifierResponse(uid, code);
+        }
+    }
+
     /**
      * Should be called when a verification is received from an agent so the state of the package
      * verification can be tracked.
      *
      * @param uid user ID of the verifying agent
-     * @return {@code true} if the verifying agent actually exists in our list
      */
-    boolean setVerifierResponse(int uid, int code) {
+    void setVerifierResponse(int uid, int code) {
         if (mRequiredVerifierUids.get(uid)) {
             switch (code) {
                 case PackageManager.VERIFICATION_ALLOW_WITHOUT_SUFFICIENT:
@@ -109,13 +122,19 @@ class PackageVerificationState {
                     break;
                 default:
                     mRequiredVerificationPassed = false;
+                    // Required verifier rejected, no need to wait for the rest.
+                    mUnrespondedRequiredVerifierUids.clear();
+                    mSufficientVerifierUids.clear();
+                    mExtendedTimeoutUids.clear();
             }
+
+            // Responded, no need to extend timeout.
+            mExtendedTimeoutUids.delete(uid);
 
             mUnrespondedRequiredVerifierUids.delete(uid);
             if (mUnrespondedRequiredVerifierUids.size() == 0) {
                 mRequiredVerificationComplete = true;
             }
-            return true;
         } else if (mSufficientVerifierUids.get(uid)) {
             if (code == PackageManager.VERIFICATION_ALLOW) {
                 mSufficientVerificationPassed = true;
@@ -126,11 +145,7 @@ class PackageVerificationState {
             if (mSufficientVerifierUids.size() == 0) {
                 mSufficientVerificationComplete = true;
             }
-
-            return true;
         }
-
-        return false;
     }
 
     /**
@@ -181,10 +196,12 @@ class PackageVerificationState {
     }
 
     /** Extend the timeout for this Package to be verified. */
-    void extendTimeout() {
-        if (!mExtendedTimeout) {
-            mExtendedTimeout = true;
+    boolean extendTimeout(int uid) {
+        if (!checkRequiredVerifierUid(uid) || timeoutExtended(uid)) {
+            return false;
         }
+        mExtendedTimeoutUids.append(uid, true);
+        return true;
     }
 
     /**
@@ -192,8 +209,8 @@ class PackageVerificationState {
      *
      * @return {@code true} if a timeout was already extended.
      */
-    boolean timeoutExtended() {
-        return mExtendedTimeout;
+    boolean timeoutExtended(int uid) {
+        return mExtendedTimeoutUids.get(uid, false);
     }
 
     void setIntegrityVerificationResult(int code) {
