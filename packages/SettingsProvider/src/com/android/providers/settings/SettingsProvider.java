@@ -900,6 +900,7 @@ public class SettingsProvider extends ContentProvider {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+            mSettingsRegistry.mGenerationRegistry.dump(pw);
         }
     }
 
@@ -5990,6 +5991,11 @@ public class SettingsProvider extends ContentProvider {
 
             return !a11yButtonTargetsSettings.isNull()
                     && !TextUtils.isEmpty(a11yButtonTargetsSettings.getValue());
+        }
+
+        @NonNull
+        public GenerationRegistry getGenerationRegistry() {
+            return mGenerationRegistry;
         }
     }
 }
