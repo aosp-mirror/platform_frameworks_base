@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.pip;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -535,6 +536,15 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mPipTransitionController.startExitTransition(TRANSIT_EXIT_PIP, wct, destinationBounds);
             return;
+        }
+        if (mSplitScreenOptional.isPresent()) {
+            // If pip activity will reparent to origin task case and if the origin task still under
+            // split root, just exit split screen here to ensure it could expand to fullscreen.
+            SplitScreenController split = mSplitScreenOptional.get();
+            if (split.isTaskInSplitScreen(mTaskInfo.lastParentTaskIdBeforePip)) {
+                split.exitSplitScreen(INVALID_TASK_ID,
+                        SplitScreenController.EXIT_REASON_APP_FINISHED);
+            }
         }
         mSyncTransactionQueue.queue(wct);
         mSyncTransactionQueue.runInSync(t -> {
