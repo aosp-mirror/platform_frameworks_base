@@ -534,7 +534,7 @@ public class Transitions implements RemoteCallable<Transitions> {
         }
 
         if (info.getType() == TRANSIT_SLEEP) {
-            if (activeIdx > 0) {
+            if (activeIdx > 0 || !mActiveTransitions.isEmpty() || mReadyTransitions.size() > 1) {
                 // Sleep starts a process of forcing all prior transitions to finish immediately
                 finishForSleep(null /* forceFinish */);
                 return;
