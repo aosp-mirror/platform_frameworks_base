@@ -119,6 +119,8 @@ import android.os.BluetoothServiceManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.DdmSyncStageUpdater;
+import android.os.DdmSyncState.Stage;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -264,6 +266,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class ActivityThread extends ClientTransactionHandler
         implements ActivityThreadInternal {
+
+    private final DdmSyncStageUpdater mDdmSyncStageUpdater = new DdmSyncStageUpdater();
+
     /** @hide */
     public static final String TAG = "ActivityThread";
     private static final android.graphics.Bitmap.Config THUMBNAIL_FORMAT = Bitmap.Config.RGB_565;
@@ -6689,6 +6694,8 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @UnsupportedAppUsage
     private void handleBindApplication(AppBindData data) {
+        mDdmSyncStageUpdater.next(Stage.Bind);
+
         // Register the UI Thread as a sensitive thread to the runtime.
         VMRuntime.registerSensitiveThread();
         // In the case the stack depth property exists, pass it down to the runtime.
@@ -6738,6 +6745,7 @@ public final class ActivityThread extends ClientTransactionHandler
                                                 data.appInfo.packageName,
                                                 UserHandle.myUserId());
         VMRuntime.setProcessPackageName(data.appInfo.packageName);
+        mDdmSyncStageUpdater.next(Stage.Named);
 
         // Pass data directory path to ART. This is used for caching information and
         // should be set before any application code is loaded.
@@ -6942,6 +6950,7 @@ public final class ActivityThread extends ClientTransactionHandler
         final StrictMode.ThreadPolicy writesAllowedPolicy = StrictMode.getThreadPolicy();
 
         if (data.debugMode != ApplicationThreadConstants.DEBUG_OFF) {
+            mDdmSyncStageUpdater.next(Stage.Debugger);
             if (data.debugMode == ApplicationThreadConstants.DEBUG_WAIT) {
                 waitForDebugger(data);
             } else if (data.debugMode == ApplicationThreadConstants.DEBUG_SUSPEND) {
@@ -6949,6 +6958,7 @@ public final class ActivityThread extends ClientTransactionHandler
             }
             // Nothing special to do in case of DEBUG_ON.
         }
+        mDdmSyncStageUpdater.next(Stage.Running);
 
         try {
             // If the app is being launched for full backup or restore, bring it up in
@@ -7852,6 +7862,7 @@ public final class ActivityThread extends ClientTransactionHandler
         mConfigurationController = new ConfigurationController(this);
         mSystemThread = system;
         mStartSeq = startSeq;
+        mDdmSyncStageUpdater.next(Stage.Attach);
 
         if (!system) {
             android.ddm.DdmHandleAppName.setAppName("<pre-initialized>",

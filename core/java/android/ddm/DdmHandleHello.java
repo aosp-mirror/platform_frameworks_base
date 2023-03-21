@@ -16,6 +16,7 @@
 
 package android.ddm;
 
+import android.os.DdmSyncState;
 import android.os.Debug;
 import android.os.UserHandle;
 import android.util.Log;
@@ -44,6 +45,7 @@ public class DdmHandleHello extends DdmHandle {
     private static final String[] FRAMEWORK_FEATURES = new String[] {
         "opengl-tracing",
         "view-hierarchy",
+        "support_boot_stages"
     };
 
     /* singleton, do not instantiate */
@@ -145,7 +147,9 @@ public class DdmHandleHello extends DdmHandle {
                             + instructionSetDescription.length() * 2
                             + vmFlags.length() * 2
                             + 1
-                            + pkgName.length() * 2);
+                            + pkgName.length() * 2
+                            // STAG id (int)
+                            + Integer.BYTES);
         out.order(ChunkHandler.CHUNK_ORDER);
         out.putInt(CLIENT_PROTOCOL_VERSION);
         out.putInt(android.os.Process.myPid());
@@ -161,6 +165,10 @@ public class DdmHandleHello extends DdmHandle {
         out.put((byte)(isNativeDebuggable ? 1 : 0));
         out.putInt(pkgName.length());
         putString(out, pkgName);
+
+        // Added API 34 (and advertised via FEAT ddm packet)
+        // Send the current boot stage in ActivityThread
+        out.putInt(DdmSyncState.getStage().toInt());
 
         Chunk reply = new Chunk(CHUNK_HELO, out);
 

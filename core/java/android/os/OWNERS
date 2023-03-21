@@ -79,3 +79,7 @@ per-file PermissionEnforcer.java = tweek@google.com, brufino@google.com
 
 # ART
 per-file ArtModuleServiceManager.java = file:platform/art:/OWNERS
+
+# DDM Protocol
+per-file DdmSyncState.java = sanglardf@google.com, rpaquay@google.com
+per-file DdmSyncStageUpdater.java = sanglardf@google.com, rpaquay@google.com
