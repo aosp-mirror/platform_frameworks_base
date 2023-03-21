@@ -185,6 +185,7 @@ java_library_static {
         "com.android.sysprop.watchdog",
         "ImmutabilityAnnotation",
         "securebox",
+        "apache-commons-math",
     ],
     javac_shard_size: 50,
     javacflags: [
