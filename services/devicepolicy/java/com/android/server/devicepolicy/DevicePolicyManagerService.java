@@ -225,6 +225,7 @@ import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPR
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.provider.DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER;
+import static android.provider.DeviceConfig.NAMESPACE_TELEPHONY;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Settings.Secure.MANAGED_PROVISIONING_DPC_DOWNLOADED;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
@@ -3324,7 +3325,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 onLockSettingsReady();
                 loadAdminDataAsync();
                 mOwners.systemReady();
-                if (isWorkProfileTelephonyFlagEnabled()) {
+                if (isWorkProfileTelephonyEnabled()) {
                     applyManagedSubscriptionsPolicyIfRequired();
                 }
                 break;
@@ -7640,7 +7641,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         mLockSettingsInternal.refreshStrongAuthTimeout(parentId);
 
-        if (isWorkProfileTelephonyFlagEnabled()) {
+        if (isWorkProfileTelephonyEnabled()) {
             clearManagedSubscriptionsPolicy();
             clearLauncherShortcutOverrides();
             updateTelephonyCrossProfileIntentFilters(parentId, UserHandle.USER_NULL, false);
@@ -10991,8 +10992,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             synchronized (mSubscriptionsChangedListenerLock) {
                 pw.println("Subscription changed listener : " + mSubscriptionsChangedListener);
             }
-            pw.println(
-                    "Flag enable_work_profile_telephony : " + isWorkProfileTelephonyFlagEnabled());
+            pw.println("DPM Flag enable_work_profile_telephony : "
+                    + isWorkProfileTelephonyDevicePolicyManagerFlagEnabled());
+            pw.println("Telephony Flag enable_work_profile_telephony : "
+                    + isWorkProfileTelephonySubscriptionManagerFlagEnabled());
 
             mHandler.post(() -> handleDump(pw));
             dumpResources(pw);
@@ -22703,11 +22706,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 DEFAULT_KEEP_PROFILES_RUNNING_FLAG);
     }
 
-    private static boolean isWorkProfileTelephonyFlagEnabled() {
-        return DeviceConfig.getBoolean(
-                NAMESPACE_DEVICE_POLICY_MANAGER,
-                ENABLE_WORK_PROFILE_TELEPHONY_FLAG,
-                DEFAULT_WORK_PROFILE_TELEPHONY_FLAG);
+    private boolean isWorkProfileTelephonyEnabled() {
+        return isWorkProfileTelephonyDevicePolicyManagerFlagEnabled()
+                && isWorkProfileTelephonySubscriptionManagerFlagEnabled();
+    }
+
+    private boolean isWorkProfileTelephonyDevicePolicyManagerFlagEnabled() {
+        return DeviceConfig.getBoolean(NAMESPACE_DEVICE_POLICY_MANAGER,
+                ENABLE_WORK_PROFILE_TELEPHONY_FLAG, DEFAULT_WORK_PROFILE_TELEPHONY_FLAG);
+    }
+
+    private boolean isWorkProfileTelephonySubscriptionManagerFlagEnabled() {
+        final long ident = mInjector.binderClearCallingIdentity();
+        try {
+            return DeviceConfig.getBoolean(NAMESPACE_TELEPHONY, ENABLE_WORK_PROFILE_TELEPHONY_FLAG,
+                    false);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
     }
 
     @Override
@@ -22820,7 +22836,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy() {
-        if (isWorkProfileTelephonyFlagEnabled()) {
+        if (isWorkProfileTelephonyEnabled()) {
             synchronized (getLockObject()) {
                 ActiveAdmin admin = getProfileOwnerOfOrganizationOwnedDeviceLocked();
                 if (admin != null && admin.mManagedSubscriptionsPolicy != null) {
@@ -22834,7 +22850,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setManagedSubscriptionsPolicy(ManagedSubscriptionsPolicy policy) {
-        if (!isWorkProfileTelephonyFlagEnabled()) {
+        if (!isWorkProfileTelephonyEnabled()) {
             throw new UnsupportedOperationException("This api is not enabled");
         }
         CallerIdentity caller = getCallerIdentity();

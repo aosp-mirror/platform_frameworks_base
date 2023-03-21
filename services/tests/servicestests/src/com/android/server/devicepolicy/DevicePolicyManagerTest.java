@@ -5002,6 +5002,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
                 FLAG_ENABLE_WORK_PROFILE_TELEPHONY, "true", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_TELEPHONY,
+                FLAG_ENABLE_WORK_PROFILE_TELEPHONY, "true", false);
         // Even if the caller is the managed profile, the current user is the user 0
         when(getServices().iactivityManager.getCurrentUser())
                 .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
@@ -5063,6 +5065,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, UserHandle.USER_SYSTEM);
         verify(getServices().subscriptionManager).setSubscriptionUserHandle(0, null);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
+                FLAG_ENABLE_WORK_PROFILE_TELEPHONY, "false", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_TELEPHONY,
                 FLAG_ENABLE_WORK_PROFILE_TELEPHONY, "false", false);
     }
 
