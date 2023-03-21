@@ -27,6 +27,10 @@
     <color name="tv_pip_menu_focus_border">#E8EAED</color>
     <color name="tv_pip_menu_dim_layer">#990E0E0F</color>
     <color name="tv_pip_menu_background">#1E232C</color>
+    <!-- Normally, the arrow color would be the same as the focus border color. But due to
+        optical illusion that looks too dark on the screen. That's why we define a separate
+        (lighter) arrow color. -->
+    <color name="tv_pip_menu_arrow_color">#F1F3F4</color>
 
     <color name="tv_pip_edu_text">#99D2E3FC</color>
     <color name="tv_pip_edu_text_home_icon">#D2E3FC</color>
