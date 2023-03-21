@@ -37,6 +37,8 @@ import com.android.settingslib.Utils
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.log.ScreenDecorationsLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.util.asIndenting
+import java.io.PrintWriter
 import java.util.concurrent.Executor
 
 /**
@@ -415,5 +417,16 @@ class FaceScanningOverlay(
             }
             path.transform(scaleMatrix)
         }
+    }
+
+    override fun dump(pw: PrintWriter) {
+        val ipw = pw.asIndenting()
+        ipw.increaseIndent()
+        ipw.println("FaceScanningOverlay:")
+        super.dump(ipw)
+        ipw.println("rimProgress=$rimProgress")
+        ipw.println("rimRect=$rimRect")
+        ipw.println("this=$this")
+        ipw.decreaseIndent()
     }
 }

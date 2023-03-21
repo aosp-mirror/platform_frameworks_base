@@ -16,6 +16,8 @@
 
 package android.telephony.satellite;
 
+import android.compat.annotation.UnsupportedAppUsage;
+
 /**
  * A callback class for monitoring satellite modem state change events.
  *
@@ -26,5 +28,6 @@ public interface SatelliteStateCallback {
      * Called when satellite modem state changes.
      * @param state The new satellite modem state.
      */
+    @UnsupportedAppUsage
     void onSatelliteModemStateChanged(@SatelliteManager.SatelliteModemState int state);
 }

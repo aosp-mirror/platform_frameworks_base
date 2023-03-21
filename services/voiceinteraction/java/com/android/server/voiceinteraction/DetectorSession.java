@@ -26,6 +26,7 @@ import static android.service.voice.HotwordDetectionService.ENABLE_PROXIMITY_RES
 import static android.service.voice.HotwordDetectionService.INITIALIZATION_STATUS_SUCCESS;
 import static android.service.voice.HotwordDetectionService.INITIALIZATION_STATUS_UNKNOWN;
 import static android.service.voice.HotwordDetectionService.KEY_INITIALIZATION_STATUS;
+import static android.service.voice.HotwordDetectionServiceFailure.ERROR_CODE_COPY_AUDIO_DATA_FAILURE;
 
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_ERROR;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_SUCCESS;
@@ -68,7 +69,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
-import android.service.voice.DetectorFailure;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetectionServiceFailure;
@@ -76,6 +76,7 @@ import android.service.voice.HotwordDetector;
 import android.service.voice.HotwordRejectedResult;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
+import android.service.voice.VisualQueryDetectionServiceFailure;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;
@@ -124,17 +125,12 @@ abstract class DetectorSession {
     private static final String HOTWORD_DETECTION_OP_MESSAGE =
             "Providing hotword detection result to VoiceInteractionService";
 
-    // The error codes are used for onError callback
-    static final int HOTWORD_DETECTION_SERVICE_DIED =
-            HotwordDetectionServiceFailure.ERROR_CODE_BINDING_DIED;
-    static final int CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION =
+    // The error codes are used for onHotwordDetectionServiceFailure callback.
+    // Define these due to lines longer than 100 characters.
+    static final int ONDETECTED_GOT_SECURITY_EXCEPTION =
             HotwordDetectionServiceFailure.ERROR_CODE_ON_DETECTED_SECURITY_EXCEPTION;
-    static final int CALLBACK_DETECT_TIMEOUT =
-            HotwordDetectionServiceFailure.ERROR_CODE_DETECT_TIMEOUT;
-    static final int CALLBACK_ONDETECTED_STREAM_COPY_ERROR =
+    static final int ONDETECTED_STREAM_COPY_ERROR =
             HotwordDetectionServiceFailure.ERROR_CODE_ON_DETECTED_STREAM_COPY_FAILURE;
-    static final int CALLBACK_COPY_AUDIO_DATA_FAILURE =
-            HotwordDetectionServiceFailure.ERROR_CODE_COPY_AUDIO_DATA_FAILURE;
 
     // TODO: These constants need to be refined.
     private static final long MAX_UPDATE_TIMEOUT_MILLIS = 30000;
@@ -449,11 +445,11 @@ abstract class DetectorSession {
                 Slog.w(TAG, "Failed supplying audio data to validator", e);
 
                 try {
-                    callback.onError(
-                            new HotwordDetectionServiceFailure(CALLBACK_COPY_AUDIO_DATA_FAILURE,
+                    callback.onHotwordDetectionServiceFailure(
+                            new HotwordDetectionServiceFailure(ERROR_CODE_COPY_AUDIO_DATA_FAILURE,
                                     "Copy audio data failure for external source detection."));
                 } catch (RemoteException ex) {
-                    Slog.w(TAG, "Failed to report onError status: " + ex);
+                    Slog.w(TAG, "Failed to report onHotwordDetectionServiceFailure status: " + ex);
                     if (getDetectorType() != HotwordDetector.DETECTOR_TYPE_VISUAL_QUERY_DETECTOR) {
                         HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                                 HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION,
@@ -538,10 +534,11 @@ abstract class DetectorSession {
                                                     EXTERNAL_SOURCE_DETECT_SECURITY_EXCEPTION,
                                                     mVoiceInteractionServiceUid);
                                             try {
-                                                callback.onError(new HotwordDetectionServiceFailure(
-                                                        CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION,
-                                                        "Security exception occurs in #onDetected"
-                                                                + " method."));
+                                                callback.onHotwordDetectionServiceFailure(
+                                                        new HotwordDetectionServiceFailure(
+                                                                ONDETECTED_GOT_SECURITY_EXCEPTION,
+                                                                "Security exception occurs in "
+                                                                        + "#onDetected method"));
                                             } catch (RemoteException e1) {
                                                 notifyOnDetectorRemoteException();
                                                 throw e1;
@@ -557,9 +554,10 @@ abstract class DetectorSession {
                                                     + "IOException", e);
                                             // TODO: Write event
                                             try {
-                                                callback.onError(new HotwordDetectionServiceFailure(
-                                                        CALLBACK_ONDETECTED_STREAM_COPY_ERROR,
-                                                        "Copy audio stream failure."));
+                                                callback.onHotwordDetectionServiceFailure(
+                                                        new HotwordDetectionServiceFailure(
+                                                                ONDETECTED_STREAM_COPY_ERROR,
+                                                                "Copy audio stream failure."));
                                             } catch (RemoteException e1) {
                                                 notifyOnDetectorRemoteException();
                                                 throw e1;
@@ -624,17 +622,40 @@ abstract class DetectorSession {
         mRemoteDetectionService = remoteDetectionService;
     }
 
-    void reportErrorLocked(@NonNull DetectorFailure detectorFailure) {
+    private void reportErrorGetRemoteException() {
+        if (getDetectorType() != HotwordDetector.DETECTOR_TYPE_VISUAL_QUERY_DETECTOR) {
+            HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
+                    HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION,
+                    mVoiceInteractionServiceUid);
+        }
+        notifyOnDetectorRemoteException();
+    }
+
+    void reportErrorLocked(@NonNull HotwordDetectionServiceFailure hotwordDetectionServiceFailure) {
         try {
-            mCallback.onDetectionFailure(detectorFailure);
+            mCallback.onHotwordDetectionServiceFailure(hotwordDetectionServiceFailure);
         } catch (RemoteException e) {
-            Slog.w(TAG, "Failed to report onError status: " + e);
-            if (getDetectorType() != HotwordDetector.DETECTOR_TYPE_VISUAL_QUERY_DETECTOR) {
-                HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
-                        HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION,
-                        mVoiceInteractionServiceUid);
-            }
-            notifyOnDetectorRemoteException();
+            Slog.w(TAG, "Failed to call onHotwordDetectionServiceFailure: " + e);
+            reportErrorGetRemoteException();
+        }
+    }
+
+    void reportErrorLocked(
+            @NonNull VisualQueryDetectionServiceFailure visualQueryDetectionServiceFailure) {
+        try {
+            mCallback.onVisualQueryDetectionServiceFailure(visualQueryDetectionServiceFailure);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to call onVisualQueryDetectionServiceFailure: " + e);
+            reportErrorGetRemoteException();
+        }
+    }
+
+    void reportErrorLocked(@NonNull String errorMessage) {
+        try {
+            mCallback.onUnknownFailure(errorMessage);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to call onUnknownFailure: " + e);
+            reportErrorGetRemoteException();
         }
     }
 

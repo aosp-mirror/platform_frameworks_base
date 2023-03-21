@@ -381,7 +381,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mCentralSurfaces = centralSurfaces;
         mBiometricUnlockController = biometricUnlockController;
 
-        ViewGroup container = mCentralSurfaces.getBouncerContainer();
         mPrimaryBouncerCallbackInteractor.addBouncerExpansionCallback(mExpansionCallback);
         mNotificationPanelViewController = notificationPanelViewController;
         if (shadeExpansionStateManager != null) {

@@ -3884,6 +3884,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    @Override
     public boolean isAccessibilityTargetAllowed(String packageName, int uid, int userId) {
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -3907,6 +3908,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    @Override
     public boolean sendRestrictedDialogIntent(String packageName, int uid, int userId) {
         // The accessibility service is allowed. Don't show the restricted dialog.
         if (isAccessibilityTargetAllowed(packageName, uid, userId)) {

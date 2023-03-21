@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.SnapshotController.TASK_CLOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -77,6 +78,13 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         setSnapshotEnabled(snapshotEnabled);
     }
 
+    void systemReady() {
+        if (!shouldDisableSnapshots()) {
+            mService.mSnapshotController.registerTransitionStateConsumer(TASK_CLOSE,
+                    this::handleTaskClose);
+        }
+    }
+
     static PersistInfoProvider createPersistInfoProvider(WindowManagerService service,
             BaseAppSnapshotPersister.DirectoryResolver resolver) {
         final float highResTaskSnapshotScale = service.mContext.getResources().getFloat(
@@ -109,8 +117,21 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
                 enableLowResSnapshots, lowResScaleFactor, use16BitFormat);
     }
 
-    void onTransitionStarting(DisplayContent displayContent) {
-        handleClosingApps(displayContent.mClosingApps);
+    void handleTaskClose(SnapshotController.TransitionState<Task> closeTaskTransitionRecord) {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
+        mTmpTasks.clear();
+        final ArraySet<Task> tasks = closeTaskTransitionRecord.getParticipant(false /* open */);
+        if (mService.mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+            mTmpTasks.addAll(tasks);
+        } else {
+            for (Task task : tasks) {
+                getClosingTasksInner(task, mTmpTasks);
+            }
+        }
+        snapshotTasks(mTmpTasks);
+        mSkipClosingAppSnapshotTasks.clear();
     }
 
     /**
@@ -189,18 +210,7 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
      * children, which should be ignored.
      */
     @Nullable protected ActivityRecord findAppTokenForSnapshot(Task task) {
-        return task.getActivity((r) -> {
-            if (r == null || !r.isSurfaceShowing() || r.findMainWindow() == null) {
-                return false;
-            }
-            return r.forAllWindows(
-                    // Ensure at least one window for the top app is visible before attempting to
-                    // take a screenshot. Visible here means that the WSA surface is shown and has
-                    // an alpha greater than 0.
-                    ws -> ws.mWinAnimator != null && ws.mWinAnimator.getShown()
-                            && ws.mWinAnimator.mLastAlpha > 0f, true  /* traverseTopToBottom */);
-
-        });
+        return task.getActivity(ActivityRecord::canCaptureSnapshot);
     }
 
 
@@ -272,32 +282,22 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
             final Task task = activity.getTask();
             if (task == null) continue;
 
-            // Since RecentsAnimation will handle task snapshot while switching apps with the
-            // best capture timing (e.g. IME window capture),
-            // No need additional task capture while task is controlled by RecentsAnimation.
-            if (isAnimatingByRecents(task)) {
-                mSkipClosingAppSnapshotTasks.add(task);
-            }
-            // If the task of the app is not visible anymore, it means no other app in that task
-            // is opening. Thus, the task is closing.
-            if (!task.isVisible() && !mSkipClosingAppSnapshotTasks.contains(task)) {
-                outClosingTasks.add(task);
-            }
+            getClosingTasksInner(task, outClosingTasks);
         }
     }
 
-    /**
-     * Called when an {@link ActivityRecord} has been removed.
-     */
-    void onAppRemoved(ActivityRecord activity) {
-        mCache.onAppRemoved(activity);
-    }
-
-    /**
-     * Called when the process of an {@link ActivityRecord} has died.
-     */
-    void onAppDied(ActivityRecord activity) {
-        mCache.onAppDied(activity);
+    void getClosingTasksInner(Task task, ArraySet<Task> outClosingTasks) {
+        // Since RecentsAnimation will handle task snapshot while switching apps with the
+        // best capture timing (e.g. IME window capture),
+        // No need additional task capture while task is controlled by RecentsAnimation.
+        if (isAnimatingByRecents(task)) {
+            mSkipClosingAppSnapshotTasks.add(task);
+        }
+        // If the task of the app is not visible anymore, it means no other app in that task
+        // is opening. Thus, the task is closing.
+        if (!task.isVisible() && !mSkipClosingAppSnapshotTasks.contains(task)) {
+            outClosingTasks.add(task);
+        }
     }
 
     void notifyTaskRemovedFromRecents(int taskId, int userId) {
@@ -360,10 +360,5 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         final boolean allowSnapshotHome = displayId == Display.DEFAULT_DISPLAY
                 && mService.mPolicy.isKeyguardSecure(mService.mCurrentUserId);
         snapshotTasks(mTmpTasks, allowSnapshotHome);
-    }
-
-    private boolean isAnimatingByRecents(@NonNull Task task) {
-        return task.isAnimatingByRecents()
-                || mService.mAtmService.getTransitionController().inRecentsTransition(task);
     }
 }

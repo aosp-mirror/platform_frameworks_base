@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textSize="@dimen/chipbar_text_size"
-            android:textColor="@android:color/system_accent2_900"
+            android:textColor="@color/chipbar_text_and_icon_color"
             android:alpha="0.0"
             />
 

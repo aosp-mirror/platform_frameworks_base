@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
-package android.service.voice;
+package com.android.systemui.multishade.shared.math
 
-parcelable UnknownFailure;
+import androidx.annotation.VisibleForTesting
+import kotlin.math.abs
+
+/** Returns `true` if this [Float] is within [epsilon] of `0`. */
+fun Float.isZero(epsilon: Float = EPSILON): Boolean {
+    return abs(this) < epsilon
+}
+
+@VisibleForTesting private const val EPSILON = 0.0001f

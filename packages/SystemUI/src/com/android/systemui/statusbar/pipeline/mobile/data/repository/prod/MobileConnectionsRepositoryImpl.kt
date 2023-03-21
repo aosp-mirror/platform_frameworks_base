@@ -129,6 +129,7 @@ constructor(
         val callback =
             object : SubscriptionManager.OnSubscriptionsChangedListener() {
                 override fun onSubscriptionsChanged() {
+                    logger.logOnSubscriptionsChanged()
                     trySend(Unit)
                 }
             }

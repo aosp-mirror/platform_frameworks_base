@@ -16,10 +16,10 @@
 
 package com.android.systemui.common.shared.model
 
-import androidx.annotation.AttrRes
+import androidx.annotation.ColorRes
 
 /** Models an icon with a specific tint. */
 data class TintedIcon(
     val icon: Icon,
-    @AttrRes val tintAttr: Int?,
+    @ColorRes val tint: Int?,
 )

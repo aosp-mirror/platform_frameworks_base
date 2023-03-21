@@ -489,14 +489,6 @@ public class AppStandbyController
             | PackageManager.MATCH_DIRECT_BOOT_AWARE
             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
-    /**
-     * Whether we should allow apps into the
-     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED} bucket or not.
-     * If false, any attempts to put an app into the bucket will put the app into the
-     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RARE} bucket instead.
-     */
-    private boolean mAllowRestrictedBucket;
-
     private volatile boolean mAppIdleEnabled;
     private volatile boolean mIsCharging;
     private boolean mSystemServicesReady = false;
@@ -1056,13 +1048,6 @@ public class AppStandbyController
                     reason = app.lastRestrictReason;
                     if (DEBUG) {
                         Slog.d(TAG, "Bringing down to RESTRICTED due to timeout");
-                    }
-                }
-                if (newBucket == STANDBY_BUCKET_RESTRICTED && !mAllowRestrictedBucket) {
-                    newBucket = STANDBY_BUCKET_RARE;
-                    // Leave the reason alone.
-                    if (DEBUG) {
-                        Slog.d(TAG, "Bringing up from RESTRICTED to RARE due to off switch");
                     }
                 }
                 if (newBucket > minBucket) {
@@ -1689,7 +1674,7 @@ public class AppStandbyController
 
         final int reason = (REASON_MAIN_MASK & mainReason) | (REASON_SUB_MASK & restrictReason);
         final long nowElapsed = mInjector.elapsedRealtime();
-        final int bucket = mAllowRestrictedBucket ? STANDBY_BUCKET_RESTRICTED : STANDBY_BUCKET_RARE;
+        final int bucket = STANDBY_BUCKET_RESTRICTED;
         setAppStandbyBucket(packageName, userId, bucket, reason, nowElapsed, false);
     }
 
@@ -1792,9 +1777,6 @@ public class AppStandbyController
             if (!mInjector.isPackageInstalled(packageName, 0, userId)) {
                 Slog.e(TAG, "Tried to set bucket of uninstalled app: " + packageName);
                 return;
-            }
-            if (newBucket == STANDBY_BUCKET_RESTRICTED && !mAllowRestrictedBucket) {
-                newBucket = STANDBY_BUCKET_RARE;
             }
             AppIdleHistory.AppUsageHistory app = mAppIdleHistory.getAppUsageHistory(packageName,
                     userId, elapsedRealtime);
@@ -1921,7 +1903,6 @@ public class AppStandbyController
                                 + " due to min timeout");
                     }
                 } else if (newBucket == STANDBY_BUCKET_RARE
-                        && mAllowRestrictedBucket
                         && getBucketForLocked(packageName, userId, elapsedRealtime)
                         == STANDBY_BUCKET_RESTRICTED) {
                     // Prediction doesn't think the app will be used anytime soon and
@@ -2529,8 +2510,6 @@ public class AppStandbyController
 
         pw.println();
         pw.print("mAppIdleEnabled="); pw.print(mAppIdleEnabled);
-        pw.print(" mAllowRestrictedBucket=");
-        pw.print(mAllowRestrictedBucket);
         pw.print(" mIsCharging=");
         pw.print(mIsCharging);
         pw.println();
@@ -2709,12 +2688,6 @@ public class AppStandbyController
                 // Should not happen.
                 Slog.wtf(TAG, "Failed to get power whitelist", e);
             }
-        }
-
-        boolean isRestrictedBucketEnabled() {
-            return Global.getInt(mContext.getContentResolver(),
-                    Global.ENABLE_RESTRICTED_BUCKET,
-                    Global.DEFAULT_ENABLE_RESTRICTED_BUCKET) == 1;
         }
 
         File getDataSystemDirectory() {
@@ -3079,11 +3052,6 @@ public class AppStandbyController
             // APP_STANDBY_ENABLED is a SystemApi that some apps may be watching, so best to
             // leave it in Settings.
             cr.registerContentObserver(Global.getUriFor(Global.APP_STANDBY_ENABLED), false, this);
-            // Leave ENABLE_RESTRICTED_BUCKET as a user-controlled setting which will stay in
-            // Settings.
-            // TODO: make setting user-specific
-            cr.registerContentObserver(Global.getUriFor(Global.ENABLE_RESTRICTED_BUCKET),
-                    false, this);
             // ADAPTIVE_BATTERY_MANAGEMENT_ENABLED is a user setting, so it has to stay in Settings.
             cr.registerContentObserver(Global.getUriFor(Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED),
                     false, this);
@@ -3282,10 +3250,6 @@ public class AppStandbyController
                 Slog.d(TAG,
                         "adaptivebat=" + Global.getString(mContext.getContentResolver(),
                                 Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED));
-            }
-
-            synchronized (mAppIdleLock) {
-                mAllowRestrictedBucket = mInjector.isRestrictedBucketEnabled();
             }
 
             setAppIdleEnabled(mInjector.isAppIdleEnabled());

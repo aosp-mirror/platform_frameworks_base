@@ -94,7 +94,11 @@ public interface NotificationInterruptStateProvider {
         /**
          * No conditions blocking FSI launch.
          */
-        FSI_EXPECTED_NOT_TO_HUN(true);
+        FSI_EXPECTED_NOT_TO_HUN(true),
+        /**
+         * The notification is coming from a suspended packages, so FSI is suppressed.
+         */
+        NO_FSI_SUSPENDED(false);
 
         public final boolean shouldLaunch;
 

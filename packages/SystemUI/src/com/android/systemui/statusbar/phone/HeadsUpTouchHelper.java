@@ -21,7 +21,6 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -31,21 +30,21 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
  */
 public class HeadsUpTouchHelper implements Gefingerpoken {
 
-    private HeadsUpManagerPhone mHeadsUpManager;
-    private Callback mCallback;
+    private final HeadsUpManagerPhone mHeadsUpManager;
+    private final Callback mCallback;
     private int mTrackingPointer;
-    private float mTouchSlop;
+    private final float mTouchSlop;
     private float mInitialTouchX;
     private float mInitialTouchY;
     private boolean mTouchingHeadsUpView;
     private boolean mTrackingHeadsUp;
     private boolean mCollapseSnoozes;
-    private NotificationPanelViewController mPanel;
+    private final HeadsUpNotificationViewController mPanel;
     private ExpandableNotificationRow mPickedChild;
 
     public HeadsUpTouchHelper(HeadsUpManagerPhone headsUpManager,
             Callback callback,
-            NotificationPanelViewController notificationPanelView) {
+            HeadsUpNotificationViewController notificationPanelView) {
         mHeadsUpManager = headsUpManager;
         mCallback = callback;
         mPanel = notificationPanelView;
@@ -116,7 +115,7 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                     int startHeight = (int) (mPickedChild.getActualHeight()
                                                 + mPickedChild.getTranslationY());
                     mPanel.setHeadsUpDraggingStartingHeight(startHeight);
-                    mPanel.startExpandMotion(x, y, true /* startTracking */, startHeight);
+                    mPanel.startExpand(x, y, true /* startTracking */, startHeight);
                     // This call needs to be after the expansion start otherwise we will get a
                     // flicker of one frame as it's not expanded yet.
                     mHeadsUpManager.unpinAll(true);
@@ -180,5 +179,20 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
         ExpandableView getChildAtRawPosition(float touchX, float touchY);
         boolean isExpanded();
         Context getContext();
+    }
+
+    /** The controller for a view that houses heads up notifications. */
+    public interface HeadsUpNotificationViewController {
+        /** Called when a HUN is dragged to indicate the starting height for shade motion. */
+        void setHeadsUpDraggingStartingHeight(int startHeight);
+
+        /** Sets notification that is being expanded. */
+        void setTrackedHeadsUp(ExpandableNotificationRow expandableNotificationRow);
+
+        /** Called when a MotionEvent is about to trigger expansion. */
+        void startExpand(float newX, float newY, boolean startTracking, float expandedHeight);
+
+        /** Clear any effects that were added for the expansion. */
+        void clearNotificationEffects();
     }
 }

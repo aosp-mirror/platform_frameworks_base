@@ -23,6 +23,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.LegacyAlternateBouncer
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.SystemClock
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.Flow
 class AlternateBouncerInteractor
 @Inject
 constructor(
+    private val statusBarStateController: StatusBarStateController,
     private val keyguardStateController: KeyguardStateController,
     private val bouncerRepository: KeyguardBouncerRepository,
     private val biometricSettingsRepository: BiometricSettingsRepository,
@@ -48,6 +50,17 @@ constructor(
 
     var receivedDownTouch = false
     val isVisible: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
+
+    private val keyguardStateControllerCallback: KeyguardStateController.Callback =
+        object : KeyguardStateController.Callback {
+            override fun onUnlockedChanged() {
+                maybeHide()
+            }
+        }
+
+    init {
+        keyguardStateController.addCallback(keyguardStateControllerCallback)
+    }
 
     /**
      * Sets the correct bouncer states to show the alternate bouncer if it can show.
@@ -109,7 +122,8 @@ constructor(
                 biometricSettingsRepository.isStrongBiometricAllowed.value &&
                 biometricSettingsRepository.isFingerprintEnabledByDevicePolicy.value &&
                 !deviceEntryFingerprintAuthRepository.isLockedOut.value &&
-                !keyguardStateController.isUnlocked
+                !keyguardStateController.isUnlocked &&
+                !statusBarStateController.isDozing
         } else {
             legacyAlternateBouncer != null &&
                 keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(true)
@@ -126,6 +140,12 @@ constructor(
                 MIN_VISIBILITY_DURATION_UNTIL_TOUCHES_DISMISS_ALTERNATE_BOUNCER_MS
         } else {
             systemClock.uptimeMillis() - legacyAlternateBouncerVisibleTime > 200
+        }
+    }
+
+    private fun maybeHide() {
+        if (isVisibleState() && !canShowAlternateBouncerForFingerprint()) {
+            hide()
         }
     }
 

@@ -685,7 +685,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         allowSwipeToDismiss: Boolean = false,
     ): ChipbarInfo {
         return ChipbarInfo(
-            TintedIcon(startIcon, tintAttr = null),
+            TintedIcon(startIcon, tint = null),
             text,
             endItem,
             vibrationEffect,

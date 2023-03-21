@@ -19,12 +19,13 @@ package com.android.systemui.media.taptotransfer.common
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import androidx.annotation.AttrRes
+import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import com.android.systemui.R
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.TintedIcon
+import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo.Companion.DEFAULT_ICON_TINT
 
 /** Utility methods for media tap-to-transfer. */
 class MediaTttUtils {
@@ -78,7 +79,7 @@ class MediaTttUtils {
                     return IconInfo(
                         contentDescription,
                         MediaTttIcon.Loaded(packageManager.getApplicationIcon(appPackageName)),
-                        tintAttr = null,
+                        tint = null,
                         isAppIcon = true
                     )
                 } catch (e: PackageManager.NameNotFoundException) {
@@ -96,7 +97,7 @@ class MediaTttUtils {
                     )
                 },
                 MediaTttIcon.Resource(R.drawable.ic_cast),
-                tintAttr = android.R.attr.textColorPrimary,
+                tint = DEFAULT_ICON_TINT,
                 isAppIcon = false
             )
         }
@@ -107,7 +108,7 @@ class MediaTttUtils {
 data class IconInfo(
     val contentDescription: ContentDescription,
     val icon: MediaTttIcon,
-    @AttrRes val tintAttr: Int?,
+    @ColorRes val tint: Int?,
     /**
      * True if [drawable] is the app's icon, and false if [drawable] is some generic default icon.
      */
@@ -120,7 +121,7 @@ data class IconInfo(
                 is MediaTttIcon.Loaded -> Icon.Loaded(icon.drawable, contentDescription)
                 is MediaTttIcon.Resource -> Icon.Resource(icon.res, contentDescription)
             }
-        return TintedIcon(iconOutput, tintAttr)
+        return TintedIcon(iconOutput, tint)
     }
 }
 

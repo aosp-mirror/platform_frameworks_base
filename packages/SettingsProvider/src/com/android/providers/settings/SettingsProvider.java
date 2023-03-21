@@ -2831,7 +2831,7 @@ public class SettingsProvider extends ContentProvider {
 
         public SettingsRegistry() {
             mHandler = new MyHandler(getContext().getMainLooper());
-            mGenerationRegistry = new GenerationRegistry(mLock);
+            mGenerationRegistry = new GenerationRegistry(mLock, UserManager.getMaxSupportedUsers());
             mBackupManager = new BackupManager(getContext());
         }
 

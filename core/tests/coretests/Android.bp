@@ -20,6 +20,7 @@ android_test {
         "BinderProxyCountingTestService/src/**/*.java",
         "BinderDeathRecipientHelperApp/src/**/*.java",
         "aidl/**/I*.aidl",
+        ":FrameworksCoreTestDoubles-sources",
     ],
 
     aidl: {

@@ -294,6 +294,13 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    public void userChip_defaultVisibilityIsGone() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        assertEquals(View.GONE, getUserChipView().getVisibility());
+    }
+
+    @Test
     public void disable_noOngoingCall_chipHidden() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -327,6 +334,19 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY,
                 StatusBarManager.DISABLE_NOTIFICATION_ICONS, 0, false);
+
+        assertEquals(View.GONE,
+                mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
+    }
+
+    @Test
+    public void disable_hasOngoingCallButAlsoHun_chipHidden() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        when(mOngoingCallController.hasOngoingCall()).thenReturn(true);
+        when(mHeadsUpAppearanceController.shouldBeVisible()).thenReturn(true);
+
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
         assertEquals(View.GONE,
                 mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
@@ -556,6 +576,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         mFragments.dispatchResume();
         processAllMessages();
         return (CollapsedStatusBarFragment) mFragment;
+    }
+
+    private View getUserChipView() {
+        return mFragment.getView().findViewById(R.id.user_switcher_container);
     }
 
     private View getClockView() {

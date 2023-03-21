@@ -507,11 +507,29 @@ class StylusManagerTest : SysuiTestCase() {
         stylusManager.onBatteryStateChanged(STYLUS_DEVICE_ID, 1, batteryState)
 
         verify(uiEventLogger, times(1))
-            .logWithInstanceId(
+            .logWithInstanceIdAndPosition(
                 StylusUiEvent.USI_STYLUS_BATTERY_PRESENCE_FIRST_DETECTED,
                 0,
                 null,
-                InstanceId.fakeInstanceId(instanceIdSequenceFake.lastInstanceId)
+                InstanceId.fakeInstanceId(instanceIdSequenceFake.lastInstanceId),
+                0,
+            )
+    }
+
+    @Test
+    fun onBatteryStateChanged_batteryPresent_btStylusPresent_logsSessionStart() {
+        whenever(batteryState.isPresent).thenReturn(true)
+        stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
+
+        stylusManager.onBatteryStateChanged(STYLUS_DEVICE_ID, 1, batteryState)
+
+        verify(uiEventLogger, times(1))
+            .logWithInstanceIdAndPosition(
+                StylusUiEvent.USI_STYLUS_BATTERY_PRESENCE_FIRST_DETECTED,
+                0,
+                null,
+                InstanceId.fakeInstanceId(instanceIdSequenceFake.lastInstanceId),
+                1,
             )
     }
 
@@ -545,19 +563,21 @@ class StylusManagerTest : SysuiTestCase() {
         stylusManager.onBatteryStateChanged(STYLUS_DEVICE_ID, 1, batteryState)
 
         verify(uiEventLogger, times(1))
-            .logWithInstanceId(
+            .logWithInstanceIdAndPosition(
                 StylusUiEvent.USI_STYLUS_BATTERY_PRESENCE_FIRST_DETECTED,
                 0,
                 null,
-                instanceId
+                instanceId,
+                0
             )
 
         verify(uiEventLogger, times(1))
-            .logWithInstanceId(
+            .logWithInstanceIdAndPosition(
                 StylusUiEvent.USI_STYLUS_BATTERY_PRESENCE_REMOVED,
                 0,
                 null,
-                instanceId
+                instanceId,
+                0
             )
     }
 
