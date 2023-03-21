@@ -376,7 +376,7 @@ android_app {
     name: "SystemUIRobo-stub",
     defaults: [
         "platform_app_defaults",
-        "SystemUI_app_defaults",
+        "SystemUI_optimized_defaults",
         "SystemUI_compose_defaults",
     ],
     manifest: "tests/AndroidManifest-base.xml",
@@ -443,7 +443,7 @@ soong_config_module_type {
 }
 
 systemui_optimized_java_defaults {
-    name: "SystemUI_app_defaults",
+    name: "SystemUI_optimized_defaults",
     soong_config_variables: {
         SYSTEMUI_OPTIMIZE_JAVA: {
             optimize: {
@@ -452,12 +452,10 @@ systemui_optimized_java_defaults {
                 shrink: true,
                 shrink_resources: true,
                 proguard_compatibility: false,
-                proguard_flags_files: ["proguard.flags"],
             },
             conditions_default: {
                 optimize: {
                     proguard_compatibility: false,
-                    proguard_flags_files: ["proguard.flags"],
                 },
             },
         },
@@ -468,7 +466,7 @@ android_app {
     name: "SystemUI",
     defaults: [
         "platform_app_defaults",
-        "SystemUI_app_defaults",
+        "SystemUI_optimized_defaults",
     ],
     static_libs: [
         "SystemUI-core",
@@ -483,6 +481,9 @@ android_app {
     kotlincflags: ["-Xjvm-default=enable"],
 
     dxflags: ["--multi-dex"],
+    optimize: {
+        proguard_flags_files: ["proguard.flags"],
+    },
     required: [
         "privapp_whitelist_com.android.systemui",
         "wmshell.protolog.json.gz",
