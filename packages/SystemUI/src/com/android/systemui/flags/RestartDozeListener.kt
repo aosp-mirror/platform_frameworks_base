@@ -20,7 +20,9 @@ import android.os.PowerManager
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -33,6 +35,7 @@ constructor(
     private val statusBarStateController: StatusBarStateController,
     private val powerManager: PowerManager,
     private val systemClock: SystemClock,
+    @Background val bgExecutor: DelayableExecutor,
 ) {
 
     companion object {
@@ -44,7 +47,7 @@ constructor(
     val listener =
         object : StatusBarStateController.StateListener {
             override fun onDreamingChanged(isDreaming: Boolean) {
-                settings.putBool(RESTART_NAP_KEY, isDreaming)
+                storeSleepState(isDreaming)
             }
         }
 
@@ -62,11 +65,19 @@ constructor(
     }
 
     fun maybeRestartSleep() {
-        if (settings.getBool(RESTART_NAP_KEY, false)) {
-            Log.d("RestartDozeListener", "Restarting sleep state")
-            powerManager.wakeUp(systemClock.uptimeMillis())
-            powerManager.goToSleep(systemClock.uptimeMillis())
-            settings.putBool(RESTART_NAP_KEY, false)
-        }
+        bgExecutor.executeDelayed(
+            {
+                if (settings.getBool(RESTART_NAP_KEY, false)) {
+                    Log.d("RestartDozeListener", "Restarting sleep state")
+                    powerManager.wakeUp(systemClock.uptimeMillis())
+                    powerManager.goToSleep(systemClock.uptimeMillis())
+                }
+            },
+            1000
+        )
+    }
+
+    private fun storeSleepState(sleeping: Boolean) {
+        bgExecutor.execute { settings.putBool(RESTART_NAP_KEY, sleeping) }
     }
 }
