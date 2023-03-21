@@ -18,7 +18,7 @@ package com.android.systemui.navigationbar.gestural;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 
 import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
-import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadMotionEvent;
+import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadThreeFingerSwipe;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -244,7 +244,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private boolean mIsBackGestureAllowed;
     private boolean mGestureBlockingActivityRunning;
     private boolean mIsNewBackAffordanceEnabled;
-    private boolean mIsTrackpadGestureBackEnabled;
+    private boolean mIsTrackpadGestureFeaturesEnabled;
     private boolean mIsButtonForceVisible;
 
     private InputMonitor mInputMonitor;
@@ -590,7 +590,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
             // Add a nav bar panel window
             mIsNewBackAffordanceEnabled = mFeatureFlags.isEnabled(Flags.NEW_BACK_AFFORDANCE);
-            mIsTrackpadGestureBackEnabled = mFeatureFlags.isEnabled(
+            mIsTrackpadGestureFeaturesEnabled = mFeatureFlags.isEnabled(
                     Flags.TRACKPAD_GESTURE_FEATURES);
             resetEdgeBackPlugin();
             mPluginManager.addPluginListener(
@@ -883,7 +883,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     }
 
     private void onMotionEvent(MotionEvent ev) {
-        boolean isTrackpadEvent = isTrackpadMotionEvent(mIsTrackpadGestureBackEnabled, ev);
+        boolean isTrackpadEvent = isTrackpadThreeFingerSwipe(mIsTrackpadGestureFeaturesEnabled, ev);
         int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
             if (DEBUG_MISSING_GESTURE) {
