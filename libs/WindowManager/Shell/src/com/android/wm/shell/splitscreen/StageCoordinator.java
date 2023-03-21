@@ -373,56 +373,43 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return STAGE_TYPE_UNDEFINED;
     }
 
-    boolean moveToStage(ActivityManager.RunningTaskInfo task, @StageType int stageType,
-            @SplitPosition int stagePosition, WindowContainerTransaction wct) {
+    boolean moveToStage(ActivityManager.RunningTaskInfo task, @SplitPosition int stagePosition,
+            WindowContainerTransaction wct) {
         StageTaskListener targetStage;
         int sideStagePosition;
-        if (stageType == STAGE_TYPE_MAIN) {
-            targetStage = mMainStage;
-            sideStagePosition = reverseSplitPosition(stagePosition);
-        } else if (stageType == STAGE_TYPE_SIDE) {
+        if (isSplitScreenVisible()) {
+            // If the split screen is foreground, retrieves target stage based on position.
+            targetStage = stagePosition == mSideStagePosition ? mSideStage : mMainStage;
+            sideStagePosition = mSideStagePosition;
+        } else {
             targetStage = mSideStage;
             sideStagePosition = stagePosition;
-        } else {
-            if (isSplitScreenVisible()) {
-                // If the split screen is activated, retrieves target stage based on position.
-                targetStage = stagePosition == mSideStagePosition ? mSideStage : mMainStage;
-                sideStagePosition = mSideStagePosition;
-            } else {
-                // Exit split if it running background.
-                exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RECREATE_SPLIT);
-
-                targetStage = mSideStage;
-                sideStagePosition = stagePosition;
-            }
         }
 
         if (!isSplitActive()) {
-            // prevent the fling divider to center transitioni if split screen didn't active.
-            mIsDropEntering = true;
+            mSplitLayout.init();
+            prepareEnterSplitScreen(wct, task, stagePosition);
+            mSyncQueue.queue(wct);
+            mSyncQueue.runInSync(t -> {
+                updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
+            });
+        } else {
+            setSideStagePosition(sideStagePosition, wct);
+            targetStage.addTask(task, wct);
+            targetStage.evictAllChildren(wct);
+            if (!isSplitScreenVisible()) {
+                final StageTaskListener anotherStage = targetStage == mMainStage
+                        ? mSideStage : mMainStage;
+                anotherStage.reparentTopTask(wct);
+                anotherStage.evictAllChildren(wct);
+                wct.reorder(mRootTaskInfo.token, true);
+            }
+            setRootForceTranslucent(false, wct);
+            mSyncQueue.queue(wct);
         }
 
-        setSideStagePosition(sideStagePosition, wct);
-        final WindowContainerTransaction evictWct = new WindowContainerTransaction();
-        targetStage.evictAllChildren(evictWct);
-
-        // Apply surface bounds before animation start.
-        SurfaceControl.Transaction startT = mTransactionPool.acquire();
-        if (startT != null) {
-            updateSurfaceBounds(mSplitLayout, startT, false /* applyResizingOffset */);
-            startT.apply();
-            mTransactionPool.release(startT);
-        }
-        // reparent the task to an invisible split root will make the activity invisible.  Reorder
-        // the root task to front to make the entering transition from pip to split smooth.
-        wct.reorder(mRootTaskInfo.token, true);
-        wct.reorder(targetStage.mRootTaskInfo.token, true);
-        targetStage.addTask(task, wct);
-
-        if (!evictWct.isEmpty()) {
-            wct.merge(evictWct, true /* transfer */);
-        }
-        mTaskOrganizer.applyTransaction(wct);
+        // Due to drag already pip task entering split by this method so need to reset flag here.
+        mIsDropEntering = false;
         return true;
     }
 
