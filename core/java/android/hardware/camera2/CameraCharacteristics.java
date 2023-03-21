@@ -651,7 +651,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @param metadataClass The subclass of CameraMetadata that you want to get the keys for.
      * @param keyClass The class of the metadata key, e.g. CaptureRequest.Key.class
      * @param filterTags An array of tags to be used for filtering
-     * @param includeSynthetic Include public syntethic tag by default.
+     * @param includeSynthetic Include public synthetic tag by default.
      *
      * @return List of keys supported by this CameraDevice for metadataClass.
      *
