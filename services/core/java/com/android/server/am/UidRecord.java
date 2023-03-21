@@ -311,6 +311,11 @@ public final class UidRecord {
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})
+    ProcessRecord getProcessRecordByIndex(int idx) {
+        return mProcRecords.valueAt(idx);
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
     ProcessRecord getProcessInPackage(String packageName) {
         for (int i = mProcRecords.size() - 1; i >= 0; i--) {
             final ProcessRecord app = mProcRecords.valueAt(i);
