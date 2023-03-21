@@ -7322,7 +7322,7 @@ public final class ActiveServices {
         if (!r.mAllowWhileInUsePermissionInFgs
                 || (r.mAllowStartForeground == REASON_DENIED)) {
             final @ReasonCode int allowWhileInUse = shouldAllowFgsWhileInUsePermissionLocked(
-                    callingPackage, callingPid, callingUid, r, backgroundStartPrivileges,
+                    callingPackage, callingPid, callingUid, r.app, backgroundStartPrivileges,
                     isBindService);
             if (!r.mAllowWhileInUsePermissionInFgs) {
                 r.mAllowWhileInUsePermissionInFgs = (allowWhileInUse != REASON_DENIED);
@@ -7349,7 +7349,7 @@ public final class ActiveServices {
             return true;
         }
         final @ReasonCode int allowWhileInUse = shouldAllowFgsWhileInUsePermissionLocked(
-                callingPackage, callingPid, callingUid, null /* serviceRecord */,
+                callingPackage, callingPid, callingUid, null /* targetProcess */,
                 BackgroundStartPrivileges.NONE, false);
         @ReasonCode int allowStartFgs = shouldAllowFgsStartForegroundNoBindingCheckLocked(
                 allowWhileInUse, callingPid, callingUid, callingPackage, null /* targetService */,
@@ -7366,13 +7366,14 @@ public final class ActiveServices {
     /**
      * Should allow while-in-use permissions in FGS or not.
      * A typical BG started FGS is not allowed to have while-in-use permissions.
+     *
      * @param callingPackage caller app's package name.
-     * @param callingUid caller app's uid.
-     * @param targetService the service to start.
+     * @param callingUid     caller app's uid.
+     * @param targetProcess  the process of the service to start.
      * @return {@link ReasonCode}
      */
     private @ReasonCode int shouldAllowFgsWhileInUsePermissionLocked(String callingPackage,
-            int callingPid, int callingUid, @Nullable ServiceRecord targetService,
+            int callingPid, int callingUid, @Nullable ProcessRecord targetProcess,
             BackgroundStartPrivileges backgroundStartPrivileges, boolean isBindService) {
         int ret = REASON_DENIED;
 
@@ -7440,8 +7441,8 @@ public final class ActiveServices {
         }
 
         if (ret == REASON_DENIED) {
-            if (targetService != null && targetService.app != null) {
-                ActiveInstrumentation instr = targetService.app.getActiveInstrumentation();
+            if (targetProcess != null) {
+                ActiveInstrumentation instr = targetProcess.getActiveInstrumentation();
                 if (instr != null && instr.mHasBackgroundActivityStartsPermission) {
                     ret = REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION;
                 }
@@ -7526,7 +7527,7 @@ public final class ActiveServices {
                                 final @ReasonCode int allowWhileInUse2 =
                                         shouldAllowFgsWhileInUsePermissionLocked(
                                                 clientPackageName,
-                                                clientPid, clientUid, null /* serviceRecord */,
+                                                clientPid, clientUid, null /* targetProcess */,
                                                 BackgroundStartPrivileges.NONE, false);
                                 final @ReasonCode int allowStartFgs =
                                         shouldAllowFgsStartForegroundNoBindingCheckLocked(
@@ -7946,9 +7947,16 @@ public final class ActiveServices {
     boolean canAllowWhileInUsePermissionInFgsLocked(int callingPid, int callingUid,
             String callingPackage) {
         return shouldAllowFgsWhileInUsePermissionLocked(callingPackage, callingPid, callingUid,
-                /* targetService */ null,
+                /* targetProcess */ null,
                 BackgroundStartPrivileges.NONE, false)
                 != REASON_DENIED;
+    }
+
+    boolean canAllowWhileInUsePermissionInFgsLocked(int callingPid, int callingUid,
+            String callingPackage, @Nullable ProcessRecord targetProcess,
+            @NonNull BackgroundStartPrivileges backgroundStartPrivileges) {
+        return shouldAllowFgsWhileInUsePermissionLocked(callingPackage, callingPid, callingUid,
+                targetProcess, backgroundStartPrivileges, false) != REASON_DENIED;
     }
 
     /**
