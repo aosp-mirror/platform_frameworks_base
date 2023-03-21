@@ -1692,7 +1692,9 @@ public class AudioService extends IAudioService.Stub
         mSpatializerHelper.reset(/* featureEnabled */ mHasSpatializerEffect);
 
         // Restore rotation information.
-        RotationHelper.forceUpdate();
+        if (mMonitorRotation) {
+            RotationHelper.forceUpdate();
+        }
 
         onIndicateSystemReady();
         // indicate the end of reconfiguration phase to audio HAL
