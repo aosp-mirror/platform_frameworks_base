@@ -47,6 +47,7 @@ import android.content.IntentFilter;
 import android.os.HandlerThread;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import com.android.internal.util.IndentingPrintWriter;
@@ -56,6 +57,7 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -126,6 +128,10 @@ public final class BackgroundDexOptServiceUnitTest {
 
     @Before
     public void setUp() throws Exception {
+        // These tests are only applicable to the legacy BackgroundDexOptService and cannot be run
+        // when ART Service is enabled.
+        Assume.assumeFalse(SystemProperties.getBoolean("dalvik.vm.useartservice", false));
+
         when(mInjector.getCallingUid()).thenReturn(Process.FIRST_APPLICATION_UID);
         when(mInjector.getContext()).thenReturn(mContext);
         when(mInjector.getDexOptHelper()).thenReturn(mDexOptHelper);
