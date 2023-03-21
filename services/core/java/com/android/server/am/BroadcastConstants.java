@@ -242,7 +242,7 @@ public class BroadcastConstants {
      */
     public boolean CORE_DEFER_UNTIL_ACTIVE = DEFAULT_CORE_DEFER_UNTIL_ACTIVE;
     private static final String KEY_CORE_DEFER_UNTIL_ACTIVE = "bcast_core_defer_until_active";
-    private static final boolean DEFAULT_CORE_DEFER_UNTIL_ACTIVE = true;
+    private static final boolean DEFAULT_CORE_DEFER_UNTIL_ACTIVE = false;
 
     // Settings override tracking for this instance
     private String mSettingsKey;
