@@ -109,7 +109,7 @@ internal fun CustomizedLargeTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
     TwoRowsTopAppBar(
-        title = { Title(title = title, maxLines = 2) },
+        title = { Title(title = title, maxLines = 3) },
         titleTextStyle = MaterialTheme.typography.displaySmall,
         smallTitleTextStyle = MaterialTheme.typography.titleMedium,
         titleBottomPadding = LargeTitleBottomPadding,

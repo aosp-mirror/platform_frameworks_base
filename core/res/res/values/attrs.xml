@@ -10089,4 +10089,27 @@
         <!-- Maximum width of height drawable. Drawables exceeding this size will be downsampled. -->
         <attr name="maxDrawableHeight" format="dimension"/>
     </declare-styleable>
+
+    <!-- =============================== -->
+    <!-- Credential Manager attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+
+    <!-- Contains Credential Provider related metadata. Since providers are exposed
+         as services these should live under the service.
+    -->
+    <declare-styleable name="CredentialProvider">
+        <!-- A string that is displayed to the user in the Credential Manager settings
+             screen that can be used to provide more information about a provider. For
+             longer strings (40 char) it will be truncated. If multiple services
+             show the subtitle then the string will be joined together. -->
+        <attr name="settingsSubtitle" format="string" />
+    </declare-styleable>
+
+    <!-- A list of capabilities that indicates to the OS what kinds of credentials
+             this provider supports. This list is defined in CredentialProviderService. -->
+    <declare-styleable name="CredentialProvider_Capabilities" parent="CredentialProvider">
+        <!-- An individual capability declared by the provider. -->
+        <attr name="capability" format="string" />
+    </declare-styleable>
     </resources>

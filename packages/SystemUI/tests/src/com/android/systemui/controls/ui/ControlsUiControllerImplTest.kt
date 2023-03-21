@@ -201,6 +201,56 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testSingleAppHeaderIsNotClickable() {
+        mockLayoutInflater()
+        val packageName = "pkg"
+        `when`(authorizedPanelsRepository.getAuthorizedPanels()).thenReturn(setOf(packageName))
+        val panel = SelectedItem.PanelItem("App name", ComponentName(packageName, "cls"))
+        val serviceInfo = setUpPanel(panel)
+
+        underTest.show(parent, {}, context)
+
+        val captor = argumentCaptor<ControlsListingController.ControlsListingCallback>()
+
+        verify(controlsListingController).addCallback(capture(captor))
+
+        captor.value.onServicesUpdated(listOf(serviceInfo))
+        FakeExecutor.exhaustExecutors(uiExecutor, bgExecutor)
+
+        val header: View = parent.requireViewById(R.id.controls_header)
+        assertThat(header.isClickable).isFalse()
+        assertThat(header.hasOnClickListeners()).isFalse()
+    }
+
+    @Test
+    fun testMultipleAppHeaderIsClickable() {
+        mockLayoutInflater()
+        val packageName1 = "pkg"
+        val panel1 = SelectedItem.PanelItem("App name 1", ComponentName(packageName1, "cls"))
+        val serviceInfo1 = setUpPanel(panel1)
+
+        val packageName2 = "pkg"
+        val panel2 = SelectedItem.PanelItem("App name 2", ComponentName(packageName2, "cls"))
+        val serviceInfo2 = setUpPanel(panel2)
+
+        `when`(authorizedPanelsRepository.getAuthorizedPanels())
+                .thenReturn(setOf(packageName1, packageName2))
+
+        underTest.show(parent, {}, context)
+
+        val captor = argumentCaptor<ControlsListingController.ControlsListingCallback>()
+
+        verify(controlsListingController).addCallback(capture(captor))
+
+        captor.value.onServicesUpdated(listOf(serviceInfo1, serviceInfo2))
+        FakeExecutor.exhaustExecutors(uiExecutor, bgExecutor)
+
+        val header: View = parent.requireViewById(R.id.controls_header)
+        assertThat(header.isClickable).isTrue()
+        assertThat(header.hasOnClickListeners()).isTrue()
+    }
+
+    @Test
     fun testPanelControllerStartActivityWithCorrectArguments() {
         mockLayoutInflater()
         val packageName = "pkg"

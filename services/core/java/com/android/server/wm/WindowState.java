@@ -2913,8 +2913,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             .windowForClientLocked(mSession, mClient, false);
                     Slog.i(TAG, "WIN DEATH: " + win);
                     if (win != null) {
-                        if (win.mActivityRecord != null && win.mActivityRecord.findMainWindow() == win) {
-                            mWmService.mTaskSnapshotController.onAppDied(win.mActivityRecord);
+                        if (win.mActivityRecord != null
+                                && win.mActivityRecord.findMainWindow() == win) {
+                            mWmService.mSnapshotController.onAppDied(win.mActivityRecord);
                         }
                         win.removeIfPossible();
                     } else if (mHasSurface) {

@@ -136,9 +136,8 @@ public class TileServices extends IQSService.Stub {
             mServices.remove(tile);
             mTokenMap.remove(service.getToken());
             mTiles.remove(tile.getComponent());
-            final String slot = tile.getComponent().getClassName();
-            // TileServices doesn't know how to add more than 1 icon per slot, so remove all
-            mMainHandler.post(() -> mStatusBarIconController.removeAllIconsForSlot(slot));
+            final String slot = getStatusBarIconSlotName(tile.getComponent());
+            mMainHandler.post(() -> mStatusBarIconController.removeIconForTile(slot));
         }
     }
 
@@ -312,12 +311,11 @@ public class TileServices extends IQSService.Stub {
                             ? new StatusBarIcon(userHandle, packageName, icon, 0, 0,
                                     contentDescription)
                             : null;
+                    final String slot = getStatusBarIconSlotName(componentName);
                     mMainHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            StatusBarIconController iconController = mStatusBarIconController;
-                            iconController.setIcon(componentName.getClassName(), statusIcon);
-                            iconController.setExternalIcon(componentName.getClassName());
+                            mStatusBarIconController.setIconFromTile(slot, statusIcon);
                         }
                     });
                 }
@@ -376,6 +374,12 @@ public class TileServices extends IQSService.Stub {
         }
         mCommandQueue.removeCallback(mRequestListeningCallback);
     }
+
+    /** Returns the slot name that should be used when adding or removing status bar icons. */
+    private String getStatusBarIconSlotName(ComponentName componentName) {
+        return componentName.getClassName();
+    }
+
 
     private final CommandQueue.Callbacks mRequestListeningCallback = new CommandQueue.Callbacks() {
         @Override

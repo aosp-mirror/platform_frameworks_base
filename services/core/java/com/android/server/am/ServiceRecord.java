@@ -249,6 +249,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         final String mCallingProcessName;
         final Intent intent;
         final NeededUriGrants neededGrants;
+        final @Nullable String mCallingPackageName;
         long deliveredTime;
         int deliveryCount;
         int doneExecutingCount;
@@ -258,7 +259,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
         StartItem(ServiceRecord _sr, boolean _taskRemoved, int _id,
                 Intent _intent, NeededUriGrants _neededGrants, int _callingId,
-                String callingProcessName) {
+                String callingProcessName, @Nullable String callingPackageName) {
             sr = _sr;
             taskRemoved = _taskRemoved;
             id = _id;
@@ -266,6 +267,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             neededGrants = _neededGrants;
             callingId = _callingId;
             mCallingProcessName = callingProcessName;
+            mCallingPackageName = callingPackageName;
         }
 
         UriPermissionOwner getUriPermissionsLocked() {

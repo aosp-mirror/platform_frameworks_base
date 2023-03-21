@@ -263,7 +263,8 @@ public class ContentProviderHelper {
                             PROVIDER_ACQUISITION_EVENT_REPORTED,
                             r.uid, callingUid,
                             PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
-                            PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL);
+                            PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
+                            cpi.packageName, callingPackage);
                     return holder;
                 }
 
@@ -334,7 +335,8 @@ public class ContentProviderHelper {
                                 PROVIDER_ACQUISITION_EVENT_REPORTED,
                                 cpr.proc.uid, callingUid,
                                 PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
-                                PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL);
+                                PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
+                                cpi.packageName, callingPackage);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(origId);
@@ -511,7 +513,8 @@ public class ContentProviderHelper {
                                     PROVIDER_ACQUISITION_EVENT_REPORTED,
                                     proc.uid, callingUid,
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
-                                    PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL);
+                                    PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
+                                    cpi.packageName, callingPackage);
                         } else {
                             final int packageState =
                                     ((cpr.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0)
@@ -536,7 +539,7 @@ public class ContentProviderHelper {
                                     PROVIDER_ACQUISITION_EVENT_REPORTED,
                                     proc.uid, callingUid,
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD,
-                                    packageState);
+                                    packageState, cpi.packageName, callingPackage);
                         }
                         cpr.launchingApp = proc;
                         mLaunchingProviders.add(cpr);

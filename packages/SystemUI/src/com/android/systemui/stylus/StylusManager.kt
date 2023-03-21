@@ -261,22 +261,26 @@ constructor(
     private fun trackAndLogUsiSession(deviceId: Int, batteryStateValid: Boolean) {
         // TODO(b/268618918) handle cases where an invalid battery callback from a previous stylus
         //  is sent after the actual valid callback
+        val hasBtConnection = if (inputDeviceBtSessionIdMap.isEmpty()) 0 else 1
+
         if (batteryStateValid && usiSessionId == null) {
             logDebug { "USI battery newly present, entering new USI session: $deviceId" }
             usiSessionId = instanceIdSequence.newInstanceId()
-            uiEventLogger.logWithInstanceId(
+            uiEventLogger.logWithInstanceIdAndPosition(
                 StylusUiEvent.USI_STYLUS_BATTERY_PRESENCE_FIRST_DETECTED,
                 0,
                 null,
-                usiSessionId
+                usiSessionId,
+                hasBtConnection,
             )
         } else if (!batteryStateValid && usiSessionId != null) {
             logDebug { "USI battery newly absent, exiting USI session: $deviceId" }
-            uiEventLogger.logWithInstanceId(
+            uiEventLogger.logWithInstanceIdAndPosition(
                 StylusUiEvent.USI_STYLUS_BATTERY_PRESENCE_REMOVED,
                 0,
                 null,
-                usiSessionId
+                usiSessionId,
+                hasBtConnection,
             )
             usiSessionId = null
         }

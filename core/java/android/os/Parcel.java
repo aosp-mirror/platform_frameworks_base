@@ -4499,17 +4499,28 @@ public final class Parcel {
         public void writeToParcel(Parcel out) {
             Parcel source = mSource;
             if (source != null) {
-                out.appendFrom(source, mPosition, mLength);
-            } else {
-                out.writeValue(mObject);
+                synchronized (source) {
+                    if (mSource != null) {
+                        out.appendFrom(source, mPosition, mLength);
+                        return;
+                    }
+                }
             }
+
+            out.writeValue(mObject);
         }
 
         public boolean hasFileDescriptors() {
             Parcel source = mSource;
-            return (source != null)
-                    ? source.hasFileDescriptors(mPosition, mLength)
-                    : Parcel.hasFileDescriptors(mObject);
+            if (source != null) {
+                synchronized (source) {
+                    if (mSource != null) {
+                        return source.hasFileDescriptors(mPosition, mLength);
+                    }
+                }
+            }
+
+            return Parcel.hasFileDescriptors(mObject);
         }
 
         @Override

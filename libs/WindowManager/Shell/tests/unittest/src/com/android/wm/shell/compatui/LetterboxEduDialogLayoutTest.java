@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.compatui.letterboxedu;
+package com.android.wm.shell.compatui;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -58,9 +58,8 @@ public class LetterboxEduDialogLayoutTest extends ShellTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mLayout = (LetterboxEduDialogLayout)
-                LayoutInflater.from(mContext).inflate(R.layout.letterbox_education_dialog_layout,
-                        null);
+        mLayout = (LetterboxEduDialogLayout) LayoutInflater.from(mContext)
+                .inflate(R.layout.letterbox_education_dialog_layout, null);
         mDismissButton = mLayout.findViewById(R.id.letterbox_education_dialog_dismiss_button);
         mDialogContainer = mLayout.findViewById(R.id.letterbox_education_dialog_container);
         mLayout.setDismissOnClickListener(mDismissCallback);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.compatui.letterboxedu;
+package com.android.wm.shell.compatui;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
@@ -56,7 +56,6 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.compatui.DialogAnimationController;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.After;
@@ -400,15 +399,16 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
                 false, isDocked);
     }
 
-    private LetterboxEduWindowManager createWindowManager(boolean eligible,
-            int userId, boolean isTaskbarEduShowing) {
+    private LetterboxEduWindowManager createWindowManager(boolean eligible, int userId,
+            boolean isTaskbarEduShowing) {
         return createWindowManager(eligible, userId, isTaskbarEduShowing, /* isDocked */false);
     }
 
-    private LetterboxEduWindowManager createWindowManager(boolean eligible,
-            int userId, boolean isTaskbarEduShowing, boolean isDocked) {
+    private LetterboxEduWindowManager createWindowManager(boolean eligible, int userId,
+            boolean isTaskbarEduShowing, boolean isDocked) {
         doReturn(isDocked).when(mDockStateReader).isDocked();
-        LetterboxEduWindowManager windowManager = new LetterboxEduWindowManager(mContext,
+        LetterboxEduWindowManager
+                windowManager = new LetterboxEduWindowManager(mContext,
                 createTaskInfo(eligible, userId), mSyncTransactionQueue, mTaskListener,
                 createDisplayLayout(), mTransitions, mOnDismissCallback,
                 mAnimationController, mDockStateReader);

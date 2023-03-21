@@ -87,6 +87,7 @@ constructor(
     private var isFolded: Boolean = false
     private var isUnfoldHandled: Boolean = true
     private var overlayAddReason: AddOverlayReason? = null
+    private var isTouchBlocked: Boolean = true
 
     private var currentRotation: Int = context.display!!.rotation
 
@@ -254,13 +255,39 @@ constructor(
         params.layoutInDisplayCutoutMode =
             WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
         params.fitInsetsTypes = 0
-        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+
+        val touchFlags =
+            if (isTouchBlocked) {
+                // Touchable by default, so it will block the touches
+                0
+            } else {
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            }
+        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or touchFlags
         params.setTrustedOverlay()
 
         val packageName: String = context.opPackageName
         params.packageName = packageName
 
         return params
+    }
+
+    private fun updateTouchBlockIfNeeded(progress: Float) {
+        // When unfolding unblock touches a bit earlier than the animation end as the
+        // interpolation has a long tail of very slight movement at the end which should not
+        // affect much the usage of the device
+        val shouldBlockTouches =
+            if (overlayAddReason == UNFOLD) {
+                progress < UNFOLD_BLOCK_TOUCHES_UNTIL_PROGRESS
+            } else {
+                true
+            }
+
+        if (isTouchBlocked != shouldBlockTouches) {
+            isTouchBlocked = shouldBlockTouches
+
+            traceSection("$TAG#relayoutToUpdateTouch") { root?.relayout(getLayoutParams()) }
+        }
     }
 
     private fun createLightRevealEffect(): LightRevealEffect {
@@ -289,7 +316,10 @@ constructor(
     private inner class TransitionListener : TransitionProgressListener {
 
         override fun onTransitionProgress(progress: Float) {
-            executeInBackground { scrimView?.revealAmount = calculateRevealAmount(progress) }
+            executeInBackground {
+                scrimView?.revealAmount = calculateRevealAmount(progress)
+                updateTouchBlockIfNeeded(progress)
+            }
         }
 
         override fun onTransitionFinished() {
@@ -361,5 +391,7 @@ constructor(
         // constants for revealAmount.
         const val TRANSPARENT = 1f
         const val BLACK = 0f
+
+        private const val UNFOLD_BLOCK_TOUCHES_UNTIL_PROGRESS = 0.8f
     }
 }

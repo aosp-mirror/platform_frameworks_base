@@ -5841,6 +5841,57 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testVisualDifference_sameImages() {
+        Icon large = Icon.createWithResource(mContext, 1);
+        Notification n1 = new Notification.Builder(mContext, "channel")
+                .setSmallIcon(1).setLargeIcon(large).build();
+        Notification n2 = new Notification.Builder(mContext, "channel")
+                .setSmallIcon(1).setLargeIcon(large).build();
+
+        NotificationRecord r1 = notificationToRecord(n1);
+        NotificationRecord r2 = notificationToRecord(n2);
+
+        assertThat(mService.isVisuallyInterruptive(r1, r2)).isFalse();
+    }
+
+    @Test
+    public void testVisualDifference_differentSmallImage() {
+        Icon large = Icon.createWithResource(mContext, 1);
+        Notification n1 = new Notification.Builder(mContext, "channel")
+                .setSmallIcon(1).setLargeIcon(large).build();
+        Notification n2 = new Notification.Builder(mContext, "channel")
+                .setSmallIcon(2).setLargeIcon(large).build();
+
+        NotificationRecord r1 = notificationToRecord(n1);
+        NotificationRecord r2 = notificationToRecord(n2);
+
+        assertThat(mService.isVisuallyInterruptive(r1, r2)).isTrue();
+    }
+
+    @Test
+    public void testVisualDifference_differentLargeImage() {
+        Icon large1 = Icon.createWithResource(mContext, 1);
+        Icon large2 = Icon.createWithResource(mContext, 2);
+        Notification n1 = new Notification.Builder(mContext, "channel")
+                .setSmallIcon(1).setLargeIcon(large1).build();
+        Notification n2 = new Notification.Builder(mContext, "channel")
+                .setSmallIcon(1).setLargeIcon(large2).build();
+
+        NotificationRecord r1 = notificationToRecord(n1);
+        NotificationRecord r2 = notificationToRecord(n2);
+
+        assertThat(mService.isVisuallyInterruptive(r1, r2)).isTrue();
+    }
+
+    private NotificationRecord notificationToRecord(Notification n) {
+        return new NotificationRecord(
+                mContext,
+                new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0, n,
+                        UserHandle.getUserHandleForUid(mUid), null, 0),
+                mock(NotificationChannel.class));
+    }
+
+    @Test
     public void testHideAndUnhideNotificationsOnSuspendedPackageBroadcast() {
         // post 2 notification from this package
         final NotificationRecord notif1 = generateNotificationRecord(

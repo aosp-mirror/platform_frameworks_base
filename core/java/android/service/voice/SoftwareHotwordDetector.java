@@ -30,6 +30,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
@@ -176,11 +177,16 @@ class SoftwareHotwordDetector extends AbstractDetector {
 
         /** Called when the detection fails due to an error. */
         @Override
-        public void onError(DetectorFailure detectorFailure) {
-            Slog.v(TAG, "BinderCallback#onError detectorFailure: " + detectorFailure);
+        public void onHotwordDetectionServiceFailure(
+                HotwordDetectionServiceFailure hotwordDetectionServiceFailure) {
+            Slog.v(TAG, "BinderCallback#onHotwordDetectionServiceFailure:"
+                    + hotwordDetectionServiceFailure);
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
-                mCallback.onFailure(detectorFailure != null ? detectorFailure
-                        : new UnknownFailure("Error data is null"));
+                if (hotwordDetectionServiceFailure != null) {
+                    mCallback.onFailure(hotwordDetectionServiceFailure);
+                } else {
+                    mCallback.onUnknownFailure("Error data is null");
+                }
             }));
         }
 
@@ -236,11 +242,34 @@ class SoftwareHotwordDetector extends AbstractDetector {
         }
 
         @Override
-        public void onDetectionFailure(DetectorFailure detectorFailure) throws RemoteException {
-            Slog.v(TAG, "onDetectionFailure detectorFailure: " + detectorFailure);
+        public void onHotwordDetectionServiceFailure(
+                HotwordDetectionServiceFailure hotwordDetectionServiceFailure)
+                throws RemoteException {
+            Slog.v(TAG, "onHotwordDetectionServiceFailure: " + hotwordDetectionServiceFailure);
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
-                mCallback.onFailure(detectorFailure != null ? detectorFailure
-                        : new UnknownFailure("Error data is null"));
+                if (hotwordDetectionServiceFailure != null) {
+                    mCallback.onFailure(hotwordDetectionServiceFailure);
+                } else {
+                    mCallback.onUnknownFailure("Error data is null");
+                }
+            }));
+        }
+
+        @Override
+        public void onVisualQueryDetectionServiceFailure(
+                VisualQueryDetectionServiceFailure visualQueryDetectionServiceFailure)
+                throws RemoteException {
+            // It should never be called here.
+            Slog.w(TAG, "onVisualQueryDetectionServiceFailure: "
+                    + visualQueryDetectionServiceFailure);
+        }
+
+        @Override
+        public void onUnknownFailure(String errorMessage) throws RemoteException {
+            Slog.v(TAG, "onUnknownFailure: " + errorMessage);
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                mCallback.onUnknownFailure(
+                        !TextUtils.isEmpty(errorMessage) ? errorMessage : "Error data is null");
             }));
         }
 

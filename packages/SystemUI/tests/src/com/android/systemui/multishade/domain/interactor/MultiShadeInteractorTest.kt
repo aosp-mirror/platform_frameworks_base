@@ -73,6 +73,28 @@ class MultiShadeInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun isAnyShadeExpanded() =
+        testScope.runTest {
+            val underTest = create()
+            val isAnyShadeExpanded: Boolean? by collectLastValue(underTest.isAnyShadeExpanded)
+            assertWithMessage("isAnyShadeExpanded must start with false!")
+                .that(isAnyShadeExpanded)
+                .isFalse()
+
+            underTest.setExpansion(shadeId = ShadeId.LEFT, expansion = 0.441f)
+            assertThat(isAnyShadeExpanded).isTrue()
+
+            underTest.setExpansion(shadeId = ShadeId.RIGHT, expansion = 0.442f)
+            assertThat(isAnyShadeExpanded).isTrue()
+
+            underTest.setExpansion(shadeId = ShadeId.RIGHT, expansion = 0f)
+            assertThat(isAnyShadeExpanded).isTrue()
+
+            underTest.setExpansion(shadeId = ShadeId.LEFT, expansion = 0f)
+            assertThat(isAnyShadeExpanded).isFalse()
+        }
+
+    @Test
     fun isVisible_dualShadeConfig() =
         testScope.runTest {
             overrideResource(R.bool.dual_shade_enabled, true)

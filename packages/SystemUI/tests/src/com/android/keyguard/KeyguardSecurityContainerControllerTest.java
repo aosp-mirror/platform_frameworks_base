@@ -196,6 +196,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 .thenReturn(mKeyguardMessageAreaController);
         when(mKeyguardPasswordView.getWindowInsetsController()).thenReturn(mWindowInsetsController);
         when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(SecurityMode.PIN);
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
         mKeyguardPasswordViewController = new KeyguardPasswordViewController(
                 (KeyguardPasswordView) mKeyguardPasswordView, mKeyguardUpdateMonitor,
                 SecurityMode.Password, mLockPatternUtils, null,
@@ -551,6 +552,22 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         mKeyguardSecurityContainerController.finish(false /* strongAuth */, 0 /* currentUser */);
 
         assertThat(mKeyguardSecurityContainerController.willRunDismissFromKeyguard()).isFalse();
+    }
+
+    @Test
+    public void testSecurityCallbackFinish() {
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUserUnlocked(0)).thenReturn(true);
+        mKeyguardSecurityContainerController.finish(true, 0);
+        verify(mViewMediatorCallback).keyguardDone(anyBoolean(), anyInt());
+    }
+
+    @Test
+    public void testSecurityCallbackFinish_cannotDismissLockScreenAndNotStrongAuth() {
+        when(mFeatureFlags.isEnabled(Flags.PREVENT_BYPASS_KEYGUARD)).thenReturn(true);
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
+        mKeyguardSecurityContainerController.finish(false, 0);
+        verify(mViewMediatorCallback, never()).keyguardDone(anyBoolean(), anyInt());
     }
 
     @Test

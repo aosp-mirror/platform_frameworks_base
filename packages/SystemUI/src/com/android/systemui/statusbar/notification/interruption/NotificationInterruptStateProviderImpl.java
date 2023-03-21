@@ -28,7 +28,6 @@ import android.database.ContentObserver;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.os.SystemProperties;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 
@@ -271,6 +270,12 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             // suppressive groupAlertBehavior, and now correctly block the FSI from firing.
             return getDecisionGivenSuppression(
                     FullScreenIntentDecision.NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR,
+                    suppressedByDND);
+        }
+
+        // Notification is coming from a suspended package, block FSI
+        if (entry.getRanking().isSuspended()) {
+            return getDecisionGivenSuppression(FullScreenIntentDecision.NO_FSI_SUSPENDED,
                     suppressedByDND);
         }
 

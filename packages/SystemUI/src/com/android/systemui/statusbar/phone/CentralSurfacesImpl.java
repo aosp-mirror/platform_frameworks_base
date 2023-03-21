@@ -1722,11 +1722,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
-    public ViewGroup getBouncerContainer() {
-        return mNotificationShadeWindowViewController.getBouncerContainer();
-    }
-
-    @Override
     public AuthKeyguardMessageArea getKeyguardMessageArea() {
         return mNotificationShadeWindowViewController.getKeyguardMessageArea();
     }

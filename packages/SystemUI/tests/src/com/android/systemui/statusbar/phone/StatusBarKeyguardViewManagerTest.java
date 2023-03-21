@@ -154,7 +154,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mCentralSurfaces.getBouncerContainer()).thenReturn(mContainer);
         when(mContainer.findViewById(anyInt())).thenReturn(mKeyguardMessageArea);
         when(mKeyguardMessageAreaFactory.create(any(KeyguardMessageArea.class)))
                 .thenReturn(mKeyguardMessageAreaController);

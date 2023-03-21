@@ -115,6 +115,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -613,11 +615,13 @@ public class ScreenshotController {
         // Note that this may block if the sound is still being loaded (very unlikely) but we can't
         // reliably release in the background because the service is being destroyed.
         try {
-            MediaPlayer player = mCameraSound.get();
+            MediaPlayer player = mCameraSound.get(1, TimeUnit.SECONDS);
             if (player != null) {
                 player.release();
             }
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            mCameraSound.cancel(true);
+            Log.w(TAG, "Error releasing shutter sound", e);
         }
     }
 

@@ -16,6 +16,7 @@
 
 package com.android.server.credentials;
 
+import static android.Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS;
 import static android.Manifest.permission.CREDENTIAL_MANAGER_SET_ORIGIN;
 import static android.Manifest.permission.LAUNCH_CREDENTIAL_SELECTOR;
 import static android.content.Context.CREDENTIAL_SERVICE;
@@ -124,7 +125,8 @@ public final class CredentialManagerService
         serviceInfos.forEach(
                 info -> {
                     services.add(
-                            new CredentialManagerServiceImpl(this, mLock, resolvedUserId, info));
+                            new CredentialManagerServiceImpl(this, mLock, resolvedUserId,
+                                    info));
                 });
         return services;
     }
@@ -418,6 +420,7 @@ public final class CredentialManagerService
                 // Check privileged permissions
                 mContext.enforceCallingPermission(CREDENTIAL_MANAGER_SET_ORIGIN, null);
             }
+            enforcePermissionForAllowedProviders(request);
 
             final int userId = UserHandle.getCallingUserId();
             final int callingUid = Binder.getCallingUid();
@@ -447,6 +450,9 @@ public final class CredentialManagerService
             // TODO(b/273308895): implement
 
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
+
+            enforcePermissionForAllowedProviders(request);
+
             return cancelTransport;
         }
 
@@ -820,6 +826,17 @@ public final class CredentialManagerService
                     CredentialDescriptionRegistry.forUser(UserHandle.getCallingUserId());
 
             session.executeUnregisterRequest(request, callingPackage);
+        }
+    }
+
+    private void enforcePermissionForAllowedProviders(GetCredentialRequest request) {
+        boolean containsAllowedProviders = request.getCredentialOptions()
+                .stream()
+                .anyMatch(option -> option.getAllowedProviders() != null
+                        && !option.getAllowedProviders().isEmpty());
+        if (containsAllowedProviders) {
+            mContext.enforceCallingPermission(CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS,
+                    null);
         }
     }
 

@@ -15,9 +15,11 @@
  */
 package com.android.server.notification;
 
-import static org.hamcrest.Matchers.contains;
+import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.NO_SORT_BY_INTERRUPTIVENESS;
+
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -43,13 +45,14 @@ import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import androidx.test.runner.AndroidJUnit4;
-
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.server.UiServiceTestCase;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -58,7 +61,7 @@ import java.util.Collections;
 import java.util.List;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(Parameterized.class)
 public class NotificationComparatorTest extends UiServiceTestCase {
     @Mock Context mContext;
     @Mock TelecomManager mTm;
@@ -92,9 +95,24 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     private NotificationRecord mRecordColorized;
     private NotificationRecord mRecordColorizedCall;
 
+    @Parameterized.Parameters(name = "sortByInterruptiveness={0}")
+    public static Boolean[] getSortByInterruptiveness() {
+        return new Boolean[] { true, false };
+    }
+
+    @Parameterized.Parameter
+    public boolean mSortByInterruptiveness;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        SystemUiSystemPropertiesFlags.TEST_RESOLVER = flag -> {
+            if (flag.mSysPropKey.equals(NO_SORT_BY_INTERRUPTIVENESS.mSysPropKey)) {
+                return !mSortByInterruptiveness;
+            }
+            return new SystemUiSystemPropertiesFlags.DebugResolver().isEnabled(flag);
+        };
+
         int userId = UserHandle.myUserId();
 
         when(mContext.getResources()).thenReturn(getContext().getResources());
@@ -126,7 +144,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
                 new StatusBarNotification(callPkg,
                         callPkg, 1, "mRecordMinCallNonInterruptive", callUid, callUid,
                         nonInterruptiveNotif,
-                        new UserHandle(userId), "", 2000), getDefaultChannel());
+                        new UserHandle(userId), "", 2001), getDefaultChannel());
         mRecordMinCallNonInterruptive.setSystemImportance(NotificationManager.IMPORTANCE_MIN);
         mRecordMinCallNonInterruptive.setInterruptive(false);
 
@@ -228,7 +246,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
                 .setColorized(true).setColor(Color.WHITE)
                 .build();
         mRecordCheaterColorized = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
-                pkg2, 1, "cheater", uid2, uid2, n11, new UserHandle(userId),
+                pkg2, 1, "cheaterColorized", uid2, uid2, n11, new UserHandle(userId),
                 "", 9258), getDefaultChannel());
         mRecordCheaterColorized.setSystemImportance(NotificationManager.IMPORTANCE_LOW);
 
@@ -262,6 +280,11 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         mRecordColorizedCall.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
     }
 
+    @After
+    public void tearDown() {
+        SystemUiSystemPropertiesFlags.TEST_RESOLVER = null;
+    }
+
     @Test
     public void testOrdering() {
         final List<NotificationRecord> expected = new ArrayList<>();
@@ -281,8 +304,13 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         expected.add(mNoMediaSessionMedia);
         expected.add(mRecordCheater);
         expected.add(mRecordCheaterColorized);
-        expected.add(mRecordMinCall);
-        expected.add(mRecordMinCallNonInterruptive);
+        if (mSortByInterruptiveness) {
+            expected.add(mRecordMinCall);
+            expected.add(mRecordMinCallNonInterruptive);
+        } else {
+            expected.add(mRecordMinCallNonInterruptive);
+            expected.add(mRecordMinCall);
+        }
 
         List<NotificationRecord> actual = new ArrayList<>();
         actual.addAll(expected);
@@ -290,14 +318,18 @@ public class NotificationComparatorTest extends UiServiceTestCase {
 
         Collections.sort(actual, new NotificationComparator(mContext));
 
-        assertThat(actual, contains(expected.toArray()));
+        assertThat(actual).containsExactlyElementsIn(expected).inOrder();
     }
 
     @Test
     public void testRankingScoreOverrides() {
         NotificationComparator comp = new NotificationComparator(mContext);
         NotificationRecord recordMinCallNonInterruptive = spy(mRecordMinCallNonInterruptive);
-        assertTrue(comp.compare(mRecordMinCall, recordMinCallNonInterruptive) < 0);
+        if (mSortByInterruptiveness) {
+            assertTrue(comp.compare(mRecordMinCall, recordMinCallNonInterruptive) < 0);
+        } else {
+            assertTrue(comp.compare(mRecordMinCall, recordMinCallNonInterruptive) > 0);
+        }
 
         when(recordMinCallNonInterruptive.getRankingScore()).thenReturn(1f);
         assertTrue(comp.compare(mRecordMinCall, recordMinCallNonInterruptive) > 0);

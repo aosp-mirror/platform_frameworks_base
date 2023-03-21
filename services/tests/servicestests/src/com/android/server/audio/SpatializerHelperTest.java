@@ -80,7 +80,9 @@ public class SpatializerHelperTest {
             asAdapter = mMockAudioSystem;
         }
         mSpatHelper = new SpatializerHelper(mMockAudioService, asAdapter,
-                false /*headTrackingEnabledByDefault*/);
+                true /*binauralEnabledDefault*/,
+                true /*transauralEnabledDefault*/,
+                false /*headTrackingEnabledDefault*/);
 
     }
 

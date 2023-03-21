@@ -62,10 +62,12 @@ class AppOpsController(
         }
 
         val permission = AppOpsManager.opToPermission(op)
-        packageManager.updatePermissionFlags(permission, app.packageName,
-                PackageManager.FLAG_PERMISSION_USER_SET, PackageManager.FLAG_PERMISSION_USER_SET,
-                UserHandle.getUserHandleForUid(app.uid))
-
+        if (permission != null) {
+            packageManager.updatePermissionFlags(permission, app.packageName,
+                    PackageManager.FLAG_PERMISSION_USER_SET,
+                    PackageManager.FLAG_PERMISSION_USER_SET,
+                    UserHandle.getUserHandleForUid(app.uid))
+        }
         _mode.postValue(mode)
     }
 

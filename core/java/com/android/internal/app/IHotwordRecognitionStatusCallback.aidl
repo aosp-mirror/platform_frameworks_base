@@ -17,9 +17,10 @@
 package com.android.internal.app;
 
 import android.hardware.soundtrigger.SoundTrigger;
-import android.service.voice.DetectorFailure;
 import android.service.voice.HotwordDetectedResult;
+import android.service.voice.HotwordDetectionServiceFailure;
 import android.service.voice.HotwordRejectedResult;
+import android.service.voice.VisualQueryDetectionServiceFailure;
 
 /**
  * @hide
@@ -63,11 +64,31 @@ oneway interface IHotwordRecognitionStatusCallback {
     void onError(int status);
 
     /**
-     * Called when the detection fails due to an error.
+     * Called when the detection fails due to an error occurs in the
+     * {@link HotwordDetectionService}.
      *
-     * @param detectorFailure It provides the error code, error message and suggested action.
+     * @param hotwordDetectionServiceFailure It provides the error code, error message and
+     *                                       suggested action.
      */
-    void onDetectionFailure(in DetectorFailure detectorFailure);
+    void onHotwordDetectionServiceFailure(
+        in HotwordDetectionServiceFailure hotwordDetectionServiceFailure);
+
+    /**
+     * Called when the detection fails due to an error occurs in the
+     * {@link VisualQueryDetectionService}.
+     *
+     * @param visualQueryDetectionServiceFailure It provides the error code, error message and
+     *                                           suggested action.
+     */
+    void onVisualQueryDetectionServiceFailure(
+        in VisualQueryDetectionServiceFailure visualQueryDetectionServiceFailure);
+
+    /**
+     * Called when the detection fails due to an unknown error occurs.
+     *
+     * @param errorMessage It provides the error message.
+     */
+    void onUnknownFailure(in String errorMessage);
 
     /**
      * Called when the recognition is paused temporarily for some reason.
