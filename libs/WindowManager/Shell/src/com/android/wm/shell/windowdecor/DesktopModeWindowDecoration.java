@@ -22,15 +22,10 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Choreographer;
@@ -48,20 +43,24 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
+import com.android.wm.shell.windowdecor.viewholder.DesktopModeAppControlsWindowDecorationViewHolder;
+import com.android.wm.shell.windowdecor.viewholder.DesktopModeFocusedWindowDecorationViewHolder;
+import com.android.wm.shell.windowdecor.viewholder.DesktopModeWindowDecorationViewHolder;
 
 /**
  * Defines visuals and behaviors of a window decoration of a caption bar and shadows. It works with
- * {@link DesktopModeWindowDecorViewModel}. The caption bar contains a handle, back button, and
- * close button.
+ * {@link DesktopModeWindowDecorViewModel}.
  *
  * The shadow's thickness is 20dp when the window is in focus and 5dp when the window isn't.
  */
 public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLinearLayout> {
     private static final String TAG = "DesktopModeWindowDecoration";
+
     private final Handler mHandler;
     private final Choreographer mChoreographer;
     private final SyncTransactionQueue mSyncQueue;
 
+    private DesktopModeWindowDecorationViewHolder mWindowDecorViewHolder;
     private View.OnClickListener mOnCaptionButtonClickListener;
     private View.OnTouchListener mOnCaptionTouchListener;
     private DragPositioningCallback mDragPositioningCallback;
@@ -73,7 +72,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final WindowDecoration.RelayoutResult<WindowDecorLinearLayout> mResult =
             new WindowDecoration.RelayoutResult<>();
 
-    private boolean mDesktopActive;
     private AdditionalWindow mHandleMenu;
     private final int mHandleMenuWidthId = R.dimen.freeform_decor_caption_menu_width;
     private final int mHandleMenuShadowRadiusId = R.dimen.caption_menu_shadow_radius;
@@ -94,7 +92,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mHandler = handler;
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
-        mDesktopActive = DesktopModeStatus.isActive(mContext);
     }
 
     @Override
@@ -152,9 +149,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final int outsetRightId = R.dimen.freeform_resize_handle;
         final int outsetBottomId = R.dimen.freeform_resize_handle;
 
+        final int windowDecorLayoutId = getDesktopModeWindowDecorLayoutId(
+                taskInfo.getWindowingMode());
         mRelayoutParams.reset();
         mRelayoutParams.mRunningTaskInfo = taskInfo;
-        mRelayoutParams.mLayoutResId = R.layout.desktop_mode_window_decor;
+        mRelayoutParams.mLayoutResId = windowDecorLayoutId;
         mRelayoutParams.mCaptionHeightId = R.dimen.freeform_decor_caption_height;
         mRelayoutParams.mShadowRadiusId = shadowRadiusID;
         if (isDragResizeable) {
@@ -172,23 +171,27 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             return;
         }
         if (oldRootView != mResult.mRootView) {
-            setupRootView();
-        }
-
-        // If this task is not focused, do not show caption.
-        setCaptionVisibility(mTaskInfo.isFocused);
-
-        if (mTaskInfo.isFocused) {
-            if (DesktopModeStatus.isProto2Enabled()) {
-                updateButtonVisibility();
-            } else if (DesktopModeStatus.isProto1Enabled()) {
-                // Only handle should show if Desktop Mode is inactive.
-                boolean desktopCurrentStatus = DesktopModeStatus.isActive(mContext);
-                if (mDesktopActive != desktopCurrentStatus) {
-                    mDesktopActive = desktopCurrentStatus;
-                    setButtonVisibility(mDesktopActive);
-                }
+            if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_focused_window_decor) {
+                mWindowDecorViewHolder = new DesktopModeFocusedWindowDecorationViewHolder(
+                        mResult.mRootView,
+                        mOnCaptionTouchListener,
+                        mOnCaptionButtonClickListener
+                );
+            } else if (mRelayoutParams.mLayoutResId
+                    == R.layout.desktop_mode_app_controls_window_decor) {
+                mWindowDecorViewHolder = new DesktopModeAppControlsWindowDecorationViewHolder(
+                        mResult.mRootView,
+                        mOnCaptionTouchListener,
+                        mOnCaptionButtonClickListener
+                );
+            } else {
+                throw new IllegalArgumentException("Unexpected layout resource id");
             }
+        }
+        mWindowDecorViewHolder.bindData(mTaskInfo);
+
+        if (!mTaskInfo.isFocused) {
+            closeHandleMenu();
         }
 
         if (!isDragResizeable) {
@@ -219,24 +222,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 mResult.mWidth, mResult.mHeight, resize_handle, resize_corner, touchSlop);
     }
 
-    /**
-     * Sets up listeners when a new root view is created.
-     */
-    private void setupRootView() {
-        final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
-        caption.setOnTouchListener(mOnCaptionTouchListener);
-        final View handle = caption.findViewById(R.id.caption_handle);
-        handle.setOnTouchListener(mOnCaptionTouchListener);
-        handle.setOnClickListener(mOnCaptionButtonClickListener);
-        if (DesktopModeStatus.isProto1Enabled()) {
-            final View back = caption.findViewById(R.id.back_button);
-            back.setOnClickListener(mOnCaptionButtonClickListener);
-            final View close = caption.findViewById(R.id.close_window);
-            close.setOnClickListener(mOnCaptionButtonClickListener);
-        }
-        updateButtonVisibility();
-    }
-
     private void setupHandleMenu() {
         final View menu = mHandleMenu.mWindowViewHost.getView();
         final View fullscreen = menu.findViewById(R.id.fullscreen_button);
@@ -255,98 +240,26 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         collapse.setOnClickListener(mOnCaptionButtonClickListener);
         menu.setOnTouchListener(mOnCaptionTouchListener);
 
-        String packageName = mTaskInfo.baseActivity.getPackageName();
-        PackageManager pm = mContext.getApplicationContext().getPackageManager();
-        // TODO(b/268363572): Use IconProvider or BaseIconCache to set drawable/name.
-        try {
-            ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName,
-                    PackageManager.ApplicationInfoFlags.of(0));
-            final ImageView appIcon = menu.findViewById(R.id.application_icon);
-            appIcon.setImageDrawable(pm.getApplicationIcon(applicationInfo));
-            final TextView appName = menu.findViewById(R.id.application_name);
-            appName.setText(pm.getApplicationLabel(applicationInfo));
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "Package not found: " + packageName, e);
-        }
-    }
-
-    /**
-     * Sets caption visibility based on task focus.
-     * Note: Only applicable to Desktop Proto 1; Proto 2 only closes handle menu on focus loss
-     * @param visible whether or not the caption should be visible
-     */
-    private void setCaptionVisibility(boolean visible) {
-        if (!visible) closeHandleMenu();
-        if (!DesktopModeStatus.isProto1Enabled()) return;
-        final int v = visible ? View.VISIBLE : View.GONE;
-        final View captionView = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
-        captionView.setVisibility(v);
-
-    }
-
-    /**
-     * Sets the visibility of buttons and color of caption based on desktop mode status
-     */
-    void updateButtonVisibility() {
-        if (DesktopModeStatus.isProto2Enabled()) {
-            setButtonVisibility(mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM);
-        } else if (DesktopModeStatus.isProto1Enabled()) {
-            mDesktopActive = DesktopModeStatus.isActive(mContext);
-            setButtonVisibility(mDesktopActive);
-        }
-    }
-
-    /**
-     * Show or hide buttons
-     */
-    void setButtonVisibility(boolean visible) {
-        final int visibility = visible && DesktopModeStatus.isProto1Enabled()
-                ? View.VISIBLE : View.GONE;
-        final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
-        final View back = caption.findViewById(R.id.back_button);
-        final View close = caption.findViewById(R.id.close_window);
-        back.setVisibility(visibility);
-        close.setVisibility(visibility);
-        final int buttonTintColorRes =
-                mDesktopActive ? R.color.decor_button_dark_color
-                        : R.color.decor_button_light_color;
-        final ColorStateList buttonTintColor =
-                caption.getResources().getColorStateList(buttonTintColorRes, null /* theme */);
-        final View handle = caption.findViewById(R.id.caption_handle);
-        final VectorDrawable handleBackground = (VectorDrawable) handle.getBackground();
-        handleBackground.setTintList(buttonTintColor);
+        final ImageView appIcon = menu.findViewById(R.id.application_icon);
+        final TextView appName = menu.findViewById(R.id.application_name);
+        loadAppInfo(appName, appIcon);
     }
 
     boolean isHandleMenuActive() {
         return mHandleMenu != null;
     }
 
-    void setCaptionColor(int captionColor) {
-        if (mResult.mRootView == null) {
-            return;
-        }
-
-        final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
-        final GradientDrawable captionDrawable = (GradientDrawable) caption.getBackground();
-        captionDrawable.setColor(captionColor);
-
-        final int buttonTintColorRes =
-                Color.valueOf(captionColor).luminance() < 0.5
-                        ? R.color.decor_button_light_color
-                        : R.color.decor_button_dark_color;
-        final ColorStateList buttonTintColor =
-                caption.getResources().getColorStateList(buttonTintColorRes, null /* theme */);
-
-        final View handle = caption.findViewById(R.id.caption_handle);
-        final Drawable handleBackground = handle.getBackground();
-        handleBackground.setTintList(buttonTintColor);
-        if (DesktopModeStatus.isProto1Enabled()) {
-            final View back = caption.findViewById(R.id.back_button);
-            final Drawable backBackground = back.getBackground();
-            backBackground.setTintList(buttonTintColor);
-            final View close = caption.findViewById(R.id.close_window);
-            final Drawable closeBackground = close.getBackground();
-            closeBackground.setTintList(buttonTintColor);
+    private void loadAppInfo(TextView appNameTextView, ImageView appIconImageView) {
+        String packageName = mTaskInfo.realActivity.getPackageName();
+        PackageManager pm = mContext.getApplicationContext().getPackageManager();
+        try {
+            // TODO(b/268363572): Use IconProvider or BaseIconCache to set drawable/name.
+            ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName,
+                    PackageManager.ApplicationInfoFlags.of(0));
+            appNameTextView.setText(pm.getApplicationLabel(applicationInfo));
+            appIconImageView.setImageDrawable(pm.getApplicationIcon(applicationInfo));
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "Package not found: " + packageName, e);
         }
     }
 
@@ -371,9 +284,18 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final int shadowRadius = loadDimensionPixelSize(resources, mHandleMenuShadowRadiusId);
         final int cornerRadius = loadDimensionPixelSize(resources, mHandleMenuCornerRadiusId);
 
-        final int x = mRelayoutParams.mCaptionX + (captionWidth / 2) - (menuWidth / 2)
-                - mResult.mDecorContainerOffsetX;
-        final int y = mRelayoutParams.mCaptionY - mResult.mDecorContainerOffsetY;
+        final int x, y;
+        if (mRelayoutParams.mLayoutResId
+                == R.layout.desktop_mode_app_controls_window_decor) {
+            // Align the handle menu to the left of the caption.
+            x = mRelayoutParams.mCaptionX - mResult.mDecorContainerOffsetX;
+            y = mRelayoutParams.mCaptionY - mResult.mDecorContainerOffsetY;
+        } else {
+            // Position the handle menu at the center of the caption.
+            x = mRelayoutParams.mCaptionX + (captionWidth / 2) - (menuWidth / 2)
+                    - mResult.mDecorContainerOffsetX;
+            y = mRelayoutParams.mCaptionY - mResult.mDecorContainerOffsetY;
+        }
         mHandleMenuPosition.set(x, y);
         String namePrefix = "Caption Menu";
         mHandleMenu = addWindow(R.layout.desktop_mode_decor_handle_menu, namePrefix, t, x, y,
@@ -501,6 +423,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         closeDragResizeListener();
         closeHandleMenu();
         super.close();
+    }
+
+    private int getDesktopModeWindowDecorLayoutId(int windowingMode) {
+        if (DesktopModeStatus.isProto1Enabled()) {
+            return R.layout.desktop_mode_app_controls_window_decor;
+        }
+        return windowingMode == WINDOWING_MODE_FREEFORM
+                ? R.layout.desktop_mode_app_controls_window_decor
+                : R.layout.desktop_mode_focused_window_decor;
     }
 
     static class Factory {
