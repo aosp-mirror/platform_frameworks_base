@@ -325,7 +325,24 @@ public class Binder implements IBinder {
      * @hide
      */
     @CriticalNative
-    public static final native boolean isDirectlyHandlingTransaction();
+    public static final native boolean isDirectlyHandlingTransactionNative();
+
+    private static boolean sIsHandlingBinderTransaction = false;
+
+    /**
+     * @hide
+     */
+    public static final boolean isDirectlyHandlingTransaction() {
+        return sIsHandlingBinderTransaction || isDirectlyHandlingTransactionNative();
+    }
+
+    /**
+     * This is Test API which will be used to override output of isDirectlyHandlingTransactionNative
+     * @hide
+     */
+    public static void setIsDirectlyHandlingTransactionOverride(boolean isInTransaction) {
+        sIsHandlingBinderTransaction = isInTransaction;
+    }
 
     /**
     * Returns {@code true} if the current thread has had its identity
