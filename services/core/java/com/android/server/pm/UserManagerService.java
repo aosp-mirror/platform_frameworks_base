@@ -1275,7 +1275,7 @@ public class UserManagerService extends IUserManager.Stub {
         intent.putExtra(Intent.EXTRA_USER_HANDLE, profileHandle.getIdentifier());
         getDevicePolicyManagerInternal().broadcastIntentToManifestReceivers(
                 intent, parentHandle, /* requiresPermission= */ true);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
         mContext.sendBroadcastAsUser(intent, parentHandle);
     }
 
