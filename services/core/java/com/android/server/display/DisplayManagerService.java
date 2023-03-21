@@ -1514,14 +1514,17 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
 
-            // When calling setContentRecordingSession into the WindowManagerService, the WMS
+            // When calling WindowManagerService#setContentRecordingSession, WindowManagerService
             // attempts to acquire a lock before executing its main body. Due to this, we need
             // to be sure that it isn't called while the DisplayManagerService is also holding
             // a lock, to avoid a deadlock scenario.
             final ContentRecordingSession session =
                     virtualDisplayConfig.getContentRecordingSession();
-
-            if (displayId != Display.INVALID_DISPLAY && session != null) {
+            // Ensure session details are only set when mirroring (through VirtualDisplay flags or
+            // MediaProjection).
+            final boolean shouldMirror =
+                    projection != null || (flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0;
+            if (shouldMirror && displayId != Display.INVALID_DISPLAY && session != null) {
                 // Only attempt to set content recording session if there are details to set and a
                 // VirtualDisplay has been successfully constructed.
                 session.setDisplayId(displayId);
@@ -1529,8 +1532,8 @@ public final class DisplayManagerService extends SystemService {
                 // We set the content recording session here on the server side instead of using
                 // a second AIDL call in MediaProjection. By ensuring that a virtual display has
                 // been constructed before calling setContentRecordingSession, we avoid a race
-                // condition between the DMS & WMS which could lead to the MediaProjection
-                // being pre-emptively torn down.
+                // condition between the DisplayManagerService & WindowManagerService which could
+                // lead to the MediaProjection being pre-emptively torn down.
                 if (!mWindowManagerInternal.setContentRecordingSession(session)) {
                     // Unable to start mirroring, so tear down projection & release VirtualDisplay.
                     try {
