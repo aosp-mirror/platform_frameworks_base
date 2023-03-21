@@ -30,9 +30,9 @@ import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.PermissionApex
 import com.android.server.permission.access.util.parseBinaryXml
-import com.android.server.permission.access.util.read
+import com.android.server.permission.access.util.readWithReserveCopy
 import com.android.server.permission.access.util.serializeBinaryXml
-import com.android.server.permission.access.util.writeInlined
+import com.android.server.permission.access.util.writeWithReserveCopy
 import java.io.File
 import java.io.FileNotFoundException
 
@@ -100,7 +100,7 @@ class AccessPersistence(
      */
     private inline fun File.parse(block: BinaryXmlPullParser.() -> Unit): Boolean =
         try {
-            AtomicFile(this).read { it.parseBinaryXml(block) }
+            AtomicFile(this).readWithReserveCopy { it.parseBinaryXml(block) }
             true
         } catch (e: FileNotFoundException) {
             Log.i(LOG_TAG, "$this not found")
@@ -179,7 +179,7 @@ class AccessPersistence(
 
     private inline fun File.serialize(block: BinaryXmlSerializer.() -> Unit) {
         try {
-            AtomicFile(this).writeInlined { it.serializeBinaryXml(block) }
+            AtomicFile(this).writeWithReserveCopy { it.serializeBinaryXml(block) }
         } catch (e: Exception) {
             Log.e(LOG_TAG, "Failed to serialize $this", e)
         }
