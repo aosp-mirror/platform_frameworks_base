@@ -141,7 +141,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * parameters. All automatic control is disabled (auto-exposure, auto-white
      * balance, auto-focus), and post-processing parameters are set to preview
      * quality. The manual capture parameters (exposure, sensitivity, and so on)
-     * are set to reasonable defaults, but should be overriden by the
+     * are set to reasonable defaults, but should be overridden by the
      * application depending on the intended use case.
      * This template is guaranteed to be supported on camera devices that support the
      * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR MANUAL_SENSOR}
@@ -680,7 +680,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> <td colspan="2" id="rb"></td> <td>Maximum-resolution GPU processing with preview.</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code MAXIMUM}</td> <td colspan="2" id="rb"></td> <td>Maximum-resolution in-app processing with preview.</td> </tr>
-     * <tr> <td>{@code YUV }</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code MAXIMUM}</td> <td colspan="2" id="rb"></td> <td>Maximum-resolution two-input in-app processsing.</td> </tr>
+     * <tr> <td>{@code YUV }</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code MAXIMUM}</td> <td colspan="2" id="rb"></td> <td>Maximum-resolution two-input in-app processing.</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td> <td>Video recording with maximum-size video snapshot</td> </tr>
      * <tr> <td>{@code YUV }</td><td id="rb">{@code 640x480}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code MAXIMUM}</td> <td>Standard video recording plus maximum-resolution in-app processing.</td> </tr>
      * <tr> <td>{@code YUV }</td><td id="rb">{@code 640x480}</td> <td>{@code YUV }</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code MAXIMUM}</td> <td>Preview plus two-input maximum-resolution in-app processing.</td> </tr>
@@ -722,7 +722,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> <td>Maximum-resolution GPU processing with preview.</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code MAXIMUM}</td> <td>Maximum-resolution in-app processing with preview.</td> </tr>
-     * <tr> <td>{@code YUV }</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code MAXIMUM}</td> <td>Maximum-resolution two-input in-app processsing.</td> </tr>
+     * <tr> <td>{@code YUV }</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code MAXIMUM}</td> <td>Maximum-resolution two-input in-app processing.</td> </tr>
      * </table><br>
      * </p>
      *
@@ -1137,7 +1137,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr><th colspan="13">Additional guaranteed combinations for ULTRA_HIGH_RESOLUTION sensors (YUV / PRIV inputs are guaranteed only if YUV / PRIVATE reprocessing are supported)</th></tr>
      * <tr> <th colspan="3" id="rb">Input</th> <th colspan="3" id="rb">Target 1</th> <th colspan="3" id="rb">Target 2</th>  <th colspan="3" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
      * <tr> <th>Type</th><th id="rb"> SC Map</th><th id="rb">Max size</th><th>Type</th><th id="rb"> SC Map</th><th id="rb">Max size</th> <th>Type</th><th id="rb"> SC Map</th><th id="rb">Max size</th> <th>Type</th><th id="rb"> SC Map</th><th id="rb">Max size</th></tr>
-     * <tr> <td>{@code RAW}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td>{@code RAW}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td id="rb">{@code PRIV / YUV}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code PREVIEW}</td><td colspan="3" id="rb"></td> <td>RAW remosaic reprocessing with seperate preview</td> </tr>
+     * <tr> <td>{@code RAW}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td>{@code RAW}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td id="rb">{@code PRIV / YUV}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code PREVIEW}</td><td colspan="3" id="rb"></td> <td>RAW remosaic reprocessing with separate preview</td> </tr>
      * <tr> <td>{@code RAW}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td>{@code RAW}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td id="rb">{@code PRIV / YUV}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code JPEG / YUV}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td> <td>Ultra high res RAW -> JPEG / YUV with seperate preview</td> </tr>
      * <tr> <td>{@code YUV / PRIV}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td> <td>{@code YUV / PRIV}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td id="rb">{@code YUV / PRIV}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code JPEG }</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td> <td> Ultra high res PRIV / YUV -> YUV / JPEG reprocessing with seperate preview</td> </tr>
      * </table><br>
@@ -1260,7 +1260,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * settings by calling {@link CaptureRequest.Builder#setPhysicalCameraKey}.</p>
      *
      * <p>Individual physical camera settings will only be honored for camera session
-     * that was initialiazed with corresponding physical camera id output configuration
+     * that was initialized with corresponding physical camera id output configuration
      * {@link OutputConfiguration#setPhysicalCameraId} and the same output targets are
      * also attached in the request by {@link CaptureRequest.Builder#addTarget}.</p>
      *

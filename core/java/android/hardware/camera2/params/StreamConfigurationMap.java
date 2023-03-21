@@ -1790,7 +1790,7 @@ public final class StreamConfigurationMap {
      *
      * <p>{@code ValidOutputFormatsForInput([in:%s(%d), out:%s(%d), ... %s(%d)],
      * ... [in:%s(%d), out:%s(%d), ... %s(%d)])}, where {@code [in:%s(%d), out:%s(%d), ... %s(%d)]}
-     * represents an input fomat and its valid output formats.</p>
+     * represents an input format and its valid output formats.</p>
      *
      * <p>{@code HighSpeedVideoConfigurations([w:%d, h:%d, min_fps:%d, max_fps:%d],
      * ... [w:%d, h:%d, min_fps:%d, max_fps:%d])}, where
