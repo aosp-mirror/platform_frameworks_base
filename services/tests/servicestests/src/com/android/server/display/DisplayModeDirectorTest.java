@@ -1905,7 +1905,7 @@ public class DisplayModeDirectorTest {
         // We don't expect any interaction with DeviceConfig when the director is initialized
         // because we explicitly avoid doing this as this can lead to a latency spike in the
         // startup of DisplayManagerService
-        // Verify all the loaded values are from DisplayDeviceConfig
+        // Verify all the loaded values are from config.xml
         assertEquals(director.getSettingsObserver().getDefaultRefreshRate(), 45, 0.0);
         assertEquals(director.getSettingsObserver().getDefaultPeakRefreshRate(), 75,
                 0.0);
@@ -1937,6 +1937,7 @@ public class DisplayModeDirectorTest {
         when(displayDeviceConfig.getDefaultRefreshRateInHbmSunlight()).thenReturn(75);
         director.defaultDisplayDeviceUpdated(displayDeviceConfig);
 
+        // Verify the new values are from the freshly loaded DisplayDeviceConfig.
         assertEquals(director.getSettingsObserver().getDefaultRefreshRate(), 60, 0.0);
         assertEquals(director.getSettingsObserver().getDefaultPeakRefreshRate(), 65,
                 0.0);
@@ -1966,6 +1967,7 @@ public class DisplayModeDirectorTest {
         config.setRefreshRateInHbmSunlight(80);
         director.defaultDisplayDeviceUpdated(displayDeviceConfig);
 
+        // Verify the values are loaded from the DeviceConfig.
         assertEquals(director.getSettingsObserver().getDefaultRefreshRate(), 60, 0.0);
         assertEquals(director.getSettingsObserver().getDefaultPeakRefreshRate(), 60,
                 0.0);
@@ -1981,6 +1983,35 @@ public class DisplayModeDirectorTest {
                 new int[]{20});
         assertEquals(director.getHbmObserver().getRefreshRateInHbmHdr(), 70);
         assertEquals(director.getHbmObserver().getRefreshRateInHbmSunlight(), 80);
+
+        // Reset the DeviceConfig
+        config.setDefaultPeakRefreshRate(null);
+        config.setRefreshRateInHighZone(null);
+        config.setRefreshRateInLowZone(null);
+        config.setLowAmbientBrightnessThresholds(new int[]{});
+        config.setLowDisplayBrightnessThresholds(new int[]{});
+        config.setHighDisplayBrightnessThresholds(new int[]{});
+        config.setHighAmbientBrightnessThresholds(new int[]{});
+        config.setRefreshRateInHbmHdr(null);
+        config.setRefreshRateInHbmSunlight(null);
+        waitForIdleSync();
+
+        // verify the new values now fallback to DisplayDeviceConfig
+        assertEquals(director.getSettingsObserver().getDefaultRefreshRate(), 60, 0.0);
+        assertEquals(director.getSettingsObserver().getDefaultPeakRefreshRate(), 65,
+                0.0);
+        assertEquals(director.getBrightnessObserver().getRefreshRateInHighZone(), 55);
+        assertEquals(director.getBrightnessObserver().getRefreshRateInLowZone(), 50);
+        assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThreshold(),
+                new int[]{210});
+        assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThreshold(),
+                new int[]{2100});
+        assertArrayEquals(director.getBrightnessObserver().getLowDisplayBrightnessThreshold(),
+                new int[]{25});
+        assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThreshold(),
+                new int[]{30});
+        assertEquals(director.getHbmObserver().getRefreshRateInHbmHdr(), 65);
+        assertEquals(director.getHbmObserver().getRefreshRateInHbmSunlight(), 75);
     }
 
     @Test
@@ -2140,18 +2171,18 @@ public class DisplayModeDirectorTest {
             super.addOnPropertiesChangedListener(namespace, executor, listener);
         }
 
-        void setRefreshRateInLowZone(int fps) {
+        void setRefreshRateInLowZone(Integer fps) {
             putPropertyAndNotify(
                     DeviceConfig.NAMESPACE_DISPLAY_MANAGER, KEY_REFRESH_RATE_IN_LOW_ZONE,
                     String.valueOf(fps));
         }
 
-        void setRefreshRateInHbmSunlight(int fps) {
+        void setRefreshRateInHbmSunlight(Integer fps) {
             putPropertyAndNotify(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
                     KEY_REFRESH_RATE_IN_HBM_SUNLIGHT, String.valueOf(fps));
         }
 
-        void setRefreshRateInHbmHdr(int fps) {
+        void setRefreshRateInHbmHdr(Integer fps) {
             putPropertyAndNotify(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
                     KEY_REFRESH_RATE_IN_HBM_HDR, String.valueOf(fps));
         }
@@ -2187,13 +2218,13 @@ public class DisplayModeDirectorTest {
                     thresholds);
         }
 
-        void setRefreshRateInHighZone(int fps) {
+        void setRefreshRateInHighZone(Integer fps) {
             putPropertyAndNotify(
                     DeviceConfig.NAMESPACE_DISPLAY_MANAGER, KEY_REFRESH_RATE_IN_HIGH_ZONE,
                     String.valueOf(fps));
         }
 
-        void setDefaultPeakRefreshRate(int fps) {
+        void setDefaultPeakRefreshRate(Integer fps) {
             putPropertyAndNotify(
                     DeviceConfig.NAMESPACE_DISPLAY_MANAGER, KEY_PEAK_REFRESH_RATE_DEFAULT,
                     String.valueOf(fps));
