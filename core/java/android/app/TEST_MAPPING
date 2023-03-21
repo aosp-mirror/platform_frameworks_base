@@ -42,10 +42,10 @@
         },
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
-            "name": "CtsPermission2TestCases",
+            "name": "CtsPermissionPolicyTestCases",
             "options": [
                 {
-                    "include-filter": "android.permission2.cts.RuntimePermissionProperties"
+                    "include-filter": "android.permissionpolicy.cts.RuntimePermissionProperties"
                 }
             ]
         },
