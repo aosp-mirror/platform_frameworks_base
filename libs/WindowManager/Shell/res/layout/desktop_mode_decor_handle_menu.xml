@@ -50,7 +50,7 @@
             android:layout_marginEnd="10dp"
             android:contentDescription="@string/collapse_menu_text"
             android:layout_alignParentEnd="true"
-            android:background="@drawable/caption_collapse_menu_button"
+            android:background="@drawable/ic_baseline_expand_more_24"
             android:layout_centerVertical="true"/>
     </RelativeLayout>
     <LinearLayout

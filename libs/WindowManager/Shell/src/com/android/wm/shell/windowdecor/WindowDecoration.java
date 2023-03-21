@@ -84,6 +84,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             };
 
     RunningTaskInfo mTaskInfo;
+    int mLayoutResId;
     final SurfaceControl mTaskSurface;
 
     Display mDisplay;
@@ -162,6 +163,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         if (params.mRunningTaskInfo != null) {
             mTaskInfo = params.mRunningTaskInfo;
         }
+        final int oldLayoutResId = mLayoutResId;
+        mLayoutResId = params.mLayoutResId;
 
         if (!mTaskInfo.isVisible) {
             releaseViews();
@@ -178,7 +181,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         final Configuration taskConfig = getConfigurationWithOverrides(mTaskInfo);
         if (oldTaskConfig.densityDpi != taskConfig.densityDpi
                 || mDisplay == null
-                || mDisplay.getDisplayId() != mTaskInfo.displayId) {
+                || mDisplay.getDisplayId() != mTaskInfo.displayId
+                || oldLayoutResId != mLayoutResId) {
             releaseViews();
 
             if (!obtainDisplayOrRegisterListener()) {

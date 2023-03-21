@@ -16,26 +16,21 @@
   -->
 <com.android.wm.shell.windowdecor.WindowDecorLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/desktop_mode_caption"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
     android:background="@drawable/desktop_mode_decor_title">
-    <Button
-        style="@style/CaptionButtonStyle"
-        android:id="@+id/back_button"
-        android:contentDescription="@string/back_button_text"
-        android:background="@drawable/decor_back_button_dark"/>
-    <Button
+
+    <ImageButton
         android:id="@+id/caption_handle"
         android:layout_width="128dp"
-        android:layout_height="32dp"
-        android:layout_margin="5dp"
+        android:layout_height="42dp"
         android:contentDescription="@string/handle_text"
-        android:background="@drawable/decor_handle_dark"/>
-    <Button
-        style="@style/CaptionButtonStyle"
-        android:id="@+id/close_window"
-        android:contentDescription="@string/close_button_text"
-        android:background="@drawable/decor_close_button_dark"/>
+        android:src="@drawable/decor_handle_dark"
+        tools:tint="@color/desktop_mode_caption_handle_bar_dark"
+        android:scaleType="fitXY"
+        android:background="?android:selectableItemBackground"/>
+
 </com.android.wm.shell.windowdecor.WindowDecorLinearLayout>
