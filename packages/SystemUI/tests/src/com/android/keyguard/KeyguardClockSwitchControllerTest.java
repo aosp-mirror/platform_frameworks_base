@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -363,6 +364,12 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         observer.onChange(true);
         mExecutor.runAllReady();
         assertEquals(View.VISIBLE, mFakeWeatherView.getVisibility());
+    }
+
+    @Test
+    public void testGetClockAnimations_nullClock_returnsNull() {
+        when(mClockEventController.getClock()).thenReturn(null);
+        assertNull(mController.getClockAnimations());
     }
 
     private void verifyAttachment(VerificationMode times) {
