@@ -121,6 +121,7 @@ import static android.view.WindowManager.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENAB
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
+import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
@@ -5205,7 +5206,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             Slog.w(TAG_WM, "Attempted to set visibility of non-existing app token: " + token);
             return;
         }
-        if (visible == mVisibleRequested && visible == mVisible
+        if (visible == mVisibleRequested && visible == mVisible && visible == isClientVisible()
                 && mTransitionController.isShellTransitionsEnabled()) {
             // For shell transition, it is no-op if there is no state change.
             return;
@@ -9701,9 +9702,36 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        if (getParent() != null) {
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            final Transition transition = new Transition(TRANSIT_RELAUNCH, 0 /* flags */,
+                    mTransitionController, mWmService.mSyncEngine);
+            final Runnable executeRestart = () -> {
+                if (mState != RESTARTING_PROCESS || !attachedToProcess()) {
+                    transition.abort();
+                    return;
+                }
+                // Request invisible so there will be a change after the activity is restarted
+                // to be visible.
+                setVisibleRequested(false);
+                transition.collect(this);
+                mTransitionController.requestStartTransition(transition, task,
+                        null /* remoteTransition */, null /* displayChange */);
+                scheduleStopForRestartProcess();
+            };
+            if (mWmService.mSyncEngine.hasActiveSync()) {
+                mWmService.mSyncEngine.queueSyncSet(
+                        () -> mTransitionController.moveToCollecting(transition), executeRestart);
+            } else {
+                mTransitionController.moveToCollecting(transition);
+                executeRestart.run();
+            }
+        } else {
             startFreezingScreen();
+            scheduleStopForRestartProcess();
         }
+    }
+
+    private void scheduleStopForRestartProcess() {
         // The process will be killed until the activity reports stopped with saved state (see
         // {@link ActivityTaskManagerService.activityStopped}).
         try {
