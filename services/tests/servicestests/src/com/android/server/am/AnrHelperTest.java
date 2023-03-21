@@ -26,7 +26,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -49,10 +48,8 @@ import org.junit.Test;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -66,9 +63,8 @@ public class AnrHelperTest {
     private AnrHelper mAnrHelper;
 
     private ProcessRecord mAnrApp;
-    private ExecutorService mAuxExecutorService;
+    private ExecutorService mExecutorService;
 
-    private Future<File> mEarlyDumpFuture;
     @Rule
     public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
 
@@ -95,12 +91,9 @@ public class AnrHelperTest {
                         return mServiceThreadRule.getThread().getThreadHandler();
                     }
                 }, mServiceThreadRule.getThread());
-            mAuxExecutorService = mock(ExecutorService.class);
-            final ExecutorService earlyDumpExecutorService = mock(ExecutorService.class);
-            mEarlyDumpFuture = mock(Future.class);
-            doReturn(mEarlyDumpFuture).when(earlyDumpExecutorService).submit(any(Callable.class));
+            mExecutorService = mock(ExecutorService.class);
 
-            mAnrHelper = new AnrHelper(service, mAuxExecutorService, earlyDumpExecutorService);
+            mAnrHelper = new AnrHelper(service, mExecutorService);
         });
     }
 
@@ -132,8 +125,8 @@ public class AnrHelperTest {
 
         verify(mAnrApp.mErrorState, timeout(TIMEOUT_MS)).appNotResponding(
                 eq(activityShortComponentName), eq(appInfo), eq(parentShortComponentName),
-                eq(parentProcess), eq(aboveSystem), eq(timeoutRecord), eq(mAuxExecutorService),
-                eq(false) /* onlyDumpSelf */, eq(false) /*isContinuousAnr*/, eq(mEarlyDumpFuture));
+                eq(parentProcess), eq(aboveSystem), eq(timeoutRecord), eq(mExecutorService),
+                eq(false) /* onlyDumpSelf */, eq(false) /*isContinuousAnr*/);
     }
 
     @Test
@@ -146,7 +139,7 @@ public class AnrHelperTest {
             processingLatch.await();
             return null;
         }).when(mAnrApp.mErrorState).appNotResponding(anyString(), any(), any(), any(),
-                anyBoolean(), any(), any(), anyBoolean(), anyBoolean(), any());
+                anyBoolean(), any(), any(), anyBoolean(), anyBoolean());
         final ApplicationInfo appInfo = new ApplicationInfo();
         final TimeoutRecord timeoutRecord = TimeoutRecord.forInputDispatchWindowUnresponsive(
                 "annotation");
@@ -169,7 +162,7 @@ public class AnrHelperTest {
         processingLatch.countDown();
         // There is only one ANR reported.
         verify(mAnrApp.mErrorState, timeout(TIMEOUT_MS).only()).appNotResponding(
-                anyString(), any(), any(), any(), anyBoolean(), any(), eq(mAuxExecutorService),
-                anyBoolean(), anyBoolean(), any());
+                anyString(), any(), any(), any(), anyBoolean(), any(), eq(mExecutorService),
+                anyBoolean(), anyBoolean());
     }
 }

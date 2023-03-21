@@ -59,10 +59,7 @@ public class AnrLatencyTrackerTests {
             .thenReturn(175L)
             .thenReturn(198L)
             .thenReturn(203L)
-            .thenReturn(209L)
-            .thenReturn(211L)
-            .thenReturn(212L)
-            .thenReturn(220L);
+            .thenReturn(209L);
     }
 
     @Test
@@ -71,7 +68,6 @@ public class AnrLatencyTrackerTests {
         mLatencyTracker.appNotRespondingStarted();
         mLatencyTracker.waitingOnAnrRecordLockStarted();
         mLatencyTracker.waitingOnAnrRecordLockEnded();
-        mLatencyTracker.earlyDumpRequestSubmittedWithSize(5);
         mLatencyTracker.anrRecordPlacingOnQueueWithSize(3);
         mLatencyTracker.appNotRespondingEnded();
 
@@ -94,16 +90,7 @@ public class AnrLatencyTrackerTests {
         mLatencyTracker.waitingOnProcLockStarted();
         mLatencyTracker.waitingOnProcLockEnded();
 
-        mLatencyTracker.dumpStackTracesTempFileStarted();
-        mLatencyTracker.dumpingPidStarted(5);
-
         mLatencyTracker.dumpStackTracesStarted();
-        mLatencyTracker.copyingFirstPidStarted();
-
-        mLatencyTracker.dumpingPidEnded();
-        mLatencyTracker.dumpStackTracesTempFileEnded();
-
-        mLatencyTracker.copyingFirstPidEnded(true);
         mLatencyTracker.dumpingFirstPidsStarted();
         mLatencyTracker.dumpingPidStarted(1);
         mLatencyTracker.dumpingPidEnded();
@@ -124,7 +111,7 @@ public class AnrLatencyTrackerTests {
         mLatencyTracker.close();
 
         assertThat(mLatencyTracker.dumpAsCommaSeparatedArrayWithHeader())
-            .isEqualTo("DurationsV3: 50,5,33,11,112,4,2,4,6,5,1,10,5,10,3,9,11,129,5,8,1\n\n");
+            .isEqualTo("DurationsV2: 50,5,25,8,115,2,3,7,8,15,2,7,23,10,3,6\n\n");
         verify(mLatencyTracker, times(1)).pushAtom();
     }
 
@@ -134,7 +121,6 @@ public class AnrLatencyTrackerTests {
         mLatencyTracker.appNotRespondingStarted();
         mLatencyTracker.waitingOnAnrRecordLockStarted();
         mLatencyTracker.waitingOnAnrRecordLockEnded();
-        mLatencyTracker.earlyDumpRequestSubmittedWithSize(5);
         mLatencyTracker.anrRecordPlacingOnQueueWithSize(3);
         mLatencyTracker.appNotRespondingEnded();
 
@@ -157,18 +143,7 @@ public class AnrLatencyTrackerTests {
         mLatencyTracker.waitingOnProcLockStarted();
         mLatencyTracker.waitingOnProcLockEnded();
 
-
-
-        mLatencyTracker.dumpStackTracesTempFileStarted();
-        mLatencyTracker.dumpingPidStarted(5);
-
         mLatencyTracker.dumpStackTracesStarted();
-        mLatencyTracker.copyingFirstPidStarted();
-
-        mLatencyTracker.dumpingPidEnded();
-        mLatencyTracker.dumpStackTracesTempFileEnded();
-
-        mLatencyTracker.copyingFirstPidEnded(true);
         mLatencyTracker.dumpingFirstPidsStarted();
         mLatencyTracker.dumpingPidStarted(1);
         mLatencyTracker.dumpingPidEnded();
