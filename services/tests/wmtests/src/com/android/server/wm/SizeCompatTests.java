@@ -52,6 +52,7 @@ import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANG
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
+import static com.android.server.wm.ActivityRecord.State.DESTROYED;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -168,6 +169,26 @@ public class SizeCompatTests extends WindowTestsBase {
     private void setUpDisplaySizeWithApp(int dw, int dh) {
         final TestDisplayContent.Builder builder = new TestDisplayContent.Builder(mAtm, dw, dh);
         setUpApp(builder.build());
+    }
+
+    @Test
+    public void testCleanLetterboxConfigListenerWhenTranslucentIsDestroyed() {
+        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
+        setUpDisplaySizeWithApp(2000, 1000);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        // Translucent Activity
+        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setLaunchedFromUid(mActivity.getUid())
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .build();
+        doReturn(false).when(translucentActivity).fillsParent();
+        mTask.addChild(translucentActivity);
+
+        translucentActivity.setState(DESTROYED, "testing");
+        translucentActivity.removeImmediately();
+
+        assertFalse(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
     }
 
     @Test
