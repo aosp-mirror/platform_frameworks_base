@@ -17,13 +17,21 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class FakeDeviceEntryFingerprintAuthRepository : DeviceEntryFingerprintAuthRepository {
-    private val _isLockedOut = MutableStateFlow<Boolean>(false)
+    private val _isLockedOut = MutableStateFlow(false)
     override val isLockedOut: StateFlow<Boolean> = _isLockedOut.asStateFlow()
+
+    private val _isRunning = MutableStateFlow(false)
+    override val isRunning: Flow<Boolean>
+        get() = _isRunning
+
+    override val availableFpSensorType: BiometricType?
+        get() = null
 
     fun setLockedOut(lockedOut: Boolean) {
         _isLockedOut.value = lockedOut
