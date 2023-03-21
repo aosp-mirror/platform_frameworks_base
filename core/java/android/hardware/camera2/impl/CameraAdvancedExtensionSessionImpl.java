@@ -258,6 +258,9 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             OutputConfiguration cameraOutput = new OutputConfiguration(output.surfaceGroupId,
                     outputSurface);
 
+            if (output.isMultiResolutionOutput) {
+                cameraOutput.setMultiResolutionOutput();
+            }
             if ((output.sharedSurfaceConfigs != null) && !output.sharedSurfaceConfigs.isEmpty()) {
                 cameraOutput.enableSurfaceSharing();
                 for (CameraOutputConfig sharedOutputConfig : output.sharedSurfaceConfigs) {
