@@ -357,16 +357,6 @@ public final class CredentialProviderInfoFactory {
             Log.e(TAG, "Failed to get capabilities: ", e);
         }
 
-        try {
-            String[] discovered =
-                    metadata.getStringArray(CredentialProviderService.CAPABILITY_META_DATA_KEY);
-            if (discovered != null) {
-                capabilities.addAll(Arrays.asList(discovered));
-            }
-        } catch (Resources.NotFoundException | NullPointerException e) {
-            Log.e(TAG, "Failed to get capabilities: ", e);
-        }
-
         if (capabilities.size() == 0) {
             Log.e(TAG, "No capabilities found for provider:" + serviceInfo);
             return output;
