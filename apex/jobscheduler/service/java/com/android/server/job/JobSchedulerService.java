@@ -483,6 +483,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         case Constants.KEY_RUNTIME_UI_LIMIT_MS:
                         case Constants.KEY_RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_BUFFER_FACTOR:
                         case Constants.KEY_RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS:
+                        case Constants.KEY_RUNTIME_CUMULATIVE_UI_LIMIT_MS:
                         case Constants.KEY_RUNTIME_USE_DATA_ESTIMATES_FOR_LIMITS:
                             if (!runtimeUpdated) {
                                 mConstants.updateRuntimeConstantsLocked();
@@ -583,6 +584,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 "runtime_min_ui_data_transfer_guarantee_buffer_factor";
         private static final String KEY_RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS =
                 "runtime_min_ui_data_transfer_guarantee_ms";
+        private static final String KEY_RUNTIME_CUMULATIVE_UI_LIMIT_MS =
+                "runtime_cumulative_ui_limit_ms";
         private static final String KEY_RUNTIME_USE_DATA_ESTIMATES_FOR_LIMITS =
                 "runtime_use_data_estimates_for_limits";
 
@@ -623,6 +626,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 1.35f;
         public static final long DEFAULT_RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS =
                 Math.max(10 * MINUTE_IN_MILLIS, DEFAULT_RUNTIME_MIN_UI_GUARANTEE_MS);
+        public static final long DEFAULT_RUNTIME_CUMULATIVE_UI_LIMIT_MS = 24 * HOUR_IN_MILLIS;
         public static final boolean DEFAULT_RUNTIME_USE_DATA_ESTIMATES_FOR_LIMITS = false;
         static final boolean DEFAULT_PERSIST_IN_SPLIT_FILES = true;
         static final int DEFAULT_MAX_NUM_PERSISTED_JOB_WORK_ITEMS = 100_000;
@@ -761,6 +765,12 @@ public class JobSchedulerService extends com.android.server.SystemService
                 DEFAULT_RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS;
 
         /**
+         * The maximum amount of cumulative time we will let a user-initiated job run for
+         * before downgrading it.
+         */
+        public long RUNTIME_CUMULATIVE_UI_LIMIT_MS = DEFAULT_RUNTIME_CUMULATIVE_UI_LIMIT_MS;
+
+        /**
          * Whether to use data estimates to determine execution limits for execution limits.
          */
         public boolean RUNTIME_USE_DATA_ESTIMATES_FOR_LIMITS =
@@ -882,6 +892,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     KEY_RUNTIME_MIN_UI_GUARANTEE_MS,
                     KEY_RUNTIME_UI_LIMIT_MS,
                     KEY_RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS,
+                    KEY_RUNTIME_CUMULATIVE_UI_LIMIT_MS,
                     KEY_RUNTIME_USE_DATA_ESTIMATES_FOR_LIMITS);
 
             // Make sure min runtime for regular jobs is at least 10 minutes.
@@ -916,6 +927,11 @@ public class JobSchedulerService extends com.android.server.SystemService
                     properties.getLong(
                             KEY_RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS,
                             DEFAULT_RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS));
+            // The cumulative runtime limit should be at least the max execution limit.
+            RUNTIME_CUMULATIVE_UI_LIMIT_MS = Math.max(RUNTIME_UI_LIMIT_MS,
+                    properties.getLong(
+                            KEY_RUNTIME_CUMULATIVE_UI_LIMIT_MS,
+                            DEFAULT_RUNTIME_CUMULATIVE_UI_LIMIT_MS));
 
             RUNTIME_USE_DATA_ESTIMATES_FOR_LIMITS = properties.getBoolean(
                     KEY_RUNTIME_USE_DATA_ESTIMATES_FOR_LIMITS,
@@ -973,6 +989,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_BUFFER_FACTOR).println();
             pw.print(KEY_RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS,
                     RUNTIME_MIN_UI_DATA_TRANSFER_GUARANTEE_MS).println();
+            pw.print(KEY_RUNTIME_CUMULATIVE_UI_LIMIT_MS, RUNTIME_CUMULATIVE_UI_LIMIT_MS).println();
             pw.print(KEY_RUNTIME_USE_DATA_ESTIMATES_FOR_LIMITS,
                     RUNTIME_USE_DATA_ESTIMATES_FOR_LIMITS).println();
 
@@ -2447,10 +2464,15 @@ public class JobSchedulerService extends com.android.server.SystemService
         JobStatus newJob = new JobStatus(failureToReschedule,
                 elapsedNowMillis + delayMillis,
                 JobStatus.NO_LATEST_RUNTIME, numFailures, numSystemStops,
-                failureToReschedule.getLastSuccessfulRunTime(), sSystemClock.millis());
+                failureToReschedule.getLastSuccessfulRunTime(), sSystemClock.millis(),
+                failureToReschedule.getCumulativeExecutionTimeMs());
         if (stopReason == JobParameters.STOP_REASON_USER) {
             // Demote all jobs to regular for user stops so they don't keep privileges.
             newJob.addInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+        }
+        if (newJob.getCumulativeExecutionTimeMs() >= mConstants.RUNTIME_CUMULATIVE_UI_LIMIT_MS
+                && newJob.shouldTreatAsUserInitiatedJob()) {
+            newJob.addInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ);
         }
         if (job.isPeriodic()) {
             newJob.setOriginalLatestRunTimeElapsed(
@@ -2543,7 +2565,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     elapsedNow + period - flex, elapsedNow + period,
                     0 /* numFailures */, 0 /* numSystemStops */,
                     sSystemClock.millis() /* lastSuccessfulRunTime */,
-                    periodicToReschedule.getLastFailedRunTime());
+                    periodicToReschedule.getLastFailedRunTime(),
+                    0 /* Reset cumulativeExecutionTime because of successful execution */);
         }
 
         final long newEarliestRunTimeElapsed = newLatestRuntimeElapsed
@@ -2558,7 +2581,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 newEarliestRunTimeElapsed, newLatestRuntimeElapsed,
                 0 /* numFailures */, 0 /* numSystemStops */,
                 sSystemClock.millis() /* lastSuccessfulRunTime */,
-                periodicToReschedule.getLastFailedRunTime());
+                periodicToReschedule.getLastFailedRunTime(),
+                0 /* Reset cumulativeExecutionTime because of successful execution */);
     }
 
     // JobCompletedListener implementations.

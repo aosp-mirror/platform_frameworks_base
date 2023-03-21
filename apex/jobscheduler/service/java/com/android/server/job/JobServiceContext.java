@@ -109,6 +109,7 @@ public final class JobServiceContext implements ServiceConnection {
     private static final long OP_TIMEOUT_MILLIS = 8 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
     /** Amount of time the JobScheduler will wait for a job to provide a required notification. */
     private static final long NOTIFICATION_TIMEOUT_MILLIS = 10_000L * Build.HW_TIMEOUT_MULTIPLIER;
+    private static final long EXECUTION_DURATION_STAMP_PERIOD_MILLIS = 5 * 60_000L;
 
     private static final String[] VERB_STRINGS = {
             "VERB_BINDING", "VERB_STARTING", "VERB_EXECUTING", "VERB_STOPPING", "VERB_FINISHED"
@@ -194,6 +195,8 @@ public final class JobServiceContext implements ServiceConnection {
     private long mMaxExecutionTimeMillis;
     /** Whether this job is required to provide a notification and we're still waiting for it. */
     private boolean mAwaitingNotification;
+    /** The last time we updated the job's execution duration, in the elapsed realtime timebase. */
+    private long mLastExecutionDurationStampTimeElapsed;
 
     private long mEstimatedDownloadBytes;
     private long mEstimatedUploadBytes;
@@ -1234,7 +1237,15 @@ public final class JobServiceContext implements ServiceConnection {
                             /* anrMessage */ "required notification not provided",
                             /* triggerAnr */ true);
                 } else {
-                    Slog.e(TAG, "Unexpected op timeout while EXECUTING");
+                    final long timeSinceDurationStampTimeMs =
+                            nowElapsed - mLastExecutionDurationStampTimeElapsed;
+                    if (timeSinceDurationStampTimeMs < EXECUTION_DURATION_STAMP_PERIOD_MILLIS) {
+                        Slog.e(TAG, "Unexpected op timeout while EXECUTING");
+                    }
+                    // Update the execution time even if this wasn't the pre-set time.
+                    mRunningJob.incrementCumulativeExecutionTime(timeSinceDurationStampTimeMs);
+                    mService.mJobs.touchJob(mRunningJob);
+                    mLastExecutionDurationStampTimeElapsed = nowElapsed;
                     scheduleOpTimeOutLocked();
                 }
                 break;
@@ -1303,8 +1314,11 @@ public final class JobServiceContext implements ServiceConnection {
             Slog.d(TAG, "Cleaning up " + mRunningJob.toShortString()
                     + " reschedule=" + reschedule + " reason=" + loggingDebugReason);
         }
+        final long nowElapsed = sElapsedRealtimeClock.millis();
         applyStoppedReasonLocked(loggingDebugReason);
         completedJob = mRunningJob;
+        completedJob.incrementCumulativeExecutionTime(
+                nowElapsed - mLastExecutionDurationStampTimeElapsed);
         // Use the JobParameters stop reasons for logging and metric purposes,
         // but if the job was marked for death, use that reason for rescheduling purposes.
         // The discrepancy could happen if a job ends up stopping for some reason
@@ -1331,7 +1345,7 @@ public final class JobServiceContext implements ServiceConnection {
         mPreviousJobHadSuccessfulFinish =
                 (loggingInternalStopReason == JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         if (!mPreviousJobHadSuccessfulFinish) {
-            mLastUnsuccessfulFinishElapsed = sElapsedRealtimeClock.millis();
+            mLastUnsuccessfulFinishElapsed = nowElapsed;
         }
         mJobPackageTracker.noteInactive(completedJob,
                 loggingInternalStopReason, loggingDebugReason);
@@ -1400,6 +1414,7 @@ public final class JobServiceContext implements ServiceConnection {
         mDeathMarkStopReason = JobParameters.STOP_REASON_UNDEFINED;
         mDeathMarkInternalStopReason = 0;
         mDeathMarkDebugReason = null;
+        mLastExecutionDurationStampTimeElapsed = 0;
         mPendingStopReason = JobParameters.STOP_REASON_UNDEFINED;
         mPendingInternalStopReason = 0;
         mPendingDebugStopReason = null;
@@ -1449,6 +1464,7 @@ public final class JobServiceContext implements ServiceConnection {
                 if (mAwaitingNotification) {
                     minTimeout = Math.min(minTimeout, NOTIFICATION_TIMEOUT_MILLIS);
                 }
+                minTimeout = Math.min(minTimeout, EXECUTION_DURATION_STAMP_PERIOD_MILLIS);
                 timeoutMillis = minTimeout;
                 break;
 
