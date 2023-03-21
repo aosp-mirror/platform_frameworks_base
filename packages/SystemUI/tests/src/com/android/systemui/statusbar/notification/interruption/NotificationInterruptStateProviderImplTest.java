@@ -858,6 +858,23 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testShouldNotScreen_appSuspended() throws RemoteException {
+        NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
+        when(mPowerManager.isInteractive()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.getState()).thenReturn(SHADE);
+        modifyRanking(entry).setSuspended(true).build();
+
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.NO_FSI_SUSPENDED);
+        assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
+                .isFalse();
+        verify(mLogger).logNoFullscreen(entry, "NO_FSI_SUSPENDED");
+        verify(mLogger, never()).logNoFullscreenWarning(any(), any());
+        verify(mLogger, never()).logFullscreen(any(), any());
+    }
+
+    @Test
     public void logFullScreenIntentDecision_shouldAlmostAlwaysLogOneTime() {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         Set<FullScreenIntentDecision> warnings = new HashSet<>(Arrays.asList(

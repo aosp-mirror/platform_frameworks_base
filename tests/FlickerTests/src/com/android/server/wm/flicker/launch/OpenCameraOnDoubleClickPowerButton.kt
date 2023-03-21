@@ -24,10 +24,10 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
 import android.view.KeyEvent
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.setRotation
-import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,6 +44,7 @@ import org.junit.runners.Parameterized
  *     Make sure no apps are running on the device
  *     Launch an app [testApp] and wait animation to complete
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)

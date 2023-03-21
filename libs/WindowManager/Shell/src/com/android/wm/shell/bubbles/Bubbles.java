@@ -26,6 +26,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.app.NotificationChannel;
 import android.content.Intent;
 import android.content.pm.UserInfo;
+import android.graphics.drawable.Icon;
 import android.hardware.HardwareBuffer;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
@@ -135,8 +136,9 @@ public interface Bubbles {
      *
      * @param intent the intent to display in the bubble expanded view.
      * @param user the {@link UserHandle} of the user to start this activity for.
+     * @param icon the {@link Icon} to use for the bubble view.
      */
-    void showOrHideAppBubble(Intent intent, UserHandle user);
+    void showOrHideAppBubble(Intent intent, UserHandle user, @Nullable Icon icon);
 
     /** @return true if the specified {@code taskId} corresponds to app bubble's taskId. */
     boolean isAppBubbleTaskId(int taskId);

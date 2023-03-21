@@ -24,7 +24,7 @@ import android.window.TaskSnapshot;
  * <p>
  * Access to this class should be guarded by the global window manager lock.
  */
-class TaskSnapshotCache extends AbsAppSnapshotCache<Task> {
+class TaskSnapshotCache extends SnapshotCache<Task> {
 
     private final AppSnapshotLoader mLoader;
 

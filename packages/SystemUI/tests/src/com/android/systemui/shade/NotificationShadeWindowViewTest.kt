@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransition
 import com.android.systemui.multishade.data.remoteproxy.MultiShadeInputProxy
 import com.android.systemui.multishade.data.repository.MultiShadeRepository
 import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor
+import com.android.systemui.multishade.domain.interactor.MultiShadeMotionEventInteractor
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.DragDownHelper
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -140,6 +141,16 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         featureFlags.set(Flags.DUAL_SHADE, false)
         val inputProxy = MultiShadeInputProxy()
         testScope = TestScope()
+        val multiShadeInteractor =
+            MultiShadeInteractor(
+                applicationScope = testScope.backgroundScope,
+                repository =
+                    MultiShadeRepository(
+                        applicationContext = context,
+                        inputProxy = inputProxy,
+                    ),
+                inputProxy = inputProxy,
+            )
         controller =
             NotificationShadeWindowViewController(
                 lockscreenShadeTransitionController,
@@ -165,18 +176,15 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 keyguardTransitionInteractor,
                 primaryBouncerToGoneTransitionViewModel,
                 featureFlags,
+                { multiShadeInteractor },
+                FakeSystemClock(),
                 {
-                    MultiShadeInteractor(
+                    MultiShadeMotionEventInteractor(
+                        applicationContext = context,
                         applicationScope = testScope.backgroundScope,
-                        repository =
-                            MultiShadeRepository(
-                                applicationContext = context,
-                                inputProxy = inputProxy,
-                            ),
-                        inputProxy = inputProxy,
+                        interactor = multiShadeInteractor,
                     )
                 },
-                FakeSystemClock(),
             )
 
         controller.setupExpandedStatusBar()

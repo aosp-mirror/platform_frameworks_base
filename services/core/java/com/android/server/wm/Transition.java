@@ -879,8 +879,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                                 && mTransientLaunches != null) {
                             // If transition is transient, then snapshots are taken at end of
                             // transition.
-                            mController.mTaskSnapshotController.recordSnapshot(
-                                    task, false /* allowSnapshotHome */);
+                            mController.mSnapshotController.mTaskSnapshotController
+                                    .recordSnapshot(task, false /* allowSnapshotHome */);
+                            mController.mSnapshotController.mActivitySnapshotController
+                                    .notifyAppVisibilityChanged(ar, false /* visible */);
                         }
                         ar.commitVisibility(false /* visible */, false /* performLayout */,
                                 true /* fromTransition */);
@@ -1225,13 +1227,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // transferred. If transition is transient, IME won't be moved during the transition and
         // the tasks are still live, so we take the snapshot at the end of the transition instead.
         if (mTransientLaunches == null) {
-            for (int i = mParticipants.size() - 1; i >= 0; --i) {
-                final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
-                if (ar == null || ar.isVisibleRequested() || ar.getTask() == null
-                        || ar.getTask().isVisibleRequested()) continue;
-                mController.mTaskSnapshotController.recordSnapshot(
-                        ar.getTask(), false /* allowSnapshotHome */);
-            }
+            mController.mSnapshotController.onTransitionReady(mType, mParticipants);
         }
 
         // This is non-null only if display has changes. It handles the visible windows that don't
@@ -1485,9 +1481,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // then we have to notify KeyguardService directly. This can happen if there is
             // another ongoing transition when the app changes occlusion OR if the app dies or
             // is killed. Both of these are common during tests.
-            final boolean notify = !(transit == TRANSIT_KEYGUARD_OCCLUDE
-                    || transit == TRANSIT_KEYGUARD_UNOCCLUDE);
-            mController.mAtm.mWindowManager.mPolicy.applyKeyguardOcclusionChange(notify);
+            if (transit != TRANSIT_KEYGUARD_OCCLUDE && transit != TRANSIT_KEYGUARD_UNOCCLUDE) {
+                mController.mAtm.mWindowManager.mPolicy.applyKeyguardOcclusionChange();
+            }
         }
     }
 

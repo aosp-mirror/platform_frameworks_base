@@ -689,8 +689,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // changes the orientation.
     private final PowerManager.WakeLock mScreenFrozenLock;
 
-    final SnapshotPersistQueue mSnapshotPersistQueue;
     final TaskSnapshotController mTaskSnapshotController;
+    final SnapshotController mSnapshotController;
 
     final BlurController mBlurController;
     final TaskFpsCallbackController mTaskFpsCallbackController;
@@ -1200,8 +1200,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mSyncEngine = new BLASTSyncEngine(this);
 
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
-        mSnapshotPersistQueue = new SnapshotPersistQueue();
-        mTaskSnapshotController = new TaskSnapshotController(this, mSnapshotPersistQueue);
+        mSnapshotController = new SnapshotController(this);
+        mTaskSnapshotController = mSnapshotController.mTaskSnapshotController;
 
         mWindowTracing = WindowTracing.createDefaultAndStartLooper(this,
                 Choreographer.getInstance());
@@ -5141,7 +5141,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mSystemReady = true;
         mPolicy.systemReady();
         mRoot.forAllDisplayPolicies(DisplayPolicy::systemReady);
-        mSnapshotPersistQueue.systemReady();
+        mSnapshotController.systemReady();
         mHasWideColorGamutSupport = queryWideColorGamutSupport();
         mHasHdrSupport = queryHdrSupport();
         UiThread.getHandler().post(mSettingsObserver::loadSettings);
@@ -6685,7 +6685,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println();
 
         mInputManagerCallback.dump(pw, "  ");
-        mTaskSnapshotController.dump(pw, "  ");
+        mSnapshotController.dump(pw, " ");
         if (mAccessibilityController.hasCallbacks()) {
             mAccessibilityController.dump(pw, "  ");
         }
@@ -9383,30 +9383,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mSurfaceSyncGroupController.markSyncGroupReady(syncGroupToken);
     }
 
-    private ArraySet<ActivityRecord> getVisibleActivityRecords(int displayId) {
-        ArraySet<ActivityRecord> result = new ArraySet<>();
-        synchronized (mGlobalLock) {
-            ArraySet<ComponentName> addedActivities = new ArraySet<>();
-            DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-            if (displayContent != null) {
-                displayContent.forAllWindows(
-                        (w) -> {
-                            if (w.isVisible()
-                                    && w.isDisplayed()
-                                    && w.mActivityRecord != null
-                                    && !addedActivities.contains(
-                                    w.mActivityRecord.mActivityComponent)
-                                    && w.mActivityRecord.isVisible()
-                                    && w.isVisibleNow()) {
-                                addedActivities.add(w.mActivityRecord.mActivityComponent);
-                                result.add(w.mActivityRecord);
-                            }
-                        },
-                        true /* traverseTopToBottom */);
-            }
-        }
-        return result;
-    }
 
     /**
      * Must be called when a screenshot is taken via hardware chord.
@@ -9422,14 +9398,20 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires STATUS_BAR_SERVICE permission");
         }
         synchronized (mGlobalLock) {
-            ArraySet<ComponentName> notifiedApps = new ArraySet<>();
-            ArraySet<ActivityRecord> visibleApps = getVisibleActivityRecords(displayId);
-            for (ActivityRecord ar : visibleApps) {
-                if (ar.isRegisteredForScreenCaptureCallback()) {
-                    ar.reportScreenCaptured();
-                    notifiedApps.add(ar.mActivityComponent);
-                }
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                return new ArrayList<>();
             }
+            ArraySet<ComponentName> notifiedApps = new ArraySet<>();
+            displayContent.forAllActivities(
+                    (ar) -> {
+                        if (!notifiedApps.contains(ar.mActivityComponent) && ar.isVisible()
+                                && ar.isRegisteredForScreenCaptureCallback()) {
+                            ar.reportScreenCaptured();
+                            notifiedApps.add(ar.mActivityComponent);
+                        }
+                    },
+                    true /* traverseTopToBottom */);
             return List.copyOf(notifiedApps);
         }
     }

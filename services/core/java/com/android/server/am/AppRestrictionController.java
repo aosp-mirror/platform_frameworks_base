@@ -106,7 +106,6 @@ import android.app.role.RoleManager;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -117,7 +116,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ServiceInfo;
 import android.content.pm.ServiceInfo.ForegroundServiceType;
-import android.database.ContentObserver;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.AppBackgroundRestrictionsInfo;
@@ -137,7 +135,6 @@ import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
-import android.provider.Settings.Global;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -1069,8 +1066,7 @@ public final class AppRestrictionController {
         }
     }
 
-    final class ConstantsObserver extends ContentObserver implements
-            OnPropertiesChangedListener {
+    final class ConstantsObserver implements OnPropertiesChangedListener {
         /**
          * Whether or not to set the app to restricted standby bucket automatically
          * when it's background-restricted.
@@ -1181,8 +1177,6 @@ public final class AppRestrictionController {
 
         volatile boolean mBgAutoRestrictAbusiveApps;
 
-        volatile boolean mRestrictedBucketEnabled;
-
         volatile long mBgAbusiveNotificationMinIntervalMs;
 
         volatile long mBgLongFgsNotificationMinIntervalMs;
@@ -1215,7 +1209,6 @@ public final class AppRestrictionController {
         volatile boolean mBgPromptAbusiveAppsToBgRestricted;
 
         ConstantsObserver(Handler handler, Context context) {
-            super(handler);
             mDefaultBgPromptFgsWithNotiToBgRestricted = context.getResources().getBoolean(
                     com.android.internal.R.bool.config_bg_prompt_fgs_with_noti_to_bg_restricted);
             mDefaultBgPromptAbusiveAppToBgRestricted = context.getResources().getBoolean(
@@ -1261,27 +1254,8 @@ public final class AppRestrictionController {
             }
         }
 
-        @Override
-        public void onChange(boolean selfChange) {
-            updateSettings();
-        }
-
         public void start() {
-            final ContentResolver cr = mContext.getContentResolver();
-            cr.registerContentObserver(Global.getUriFor(Global.ENABLE_RESTRICTED_BUCKET),
-                    false, this);
-            updateSettings();
             updateDeviceConfig();
-        }
-
-        void updateSettings() {
-            mRestrictedBucketEnabled = isRestrictedBucketEnabled();
-        }
-
-        private boolean isRestrictedBucketEnabled() {
-            return Global.getInt(mContext.getContentResolver(),
-                    Global.ENABLE_RESTRICTED_BUCKET,
-                    Global.DEFAULT_ENABLE_RESTRICTED_BUCKET) == 1;
         }
 
         void updateDeviceConfig() {
@@ -1763,8 +1737,7 @@ public final class AppRestrictionController {
                         .isAppBackgroundRestricted(uid, packageName)) {
                     return new Pair<>(RESTRICTION_LEVEL_BACKGROUND_RESTRICTED, mEmptyTrackerInfo);
                 }
-                level = mConstantsObserver.mRestrictedBucketEnabled
-                        && standbyBucket == STANDBY_BUCKET_RESTRICTED
+                level = standbyBucket == STANDBY_BUCKET_RESTRICTED
                         ? RESTRICTION_LEVEL_RESTRICTED_BUCKET
                         : RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
                 if (calcTrackers) {
@@ -1811,13 +1784,9 @@ public final class AppRestrictionController {
         @RestrictionLevel int level = RESTRICTION_LEVEL_UNKNOWN;
         @RestrictionLevel int prevLevel = level;
         BaseAppStateTracker resultTracker = null;
-        final boolean isRestrictedBucketEnabled = mConstantsObserver.mRestrictedBucketEnabled;
         for (int i = mAppStateTrackers.size() - 1; i >= 0; i--) {
             @RestrictionLevel int l = mAppStateTrackers.get(i).getPolicy()
                     .getProposedRestrictionLevel(packageName, uid, maxLevel);
-            if (!isRestrictedBucketEnabled && l == RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
-                l = RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
-            }
             level = Math.max(level, l);
             if (level != prevLevel) {
                 resultTracker = mAppStateTrackers.get(i);
@@ -2193,9 +2162,6 @@ public final class AppRestrictionController {
         }
         if (level >= RESTRICTION_LEVEL_RESTRICTED_BUCKET
                 && curLevel < RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
-            if (!mConstantsObserver.mRestrictedBucketEnabled) {
-                return;
-            }
             // Moving the app standby bucket to restricted in the meanwhile.
             if (DEBUG_BG_RESTRICTION_CONTROLLER
                     && level == RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {

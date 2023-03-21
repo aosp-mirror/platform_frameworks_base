@@ -185,7 +185,8 @@ public class BubbleDataTest extends ShellTestCase {
 
         Intent appBubbleIntent = new Intent(mContext, BubblesTestActivity.class);
         appBubbleIntent.setPackage(mContext.getPackageName());
-        mAppBubble = new Bubble(appBubbleIntent, new UserHandle(1), mMainExecutor);
+        mAppBubble = new Bubble(appBubbleIntent, new UserHandle(1), mock(Icon.class),
+                mMainExecutor);
 
         mPositioner = new TestableBubblePositioner(mContext,
                 mock(WindowManager.class));

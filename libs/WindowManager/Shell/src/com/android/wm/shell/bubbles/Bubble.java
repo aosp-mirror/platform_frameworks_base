@@ -206,12 +206,14 @@ public class Bubble implements BubbleViewProvider {
 
     public Bubble(Intent intent,
             UserHandle user,
+            @Nullable Icon icon,
             Executor mainExecutor) {
         mKey = KEY_APP_BUBBLE;
         mGroupKey = null;
         mLocusId = null;
         mFlags = 0;
         mUser = user;
+        mIcon = icon;
         mShowBubbleUpdateDot = false;
         mMainExecutor = mainExecutor;
         mTaskId = INVALID_TASK_ID;

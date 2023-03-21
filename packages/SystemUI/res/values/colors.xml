@@ -231,6 +231,9 @@
 
     <color name="people_tile_background">@color/material_dynamic_secondary95</color>
 
+    <!-- Chipbar -->
+    <color name="chipbar_text_and_icon_color">@android:color/system_accent2_900</color>
+
     <!-- Internet Dialog -->
     <!-- Material next state on color-->
     <color name="settingslib_state_on_color">@color/settingslib_state_on</color>

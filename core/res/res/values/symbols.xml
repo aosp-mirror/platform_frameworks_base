@@ -362,6 +362,7 @@
   <java-symbol type="bool" name="config_disableUsbPermissionDialogs"/>
   <java-symbol type="dimen" name="config_highResTaskSnapshotScale" />
   <java-symbol type="dimen" name="config_lowResTaskSnapshotScale" />
+  <java-symbol type="dimen" name="config_resActivitySnapshotScale" />
   <java-symbol type="dimen" name="config_qsTileStrokeWidthInactive" />
   <java-symbol type="dimen" name="config_qsTileStrokeWidthActive" />
   <java-symbol type="bool" name="config_use16BitTaskSnapshotPixelFormat" />

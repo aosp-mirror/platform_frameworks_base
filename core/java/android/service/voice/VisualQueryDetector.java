@@ -32,6 +32,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
@@ -216,9 +217,23 @@ public class VisualQueryDetector {
         void onVisualQueryDetectionServiceRestarted();
 
         /**
-         * Called when the detection fails due to an error.
+         * Called when the detection fails due to an error occurs in the
+         * {@link VisualQueryDetectionService}, {@link VisualQueryDetectionServiceFailure} will be
+         * reported to the detector.
+         *
+         * @param visualQueryDetectionServiceFailure It provides the error code, error message and
+         *                                           suggested action.
          */
-        void onFailure(@NonNull DetectorFailure detectorFailure);
+        void onFailure(
+                @NonNull VisualQueryDetectionServiceFailure visualQueryDetectionServiceFailure);
+
+        /**
+         * Called when the detection fails due to an unknown error occurs, an error message
+         * will be reported to the detector.
+         *
+         * @param errorMessage It provides the error message.
+         */
+        void onUnknownFailure(@NonNull String errorMessage);
     }
 
     private class VisualQueryDetectorInitializationDelegate extends AbstractDetector {
@@ -295,10 +310,17 @@ public class VisualQueryDetector {
 
         /** Called when the detection fails due to an error. */
         @Override
-        public void onDetectionFailure(DetectorFailure detectorFailure) {
-            Slog.v(TAG, "BinderCallback#onDetectionFailure");
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> mCallback.onFailure(detectorFailure)));
+        public void onVisualQueryDetectionServiceFailure(
+                VisualQueryDetectionServiceFailure visualQueryDetectionServiceFailure) {
+            Slog.v(TAG, "BinderCallback#onVisualQueryDetectionServiceFailure: "
+                    + visualQueryDetectionServiceFailure);
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                if (visualQueryDetectionServiceFailure != null) {
+                    mCallback.onFailure(visualQueryDetectionServiceFailure);
+                } else {
+                    mCallback.onUnknownFailure("Error data is null");
+                }
+            }));
         }
     }
 
@@ -375,7 +397,35 @@ public class VisualQueryDetector {
         }
 
         @Override
-        public void onDetectionFailure(DetectorFailure detectorFailure) throws RemoteException {
+        public void onHotwordDetectionServiceFailure(
+                HotwordDetectionServiceFailure hotwordDetectionServiceFailure)
+                throws RemoteException {
+            // It should never be called here.
+            Slog.w(TAG, "onHotwordDetectionServiceFailure: " + hotwordDetectionServiceFailure);
+        }
+
+        @Override
+        public void onVisualQueryDetectionServiceFailure(
+                VisualQueryDetectionServiceFailure visualQueryDetectionServiceFailure)
+                throws RemoteException {
+            Slog.v(TAG, "onVisualQueryDetectionServiceFailure: "
+                    + visualQueryDetectionServiceFailure);
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                if (visualQueryDetectionServiceFailure != null) {
+                    mCallback.onFailure(visualQueryDetectionServiceFailure);
+                } else {
+                    mCallback.onUnknownFailure("Error data is null");
+                }
+            }));
+        }
+
+        @Override
+        public void onUnknownFailure(String errorMessage) throws RemoteException {
+            Slog.v(TAG, "onUnknownFailure: " + errorMessage);
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                mCallback.onUnknownFailure(
+                        !TextUtils.isEmpty(errorMessage) ? errorMessage : "Error data is null");
+            }));
         }
     }
 }

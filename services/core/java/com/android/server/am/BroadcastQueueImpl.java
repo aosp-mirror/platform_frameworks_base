@@ -601,7 +601,9 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     r.dispatchTime - r.enqueueTime,
                     r.receiverTime - r.dispatchTime,
                     finishTime - r.receiverTime,
-                    packageState);
+                    packageState,
+                    r.curApp.info.packageName,
+                    r.callerPackage);
         }
         if (state == BroadcastRecord.IDLE) {
             Slog.w(TAG_BROADCAST, "finishReceiver [" + mQueueName + "] called but state is IDLE");
@@ -780,7 +782,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME,
                     BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                     dispatchDelay, receiveDelay, 0 /* finish_delay */,
-                    SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL);
+                    SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
+                    app != null ? app.info.packageName : null, callingPackage);
         }
     }
 
