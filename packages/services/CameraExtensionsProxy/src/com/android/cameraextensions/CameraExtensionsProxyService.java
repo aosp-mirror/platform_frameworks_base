@@ -19,7 +19,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -1855,6 +1854,7 @@ public class CameraExtensionsProxyService extends Service {
         ret.outputId.id = output.getId();
         ret.physicalCameraId = output.getPhysicalCameraId();
         ret.surfaceGroupId = output.getSurfaceGroupId();
+        ret.isMultiResolutionOutput = false;
         if (output instanceof SurfaceOutputConfigImpl) {
             SurfaceOutputConfigImpl surfaceConfig = (SurfaceOutputConfigImpl) output;
             ret.type = CameraOutputConfig.TYPE_SURFACE;
@@ -1874,6 +1874,7 @@ public class CameraExtensionsProxyService extends Service {
             ret.type = CameraOutputConfig.TYPE_MULTIRES_IMAGEREADER;
             ret.imageFormat = multiResReaderConfig.getImageFormat();
             ret.capacity = multiResReaderConfig.getMaxImages();
+            ret.isMultiResolutionOutput = true;
         } else {
             throw new IllegalStateException("Unknown output config type!");
         }
