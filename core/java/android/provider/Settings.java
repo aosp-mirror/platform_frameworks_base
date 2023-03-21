@@ -11728,13 +11728,14 @@ public final class Settings {
         public static final String THEATER_MODE_ON = "theater_mode_on";
 
         /**
-         * Constant for use in AIRPLANE_MODE_RADIOS to specify Bluetooth radio.
+         * Constant for use in AIRPLANE_MODE_RADIOS or SATELLITE_MODE_RADIOS to specify Bluetooth
+         * radio.
          */
         @Readable
         public static final String RADIO_BLUETOOTH = "bluetooth";
 
         /**
-         * Constant for use in AIRPLANE_MODE_RADIOS to specify Wi-Fi radio.
+         * Constant for use in AIRPLANE_MODE_RADIOS or SATELLITE_MODE_RADIOS to specify Wi-Fi radio.
          */
         @Readable
         public static final String RADIO_WIFI = "wifi";
@@ -11751,10 +11752,38 @@ public final class Settings {
         public static final String RADIO_CELL = "cell";
 
         /**
-         * Constant for use in AIRPLANE_MODE_RADIOS to specify NFC radio.
+         * Constant for use in AIRPLANE_MODE_RADIOS or SATELLITE_MODE_RADIOS to specify NFC radio.
          */
         @Readable
         public static final String RADIO_NFC = "nfc";
+
+        /**
+         * Constant for use in SATELLITE_MODE_RADIOS to specify UWB radio.
+         *
+         * {@hide}
+         */
+        public static final String RADIO_UWB = "uwb";
+
+
+        /**
+         * A comma separated list of radios that need to be disabled when satellite mode is on.
+         *
+         * {@hide}
+         */
+        public static final String SATELLITE_MODE_RADIOS = "satellite_mode_radios";
+
+        /**
+         * The satellite mode is enabled for the user. When the satellite mode is enabled, the
+         * satellite radio will be turned on and all other radios will be turned off. When the
+         * satellite mode is disabled, the satellite radio will be turned off and the states of
+         * other radios will be restored.
+         * <p>
+         * When this setting is set to 0, it means the satellite mode is disabled. When this
+         * setting is set to 1, it means the satellite mode is enabled.
+         *
+         * {@hide}
+         */
+        public static final String SATELLITE_MODE_ENABLED = "satellite_mode_enabled";
 
         /**
          * A comma separated list of radios that need to be disabled when airplane mode
