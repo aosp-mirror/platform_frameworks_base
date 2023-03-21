@@ -94,7 +94,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             RemoteCredentialService remoteCredentialService) {
         android.credentials.GetCredentialRequest filteredRequest =
                 filterOptions(providerInfo.getCapabilities(),
-                        getRequestSession.mClientRequest);
+                        getRequestSession.mClientRequest,
+                        providerInfo.getComponentName());
         if (filteredRequest != null) {
             Map<String, CredentialOption> beginGetOptionToCredentialOptionMap =
                     new HashMap<>();
@@ -142,17 +143,19 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     @Nullable
     private static android.credentials.GetCredentialRequest filterOptions(
             List<String> providerCapabilities,
-            android.credentials.GetCredentialRequest clientRequest
+            android.credentials.GetCredentialRequest clientRequest,
+            ComponentName componentName
     ) {
         List<CredentialOption> filteredOptions = new ArrayList<>();
         for (CredentialOption option : clientRequest.getCredentialOptions()) {
-            if (providerCapabilities.contains(option.getType())) {
+            if (providerCapabilities.contains(option.getType())
+                    && isProviderAllowed(option, componentName)) {
                 Log.i(TAG, "In createProviderRequest - capability found : "
                         + option.getType());
                 filteredOptions.add(option);
             } else {
                 Log.i(TAG, "In createProviderRequest - capability not "
-                        + "found : " + option.getType());
+                        + "found, or provider not allowed : " + option.getType());
             }
         }
         if (!filteredOptions.isEmpty()) {
@@ -163,6 +166,16 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         }
         Log.i(TAG, "In createProviderRequest - returning null");
         return null;
+    }
+
+    private static boolean isProviderAllowed(CredentialOption option, ComponentName componentName) {
+        if (!option.getAllowedProviders().isEmpty() && !option.getAllowedProviders().contains(
+                componentName)) {
+            Log.d(TAG, "Provider allow list specified but does not contain this provider: "
+                    + componentName.flattenToString());
+            return false;
+        }
+        return true;
     }
 
     public ProviderGetSession(Context context,
