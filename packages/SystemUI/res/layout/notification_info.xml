@@ -321,7 +321,8 @@ asked for it -->
         <RelativeLayout
             android:id="@+id/bottom_buttons"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
+            android:minHeight="60dp"
             android:gravity="center_vertical"
             android:paddingStart="4dp"
             android:paddingEnd="4dp"
