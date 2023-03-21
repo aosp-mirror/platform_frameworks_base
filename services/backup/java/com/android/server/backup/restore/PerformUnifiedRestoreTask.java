@@ -677,7 +677,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // Good to go!  Set up and bind the agent...
         mAgent = backupManagerService.bindToAgentSynchronous(
                 mCurrentPackage.applicationInfo,
-                ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL,
+                ApplicationThreadConstants.BACKUP_MODE_RESTORE,
                 mBackupEligibilityRules.getBackupDestination());
         if (mAgent == null) {
             Slog.w(TAG, "Can't find backup agent for " + packageName);
