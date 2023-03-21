@@ -52,8 +52,13 @@ import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.hardware.power.Boost;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -1054,6 +1059,10 @@ public class DisplayRotation {
             return false;
         }
 
+        if (mFoldController != null && mFoldController.shouldDisableRotationSensor()) {
+            return false;
+        }
+
         if (mSupportAutoRotation) {
             if (mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR
                     || mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
@@ -1151,6 +1160,9 @@ public class DisplayRotation {
         int sensorRotation = mOrientationListener != null
                 ? mOrientationListener.getProposedRotation() // may be -1
                 : -1;
+        if (mFoldController != null && mFoldController.shouldIgnoreSensorRotation()) {
+            sensorRotation = -1;
+        }
         if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis()) {
             // Flipping 270 and 90 has the same effect as changing the direction which rotation is
             // applied.
@@ -1398,6 +1410,11 @@ public class DisplayRotation {
             return false;
         }
 
+        // Do not show rotation choice when fold controller blocks rotation sensor
+        if (mFoldController != null && mFoldController.shouldIgnoreSensorRotation()) {
+            return false;
+        }
+
         // Don't show rotation choice if we are in tabletop or book modes.
         if (isTabletopAutoRotateOverrideEnabled()) return false;
 
@@ -1491,6 +1508,12 @@ public class DisplayRotation {
         }
     }
 
+    void onDisplayRemoved() {
+        if (mFoldController != null) {
+            mFoldController.onDisplayRemoved();
+        }
+    }
+
     /** Return whether the rotation settings has changed. */
     private boolean updateSettings() {
         final ContentResolver resolver = mContext.getContentResolver();
@@ -1580,6 +1603,22 @@ public class DisplayRotation {
         pw.println(prefix + "  mLidOpenRotation=" + Surface.rotationToString(mLidOpenRotation));
         pw.println(prefix + "  mFixedToUserRotation=" + isFixedToUserRotation());
 
+        if (mFoldController != null) {
+            pw.println(prefix + "FoldController");
+            pw.println(prefix + "  mPauseAutorotationDuringUnfolding="
+                    + mFoldController.mPauseAutorotationDuringUnfolding);
+            pw.println(prefix + "  mShouldDisableRotationSensor="
+                    + mFoldController.mShouldDisableRotationSensor);
+            pw.println(prefix + "  mShouldIgnoreSensorRotation="
+                    + mFoldController.mShouldIgnoreSensorRotation);
+            pw.println(prefix + "  mLastDisplaySwitchTime="
+                    + mFoldController.mLastDisplaySwitchTime);
+            pw.println(prefix + "  mLastHingeAngleEventTime="
+                    + mFoldController.mLastHingeAngleEventTime);
+            pw.println(prefix + "  mDeviceState="
+                    + mFoldController.mDeviceState);
+        }
+
         if (!mRotationHistory.mRecords.isEmpty()) {
             pw.println();
             pw.println(prefix + "  RotationHistory");
@@ -1621,13 +1660,37 @@ public class DisplayRotation {
         }
     }
 
-    private class FoldController {
+    /**
+     * Called by the DisplayContent when the physical display changes
+     */
+    void physicalDisplayChanged() {
+        if (mFoldController != null) {
+            mFoldController.onPhysicalDisplayChanged();
+        }
+    }
+
+    @VisibleForTesting
+    long uptimeMillis() {
+        return SystemClock.uptimeMillis();
+    }
+
+    class FoldController {
+        private final boolean mPauseAutorotationDuringUnfolding;
         @Surface.Rotation
         private int mHalfFoldSavedRotation = -1; // No saved rotation
         private DeviceStateController.DeviceState mDeviceState =
                 DeviceStateController.DeviceState.UNKNOWN;
+        private long mLastHingeAngleEventTime = 0;
+        private long mLastDisplaySwitchTime = 0;
+        private boolean mShouldIgnoreSensorRotation;
+        private boolean mShouldDisableRotationSensor;
         private boolean mInHalfFoldTransition = false;
+        private int mDisplaySwitchRotationBlockTimeMs;
+        private int mHingeAngleRotationBlockTimeMs;
+        private int mMaxHingeAngle;
         private final boolean mIsDisplayAlwaysSeparatingHinge;
+        private SensorManager mSensorManager;
+        private SensorEventListener mHingeAngleSensorEventListener;
         private final Set<Integer> mTabletopRotations;
         private final Runnable mActivityBoundsUpdateCallback;
 
@@ -1684,6 +1747,48 @@ public class DisplayRotation {
                     }
                 }
             };
+
+            mPauseAutorotationDuringUnfolding = mContext.getResources().getBoolean(
+                    R.bool.config_windowManagerPauseRotationWhenUnfolding);
+
+            if (mPauseAutorotationDuringUnfolding) {
+                mDisplaySwitchRotationBlockTimeMs = mContext.getResources().getInteger(
+                        R.integer.config_pauseRotationWhenUnfolding_displaySwitchTimeout);
+                mHingeAngleRotationBlockTimeMs = mContext.getResources().getInteger(
+                        R.integer.config_pauseRotationWhenUnfolding_hingeEventTimeout);
+                mMaxHingeAngle = mContext.getResources().getInteger(
+                        R.integer.config_pauseRotationWhenUnfolding_maxHingeAngle);
+                registerSensorManager();
+            }
+        }
+
+        private void registerSensorManager() {
+            mSensorManager = mContext.getSystemService(SensorManager.class);
+            if (mSensorManager != null) {
+                final Sensor hingeAngleSensor = mSensorManager
+                        .getDefaultSensor(Sensor.TYPE_HINGE_ANGLE);
+
+                if (hingeAngleSensor != null) {
+                    mHingeAngleSensorEventListener = new SensorEventListener() {
+                        @Override
+                        public void onSensorChanged(SensorEvent event) {
+                            onHingeAngleChanged(event.values[0]);
+                        }
+
+                        @Override
+                        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                        }
+                    };
+                    mSensorManager.registerListener(mHingeAngleSensorEventListener,
+                            hingeAngleSensor, SensorManager.SENSOR_DELAY_FASTEST, getHandler());
+                }
+            }
+        }
+
+        void onDisplayRemoved() {
+            if (mSensorManager != null && mHingeAngleSensorEventListener != null) {
+                mSensorManager.unregisterListener(mHingeAngleSensorEventListener);
+            }
         }
 
         boolean isDeviceInPosture(DeviceStateController.DeviceState state, boolean isTabletop) {
@@ -1713,6 +1818,7 @@ public class DisplayRotation {
         boolean shouldRevertOverriddenRotation() {
             // When transitioning to open.
             return mDeviceState == DeviceStateController.DeviceState.OPEN
+                    && !mShouldIgnoreSensorRotation // Ignore if the hinge angle still moving
                     && mInHalfFoldTransition
                     && mHalfFoldSavedRotation != -1 // Ignore if we've already reverted.
                     && mUserRotationMode
@@ -1759,6 +1865,80 @@ public class DisplayRotation {
             UiThread.getHandler().postDelayed(mActivityBoundsUpdateCallback,
                     FOLDING_RECOMPUTE_CONFIG_DELAY_MS);
         }
+
+        boolean shouldIgnoreSensorRotation() {
+            return mShouldIgnoreSensorRotation;
+        }
+
+        boolean shouldDisableRotationSensor() {
+            return mShouldDisableRotationSensor;
+        }
+
+        private void updateSensorRotationBlockIfNeeded() {
+            final long currentTime = uptimeMillis();
+            final boolean newShouldIgnoreRotation =
+                    currentTime - mLastDisplaySwitchTime < mDisplaySwitchRotationBlockTimeMs
+                    || currentTime - mLastHingeAngleEventTime < mHingeAngleRotationBlockTimeMs;
+
+            if (newShouldIgnoreRotation != mShouldIgnoreSensorRotation) {
+                mShouldIgnoreSensorRotation = newShouldIgnoreRotation;
+
+                // Resuming the autorotation
+                if (!mShouldIgnoreSensorRotation) {
+                    if (mShouldDisableRotationSensor) {
+                        // Sensor was disabled, let's re-enable it
+                        mShouldDisableRotationSensor = false;
+                        updateOrientationListenerLw();
+                    } else {
+                        // Sensor was not disabled, let's update the rotation in case if we received
+                        // some rotation sensor updates when autorotate was disabled
+                        updateRotationAndSendNewConfigIfChanged();
+                    }
+                }
+            }
+        }
+
+        void onPhysicalDisplayChanged() {
+            if (!mPauseAutorotationDuringUnfolding) return;
+
+            mLastDisplaySwitchTime = uptimeMillis();
+
+            final boolean isUnfolding =
+                    mDeviceState == DeviceStateController.DeviceState.OPEN
+                    || mDeviceState == DeviceStateController.DeviceState.HALF_FOLDED;
+
+            if (isUnfolding) {
+                // Temporary disable rotation sensor updates when unfolding
+                mShouldDisableRotationSensor = true;
+                updateOrientationListenerLw();
+            }
+
+            updateSensorRotationBlockIfNeeded();
+            getHandler().postDelayed(() -> {
+                synchronized (mLock) {
+                    updateSensorRotationBlockIfNeeded();
+                };
+            }, mDisplaySwitchRotationBlockTimeMs);
+        }
+
+        void onHingeAngleChanged(float hingeAngle) {
+            if (hingeAngle < mMaxHingeAngle) {
+                mLastHingeAngleEventTime = uptimeMillis();
+
+                updateSensorRotationBlockIfNeeded();
+
+                getHandler().postDelayed(() -> {
+                    synchronized (mLock) {
+                        updateSensorRotationBlockIfNeeded();
+                    };
+                }, mHingeAngleRotationBlockTimeMs);
+            }
+        }
+    }
+
+    @VisibleForTesting
+    Handler getHandler() {
+        return mService.mH;
     }
 
     private class OrientationListener extends WindowOrientationListener implements Runnable {
