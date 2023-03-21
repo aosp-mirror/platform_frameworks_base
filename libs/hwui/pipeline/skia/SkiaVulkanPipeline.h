@@ -55,6 +55,7 @@ public:
     bool isContextReady() override;
     bool supportsExtendedRangeHdr() const override { return true; }
     void setTargetSdrHdrRatio(float ratio) override;
+    const SkM44& getPixelSnapMatrix() const override;
 
     static void invokeFunctor(const renderthread::RenderThread& thread, Functor* functor);
     static sk_sp<Bitmap> allocateHardwareBitmap(renderthread::RenderThread& thread,
