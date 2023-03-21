@@ -39,6 +39,7 @@ import static com.android.companiondevicemanager.CompanionDeviceResources.TITLES
 import static com.android.companiondevicemanager.Utils.getApplicationLabel;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 import static com.android.companiondevicemanager.Utils.getIcon;
+import static com.android.companiondevicemanager.Utils.getImageColor;
 import static com.android.companiondevicemanager.Utils.getVendorHeaderIcon;
 import static com.android.companiondevicemanager.Utils.getVendorHeaderName;
 import static com.android.companiondevicemanager.Utils.hasVendorIcon;
@@ -56,7 +57,6 @@ import android.companion.CompanionDeviceManager;
 import android.companion.IAssociationRequestCallback;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.BlendMode;
 import android.graphics.BlendModeColorFilter;
 import android.graphics.Color;
@@ -463,8 +463,6 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         final Drawable vendorIcon;
         final CharSequence vendorName;
         final Spanned title;
-        int nightModeFlags = getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK;
 
         if (!SUPPORTED_SELF_MANAGED_PROFILES.contains(deviceProfile)) {
             throw new RuntimeException("Unsupported profile " + deviceProfile);
@@ -477,8 +475,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             vendorName = getVendorHeaderName(this, packageName, userId);
             mVendorHeaderImage.setImageDrawable(vendorIcon);
             if (hasVendorIcon(this, packageName, userId)) {
-                int color = nightModeFlags == Configuration.UI_MODE_NIGHT_YES
-                        ? android.R.color.system_accent1_200 : android.R.color.system_accent1_600;
+                int color = getImageColor(this);
                 mVendorHeaderImage.setColorFilter(getResources().getColor(color, /* Theme= */null));
             }
         } catch (PackageManager.NameNotFoundException e) {
