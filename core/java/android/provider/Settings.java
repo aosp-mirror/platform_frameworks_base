@@ -2428,6 +2428,24 @@ public final class Settings {
             "android.settings.REQUEST_SET_AUTOFILL_SERVICE";
 
     /**
+     * Activity Action: Show screen that let user enable a Credential Manager provider.
+     * <p>
+     * Input: Intent's data URI set with an application name, using the
+     * "package" schema (like "package:com.my.app").
+     *
+     * <p>
+     * Output: {@link android.app.Activity#RESULT_OK} if user selected a provider belonging
+     * to the caller package.
+     * <p>
+     * <b>NOTE: </b> Applications should call
+     * {@link android.credentials.CredentialManager#isEnabledCredentialProviderService()}
+     * and only use this action to start an activity if they return {@code false}.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CREDENTIAL_PROVIDER =
+            "android.settings.CREDENTIAL_PROVIDER";
+
+    /**
      * Activity Action: Show screen for controlling the Quick Access Wallet.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
