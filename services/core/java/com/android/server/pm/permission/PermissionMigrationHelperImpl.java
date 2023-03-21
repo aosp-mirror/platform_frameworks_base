@@ -18,11 +18,9 @@ package com.android.server.pm.permission;
 
 import android.annotation.NonNull;
 import android.content.pm.PackageManagerInternal;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 
-import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
@@ -81,15 +79,12 @@ public class PermissionMigrationHelperImpl implements PermissionMigrationHelper 
      */
     @NonNull
     public Map<Integer, Map<String, LegacyPermissionState>> getLegacyPermissionStates(int userId) {
-        RuntimePermissionsPersistence legacyPersistence =
-                RuntimePermissionsPersistence.createInstance();
+        PackageManagerInternal mPackageManagerInternal =
+                LocalServices.getService(PackageManagerInternal.class);
         Map<Integer, Map<String, LegacyPermissionState>> appIdPermissionStates = new ArrayMap<>();
 
-        RuntimePermissionsState legacyState = legacyPersistence.readForUser(UserHandle.of(userId));
-        if (legacyState == null) {
-            return appIdPermissionStates;
-        }
-
+        RuntimePermissionsState legacyState =
+                mPackageManagerInternal.getLegacyPermissionsState(userId);
         PackageManagerLocal packageManagerLocal =
                 LocalManagerRegistry.getManager(PackageManagerLocal.class);
 
