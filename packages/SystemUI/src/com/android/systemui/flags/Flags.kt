@@ -231,7 +231,7 @@ object Flags {
     /** Whether to inflate the bouncer view on a background thread. */
     // TODO(b/273341787): Tracking Bug
     @JvmField
-    val PREVENT_BYPASS_KEYGUARD = unreleasedFlag(230, "prevent_bypass_keyguard")
+    val PREVENT_BYPASS_KEYGUARD = unreleasedFlag(230, "prevent_bypass_keyguard", teamfood = true)
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
