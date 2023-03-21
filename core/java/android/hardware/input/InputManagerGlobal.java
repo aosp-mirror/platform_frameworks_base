@@ -307,7 +307,7 @@ public final class InputManagerGlobal {
     /**
      * @see InputManager#registerInputDeviceListener
      */
-    void registerInputDeviceListener(InputDeviceListener listener, Handler handler) {
+    public void registerInputDeviceListener(InputDeviceListener listener, Handler handler) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null");
         }
@@ -324,7 +324,7 @@ public final class InputManagerGlobal {
     /**
      * @see InputManager#unregisterInputDeviceListener
      */
-    void unregisterInputDeviceListener(InputDeviceListener listener) {
+    public void unregisterInputDeviceListener(InputDeviceListener listener) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null");
         }
@@ -1118,6 +1118,13 @@ public final class InputManagerGlobal {
     }
 
     /**
+     * @see InputManager#deviceHasKeys(int[])
+     */
+    public boolean[] deviceHasKeys(int[] keyCodes) {
+        return deviceHasKeys(-1, keyCodes);
+    }
+
+    /**
      * @see InputManager#deviceHasKeys(int, int[])
      */
     public boolean[] deviceHasKeys(int id, int[] keyCodes) {
@@ -1203,9 +1210,9 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see Inputmanager#monitorGestureInput(String, int)
+     * @see InputManager#monitorGestureInput(String, int)
      */
-    InputMonitor monitorGestureInput(String name, int displayId) {
+    public InputMonitor monitorGestureInput(String name, int displayId) {
         try {
             return mIm.monitorGestureInput(new Binder(), name, displayId);
         } catch (RemoteException ex) {
@@ -1216,7 +1223,7 @@ public final class InputManagerGlobal {
     /**
      * @see InputManager#addUniqueIdAssociation(String, String)
      */
-    void addUniqueIdAssociation(@NonNull String inputPort, @NonNull String displayUniqueId) {
+    public void addUniqueIdAssociation(@NonNull String inputPort, @NonNull String displayUniqueId) {
         try {
             mIm.addUniqueIdAssociation(inputPort, displayUniqueId);
         } catch (RemoteException e) {
@@ -1251,7 +1258,7 @@ public final class InputManagerGlobal {
     /**
      * @see InputManager#cancelCurrentTouch()
      */
-    void cancelCurrentTouch() {
+    public void cancelCurrentTouch() {
         try {
             mIm.cancelCurrentTouch();
         } catch (RemoteException e) {
@@ -1263,7 +1270,7 @@ public final class InputManagerGlobal {
      * @see InputManager#pilferPointers(IBinder)
      */
     @RequiresPermission(Manifest.permission.MONITOR_INPUT)
-    void pilferPointers(IBinder inputChannelToken) {
+    public void pilferPointers(IBinder inputChannelToken) {
         try {
             mIm.pilferPointers(inputChannelToken);
         } catch (RemoteException e) {
