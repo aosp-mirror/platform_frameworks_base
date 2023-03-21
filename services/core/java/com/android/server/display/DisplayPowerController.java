@@ -1039,7 +1039,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         noteScreenBrightness(mPowerState.getScreenBrightness());
 
         // Initialize all of the brightness tracking state
-        final float brightness = convertToNits(mPowerState.getScreenBrightness());
+        final float brightness = convertToAdjustedNits(mPowerState.getScreenBrightness());
         if (mBrightnessTracker != null && brightness >= PowerManager.BRIGHTNESS_MIN) {
             mBrightnessTracker.start(brightness);
         }
@@ -2698,7 +2698,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private void notifyBrightnessTrackerChanged(float brightness, boolean userInitiated,
             boolean wasShortTermModelActive) {
-        final float brightnessInNits = convertToNits(brightness);
+        final float brightnessInNits = convertToAdjustedNits(brightness);
         if (mUseAutoBrightness && brightnessInNits >= 0.0f
                 && mAutomaticBrightnessController != null && mBrightnessTracker != null) {
             // We only want to track changes on devices that can actually map the display backlight
@@ -2720,6 +2720,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             return -1f;
         }
         return mAutomaticBrightnessController.convertToNits(brightness);
+    }
+
+    private float convertToAdjustedNits(float brightness) {
+        if (mAutomaticBrightnessController == null) {
+            return -1f;
+        }
+        return mAutomaticBrightnessController.convertToAdjustedNits(brightness);
     }
 
     private float convertToFloatScale(float nits) {
@@ -3075,16 +3082,16 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         int appliedRbcStrength  = event.isRbcEnabled() ? event.getRbcStrength() : -1;
         float appliedHbmMaxNits =
                 event.getHbmMode() == BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF
-                ? -1f : convertToNits(event.getHbmMax());
+                ? -1f : convertToAdjustedNits(event.getHbmMax());
         // thermalCapNits set to -1 if not currently capping max brightness
         float appliedThermalCapNits =
                 event.getThermalMax() == PowerManager.BRIGHTNESS_MAX
-                ? -1f : convertToNits(event.getThermalMax());
+                ? -1f : convertToAdjustedNits(event.getThermalMax());
 
         if (mIsDisplayInternal) {
             FrameworkStatsLog.write(FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED,
-                    convertToNits(event.getInitialBrightness()),
-                    convertToNits(event.getBrightness()),
+                    convertToAdjustedNits(event.getInitialBrightness()),
+                    convertToAdjustedNits(event.getBrightness()),
                     event.getLux(),
                     event.getPhysicalDisplayId(),
                     event.wasShortTermModelActive(),

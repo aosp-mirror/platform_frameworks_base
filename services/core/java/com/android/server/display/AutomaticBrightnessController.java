@@ -1160,6 +1160,14 @@ public class AutomaticBrightnessController {
         update();
     }
 
+    /**
+     * Convert a brightness float scale value to a nit value. Adjustments, such as RBC, are not
+     * applied. This is used when storing the brightness in nits for the default display and when
+     * passing the brightness value to follower displays.
+     *
+     * @param brightness The float scale value
+     * @return The nit value or -1f if no conversion is possible.
+     */
     public float convertToNits(float brightness) {
         if (mCurrentBrightnessMapper != null) {
             return mCurrentBrightnessMapper.convertToNits(brightness);
@@ -1168,6 +1176,30 @@ public class AutomaticBrightnessController {
         }
     }
 
+    /**
+     * Convert a brightness float scale value to a nit value. Adjustments, such as RBC are applied.
+     * This is used when sending the brightness value to
+     * {@link com.android.server.display.BrightnessTracker}.
+     *
+     * @param brightness The float scale value
+     * @return The nit value or -1f if no conversion is possible.
+     */
+    public float convertToAdjustedNits(float brightness) {
+        if (mCurrentBrightnessMapper != null) {
+            return mCurrentBrightnessMapper.convertToAdjustedNits(brightness);
+        } else {
+            return -1.0f;
+        }
+    }
+
+    /**
+     * Convert a brightness nit value to a float scale value. It is assumed that the nit value
+     * provided does not have adjustments, such as RBC, applied.
+     *
+     * @param nits The nit value
+     * @return The float scale value or {@link PowerManager.BRIGHTNESS_INVALID_FLOAT} if no
+     * conversion is possible.
+     */
     public float convertToFloatScale(float nits) {
         if (mCurrentBrightnessMapper != null) {
             return mCurrentBrightnessMapper.convertToFloatScale(nits);
