@@ -2808,6 +2808,15 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getMobileRadioMeasuredBatteryConsumptionUC();
 
     /**
+     * Returns the battery consumption (in microcoulombs) of the phone calls, derived from on device
+     * power measurement data.
+     * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+     *
+     * {@hide}
+     */
+    public abstract long getPhoneEnergyConsumptionUC();
+
+    /**
      * Returns the battery consumption (in microcoulombs) of the screen while on, derived from on
      * device power measurement data.
      * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.

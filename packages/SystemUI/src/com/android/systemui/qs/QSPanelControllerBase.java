@@ -91,15 +91,18 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             new QSPanel.OnConfigurationChangedListener() {
                 @Override
                 public void onConfigurationChange(Configuration newConfig) {
-                    mQSLogger.logOnConfigurationChanged(
-                        /* lastOrientation= */ mLastOrientation,
-                        /* newOrientation= */ newConfig.orientation,
-                        /* containerName= */ mView.getDumpableTag());
-
-                    boolean previousSplitShadeState = mShouldUseSplitNotificationShade;
+                    final boolean previousSplitShadeState = mShouldUseSplitNotificationShade;
+                    final int previousOrientation = mLastOrientation;
                     mShouldUseSplitNotificationShade =
-                        LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
+                            LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
                     mLastOrientation = newConfig.orientation;
+
+                    mQSLogger.logOnConfigurationChanged(
+                        /* oldOrientation= */ previousOrientation,
+                        /* newOrientation= */ mLastOrientation,
+                        /* oldShouldUseSplitShade= */ previousSplitShadeState,
+                        /* newShouldUseSplitShade= */ mShouldUseSplitNotificationShade,
+                        /* containerName= */ mView.getDumpableTag());
 
                     switchTileLayoutIfNeeded();
                     onConfigurationChanged();
