@@ -2363,6 +2363,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (isTranslucent(wc)) {
                 flags |= FLAG_TRANSLUCENT;
             }
+            if (wc.mWmService.mAtmService.mBackNavigationController.isMonitorTransitionTarget(wc)) {
+                flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
+            }
             final Task task = wc.asTask();
             if (task != null) {
                 final ActivityRecord topActivity = task.getTopNonFinishingActivity();
@@ -2371,18 +2374,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                             && topActivity.mStartingData.hasImeSurface()) {
                         flags |= FLAG_WILL_IME_SHOWN;
                     }
-                    if (topActivity.mAtmService.mBackNavigationController
-                            .isMonitorTransitionTarget(topActivity)) {
-                        flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
-                    }
-                    if (topActivity != null && topActivity.mLaunchTaskBehind) {
+                    if (topActivity.mLaunchTaskBehind) {
                         Slog.e(TAG, "Unexpected launch-task-behind operation in shell transition");
                         flags |= FLAG_TASK_LAUNCHING_BEHIND;
-                    }
-                } else {
-                    if (task.mAtmService.mBackNavigationController
-                            .isMonitorTransitionTarget(task)) {
-                        flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
                     }
                 }
                 if (task.voiceSession != null) {
@@ -2397,10 +2391,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     flags |= FLAG_IS_VOICE_INTERACTION;
                 }
                 flags |= record.mTransitionChangeFlags;
-                if (record.mAtmService.mBackNavigationController
-                        .isMonitorTransitionTarget(record)) {
-                    flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
-                }
             }
             final TaskFragment taskFragment = wc.asTaskFragment();
             if (taskFragment != null && task == null) {
