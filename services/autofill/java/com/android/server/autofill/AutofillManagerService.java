@@ -383,7 +383,7 @@ public final class AutofillManagerService
             final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
             if (service == null) {
                 // If we cannot get the service from the services cache, it will call
-                // updateRemoteAugmentedAutofillService() finally. Skip call this update again.
+                // updateRemoteFieldClassificationService() finally. Skip call this update again.
                 getServiceForUserLocked(userId);
             } else {
                 service.updateRemoteFieldClassificationService();
