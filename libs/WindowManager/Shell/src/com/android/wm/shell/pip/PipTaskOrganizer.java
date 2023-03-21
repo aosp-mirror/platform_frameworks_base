@@ -1481,9 +1481,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 applyFinishBoundsResize(wct, direction, false);
             }
         } else {
-            final boolean isPipTopLeft =
-                    direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN && isPipToTopLeft();
-            applyFinishBoundsResize(wct, direction, isPipTopLeft);
+            applyFinishBoundsResize(wct, direction, isPipToTopLeft());
+            // Use sync transaction to apply finish transaction for enter split case.
+            if (direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN) {
+                mSyncTransactionQueue.runInSync(t -> {
+                    t.merge(tx);
+                });
+            }
         }
 
         finishResizeForMenu(destinationBounds);
@@ -1520,7 +1524,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mSurfaceTransactionHelper.round(tx, mLeash, isInPip());
 
         wct.setBounds(mToken, taskBounds);
-        wct.setBoundsChangeTransaction(mToken, tx);
+        // Pip to split should use sync transaction to sync split bounds change.
+        if (direction != TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN) {
+            wct.setBoundsChangeTransaction(mToken, tx);
+        }
     }
 
     /**
