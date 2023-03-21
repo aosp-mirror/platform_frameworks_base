@@ -150,6 +150,15 @@ public class AutofillFeatureFlags {
             "package_deny_list_for_unimportant_view";
 
     /**
+     * Sets the list of activities and packages allowed for autofill. The format is same with
+     * {@link #DEVICE_CONFIG_PACKAGE_DENYLIST_FOR_UNIMPORTANT_VIEW}
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PACKAGE_AND_ACTIVITY_ALLOWLIST_FOR_TRIGGERING_FILL_REQUEST =
+            "package_and_activity_allowlist_for_triggering_fill_request";
+
+    /**
      * Whether the heuristics check for view is enabled
      */
     public static final String DEVICE_CONFIG_TRIGGER_FILL_REQUEST_ON_UNIMPORTANT_VIEW =
@@ -183,6 +192,7 @@ public class AutofillFeatureFlags {
      */
     public static final String DEVICE_CONFIG_SHOULD_ENABLE_AUTOFILL_ON_ALL_VIEW_TYPES =
             "should_enable_autofill_on_all_view_types";
+
     // END AUTOFILL FOR ALL APPS FLAGS //
 
 
@@ -378,6 +388,16 @@ public class AutofillFeatureFlags {
             DEVICE_CONFIG_PACKAGE_DENYLIST_FOR_UNIMPORTANT_VIEW, "");
     }
 
+    /**
+     * Get autofill allowlist from flag
+     *
+     * @hide
+     */
+    public static String getAllowlistStringFromFlag() {
+        return DeviceConfig.getString(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_PACKAGE_AND_ACTIVITY_ALLOWLIST_FOR_TRIGGERING_FILL_REQUEST, "");
+    }
 
     // START AUTOFILL PCC CLASSIFICATION FUNCTIONS
 
