@@ -1452,11 +1452,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public boolean onTouch(MotionEvent event) {
         boolean handledTouch = false;
         if (mAlternateBouncerInteractor.isVisibleState()) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            final boolean downThenUp = event.getActionMasked() == MotionEvent.ACTION_UP
+                    && mAlternateBouncerReceivedDownTouch;
+            final boolean outsideTouch = event.getActionMasked() == MotionEvent.ACTION_OUTSIDE;
+            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                 mAlternateBouncerReceivedDownTouch = true;
-            } else if (event.getAction() == MotionEvent.ACTION_UP
-                    && mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()
-                    && mAlternateBouncerReceivedDownTouch) {
+            } else if ((downThenUp || outsideTouch)
+                    && mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()) {
                 showPrimaryBouncer(true);
             }
             handledTouch = true;
