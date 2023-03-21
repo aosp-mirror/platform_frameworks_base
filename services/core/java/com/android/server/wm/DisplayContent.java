@@ -1188,7 +1188,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private void finishHoldScreenUpdate() {
         final boolean hold = mTmpHoldScreenWindow != null;
         if (hold && mTmpHoldScreenWindow != mHoldScreenWindow) {
-            mHoldScreenWakeLock.setWorkSource(new WorkSource(mTmpHoldScreenWindow.mSession.mUid));
+            mHoldScreenWakeLock.setWorkSource(new WorkSource(mTmpHoldScreenWindow.mSession.mUid,
+                    mTmpHoldScreenWindow.mSession.mPackageName));
         }
         mHoldScreenWindow = mTmpHoldScreenWindow;
         mTmpHoldScreenWindow = null;
