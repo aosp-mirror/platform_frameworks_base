@@ -422,9 +422,9 @@ object Flags {
 
     @JvmField
     // TODO(b/271428141): Tracking Bug
-    val ENABLE_LOW_LIGHT_CLOCK_UNDOCKED = unreleasedFlag(
+    val ENABLE_LOW_LIGHT_CLOCK_UNDOCKED = releasedFlag(
         1004,
-        "enable_low_light_clock_undocked", teamfood = true)
+        "enable_low_light_clock_undocked")
 
     // 1100 - windowing
     @Keep
