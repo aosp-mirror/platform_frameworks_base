@@ -36,6 +36,16 @@ public final class Counter {
     }
 
     /**
+     * Increments Telemetry Express Counter metric by 1
+     * @param metricId to log, no-op if metricId is not defined in the TeX catalog
+     * @param uid used as a dimension for the count metric
+     * @hide
+     */
+    public static void logIncrementWithUid(@NonNull String metricId, int uid) {
+        logIncrementWithUid(metricId, uid, 1);
+    }
+
+    /**
      * Increments Telemetry Express Counter metric by arbitrary value
      * @param metricId to log, no-op if metricId is not defined in the TeX catalog
      * @param amount to increment counter
@@ -44,5 +54,18 @@ public final class Counter {
     public static void logIncrement(@NonNull String metricId, long amount) {
         final long metricIdHash = Utils.hashString(metricId);
         FrameworkStatsLog.write(FrameworkStatsLog.EXPRESS_EVENT_REPORTED, metricIdHash, amount);
+    }
+
+    /**
+     * Increments Telemetry Express Counter metric by arbitrary value
+     * @param metricId to log, no-op if metricId is not defined in the TeX catalog
+     * @param uid used as a dimension for the count metric
+     * @param amount to increment counter
+     * @hide
+     */
+    public static void logIncrementWithUid(@NonNull String metricId, int uid, long amount) {
+        final long metricIdHash = Utils.hashString(metricId);
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.EXPRESS_UID_EVENT_REPORTED, metricIdHash, amount, uid);
     }
 }
