@@ -2778,51 +2778,70 @@ public final class AlarmManagerServiceTest {
             setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i + 1, getNewMockPendingIntent());
         }
 
-        final String otherUidPackage1 = "other.uid.package1";
-        final String otherUidPackage2 = "other.uid.package2";
-        final int otherUid = 1243;
+        final String otherPackage1 = "other.package1";
+        final String otherPackage2 = "other.package2";
+        final int otherAppId = 1243;
+        final int otherUser1 = 31;
+        final int otherUser2 = 8;
+        final int otherUid1 = UserHandle.getUid(otherUser1, otherAppId);
+        final int otherUid2 = UserHandle.getUid(otherUser2, otherAppId);
 
         registerAppIds(
-                new String[]{TEST_CALLING_PACKAGE, otherUidPackage1, otherUidPackage2},
-                new Integer[]{TEST_CALLING_UID, otherUid, otherUid}
+                new String[]{TEST_CALLING_PACKAGE, otherPackage1, otherPackage2},
+                new Integer[]{UserHandle.getAppId(TEST_CALLING_UID), otherAppId, otherAppId}
         );
 
         for (int i = 0; i < 9; i++) {
             setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i + 11, 0,
-                    getNewMockPendingIntent(otherUid, otherUidPackage1), 0, 0, otherUid,
-                    otherUidPackage1, null);
+                    getNewMockPendingIntent(otherUid1, otherPackage1), 0, 0, otherUid1,
+                    otherPackage1, null);
         }
 
         for (int i = 0; i < 8; i++) {
             setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i + 20, 0,
-                    getNewMockPendingIntent(otherUid, otherUidPackage2), 0, 0, otherUid,
-                    otherUidPackage2, null);
+                    getNewMockPendingIntent(otherUid1, otherPackage2), 0, 0, otherUid1,
+                    otherPackage2, null);
         }
 
-        assertEquals(27, mService.mAlarmStore.size());
+        for (int i = 0; i < 7; i++) {
+            setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i + 28, 0,
+                    getNewMockPendingIntent(otherUid2, otherPackage2), 0, 0, otherUid2,
+                    otherPackage2, null);
+        }
+
+        assertEquals(34, mService.mAlarmStore.size());
 
         try {
-            mBinder.removeAll(otherUidPackage1);
+            mBinder.removeAll(otherPackage1);
             fail("removeAll() for wrong package did not throw SecurityException");
         } catch (SecurityException se) {
             // Expected
         }
 
         try {
-            mBinder.removeAll(otherUidPackage2);
+            mBinder.removeAll(otherPackage2);
             fail("removeAll() for wrong package did not throw SecurityException");
         } catch (SecurityException se) {
             // Expected
         }
 
         mBinder.removeAll(TEST_CALLING_PACKAGE);
-        assertEquals(17, mService.mAlarmStore.size());
+        assertEquals(24, mService.mAlarmStore.size());
         assertEquals(0, mService.mAlarmStore.getCount(a -> a.matches(TEST_CALLING_PACKAGE)));
 
-        mTestCallingUid = otherUid;
-        mBinder.removeAll(otherUidPackage1);
-        assertEquals(0, mService.mAlarmStore.getCount(a -> a.matches(otherUidPackage1)));
-        assertEquals(8, mService.mAlarmStore.getCount(a -> a.matches(otherUidPackage2)));
+        mTestCallingUid = otherUid1;
+        mBinder.removeAll(otherPackage1);
+        assertEquals(15, mService.mAlarmStore.size());
+        assertEquals(15, mService.mAlarmStore.getCount(a -> a.matches(otherPackage2)));
+        assertEquals(0, mService.mAlarmStore.getCount(a -> a.matches(otherPackage1)));
+
+        mBinder.removeAll(otherPackage2);
+        assertEquals(7, mService.mAlarmStore.size());
+        assertEquals(7, mService.mAlarmStore.getCount(a -> a.matches(otherPackage2)));
+
+        mTestCallingUid = otherUid2;
+        mBinder.removeAll(otherPackage2);
+        assertEquals(0, mService.mAlarmStore.size());
     }
 
     @Test
