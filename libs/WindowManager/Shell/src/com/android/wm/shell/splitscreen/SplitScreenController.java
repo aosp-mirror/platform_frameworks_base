@@ -31,7 +31,6 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.common.split.SplitScreenUtils.isValidToSplit;
 import static com.android.wm.shell.common.split.SplitScreenUtils.reverseSplitPosition;
 import static com.android.wm.shell.common.split.SplitScreenUtils.samePackage;
-import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
@@ -89,7 +88,6 @@ import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
-import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
@@ -339,8 +337,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     public boolean moveToSideStage(int taskId, @SplitPosition int sideStagePosition) {
-        return moveToStage(taskId, STAGE_TYPE_SIDE, sideStagePosition,
-                new WindowContainerTransaction());
+        return moveToStage(taskId, sideStagePosition, new WindowContainerTransaction());
     }
 
     /**
@@ -351,13 +348,13 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mStageCoordinator.updateSurfaces(transaction);
     }
 
-    private boolean moveToStage(int taskId, @StageType int stageType,
-            @SplitPosition int stagePosition, WindowContainerTransaction wct) {
+    private boolean moveToStage(int taskId, @SplitPosition int stagePosition,
+            WindowContainerTransaction wct) {
         final ActivityManager.RunningTaskInfo task = mTaskOrganizer.getRunningTaskInfo(taskId);
         if (task == null) {
             throw new IllegalArgumentException("Unknown taskId" + taskId);
         }
-        return mStageCoordinator.moveToStage(task, stageType, stagePosition, wct);
+        return mStageCoordinator.moveToStage(task, stagePosition, wct);
     }
 
     public boolean removeFromSideStage(int taskId) {
@@ -382,10 +379,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     public void enterSplitScreen(int taskId, boolean leftOrTop, WindowContainerTransaction wct) {
-        final int stageType = isSplitScreenVisible() ? STAGE_TYPE_UNDEFINED : STAGE_TYPE_SIDE;
         final int stagePosition =
                 leftOrTop ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT;
-        moveToStage(taskId, stageType, stagePosition, wct);
+        moveToStage(taskId, stagePosition, wct);
     }
 
     public void exitSplitScreen(int toTopTaskId, @ExitReason int exitReason) {
