@@ -8071,6 +8071,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mSizeCompatScale = 1f;
         mSizeCompatBounds = null;
         mCompatDisplayInsets = null;
+        mLetterboxUiController.clearInheritedCompatDisplayInsets();
     }
 
     @VisibleForTesting
