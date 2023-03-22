@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager.createflow
 
+import android.text.TextUtils
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -668,7 +669,7 @@ fun PrimaryCreateOptionRow(
         entryHeadlineText = requestDisplayInfo.title,
         entrySecondLineText = when (requestDisplayInfo.type) {
             CredentialType.PASSKEY -> {
-                if (requestDisplayInfo.subtitle != null) {
+                if (!TextUtils.isEmpty(requestDisplayInfo.subtitle)) {
                     requestDisplayInfo.subtitle + " • " + stringResource(
                         R.string.passkey_before_subtitle
                     )
