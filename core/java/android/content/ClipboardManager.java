@@ -85,7 +85,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      *
      * @hide
      */
-    public static final boolean DEVICE_CONFIG_DEFAULT_ALLOW_VIRTUALDEVICE_SILOS = false;
+    public static final boolean DEVICE_CONFIG_DEFAULT_ALLOW_VIRTUALDEVICE_SILOS = true;
 
     private final Context mContext;
     private final Handler mHandler;
