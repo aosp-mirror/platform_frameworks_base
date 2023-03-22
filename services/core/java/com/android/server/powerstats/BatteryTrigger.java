@@ -59,7 +59,9 @@ public final class BatteryTrigger extends PowerStatsLogTrigger {
         if (triggerEnabled) {
             IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
             Intent batteryStatus = mContext.registerReceiver(mBatteryLevelReceiver, filter);
-            mBatteryLevel = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+            if (batteryStatus != null) {
+                mBatteryLevel = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+            }
         }
     }
 }
