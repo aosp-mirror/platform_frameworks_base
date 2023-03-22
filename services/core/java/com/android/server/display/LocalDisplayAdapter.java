@@ -911,7 +911,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         final float newHdrSdrRatio;
                         if (displayNits != DisplayDeviceConfig.NITS_INVALID
                                 && sdrNits != DisplayDeviceConfig.NITS_INVALID) {
-                            newHdrSdrRatio = displayNits / sdrNits;
+                            // Ensure the ratio stays >= 1.0f as values below that are nonsensical
+                            newHdrSdrRatio = Math.max(1.f, displayNits / sdrNits);
                         } else {
                             newHdrSdrRatio = Float.NaN;
                         }
