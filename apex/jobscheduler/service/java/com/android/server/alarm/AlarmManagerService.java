@@ -3088,7 +3088,9 @@ public class AlarmManagerService extends SystemService {
                         + " does not belong to the calling uid " + callingUid);
             }
             synchronized (mLock) {
-                removeLocked(callingPackage, REMOVE_REASON_ALARM_CANCELLED);
+                removeAlarmsInternalLocked(
+                        a -> (a.matches(callingPackage) && a.creatorUid == callingUid),
+                        REMOVE_REASON_ALARM_CANCELLED);
             }
         }
 
