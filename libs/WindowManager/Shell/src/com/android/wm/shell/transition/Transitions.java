@@ -140,6 +140,9 @@ public class Transitions implements RemoteCallable<Transitions> {
     /** Transition type to freeform in desktop mode. */
     public static final int TRANSIT_ENTER_DESKTOP_MODE = WindowManager.TRANSIT_FIRST_CUSTOM + 11;
 
+    /** Transition type to fullscreen from desktop mode. */
+    public static final int TRANSIT_EXIT_DESKTOP_MODE = WindowManager.TRANSIT_FIRST_CUSTOM + 12;
+
     private final WindowOrganizer mOrganizer;
     private final Context mContext;
     private final ShellExecutor mMainExecutor;
