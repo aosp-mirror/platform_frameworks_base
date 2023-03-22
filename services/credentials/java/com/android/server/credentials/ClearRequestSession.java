@@ -88,8 +88,8 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
             ComponentName componentName,
             Void response) {
         mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(
-                mProviders.get(componentName.flattenToString())
-                .mCandidatePhasePerProviderMetric);
+                mProviders.get(componentName.flattenToString()).mProviderSessionMetric
+                        .getCandidatePhasePerProviderMetric());
         respondToClientWithResponseAndFinish(null);
     }
 

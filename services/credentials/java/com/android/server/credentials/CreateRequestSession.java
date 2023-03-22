@@ -117,8 +117,8 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         Log.i(TAG, "onFinalCredentialReceived from: " + componentName.flattenToString());
         mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
         mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(mProviders.get(
-                componentName.flattenToString())
-                .mCandidatePhasePerProviderMetric);
+                componentName.flattenToString()).mProviderSessionMetric
+                .getCandidatePhasePerProviderMetric());
         if (response != null) {
             mRequestSessionMetric.collectChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_SUCCESS.getMetricCode());
