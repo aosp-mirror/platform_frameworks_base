@@ -352,27 +352,28 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertTrue(imeSource.getFrame().contains(navBarSource.getFrame()));
     }
 
-    @SetupWindows(addWindows = W_NAVIGATION_BAR)
+    @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
-    public void testInsetsGivenContentFrame() {
+    public void testImeInsetsGivenContentFrame() {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
         final DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.logicalWidth = 1000;
         displayInfo.logicalHeight = 2000;
         displayInfo.rotation = ROTATION_0;
 
-        WindowManager.LayoutParams attrs = mNavBarWindow.mAttrs;
-        displayPolicy.addWindowLw(mNavBarWindow, attrs);
-        mNavBarWindow.setRequestedSize(attrs.width, attrs.height);
-        mNavBarWindow.getControllableInsetProvider().setServerVisible(true);
+        mDisplayContent.setInputMethodWindowLocked(mImeWindow);
+        mImeWindow.getControllableInsetProvider().setServerVisible(true);
 
-        mNavBarWindow.mGivenContentInsets.set(0, 10, 0, 0);
+        mImeWindow.mGivenContentInsets.set(0, 10, 0, 0);
 
-        displayPolicy.layoutWindowLw(mNavBarWindow, null, mDisplayContent.mDisplayFrames);
+        displayPolicy.layoutWindowLw(mImeWindow, null, mDisplayContent.mDisplayFrames);
         final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
-        final InsetsSource navBarSource = state.peekSource(
-                mNavBarWindow.getControllableInsetProvider().getSource().getId());
-        assertEquals(attrs.height - 10, navBarSource.getFrame().height());
+        final InsetsSource imeSource = state.peekSource(ID_IME);
+
+        assertNotNull(imeSource);
+        assertFalse(imeSource.getFrame().isEmpty());
+        assertEquals(mImeWindow.getWindowFrames().mFrame.height() - 10,
+                imeSource.getFrame().height());
     }
 
     @SetupWindows(addWindows = { W_ACTIVITY, W_NAVIGATION_BAR })
