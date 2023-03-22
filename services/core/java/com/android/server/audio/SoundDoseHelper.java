@@ -369,7 +369,7 @@ public class SoundDoseHelper {
 
             if (mCurrentCsd > 0.0f) {
                 final SoundDoseRecord record = new SoundDoseRecord();
-                record.timestamp = SystemClock.elapsedRealtime();
+                record.timestamp = SystemClock.elapsedRealtime() / 1000;
                 record.value = csd;
                 mDoseRecords.add(record);
             }
