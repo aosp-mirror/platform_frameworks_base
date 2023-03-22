@@ -38,6 +38,10 @@ import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
 import static android.content.pm.ActivityInfo.screenOrientationToString;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
+import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
+import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
+import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
@@ -183,7 +187,7 @@ final class LetterboxUiController {
     private float mInheritedMaxAspectRatio = UNDEFINED_ASPECT_RATIO;
 
     @Configuration.Orientation
-    private int mInheritedOrientation = Configuration.ORIENTATION_UNDEFINED;
+    private int mInheritedOrientation = ORIENTATION_UNDEFINED;
 
     // The app compat state for the opaque activity if any
     private int mInheritedAppCompatState = APP_COMPAT_STATE_CHANGED__STATE__UNKNOWN;
@@ -1409,7 +1413,8 @@ final class LetterboxUiController {
         mLetterboxConfigListener = WindowContainer.overrideConfigurationPropagation(
                 mActivityRecord, firstOpaqueActivityBeneath,
                 (opaqueConfig, transparentConfig) -> {
-                    final Configuration mutatedConfiguration = new Configuration();
+                    final Configuration mutatedConfiguration =
+                            fromOriginalTranslucentConfig(transparentConfig);
                     final Rect parentBounds = parent.getWindowConfiguration().getBounds();
                     final Rect bounds = mutatedConfiguration.windowConfiguration.getBounds();
                     final Rect letterboxBounds = opaqueConfig.windowConfiguration.getBounds();
@@ -1497,6 +1502,22 @@ final class LetterboxUiController {
                 true /* traverseTopToBottom */));
     }
 
+    // When overriding translucent activities configuration we need to keep some of the
+    // original properties
+    private Configuration fromOriginalTranslucentConfig(Configuration translucentConfig) {
+        final Configuration configuration = new Configuration(translucentConfig);
+        // The values for the following properties will be defined during the configuration
+        // resolution in {@link ActivityRecord#resolveOverrideConfiguration} using the
+        // properties inherited from the first not finishing opaque activity beneath.
+        configuration.orientation = ORIENTATION_UNDEFINED;
+        configuration.screenWidthDp = configuration.compatScreenWidthDp = SCREEN_WIDTH_DP_UNDEFINED;
+        configuration.screenHeightDp =
+                configuration.compatScreenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
+        configuration.smallestScreenWidthDp =
+                configuration.compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
+        return configuration;
+    }
+
     private void inheritConfiguration(ActivityRecord firstOpaque) {
         // To avoid wrong behaviour, we're not forcing a specific aspect ratio to activities
         // which are not already providing one (e.g. permission dialogs) and presumably also
@@ -1516,7 +1537,7 @@ final class LetterboxUiController {
         mLetterboxConfigListener = null;
         mInheritedMinAspectRatio = UNDEFINED_ASPECT_RATIO;
         mInheritedMaxAspectRatio = UNDEFINED_ASPECT_RATIO;
-        mInheritedOrientation = Configuration.ORIENTATION_UNDEFINED;
+        mInheritedOrientation = ORIENTATION_UNDEFINED;
         mInheritedAppCompatState = APP_COMPAT_STATE_CHANGED__STATE__UNKNOWN;
         mInheritedCompatDisplayInsets = null;
     }
