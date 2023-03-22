@@ -893,18 +893,6 @@
                   android:visibleToInstantApps="true">
         </activity>
 
-        <activity android:name=".user.UserSwitcherActivity"
-                  android:label="@string/accessibility_multi_user_switch_switcher"
-                  android:theme="@style/Theme.UserSwitcherActivity"
-                  android:excludeFromRecents="true"
-                  android:showWhenLocked="true"
-                  android:showForAllUsers="true"
-                  android:finishOnTaskLaunch="true"
-                  android:lockTaskMode="always"
-                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
-                  android:visibleToInstantApps="true">
-        </activity>
-
         <receiver android:name=".controls.management.ControlsRequestReceiver"
             android:exported="true">
             <intent-filter>
