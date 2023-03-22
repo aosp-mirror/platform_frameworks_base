@@ -143,14 +143,15 @@ final class ContentRecorder implements WindowContainerListener {
             // Recording has already begun, but update recording since the display is now on.
             if (mRecordedWindowContainer == null) {
                 ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                        "Unexpectedly null window container; unable to update recording for "
-                                + "display %d",
+                        "Content Recording: Unexpectedly null window container; unable to update "
+                                + "recording for display %d",
                         mDisplayContent.getDisplayId());
                 return;
             }
 
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                    "Display %d was already recording, so apply transformations if necessary",
+                    "Content Recording: Display %d was already recording, so apply "
+                            + "transformations if necessary",
                     mDisplayContent.getDisplayId());
             // Retrieve the size of the region to record, and continue with the update
             // if the bounds or orientation has changed.
@@ -161,8 +162,8 @@ final class ContentRecorder implements WindowContainerListener {
                 Point surfaceSize = fetchSurfaceSizeIfPresent();
                 if (surfaceSize != null) {
                     ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                            "Going ahead with updating recording for display %d to new "
-                                    + "bounds %s and/or orientation %d.",
+                            "Content Recording: Going ahead with updating recording for display "
+                                    + "%d to new bounds %s and/or orientation %d.",
                             mDisplayContent.getDisplayId(), recordedContentBounds,
                             recordedContentOrientation);
                     updateMirroredSurface(mDisplayContent.mWmService.mTransactionFactory.get(),
@@ -171,8 +172,9 @@ final class ContentRecorder implements WindowContainerListener {
                     // If the surface removed, do nothing. We will handle this via onDisplayChanged
                     // (the display will be off if the surface is removed).
                     ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                            "Unable to update recording for display %d to new bounds %s"
-                                    + " and/or orientation %d, since the surface is not available.",
+                            "Content Recording: Unable to update recording for display %d to new "
+                                    + "bounds %s and/or orientation %d, since the surface is not "
+                                    + "available.",
                             mDisplayContent.getDisplayId(), recordedContentBounds,
                             recordedContentOrientation);
                 }
@@ -189,8 +191,8 @@ final class ContentRecorder implements WindowContainerListener {
             return;
         }
         ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                "Display %d has content (%b) so pause recording", mDisplayContent.getDisplayId(),
-                mDisplayContent.getLastHasContent());
+                "Content Recording: Display %d has content (%b) so pause recording",
+                mDisplayContent.getDisplayId(), mDisplayContent.getLastHasContent());
         // If the display is not on and it is a virtual display, then it no longer has an
         // associated surface to write output to.
         // If the display now has content, stop mirroring to it.
@@ -231,7 +233,8 @@ final class ContentRecorder implements WindowContainerListener {
      */
     private void stopMediaProjection() {
         ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                "Stop MediaProjection on virtual display %d", mDisplayContent.getDisplayId());
+                "Content Recording: Stop MediaProjection on virtual display %d",
+                mDisplayContent.getDisplayId());
         if (mMediaProjectionManager != null) {
             mMediaProjectionManager.stopActiveProjection();
         }
@@ -283,13 +286,14 @@ final class ContentRecorder implements WindowContainerListener {
         final Point surfaceSize = fetchSurfaceSizeIfPresent();
         if (surfaceSize == null) {
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                    "Unable to start recording for display %d since the surface is not "
-                            + "available.",
+                    "Content Recording: Unable to start recording for display %d since the "
+                            + "surface is not available.",
                     mDisplayContent.getDisplayId());
             return;
         }
         ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                "Display %d has no content and is on, so start recording for state %d",
+                "Content Recording: Display %d has no content and is on, so start recording for "
+                        + "state %d",
                 mDisplayContent.getDisplayId(), mDisplayContent.getDisplay().getState());
 
         // Create a mirrored hierarchy for the SurfaceControl of the DisplayArea to capture.
@@ -349,7 +353,7 @@ final class ContentRecorder implements WindowContainerListener {
         if (tokenToRecord == null) {
             handleStartRecordingFailed();
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                    "Unable to start recording due to null token for display %d",
+                    "Content Recording: Unable to start recording due to null token for display %d",
                     mDisplayContent.getDisplayId());
             return null;
         }
@@ -359,13 +363,14 @@ final class ContentRecorder implements WindowContainerListener {
                         mDisplayContent.mWmService.mWindowContextListenerController.getContainer(
                                 tokenToRecord);
                 if (wc == null) {
-                    // Fall back to screenrecording using the data sent to DisplayManager
+                    // Fall back to mirroring using the data sent to DisplayManager
                     mDisplayContent.mWmService.mDisplayManagerInternal.setWindowManagerMirroring(
                             mDisplayContent.getDisplayId(), false);
                     handleStartRecordingFailed();
                     ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                            "Unable to retrieve window container to start recording for "
-                                    + "display %d", mDisplayContent.getDisplayId());
+                            "Content Recording: Unable to retrieve window container to start "
+                                    + "recording for display %d",
+                            mDisplayContent.getDisplayId());
                     return null;
                 }
                 // TODO(206461622) Migrate to using the RootDisplayArea
@@ -375,7 +380,7 @@ final class ContentRecorder implements WindowContainerListener {
                         KEY_RECORD_TASK_FEATURE, false)) {
                     handleStartRecordingFailed();
                     ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                            "Unable to record task since feature is disabled %d",
+                            "Content Recording: Unable to record task since feature is disabled %d",
                             mDisplayContent.getDisplayId());
                     return null;
                 }
@@ -383,8 +388,9 @@ final class ContentRecorder implements WindowContainerListener {
                 if (taskToRecord == null) {
                     handleStartRecordingFailed();
                     ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                            "Unable to retrieve task to start recording for "
-                                    + "display %d", mDisplayContent.getDisplayId());
+                            "Content Recording: Unable to retrieve task to start recording for "
+                                    + "display %d",
+                            mDisplayContent.getDisplayId());
                 } else {
                     taskToRecord.registerWindowContainerListener(this);
                 }
@@ -394,7 +400,8 @@ final class ContentRecorder implements WindowContainerListener {
                 // capture for the entire display.
                 handleStartRecordingFailed();
                 ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                        "Unable to start recording due to invalid region for display %d",
+                        "Content Recording: Unable to start recording due to invalid region for "
+                                + "display %d",
                         mDisplayContent.getDisplayId());
                 return null;
         }
@@ -488,8 +495,8 @@ final class ContentRecorder implements WindowContainerListener {
             // State of virtual display will change to 'ON' when the surface is set.
             // will get event DISPLAY_DEVICE_EVENT_CHANGED
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                    "Provided surface for recording on display %d is not present, so do not"
-                            + " update the surface",
+                    "Content Recording: Provided surface for recording on display %d is not "
+                            + "present, so do not update the surface",
                     mDisplayContent.getDisplayId());
             return null;
         }
@@ -500,7 +507,7 @@ final class ContentRecorder implements WindowContainerListener {
     @Override
     public void onRemoved() {
         ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                "Recorded task is removed, so stop recording on display %d",
+                "Content Recording: Recorded task is removed, so stop recording on display %d",
                 mDisplayContent.getDisplayId());
 
         unregisterListener();
@@ -551,8 +558,8 @@ final class ContentRecorder implements WindowContainerListener {
                 mIMediaProjectionManager.stopActiveProjection();
             } catch (RemoteException e) {
                 ProtoLog.e(WM_DEBUG_CONTENT_RECORDING,
-                        "Unable to tell MediaProjectionManagerService to stop the active "
-                                + "projection: %s",
+                        "Content Recording: Unable to tell MediaProjectionManagerService to stop "
+                                + "the active projection: %s",
                         e);
             }
         }
@@ -568,8 +575,8 @@ final class ContentRecorder implements WindowContainerListener {
                         height);
             } catch (RemoteException e) {
                 ProtoLog.e(WM_DEBUG_CONTENT_RECORDING,
-                        "Unable to tell MediaProjectionManagerService about resizing the active "
-                                + "projection: %s",
+                        "Content Recording: Unable to tell MediaProjectionManagerService about "
+                                + "resizing the active projection: %s",
                         e);
             }
         }
@@ -585,8 +592,8 @@ final class ContentRecorder implements WindowContainerListener {
                         isVisible);
             } catch (RemoteException e) {
                 ProtoLog.e(WM_DEBUG_CONTENT_RECORDING,
-                        "Unable to tell MediaProjectionManagerService about visibility change on "
-                                + "the active projection: %s",
+                        "Content Recording: Unable to tell MediaProjectionManagerService about "
+                                + "visibility change on the active projection: %s",
                         e);
             }
         }

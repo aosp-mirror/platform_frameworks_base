@@ -53,35 +53,59 @@ final class ContentRecordingController {
     }
 
     /**
-     * Updates the current recording session. If a new display is taking over recording, then
-     * stops the prior display from recording.
+     * Updates the current recording session.
+     * <p>Handles the following scenarios:
+     * <ul>
+     *         <li>Invalid scenarios: The incoming session is malformed, or the incoming session is
+     *         identical to the current session</li>
+     *         <li>Start Scenario: Starting a new session. Recording begins immediately.</li>
+     *         <li>Takeover Scenario: Occurs during a Start Scenario, if a pre-existing session was
+     *         in-progress. For example, recording on VirtualDisplay "app_foo" was ongoing. A
+     *         session for VirtualDisplay "app_bar" arrives. The controller stops the session on
+     *         VirtualDisplay "app_foo" and allows the session for VirtualDisplay "app_bar" to
+     *         begin.</li>
+     *         <li>Stopping scenario: The incoming session is null and there is currently an ongoing
+     *         session. The controller stops recording.</li>
+     * </ul>
      *
-     * @param incomingSession the new recording session. Should either have a {@code null} token, to
-     *                        stop the current session, or a session on a new/different display
-     *                        than the current session.
-     * @param wmService       the window manager service
+     * @param incomingSession The incoming recording session (either an update to a current session
+     *                        or a new session), or null to stop the current session.
+     * @param wmService       The window manager service.
      */
     void setContentRecordingSessionLocked(@Nullable ContentRecordingSession incomingSession,
             @NonNull WindowManagerService wmService) {
-        if (incomingSession != null && (!ContentRecordingSession.isValid(incomingSession)
-                || ContentRecordingSession.isSameDisplay(mSession, incomingSession))) {
-            // Ignore an invalid session, or a session for the same display as currently recording.
+        // Invalid scenario: ignore invalid incoming session.
+        if (incomingSession != null && !ContentRecordingSession.isValid(incomingSession)) {
+            return;
+        }
+        // Invalid scenario: ignore identical incoming session.
+        if (ContentRecordingSession.isProjectionOnSameDisplay(mSession, incomingSession)) {
+            // TODO(242833866) if incoming session is no longer waiting to record, allow
+            //  the update through.
+
+            ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                    "Content Recording: Ignoring session on same display %d, with an existing "
+                            + "session %s",
+                    incomingSession.getDisplayId(), mSession.getDisplayId());
             return;
         }
         DisplayContent incomingDisplayContent = null;
+        // Start scenario: recording begins immediately.
         if (incomingSession != null) {
-            // Recording will start on a new display, possibly taking over from a current session.
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
-                    "Handle incoming session on display %d, with a pre-existing session %s",
-                    incomingSession.getDisplayId(),
+                    "Content Recording: Handle incoming session on display %d, with a "
+                            + "pre-existing session %s", incomingSession.getDisplayId(),
                     mSession == null ? null : mSession.getDisplayId());
             incomingDisplayContent = wmService.mRoot.getDisplayContentOrCreate(
                     incomingSession.getDisplayId());
             incomingDisplayContent.setContentRecordingSession(incomingSession);
+            // TODO(b/270118861) When user grants consent to re-use, explicitly ask ContentRecorder
+            //  to update, since no config/display change arrives. Mark recording as black.
         }
+        // Takeover and stopping scenario: stop recording on the pre-existing session.
         if (mSession != null) {
-            // Update the pre-existing display about the new session.
-            ProtoLog.v(WM_DEBUG_CONTENT_RECORDING, "Pause the recording session on display %s",
+            ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                    "Content Recording: Pause the recording session on display %s",
                     mDisplayContent.getDisplayId());
             mDisplayContent.pauseRecording();
             mDisplayContent.setContentRecordingSession(null);
