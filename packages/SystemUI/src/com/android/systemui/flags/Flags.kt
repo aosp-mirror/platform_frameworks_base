@@ -226,7 +226,7 @@ object Flags {
     /** Whether to inflate the bouncer view on a background thread. */
     // TODO(b/272091103): Tracking Bug
     @JvmField
-    val ASYNC_INFLATE_BOUNCER = unreleasedFlag(229, "async_inflate_bouncer", teamfood = false)
+    val ASYNC_INFLATE_BOUNCER = unreleasedFlag(229, "async_inflate_bouncer", teamfood = true)
 
     /** Whether to inflate the bouncer view on a background thread. */
     // TODO(b/273341787): Tracking Bug
