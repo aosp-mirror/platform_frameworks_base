@@ -697,7 +697,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         mHandler = handler;
         mLock = lock;
         mAppIds = new AppIdSettingMap();
-        mPermissions = new LegacyPermissionSettings(lock);
+        mPermissions = new LegacyPermissionSettings();
         mRuntimePermissionsPersistence = new RuntimePermissionPersistence(
                 runtimePermissionsPersistence, new Consumer<Integer>() {
             @Override
