@@ -88,6 +88,10 @@ import java.util.Set;
 public class DisplayRotation {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayRotation" : TAG_WM;
 
+    // Delay in milliseconds when updating config due to folding events. This prevents
+    // config changes and unexpected jumps while folding the device to closed state.
+    private static final int FOLDING_RECOMPUTE_CONFIG_DELAY_MS = 800;
+
     private static class RotationAnimationPair {
         @AnimRes
         int mEnter;
@@ -1618,6 +1622,7 @@ public class DisplayRotation {
         private boolean mInHalfFoldTransition = false;
         private final boolean mIsDisplayAlwaysSeparatingHinge;
         private final Set<Integer> mTabletopRotations;
+        private final Runnable mActivityBoundsUpdateCallback;
 
         FoldController() {
             mTabletopRotations = new ArraySet<>();
@@ -1652,6 +1657,26 @@ public class DisplayRotation {
             }
             mIsDisplayAlwaysSeparatingHinge = mContext.getResources().getBoolean(
                     R.bool.config_isDisplayHingeAlwaysSeparating);
+
+            mActivityBoundsUpdateCallback = new Runnable() {
+                public void run() {
+                    if (mDeviceState == DeviceStateController.DeviceState.OPEN
+                            || mDeviceState == DeviceStateController.DeviceState.HALF_FOLDED) {
+                        synchronized (mLock) {
+                            final Task topFullscreenTask =
+                                    mDisplayContent.getTask(
+                                            t -> t.getWindowingMode() == WINDOWING_MODE_FULLSCREEN);
+                            if (topFullscreenTask != null) {
+                                final ActivityRecord top =
+                                        topFullscreenTask.topRunningActivity();
+                                if (top != null) {
+                                    top.recomputeConfiguration();
+                                }
+                            }
+                        }
+                    }
+                }
+            };
         }
 
         boolean isDeviceInPosture(DeviceStateController.DeviceState state, boolean isTabletop) {
@@ -1723,14 +1748,9 @@ public class DisplayRotation {
                         false /* forceRelayout */);
             }
             // Alert the activity of possible new bounds.
-            final Task topFullscreenTask =
-                    mDisplayContent.getTask(t -> t.getWindowingMode() == WINDOWING_MODE_FULLSCREEN);
-            if (topFullscreenTask != null) {
-                final ActivityRecord top = topFullscreenTask.topRunningActivity();
-                if (top != null) {
-                    top.recomputeConfiguration();
-                }
-            }
+            UiThread.getHandler().removeCallbacks(mActivityBoundsUpdateCallback);
+            UiThread.getHandler().postDelayed(mActivityBoundsUpdateCallback,
+                    FOLDING_RECOMPUTE_CONFIG_DELAY_MS);
         }
     }
 
