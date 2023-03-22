@@ -210,12 +210,16 @@ public abstract class ColorSpace {
 
     private static final Rgb.TransferParameters SRGB_TRANSFER_PARAMETERS =
             new Rgb.TransferParameters(1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045, 2.4);
+
+    // HLG transfer with an SDR whitepoint of 203 nits
     private static final Rgb.TransferParameters BT2020_HLG_TRANSFER_PARAMETERS =
-            new Rgb.TransferParameters(2.0f, 2.0f, 1 / 0.17883277f,
-                0.28466892f, 0.5599107f, -11 / 12.0f, -3.0f, true);
+            new Rgb.TransferParameters(2.0, 2.0, 1 / 0.17883277, 0.28466892, 0.55991073,
+                    -0.685490157, Rgb.TransferParameters.TYPE_HLGish);
+
+    // PQ transfer with an SDR whitepoint of 203 nits
     private static final Rgb.TransferParameters BT2020_PQ_TRANSFER_PARAMETERS =
-            new Rgb.TransferParameters(-107 / 128.0f, 1.0f, 32 / 2523.0f,
-                2413 / 128.0f, -2392 / 128.0f, 8192 / 1305.0f, -2.0f, true);
+            new Rgb.TransferParameters(-1.555223, 1.860454, 32 / 2523.0, 2413 / 128.0,
+                    -2392 / 128.0, 8192 / 1305.0, Rgb.TransferParameters.TYPE_PQish);
 
     // See static initialization block next to #get(Named)
     private static final ColorSpace[] sNamedColorSpaces = new ColorSpace[Named.values().length];
@@ -1651,8 +1655,8 @@ public abstract class ColorSpace {
                 BT2020_PRIMARIES,
                 ILLUMINANT_D65,
                 null,
-                x -> transferHLGOETF(x),
-                x -> transferHLGEOTF(x),
+                x -> transferHLGOETF(BT2020_HLG_TRANSFER_PARAMETERS, x),
+                x -> transferHLGEOTF(BT2020_HLG_TRANSFER_PARAMETERS, x),
                 0.0f, 1.0f,
                 BT2020_HLG_TRANSFER_PARAMETERS,
                 Named.BT2020_HLG.ordinal()
@@ -1663,8 +1667,8 @@ public abstract class ColorSpace {
                 BT2020_PRIMARIES,
                 ILLUMINANT_D65,
                 null,
-                x -> transferST2048OETF(x),
-                x -> transferST2048EOTF(x),
+                x -> transferST2048OETF(BT2020_PQ_TRANSFER_PARAMETERS, x),
+                x -> transferST2048EOTF(BT2020_PQ_TRANSFER_PARAMETERS, x),
                 0.0f, 1.0f,
                 BT2020_PQ_TRANSFER_PARAMETERS,
                 Named.BT2020_PQ.ordinal()
@@ -1672,44 +1676,58 @@ public abstract class ColorSpace {
         sDataToColorSpaces.put(DataSpace.DATASPACE_BT2020_PQ, Named.BT2020_PQ.ordinal());
     }
 
-    private static double transferHLGOETF(double x) {
-        double a = 0.17883277;
-        double b = 0.28466892;
-        double c = 0.55991073;
-        double r = 0.5;
-        return x > 1.0 ? a * Math.log(x - b) + c : r * Math.sqrt(x);
+    private static double transferHLGOETF(Rgb.TransferParameters params, double x) {
+        double sign = x < 0 ? -1.0 : 1.0;
+        x *= sign;
+
+        // Unpack the transfer params matching skia's packing & invert R, G, and a
+        final double R = 1.0 / params.a;
+        final double G = 1.0 / params.b;
+        final double a = 1.0 / params.c;
+        final double b = params.d;
+        final double c = params.e;
+        final double K = params.f + 1.0;
+
+        x /= K;
+        return sign * (x <= 1 ? R * Math.pow(x, G) : a * Math.log(x - b) + c);
     }
 
-    private static double transferHLGEOTF(double x) {
-        double a = 0.17883277;
-        double b = 0.28466892;
-        double c = 0.55991073;
-        double r = 0.5;
-        return x <= 0.5 ? (x * x) / (r * r) : Math.exp((x - c) / a + b);
+    private static double transferHLGEOTF(Rgb.TransferParameters params, double x) {
+        double sign = x < 0 ? -1.0 : 1.0;
+        x *= sign;
+
+        // Unpack the transfer params matching skia's packing
+        final double R = params.a;
+        final double G = params.b;
+        final double a = params.c;
+        final double b = params.d;
+        final double c = params.e;
+        final double K = params.f + 1.0;
+
+        return K * sign * (x * R <= 1 ? Math.pow(x * R, G) : Math.exp((x - c) * a) + b);
     }
 
-    private static double transferST2048OETF(double x) {
-        double m1 = (2610.0 / 4096.0) / 4.0;
-        double m2 = (2523.0 / 4096.0) * 128.0;
-        double c1 = (3424.0 / 4096.0);
-        double c2 = (2413.0 / 4096.0) * 32.0;
-        double c3 = (2392.0 / 4096.0) * 32.0;
+    private static double transferST2048OETF(Rgb.TransferParameters params, double x) {
+        double sign = x < 0 ? -1.0 : 1.0;
+        x *= sign;
 
-        double tmp = Math.pow(x, m1);
-        tmp = (c1 + c2 * tmp) / (1.0 + c3 * tmp);
-        return Math.pow(tmp, m2);
+        double a = -params.a;
+        double b = params.d;
+        double c = 1.0 / params.f;
+        double d = params.b;
+        double e = -params.e;
+        double f = 1.0 / params.c;
+
+        double tmp = Math.max(a + b * Math.pow(x, c), 0);
+        return sign * Math.pow(tmp / (d + e * Math.pow(x, c)), f);
     }
 
-    private static double transferST2048EOTF(double x) {
-        double m1 = (2610.0 / 4096.0) / 4.0;
-        double m2 = (2523.0 / 4096.0) * 128.0;
-        double c1 = (3424.0 / 4096.0);
-        double c2 = (2413.0 / 4096.0) * 32.0;
-        double c3 = (2392.0 / 4096.0) * 32.0;
+    private static double transferST2048EOTF(Rgb.TransferParameters pq, double x) {
+        double sign = x < 0 ? -1.0 : 1.0;
+        x *= sign;
 
-        double tmp = Math.pow(Math.min(Math.max(x, 0.0), 1.0), 1.0 / m2);
-        tmp = Math.max(tmp - c1, 0.0) / (c2 - c3 * tmp);
-        return Math.pow(tmp, 1.0 / m1);
+        double tmp = Math.max(pq.a + pq.b * Math.pow(x, pq.c), 0);
+        return sign * Math.pow(tmp / (pq.d + pq.e * Math.pow(x, pq.c)), pq.f);
     }
 
     // Reciprocal piecewise gamma response
@@ -2276,6 +2294,10 @@ public abstract class ColorSpace {
          * </ul>
          */
         public static class TransferParameters {
+
+            private static final double TYPE_PQish = -2.0;
+            private static final double TYPE_HLGish = -3.0;
+
             /** Variable \(a\) in the equation of the EOTF described above. */
             public final double a;
             /** Variable \(b\) in the equation of the EOTF described above. */
@@ -2291,56 +2313,8 @@ public abstract class ColorSpace {
             /** Variable \(g\) in the equation of the EOTF described above. */
             public final double g;
 
-            private TransferParameters(double a, double b, double c, double d, double e,
-                    double f, double g, boolean nonCurveTransferParameters) {
-                // nonCurveTransferParameters correspondes to a "special" transfer function
-                if (!nonCurveTransferParameters) {
-                    if (Double.isNaN(a) || Double.isNaN(b) || Double.isNaN(c)
-                            || Double.isNaN(d) || Double.isNaN(e) || Double.isNaN(f)
-                            || Double.isNaN(g)) {
-                        throw new IllegalArgumentException("Parameters cannot be NaN");
-                    }
-
-                    // Next representable float after 1.0
-                    // We use doubles here but the representation inside our native code
-                    // is often floats
-                    if (!(d >= 0.0 && d <= 1.0f + Math.ulp(1.0f))) {
-                        throw new IllegalArgumentException(
-                            "Parameter d must be in the range [0..1], " + "was " + d);
-                    }
-
-                    if (d == 0.0 && (a == 0.0 || g == 0.0)) {
-                        throw new IllegalArgumentException(
-                            "Parameter a or g is zero, the transfer function is constant");
-                    }
-
-                    if (d >= 1.0 && c == 0.0) {
-                        throw new IllegalArgumentException(
-                            "Parameter c is zero, the transfer function is constant");
-                    }
-
-                    if ((a == 0.0 || g == 0.0) && c == 0.0) {
-                        throw new IllegalArgumentException("Parameter a or g is zero,"
-                            + " and c is zero, the transfer function is constant");
-                    }
-
-                    if (c < 0.0) {
-                        throw new IllegalArgumentException(
-                            "The transfer function must be increasing");
-                    }
-
-                    if (a < 0.0 || g < 0.0) {
-                        throw new IllegalArgumentException(
-                            "The transfer function must be positive or increasing");
-                    }
-                }
-                this.a = a;
-                this.b = b;
-                this.c = c;
-                this.d = d;
-                this.e = e;
-                this.f = f;
-                this.g = g;
+            private static boolean isSpecialG(double g) {
+                return g == TYPE_PQish || g == TYPE_HLGish;
             }
 
             /**
@@ -2365,7 +2339,7 @@ public abstract class ColorSpace {
              * @throws IllegalArgumentException If the parameters form an invalid transfer function
              */
             public TransferParameters(double a, double b, double c, double d, double g) {
-                this(a, b, c, d, 0.0, 0.0, g, false);
+                this(a, b, c, d, 0.0, 0.0, g);
             }
 
             /**
@@ -2384,7 +2358,52 @@ public abstract class ColorSpace {
              */
             public TransferParameters(double a, double b, double c, double d, double e,
                     double f, double g) {
-                this(a, b, c, d, e, f, g, false);
+                if (Double.isNaN(a) || Double.isNaN(b) || Double.isNaN(c)
+                        || Double.isNaN(d) || Double.isNaN(e) || Double.isNaN(f)
+                        || Double.isNaN(g)) {
+                    throw new IllegalArgumentException("Parameters cannot be NaN");
+                }
+                if (!isSpecialG(g)) {
+                    // Next representable float after 1.0
+                    // We use doubles here but the representation inside our native code
+                    // is often floats
+                    if (!(d >= 0.0 && d <= 1.0f + Math.ulp(1.0f))) {
+                        throw new IllegalArgumentException(
+                                "Parameter d must be in the range [0..1], " + "was " + d);
+                    }
+
+                    if (d == 0.0 && (a == 0.0 || g == 0.0)) {
+                        throw new IllegalArgumentException(
+                                "Parameter a or g is zero, the transfer function is constant");
+                    }
+
+                    if (d >= 1.0 && c == 0.0) {
+                        throw new IllegalArgumentException(
+                                "Parameter c is zero, the transfer function is constant");
+                    }
+
+                    if ((a == 0.0 || g == 0.0) && c == 0.0) {
+                        throw new IllegalArgumentException("Parameter a or g is zero,"
+                                + " and c is zero, the transfer function is constant");
+                    }
+
+                    if (c < 0.0) {
+                        throw new IllegalArgumentException(
+                                "The transfer function must be increasing");
+                    }
+
+                    if (a < 0.0 || g < 0.0) {
+                        throw new IllegalArgumentException(
+                                "The transfer function must be positive or increasing");
+                    }
+                }
+                this.a = a;
+                this.b = b;
+                this.c = c;
+                this.d = d;
+                this.e = e;
+                this.f = f;
+                this.g = g;
             }
 
             @SuppressWarnings("SimplifiableIfStatement")
@@ -2424,6 +2443,17 @@ public abstract class ColorSpace {
                 result = 31 * result + (int) (temp ^ (temp >>> 32));
                 return result;
             }
+
+            /**
+             * @hide
+             */
+            private boolean isHLGish() {
+                return g == TYPE_HLGish;
+            }
+
+            private boolean isPQish() {
+                return g == TYPE_PQish;
+            }
         }
 
         @NonNull private final float[] mWhitePoint;
@@ -2460,11 +2490,10 @@ public abstract class ColorSpace {
                 float e, float f, float g, float[] xyz);
 
         private static DoubleUnaryOperator generateOETF(TransferParameters function) {
-            boolean isNonCurveTransferParameters = function.equals(BT2020_HLG_TRANSFER_PARAMETERS)
-                    || function.equals(BT2020_PQ_TRANSFER_PARAMETERS);
-            if (isNonCurveTransferParameters) {
-                return function.f == 0.0 && function.g < 0.0 ? x -> transferHLGOETF(x)
-                    : x -> transferST2048OETF(x);
+            if (function.isHLGish()) {
+                return x -> transferHLGOETF(function, x);
+            } else if (function.isPQish()) {
+                return x -> transferST2048OETF(function, x);
             } else {
                 return function.e == 0.0 && function.f == 0.0
                     ? x -> rcpResponse(x, function.a, function.b,
@@ -2475,11 +2504,10 @@ public abstract class ColorSpace {
         }
 
         private static DoubleUnaryOperator generateEOTF(TransferParameters function) {
-            boolean isNonCurveTransferParameters = function.equals(BT2020_HLG_TRANSFER_PARAMETERS)
-                    || function.equals(BT2020_PQ_TRANSFER_PARAMETERS);
-            if (isNonCurveTransferParameters) {
-                return function.f == 0.0 && function.g < 0.0 ? x -> transferHLGEOTF(x)
-                    : x -> transferST2048EOTF(x);
+            if (function.isHLGish()) {
+                return x -> transferHLGEOTF(function, x);
+            } else if (function.isPQish()) {
+                return x -> transferST2048OETF(function, x);
             } else {
                 return function.e == 0.0 && function.f == 0.0
                     ? x -> response(x, function.a, function.b,
