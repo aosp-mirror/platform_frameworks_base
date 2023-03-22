@@ -674,13 +674,13 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
     }
 
     protected void expectDisplayAssignedToUser(@UserIdInt int userId, int displayId) {
-        expectWithMessage("getDisplayAssignedToUser(%s)", userId)
-                .that(mMediator.getDisplayAssignedToUser(userId)).isEqualTo(displayId);
+        expectWithMessage("getMainDisplayAssignedToUser(%s)", userId)
+                .that(mMediator.getMainDisplayAssignedToUser(userId)).isEqualTo(displayId);
     }
 
     protected void expectNoDisplayAssignedToUser(@UserIdInt int userId) {
-        expectWithMessage("getDisplayAssignedToUser(%s)", userId)
-                .that(mMediator.getDisplayAssignedToUser(userId)).isEqualTo(INVALID_DISPLAY);
+        expectWithMessage("getMainDisplayAssignedToUser(%s)", userId)
+                .that(mMediator.getMainDisplayAssignedToUser(userId)).isEqualTo(INVALID_DISPLAY);
     }
 
     protected void expectDisplaysAssignedToUserContainsDisplayId(

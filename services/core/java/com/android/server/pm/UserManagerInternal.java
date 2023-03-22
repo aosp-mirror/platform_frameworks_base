@@ -506,15 +506,14 @@ public abstract class UserManagerInternal {
      *
      * <p>If the user is a profile and is running, it's assigned to its parent display.
      */
-    // TODO(b/272366483) rename this method to avoid confusion with getDisplaysAssignedTOUser().
-    public abstract int getDisplayAssignedToUser(@UserIdInt int userId);
+    public abstract int getMainDisplayAssignedToUser(@UserIdInt int userId);
 
     /**
      * Returns all display ids assigned to the user including {@link
      * #assignUserToExtraDisplay(int, int) extra displays}, or {@code null} if there is no display
      * assigned to the specified user.
      *
-     * <p>Note that this method is different from {@link #getDisplayAssignedToUser(int)}, which
+     * <p>Note that this method is different from {@link #getMainDisplayAssignedToUser(int)}, which
      * returns a main display only.
      */
     public abstract @Nullable int[] getDisplaysAssignedToUser(@UserIdInt int userId);
