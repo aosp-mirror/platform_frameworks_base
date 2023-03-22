@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_name (2809080280462257271) -->
-    <skip />
+    <string name="app_name" msgid="2809080280462257271">"වාහක සන්නිවේදනය"</string>
     <string name="android_system_label" msgid="2797790869522345065">"ජංගම වාහකය"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"ජංගම දත්ත අවසන් වී ඇත"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"ඔබගේ ජංගම දත්ත අක්‍රිය කර ඇත"</string>
@@ -16,10 +15,8 @@
     <string name="ssl_error_example" msgid="6188711843183058764">"උදාහරණයක් ලෙස, පුරනය වන පිටුව පෙන්වා ඇති සංවිධානයට අයිති නැති විය හැක."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"කෙසේ වුවත් බ්‍රවුසරය හරහා ඉදිරියට යන්න"</string>
     <string name="performance_boost_notification_channel" msgid="3475440855635538592">"කාර්ය සාධනය ඉහළ නැංවීම"</string>
-    <!-- no translation found for performance_boost_notification_title (3126203390685781861) -->
-    <skip />
-    <!-- no translation found for performance_boost_notification_detail (216569851036236346) -->
-    <skip />
+    <string name="performance_boost_notification_title" msgid="3126203390685781861">"ඔබේ වාහකයෙන් 5G විකල්ප"</string>
+    <string name="performance_boost_notification_detail" msgid="216569851036236346">"ඔබේ යෙදුම් අත්දැකීම සඳහා විකල්ප බැලීමට %sගේ වෙබ් අඩවියට පිවිසෙන්න"</string>
     <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"දැන් නොවේ"</string>
     <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"කළමනාකරණය කරන්න"</string>
     <string name="slice_purchase_app_label" msgid="7170191659233241166">"කාර්ය සාධනය ඉහළ නැංවීමක් මිල දී ගන්න."</string>
