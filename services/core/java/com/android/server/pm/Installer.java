@@ -1179,7 +1179,7 @@ public class Installer extends SystemService {
         // TODO(b/260124949): Remove the legacy dexopt code paths, i.e. this exception and all code
         // that may throw it.
         public LegacyDexoptDisabledException() {
-            super("Invalid call to legacy dexopt installd method while ART Service is in use.");
+            super("Invalid call to legacy dexopt method while ART Service is in use.");
         }
     }
 
