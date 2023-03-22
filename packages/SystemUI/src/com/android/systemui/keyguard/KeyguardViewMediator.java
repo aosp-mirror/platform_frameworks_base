@@ -39,9 +39,9 @@ import static com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTra
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.BroadcastOptions;
+import android.app.IActivityTaskManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.WindowConfiguration;
@@ -1178,6 +1178,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     private Lazy<ActivityLaunchAnimator> mActivityLaunchAnimator;
     private Lazy<ScrimController> mScrimControllerLazy;
+    private IActivityTaskManager mActivityTaskManagerService;
 
     /**
      * Injected constructor. See {@link KeyguardModule}.
@@ -1209,7 +1210,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             Lazy<ShadeController> shadeControllerLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowControllerLazy,
             Lazy<ActivityLaunchAnimator> activityLaunchAnimator,
-            Lazy<ScrimController> scrimControllerLazy) {
+            Lazy<ScrimController> scrimControllerLazy,
+            IActivityTaskManager activityTaskManagerService) {
         mContext = context;
         mUserTracker = userTracker;
         mFalsingCollector = falsingCollector;
@@ -1257,6 +1259,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
         mActivityLaunchAnimator = activityLaunchAnimator;
         mScrimControllerLazy = scrimControllerLazy;
+        mActivityTaskManagerService = activityTaskManagerService;
 
         mPowerButtonY = context.getResources().getDimensionPixelSize(
                 R.dimen.physical_power_button_center_screen_location_y);
@@ -1800,10 +1803,15 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     /**
-     * Is the keyguard currently showing and not being force hidden?
+     * Is the keyguard currently showing, and not occluded (no activity is drawing over the
+     * lockscreen).
      */
     public boolean isShowingAndNotOccluded() {
         return mShowing && !mOccluded;
+    }
+
+    public boolean isShowing() {
+        return mShowing;
     }
 
     public boolean isOccludeAnimationPlaying() {
@@ -2419,7 +2427,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 Log.d(TAG, "updateActivityLockScreenState(" + showing + ", " + aodShowing + ")");
             }
             try {
-                ActivityTaskManager.getService().setLockScreenShown(showing, aodShowing);
+                mActivityTaskManagerService.setLockScreenShown(showing, aodShowing);
             } catch (RemoteException e) {
             }
         });
@@ -2535,7 +2543,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             final int keyguardFlag = flags;
             mUiBgExecutor.execute(() -> {
                 try {
-                    ActivityTaskManager.getService().keyguardGoingAway(keyguardFlag);
+                    mActivityTaskManagerService.keyguardGoingAway(keyguardFlag);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error while calling WindowManager", e);
                 }
@@ -2868,7 +2876,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 flags |= KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
             }
 
-            ActivityTaskManager.getService().keyguardGoingAway(flags);
+            mActivityTaskManagerService.keyguardGoingAway(flags);
             mKeyguardStateController.notifyKeyguardGoingAway(true);
         } catch (RemoteException e) {
             mSurfaceBehindRemoteAnimationRequested = false;

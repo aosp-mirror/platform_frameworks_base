@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.dagger;
 
+import android.app.IActivityTaskManager;
 import android.app.trust.TrustManager;
 import android.content.Context;
 import android.os.PowerManager;
@@ -119,7 +120,8 @@ public class KeyguardModule {
             Lazy<ShadeController> shadeController,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             Lazy<ActivityLaunchAnimator> activityLaunchAnimator,
-            Lazy<ScrimController> scrimControllerLazy) {
+            Lazy<ScrimController> scrimControllerLazy,
+            IActivityTaskManager activityTaskManagerService) {
         return new KeyguardViewMediator(
                 context,
                 userTracker,
@@ -149,7 +151,8 @@ public class KeyguardModule {
                 shadeController,
                 notificationShadeWindowController,
                 activityLaunchAnimator,
-                scrimControllerLazy);
+                scrimControllerLazy,
+                activityTaskManagerService);
     }
 
     /** */
