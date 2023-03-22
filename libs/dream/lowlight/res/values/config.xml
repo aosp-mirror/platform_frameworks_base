@@ -17,4 +17,7 @@
 <resources>
     <!-- The dream component used when the device is low light environment. -->
     <string translatable="false" name="config_lowLightDreamComponent"/>
+    <!-- The max number of milliseconds to wait for the low light transition before setting
+    the system dream component -->
+    <integer name="config_lowLightTransitionTimeoutMs">2000</integer>
 </resources>
