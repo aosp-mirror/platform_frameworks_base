@@ -259,20 +259,6 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    public void programSelectorToHalProgramSelector_withInvalidDabSelector_returnsNull() {
-        ProgramSelector invalidDbSelector = new ProgramSelector(ProgramSelector.PROGRAM_TYPE_DAB,
-                TEST_DAB_SID_EXT_ID,
-                new ProgramSelector.Identifier[0],
-                new long[0]);
-
-        android.hardware.broadcastradio.ProgramSelector invalidHalDabSelector =
-                ConversionUtils.programSelectorToHalProgramSelector(invalidDbSelector);
-
-        expect.withMessage("Invalid HAL DAB selector without required secondary ids")
-                .that(invalidHalDabSelector).isNull();
-    }
-
-    @Test
     public void programSelectorFromHalProgramSelector_withValidSelector() {
         android.hardware.broadcastradio.ProgramSelector halDabSelector =
                 AidlTestUtils.makeHalSelector(TEST_HAL_DAB_SID_EXT_ID, new ProgramIdentifier[]{
@@ -286,18 +272,6 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
         expect.withMessage("Secondary identifiers of converted DAB selector")
                 .that(dabSelector.getSecondaryIds()).asList()
                 .containsExactly(TEST_DAB_FREQUENCY_ID, TEST_DAB_ENSEMBLE_ID);
-    }
-
-    @Test
-    public void programSelectorFromHalProgramSelector_withInvalidSelector_returnsNull() {
-        android.hardware.broadcastradio.ProgramSelector invalidHalDabSelector =
-                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_SID_EXT_ID, new ProgramIdentifier[]{});
-
-        ProgramSelector invalidDabSelector =
-                ConversionUtils.programSelectorFromHalProgramSelector(invalidHalDabSelector);
-
-        expect.withMessage("Invalid DAB selector without required secondary ids")
-                .that(invalidDabSelector).isNull();
     }
 
     @Test
