@@ -38,7 +38,9 @@ import com.android.credentialmanager.common.StartBalIntentSenderForResultContrac
 import com.android.credentialmanager.createflow.CreateCredentialScreen
 import com.android.credentialmanager.createflow.hasContentToDisplay
 import com.android.credentialmanager.getflow.GetCredentialScreen
+import com.android.credentialmanager.getflow.GetGenericCredentialScreen
 import com.android.credentialmanager.getflow.hasContentToDisplay
+import com.android.credentialmanager.getflow.isFallbackScreen
 import com.android.credentialmanager.ui.theme.PlatformTheme
 
 @ExperimentalMaterialApi
@@ -118,11 +120,19 @@ class CredentialSelectorActivity : ComponentActivity() {
                 providerActivityLauncher = launcher
             )
         } else if (getCredentialUiState != null && hasContentToDisplay(getCredentialUiState)) {
-            GetCredentialScreen(
-                viewModel = viewModel,
-                getCredentialUiState = getCredentialUiState,
-                providerActivityLauncher = launcher
-            )
+            if (isFallbackScreen(getCredentialUiState)) {
+                GetGenericCredentialScreen(
+                        viewModel = viewModel,
+                        getCredentialUiState = getCredentialUiState,
+                        providerActivityLauncher = launcher
+                )
+            } else {
+                GetCredentialScreen(
+                        viewModel = viewModel,
+                        getCredentialUiState = getCredentialUiState,
+                        providerActivityLauncher = launcher
+                )
+            }
         } else {
             Log.d(Constants.LOG_TAG, "UI wasn't able to render neither get nor create flow")
             reportInstantiationErrorAndFinishActivity(credManRepo)
