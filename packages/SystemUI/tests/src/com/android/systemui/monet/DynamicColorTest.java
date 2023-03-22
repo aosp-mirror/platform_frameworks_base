@@ -20,6 +20,7 @@ import static com.android.systemui.monet.utils.ArgbSubject.assertThat;
 
 import static org.junit.Assert.assertTrue;
 
+
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -178,12 +179,39 @@ public final class DynamicColorTest extends SysuiTestCase {
         }
     }
 
+    @Test
+    public void valuesAreCorrect() {
+        // Checks that the values of certain dynamic colors match Dart results.
+        assertThat(
+                MaterialDynamicColors.onPrimaryContainer.getArgb(
+                        new SchemeFidelity(Hct.fromInt(0xFFFF0000), false, 0.5)))
+                .isSameColorAs(0xFFFFE5E1);
+        assertThat(
+                MaterialDynamicColors.onSecondaryContainer.getArgb(
+                        new SchemeContent(Hct.fromInt(0xFF0000FF), false, 0.5)))
+                .isSameColorAs(0xFFFFFCFF);
+        assertThat(
+                MaterialDynamicColors.onTertiaryContainer.getArgb(
+                        new SchemeContent(Hct.fromInt(0xFFFFFF00), true, -0.5)))
+                .isSameColorAs(0xFF616600);
+        assertThat(
+                MaterialDynamicColors.surfaceInverse.getArgb(
+                        new SchemeContent(Hct.fromInt(0xFF0000FF), false, 0.0)))
+                .isSameColorAs(0xFF464652);
+        assertThat(
+                MaterialDynamicColors.primaryInverse.getArgb(
+                        new SchemeContent(Hct.fromInt(0xFFFF0000), false, -0.5)))
+                .isSameColorAs(0xFFFF8C7A);
+        assertThat(
+                MaterialDynamicColors.outlineVariant.getArgb(
+                        new SchemeContent(Hct.fromInt(0xFFFFFF00), true, 0.0)))
+                .isSameColorAs(0xFF484831);
+    }
+
     private boolean pairSatisfiesContrast(DynamicScheme scheme, DynamicColor fg, DynamicColor bg) {
         double fgTone = fg.getHct(scheme).getTone();
         double bgTone = bg.getHct(scheme).getTone();
-        // TODO(b/270915664) - Fix inconsistencies.
-        // TODO(b/270915664) - Minimum requirement should be 4.5 when not reducing contrast.
-        double minimumRequirement = 3.0;
+        double minimumRequirement = scheme.contrastLevel >= 0.0 ? 4.5 : 3.0;
         return Contrast.ratioOfTones(fgTone, bgTone) >= minimumRequirement;
     }
 }

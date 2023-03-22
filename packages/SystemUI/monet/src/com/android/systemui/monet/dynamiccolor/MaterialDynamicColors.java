@@ -17,15 +17,18 @@
 package com.android.systemui.monet.dynamiccolor;
 
 import com.android.systemui.monet.dislike.DislikeAnalyzer;
-import com.android.systemui.monet.dynamiccolor.DynamicColor;
-import com.android.systemui.monet.dynamiccolor.ToneDeltaConstraint;
-import com.android.systemui.monet.dynamiccolor.TonePolarity;
 import com.android.systemui.monet.hct.Hct;
 import com.android.systemui.monet.hct.ViewingConditions;
 import com.android.systemui.monet.scheme.DynamicScheme;
 import com.android.systemui.monet.scheme.Variant;
 
 /** Named colors, otherwise known as tokens, or roles, in the Material Design system. */
+// Prevent lint for Function.apply not being available on Android before API level 14 (4.0.1).
+// "AndroidJdkLibsChecker" for Function, "NewApi" for Function.apply().
+// A java_library Bazel rule with an Android constraint cannot skip these warnings without this
+// annotation; another solution would be to create an android_library rule and supply
+// AndroidManifest with an SDK set higher than 14.
+@SuppressWarnings({"AndroidJdkLibsChecker", "NewApi"})
 public final class MaterialDynamicColors {
     private static final double CONTAINER_ACCENT_TONE_DELTA = 15.0;
 
@@ -33,7 +36,6 @@ public final class MaterialDynamicColors {
     private MaterialDynamicColors() {
     }
 
-    /** In light mode, the darkest surface. In dark mode, the lightest surface. */
     public static DynamicColor highestSurface(DynamicScheme s) {
         return s.isDark ? surfaceBright : surfaceDim;
     }
@@ -49,7 +51,7 @@ public final class MaterialDynamicColors {
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 6.0 : 98.0);
 
     public static final DynamicColor surfaceInverse =
-            DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 90.0 : 20.0);
+            DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 90.0 : 30.0);
 
     public static final DynamicColor surfaceBright =
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 24.0 : 98.0);
@@ -57,19 +59,19 @@ public final class MaterialDynamicColors {
     public static final DynamicColor surfaceDim =
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 6.0 : 87.0);
 
-    public static final DynamicColor surfaceContainerLowest =
+    public static final DynamicColor surfaceSub2 =
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 4.0 : 100.0);
 
-    public static final DynamicColor surfaceContainerLow =
+    public static final DynamicColor surfaceSub1 =
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 10.0 : 96.0);
 
     public static final DynamicColor surfaceContainer =
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 12.0 : 94.0);
 
-    public static final DynamicColor surfaceContainerHigh =
+    public static final DynamicColor surfaceAdd1 =
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 17.0 : 92.0);
 
-    public static final DynamicColor surfaceContainerHighest =
+    public static final DynamicColor surfaceAdd2 =
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 22.0 : 90.0);
 
     public static final DynamicColor onSurface =
@@ -95,7 +97,8 @@ public final class MaterialDynamicColors {
 
     public static final DynamicColor outlineVariant =
             DynamicColor.fromPalette(
-                    (s) -> s.neutralVariantPalette, (s) -> 80.0, (s) -> highestSurface(s));
+                    (s) -> s.neutralVariantPalette, (s) -> s.isDark ? 30.0 : 80.0,
+                    (s) -> highestSurface(s));
 
     public static final DynamicColor primaryContainer =
             DynamicColor.fromPalette(
@@ -115,7 +118,7 @@ public final class MaterialDynamicColors {
                         if (!isFidelity(s)) {
                             return s.isDark ? 90.0 : 10.0;
                         }
-                        return DynamicColor.contrastingTone(primaryContainer.getTone(s), 4.5);
+                        return DynamicColor.contrastingTone(primaryContainer.tone.apply(s), 4.5);
                     },
                     (s) -> primaryContainer,
                     null);
@@ -165,7 +168,7 @@ public final class MaterialDynamicColors {
                         if (!isFidelity(s)) {
                             return s.isDark ? 90.0 : 10.0;
                         }
-                        return DynamicColor.contrastingTone(secondaryContainer.getTone(s), 4.5);
+                        return DynamicColor.contrastingTone(secondaryContainer.tone.apply(s), 4.5);
                     },
                     (s) -> secondaryContainer);
 
@@ -206,7 +209,7 @@ public final class MaterialDynamicColors {
                         if (!isFidelity(s)) {
                             return s.isDark ? 90.0 : 10.0;
                         }
-                        return DynamicColor.contrastingTone(tertiaryContainer.getTone(s), 4.5);
+                        return DynamicColor.contrastingTone(tertiaryContainer.tone.apply(s), 4.5);
                     },
                     (s) -> tertiaryContainer);
 
@@ -252,49 +255,49 @@ public final class MaterialDynamicColors {
             DynamicColor.fromPalette((s) -> s.primaryPalette, (s) -> 90.0,
                     (s) -> highestSurface(s));
 
-    public static final DynamicColor primaryFixedDim =
+    public static final DynamicColor primaryFixedDarker =
             DynamicColor.fromPalette((s) -> s.primaryPalette, (s) -> 80.0,
                     (s) -> highestSurface(s));
 
     public static final DynamicColor onPrimaryFixed =
             DynamicColor.fromPalette((s) -> s.primaryPalette, (s) -> 10.0,
-                    (s) -> primaryFixedDim);
+                    (s) -> primaryFixedDarker);
 
     public static final DynamicColor onPrimaryFixedVariant =
             DynamicColor.fromPalette((s) -> s.primaryPalette, (s) -> 30.0,
-                    (s) -> primaryFixedDim);
+                    (s) -> primaryFixedDarker);
 
     public static final DynamicColor secondaryFixed =
             DynamicColor.fromPalette((s) -> s.secondaryPalette, (s) -> 90.0,
                     (s) -> highestSurface(s));
 
-    public static final DynamicColor secondaryFixedDim =
+    public static final DynamicColor secondaryFixedDarker =
             DynamicColor.fromPalette((s) -> s.secondaryPalette, (s) -> 80.0,
                     (s) -> highestSurface(s));
 
     public static final DynamicColor onSecondaryFixed =
             DynamicColor.fromPalette((s) -> s.secondaryPalette, (s) -> 10.0,
-                    (s) -> secondaryFixedDim);
+                    (s) -> secondaryFixedDarker);
 
     public static final DynamicColor onSecondaryFixedVariant =
             DynamicColor.fromPalette((s) -> s.secondaryPalette, (s) -> 30.0,
-                    (s) -> secondaryFixedDim);
+                    (s) -> secondaryFixedDarker);
 
     public static final DynamicColor tertiaryFixed =
             DynamicColor.fromPalette((s) -> s.tertiaryPalette, (s) -> 90.0,
                     (s) -> highestSurface(s));
 
-    public static final DynamicColor tertiaryFixedDim =
+    public static final DynamicColor tertiaryFixedDarker =
             DynamicColor.fromPalette((s) -> s.tertiaryPalette, (s) -> 80.0,
                     (s) -> highestSurface(s));
 
     public static final DynamicColor onTertiaryFixed =
             DynamicColor.fromPalette((s) -> s.tertiaryPalette, (s) -> 10.0,
-                    (s) -> tertiaryFixedDim);
+                    (s) -> tertiaryFixedDarker);
 
     public static final DynamicColor onTertiaryFixedVariant =
             DynamicColor.fromPalette((s) -> s.tertiaryPalette, (s) -> 30.0,
-                    (s) -> tertiaryFixedDim);
+                    (s) -> tertiaryFixedDarker);
 
     /**
      * These colors were present in Android framework before Android U, and used by MDC controls.
@@ -366,27 +369,6 @@ public final class MaterialDynamicColors {
     public static final DynamicColor textHintInverse =
             DynamicColor.fromPalette((s) -> s.neutralPalette, (s) -> s.isDark ? 10.0 : 90.0);
 
-    public static final DynamicColor primaryPaletteKeyColor =
-            DynamicColor.fromPalette(
-                    (s) -> s.primaryPalette, (s) -> s.primaryPalette.getKeyColor().getTone());
-
-    public static final DynamicColor secondaryPaletteKeyColor =
-            DynamicColor.fromPalette(
-                    (s) -> s.secondaryPalette, (s) -> s.secondaryPalette.getKeyColor().getTone());
-
-    public static final DynamicColor tertiaryPaletteKeyColor =
-            DynamicColor.fromPalette(
-                    (s) -> s.tertiaryPalette, (s) -> s.tertiaryPalette.getKeyColor().getTone());
-
-    public static final DynamicColor neutralPaletteKeyColor =
-            DynamicColor.fromPalette(
-                    (s) -> s.neutralPalette, (s) -> s.neutralPalette.getKeyColor().getTone());
-
-    public static final DynamicColor neutralVariantPaletteKeyColor =
-            DynamicColor.fromPalette(
-                    (s) -> s.neutralVariantPalette,
-                    (s) -> s.neutralVariantPalette.getKeyColor().getTone());
-
     private static ViewingConditions viewingConditionsForAlbers(DynamicScheme scheme) {
         return ViewingConditions.defaultWithBackgroundLstar(scheme.isDark ? 30.0 : 80.0);
     }
@@ -433,4 +415,35 @@ public final class MaterialDynamicColors {
             return DynamicColor.enableLightForeground(albersd.getTone());
         }
     }
+
+    // Compatibility mappings for Android
+    public static final DynamicColor surfaceContainerLow = surfaceSub1;
+    public static final DynamicColor surfaceContainerLowest = surfaceSub2;
+    public static final DynamicColor surfaceContainerHigh = surfaceAdd1;
+    public static final DynamicColor surfaceContainerHighest = surfaceAdd2;
+    public static final DynamicColor primaryFixedDim = primaryFixedDarker;
+    public static final DynamicColor secondaryFixedDim = secondaryFixedDarker;
+    public static final DynamicColor tertiaryFixedDim = tertiaryFixedDarker;
+
+    // Compatibility Keys Colors for Android
+    public static final DynamicColor primaryPaletteKeyColor =
+            DynamicColor.fromPalette(
+                    (s) -> s.primaryPalette, (s) -> s.primaryPalette.getKeyColor().getTone());
+
+    public static final DynamicColor secondaryPaletteKeyColor =
+            DynamicColor.fromPalette(
+                    (s) -> s.secondaryPalette, (s) -> s.secondaryPalette.getKeyColor().getTone());
+
+    public static final DynamicColor tertiaryPaletteKeyColor =
+            DynamicColor.fromPalette(
+                    (s) -> s.tertiaryPalette, (s) -> s.tertiaryPalette.getKeyColor().getTone());
+
+    public static final DynamicColor neutralPaletteKeyColor =
+            DynamicColor.fromPalette(
+                    (s) -> s.neutralPalette, (s) -> s.neutralPalette.getKeyColor().getTone());
+
+    public static final DynamicColor neutralVariantPaletteKeyColor =
+            DynamicColor.fromPalette(
+                    (s) -> s.neutralVariantPalette,
+                    (s) -> s.neutralVariantPalette.getKeyColor().getTone());
 }
