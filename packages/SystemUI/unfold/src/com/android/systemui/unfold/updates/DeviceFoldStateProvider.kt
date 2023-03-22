@@ -15,12 +15,14 @@
  */
 package com.android.systemui.unfold.updates
 
+import android.content.Context
 import android.os.Handler
 import android.os.Trace
 import android.util.Log
 import androidx.annotation.FloatRange
 import androidx.annotation.VisibleForTesting
 import androidx.core.util.Consumer
+import com.android.systemui.unfold.compat.INNER_SCREEN_SMALLEST_SCREEN_WIDTH_THRESHOLD_DP
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.dagger.UnfoldMain
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
@@ -45,6 +47,7 @@ constructor(
     private val activityTypeProvider: CurrentActivityTypeProvider,
     private val unfoldKeyguardVisibilityProvider: UnfoldKeyguardVisibilityProvider,
     private val rotationChangeProvider: RotationChangeProvider,
+    private val context: Context,
     @UnfoldMain private val mainExecutor: Executor,
     @UnfoldMain private val handler: Handler
 ) : FoldStateProvider {
@@ -119,7 +122,7 @@ constructor(
                     "lastHingeAngle: $lastHingeAngle, " +
                     "lastHingeAngleBeforeTransition: $lastHingeAngleBeforeTransition"
             )
-            Trace.setCounter( "hinge_angle", angle.toLong())
+            Trace.setCounter("hinge_angle", angle.toLong())
         }
 
         val currentDirection =
@@ -136,6 +139,7 @@ constructor(
         val isFullyOpened = FULLY_OPEN_DEGREES - angle < FULLY_OPEN_THRESHOLD_DEGREES
         val eventNotAlreadyDispatched = lastFoldUpdate != transitionUpdate
         val screenAvailableEventSent = isUnfoldHandled
+        val isOnLargeScreen = isOnLargeScreen()
 
         if (
             angleChangeSurpassedThreshold && // Do not react immediately to small changes in angle
@@ -144,7 +148,9 @@ constructor(
                                   // angle range as closing threshold could overlap this range
                 screenAvailableEventSent && // do not send transition event if we are still in the
                                             // process of turning on the inner display
-                isClosingThresholdMet(angle) // hinge angle is below certain threshold.
+                isClosingThresholdMet(angle) && // hinge angle is below certain threshold.
+                isOnLargeScreen // Avoids sending closing event when on small screen.
+                                // Start event is sent regardless due to hall sensor.
         ) {
             notifyFoldUpdate(transitionUpdate, lastHingeAngle)
         }
@@ -233,7 +239,7 @@ constructor(
     }
 
     private fun cancelAnimation(): Unit =
-            notifyFoldUpdate(FOLD_UPDATE_FINISH_HALF_OPEN, lastHingeAngle)
+        notifyFoldUpdate(FOLD_UPDATE_FINISH_HALF_OPEN, lastHingeAngle)
 
     private inner class ScreenStatusListener : ScreenStatusProvider.ScreenListener {
 
@@ -259,6 +265,11 @@ constructor(
             isScreenOn = false
             updateHingeAngleProviderState()
         }
+    }
+
+    private fun isOnLargeScreen(): Boolean {
+      return context.resources.configuration.smallestScreenWidthDp >
+          INNER_SCREEN_SMALLEST_SCREEN_WIDTH_THRESHOLD_DP
     }
 
     /** While the screen is off or the device is folded, hinge angle updates are not needed. */

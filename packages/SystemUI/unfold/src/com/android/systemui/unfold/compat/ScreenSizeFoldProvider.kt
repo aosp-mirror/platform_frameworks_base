@@ -53,4 +53,4 @@ class ScreenSizeFoldProvider(private val context: Context) : FoldProvider {
     }
 }
 
-private const val INNER_SCREEN_SMALLEST_SCREEN_WIDTH_THRESHOLD_DP = 600
+internal const val INNER_SCREEN_SMALLEST_SCREEN_WIDTH_THRESHOLD_DP = 600
