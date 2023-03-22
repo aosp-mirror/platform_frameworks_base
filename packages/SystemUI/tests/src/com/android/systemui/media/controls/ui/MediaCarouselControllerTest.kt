@@ -17,7 +17,7 @@
 package com.android.systemui.media.controls.ui
 
 import android.app.PendingIntent
-import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.util.MathUtils.abs
@@ -26,9 +26,9 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -49,7 +49,7 @@ import com.android.systemui.qs.PageIndicator
 import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
@@ -89,6 +89,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var mediaHostStatesManager: MediaHostStatesManager
     @Mock lateinit var mediaHostState: MediaHostState
     @Mock lateinit var activityStarter: ActivityStarter
+    @Mock @Main private lateinit var executor: DelayableExecutor
     @Mock lateinit var mediaDataManager: MediaDataManager
     @Mock lateinit var configurationController: ConfigurationController
     @Mock lateinit var falsingCollector: FalsingCollector
@@ -112,15 +113,11 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
     private val clock = FakeSystemClock()
     private lateinit var mediaCarouselController: MediaCarouselController
-    private lateinit var mainExecutor: FakeExecutor
-    private lateinit var backgroundExecutor: FakeExecutor
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
         transitionRepository = FakeKeyguardTransitionRepository()
-        mainExecutor = FakeExecutor(clock)
-        backgroundExecutor = FakeExecutor(clock)
         mediaCarouselController =
             MediaCarouselController(
                 context,
@@ -129,8 +126,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 mediaHostStatesManager,
                 activityStarter,
                 clock,
-                mainExecutor,
-                backgroundExecutor,
+                executor,
                 mediaDataManager,
                 configurationController,
                 falsingCollector,
@@ -405,7 +401,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 resumption = true
             )
         )
-        runAllReady()
 
         assertEquals(
             MediaPlayerData.getMediaPlayerIndex("paused local"),
@@ -515,8 +510,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             false
         )
         mediaCarouselController.shouldScrollToKey = true
-        runAllReady()
-
         // switching between media players.
         listener.value.onMediaDataLoaded(
             "playing local",
@@ -538,7 +531,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 resumption = false
             )
         )
-        runAllReady()
 
         assertEquals(
             MediaPlayerData.getMediaPlayerIndex("paused local"),
@@ -563,7 +555,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 resumption = false
             )
         )
-        runAllReady()
 
         var playerIndex = MediaPlayerData.getMediaPlayerIndex("playing local")
         assertEquals(
@@ -586,8 +577,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 packageName = "PACKAGE_NAME"
             )
         )
-        runAllReady()
-
         playerIndex = MediaPlayerData.getMediaPlayerIndex("playing local")
         assertEquals(playerIndex, 0)
     }
@@ -684,9 +673,17 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnUiModeChanged_playersAreAddedBack() {
-        mediaCarouselController.pageIndicator = pageIndicator
-
+    fun testOnConfigChanged_playersAreAddedBack() {
+        listener.value.onMediaDataLoaded(
+            "playing local",
+            null,
+            DATA.copy(
+                active = true,
+                isPlaying = true,
+                playbackLocation = MediaData.PLAYBACK_LOCAL,
+                resumption = false
+            )
+        )
         listener.value.onMediaDataLoaded(
             "paused local",
             null,
@@ -697,75 +694,14 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 resumption = false
             )
         )
-        runAllReady()
 
         val playersSize = MediaPlayerData.players().size
-        configListener.value.onUiModeChanged()
-        runAllReady()
 
-        verify(pageIndicator).tintList =
-            ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
+        configListener.value.onConfigChanged(Configuration())
+
         assertEquals(playersSize, MediaPlayerData.players().size)
         assertEquals(
-            MediaPlayerData.getMediaPlayerIndex("paused local"),
-            mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
-        )
-    }
-
-    @Test
-    fun testOnDensityOrFontScaleChanged_playersAreAddedBack() {
-        mediaCarouselController.pageIndicator = pageIndicator
-
-        listener.value.onMediaDataLoaded(
-            "paused local",
-            null,
-            DATA.copy(
-                active = true,
-                isPlaying = false,
-                playbackLocation = MediaData.PLAYBACK_LOCAL,
-                resumption = false
-            )
-        )
-        runAllReady()
-
-        val playersSize = MediaPlayerData.players().size
-        configListener.value.onDensityOrFontScaleChanged()
-        runAllReady()
-
-        verify(pageIndicator).tintList =
-            ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
-        assertEquals(playersSize, MediaPlayerData.players().size)
-        assertEquals(
-            MediaPlayerData.getMediaPlayerIndex("paused local"),
-            mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
-        )
-    }
-
-    @Test
-    fun testOnThemeChanged_playersAreAddedBack() {
-        mediaCarouselController.pageIndicator = pageIndicator
-
-        listener.value.onMediaDataLoaded(
-            "paused local",
-            null,
-            DATA.copy(
-                active = true,
-                isPlaying = false,
-                playbackLocation = MediaData.PLAYBACK_LOCAL,
-                resumption = false
-            )
-        )
-        runAllReady()
-
-        val playersSize = MediaPlayerData.players().size
-        configListener.value.onThemeChanged()
-        runAllReady()
-
-        verify(pageIndicator).tintList =
-            ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
-        assertEquals(playersSize, MediaPlayerData.players().size)
-        assertEquals(
-            MediaPlayerData.getMediaPlayerIndex("paused local"),
+            MediaPlayerData.getMediaPlayerIndex("playing local"),
             mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
         )
     }
@@ -895,10 +831,5 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
         // Verify that seekbar listening attribute in media control panel is set to false.
         verify(panel, times(MediaPlayerData.players().size)).listening = false
-    }
-
-    private fun runAllReady() {
-        backgroundExecutor.runAllReady()
-        mainExecutor.runAllReady()
     }
 }
