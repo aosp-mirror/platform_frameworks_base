@@ -192,8 +192,11 @@ public abstract class MediaOutputBaseAdapter extends
             mSubTitleText.setTextColor(mController.getColorItemContent());
             mTwoLineTitleText.setTextColor(mController.getColorItemContent());
             if (mController.isAdvancedLayoutSupported()) {
-                mIconAreaLayout.setOnClickListener(null);
                 mVolumeValueText.setTextColor(mController.getColorItemContent());
+                mTitleIcon.setOnTouchListener(((v, event) -> {
+                    mSeekBar.dispatchTouchEvent(event);
+                    return false;
+                }));
             }
             mSeekBar.setProgressTintList(
                     ColorStateList.valueOf(mController.getColorSeekbarProgress()));
@@ -444,9 +447,6 @@ public abstract class MediaOutputBaseAdapter extends
         }
 
         void updateIconAreaClickListener(View.OnClickListener listener) {
-            if (mController.isAdvancedLayoutSupported()) {
-                mIconAreaLayout.setOnClickListener(listener);
-            }
             mTitleIcon.setOnClickListener(listener);
         }
 
