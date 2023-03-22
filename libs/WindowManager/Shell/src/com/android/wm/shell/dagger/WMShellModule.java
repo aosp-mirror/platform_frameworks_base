@@ -671,13 +671,17 @@ public abstract class WMShellModule {
             Context context,
             ShellInit shellInit,
             ShellController shellController,
+            DisplayController displayController,
             ShellTaskOrganizer shellTaskOrganizer,
+            SyncTransactionQueue syncQueue,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             Transitions transitions,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
-        return new DesktopTasksController(context, shellInit, shellController, shellTaskOrganizer,
-                transitions, desktopModeTaskRepository, mainExecutor);
+        return new DesktopTasksController(context, shellInit, shellController, displayController,
+                shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer, transitions,
+                desktopModeTaskRepository, mainExecutor);
     }
 
     @WMSingleton

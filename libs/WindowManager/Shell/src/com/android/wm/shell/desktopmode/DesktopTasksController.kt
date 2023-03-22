@@ -17,6 +17,7 @@
 package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager
+import android.app.ActivityManager.RunningTaskInfo
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
@@ -37,11 +38,14 @@ import android.window.WindowContainerToken
 import android.window.WindowContainerTransaction
 import androidx.annotation.BinderThread
 import com.android.internal.protolog.common.ProtoLog
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
+import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.ExecutorUtils
 import com.android.wm.shell.common.ExternalInterfaceBinder
 import com.android.wm.shell.common.RemoteCallable
 import com.android.wm.shell.common.ShellExecutor
+import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.annotations.ExternalThread
 import com.android.wm.shell.common.annotations.ShellMainThread
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
@@ -55,16 +59,20 @@ import java.util.function.Consumer
 
 /** Handles moving tasks in and out of desktop */
 class DesktopTasksController(
-    private val context: Context,
-    shellInit: ShellInit,
-    private val shellController: ShellController,
-    private val shellTaskOrganizer: ShellTaskOrganizer,
-    private val transitions: Transitions,
-    private val desktopModeTaskRepository: DesktopModeTaskRepository,
-    @ShellMainThread private val mainExecutor: ShellExecutor
+        private val context: Context,
+        shellInit: ShellInit,
+        private val shellController: ShellController,
+        private val displayController: DisplayController,
+        private val shellTaskOrganizer: ShellTaskOrganizer,
+        private val syncQueue: SyncTransactionQueue,
+        private val rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
+        private val transitions: Transitions,
+        private val desktopModeTaskRepository: DesktopModeTaskRepository,
+        @ShellMainThread private val mainExecutor: ShellExecutor
 ) : RemoteCallable<DesktopTasksController>, Transitions.TransitionHandler {
 
     private val desktopMode: DesktopModeImpl
+    private var visualIndicator: DesktopModeVisualIndicator? = null
 
     init {
         desktopMode = DesktopModeImpl()
@@ -295,6 +303,52 @@ class DesktopTasksController(
     /** Get connection interface between sysui and shell */
     fun asDesktopMode(): DesktopMode {
         return desktopMode
+    }
+
+    /**
+     * Perform checks required on drag move. Create/release fullscreen indicator as needed.
+     *
+     * @param taskInfo the task being dragged.
+     * @param taskSurface SurfaceControl of dragged task.
+     * @param y coordinate of dragged task. Used for checks against status bar height.
+     */
+    fun onDragPositioningMove(
+            taskInfo: RunningTaskInfo,
+            taskSurface: SurfaceControl,
+            y: Float
+    ) {
+        val statusBarHeight = displayController
+                .getDisplayLayout(taskInfo.displayId)?.stableInsets()?.top ?: 0
+        if (taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
+            if (y <= statusBarHeight && visualIndicator == null) {
+                visualIndicator = DesktopModeVisualIndicator(syncQueue, taskInfo,
+                        displayController, context, taskSurface, shellTaskOrganizer,
+                        rootTaskDisplayAreaOrganizer)
+                visualIndicator?.createFullscreenIndicator()
+            } else if (y > statusBarHeight && visualIndicator != null) {
+                visualIndicator?.releaseFullscreenIndicator()
+                visualIndicator = null
+            }
+        }
+    }
+
+    /**
+     * Perform checks required on drag end. Move to fullscreen if drag ends in status bar area.
+     *
+     * @param taskInfo the task being dragged.
+     * @param y height of drag, to be checked against status bar height.
+     */
+    fun onDragPositioningEnd(
+            taskInfo: RunningTaskInfo,
+            y: Float
+    ) {
+        val statusBarHeight = displayController
+                .getDisplayLayout(taskInfo.displayId)?.stableInsets()?.top ?: 0
+        if (y <= statusBarHeight && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
+            moveToFullscreen(taskInfo.taskId)
+            visualIndicator?.releaseFullscreenIndicator()
+            visualIndicator = null
+        }
     }
 
     /**
