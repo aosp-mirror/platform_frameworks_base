@@ -26,6 +26,7 @@ import android.widget.SeekBar;
  */
 public class MediaOutputSeekbar extends SeekBar {
     private static final int SCALE_SIZE = 1000;
+    private static final int INITIAL_PROGRESS = 500;
     public static final int VOLUME_PERCENTAGE_SCALE_SIZE = 100000;
 
     public MediaOutputSeekbar(Context context, AttributeSet attrs) {
@@ -38,7 +39,7 @@ public class MediaOutputSeekbar extends SeekBar {
     }
 
     static int scaleVolumeToProgress(int volume) {
-        return volume * SCALE_SIZE;
+        return volume == 0 ? 0 : INITIAL_PROGRESS + volume * SCALE_SIZE;
     }
 
     int getVolume() {
@@ -46,7 +47,7 @@ public class MediaOutputSeekbar extends SeekBar {
     }
 
     void setVolume(int volume) {
-        setProgress(volume * SCALE_SIZE, true);
+        setProgress(scaleVolumeToProgress(volume), true);
     }
 
     void setMaxVolume(int maxVolume) {
