@@ -30,6 +30,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.ArrayList;
+
 @MediumTest
 public class AnimatorSetCallsTest {
     @Rule
@@ -38,6 +40,7 @@ public class AnimatorSetCallsTest {
 
     private AnimatorSetActivity mActivity;
     private AnimatorSet mSet1;
+    private ObjectAnimator mAnimator;
     private CountListener mListener1;
     private CountListener mListener2;
     private CountListener mListener3;
@@ -58,13 +61,13 @@ public class AnimatorSetCallsTest {
             set2.addListener(mListener2);
             set2.addPauseListener(mListener2);
 
-            ObjectAnimator anim = ObjectAnimator.ofFloat(square, "translationX", 0f, 100f);
+            mAnimator = ObjectAnimator.ofFloat(square, "translationX", 0f, 100f);
             mListener3 = new CountListener();
-            anim.addListener(mListener3);
-            anim.addPauseListener(mListener3);
-            anim.setDuration(1);
+            mAnimator.addListener(mListener3);
+            mAnimator.addPauseListener(mListener3);
+            mAnimator.setDuration(1);
 
-            set2.play(anim);
+            set2.play(mAnimator);
             mSet1.play(set2);
         });
     }
@@ -155,6 +158,53 @@ public class AnimatorSetCallsTest {
         mListener3.assertValues(
                 1, 0, 1, 0, 0, 0, 1, 1
         );
+    }
+
+    @Test
+    public void updateOnlyWhileChangingValues() {
+        ArrayList<Float> updateValues = new ArrayList<>();
+        mAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                updateValues.add((Float) animation.getAnimatedValue());
+            }
+        });
+
+        mSet1.setCurrentPlayTime(0);
+
+        assertEquals(1, updateValues.size());
+        assertEquals(0f, updateValues.get(0), 0f);
+    }
+    @Test
+    public void updateOnlyWhileRunning() {
+        ArrayList<Float> updateValues = new ArrayList<>();
+        mAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                updateValues.add((Float) animation.getAnimatedValue());
+            }
+        });
+
+        mRule.getScenario().onActivity((a) -> {
+            mSet1.start();
+        });
+
+        waitForOnUiThread(() -> mListener1.endForward > 0);
+
+        // the duration is only 1ms, so there should only be two values, 0 and 100.
+        assertEquals(0f, updateValues.get(0), 0f);
+        assertEquals(100f, updateValues.get(updateValues.size() - 1), 0f);
+
+        // now check all the values in the middle, which can never go from 100->0.
+        boolean isAtEnd = false;
+        for (int i = 1; i < updateValues.size() - 1; i++) {
+            float actual = updateValues.get(i);
+            if (actual == 100f) {
+                isAtEnd = true;
+            }
+            float expected = isAtEnd ? 100f : 0f;
+            assertEquals(expected, actual, 0f);
+        }
     }
 
     private void waitForOnUiThread(PollingCheck.PollingCheckCondition condition) {
