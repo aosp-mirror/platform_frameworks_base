@@ -21,11 +21,14 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
@@ -676,6 +679,7 @@ public final class DisplayPowerControllerTest {
 
     @Test
     public void testStopScreenOffBrightnessSensorControllerWhenDisplayDeviceChanges() {
+        // New display device
         setUpDisplay(DISPLAY_ID, "new_unique_id", mHolder.display, mock(DisplayDevice.class),
                 mock(DisplayDeviceConfig.class), /* isEnabled= */ true);
 
@@ -713,6 +717,56 @@ public final class DisplayPowerControllerTest {
         advanceTime(1); // Run updatePowerState
         // One triggered by handleBrightnessModeChange, another triggered by onDisplayChanged
         verify(mHolder.animator, times(2)).animateTo(eq(newBrightness), anyFloat(), anyFloat());
+    }
+
+    @Test
+    public void testShortTermModelPersistsWhenDisplayDeviceChanges() {
+        float lux = 2000;
+        float brightness = 0.4f;
+        float nits = 500;
+        when(mHolder.brightnessMappingStrategy.getUserLux()).thenReturn(lux);
+        when(mHolder.brightnessMappingStrategy.getUserBrightness()).thenReturn(brightness);
+        when(mHolder.brightnessMappingStrategy.convertToNits(brightness)).thenReturn(nits);
+        when(mHolder.brightnessMappingStrategy.convertToFloatScale(nits)).thenReturn(brightness);
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1);
+        clearInvocations(mHolder.injector);
+
+        // New display device
+        setUpDisplay(DISPLAY_ID, "new_unique_id", mHolder.display, mock(DisplayDevice.class),
+                mock(DisplayDeviceConfig.class), /* isEnabled= */ true);
+        mHolder.dpc.onDisplayChanged(mHolder.hbmMetadata, Layout.NO_LEAD_DISPLAY);
+        advanceTime(1);
+
+        verify(mHolder.injector).getAutomaticBrightnessController(
+                any(AutomaticBrightnessController.Callbacks.class),
+                any(Looper.class),
+                eq(mSensorManagerMock),
+                any(),
+                eq(mHolder.brightnessMappingStrategy),
+                anyInt(),
+                anyFloat(),
+                anyFloat(),
+                anyFloat(),
+                anyInt(),
+                anyInt(),
+                anyLong(),
+                anyLong(),
+                anyBoolean(),
+                any(HysteresisLevels.class),
+                any(HysteresisLevels.class),
+                any(HysteresisLevels.class),
+                any(HysteresisLevels.class),
+                eq(mContextSpy),
+                any(HighBrightnessModeController.class),
+                any(BrightnessThrottler.class),
+                isNull(),
+                anyInt(),
+                anyInt(),
+                eq(lux),
+                eq(brightness)
+        );
     }
 
     /**
@@ -799,9 +853,9 @@ public final class DisplayPowerControllerTest {
         final ScreenOffBrightnessSensorController screenOffBrightnessSensorController =
                 mock(ScreenOffBrightnessSensorController.class);
 
-        DisplayPowerController.Injector injector = new TestInjector(displayPowerState, animator,
+        DisplayPowerController.Injector injector = spy(new TestInjector(displayPowerState, animator,
                 automaticBrightnessController, brightnessMappingStrategy, hysteresisLevels,
-                screenOffBrightnessSensorController);
+                screenOffBrightnessSensorController));
 
         final LogicalDisplay display = mock(LogicalDisplay.class);
         final DisplayDevice device = mock(DisplayDevice.class);
@@ -819,7 +873,7 @@ public final class DisplayPowerControllerTest {
 
         return new DisplayPowerControllerHolder(dpc, display, displayPowerState, brightnessSetting,
                 animator, automaticBrightnessController, screenOffBrightnessSensorController,
-                hbmMetadata);
+                hbmMetadata, brightnessMappingStrategy, injector);
     }
 
     /**
@@ -835,13 +889,17 @@ public final class DisplayPowerControllerTest {
         public final AutomaticBrightnessController automaticBrightnessController;
         public final ScreenOffBrightnessSensorController screenOffBrightnessSensorController;
         public final HighBrightnessModeMetadata hbmMetadata;
+        public final BrightnessMappingStrategy brightnessMappingStrategy;
+        public final DisplayPowerController.Injector injector;
 
         DisplayPowerControllerHolder(DisplayPowerController dpc, LogicalDisplay display,
                 DisplayPowerState displayPowerState, BrightnessSetting brightnessSetting,
                 DualRampAnimator<DisplayPowerState> animator,
                 AutomaticBrightnessController automaticBrightnessController,
                 ScreenOffBrightnessSensorController screenOffBrightnessSensorController,
-                HighBrightnessModeMetadata hbmMetadata) {
+                HighBrightnessModeMetadata hbmMetadata,
+                BrightnessMappingStrategy brightnessMappingStrategy,
+                DisplayPowerController.Injector injector) {
             this.dpc = dpc;
             this.display = display;
             this.displayPowerState = displayPowerState;
@@ -850,6 +908,8 @@ public final class DisplayPowerControllerTest {
             this.automaticBrightnessController = automaticBrightnessController;
             this.screenOffBrightnessSensorController = screenOffBrightnessSensorController;
             this.hbmMetadata = hbmMetadata;
+            this.brightnessMappingStrategy = brightnessMappingStrategy;
+            this.injector = injector;
         }
     }
 
