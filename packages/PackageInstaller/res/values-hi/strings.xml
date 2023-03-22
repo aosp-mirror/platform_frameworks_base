@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"ऐप्लिकेशन इंस्‍टॉल हो गया."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"क्या आपको यह ऐप्लिकेशन इंस्टॉल करना है?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"क्या आप इस ऐप्लिकेशन को अपडेट करना चाहते हैं?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"ऐप्लिकेशन इंस्‍टॉल नहीं हुआ."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"पैकेज को इंस्टॉल होने से ब्लॉक किया हुआ है."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ऐप्लिकेशन इंस्टॉल नहीं हुआ क्योंकि पैकेज का किसी मौजूदा पैकेज से विरोध है."</string>
@@ -41,6 +43,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"यह उपयोगकर्ता अनजान ऐप्लिकेशन इंस्टॉल नहीं कर सकता"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"इस उपयोगकर्ता को ऐप्लिकेशन इंस्टॉल करने की अनुमति नहीं है"</string>
     <string name="ok" msgid="7871959885003339302">"ठीक है"</string>
+    <!-- no translation found for update_anyway (8792432341346261969) -->
+    <skip />
     <string name="manage_applications" msgid="5400164782453975580">"ऐप्लिकेशन प्रबंधित करें"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"जगह नहीं है"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> को इंस्‍टॉल नहीं किया जा सका. थोड़ी जगह खाली करें और फिर से कोशिश करें."</string>
