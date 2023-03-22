@@ -188,6 +188,14 @@ public class TaskInfo {
     public int launchIntoPipHostTaskId;
 
     /**
+     * The task id of the parent Task of the launch-into-pip Activity, i.e., if task have more than
+     * one activity it will create new task for this activity, this id is the origin task id and
+     * the pip activity will be reparent to origin task when it exit pip mode.
+     * @hide
+     */
+    public int lastParentTaskIdBeforePip;
+
+    /**
      * The {@link Rect} copied from {@link DisplayCutout#getSafeInsets()} if the cutout is not of
      * (LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES, LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS),
      * {@code null} otherwise.
@@ -512,6 +520,7 @@ public class TaskInfo {
         pictureInPictureParams = source.readTypedObject(PictureInPictureParams.CREATOR);
         shouldDockBigOverlays = source.readBoolean();
         launchIntoPipHostTaskId = source.readInt();
+        lastParentTaskIdBeforePip = source.readInt();
         displayCutoutInsets = source.readTypedObject(Rect.CREATOR);
         topActivityInfo = source.readTypedObject(ActivityInfo.CREATOR);
         isResizeable = source.readBoolean();
@@ -558,6 +567,7 @@ public class TaskInfo {
         dest.writeTypedObject(pictureInPictureParams, flags);
         dest.writeBoolean(shouldDockBigOverlays);
         dest.writeInt(launchIntoPipHostTaskId);
+        dest.writeInt(lastParentTaskIdBeforePip);
         dest.writeTypedObject(displayCutoutInsets, flags);
         dest.writeTypedObject(topActivityInfo, flags);
         dest.writeBoolean(isResizeable);
@@ -598,6 +608,7 @@ public class TaskInfo {
                 + " pictureInPictureParams=" + pictureInPictureParams
                 + " shouldDockBigOverlays=" + shouldDockBigOverlays
                 + " launchIntoPipHostTaskId=" + launchIntoPipHostTaskId
+                + " lastParentTaskIdBeforePip=" + lastParentTaskIdBeforePip
                 + " displayCutoutSafeInsets=" + displayCutoutInsets
                 + " topActivityInfo=" + topActivityInfo
                 + " launchCookies=" + launchCookies

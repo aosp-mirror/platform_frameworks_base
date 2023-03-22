@@ -439,7 +439,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 // multiple sync at the same time because it may cause conflict.
                 // Create a new transition when there is no active sync to collect the changes.
                 final Transition transition = mTransitionController.createTransition(type);
-                applyTransaction(wct, -1 /* syncId */, transition, caller);
+                if (applyTransaction(wct, -1 /* syncId */, transition, caller)
+                        == TRANSACT_EFFECTS_NONE && transition.mParticipants.isEmpty()) {
+                    transition.abort();
+                    return;
+                }
                 mTransitionController.requestStartTransition(transition, null /* startTask */,
                         null /* remoteTransition */, null /* displayChange */);
                 transition.setAllReady();
@@ -476,24 +480,26 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     // calls startSyncSet.
                     () -> mTransitionController.moveToCollecting(nextTransition),
                     () -> {
-                        if (mTaskFragmentOrganizerController.isValidTransaction(wct)) {
-                            applyTransaction(wct, -1 /*syncId*/, nextTransition, caller);
+                        if (mTaskFragmentOrganizerController.isValidTransaction(wct)
+                                && (applyTransaction(wct, -1 /* syncId */, nextTransition, caller)
+                                        != TRANSACT_EFFECTS_NONE
+                                || !nextTransition.mParticipants.isEmpty())) {
                             mTransitionController.requestStartTransition(nextTransition,
                                     null /* startTask */, null /* remoteTransition */,
                                     null /* displayChange */);
                             nextTransition.setAllReady();
-                        } else {
-                            nextTransition.abort();
+                            return;
                         }
+                        nextTransition.abort();
                     });
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    private void applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
+    private int applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
             @Nullable Transition transition, @NonNull CallerInfo caller) {
-        applyTransaction(t, syncId, transition, caller, null /* finishTransition */);
+        return applyTransaction(t, syncId, transition, caller, null /* finishTransition */);
     }
 
     /**
@@ -501,8 +507,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
      * @param transition A transition to collect changes into.
      * @param caller Info about the calling process.
      * @param finishTransition The transition that is currently being finished.
+     * @return The effects of the window container transaction.
      */
-    private void applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
+    private int applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
             @Nullable Transition transition, @NonNull CallerInfo caller,
             @Nullable Transition finishTransition) {
         int effects = TRANSACT_EFFECTS_NONE;
@@ -639,6 +646,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
             mService.continueWindowLayout();
         }
+        return effects;
     }
 
     private int applyChanges(@NonNull WindowContainer<?> container,

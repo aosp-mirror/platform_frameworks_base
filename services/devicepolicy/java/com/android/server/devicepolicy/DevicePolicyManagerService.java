@@ -225,6 +225,7 @@ import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPR
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.provider.DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER;
+import static android.provider.DeviceConfig.NAMESPACE_TELEPHONY;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Settings.Secure.MANAGED_PROVISIONING_DPC_DOWNLOADED;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
@@ -426,6 +427,7 @@ import android.security.keystore.AttestationUtils;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.stats.devicepolicy.DevicePolicyEnums;
+import android.telecom.TelecomManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
@@ -3324,7 +3326,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 onLockSettingsReady();
                 loadAdminDataAsync();
                 mOwners.systemReady();
-                if (isWorkProfileTelephonyFlagEnabled()) {
+                if (isWorkProfileTelephonyEnabled()) {
                     applyManagedSubscriptionsPolicyIfRequired();
                 }
                 break;
@@ -3534,26 +3536,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 userId == UserHandle.USER_SYSTEM ? UserHandle.USER_ALL : userId);
         updatePermissionPolicyCache(userId);
         updateAdminCanGrantSensorsPermissionCache(userId);
-        final List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs;
-        boolean isManagedSubscription;
 
+        final List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs;
         synchronized (getLockObject()) {
             ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
             preferentialNetworkServiceConfigs = owner != null
                     ? owner.mPreferentialNetworkServiceConfigs
                     : List.of(PreferentialNetworkServiceConfig.DEFAULT);
-
-            isManagedSubscription = owner != null && owner.mManagedSubscriptionsPolicy != null
-                    && owner.mManagedSubscriptionsPolicy.getPolicyType()
-                    == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS;
         }
         updateNetworkPreferenceForUser(userId, preferentialNetworkServiceConfigs);
 
-        if (isManagedSubscription) {
-            String defaultDialerPackageName = getDefaultRoleHolderPackageName(
-                    com.android.internal.R.string.config_defaultDialer);
-            String defaultSmsPackageName = getDefaultRoleHolderPackageName(
-                    com.android.internal.R.string.config_defaultSms);
+        if (isProfileOwnerOfOrganizationOwnedDevice(userId)
+                && getManagedSubscriptionsPolicy().getPolicyType()
+                == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
+            String defaultDialerPackageName = getOemDefaultDialerPackage();
+            String defaultSmsPackageName = getOemDefaultSmsPackage();
             updateDialerAndSmsManagedShortcutsOverrideCache(defaultDialerPackageName,
                     defaultSmsPackageName);
         }
@@ -7640,7 +7637,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         mLockSettingsInternal.refreshStrongAuthTimeout(parentId);
 
-        if (isWorkProfileTelephonyFlagEnabled()) {
+        if (isWorkProfileTelephonyEnabled()) {
             clearManagedSubscriptionsPolicy();
             clearLauncherShortcutOverrides();
             updateTelephonyCrossProfileIntentFilters(parentId, UserHandle.USER_NULL, false);
@@ -10991,8 +10988,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             synchronized (mSubscriptionsChangedListenerLock) {
                 pw.println("Subscription changed listener : " + mSubscriptionsChangedListener);
             }
-            pw.println(
-                    "Flag enable_work_profile_telephony : " + isWorkProfileTelephonyFlagEnabled());
+            pw.println("DPM Flag enable_work_profile_telephony : "
+                    + isWorkProfileTelephonyDevicePolicyManagerFlagEnabled());
+            pw.println("Telephony Flag enable_work_profile_telephony : "
+                    + isWorkProfileTelephonySubscriptionManagerFlagEnabled());
 
             mHandler.post(() -> handleDump(pw));
             dumpResources(pw);
@@ -22705,11 +22704,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 DEFAULT_KEEP_PROFILES_RUNNING_FLAG);
     }
 
-    private static boolean isWorkProfileTelephonyFlagEnabled() {
-        return DeviceConfig.getBoolean(
-                NAMESPACE_DEVICE_POLICY_MANAGER,
-                ENABLE_WORK_PROFILE_TELEPHONY_FLAG,
-                DEFAULT_WORK_PROFILE_TELEPHONY_FLAG);
+    private boolean isWorkProfileTelephonyEnabled() {
+        return isWorkProfileTelephonyDevicePolicyManagerFlagEnabled()
+                && isWorkProfileTelephonySubscriptionManagerFlagEnabled();
+    }
+
+    private boolean isWorkProfileTelephonyDevicePolicyManagerFlagEnabled() {
+        return DeviceConfig.getBoolean(NAMESPACE_DEVICE_POLICY_MANAGER,
+                ENABLE_WORK_PROFILE_TELEPHONY_FLAG, DEFAULT_WORK_PROFILE_TELEPHONY_FLAG);
+    }
+
+    private boolean isWorkProfileTelephonySubscriptionManagerFlagEnabled() {
+        final long ident = mInjector.binderClearCallingIdentity();
+        try {
+            return DeviceConfig.getBoolean(NAMESPACE_TELEPHONY, ENABLE_WORK_PROFILE_TELEPHONY_FLAG,
+                    false);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
     }
 
     @Override
@@ -22822,7 +22834,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy() {
-        if (isWorkProfileTelephonyFlagEnabled()) {
+        if (isWorkProfileTelephonyEnabled()) {
             synchronized (getLockObject()) {
                 ActiveAdmin admin = getProfileOwnerOfOrganizationOwnedDeviceLocked();
                 if (admin != null && admin.mManagedSubscriptionsPolicy != null) {
@@ -22836,7 +22848,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setManagedSubscriptionsPolicy(ManagedSubscriptionsPolicy policy) {
-        if (!isWorkProfileTelephonyFlagEnabled()) {
+        if (!isWorkProfileTelephonyEnabled()) {
             throw new UnsupportedOperationException("This api is not enabled");
         }
         CallerIdentity caller = getCallerIdentity();
@@ -22844,9 +22856,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 "This policy can only be set by a profile owner on an organization-owned "
                         + "device.");
 
+        int parentUserId = getProfileParentId(caller.getUserId());
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getProfileOwnerLocked(caller.getUserId());
-            if (hasUserSetupCompleted(UserHandle.USER_SYSTEM) && !isAdminTestOnlyLocked(
+            if (hasUserSetupCompleted(parentUserId) && !isAdminTestOnlyLocked(
                     admin.info.getComponent(), caller.getUserId())) {
                 throw new IllegalStateException("Not allowed to apply this policy after setup");
             }
@@ -22868,7 +22881,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (policyType == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
             final long id = mInjector.binderClearCallingIdentity();
             try {
-                int parentUserId = getProfileParentId(caller.getUserId());
                 installOemDefaultDialerAndSmsApp(caller.getUserId());
                 updateTelephonyCrossProfileIntentFilters(parentUserId, caller.getUserId(), true);
             } finally {
@@ -22879,10 +22891,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void installOemDefaultDialerAndSmsApp(int targetUserId) {
         try {
-            String defaultDialerPackageName = getDefaultRoleHolderPackageName(
-                    com.android.internal.R.string.config_defaultDialer);
-            String defaultSmsPackageName = getDefaultRoleHolderPackageName(
-                    com.android.internal.R.string.config_defaultSms);
+            String defaultDialerPackageName = getOemDefaultDialerPackage();
+            String defaultSmsPackageName = getOemDefaultSmsPackage();
 
             if (defaultDialerPackageName != null) {
                 mIPackageManager.installExistingPackageAsUser(defaultDialerPackageName,
@@ -22906,6 +22916,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // shouldn't happen
             Slogf.wtf(LOG_TAG, "Failed to install dialer/sms app", re);
         }
+    }
+
+    private String getOemDefaultDialerPackage() {
+        TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
+        return telecomManager.getSystemDialerPackage();
+    }
+
+    private String getOemDefaultSmsPackage() {
+        return mContext.getString(R.string.config_defaultSms);
     }
 
     private void updateDialerAndSmsManagedShortcutsOverrideCache(

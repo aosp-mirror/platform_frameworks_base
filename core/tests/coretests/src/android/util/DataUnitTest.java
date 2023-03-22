@@ -26,11 +26,13 @@ public class DataUnitTest extends TestCase {
         assertEquals(12_000L, DataUnit.KILOBYTES.toBytes(12));
         assertEquals(12_000_000L, DataUnit.MEGABYTES.toBytes(12));
         assertEquals(12_000_000_000L, DataUnit.GIGABYTES.toBytes(12));
+        assertEquals(12_000_000_000_000L, DataUnit.TERABYTES.toBytes(12));
     }
 
     public void testIec() throws Exception {
         assertEquals(12_288L, DataUnit.KIBIBYTES.toBytes(12));
         assertEquals(12_582_912L, DataUnit.MEBIBYTES.toBytes(12));
         assertEquals(12_884_901_888L, DataUnit.GIBIBYTES.toBytes(12));
+        assertEquals(13_194_139_533_312L, DataUnit.TEBIBYTES.toBytes(12));
     }
 }
