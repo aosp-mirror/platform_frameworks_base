@@ -300,7 +300,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     return false;
                 }
                 case MotionEvent.ACTION_MOVE: {
+                    final DesktopModeWindowDecoration decoration =
+                            mWindowDecorByTaskId.get(mTaskId);
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
+                    mDesktopTasksController.ifPresent(c -> c.onDragPositioningMove(taskInfo,
+                            decoration.mTaskSurface, e.getRawY(dragPointerIdx)));
                     mDragPositioningCallback.onDragPositioningMove(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     mIsDragging = true;
@@ -309,18 +313,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
-                    final int statusBarHeight = mDisplayController
-                            .getDisplayLayout(taskInfo.displayId).stableInsets().top;
                     mDragPositioningCallback.onDragPositioningEnd(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
-                    if (e.getRawY(dragPointerIdx) <= statusBarHeight) {
-                        if (DesktopModeStatus.isProto2Enabled()
-                                && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
-                            // Switch a single task to fullscreen
-                            mDesktopTasksController.ifPresent(
-                                    c -> c.moveToFullscreen(taskInfo));
-                        }
-                    }
+                    mDesktopTasksController.ifPresent(c -> c.onDragPositioningEnd(taskInfo,
+                            e.getRawY(dragPointerIdx)));
                     final boolean wasDragging = mIsDragging;
                     mIsDragging = false;
                     return wasDragging;
