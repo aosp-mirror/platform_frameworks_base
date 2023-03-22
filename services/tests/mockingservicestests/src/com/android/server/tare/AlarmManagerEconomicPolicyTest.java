@@ -136,17 +136,30 @@ public class AlarmManagerEconomicPolicyTest {
                 mEconomicPolicy.getMinSatiatedConsumptionLimit());
         assertEquals(EconomyManager.DEFAULT_AM_MAX_CONSUMPTION_LIMIT_CAKES,
                 mEconomicPolicy.getMaxSatiatedConsumptionLimit());
+
         final String pkgRestricted = "com.pkg.restricted";
         when(mIrs.isPackageRestricted(anyInt(), eq(pkgRestricted))).thenReturn(true);
+        assertEquals(0, mEconomicPolicy.getMinSatiatedBalance(0, pkgRestricted));
         assertEquals(0, mEconomicPolicy.getMaxSatiatedBalance(0, pkgRestricted));
-        assertEquals(EconomyManager.DEFAULT_AM_MAX_SATIATED_BALANCE_CAKES,
-                mEconomicPolicy.getMaxSatiatedBalance(0, "com.any.other.app"));
+
         final String pkgExempted = "com.pkg.exempted";
         when(mIrs.isPackageExempted(anyInt(), eq(pkgExempted))).thenReturn(true);
         assertEquals(EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_EXEMPTED_CAKES,
                 mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
+        assertEquals(EconomyManager.DEFAULT_AM_MAX_SATIATED_BALANCE_CAKES,
+                mEconomicPolicy.getMaxSatiatedBalance(0, pkgExempted));
+
+        final String pkgHeadlessSystemApp = "com.pkg.headless_system_app";
+        when(mIrs.isHeadlessSystemApp(eq(pkgHeadlessSystemApp))).thenReturn(true);
+        assertEquals(EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP_CAKES,
+                mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
+        assertEquals(EconomyManager.DEFAULT_AM_MAX_SATIATED_BALANCE_CAKES,
+                mEconomicPolicy.getMaxSatiatedBalance(0, pkgHeadlessSystemApp));
+
         assertEquals(EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP_CAKES,
                 mEconomicPolicy.getMinSatiatedBalance(0, "com.any.other.app"));
+        assertEquals(EconomyManager.DEFAULT_AM_MAX_SATIATED_BALANCE_CAKES,
+                mEconomicPolicy.getMaxSatiatedBalance(0, "com.any.other.app"));
     }
 
     @Test
@@ -156,6 +169,8 @@ public class AlarmManagerEconomicPolicyTest {
         setDeviceConfigCakes(EconomyManager.KEY_AM_MAX_CONSUMPTION_LIMIT, arcToCake(25));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MAX_SATIATED_BALANCE, arcToCake(10));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED, arcToCake(9));
+        setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP,
+                arcToCake(8));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP, arcToCake(7));
 
         assertEquals(arcToCake(5), mEconomicPolicy.getInitialSatiatedConsumptionLimit());
@@ -168,6 +183,9 @@ public class AlarmManagerEconomicPolicyTest {
         final String pkgExempted = "com.pkg.exempted";
         when(mIrs.isPackageExempted(anyInt(), eq(pkgExempted))).thenReturn(true);
         assertEquals(arcToCake(9), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
+        final String pkgHeadlessSystemApp = "com.pkg.headless_system_app";
+        when(mIrs.isHeadlessSystemApp(eq(pkgHeadlessSystemApp))).thenReturn(true);
+        assertEquals(arcToCake(8), mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
         assertEquals(arcToCake(7), mEconomicPolicy.getMinSatiatedBalance(0, "com.any.other.app"));
     }
 
@@ -179,6 +197,8 @@ public class AlarmManagerEconomicPolicyTest {
         setDeviceConfigCakes(EconomyManager.KEY_AM_MAX_CONSUMPTION_LIMIT, arcToCake(-5));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MAX_SATIATED_BALANCE, arcToCake(-1));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED, arcToCake(-2));
+        setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP,
+                arcToCake(-3));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP, arcToCake(-3));
 
         assertEquals(arcToCake(1), mEconomicPolicy.getInitialSatiatedConsumptionLimit());
@@ -191,6 +211,9 @@ public class AlarmManagerEconomicPolicyTest {
         final String pkgExempted = "com.pkg.exempted";
         when(mIrs.isPackageExempted(anyInt(), eq(pkgExempted))).thenReturn(true);
         assertEquals(arcToCake(0), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
+        final String pkgHeadlessSystemApp = "com.pkg.headless_system_app";
+        when(mIrs.isHeadlessSystemApp(eq(pkgHeadlessSystemApp))).thenReturn(true);
+        assertEquals(arcToCake(0), mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
         assertEquals(arcToCake(0), mEconomicPolicy.getMinSatiatedBalance(0, "com.any.other.app"));
 
         // Test min+max reversed.
@@ -199,6 +222,8 @@ public class AlarmManagerEconomicPolicyTest {
         setDeviceConfigCakes(EconomyManager.KEY_AM_MAX_CONSUMPTION_LIMIT, arcToCake(3));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MAX_SATIATED_BALANCE, arcToCake(10));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED, arcToCake(11));
+        setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP,
+                arcToCake(12));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP, arcToCake(13));
 
         assertEquals(arcToCake(5), mEconomicPolicy.getInitialSatiatedConsumptionLimit());
@@ -207,6 +232,7 @@ public class AlarmManagerEconomicPolicyTest {
         assertEquals(arcToCake(0), mEconomicPolicy.getMaxSatiatedBalance(0, pkgRestricted));
         assertEquals(arcToCake(13), mEconomicPolicy.getMaxSatiatedBalance(0, "com.any.other.app"));
         assertEquals(arcToCake(13), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
+        assertEquals(arcToCake(13), mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
         assertEquals(arcToCake(13), mEconomicPolicy.getMinSatiatedBalance(0, "com.any.other.app"));
     }
 }

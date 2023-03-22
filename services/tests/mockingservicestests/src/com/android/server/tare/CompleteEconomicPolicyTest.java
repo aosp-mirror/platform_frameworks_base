@@ -189,6 +189,10 @@ public class CompleteEconomicPolicyTest {
         setDeviceConfigCakes(EconomyManager.KEY_AM_MAX_SATIATED_BALANCE, arcToCake(11));
         setDeviceConfigCakes(EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED, arcToCake(8));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED, arcToCake(5));
+        setDeviceConfigCakes(EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP,
+                arcToCake(6));
+        setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP,
+                arcToCake(4));
         setDeviceConfigCakes(EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP, arcToCake(3));
         setDeviceConfigCakes(EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP, arcToCake(2));
 
@@ -202,6 +206,9 @@ public class CompleteEconomicPolicyTest {
         final String pkgExempted = "com.pkg.exempted";
         when(mIrs.isPackageExempted(anyInt(), eq(pkgExempted))).thenReturn(true);
         assertEquals(arcToCake(13), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
+        final String pkgHeadlessSystemApp = "com.pkg.headless_system_app";
+        when(mIrs.isHeadlessSystemApp(eq(pkgHeadlessSystemApp))).thenReturn(true);
+        assertEquals(arcToCake(10), mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
         assertEquals(arcToCake(5), mEconomicPolicy.getMinSatiatedBalance(0, "com.any.other.app"));
     }
 
