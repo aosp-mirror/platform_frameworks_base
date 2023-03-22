@@ -2230,7 +2230,7 @@ public final class AutofillManager {
             @NonNull AutofillRequestCallback callback) {
         if (mContext.checkSelfPermission(PROVIDE_OWN_AUTOFILL_SUGGESTIONS)
                 != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires USE_APP_AUTOFILL permission!");
+            throw new SecurityException("Requires PROVIDE_OWN_AUTOFILL_SUGGESTIONS permission!");
         }
 
         synchronized (mLock) {
