@@ -3965,10 +3965,14 @@ final class InstallPackageHelper {
                     deletePackageHelper.deletePackageLIF(parsedPackage.getPackageName(), null, true,
                             mPm.mUserManager.getUserIds(), 0, null, false);
                 }
-            } else if (newPkgVersionGreater) {
+            } else if (newPkgVersionGreater || newSharedUserSetting) {
                 // The application on /system is newer than the application on /data.
                 // Simply remove the application on /data [keeping application data]
                 // and replace it with the version on /system.
+                // Also, if the sharedUserSetting of the application on /system is different
+                // from the sharedUserSetting on data, we should trust the sharedUserSetting
+                // on /system, even if the application version on /system is smaller than
+                // the version on /data.
                 logCriticalInfo(Log.WARN,
                         "System package enabled;"
                                 + " name: " + pkgSetting.getPackageName()
