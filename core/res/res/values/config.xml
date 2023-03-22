@@ -5301,6 +5301,10 @@
     <!-- Whether vertical reachability repositioning is allowed for letterboxed fullscreen apps. -->
     <bool name="config_letterboxIsVerticalReachabilityEnabled">false</bool>
 
+    <!-- Whether book mode automatic horizontal reachability positioning is allowed for letterboxed
+        fullscreen apps -->
+    <bool name="config_letterboxIsAutomaticReachabilityInBookModeEnabled">false</bool>
+
     <!-- Default horizontal position of the letterboxed app window when reachability is
         enabled and an app is fullscreen in landscape device orientation. When reachability is
         enabled, the position can change between left, center and right. This config defines the
