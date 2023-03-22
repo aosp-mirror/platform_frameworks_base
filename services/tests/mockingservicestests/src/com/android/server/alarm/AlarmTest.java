@@ -210,4 +210,26 @@ public class AlarmTest {
                 createDefaultAlarm(anything, anything, FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED)));
         assertTrue("Alarm clock not exempt", isExemptFromTare(createAlarmClock(anything)));
     }
+
+    @Test
+    public void snapshotImmutable() {
+        final Alarm a = createDefaultAlarm(0, 0, 0);
+
+        final Random random = new Random(234);
+        final long[] policyElapsed = new long[NUM_POLICIES];
+        for (int i = 0; i < NUM_POLICIES; i++) {
+            a.setPolicyElapsed(i, policyElapsed[i] = random.nextInt(1 << 10));
+        }
+
+        final Alarm.Snapshot snapshot = new Alarm.Snapshot(a);
+
+        for (int i = 0; i < NUM_POLICIES; i++) {
+            assertEquals(policyElapsed[i], snapshot.mPolicyWhenElapsed[i]);
+        }
+
+        for (int i = 0; i < NUM_POLICIES; i++) {
+            a.setPolicyElapsed(i, policyElapsed[i] + 5 + i);
+            assertEquals(policyElapsed[i], snapshot.mPolicyWhenElapsed[i]);
+        }
+    }
 }
