@@ -1996,10 +1996,10 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public int getDisplayIdAssignedToUser() {
+    public int getMainDisplayIdAssignedToUser() {
         // Not checking for any permission as it returns info about calling user
         int userId = UserHandle.getUserId(Binder.getCallingUid());
-        int displayId = mUserVisibilityMediator.getDisplayAssignedToUser(userId);
+        int displayId = mUserVisibilityMediator.getMainDisplayAssignedToUser(userId);
         return displayId;
     }
 
@@ -7189,8 +7189,8 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
-        public int getDisplayAssignedToUser(@UserIdInt int userId) {
-            return mUserVisibilityMediator.getDisplayAssignedToUser(userId);
+        public int getMainDisplayAssignedToUser(@UserIdInt int userId) {
+            return mUserVisibilityMediator.getMainDisplayAssignedToUser(userId);
         }
 
         @Override

@@ -774,9 +774,9 @@ public final class UserVisibilityMediator implements Dumpable {
     }
 
     /**
-     * See {@link UserManagerInternal#getDisplayAssignedToUser(int)}.
+     * See {@link UserManagerInternal#getMainDisplayAssignedToUser(int)}.
      */
-    public int getDisplayAssignedToUser(@UserIdInt int userId) {
+    public int getMainDisplayAssignedToUser(@UserIdInt int userId) {
         if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
             if (mVisibleBackgroundUserOnDefaultDisplayEnabled) {
                 // When device supports visible bg users on default display, the default display is
@@ -787,8 +787,8 @@ public final class UserVisibilityMediator implements Dumpable {
                 }
                 if (userStartedOnDefaultDisplay != USER_NULL) {
                     if (DBG) {
-                        Slogf.d(TAG, "getDisplayAssignedToUser(%d): returning INVALID_DISPLAY for "
-                                + "current user user %d was started on DEFAULT_DISPLAY",
+                        Slogf.d(TAG, "getMainDisplayAssignedToUser(%d): returning INVALID_DISPLAY "
+                                        + "for current user user %d was started on DEFAULT_DISPLAY",
                                 userId, userStartedOnDefaultDisplay);
                     }
                     return INVALID_DISPLAY;
@@ -809,7 +809,7 @@ public final class UserVisibilityMediator implements Dumpable {
     /** See {@link UserManagerInternal#getDisplaysAssignedToUser(int)}. */
     @Nullable
     public int[] getDisplaysAssignedToUser(@UserIdInt int userId) {
-        int mainDisplayId = getDisplayAssignedToUser(userId);
+        int mainDisplayId = getMainDisplayAssignedToUser(userId);
         if (mainDisplayId == INVALID_DISPLAY) {
             // The user will not have any extra displays if they have no main display.
             // Return null if no display is assigned to the user.
