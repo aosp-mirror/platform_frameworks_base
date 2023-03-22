@@ -27,6 +27,7 @@ import android.view.Surface
 import androidx.test.filters.SmallTest
 import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -49,6 +50,7 @@ private const val SENSOR_Y = 250
 private const val SENSOR_RADIUS = 10
 
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class UdfpsViewTest : SysuiTestCase() {
