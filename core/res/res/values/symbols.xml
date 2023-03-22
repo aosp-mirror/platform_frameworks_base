@@ -5027,7 +5027,6 @@
   <java-symbol name="materialColorSurfaceContainerHighest" type="attr"/>
   <java-symbol name="materialColorOnSurfaceVariant" type="attr"/>
   <java-symbol name="materialColorOutline" type="attr"/>
-  <java-symbol name="materialColorOutlineVariant" type="attr"/>
   <java-symbol name="materialColorOnPrimary" type="attr"/>
   <java-symbol name="materialColorOnSurface" type="attr"/>
   <java-symbol name="materialColorSurfaceContainer" type="attr"/>
