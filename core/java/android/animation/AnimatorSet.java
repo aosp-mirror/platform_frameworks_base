@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * This class plays a set of {@link Animator} objects in the specified order. Animations
@@ -424,21 +425,25 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
             throw new AndroidRuntimeException("Animators may only be run on Looper threads");
         }
         if (isStarted()) {
-            ArrayList<AnimatorListener> tmpListeners = null;
-            if (mListeners != null) {
-                tmpListeners = (ArrayList<AnimatorListener>) mListeners.clone();
-                int size = tmpListeners.size();
-                for (int i = 0; i < size; i++) {
-                    tmpListeners.get(i).onAnimationCancel(this);
-                }
-            }
-            ArrayList<Node> playingSet = new ArrayList<>(mPlayingSet);
-            int setSize = playingSet.size();
-            for (int i = 0; i < setSize; i++) {
-                playingSet.get(i).mAnimation.cancel();
-            }
+            notifyListeners(AnimatorCaller.ON_CANCEL, false);
+            callOnPlayingSet(Animator::cancel);
             mPlayingSet.clear();
             endAnimation();
+        }
+    }
+
+    /**
+     * Calls consumer on every Animator of mPlayingSet.
+     *
+     * @param consumer The method to call on every Animator of mPlayingSet.
+     */
+    private void callOnPlayingSet(Consumer<Animator> consumer) {
+        final ArrayList<Node> list = mPlayingSet;
+        final int size = list.size();
+        //noinspection ForLoopReplaceableByForEach
+        for (int i = 0; i < size; i++) {
+            final Animator animator = list.get(i).mAnimation;
+            consumer.accept(animator);
         }
     }
 
@@ -662,6 +667,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         super.pause();
         if (!previouslyPaused && mPaused) {
             mPauseTime = -1;
+            callOnPlayingSet(Animator::pause);
         }
     }
 
@@ -676,6 +682,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
             if (mPauseTime >= 0) {
                 addAnimationCallback(0);
             }
+            callOnPlayingSet(Animator::resume);
         }
     }
 
@@ -751,26 +758,14 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
 
     private void notifyStartListeners(boolean inReverse) {
         if (mListeners != null && !mStartListenersCalled) {
-            ArrayList<AnimatorListener> tmpListeners =
-                    (ArrayList<AnimatorListener>) mListeners.clone();
-            int numListeners = tmpListeners.size();
-            for (int i = 0; i < numListeners; ++i) {
-                AnimatorListener listener = tmpListeners.get(i);
-                listener.onAnimationStart(this, inReverse);
-            }
+            notifyListeners(AnimatorCaller.ON_START, inReverse);
         }
         mStartListenersCalled = true;
     }
 
     private void notifyEndListeners(boolean inReverse) {
         if (mListeners != null && mStartListenersCalled) {
-            ArrayList<AnimatorListener> tmpListeners =
-                    (ArrayList<AnimatorListener>) mListeners.clone();
-            int numListeners = tmpListeners.size();
-            for (int i = 0; i < numListeners; ++i) {
-                AnimatorListener listener = tmpListeners.get(i);
-                listener.onAnimationEnd(this, inReverse);
-            }
+            notifyListeners(AnimatorCaller.ON_END, inReverse);
         }
         mStartListenersCalled = false;
     }
