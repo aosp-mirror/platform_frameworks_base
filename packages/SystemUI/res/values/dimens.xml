@@ -1404,10 +1404,6 @@
     -->
     <dimen name="split_shade_scrim_transition_distance">300dp</dimen>
 
-    <!-- Alpha in duration in ms for the auth ripple to become fully vislble. If set to 0,
-         it is immediately visible. -->
-    <integer name="auth_ripple_alpha_in_duration">100</integer>
-
     <dimen name="people_space_widget_radius">28dp</dimen>
     <dimen name="people_space_image_radius">20dp</dimen>
     <dimen name="people_space_messages_count_radius">12dp</dimen>
