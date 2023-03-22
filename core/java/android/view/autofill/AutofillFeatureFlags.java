@@ -365,7 +365,10 @@ public class AutofillFeatureFlags {
     }
 
     /**
-     * Get denylist string from flag
+     * Get denylist string from flag.
+     *
+     * Note: This denylist works both on important view and not important views. The flag used here
+     * is legacy flag which will be replaced with soon.
      *
      * @hide
      */
