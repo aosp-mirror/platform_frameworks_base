@@ -119,6 +119,40 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         return null;
     }
 
+    /** Creates a new provider session to be used by the request session. */
+    @Nullable public static ProviderGetSession createNewSession(
+            Context context,
+            @UserIdInt int userId,
+            CredentialProviderInfo providerInfo,
+            PrepareGetRequestSession getRequestSession,
+            RemoteCredentialService remoteCredentialService) {
+        android.credentials.GetCredentialRequest filteredRequest =
+                filterOptions(providerInfo.getCapabilities(),
+                        getRequestSession.mClientRequest,
+                        providerInfo.getComponentName());
+        if (filteredRequest != null) {
+            Map<String, CredentialOption> beginGetOptionToCredentialOptionMap =
+                    new HashMap<>();
+            return new ProviderGetSession(
+                    context,
+                    providerInfo,
+                    getRequestSession,
+                    userId,
+                    remoteCredentialService,
+                    constructQueryPhaseRequest(
+                            filteredRequest, getRequestSession.mClientAppInfo,
+                            getRequestSession.mClientRequest.alwaysSendAppInfoToProvider(),
+                            beginGetOptionToCredentialOptionMap),
+                    filteredRequest,
+                    getRequestSession.mClientAppInfo,
+                    beginGetOptionToCredentialOptionMap,
+                    getRequestSession.mHybridService
+            );
+        }
+        Log.i(TAG, "Unable to create provider session");
+        return null;
+    }
+
     private static BeginGetCredentialRequest constructQueryPhaseRequest(
             android.credentials.GetCredentialRequest filteredRequest,
             CallingAppInfo callingAppInfo,
