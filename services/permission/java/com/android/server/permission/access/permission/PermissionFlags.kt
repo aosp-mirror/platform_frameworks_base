@@ -318,6 +318,11 @@ object PermissionFlags {
      */
     const val MASK_EXEMPT = INSTALLER_EXEMPT or SYSTEM_EXEMPT or UPGRADE_EXEMPT
 
+    /**
+     * Mask for all permission flags about permission restriction.
+     */
+    const val MASK_RESTRICTED = RESTRICTION_REVOKED or SOFT_RESTRICTED
+
     fun isPermissionGranted(flags: Int): Boolean {
         if (flags.hasBits(INSTALL_GRANTED)) {
             return true
