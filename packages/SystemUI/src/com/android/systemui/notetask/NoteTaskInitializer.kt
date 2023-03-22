@@ -15,11 +15,15 @@
  */
 package com.android.systemui.notetask
 
+import android.app.role.RoleManager
+import android.os.UserHandle
 import android.view.KeyEvent
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.CommandQueue
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /** Class responsible to "glue" all note task dependencies. */
@@ -27,8 +31,10 @@ internal class NoteTaskInitializer
 @Inject
 constructor(
     private val controller: NoteTaskController,
+    private val roleManager: RoleManager,
     private val commandQueue: CommandQueue,
     private val optionalBubbles: Optional<Bubbles>,
+    @Background private val backgroundExecutor: Executor,
     @NoteTaskEnabledKey private val isEnabled: Boolean,
 ) {
 
@@ -43,11 +49,15 @@ constructor(
         }
 
     fun initialize() {
-        controller.setNoteTaskShortcutEnabled(isEnabled)
-
         // Guard against feature not being enabled or mandatory dependencies aren't available.
         if (!isEnabled || optionalBubbles.isEmpty) return
 
+        controller.setNoteTaskShortcutEnabled(true)
         commandQueue.addCallback(callbacks)
+        roleManager.addOnRoleHoldersChangedListenerAsUser(
+            backgroundExecutor,
+            controller::onRoleHoldersChanged,
+            UserHandle.ALL,
+        )
     }
 }
