@@ -604,10 +604,11 @@ public class LocationManagerService extends ILocationManager.Stub implements
         return mGnssManagerService == null ? 0 : mGnssManagerService.getGnssBatchSize();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public void startGnssBatch(long periodNanos, ILocationListener listener, String packageName,
             @Nullable String attributionTag, String listenerId) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        startGnssBatch_enforcePermission();
 
         if (mGnssManagerService == null) {
             return;
@@ -633,9 +634,10 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public void flushGnssBatch() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        flushGnssBatch_enforcePermission();
 
         if (mGnssManagerService == null) {
             return;
@@ -648,9 +650,10 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public void stopGnssBatch() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        stopGnssBatch_enforcePermission();
 
         if (mGnssManagerService == null) {
             return;
@@ -1104,10 +1107,11 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     @Override
     @RequiresPermission(INTERACT_ACROSS_USERS)
     public void addProviderRequestListener(IProviderRequestListener listener) {
-        mContext.enforceCallingOrSelfPermission(INTERACT_ACROSS_USERS, null);
+        addProviderRequestListener_enforcePermission();
         for (LocationProviderManager manager : mProviderManagers) {
             if (manager.isVisibleToCaller()) {
                 manager.addProviderRequestListener(listener);
@@ -1188,10 +1192,11 @@ public class LocationManagerService extends ILocationManager.Stub implements
         return manager.getProperties();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.READ_DEVICE_CONFIG)
     @Override
     public boolean isProviderPackage(@Nullable String provider, String packageName,
             @Nullable String attributionTag) {
-        mContext.enforceCallingOrSelfPermission(permission.READ_DEVICE_CONFIG, null);
+        isProviderPackage_enforcePermission();
 
         for (LocationProviderManager manager : mProviderManagers) {
             if (provider != null && !provider.equals(manager.getName())) {
@@ -1210,9 +1215,10 @@ public class LocationManagerService extends ILocationManager.Stub implements
         return false;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.READ_DEVICE_CONFIG)
     @Override
     public List<String> getProviderPackages(String provider) {
-        mContext.enforceCallingOrSelfPermission(permission.READ_DEVICE_CONFIG, null);
+        getProviderPackages_enforcePermission();
 
         LocationProviderManager manager = getLocationProviderManager(provider);
         if (manager == null) {

@@ -298,20 +298,18 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         return controller.isVibratorInfoLoadSuccessful() ? info : null;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
     @Override // Binder call
     public boolean isVibrating(int vibratorId) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_VIBRATOR_STATE,
-                "isVibrating");
+        isVibrating_enforcePermission();
         VibratorController controller = mVibrators.get(vibratorId);
         return controller != null && controller.isVibrating();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
     @Override // Binder call
     public boolean registerVibratorStateListener(int vibratorId, IVibratorStateListener listener) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_VIBRATOR_STATE,
-                "registerVibratorStateListener");
+        registerVibratorStateListener_enforcePermission();
         VibratorController controller = mVibrators.get(vibratorId);
         if (controller == null) {
             return false;
@@ -319,12 +317,11 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         return controller.registerVibratorStateListener(listener);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
     @Override // Binder call
     public boolean unregisterVibratorStateListener(int vibratorId,
             IVibratorStateListener listener) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_VIBRATOR_STATE,
-                "unregisterVibratorStateListener");
+        unregisterVibratorStateListener_enforcePermission();
         VibratorController controller = mVibrators.get(vibratorId);
         if (controller == null) {
             return false;

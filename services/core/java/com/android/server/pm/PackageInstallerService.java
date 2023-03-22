@@ -1294,9 +1294,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 installReason, allowListedPermissions, statusReceiver);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.INSTALL_PACKAGES)
     @Override
     public void setPermissionsResult(int sessionId, boolean accepted) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES, TAG);
+        setPermissionsResult_enforcePermission();
 
         synchronized (mSessions) {
             PackageInstallerSession session = mSessions.get(sessionId);

@@ -25,8 +25,11 @@ import android.os.VibratorInfo;
 interface IVibratorManagerService {
     int[] getVibratorIds();
     VibratorInfo getVibratorInfo(int vibratorId);
+    @EnforcePermission("ACCESS_VIBRATOR_STATE")
     boolean isVibrating(int vibratorId);
+    @EnforcePermission("ACCESS_VIBRATOR_STATE")
     boolean registerVibratorStateListener(int vibratorId, in IVibratorStateListener listener);
+    @EnforcePermission("ACCESS_VIBRATOR_STATE")
     boolean unregisterVibratorStateListener(int vibratorId, in IVibratorStateListener listener);
     boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId,
             in CombinedVibration vibration, in VibrationAttributes attributes);

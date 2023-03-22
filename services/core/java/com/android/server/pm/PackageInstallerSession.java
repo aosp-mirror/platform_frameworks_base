@@ -4093,16 +4093,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return params.installFlags;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.USE_INSTALLER_V2)
     @Override
     public DataLoaderParamsParcel getDataLoaderParams() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.USE_INSTALLER_V2, null);
+        getDataLoaderParams_enforcePermission();
         return params.dataLoaderParams != null ? params.dataLoaderParams.getData() : null;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.USE_INSTALLER_V2)
     @Override
     public void addFile(int location, String name, long lengthBytes, byte[] metadata,
             byte[] signature) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.USE_INSTALLER_V2, null);
+        addFile_enforcePermission();
         if (!isDataLoaderInstallation()) {
             throw new IllegalStateException(
                     "Cannot add files to non-data loader installation session.");
@@ -4133,9 +4135,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.USE_INSTALLER_V2)
     @Override
     public void removeFile(int location, String name) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.USE_INSTALLER_V2, null);
+        removeFile_enforcePermission();
         if (!isDataLoaderInstallation()) {
             throw new IllegalStateException(
                     "Cannot add files to non-data loader installation session.");

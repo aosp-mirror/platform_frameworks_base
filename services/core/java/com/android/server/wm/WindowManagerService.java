@@ -3206,15 +3206,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.DISABLE_KEYGUARD)
     /**
      * @see android.app.KeyguardManager#exitKeyguardSecurely
      */
     @Override
     public void exitKeyguardSecurely(final IOnKeyguardExitResult callback) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
-            != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires DISABLE_KEYGUARD permission");
-        }
+        exitKeyguardSecurely_enforcePermission();
 
         if (callback == null) {
             throw new IllegalArgumentException("callback == null");
@@ -4371,13 +4369,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
     @Override
     public SurfaceControl addShellRoot(int displayId, IWindow client,
             @WindowManager.ShellRootLayer int shellRootLayer) {
-        if (mContext.checkCallingOrSelfPermission(MANAGE_APP_TOKENS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + MANAGE_APP_TOKENS);
-        }
+        addShellRoot_enforcePermission();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -4392,13 +4388,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
     @Override
     public void setShellRootAccessibilityWindow(int displayId,
             @WindowManager.ShellRootLayer int shellRootLayer, IWindow target) {
-        if (mContext.checkCallingOrSelfPermission(MANAGE_APP_TOKENS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + MANAGE_APP_TOKENS);
-        }
+        setShellRootAccessibilityWindow_enforcePermission();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -4417,13 +4411,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
     @Override
     public void setDisplayWindowInsetsController(
             int displayId, IDisplayWindowInsetsController insetsController) {
-        if (mContext.checkCallingOrSelfPermission(MANAGE_APP_TOKENS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + MANAGE_APP_TOKENS);
-        }
+        setDisplayWindowInsetsController_enforcePermission();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -4438,13 +4430,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
     @Override
     public void updateDisplayWindowRequestedVisibleTypes(
             int displayId, @InsetsType int requestedVisibleTypes) {
-        if (mContext.checkCallingOrSelfPermission(MANAGE_APP_TOKENS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + MANAGE_APP_TOKENS);
-        }
+        updateDisplayWindowRequestedVisibleTypes_enforcePermission();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -5653,12 +5643,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @Override
     public void setForcedDisplaySize(int displayId, int width, int height) {
-        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
-        }
+        setForcedDisplaySize_enforcePermission();
 
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -5673,12 +5661,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @Override
     public void setForcedDisplayScalingMode(int displayId, int mode) {
-        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
-        }
+        setForcedDisplayScalingMode_enforcePermission();
 
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -5761,12 +5747,10 @@ public class WindowManagerService extends IWindowManager.Stub
         return changed;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @Override
     public void clearForcedDisplaySize(int displayId) {
-        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
-        }
+        clearForcedDisplaySize_enforcePermission();
 
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -5826,12 +5810,10 @@ public class WindowManagerService extends IWindowManager.Stub
         return -1;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @Override
     public void setForcedDisplayDensityForUser(int displayId, int density, int userId) {
-        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
-        }
+        setForcedDisplayDensityForUser_enforcePermission();
 
         final int targetUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, false, true, "setForcedDisplayDensityForUser",
@@ -5854,12 +5836,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @Override
     public void clearForcedDisplayDensityForUser(int displayId, int userId) {
-        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
-        }
+        clearForcedDisplayDensityForUser_enforcePermission();
 
         final int callingUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, false, true, "clearForcedDisplayDensityForUser",
@@ -6354,12 +6334,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.STATUS_BAR)
     public void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller does not hold permission "
-                    + android.Manifest.permission.STATUS_BAR);
-        }
+        setNavBarVirtualKeyHapticFeedbackEnabled_enforcePermission();
 
         synchronized (mGlobalLock) {
             mPolicy.setNavBarVirtualKeyHapticFeedbackEnabledLw(enabled);
@@ -6399,11 +6376,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
     @Override
     public Region getCurrentImeTouchRegion() {
-        if (mContext.checkCallingOrSelfPermission(RESTRICTED_VR_ACCESS) != PERMISSION_GRANTED) {
-            throw new SecurityException("getCurrentImeTouchRegion is restricted to VR services");
-        }
+        getCurrentImeTouchRegion_enforcePermission();
         synchronized (mGlobalLock) {
             final Region r = new Region();
             // TODO(b/111080190): this method is only return the recent focused IME touch region,

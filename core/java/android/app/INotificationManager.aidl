@@ -127,13 +127,16 @@ interface INotificationManager
     // INotificationListener method.
     @UnsupportedAppUsage
     StatusBarNotification[] getActiveNotifications(String callingPkg);
+    @EnforcePermission("ACCESS_NOTIFICATIONS")
     StatusBarNotification[] getActiveNotificationsWithAttribution(String callingPkg,
             String callingAttributionTag);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count, boolean includeSnoozed);
+    @EnforcePermission("ACCESS_NOTIFICATIONS")
     StatusBarNotification[] getHistoricalNotificationsWithAttribution(String callingPkg,
             String callingAttributionTag, int count, boolean includeSnoozed);
 
+    @EnforcePermission("ACCESS_NOTIFICATIONS")
     NotificationHistory getNotificationHistory(String callingPkg, String callingAttributionTag);
 
     void registerListener(in INotificationListener listener, in ComponentName component, int userid);

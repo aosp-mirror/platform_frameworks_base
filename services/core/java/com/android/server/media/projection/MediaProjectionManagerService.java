@@ -333,13 +333,10 @@ public final class MediaProjectionManagerService extends SystemService
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override // Binder call
         public void stopActiveProjection() {
-            if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_MEDIA_PROJECTION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to add "
-                        + "projection callbacks");
-            }
+            stopActiveProjection_enforcePermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 if (mProjectionGrant != null) {
@@ -350,13 +347,10 @@ public final class MediaProjectionManagerService extends SystemService
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override // Binder call
         public void notifyActiveProjectionCapturedContentResized(int width, int height) {
-            if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_MEDIA_PROJECTION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to notify "
-                        + "on captured content resize");
-            }
+            notifyActiveProjectionCapturedContentResized_enforcePermission();
             if (!isCurrentProjection(mProjectionGrant)) {
                 return;
             }
@@ -370,13 +364,10 @@ public final class MediaProjectionManagerService extends SystemService
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override
         public void notifyActiveProjectionCapturedContentVisibilityChanged(boolean isVisible) {
-            if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_MEDIA_PROJECTION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to notify "
-                        + "on captured content resize");
-            }
+            notifyActiveProjectionCapturedContentVisibilityChanged_enforcePermission();
             if (!isCurrentProjection(mProjectionGrant)) {
                 return;
             }
