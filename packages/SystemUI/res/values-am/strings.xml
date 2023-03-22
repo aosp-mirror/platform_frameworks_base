@@ -871,8 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# ቁጥጥር ታክሏል።}one{# ቁጥጥር ታክሏል።}other{# ቁጥጥሮች ታክለዋል።}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"ተወግዷል"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> ይታከል?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> የትኛዎቹ መቆጣጠሪያዎች እና ይዘት እዚህ እንደሚታዩ መምረጥ ይችላል።"</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"የ<xliff:g id="APPNAME">%s</xliff:g> መቆጣጠሪያዎች ይወገዱ?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"ተወዳጅ የተደረገ"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"ተወዳጅ ተደርጓል፣ አቋም <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -1067,7 +1066,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"አርትዕ"</string>
     <string name="add" msgid="81036585205287996">"አክል"</string>
     <string name="manage_users" msgid="1823875311934643849">"ተጠቃሚዎችን ያስተዳድሩ"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"ይህ ማሳወቂያ ወደ Splitscreen መጎተትን አይደግፍም።"</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"ይህ ማሳወቂያ ወደ የተከፈለ ማያ ገጽ መጎተትን አይደግፍም"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi አይገኝም"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"የቅድሚያ ሁነታ"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"ማንቂያ ተቀናብሯል"</string>
