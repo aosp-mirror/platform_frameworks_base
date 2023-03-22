@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"S\'ha instal·lat l\'aplicació."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vols instal·lar aquesta aplicació?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vols actualitzar aquesta aplicació?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"No s\'ha instal·lat l\'aplicació."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"El paquet s\'ha bloquejat perquè no es pugui instal·lar."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"L\'aplicació no s\'ha instal·lat perquè el paquet entra en conflicte amb un d\'existent."</string>
@@ -41,6 +43,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Aquest usuari no pot instal·lar aplicacions desconegudes"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Aquest usuari no té permís per instal·lar aplicacions"</string>
     <string name="ok" msgid="7871959885003339302">"D\'acord"</string>
+    <!-- no translation found for update_anyway (8792432341346261969) -->
+    <skip />
     <string name="manage_applications" msgid="5400164782453975580">"Gestiona apps"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Espai esgotat"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"No s\'ha pogut instal·lar <xliff:g id="APP_NAME">%1$s</xliff:g>. Allibera espai i torna-ho a provar."</string>

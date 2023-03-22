@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"Aplikace je nainstalována."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Chcete tuto aplikaci nainstalovat?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Chcete tuto aplikaci aktualizovat?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Aplikaci nelze nainstalovat."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Instalace balíčku byla zablokována."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikaci nelze nainstalovat, protože balíček je v konfliktu se stávajícím balíčkem."</string>
@@ -41,6 +43,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Tento uživatel nemůže instalovat neznámé aplikace"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Tento uživatel nesmí instalovat aplikace"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <!-- no translation found for update_anyway (8792432341346261969) -->
+    <skip />
     <string name="manage_applications" msgid="5400164782453975580">"Správa aplikací"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Nedostatek místa"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g> nelze nainstalovat. Uvolněte místo v paměti a zkuste to znovu."</string>
