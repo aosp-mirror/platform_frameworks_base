@@ -16,8 +16,6 @@
 
 package android.credentials;
 
-import static android.Manifest.permission.CREDENTIAL_MANAGER_SET_ORIGIN;
-
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.CallbackExecutor;
@@ -167,37 +165,83 @@ public final class CredentialManager {
     }
 
     /**
-     * Gets a {@link GetPendingCredentialResponse} that can launch the credential retrieval UI flow
-     * to request a user credential for your app.
+     * Launches the remaining flows to retrieve an app credential from the user, after the
+     * completed prefetch work corresponding to the given {@code pendingGetCredentialHandle}.
+     *
+     * <p>The execution can potentially launch UI flows to collect user consent to using a
+     * credential, display a picker when multiple credentials exist, etc.
+     *
+     * <p>Use this API to complete the full credential retrieval operation after you initiated a
+     * request through the {@link #prepareGetCredential(
+     * GetCredentialRequest, CancellationSignal, Executor, OutcomeReceiver)} API.
+     *
+     * @param pendingGetCredentialHandle the handle representing the pending operation to resume
+     * @param activity the activity used to launch any UI needed
+     * @param cancellationSignal an optional signal that allows for cancelling this call
+     * @param executor the callback will take place on this {@link Executor}
+     * @param callback the callback invoked when the request succeeds or fails
+     */
+    public void getCredential(
+            @NonNull PrepareGetCredentialResponse.PendingGetCredentialHandle
+                    pendingGetCredentialHandle,
+            @NonNull Activity activity,
+            @Nullable CancellationSignal cancellationSignal,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
+        requireNonNull(pendingGetCredentialHandle, "pendingGetCredentialHandle must not be null");
+        requireNonNull(activity, "activity must not be null");
+        requireNonNull(executor, "executor must not be null");
+        requireNonNull(callback, "callback must not be null");
+
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+            Log.w(TAG, "getCredential already canceled");
+            return;
+        }
+
+        pendingGetCredentialHandle.show(activity, cancellationSignal, executor, callback);
+    }
+
+    /**
+     * Prepare for a get-credential operation. Returns a {@link PrepareGetCredentialResponse} that
+     * can launch the credential retrieval UI flow to request a user credential for your app.
+     *
+     * <p>This API doesn't invoke any UI. It only performs the preparation work so that you can
+     * later launch the remaining get-credential operation (involves UIs) through the {@link
+     * #getCredential(PrepareGetCredentialResponse.PendingGetCredentialHandle, Activity,
+     * CancellationSignal, Executor, OutcomeReceiver)} API which incurs less latency compared to
+     * the {@link #getCredential(GetCredentialRequest, Activity, CancellationSignal, Executor,
+     * OutcomeReceiver)} API that executes the whole operation in one call.
      *
      * @param request            the request specifying type(s) of credentials to get from the user
      * @param cancellationSignal an optional signal that allows for cancelling this call
      * @param executor           the callback will take place on this {@link Executor}
      * @param callback           the callback invoked when the request succeeds or fails
-     *
-     * @hide
      */
-    public void getPendingCredential(
+    public void prepareGetCredential(
             @NonNull GetCredentialRequest request,
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<
-                    GetPendingCredentialResponse, GetCredentialException> callback) {
+                    PrepareGetCredentialResponse, GetCredentialException> callback) {
         requireNonNull(request, "request must not be null");
         requireNonNull(executor, "executor must not be null");
         requireNonNull(callback, "callback must not be null");
 
         if (cancellationSignal != null && cancellationSignal.isCanceled()) {
-            Log.w(TAG, "getPendingCredential already canceled");
+            Log.w(TAG, "prepareGetCredential already canceled");
             return;
         }
 
         ICancellationSignal cancelRemote = null;
+        GetCredentialTransportPendingUseCase getCredentialTransport =
+                new GetCredentialTransportPendingUseCase();
         try {
             cancelRemote =
-                    mService.executeGetPendingCredential(
+                    mService.executePrepareGetCredential(
                             request,
-                            new GetPendingCredentialTransport(executor, callback),
+                            new PrepareGetCredentialTransport(
+                                    executor, callback, getCredentialTransport),
+                            getCredentialTransport,
                             mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -484,29 +528,78 @@ public final class CredentialManager {
         }
     }
 
-    private static class GetPendingCredentialTransport extends IGetPendingCredentialCallback.Stub {
+    private static class PrepareGetCredentialTransport extends IPrepareGetCredentialCallback.Stub {
         // TODO: listen for cancellation to release callback.
 
         private final Executor mExecutor;
         private final OutcomeReceiver<
-                GetPendingCredentialResponse, GetCredentialException> mCallback;
+                PrepareGetCredentialResponse, GetCredentialException> mCallback;
+        private final GetCredentialTransportPendingUseCase mGetCredentialTransport;
 
-        private GetPendingCredentialTransport(
+        private PrepareGetCredentialTransport(
                 Executor executor,
-                OutcomeReceiver<GetPendingCredentialResponse, GetCredentialException> callback) {
+                OutcomeReceiver<PrepareGetCredentialResponse, GetCredentialException> callback,
+                GetCredentialTransportPendingUseCase getCredentialTransport) {
             mExecutor = executor;
             mCallback = callback;
+            mGetCredentialTransport = getCredentialTransport;
         }
 
         @Override
-        public void onResponse(GetPendingCredentialResponse response) {
-            mExecutor.execute(() -> mCallback.onResult(response));
+        public void onResponse(PrepareGetCredentialResponseInternal response) {
+            mExecutor.execute(() -> mCallback.onResult(
+                    new PrepareGetCredentialResponse(response, mGetCredentialTransport)));
         }
 
         @Override
         public void onError(String errorType, String message) {
             mExecutor.execute(
                     () -> mCallback.onError(new GetCredentialException(errorType, message)));
+        }
+    }
+
+    /** @hide */
+    protected static class GetCredentialTransportPendingUseCase
+            extends IGetCredentialCallback.Stub {
+        @Nullable private PrepareGetCredentialResponse.GetPendingCredentialInternalCallback
+                mCallback = null;
+
+        private GetCredentialTransportPendingUseCase() {}
+
+        public void setCallback(
+                PrepareGetCredentialResponse.GetPendingCredentialInternalCallback callback) {
+            if (mCallback == null) {
+                mCallback = callback;
+            } else {
+                throw new IllegalStateException("callback has already been set once");
+            }
+        }
+
+        @Override
+        public void onPendingIntent(PendingIntent pendingIntent) {
+            if (mCallback != null) {
+                mCallback.onPendingIntent(pendingIntent);
+            } else {
+                Log.d(TAG, "Unexpected onPendingIntent call before the show invocation");
+            }
+        }
+
+        @Override
+        public void onResponse(GetCredentialResponse response) {
+            if (mCallback != null) {
+                mCallback.onResponse(response);
+            } else {
+                Log.d(TAG, "Unexpected onResponse call before the show invocation");
+            }
+        }
+
+        @Override
+        public void onError(String errorType, String message) {
+            if (mCallback != null) {
+                mCallback.onError(errorType, message);
+            } else {
+                Log.d(TAG, "Unexpected onError call before the show invocation");
+            }
         }
     }
 
@@ -535,7 +628,8 @@ public final class CredentialManager {
                         TAG,
                         "startIntentSender() failed for intent:" + pendingIntent.getIntentSender(),
                         e);
-                // TODO: propagate the error.
+                mExecutor.execute(() -> mCallback.onError(
+                        new GetCredentialException(GetCredentialException.TYPE_UNKNOWN)));
             }
         }
 
@@ -577,7 +671,8 @@ public final class CredentialManager {
                         TAG,
                         "startIntentSender() failed for intent:" + pendingIntent.getIntentSender(),
                         e);
-                // TODO: propagate the error.
+                mExecutor.execute(() -> mCallback.onError(
+                        new CreateCredentialException(CreateCredentialException.TYPE_UNKNOWN)));
             }
         }
 
