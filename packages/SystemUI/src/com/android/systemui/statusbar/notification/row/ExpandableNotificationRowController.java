@@ -22,6 +22,8 @@ import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENAB
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -69,6 +71,7 @@ public class ExpandableNotificationRowController {
     private final FalsingManager mFalsingManager;
     private final boolean mAllowLongPress;
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
+    private final IStatusBarService mStatusBarService;
 
     @Inject
     public ExpandableNotificationRowController(ExpandableNotificationRow view,
@@ -84,7 +87,8 @@ public class ExpandableNotificationRowController {
             NotificationGutsManager notificationGutsManager,
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             @DismissRunnable Runnable onDismissRunnable, FalsingManager falsingManager,
-            PeopleNotificationIdentifier peopleNotificationIdentifier) {
+            PeopleNotificationIdentifier peopleNotificationIdentifier,
+            IStatusBarService statusBarService) {
         mView = view;
         mActivatableNotificationViewController = activatableNotificationViewController;
         mMediaManager = mediaManager;
@@ -105,6 +109,7 @@ public class ExpandableNotificationRowController {
         mAllowLongPress = allowLongPress;
         mFalsingManager = falsingManager;
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
+        mStatusBarService = statusBarService;
     }
 
     /**
@@ -125,7 +130,8 @@ public class ExpandableNotificationRowController {
                 mOnAppOpsClickListener,
                 mFalsingManager,
                 mStatusBarStateController,
-                mPeopleNotificationIdentifier
+                mPeopleNotificationIdentifier,
+                mStatusBarService
         );
         mView.setOnDismissRunnable(mOnDismissRunnable);
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
