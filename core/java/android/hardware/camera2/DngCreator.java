@@ -482,7 +482,7 @@ public final class DngCreator implements AutoCloseable {
     }
 
     private static final int DEFAULT_PIXEL_STRIDE = 2; // bytes per sample
-    private static final int BYTES_PER_RGB_PIX = 3; // byts per pixel
+    private static final int BYTES_PER_RGB_PIX = 3; // bytes per pixel
 
     // TIFF tag values needed to map between public API and TIFF spec
     private static final int TAG_ORIENTATION_UNKNOWN = 9;

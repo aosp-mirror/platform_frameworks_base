@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.content.componentalias.tests.b;
 
-public class Target01 extends BaseReceiver {
+package com.android.systemui.log.dagger;
+
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import com.android.systemui.plugins.log.LogBuffer;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+
+import javax.inject.Qualifier;
+
+/** A {@link LogBuffer} for QS configuration changed messages. */
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface QSConfigLog {
 }

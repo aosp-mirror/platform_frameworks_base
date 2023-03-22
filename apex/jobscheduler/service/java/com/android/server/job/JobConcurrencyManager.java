@@ -1259,10 +1259,14 @@ class JobConcurrencyManager {
 
                 final BackgroundStartPrivileges bsp =
                         activityManagerInternal.getBackgroundStartPrivileges(uid);
-                final boolean balAllowed = bsp.allowsBackgroundActivityStarts();
                 if (DEBUG) {
-                    Slog.d(TAG, "Job " + job.toShortString() + " bal state: " + bsp);
+                    Slog.d(TAG, "Job " + job.toShortString() + " bsp state: " + bsp);
                 }
+                // Intentionally use the background activity start BSP here instead of
+                // the full BAL check since the former is transient and better indicates that the
+                // user recently interacted with the app, while the latter includes
+                // permanent exceptions that don't warrant bypassing normal concurrency policy.
+                final boolean balAllowed = bsp.allowsBackgroundActivityStarts();
                 cachedPrivilegedState.put(uid,
                         balAllowed ? PRIVILEGED_STATE_BAL : PRIVILEGED_STATE_NONE);
                 return balAllowed;

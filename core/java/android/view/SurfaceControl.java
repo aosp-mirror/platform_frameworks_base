@@ -3896,10 +3896,12 @@ public final class SurfaceControl implements Parcelable {
                 float currentBufferRatio, float desiredRatio) {
             checkPreconditions(sc);
             if (!Float.isFinite(currentBufferRatio) || currentBufferRatio < 1.0f) {
-                throw new IllegalArgumentException("currentBufferRatio must be finite && >= 1.0f");
+                throw new IllegalArgumentException(
+                        "currentBufferRatio must be finite && >= 1.0f; got " + currentBufferRatio);
             }
             if (!Float.isFinite(desiredRatio) || desiredRatio < 1.0f) {
-                throw new IllegalArgumentException("desiredRatio must be finite && >= 1.0f");
+                throw new IllegalArgumentException(
+                        "desiredRatio must be finite && >= 1.0f; got " + desiredRatio);
             }
             nativeSetExtendedRangeBrightness(mNativeObject, sc.mNativeObject, currentBufferRatio,
                     desiredRatio);

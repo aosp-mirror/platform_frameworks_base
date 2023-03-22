@@ -79,7 +79,8 @@ class EnterSplitScreenByDragFromAllApps(flicker: FlickerTest) : SplitScreenBase(
     @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
-    fun cujCompleted() = flicker.splitScreenEntered(primaryApp, secondaryApp, fromOtherApp = false)
+    fun cujCompleted() = flicker.splitScreenEntered(primaryApp, secondaryApp, fromOtherApp = false,
+            appExistAtStart = false)
 
     @Presubmit
     @Test

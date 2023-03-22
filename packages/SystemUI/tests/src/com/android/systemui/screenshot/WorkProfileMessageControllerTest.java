@@ -45,7 +45,6 @@ import com.android.systemui.util.FakeSharedPreferences;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -58,8 +57,9 @@ import kotlin.Unit;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class WorkProfileMessageControllerTest extends SysuiTestCase {
-    private static final String DEFAULT_LABEL = "default label";
-    private static final String APP_LABEL = "app label";
+    private static final String FILES_APP_COMPONENT = "com.android.test/.FilesComponent";
+    private static final String FILES_APP_LABEL = "Custom Files App";
+    private static final String DEFAULT_FILES_APP_LABEL = "Files";
     private static final UserHandle NON_WORK_USER = UserHandle.of(0);
     private static final UserHandle WORK_USER = UserHandle.of(10);
 
@@ -88,14 +88,21 @@ public class WorkProfileMessageControllerTest extends SysuiTestCase {
         when(mMockContext.getSharedPreferences(
                 eq(WorkProfileMessageController.SHARED_PREFERENCES_NAME),
                 eq(Context.MODE_PRIVATE))).thenReturn(mSharedPreferences);
-        when(mMockContext.getString(ArgumentMatchers.anyInt())).thenReturn(DEFAULT_LABEL);
-        when(mPackageManager.getActivityIcon(any(ComponentName.class)))
+        when(mMockContext.getString(R.string.config_sceenshotWorkProfileFilesApp))
+                .thenReturn(FILES_APP_COMPONENT);
+        when(mMockContext.getString(R.string.screenshot_default_files_app_name))
+                .thenReturn(DEFAULT_FILES_APP_LABEL);
+        when(mPackageManager.getActivityIcon(
+                eq(ComponentName.unflattenFromString(FILES_APP_COMPONENT))))
                 .thenReturn(mActivityIcon);
-        when(mPackageManager.getUserBadgedIcon(
-                any(), any())).thenReturn(mBadgedActivityIcon);
-        when(mPackageManager.getActivityInfo(any(),
-                any(PackageManager.ComponentInfoFlags.class))).thenReturn(mActivityInfo);
-        when(mActivityInfo.loadLabel(eq(mPackageManager))).thenReturn(APP_LABEL);
+        when(mPackageManager.getUserBadgedIcon(any(), any()))
+                .thenReturn(mBadgedActivityIcon);
+        when(mPackageManager.getActivityInfo(
+                eq(ComponentName.unflattenFromString(FILES_APP_COMPONENT)),
+                any(PackageManager.ComponentInfoFlags.class)))
+                .thenReturn(mActivityInfo);
+        when(mActivityInfo.loadLabel(eq(mPackageManager)))
+                .thenReturn(FILES_APP_LABEL);
 
         mSharedPreferences.edit().putBoolean(
                 WorkProfileMessageController.PREFERENCE_KEY, false).apply();
@@ -120,14 +127,15 @@ public class WorkProfileMessageControllerTest extends SysuiTestCase {
     @Test
     public void testOnScreenshotTaken_packageNotFound()
             throws PackageManager.NameNotFoundException {
-        when(mPackageManager.getActivityInfo(any(),
+        when(mPackageManager.getActivityInfo(
+                eq(ComponentName.unflattenFromString(FILES_APP_COMPONENT)),
                 any(PackageManager.ComponentInfoFlags.class))).thenThrow(
                 new PackageManager.NameNotFoundException());
 
         WorkProfileMessageController.WorkProfileFirstRunData data =
                 mMessageController.onScreenshotTaken(WORK_USER);
 
-        assertEquals(DEFAULT_LABEL, data.getAppName());
+        assertEquals(DEFAULT_FILES_APP_LABEL, data.getAppName());
         assertNull(data.getIcon());
     }
 
@@ -136,8 +144,20 @@ public class WorkProfileMessageControllerTest extends SysuiTestCase {
         WorkProfileMessageController.WorkProfileFirstRunData data =
                 mMessageController.onScreenshotTaken(WORK_USER);
 
-        assertEquals(APP_LABEL, data.getAppName());
+        assertEquals(FILES_APP_LABEL, data.getAppName());
         assertEquals(mBadgedActivityIcon, data.getIcon());
+    }
+
+    @Test
+    public void testOnScreenshotTaken_noFilesAppComponentDefined() {
+        when(mMockContext.getString(R.string.config_sceenshotWorkProfileFilesApp))
+                .thenReturn("");
+
+        WorkProfileMessageController.WorkProfileFirstRunData data =
+                mMessageController.onScreenshotTaken(WORK_USER);
+
+        assertEquals(DEFAULT_FILES_APP_LABEL, data.getAppName());
+        assertNull(data.getIcon());
     }
 
     @Test
@@ -145,7 +165,7 @@ public class WorkProfileMessageControllerTest extends SysuiTestCase {
         ViewGroup layout = (ViewGroup) LayoutInflater.from(mContext).inflate(
                 R.layout.screenshot_work_profile_first_run, null);
         WorkProfileMessageController.WorkProfileFirstRunData data =
-                new WorkProfileMessageController.WorkProfileFirstRunData(APP_LABEL,
+                new WorkProfileMessageController.WorkProfileFirstRunData(FILES_APP_LABEL,
                         mBadgedActivityIcon);
         final CountDownLatch countdown = new CountDownLatch(1);
         mMessageController.populateView(layout, data, () -> {
@@ -157,7 +177,7 @@ public class WorkProfileMessageControllerTest extends SysuiTestCase {
         assertEquals(mBadgedActivityIcon, image.getDrawable());
         TextView text = layout.findViewById(R.id.screenshot_message_content);
         // The app name is used in a template, but at least validate that it was inserted.
-        assertTrue(text.getText().toString().contains(APP_LABEL));
+        assertTrue(text.getText().toString().contains(FILES_APP_LABEL));
 
         // Validate that clicking the dismiss button calls back properly.
         assertEquals(1, countdown.getCount());
