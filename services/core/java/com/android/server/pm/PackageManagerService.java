@@ -43,6 +43,7 @@ import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
+import static com.android.server.pm.PackageManagerServiceUtils.isInstalledByAdb;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
 import android.Manifest;
@@ -352,6 +353,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     static final boolean DEBUG_ABI_SELECTION = false;
     public static final boolean DEBUG_INSTANT = Build.IS_DEBUGGABLE;
+
+    static final String SHELL_PACKAGE_NAME = "com.android.shell";
 
     static final boolean HIDE_EPHEMERAL_APIS = false;
 
@@ -1332,10 +1335,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         final InstallSourceInfo installSourceInfo = snapshot.getInstallSourceInfo(packageName,
                 userId);
+        final String initiatingPackageName = installSourceInfo.getInitiatingPackageName();
         final String installerPackageName;
         if (installSourceInfo != null) {
-            if (!TextUtils.isEmpty(installSourceInfo.getInitiatingPackageName())) {
-                installerPackageName = installSourceInfo.getInitiatingPackageName();
+            if (!isInstalledByAdb(initiatingPackageName)) {
+                installerPackageName = initiatingPackageName;
             } else {
                 installerPackageName = installSourceInfo.getInstallingPackageName();
             }
