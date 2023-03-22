@@ -135,11 +135,15 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
 
     @Override
     protected void onChildSnappedBack(View animView, float targetLeft) {
+        super.onChildSnappedBack(animView, targetLeft);
+
         final NotificationMenuRowPlugin menuRow = getCurrentMenuRow();
         if (menuRow != null && targetLeft == 0) {
             menuRow.resetMenu();
             clearCurrentMenuRow();
         }
+
+        InteractionJankMonitor.getInstance().end(CUJ_NOTIFICATION_SHADE_ROW_SWIPE);
     }
 
     @Override
@@ -348,18 +352,13 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         super.dismissChild(view, velocity, useAccelerateInterpolator);
     }
 
-    @Override
-    protected void onSnapChildWithAnimationFinished() {
-        InteractionJankMonitor.getInstance().end(CUJ_NOTIFICATION_SHADE_ROW_SWIPE);
-    }
-
     @VisibleForTesting
     protected void superSnapChild(final View animView, final float targetLeft, float velocity) {
         super.snapChild(animView, targetLeft, velocity);
     }
 
     @Override
-    public void snapChild(final View animView, final float targetLeft, float velocity) {
+    protected void snapChild(final View animView, final float targetLeft, float velocity) {
         superSnapChild(animView, targetLeft, velocity);
         mCallback.onDragCancelled(animView);
         if (targetLeft == 0) {
@@ -380,20 +379,18 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         }
     }
 
+    @Override
     @VisibleForTesting
-    protected Animator superGetViewTranslationAnimator(View v, float target,
+    protected Animator getViewTranslationAnimator(View view, float target,
             ValueAnimator.AnimatorUpdateListener listener) {
-        return super.getViewTranslationAnimator(v, target, listener);
+        return super.getViewTranslationAnimator(view, target, listener);
     }
 
     @Override
-    public Animator getViewTranslationAnimator(View v, float target,
+    @VisibleForTesting
+    protected Animator createTranslationAnimation(View view, float newPos,
             ValueAnimator.AnimatorUpdateListener listener) {
-        if (v instanceof ExpandableNotificationRow) {
-            return ((ExpandableNotificationRow) v).getTranslateViewAnimator(target, listener);
-        } else {
-            return superGetViewTranslationAnimator(v, target, listener);
-        }
+        return super.createTranslationAnimation(view, newPos, listener);
     }
 
     @Override
