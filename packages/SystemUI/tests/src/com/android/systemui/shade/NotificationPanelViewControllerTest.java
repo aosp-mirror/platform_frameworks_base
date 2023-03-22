@@ -42,6 +42,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
@@ -690,6 +692,24 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         triggerPositionClockAndNotifications();
         verify(mKeyguardStatusViewController, times(2)).displayClock(SMALL, true);
         verify(mKeyguardStatusViewController, never()).displayClock(LARGE, /* animate */ true);
+    }
+
+    @Test
+    public void testFoldToAodAnimationCleansupInAnimationEnd() {
+        ArgumentCaptor<Animator.AnimatorListener> animCaptor =
+                ArgumentCaptor.forClass(Animator.AnimatorListener.class);
+        ArgumentCaptor<ValueAnimator.AnimatorUpdateListener> updateCaptor =
+                ArgumentCaptor.forClass(ValueAnimator.AnimatorUpdateListener.class);
+
+        // Start fold animation & Capture Listeners
+        mNotificationPanelViewController.startFoldToAodAnimation(() -> {}, () -> {}, () -> {});
+        verify(mViewPropertyAnimator).setListener(animCaptor.capture());
+        verify(mViewPropertyAnimator).setUpdateListener(updateCaptor.capture());
+
+        // End animation and validate listeners were unset
+        animCaptor.getValue().onAnimationEnd(null);
+        verify(mViewPropertyAnimator).setListener(null);
+        verify(mViewPropertyAnimator).setUpdateListener(null);
     }
 
     @Test
