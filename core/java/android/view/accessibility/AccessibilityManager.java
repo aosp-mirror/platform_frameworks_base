@@ -99,30 +99,30 @@ public final class AccessibilityManager {
     private static final String LOG_TAG = "AccessibilityManager";
 
     /** @hide */
-    public static final int STATE_FLAG_ACCESSIBILITY_ENABLED = 0x00000001;
+    public static final int STATE_FLAG_ACCESSIBILITY_ENABLED = 1 /* << 0 */;
 
     /** @hide */
-    public static final int STATE_FLAG_TOUCH_EXPLORATION_ENABLED = 0x00000002;
+    public static final int STATE_FLAG_TOUCH_EXPLORATION_ENABLED = 1 << 1;
 
     /** @hide */
-    public static final int STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED = 0x00000004;
+    public static final int STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED = 1 << 2;
 
     /** @hide */
-    public static final int STATE_FLAG_DISPATCH_DOUBLE_TAP = 0x00000008;
+    public static final int STATE_FLAG_DISPATCH_DOUBLE_TAP = 1 << 3;
 
     /** @hide */
-    public static final int STATE_FLAG_REQUEST_MULTI_FINGER_GESTURES = 0x00000010;
+    public static final int STATE_FLAG_REQUEST_MULTI_FINGER_GESTURES = 1 << 4;
 
     /** @hide */
-    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_ENABLED = 0x00000100;
+    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_ENABLED = 1 << 8;
     /** @hide */
-    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_CB_ENABLED = 0x00000200;
+    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CONNECTION_CB_ENABLED = 1 << 9;
     /** @hide */
-    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CLIENT_ENABLED = 0x00000400;
+    public static final int STATE_FLAG_TRACE_A11Y_INTERACTION_CLIENT_ENABLED = 1 << 10;
     /** @hide */
-    public static final int STATE_FLAG_TRACE_A11Y_SERVICE_ENABLED = 0x00000800;
+    public static final int STATE_FLAG_TRACE_A11Y_SERVICE_ENABLED = 1 << 11;
     /** @hide */
-    public static final int STATE_FLAG_AUDIO_DESCRIPTION_BY_DEFAULT_ENABLED = 0x00001000;
+    public static final int STATE_FLAG_AUDIO_DESCRIPTION_BY_DEFAULT_ENABLED = 1 << 12;
 
     /** @hide */
     public static final int DALTONIZER_DISABLED = -1;
