@@ -21,10 +21,13 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.RemoteException;
 import android.provider.Settings;
+import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.IndentingPrintWriter;
@@ -41,6 +44,7 @@ import android.widget.LinearLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.RemoteInputController;
@@ -127,6 +131,8 @@ public class NotificationContentView extends FrameLayout implements Notification
     private RemoteInputController mRemoteInputController;
     private Runnable mExpandedVisibleListener;
     private PeopleNotificationIdentifier mPeopleIdentifier;
+    private IStatusBarService mStatusBarService;
+
     /**
      * List of listeners for when content views become inactive (i.e. not the showing view).
      */
@@ -180,6 +186,7 @@ public class NotificationContentView extends FrameLayout implements Notification
         mHybridGroupManager = new HybridGroupManager(getContext());
         mSmartReplyConstants = Dependency.get(SmartReplyConstants.class);
         mSmartReplyController = Dependency.get(SmartReplyController.class);
+        mStatusBarService = Dependency.get(IStatusBarService.class);
         initView();
     }
 
@@ -2029,5 +2036,37 @@ public class NotificationContentView extends FrameLayout implements Notification
             return true;
         }
         return false;
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        try {
+            super.dispatchDraw(canvas);
+        } catch (Exception e) {
+            // Catch draw exceptions that may be caused by RemoteViews
+            Log.e(TAG, "Drawing view failed: " + e);
+            cancelNotification(e);
+        }
+    }
+
+    private void cancelNotification(Exception exception) {
+        try {
+            setVisibility(GONE);
+            final StatusBarNotification sbn = mNotificationEntry.getSbn();
+            if (mStatusBarService != null) {
+                // report notification inflation errors back up
+                // to notification delegates
+                mStatusBarService.onNotificationError(
+                        sbn.getPackageName(),
+                        sbn.getTag(),
+                        sbn.getId(),
+                        sbn.getUid(),
+                        sbn.getInitialPid(),
+                        exception.getMessage(),
+                        sbn.getUser().getIdentifier());
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "cancelNotification failed: " + ex);
+        }
     }
 }
