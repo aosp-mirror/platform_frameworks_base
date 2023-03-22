@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# vezérlő hozzáadva.}other{# vezérlő hozzáadva.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Eltávolítva"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Hozzáadja a(z) <xliff:g id="APPNAME">%s</xliff:g> alkalmazást?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"A(z) <xliff:g id="APPNAME">%s</xliff:g> eldöntheti, milyen vezérlőket és tartalmakat jelenít meg itt."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Eltávolítja a(z) <xliff:g id="APPNAME">%s</xliff:g> vezérlőit?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Hozzáadva a kedvencekhez"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Hozzáadva a kedvencekhez <xliff:g id="NUMBER">%d</xliff:g>. helyen"</string>

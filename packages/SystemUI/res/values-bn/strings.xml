@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{#টি কন্ট্রোল যোগ করা হয়েছে।}one{#টি কন্ট্রোল যোগ করা হয়েছে।}other{#টি কন্ট্রোল যোগ করা হয়েছে।}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"সরানো হয়েছে"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> যোগ করবেন?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"এখানে কোন কন্ট্রোল ও কন্টেন্ট দেখানো হবে <xliff:g id="APPNAME">%s</xliff:g> তা বেছে নিতে পারবে।"</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g>-এর জন্য নিয়ন্ত্রণ সরিয়ে দেবেন?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"পছন্দসই হিসেবে চিহ্নিত করেছেন"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"পছন্দসই হিসেবে চিহ্নিত করেছেন, অবস্থান <xliff:g id="NUMBER">%d</xliff:g>"</string>
