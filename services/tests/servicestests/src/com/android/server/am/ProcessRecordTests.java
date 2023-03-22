@@ -203,6 +203,6 @@ public class ProcessRecordTests {
         processErrorState.appNotResponding(null /* activityShortComponentName */, null /* aInfo */,
                 null /* parentShortComponentName */, null /* parentProcess */,
                 false /* aboveSystem */, timeoutRecord, mExecutorService, false /* onlyDumpSelf */,
-                false /*isContinuousAnr*/, null);
+                false /*isContinuousAnr*/);
     }
 }

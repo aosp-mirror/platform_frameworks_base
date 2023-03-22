@@ -5371,7 +5371,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (app != null && app.getPid() > 0) {
                 ArrayList<Integer> firstPids = new ArrayList<Integer>();
                 firstPids.add(app.getPid());
-                dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, null, null, null, null);
+                dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, null, null, null);
             }
 
             File lastTracesFile = null;
