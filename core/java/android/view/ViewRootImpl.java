@@ -11369,9 +11369,13 @@ public final class ViewRootImpl implements ViewParent,
         if (mRemoved || !isHardwareEnabled()) {
             t.apply();
         } else {
+            // Copy and clear the passed in transaction for thread safety. The new transaction is
+            // accessed on the render thread.
+            var localTransaction = new Transaction();
+            localTransaction.merge(t);
             mHasPendingTransactions = true;
             registerRtFrameCallback(frame -> {
-                mergeWithNextTransaction(t, frame);
+                mergeWithNextTransaction(localTransaction, frame);
             });
         }
         return true;
