@@ -28,7 +28,6 @@ import static android.view.View.VISIBLE;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED;
-import static com.android.keyguard.KeyguardUpdateMonitor.getCurrentUser;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.IMPORTANT_MSG_MIN_DURATION;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
@@ -99,6 +98,7 @@ import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteracto
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.log.LogLevel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -146,6 +146,7 @@ public class KeyguardIndicationController {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final AuthController mAuthController;
     private final KeyguardLogger mKeyguardLogger;
+    private final UserTracker mUserTracker;
     private ViewGroup mIndicationArea;
     private KeyguardIndicationTextView mTopIndicationView;
     private KeyguardIndicationTextView mLockScreenIndicationView;
@@ -251,7 +252,8 @@ public class KeyguardIndicationController {
             FaceHelpMessageDeferral faceHelpMessageDeferral,
             KeyguardLogger keyguardLogger,
             AlternateBouncerInteractor alternateBouncerInteractor,
-            AlarmManager alarmManager
+            AlarmManager alarmManager,
+            UserTracker userTracker
     ) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -275,6 +277,7 @@ public class KeyguardIndicationController {
         mKeyguardLogger = keyguardLogger;
         mScreenLifecycle.addObserver(mScreenObserver);
         mAlternateBouncerInteractor = alternateBouncerInteractor;
+        mUserTracker = userTracker;
 
         mFaceAcquiredMessageDeferral = faceHelpMessageDeferral;
         mCoExFaceAcquisitionMsgIdsToShow = new HashSet<>();
@@ -473,6 +476,10 @@ public class KeyguardIndicationController {
                             R.string.do_disclosure_with_name, organizationName),
                     organizationName);
         }
+    }
+
+    private int getCurrentUser() {
+        return mUserTracker.getUserId();
     }
 
     private void updateLockScreenOwnerInfo() {
@@ -1166,8 +1173,7 @@ public class KeyguardIndicationController {
                             mContext.getString(R.string.keyguard_unlock)
                     );
                 } else if (fpAuthFailed
-                        && mKeyguardUpdateMonitor.getUserHasTrust(
-                                KeyguardUpdateMonitor.getCurrentUser())) {
+                        && mKeyguardUpdateMonitor.getUserHasTrust(getCurrentUser())) {
                     showBiometricMessage(
                             getTrustGrantedIndication(),
                             mContext.getString(R.string.keyguard_unlock)
@@ -1421,7 +1427,7 @@ public class KeyguardIndicationController {
 
     private boolean canUnlockWithFingerprint() {
         return mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                KeyguardUpdateMonitor.getCurrentUser());
+                getCurrentUser());
     }
 
     private void showErrorMessageNowOrLater(String errString, @Nullable String followUpMsg) {
