@@ -16,11 +16,21 @@
 
 package com.android.server.credentials.metrics;
 
+import static android.credentials.ui.RequestInfo.TYPE_CREATE;
+import static android.credentials.ui.RequestInfo.TYPE_GET;
+import static android.credentials.ui.RequestInfo.TYPE_UNDEFINED;
+
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE__API_NAME__API_NAME_CLEAR_CREDENTIAL;
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE__API_NAME__API_NAME_CREATE_CREDENTIAL;
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE__API_NAME__API_NAME_GET_CREDENTIAL;
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE__API_NAME__API_NAME_IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE;
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE__API_NAME__API_NAME_UNKNOWN;
+
+import android.credentials.ui.RequestInfo;
+import android.util.Log;
+
+import java.util.AbstractMap;
+import java.util.Map;
 
 public enum ApiName {
     UNKNOWN(CREDENTIAL_MANAGER_INITIAL_PHASE__API_NAME__API_NAME_UNKNOWN),
@@ -31,11 +41,23 @@ public enum ApiName {
         CREDENTIAL_MANAGER_INITIAL_PHASE__API_NAME__API_NAME_IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE
     );
 
+    private static final String TAG = "ApiName";
+
     private final int mInnerMetricCode;
+
+    private static final Map<String, Integer> sRequestInfoToMetric = Map.ofEntries(
+            new AbstractMap.SimpleEntry<>(TYPE_CREATE,
+                    CREATE_CREDENTIAL.mInnerMetricCode),
+            new AbstractMap.SimpleEntry<>(TYPE_GET,
+                    GET_CREDENTIAL.mInnerMetricCode),
+            new AbstractMap.SimpleEntry<>(TYPE_UNDEFINED,
+                    CLEAR_CREDENTIAL.mInnerMetricCode)
+    );
 
     ApiName(int innerMetricCode) {
         this.mInnerMetricCode = innerMetricCode;
     }
+
 
     /**
      * Gives the West-world version of the metric name.
@@ -44,5 +66,21 @@ public enum ApiName {
      */
     public int getMetricCode() {
         return this.mInnerMetricCode;
+    }
+
+    /**
+     * Given a string key type known to the framework, this returns the known metric code associated
+     * with that string. This is mainly used by {@link RequestSessionMetric} collection contexts.
+     * This relies on {@link RequestInfo} string keys.
+     *
+     * @param stringKey a string key type for a particular request info
+     * @return the metric code associated with this request info's api name counterpart
+     */
+    public static int getMetricCodeFromRequestInfo(String stringKey) {
+        if (!sRequestInfoToMetric.containsKey(stringKey)) {
+            Log.w(TAG, "Attempted to use an unsupported string key request info");
+            return UNKNOWN.mInnerMetricCode;
+        }
+        return sRequestInfoToMetric.get(stringKey);
     }
 }

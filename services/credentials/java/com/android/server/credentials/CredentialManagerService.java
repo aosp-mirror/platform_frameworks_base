@@ -724,9 +724,10 @@ public final class CredentialManagerService
 
         private void finalizeAndEmitInitialPhaseMetric(RequestSession session) {
             try {
-                var initMetric = session.mInitialPhaseMetric;
+                var initMetric = session.mRequestSessionMetric.getInitialPhaseMetric();
                 initMetric.setCredentialServiceBeginQueryTimeNanoseconds(System.nanoTime());
-                MetricUtilities.logApiCalled(initMetric, ++session.mSequenceCounter);
+                MetricUtilities.logApiCalledInitialPhase(initMetric,
+                        session.mRequestSessionMetric.returnIncrementSequence());
             } catch (Exception e) {
                 Log.w(TAG, "Unexpected error during metric logging: " + e);
             }
@@ -805,7 +806,7 @@ public final class CredentialManagerService
                     if (serviceComponentName.equals(componentName)) {
                         if (!s.getServicePackageName().equals(callingPackage)) {
                             // The component name and the package name do not match.
-                            MetricUtilities.logApiCalled(
+                            MetricUtilities.logApiCalledSimpleV1(
                                     ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
                                     ApiStatus.FAILURE, callingUid);
                             Log.w(
@@ -814,7 +815,8 @@ public final class CredentialManagerService
                                             + " match package name.");
                             return false;
                         }
-                        MetricUtilities.logApiCalled(ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
+                        MetricUtilities.logApiCalledSimpleV1(
+                                ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
                                 ApiStatus.SUCCESS, callingUid);
                         // TODO(b/271135048) - Update asap to use the new logging types
                         return true;
