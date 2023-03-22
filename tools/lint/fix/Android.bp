@@ -23,9 +23,8 @@ package {
 
 python_binary_host {
     name: "lint_fix",
-    main: "lint_fix.py",
-    srcs: ["lint_fix.py"],
-    libs: ["soong_lint_fix"],
+    main: "soong_lint_fix.py",
+    srcs: ["soong_lint_fix.py"],
 }
 
 python_library_host {
