@@ -16,6 +16,9 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+// TODO: Delete this file. It's no longer needed, but removing it on udc-dev will cause
+// a conflict on master.
+
 java_defaults {
     name: "ComponentAliasTests_defaults",
     static_libs: [
@@ -32,55 +35,4 @@ java_defaults {
         "general-tests",
     ],
     platform_apis: true, // We use hidden APIs in the test.
-}
-
-// We build three APKs from the exact same source files, so these APKs contain the exact same tests.
-// And we run the tests on each APK, so that we can test various situations:
-// - When the alias is in the same package, target in the same package.
-// - When the alias is in the same package, target in another package.
-// - When the alias is in another package, which also contains the target.
-// - When the alias is in another package, and the target is in yet another package.
-// etc etc...
-
-android_test {
-    name: "ComponentAliasTests",
-    defaults: [
-        "ComponentAliasTests_defaults",
-    ],
-    package_name: "android.content.componentalias.tests",
-    manifest: "AndroidManifest.xml",
-    additional_manifests: [
-        "AndroidManifest_main.xml",
-        "AndroidManifest_service_aliases.xml",
-        "AndroidManifest_service_targets.xml",
-    ],
-    test_config_template: "AndroidTest-template.xml",
-}
-
-android_test {
-    name: "ComponentAliasTests1",
-    defaults: [
-        "ComponentAliasTests_defaults",
-    ],
-    package_name: "android.content.componentalias.tests.sub1",
-    manifest: "AndroidManifest.xml",
-    additional_manifests: [
-        "AndroidManifest_sub1.xml",
-        "AndroidManifest_service_targets.xml",
-    ],
-    test_config_template: "AndroidTest-template.xml",
-}
-
-android_test {
-    name: "ComponentAliasTests2",
-    defaults: [
-        "ComponentAliasTests_defaults",
-    ],
-    package_name: "android.content.componentalias.tests.sub2",
-    manifest: "AndroidManifest.xml",
-    additional_manifests: [
-        "AndroidManifest_sub2.xml",
-        "AndroidManifest_service_targets.xml",
-    ],
-    test_config_template: "AndroidTest-template.xml",
 }
