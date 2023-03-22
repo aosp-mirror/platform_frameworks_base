@@ -389,6 +389,9 @@
         <service android:name="SystemUIService"
             android:exported="true"
         />
+        <service android:name=".wallet.controller.WalletContextualLocationsService"
+            android:exported="true"
+            />
 
         <!-- Service for dumping extremely verbose content during a bug report -->
         <service android:name=".dump.SystemUIAuxiliaryDumpService"
