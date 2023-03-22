@@ -24,7 +24,9 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
@@ -184,6 +186,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected NotificationStackScrollLayout mNotificationStackScrollLayout;
     @Mock protected KeyguardBottomAreaView mKeyguardBottomArea;
     @Mock protected KeyguardBottomAreaViewController mKeyguardBottomAreaViewController;
+    @Mock protected ViewPropertyAnimator mViewPropertyAnimator;
     @Mock protected KeyguardBottomAreaView mQsFrame;
     @Mock protected HeadsUpManagerPhone mHeadsUpManager;
     @Mock protected NotificationShelfController mNotificationShelfController;
@@ -357,7 +360,14 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 .thenReturn(mHeadsUpCallback);
         when(mKeyguardBottomAreaViewController.getView()).thenReturn(mKeyguardBottomArea);
         when(mView.findViewById(R.id.keyguard_bottom_area)).thenReturn(mKeyguardBottomArea);
-        when(mKeyguardBottomArea.animate()).thenReturn(mock(ViewPropertyAnimator.class));
+        when(mKeyguardBottomArea.animate()).thenReturn(mViewPropertyAnimator);
+        when(mView.animate()).thenReturn(mViewPropertyAnimator);
+        when(mViewPropertyAnimator.translationX(anyFloat())).thenReturn(mViewPropertyAnimator);
+        when(mViewPropertyAnimator.alpha(anyFloat())).thenReturn(mViewPropertyAnimator);
+        when(mViewPropertyAnimator.setDuration(anyLong())).thenReturn(mViewPropertyAnimator);
+        when(mViewPropertyAnimator.setInterpolator(any())).thenReturn(mViewPropertyAnimator);
+        when(mViewPropertyAnimator.setListener(any())).thenReturn(mViewPropertyAnimator);
+        when(mViewPropertyAnimator.setUpdateListener(any())).thenReturn(mViewPropertyAnimator);
         when(mView.findViewById(R.id.qs_frame)).thenReturn(mQsFrame);
         when(mView.findViewById(R.id.keyguard_status_view))
                 .thenReturn(mock(KeyguardStatusView.class));
