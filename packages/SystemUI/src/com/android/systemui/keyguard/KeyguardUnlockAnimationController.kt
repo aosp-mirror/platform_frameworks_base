@@ -22,6 +22,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Matrix
 import android.graphics.Rect
+import android.os.DeadObjectException
 import android.os.Handler
 import android.os.PowerManager
 import android.os.RemoteException
@@ -524,10 +525,22 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 surfaceBehindAlpha = 1f
                 setSurfaceBehindAppearAmount(1f)
 
-                launcherUnlockController?.playUnlockAnimation(
-                        true,
-                        UNLOCK_ANIMATION_DURATION_MS + CANNED_UNLOCK_START_DELAY,
-                        0 /* startDelay */)
+                try {
+                    launcherUnlockController?.playUnlockAnimation(
+                            true,
+                            UNLOCK_ANIMATION_DURATION_MS + CANNED_UNLOCK_START_DELAY,
+                            0 /* startDelay */)
+                } catch (e: DeadObjectException) {
+                    // Hello! If you are here investigating a bug where Launcher is blank (no icons)
+                    // then the below assumption about Launcher's destruction was incorrect. This
+                    // would mean prepareToUnlock was called (blanking Launcher in preparation for
+                    // the beginning of the unlock animation), but then somehow we were unable to
+                    // call playUnlockAnimation to animate the icons back in.
+                    Log.e(TAG, "launcherUnlockAnimationController was dead, but non-null. " +
+                            "Catching exception as this should mean Launcher is in the process " +
+                            "of being destroyed, but the IPC to System UI telling us hasn't " +
+                            "arrived yet.")
+                }
 
                 launcherPreparedForUnlock = false
             } else {
@@ -604,11 +617,23 @@ class KeyguardUnlockAnimationController @Inject constructor(
     private fun unlockToLauncherWithInWindowAnimations() {
         setSurfaceBehindAppearAmount(1f)
 
-        // Begin the animation, waiting for the shade to animate out.
-        launcherUnlockController?.playUnlockAnimation(
-            true /* unlocked */,
-            LAUNCHER_ICONS_ANIMATION_DURATION_MS /* duration */,
-            CANNED_UNLOCK_START_DELAY /* startDelay */)
+        try {
+            // Begin the animation, waiting for the shade to animate out.
+            launcherUnlockController?.playUnlockAnimation(
+                    true /* unlocked */,
+                    LAUNCHER_ICONS_ANIMATION_DURATION_MS /* duration */,
+                    CANNED_UNLOCK_START_DELAY /* startDelay */)
+        } catch (e: DeadObjectException) {
+            // Hello! If you are here investigating a bug where Launcher is blank (no icons)
+            // then the below assumption about Launcher's destruction was incorrect. This
+            // would mean prepareToUnlock was called (blanking Launcher in preparation for
+            // the beginning of the unlock animation), but then somehow we were unable to
+            // call playUnlockAnimation to animate the icons back in.
+            Log.e(TAG, "launcherUnlockAnimationController was dead, but non-null. " +
+                    "Catching exception as this should mean Launcher is in the process " +
+                    "of being destroyed, but the IPC to System UI telling us hasn't " +
+                    "arrived yet.")
+        }
 
         launcherPreparedForUnlock = false
 
