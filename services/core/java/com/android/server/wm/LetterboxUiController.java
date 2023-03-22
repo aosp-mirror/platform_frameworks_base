@@ -801,13 +801,18 @@ final class LetterboxUiController {
     float getHorizontalPositionMultiplier(Configuration parentConfiguration) {
         // Don't check resolved configuration because it may not be updated yet during
         // configuration change.
-        boolean bookMode = isDisplayFullScreenAndInPosture(
-                DeviceStateController.DeviceState.HALF_FOLDED, false /* isTabletop */);
+        boolean bookModeEnabled = isFullScreenAndBookModeEnabled();
         return isHorizontalReachabilityEnabled(parentConfiguration)
                 // Using the last global dynamic position to avoid "jumps" when moving
                 // between apps or activities.
-                ? mLetterboxConfiguration.getHorizontalMultiplierForReachability(bookMode)
-                : mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier(bookMode);
+                ? mLetterboxConfiguration.getHorizontalMultiplierForReachability(bookModeEnabled)
+                : mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier(bookModeEnabled);
+    }
+
+    private boolean isFullScreenAndBookModeEnabled() {
+        return isDisplayFullScreenAndInPosture(
+                DeviceStateController.DeviceState.HALF_FOLDED, false /* isTabletop */)
+                && mLetterboxConfiguration.getIsAutomaticReachabilityInBookModeEnabled();
     }
 
     float getVerticalPositionMultiplier(Configuration parentConfiguration) {
@@ -822,12 +827,14 @@ final class LetterboxUiController {
                 : mLetterboxConfiguration.getLetterboxVerticalPositionMultiplier(tabletopMode);
     }
 
-    float getFixedOrientationLetterboxAspectRatio() {
+    float getFixedOrientationLetterboxAspectRatio(@NonNull Configuration parentConfiguration) {
+        // Don't resize to split screen size when half folded if letterbox position is centered
         return isDisplayFullScreenAndSeparatingHinge()
-                ? getSplitScreenAspectRatio()
-                : mActivityRecord.shouldCreateCompatDisplayInsets()
-                    ? getDefaultMinAspectRatioForUnresizableApps()
-                    : getDefaultMinAspectRatio();
+                    && getHorizontalPositionMultiplier(parentConfiguration) != 0.5f
+                        ? getSplitScreenAspectRatio()
+                        : mActivityRecord.shouldCreateCompatDisplayInsets()
+                            ? getDefaultMinAspectRatioForUnresizableApps()
+                            : getDefaultMinAspectRatio();
     }
 
     private float getDefaultMinAspectRatioForUnresizableApps() {
@@ -889,7 +896,8 @@ final class LetterboxUiController {
             return;
         }
 
-        boolean isInFullScreenBookMode = isDisplayFullScreenAndSeparatingHinge();
+        boolean isInFullScreenBookMode = isDisplayFullScreenAndSeparatingHinge()
+                && mLetterboxConfiguration.getIsAutomaticReachabilityInBookModeEnabled();
         int letterboxPositionForHorizontalReachability = mLetterboxConfiguration
                 .getLetterboxPositionForHorizontalReachability(isInFullScreenBookMode);
         if (mLetterbox.getInnerFrame().left > x) {
