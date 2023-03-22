@@ -54,6 +54,9 @@ per-file IBackupAgent.aidl = file:/services/backup/OWNERS
 per-file Broadcast* = file:/BROADCASTS_OWNERS
 per-file ReceiverInfo* = file:/BROADCASTS_OWNERS
 
+# KeyguardManager
+per-file KeyguardManager.java = file:/services/core/java/com/android/server/locksettings/OWNERS
+
 # LocaleManager
 per-file *Locale* = file:/services/core/java/com/android/server/locales/OWNERS
 
@@ -92,8 +95,6 @@ per-file Fragment.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file *Task* = file:/services/core/java/com/android/server/wm/OWNERS
 per-file Window* = file:/services/core/java/com/android/server/wm/OWNERS
 per-file ConfigurationController.java = file:/services/core/java/com/android/server/wm/OWNERS
-
-# TODO(b/174932174): determine the ownership of KeyguardManager.java
 
 # Zygote
 per-file *Zygote* = file:/ZYGOTE_OWNERS

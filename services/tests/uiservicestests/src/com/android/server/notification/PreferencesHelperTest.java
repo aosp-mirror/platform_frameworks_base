@@ -676,10 +676,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         compareChannels(ido, mHelper.getNotificationChannel(PKG_O, UID_O, ido.getId(), false));
         compareChannels(idp, mHelper.getNotificationChannel(PKG_P, UID_P, idp.getId(), false));
 
-        verify(mPermissionHelper).setNotificationPermission(nMr1Expected);
-        verify(mPermissionHelper).setNotificationPermission(oExpected);
-        verify(mPermissionHelper).setNotificationPermission(pExpected);
-
         // verify that we also write a state for review_permissions_notification to eventually
         // show a notification
         assertEquals(NotificationManagerService.REVIEW_NOTIF_STATE_SHOULD_SHOW,

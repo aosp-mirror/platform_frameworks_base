@@ -343,8 +343,12 @@ public final class NfcAdapter {
      */
     public static final String EXTRA_READER_PRESENCE_CHECK_DELAY = "presence";
 
-    /** @hide */
+    /**
+     * @hide
+     * @removed
+     */
     @SystemApi
+    @UnsupportedAppUsage
     public static final int FLAG_NDEF_PUSH_NO_CONFIRM = 0x1;
 
     /** @hide */
@@ -418,7 +422,6 @@ public final class NfcAdapter {
     // Guarded by NfcAdapter.class
     static boolean sIsInitialized = false;
     static boolean sHasNfcFeature;
-    static boolean sHasBeamFeature;
     static boolean sHasCeFeature;
 
     // Final after first constructor, except for
@@ -484,7 +487,7 @@ public final class NfcAdapter {
      * A callback to be invoked when the system successfully delivers your {@link NdefMessage}
      * to another device.
      * @see #setOnNdefPushCompleteCallback
-     * @deprecated this feature is deprecated. File sharing can work using other technology like
+     * @deprecated this feature is removed. File sharing can work using other technology like
      * Bluetooth.
      */
     @java.lang.Deprecated
@@ -510,7 +513,7 @@ public final class NfcAdapter {
      * content currently visible to the user. Alternatively, you can call {@link
      * #setNdefPushMessage setNdefPushMessage()} if the {@link NdefMessage} always contains the
      * same data.
-     * @deprecated this feature is deprecated. File sharing can work using other technology like
+     * @deprecated this feature is removed. File sharing can work using other technology like
      * Bluetooth.
      */
     @java.lang.Deprecated
@@ -540,7 +543,7 @@ public final class NfcAdapter {
 
 
      /**
-     * @deprecated this feature is deprecated. File sharing can work using other technology like
+     * @deprecated this feature is removed. File sharing can work using other technology like
      * Bluetooth.
      */
     @java.lang.Deprecated
@@ -616,7 +619,6 @@ public final class NfcAdapter {
             PackageManager pm;
             pm = context.getPackageManager();
             sHasNfcFeature = pm.hasSystemFeature(PackageManager.FEATURE_NFC);
-            sHasBeamFeature = pm.hasSystemFeature(PackageManager.FEATURE_NFC_BEAM);
             sHasCeFeature =
                     pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)
                     || pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION_NFCF)
@@ -1114,35 +1116,17 @@ public final class NfcAdapter {
      * @param uris an array of Uri(s) to push over Android Beam
      * @param activity activity for which the Uri(s) will be pushed
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
-     * @deprecated this feature is deprecated. File sharing can work using other technology like
+     * @removed this feature is removed. File sharing can work using other technology like
      * Bluetooth.
      */
     @java.lang.Deprecated
+    @UnsupportedAppUsage
     public void setBeamPushUris(Uri[] uris, Activity activity) {
         synchronized (NfcAdapter.class) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
-            if (!sHasBeamFeature) {
-                return;
-            }
         }
-        if (activity == null) {
-            throw new NullPointerException("activity cannot be null");
-        }
-        if (uris != null) {
-            for (Uri uri : uris) {
-                if (uri == null) throw new NullPointerException("Uri not " +
-                        "allowed to be null");
-                String scheme = uri.getScheme();
-                if (scheme == null || (!scheme.equalsIgnoreCase("file") &&
-                        !scheme.equalsIgnoreCase("content"))) {
-                    throw new IllegalArgumentException("URI needs to have " +
-                            "either scheme file or scheme content");
-                }
-            }
-        }
-        mNfcActivityManager.setNdefPushContentUri(activity, uris);
     }
 
     /**
@@ -1202,23 +1186,17 @@ public final class NfcAdapter {
      * @param callback callback, or null to disable
      * @param activity activity for which the Uri(s) will be pushed
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
-     * @deprecated this feature is deprecated. File sharing can work using other technology like
+     * @removed this feature is removed. File sharing can work using other technology like
      * Bluetooth.
      */
     @java.lang.Deprecated
+    @UnsupportedAppUsage
     public void setBeamPushUrisCallback(CreateBeamUrisCallback callback, Activity activity) {
         synchronized (NfcAdapter.class) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
-            if (!sHasBeamFeature) {
-                return;
-            }
         }
-        if (activity == null) {
-            throw new NullPointerException("activity cannot be null");
-        }
-        mNfcActivityManager.setNdefPushContentUriCallback(activity, callback);
     }
 
     /**
@@ -1292,58 +1270,32 @@ public final class NfcAdapter {
      *        to only register one at a time, and to do so in that activity's
      *        {@link Activity#onCreate}
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
-     * @deprecated this feature is deprecated. File sharing can work using other technology like
+     * @removed this feature is removed. File sharing can work using other technology like
      * Bluetooth.
      */
     @java.lang.Deprecated
+    @UnsupportedAppUsage
     public void setNdefPushMessage(NdefMessage message, Activity activity,
             Activity ... activities) {
         synchronized (NfcAdapter.class) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
-            if (!sHasBeamFeature) {
-                return;
-            }
-        }
-        int targetSdkVersion = getSdkVersion();
-        try {
-            if (activity == null) {
-                throw new NullPointerException("activity cannot be null");
-            }
-            mNfcActivityManager.setNdefPushMessage(activity, message, 0);
-            for (Activity a : activities) {
-                if (a == null) {
-                    throw new NullPointerException("activities cannot contain null");
-                }
-                mNfcActivityManager.setNdefPushMessage(a, message, 0);
-            }
-        } catch (IllegalStateException e) {
-            if (targetSdkVersion < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                // Less strict on old applications - just log the error
-                Log.e(TAG, "Cannot call API with Activity that has already " +
-                        "been destroyed", e);
-            } else {
-                // Prevent new applications from making this mistake, re-throw
-                throw(e);
-            }
         }
     }
 
     /**
      * @hide
+     * @removed
      */
     @SystemApi
+    @UnsupportedAppUsage
     public void setNdefPushMessage(NdefMessage message, Activity activity, int flags) {
         synchronized (NfcAdapter.class) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
         }
-        if (activity == null) {
-            throw new NullPointerException("activity cannot be null");
-        }
-        mNfcActivityManager.setNdefPushMessage(activity, message, flags);
     }
 
     /**
@@ -1411,54 +1363,18 @@ public final class NfcAdapter {
      *        to only register one at a time, and to do so in that activity's
      *        {@link Activity#onCreate}
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
-     * @deprecated this feature is deprecated. File sharing can work using other technology like
+     * @removed this feature is removed. File sharing can work using other technology like
      * Bluetooth.
      */
     @java.lang.Deprecated
+    @UnsupportedAppUsage
     public void setNdefPushMessageCallback(CreateNdefMessageCallback callback, Activity activity,
             Activity ... activities) {
         synchronized (NfcAdapter.class) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
-            if (!sHasBeamFeature) {
-                return;
-            }
         }
-        int targetSdkVersion = getSdkVersion();
-        try {
-            if (activity == null) {
-                throw new NullPointerException("activity cannot be null");
-            }
-            mNfcActivityManager.setNdefPushMessageCallback(activity, callback, 0);
-            for (Activity a : activities) {
-                if (a == null) {
-                    throw new NullPointerException("activities cannot contain null");
-                }
-                mNfcActivityManager.setNdefPushMessageCallback(a, callback, 0);
-            }
-        } catch (IllegalStateException e) {
-            if (targetSdkVersion < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                // Less strict on old applications - just log the error
-                Log.e(TAG, "Cannot call API with Activity that has already " +
-                        "been destroyed", e);
-            } else {
-                // Prevent new applications from making this mistake, re-throw
-                throw(e);
-            }
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public void setNdefPushMessageCallback(CreateNdefMessageCallback callback, Activity activity,
-            int flags) {
-        if (activity == null) {
-            throw new NullPointerException("activity cannot be null");
-        }
-        mNfcActivityManager.setNdefPushMessageCallback(activity, callback, flags);
     }
 
     /**
@@ -1498,40 +1414,16 @@ public final class NfcAdapter {
      *        to only register one at a time, and to do so in that activity's
      *        {@link Activity#onCreate}
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
-     * @deprecated this feature is deprecated. File sharing can work using other technology like
+     * @removed this feature is removed. File sharing can work using other technology like
      * Bluetooth.
      */
     @java.lang.Deprecated
+    @UnsupportedAppUsage
     public void setOnNdefPushCompleteCallback(OnNdefPushCompleteCallback callback,
             Activity activity, Activity ... activities) {
         synchronized (NfcAdapter.class) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
-            }
-            if (!sHasBeamFeature) {
-                return;
-            }
-        }
-        int targetSdkVersion = getSdkVersion();
-        try {
-            if (activity == null) {
-                throw new NullPointerException("activity cannot be null");
-            }
-            mNfcActivityManager.setOnNdefPushCompleteCallback(activity, callback);
-            for (Activity a : activities) {
-                if (a == null) {
-                    throw new NullPointerException("activities cannot contain null");
-                }
-                mNfcActivityManager.setOnNdefPushCompleteCallback(a, callback);
-            }
-        } catch (IllegalStateException e) {
-            if (targetSdkVersion < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                // Less strict on old applications - just log the error
-                Log.e(TAG, "Cannot call API with Activity that has already " +
-                        "been destroyed", e);
-            } else {
-                // Prevent new applications from making this mistake, re-throw
-                throw(e);
             }
         }
     }
@@ -1715,46 +1607,18 @@ public final class NfcAdapter {
      * @param activity the current foreground Activity that has registered data to share
      * @return whether the Beam animation was successfully invoked
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
-     * @deprecated this feature is deprecated. File sharing can work using other technology like
+     * @removed this feature is removed. File sharing can work using other technology like
      * Bluetooth.
      */
     @java.lang.Deprecated
+    @UnsupportedAppUsage
     public boolean invokeBeam(Activity activity) {
         synchronized (NfcAdapter.class) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
-            if (!sHasBeamFeature) {
-                return false;
-            }
         }
-        if (activity == null) {
-            throw new NullPointerException("activity may not be null.");
-        }
-        enforceResumed(activity);
-        try {
-            sService.invokeBeam();
-            return true;
-        } catch (RemoteException e) {
-            Log.e(TAG, "invokeBeam: NFC process has died.");
-            attemptDeadServiceRecovery(e);
-            return false;
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public boolean invokeBeam(BeamShareData shareData) {
-        try {
-            Log.e(TAG, "invokeBeamInternal()");
-            sService.invokeBeamInternal(shareData);
-            return true;
-        } catch (RemoteException e) {
-            Log.e(TAG, "invokeBeam: NFC process has died.");
-            attemptDeadServiceRecovery(e);
-            return false;
-        }
+        return false;
     }
 
     /**
@@ -1780,25 +1644,18 @@ public final class NfcAdapter {
      *
      * @param activity foreground activity
      * @param message a NDEF Message to push over NFC
-     * @throws IllegalStateException if the activity is not currently in the foreground
-     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
-     * @deprecated use {@link #setNdefPushMessage} instead
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable
+     * @removed this feature is removed. File sharing can work using other technology like
+     * Bluetooth.
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void enableForegroundNdefPush(Activity activity, NdefMessage message) {
         synchronized (NfcAdapter.class) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
-            if (!sHasBeamFeature) {
-                return;
-            }
         }
-        if (activity == null || message == null) {
-            throw new NullPointerException();
-        }
-        enforceResumed(activity);
-        mNfcActivityManager.setNdefPushMessage(activity, message, 0);
     }
 
     /**
@@ -1817,27 +1674,18 @@ public final class NfcAdapter {
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param activity the Foreground activity
-     * @throws IllegalStateException if the Activity has already been paused
-     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
-     * @deprecated use {@link #setNdefPushMessage} instead
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable
+     * @removed this feature is removed. File sharing can work using other technology like
+     * Bluetooth.
      */
     @Deprecated
+    @UnsupportedAppUsage
     public void disableForegroundNdefPush(Activity activity) {
         synchronized (NfcAdapter.class) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
-            if (!sHasBeamFeature) {
-                return;
-            }
         }
-        if (activity == null) {
-            throw new NullPointerException();
-        }
-        enforceResumed(activity);
-        mNfcActivityManager.setNdefPushMessage(activity, null, 0);
-        mNfcActivityManager.setNdefPushMessageCallback(activity, null, 0);
-        mNfcActivityManager.setOnNdefPushCompleteCallback(activity, null);
     }
 
     /**
@@ -1971,40 +1819,26 @@ public final class NfcAdapter {
      * Enable NDEF Push feature.
      * <p>This API is for the Settings application.
      * @hide
+     * @removed
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @UnsupportedAppUsage
     public boolean enableNdefPush() {
-        if (!sHasNfcFeature) {
-            throw new UnsupportedOperationException();
-        }
-        try {
-            return sService.enableNdefPush();
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return false;
-        }
+        return false;
     }
 
     /**
      * Disable NDEF Push feature.
      * <p>This API is for the Settings application.
      * @hide
+     * @removed
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @UnsupportedAppUsage
     public boolean disableNdefPush() {
-        synchronized (NfcAdapter.class) {
-            if (!sHasNfcFeature) {
-                throw new UnsupportedOperationException();
-            }
-        }
-        try {
-            return sService.disableNdefPush();
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return false;
-        }
+        return false;
     }
 
     /**
@@ -2030,26 +1864,18 @@ public final class NfcAdapter {
      * @see android.provider.Settings#ACTION_NFCSHARING_SETTINGS
      * @return true if NDEF Push feature is enabled
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
-     * @deprecated this feature is deprecated. File sharing can work using other technology like
+     * @removed this feature is removed. File sharing can work using other technology like
      * Bluetooth.
      */
     @java.lang.Deprecated
-
+    @UnsupportedAppUsage
     public boolean isNdefPushEnabled() {
         synchronized (NfcAdapter.class) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
-            if (!sHasBeamFeature) {
-                return false;
-            }
         }
-        try {
-            return sService.isNdefPushEnabled();
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return false;
-        }
+        return false;
     }
 
     /**
@@ -2134,17 +1960,6 @@ public final class NfcAdapter {
         }
         try {
             sService.dispatch(tag);
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setP2pModes(int initiatorModes, int targetModes) {
-        try {
-            sService.setP2pModes(initiatorModes, targetModes);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
         }

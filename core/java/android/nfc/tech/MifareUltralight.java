@@ -236,6 +236,7 @@ public final class MifareUltralight extends BasicTagTechnology {
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param timeout timeout value in milliseconds
+     * @throws SecurityException if the tag object is reused after the tag has left the field
      */
     public void setTimeout(int timeout) {
         try {
@@ -255,6 +256,7 @@ public final class MifareUltralight extends BasicTagTechnology {
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @return timeout value in milliseconds
+     * @throws SecurityException if the tag object is reused after the tag has left the field
      */
     public int getTimeout() {
         try {
