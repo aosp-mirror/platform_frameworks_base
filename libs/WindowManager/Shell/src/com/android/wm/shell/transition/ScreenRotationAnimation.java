@@ -31,7 +31,6 @@ import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.ColorSpace;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -162,13 +161,12 @@ class ScreenRotationAnimation {
                         .setName("RotationLayer")
                         .build();
 
-                final ColorSpace colorSpace = screenshotBuffer.getColorSpace();
+                TransitionAnimation.configureScreenshotLayer(t, mScreenshotLayer, screenshotBuffer);
                 final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
-                t.setDataSpace(mScreenshotLayer, colorSpace.getDataSpace());
-                t.setBuffer(mScreenshotLayer, hardwareBuffer);
                 t.show(mScreenshotLayer);
                 if (!isCustomRotate()) {
-                    mStartLuma = TransitionAnimation.getBorderLuma(hardwareBuffer, colorSpace);
+                    mStartLuma = TransitionAnimation.getBorderLuma(hardwareBuffer,
+                            screenshotBuffer.getColorSpace());
                 }
                 hardwareBuffer.close();
             }
