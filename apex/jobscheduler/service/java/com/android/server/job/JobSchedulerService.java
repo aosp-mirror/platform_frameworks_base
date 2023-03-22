@@ -906,6 +906,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                     synchronized (mLock) {
                         mUidToPackageCache.remove(uid);
                     }
+                } else {
+                    synchronized (mJobSchedulerStub.mPersistCache) {
+                        mJobSchedulerStub.mPersistCache.remove(pkgUid);
+                    }
                 }
             } else if (Intent.ACTION_PACKAGE_FULLY_REMOVED.equals(action)) {
                 if (DEBUG) {
