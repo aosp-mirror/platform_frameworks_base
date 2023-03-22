@@ -961,6 +961,7 @@ public final class NotificationPanelViewController implements Dumpable {
                 onTrackingStopped(false);
                 instantCollapse();
             } else {
+                mView.animate().cancel();
                 mView.animate()
                         .alpha(0f)
                         .setStartDelay(0)
@@ -3087,7 +3088,9 @@ public final class NotificationPanelViewController implements Dumpable {
      */
     public void startFoldToAodAnimation(Runnable startAction, Runnable endAction,
             Runnable cancelAction) {
-        mView.animate()
+        final ViewPropertyAnimator viewAnimator = mView.animate();
+        viewAnimator.cancel();
+        viewAnimator
                 .translationX(0)
                 .alpha(1f)
                 .setDuration(ANIMATION_DURATION_FOLD_TO_AOD)
@@ -3106,9 +3109,14 @@ public final class NotificationPanelViewController implements Dumpable {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         endAction.run();
+
+                        viewAnimator.setListener(null);
+                        viewAnimator.setUpdateListener(null);
                     }
-                }).setUpdateListener(anim -> mKeyguardStatusViewController.animateFoldToAod(
-                        anim.getAnimatedFraction())).start();
+                })
+                .setUpdateListener(anim ->
+                        mKeyguardStatusViewController.animateFoldToAod(anim.getAnimatedFraction()))
+                .start();
     }
 
     /** Cancels fold to AOD transition and resets view state. */
@@ -3307,6 +3315,7 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     public ViewPropertyAnimator fadeOut(long startDelayMs, long durationMs, Runnable endAction) {
+        mView.animate().cancel();
         return mView.animate().alpha(0).setStartDelay(startDelayMs).setDuration(
                 durationMs).setInterpolator(Interpolators.ALPHA_OUT).withLayer().withEndAction(
                 endAction);
