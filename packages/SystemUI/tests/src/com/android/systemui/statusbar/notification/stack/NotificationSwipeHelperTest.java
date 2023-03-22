@@ -425,12 +425,12 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
     public void testGetViewTranslationAnimator_notExpandableNotificationRow() {
         Animator animator = mock(Animator.class);
         AnimatorUpdateListener listener = mock(AnimatorUpdateListener.class);
-        doReturn(animator).when(mSwipeHelper).superGetViewTranslationAnimator(mView, 0, listener);
+        doReturn(animator).when(mSwipeHelper).createTranslationAnimation(mView, 0, listener);
 
-        assertEquals("returns the correct animator from super", animator,
+        assertEquals("Should create a new animator", animator,
                 mSwipeHelper.getViewTranslationAnimator(mView, 0, listener));
 
-        verify(mSwipeHelper, times(1)).superGetViewTranslationAnimator(mView, 0, listener);
+        verify(mSwipeHelper).createTranslationAnimation(mView, 0, listener);
     }
 
     @Test
@@ -439,10 +439,10 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
         AnimatorUpdateListener listener = mock(AnimatorUpdateListener.class);
         doReturn(animator).when(mNotificationRow).getTranslateViewAnimator(0, listener);
 
-        assertEquals("returns the correct animator from super when view is an ENR", animator,
+        assertEquals("Should return the animator from ExpandableNotificationRow", animator,
                 mSwipeHelper.getViewTranslationAnimator(mNotificationRow, 0, listener));
 
-        verify(mNotificationRow, times(1)).getTranslateViewAnimator(0, listener);
+        verify(mNotificationRow).getTranslateViewAnimator(0, listener);
     }
 
     @Test
