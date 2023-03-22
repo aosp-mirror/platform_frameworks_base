@@ -786,4 +786,20 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         // THEN the alternateBouncer doesn't hide
         verify(mAlternateBouncerInteractor, never()).hide();
     }
+
+    @Test
+    public void testAlternateBouncerOnTouch_actionOutside_hidesAlternateBouncer() {
+        reset(mAlternateBouncerInteractor);
+
+        // GIVEN the alternate bouncer has shown for a minimum amount of time
+        when(mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()).thenReturn(true);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // WHEN only ACTION_OUTSIDE touch event comes
+        mStatusBarKeyguardViewManager.onTouch(
+                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_OUTSIDE, 0f, 0f, 0));
+
+        // THEN the alternateBouncer hides
+        verify(mAlternateBouncerInteractor).hide();
+    }
 }

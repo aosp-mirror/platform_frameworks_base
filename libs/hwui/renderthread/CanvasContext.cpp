@@ -793,6 +793,10 @@ SkISize CanvasContext::getNextFrameSize() const {
     return size;
 }
 
+const SkM44& CanvasContext::getPixelSnapMatrix() const {
+    return mRenderPipeline->getPixelSnapMatrix();
+}
+
 void CanvasContext::prepareAndDraw(RenderNode* node) {
     ATRACE_CALL();
 

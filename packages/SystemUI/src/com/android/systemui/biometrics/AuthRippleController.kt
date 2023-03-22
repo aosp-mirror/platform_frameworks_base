@@ -102,11 +102,6 @@ constructor(
         }
     }
 
-    override fun onInit() {
-        mView.setAlphaInDuration(sysuiContext.resources.getInteger(
-                R.integer.auth_ripple_alpha_in_duration).toLong())
-    }
-
     @VisibleForTesting
     public override fun onViewAttached() {
         authController.addCallback(authControllerCallback)

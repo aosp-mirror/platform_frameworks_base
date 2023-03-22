@@ -233,7 +233,7 @@ object Flags {
     /** Whether to inflate the bouncer view on a background thread. */
     // TODO(b/272091103): Tracking Bug
     @JvmField
-    val ASYNC_INFLATE_BOUNCER = unreleasedFlag(229, "async_inflate_bouncer", teamfood = true)
+    val ASYNC_INFLATE_BOUNCER = unreleasedFlag(229, "async_inflate_bouncer", teamfood = false)
 
     /** Whether to inflate the bouncer view on a background thread. */
     // TODO(b/273341787): Tracking Bug
@@ -519,7 +519,7 @@ object Flags {
     @JvmField
     val ENABLE_MOVE_FLOATING_WINDOW_IN_TABLETOP =
         sysPropBooleanFlag(
-            1116, "persist.wm.debug.enable_move_floating_window_in_tabletop", default = false)
+            1116, "persist.wm.debug.enable_move_floating_window_in_tabletop", default = true)
 
     // 1200 - predictive back
     @Keep

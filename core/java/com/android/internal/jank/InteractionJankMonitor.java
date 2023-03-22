@@ -16,6 +16,10 @@
 
 package com.android.internal.jank;
 
+import static android.Manifest.permission.READ_DEVICE_CONFIG;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.provider.DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR;
+
 import static com.android.internal.jank.FrameTracker.REASON_CANCEL_NORMAL;
 import static com.android.internal.jank.FrameTracker.REASON_CANCEL_TIMEOUT;
 import static com.android.internal.jank.FrameTracker.REASON_END_NORMAL;
@@ -94,6 +98,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.UiThread;
 import android.annotation.WorkerThread;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
@@ -436,18 +441,37 @@ public class InteractionJankMonitor {
         mWorker = worker;
         mWorker.start();
         mSamplingInterval = DEFAULT_SAMPLING_INTERVAL;
-
-        // Post initialization to the background in case we're running on the main
-        // thread.
-        mWorker.getThreadHandler().post(
-                () -> mPropertiesChangedListener.onPropertiesChanged(
-                        DeviceConfig.getProperties(
-                                DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR)));
-        DeviceConfig.addOnPropertiesChangedListener(
-                DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR,
-                new HandlerExecutor(mWorker.getThreadHandler()),
-                mPropertiesChangedListener);
         mEnabled = DEFAULT_ENABLED;
+
+        final Context context = ActivityThread.currentApplication();
+        if (context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG) != PERMISSION_GRANTED) {
+            if (DEBUG) {
+                Log.d(TAG, "Initialized the InteractionJankMonitor."
+                        + " (No READ_DEVICE_CONFIG permission to change configs)"
+                        + " enabled=" + mEnabled + ", interval=" + mSamplingInterval
+                        + ", missedFrameThreshold=" + mTraceThresholdMissedFrames
+                        + ", frameTimeThreshold=" + mTraceThresholdFrameTimeMillis
+                        + ", package=" + context.getPackageName());
+            }
+            return;
+        }
+
+        // Post initialization to the background in case we're running on the main thread.
+        mWorker.getThreadHandler().post(
+                () -> {
+                    try {
+                        mPropertiesChangedListener.onPropertiesChanged(
+                                DeviceConfig.getProperties(NAMESPACE_INTERACTION_JANK_MONITOR));
+                        DeviceConfig.addOnPropertiesChangedListener(
+                                NAMESPACE_INTERACTION_JANK_MONITOR,
+                                new HandlerExecutor(mWorker.getThreadHandler()),
+                                mPropertiesChangedListener);
+                    } catch (SecurityException ex) {
+                        Log.d(TAG, "Can't get properties: READ_DEVICE_CONFIG granted="
+                                + context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG)
+                                + ", package=" + context.getPackageName());
+                    }
+                });
     }
 
     /**
