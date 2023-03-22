@@ -879,6 +879,8 @@ interface IActivityManager {
     /** Logs API state change to associate with an FGS, used for FGS Type Metrics */
     void logFgsApiStateChanged(int apiType, int state, int appUid, int appPid);
 
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
     void registerUidFrozenStateChangedCallback(in IUidFrozenStateChangedCallback callback);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
     void unregisterUidFrozenStateChangedCallback(in IUidFrozenStateChangedCallback callback);
 }
