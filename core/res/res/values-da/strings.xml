@@ -140,8 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi-opkald"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wi-Fi-opkald"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Fra"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Ring via Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Ring via mobilnetværk"</string>
@@ -1259,7 +1258,7 @@
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen, mens du konfigurerer dit fingeraftryk."</string>
     <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Sluk skærmen for at afslutte konfigurationen"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Deaktiver"</string>
-    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vil du bekræfte dit fingeraftryk?"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vil du verificere dit fingeraftryk?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen for at bekræfte dit fingeraftryk."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Sluk skærm"</string>
     <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Fortsæt"</string>

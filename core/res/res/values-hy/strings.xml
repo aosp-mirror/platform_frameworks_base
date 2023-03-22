@@ -140,8 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Զանգեր Wi-Fi-ի միջոցով"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Զանգ Wi-Fi-ի միջոցով"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Անջատված է"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Զանգ Wi-Fi-ի միջոցով"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Զանգ բջջային ցանցի միջոցով"</string>

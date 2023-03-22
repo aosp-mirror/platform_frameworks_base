@@ -2325,12 +2325,9 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> está usando as duas telas para mostrar conteúdo"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"O dispositivo está muito quente"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"A tela dupla está indisponível porque o smartphone está ficando muito quente"</string>
-    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
-    <skip />
-    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
-    <skip />
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"O recurso Dual Screen está indisponível"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"O recurso Dual Screen está indisponível porque a Economia de bateria está ativada. É possível desativar essa opção nas configurações."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Ir para Configurações"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desativar"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Dispositivo <xliff:g id="DEVICE_NAME">%s</xliff:g> configurado"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Layout do teclado definido como <xliff:g id="LAYOUT_1">%s</xliff:g>. Toque para mudar."</string>
