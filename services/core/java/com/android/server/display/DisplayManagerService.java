@@ -1419,6 +1419,7 @@ public final class DisplayManagerService extends SystemService {
         }
 
         if (projection != null) {
+            final long firstToken = Binder.clearCallingIdentity();
             try {
                 if (!getProjectionService().isCurrentProjection(projection)) {
                     throw new SecurityException("Cannot create VirtualDisplay with "
@@ -1427,6 +1428,8 @@ public final class DisplayManagerService extends SystemService {
                 flags = projection.applyVirtualDisplayFlags(flags);
             } catch (RemoteException e) {
                 throw new SecurityException("unable to validate media projection or flags");
+            } finally {
+                Binder.restoreCallingIdentity(firstToken);
             }
         }
 
@@ -1494,7 +1497,7 @@ public final class DisplayManagerService extends SystemService {
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
 
-        final long token = Binder.clearCallingIdentity();
+        final long secondToken = Binder.clearCallingIdentity();
         try {
             final int displayId;
             synchronized (mSyncRoot) {
@@ -1566,7 +1569,7 @@ public final class DisplayManagerService extends SystemService {
 
             return displayId;
         } finally {
-            Binder.restoreCallingIdentity(token);
+            Binder.restoreCallingIdentity(secondToken);
         }
     }
 

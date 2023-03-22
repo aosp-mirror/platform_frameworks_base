@@ -23,22 +23,32 @@ import android.os.IBinder;
 interface IMediaProjection {
     void start(IMediaProjectionCallback callback);
     void stop();
+
     boolean canProjectAudio();
     boolean canProjectVideo();
     boolean canProjectSecureVideo();
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
     int applyVirtualDisplayFlags(int flags);
+
     void registerCallback(IMediaProjectionCallback callback);
+
     void unregisterCallback(IMediaProjectionCallback callback);
 
     /**
      * Returns the {@link android.os.IBinder} identifying the task to record, or {@code null} if
      * there is none.
      */
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
     IBinder getLaunchCookie();
 
     /**
      * Updates the {@link android.os.IBinder} identifying the task to record, or {@code null} if
      * there is none.
      */
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
     void setLaunchCookie(in IBinder launchCookie);
 }

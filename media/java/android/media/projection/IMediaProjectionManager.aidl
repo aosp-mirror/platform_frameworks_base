@@ -28,28 +28,34 @@ interface IMediaProjectionManager {
     @UnsupportedAppUsage
     boolean hasProjectionPermission(int uid, String packageName);
 
+    /**
+     * Returns a new {@link IMediaProjection} instance associated with the given package.
+     */
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     IMediaProjection createProjection(int uid, String packageName, int type,
             boolean permanentGrant);
 
+    /**
+     * Returns {@code true} if the given {@link IMediaProjection} corresponds to the current
+     * projection, or {@code false} otherwise.
+     */
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
     boolean isCurrentProjection(IMediaProjection projection);
 
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     MediaProjectionInfo getActiveProjectionInfo();
 
-    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     void stopActiveProjection();
 
-    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     void notifyActiveProjectionCapturedContentResized(int width, int height);
 
-    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
                 + ".permission.MANAGE_MEDIA_PROJECTION)")
     void notifyActiveProjectionCapturedContentVisibilityChanged(boolean isVisible);
@@ -70,6 +76,8 @@ interface IMediaProjectionManager {
      * @param incomingSession the nullable incoming content recording session
      * @param projection      the non-null projection the session describes
      */
+  @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
     void setContentRecordingSession(in ContentRecordingSession incomingSession,
             in IMediaProjection projection);
 }
