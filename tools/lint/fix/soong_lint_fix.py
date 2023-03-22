@@ -13,14 +13,21 @@
 #  limitations under the License.
 
 import argparse
+import json
 import os
+import shutil
 import subprocess
 import sys
+import zipfile
 
 ANDROID_BUILD_TOP = os.environ.get("ANDROID_BUILD_TOP")
+ANDROID_PRODUCT_OUT = os.environ.get("ANDROID_PRODUCT_OUT")
+PRODUCT_OUT = ANDROID_PRODUCT_OUT.removeprefix(f"{ANDROID_BUILD_TOP}/")
+
+SOONG_UI = "build/soong/soong_ui.bash"
 PATH_PREFIX = "out/soong/.intermediates"
 PATH_SUFFIX = "android_common/lint"
-FIX_DIR = "suggested-fixes"
+FIX_ZIP = "suggested-fixes.zip"
 
 class SoongLintFix:
     """
@@ -28,14 +35,12 @@ class SoongLintFix:
     apply lint fixes to the platform via the necessary
     combination of soong and shell commands.
 
-    It provides some basic hooks for experimental code
-    to tweak the generation of the resulting shell script.
+    It breaks up these operations into a few "private" methods
+    that are intentionally exposed so experimental code can tweak behavior.
 
-    By default, it will apply lint fixes using the intermediate `suggested-fixes`
-    directory that soong creates during its invocation of lint.
-
-    The default argument parser configures a number of command line arguments to
-    facilitate running lint via soong.
+    The entry point, `run`, will apply lint fixes using the
+    intermediate `suggested-fixes` directory that soong creates during its
+    invocation of lint.
 
     Basic usage:
     ```
@@ -45,99 +50,95 @@ class SoongLintFix:
     ```
     """
     def __init__(self):
-        self._commands = None
+        self._parser = _setup_parser()
         self._args = None
+        self._kwargs = None
         self._path = None
         self._target = None
-        self._parser = _setup_parser()
 
 
-    def add_argument(self, *args, **kwargs):
-        """
-        If necessary, add arguments to the underlying argparse.ArgumentParser before running
-        """
-        self._parser.add_argument(*args, **kwargs)
-
-
-    def run(self, add_setup_commands=None, override_fix_commands=None):
+    def run(self, additional_setup=None, custom_fix=None):
         """
         Run the script
-        :param add_setup_commands: OPTIONAL function to add additional setup commands
-            passed the command line arguments, path, and build target
-            must return a list of strings (the additional commands)
-        :param override_fix_commands: OPTIONAL function to override the fix commands
-            passed the command line arguments, path, and build target
-            must return a list of strings (the fix commands)
         """
         self._setup()
-        if add_setup_commands:
-            self._commands += add_setup_commands(self._args, self._path, self._target)
-
-        self._add_lint_report_commands()
+        self._find_module()
+        self._lint()
 
         if not self._args.no_fix:
-            if override_fix_commands:
-                self._commands += override_fix_commands(self._args, self._path, self._target)
-            else:
-                self._commands += [
-                    f"cd {self._path}",
-                    f"unzip {FIX_DIR}.zip -d {FIX_DIR}",
-                    f"cd {FIX_DIR}",
-                    # Find all the java files in the fix directory, excluding the ./out subdirectory,
-                    # and copy them back into the same path within the tree.
-                    f"find . -path ./out -prune -o -name '*.java' -print | xargs -n 1 sh -c 'cp $1 $ANDROID_BUILD_TOP/$1 || exit 255' --",
-                    f"rm -rf {FIX_DIR}"
-                ]
+            self._fix()
 
-
-        if self._args.dry_run:
-            print(self._get_commands_str())
-        else:
-            self._execute()
-
+        if self._args.print:
+            self._print()
 
     def _setup(self):
         self._args = self._parser.parse_args()
-        self._commands = []
-        self._path = f"{PATH_PREFIX}/{self._args.build_path}/{PATH_SUFFIX}"
-        self._target = f"{self._path}/lint-report.html"
-
-        if not self._args.dry_run:
-            self._commands += [f"export ANDROID_BUILD_TOP={ANDROID_BUILD_TOP}"]
-
+        env = os.environ.copy()
         if self._args.check:
-            self._commands += [f"export ANDROID_LINT_CHECK={self._args.check}"]
+            env["ANDROID_LINT_CHECK"] = self._args.check
+        if self._args.lint_module:
+            env["ANDROID_LINT_CHECK_EXTRA_MODULES"] = self._args.lint_module
+
+        self._kwargs = {
+            "env": env,
+            "executable": "/bin/bash",
+            "shell": True,
+        }
+
+        os.chdir(ANDROID_BUILD_TOP)
 
 
-    def _add_lint_report_commands(self):
-        self._commands += [
-            "cd $ANDROID_BUILD_TOP",
-            "source build/envsetup.sh",
-            # remove the file first so soong doesn't think there is no work to do
-            f"rm {self._target}",
-            # remove in case there are fixes from a prior run,
-            # that we don't want applied if this run fails
-            f"rm {self._path}/{FIX_DIR}.zip",
-            f"m {self._target}",
-        ]
+    def _find_module(self):
+        print("Refreshing soong modules...")
+        try:
+            os.mkdir(ANDROID_PRODUCT_OUT)
+        except OSError:
+            pass
+        subprocess.call(f"{SOONG_UI} --make-mode {PRODUCT_OUT}/module-info.json", **self._kwargs)
+        print("done.")
+
+        with open(f"{ANDROID_PRODUCT_OUT}/module-info.json") as f:
+            module_info = json.load(f)
+
+        if self._args.module not in module_info:
+            sys.exit(f"Module {self._args.module} not found!")
+
+        module_path = module_info[self._args.module]["path"][0]
+        print(f"Found module {module_path}/{self._args.module}.")
+
+        self._path = f"{PATH_PREFIX}/{module_path}/{self._args.module}/{PATH_SUFFIX}"
+        self._target = f"{self._path}/lint-report.txt"
 
 
-    def _get_commands_str(self):
-        prefix = "(\n"
-        delimiter = ";\n"
-        suffix = "\n)"
-        return f"{prefix}{delimiter.join(self._commands)}{suffix}"
+    def _lint(self):
+        print("Cleaning up any old lint results...")
+        try:
+            os.remove(f"{self._target}")
+            os.remove(f"{self._path}/{FIX_ZIP}")
+        except FileNotFoundError:
+            pass
+        print("done.")
+
+        print(f"Generating {self._target}")
+        subprocess.call(f"{SOONG_UI} --make-mode {self._target}", **self._kwargs)
+        print("done.")
 
 
-    def _execute(self, with_echo=True):
-        if with_echo:
-            exec_commands = []
-            for c in self._commands:
-                exec_commands.append(f'echo "{c}"')
-                exec_commands.append(c)
-            self._commands = exec_commands
+    def _fix(self):
+        print("Copying suggested fixes to the tree...")
+        with zipfile.ZipFile(f"{self._path}/{FIX_ZIP}") as zip:
+            for name in zip.namelist():
+                if name.startswith("out") or not name.endswith(".java"):
+                    continue
+                with zip.open(name) as src, open(f"{ANDROID_BUILD_TOP}/{name}", "wb") as dst:
+                    shutil.copyfileobj(src, dst)
+            print("done.")
 
-        subprocess.call(self._get_commands_str(), executable='/bin/bash', shell=True)
+
+    def _print(self):
+        print("### lint-report.txt ###", end="\n\n")
+        with open(self._target, "r") as f:
+            print(f.read())
 
 
 def _setup_parser():
@@ -147,23 +148,26 @@ def _setup_parser():
         2. Run lint on the specified target.
         3. Copy the modified files, from soong's intermediate directory, back into the tree.
 
-        **Gotcha**: You must have run `source build/envsetup.sh` and `lunch`
-        so that the `ANDROID_BUILD_TOP` environment variable has been set.
-        Alternatively, set it manually in your shell.
+        **Gotcha**: You must have run `source build/envsetup.sh` and `lunch` first.
         """, formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument('build_path', metavar='build_path', type=str,
-                        help='The build module to run '
-                             '(e.g. frameworks/base/framework-minus-apex or '
-                             'frameworks/base/services/core/services.core.unboosted)')
+    parser.add_argument('module',
+                        help='The soong build module to run '
+                             '(e.g. framework-minus-apex or services.core.unboosted)')
 
-    parser.add_argument('--check', metavar='check', type=str,
+    parser.add_argument('--check',
                         help='Which lint to run. Passed to the ANDROID_LINT_CHECK environment variable.')
 
-    parser.add_argument('--dry-run', dest='dry_run', action='store_true',
-                        help='Just print the resulting shell script instead of running it.')
+    parser.add_argument('--lint-module',
+                            help='Specific lint module to run. Passed to the ANDROID_LINT_CHECK_EXTRA_MODULES environment variable.')
 
-    parser.add_argument('--no-fix', dest='no_fix', action='store_true',
+    parser.add_argument('--no-fix', action='store_true',
                         help='Just build and run the lint, do NOT apply the fixes.')
 
+    parser.add_argument('--print', action='store_true',
+                        help='Print the contents of the generated lint-report.txt at the end.')
+
     return parser
+
+if __name__ == "__main__":
+    SoongLintFix().run()
