@@ -471,7 +471,7 @@ public class LatencyTracker {
      */
     public void onActionStart(@Action int action, String tag) {
         synchronized (mLock) {
-            if (!isEnabled()) {
+            if (!isEnabled(action)) {
                 return;
             }
             // skip if the action is already instrumenting.
@@ -495,7 +495,7 @@ public class LatencyTracker {
      */
     public void onActionEnd(@Action int action) {
         synchronized (mLock) {
-            if (!isEnabled()) {
+            if (!isEnabled(action)) {
                 return;
             }
             Session session = mSessions.get(action);
