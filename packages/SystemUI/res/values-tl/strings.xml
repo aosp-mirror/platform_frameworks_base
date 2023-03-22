@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"I-enable ang USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Matuto pa"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Na-disable ang Extend Unlock"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"nagpadala ng larawan"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Sine-save ang screenshot…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Sine-save ang screenshot sa profile sa trabaho…"</string>
@@ -871,8 +870,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Nagdagdag ng # kontrol.}one{Nagdagdag ng # kontrol.}other{Nagdagdag ng # na kontrol.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Inalis"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Idagdag ang <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"Mapipili ng <xliff:g id="APPNAME">%s</xliff:g> kung aling mga kontrol at content ang lalabas dito."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Alisin ang mga kontrol para sa <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Ginawang paborito"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Ginawang paborito, posisyon <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -1067,7 +1065,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"i-edit"</string>
     <string name="add" msgid="81036585205287996">"Magdagdag"</string>
     <string name="manage_users" msgid="1823875311934643849">"Pamahalaan ang mga user"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"Hindi sinusuportahan ng notification na ito ang pag-drag sa Splitscreen."</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"Hindi sinusuportahan ng notification na ito ang pag-drag sa split screen"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Hindi available ang Wi‑Fi"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Priority mode"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Nakatakda ang alarm"</string>
