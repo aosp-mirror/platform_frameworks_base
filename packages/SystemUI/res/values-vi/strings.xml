@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Bật USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Tìm hiểu thêm"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Chụp ảnh màn hình"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Đã tắt tính năng Luôn mở khoá"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"đã gửi hình ảnh"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Đang lưu ảnh chụp màn hình..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Đang lưu ảnh chụp màn hình vào hồ sơ công việc…"</string>
@@ -871,8 +870,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Đã thêm # chế độ điều khiển.}other{Đã thêm # chế độ điều khiển.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Đã xóa"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Thêm <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> có thể chọn các nút điều khiển và nội dung hiện ở đây."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Xoá chế độ cài đặt cho <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Được yêu thích"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Được yêu thích, vị trí số <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -1067,7 +1065,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"sửa"</string>
     <string name="add" msgid="81036585205287996">"Thêm"</string>
     <string name="manage_users" msgid="1823875311934643849">"Quản lý người dùng"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"Thông báo này không hỗ trợ thao tác kéo để Chia đôi màn hình."</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"Thông báo này không hỗ trợ thao tác kéo để chia đôi màn hình"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Không có Wi‑Fi"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Chế độ ưu tiên"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Đã đặt chuông báo"</string>

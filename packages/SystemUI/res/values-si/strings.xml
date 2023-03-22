@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB සබල කරන්න"</string>
     <string name="learn_more" msgid="4690632085667273811">"තවත් දැන ගන්න"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"තිර රුව"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"දිගු අගුළු හැරීම අබල කර ඇත"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"රූපයක් එවන ලදී"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"තිර රුව සුරැකෙමින් පවතී…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"කාර්යාල පැතිකඩ වෙත තිර රුව සුරකිමින්…"</string>
@@ -871,8 +870,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# පාලනයක් එක් කර ඇත.}one{පාලන #ක් එක් කර ඇත.}other{පාලන #ක් එක් කර ඇත.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"ඉවත් කළා"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> එක් කරන්න ද?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> හට මෙහි පෙන්වන්නේ කුමන පාලන සහ අන්තර්ගත ද යන්න තෝරා ගත හැක."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> සඳහා පාලන ඉවත් කරන්න ද?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"ප්‍රියතම කළා"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"ප්‍රියතම කළා, තත්ත්ව <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -1067,7 +1065,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"සංස්කරණය"</string>
     <string name="add" msgid="81036585205287996">"එක් කරන්න"</string>
     <string name="manage_users" msgid="1823875311934643849">"පරිශීලකයන් කළමනාකරණය කරන්න"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"මෙම දැනුම්දීම බෙදුම් තිරය වෙත ඇද ගෙන යාමට සහාය නොදක්වයි."</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"මෙම දැනුම්දීම බෙදුම් තිරය වෙත ඇද ගෙන යාමට සහාය නොදක්වයි."</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi ලබා ගත නොහැකිය"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"ප්‍රමුඛතා ප්‍රකාරය"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"සීනුව සකසන ලදි"</string>

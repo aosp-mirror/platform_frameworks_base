@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Уключыць USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Даведацца больш"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Здымак экрана"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Функцыя падоўжанай разблакіроўкі адключана"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"адпраўлены відарыс"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Захаванне скрыншота..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Захаванне здымка экрана ў працоўны профіль…"</string>
@@ -871,8 +870,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Дададзены # элемент кіравання.}one{Дададзена # элемента кіравання.}few{Дададзена # элементы кіравання.}many{Дададзена # элементаў кіравання.}other{Дададзена # элемента кіравання.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Выдалена"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Дадаць праграму \"<xliff:g id="APPNAME">%s</xliff:g>\"?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"У праграме \"<xliff:g id="APPNAME">%s</xliff:g>\" можна выбраць налады і змесціва, якія будуць тут паказвацца."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Выдаліць налады для <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Дададзена ў абранае"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Дададзена ў абранае, пазіцыя <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -1067,7 +1065,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"змяніць"</string>
     <string name="add" msgid="81036585205287996">"Дадаць"</string>
     <string name="manage_users" msgid="1823875311934643849">"Кіраванне карыстальнікамі"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"Гэта апавяшчэнне нельга перацягнуць на падзелены экран."</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"Гэта апавяшчэнне нельга перацягнуць на падзелены экран."</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Сетка Wi‑Fi недаступная"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Прыярытэтны рэжым"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Будзільнік зададзены"</string>
