@@ -1707,31 +1707,30 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get all subscription info records from SIMs that are inserted now or were inserted before.
+     * Get all subscription info records from SIMs that are inserted now or previously inserted.
      *
      * <p>
      * If the caller does not have {@link Manifest.permission#READ_PHONE_NUMBERS} permission,
      * {@link SubscriptionInfo#getNumber()} will return empty string.
      * If the caller does not have {@link Manifest.permission#USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER},
-     * {@link SubscriptionInfo#getIccId()} and {@link SubscriptionInfo#getCardString()} will return
-     * empty string, and {@link SubscriptionInfo#getGroupUuid()} will return {@code null}.
+     * {@link SubscriptionInfo#getIccId()} will return an empty string, and
+     * {@link SubscriptionInfo#getGroupUuid()} will return {@code null}.
      *
      * <p>
-     * The carrier app will always have full {@link SubscriptionInfo} for the subscriptions
-     * that it has carrier privilege.
+     * The carrier app will only get the list of subscriptions that it has carrier privilege on,
+     * but will have non-stripped {@link SubscriptionInfo} in the list.
      *
      * @return List of all {@link SubscriptionInfo} records from SIMs that are inserted or
-     * inserted before. Sorted by {@link SubscriptionInfo#getSimSlotIndex()}, then
+     * previously inserted. Sorted by {@link SubscriptionInfo#getSimSlotIndex()}, then
      * {@link SubscriptionInfo#getSubscriptionId()}.
      *
-     * @hide
+     * @throws SecurityException if callers do not hold the required permission.
      */
+    @NonNull
     @RequiresPermission(anyOf = {
             Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
             "carrier privileges",
     })
-    @NonNull
     public List<SubscriptionInfo> getAllSubscriptionInfoList() {
         List<SubscriptionInfo> result = null;
         try {
@@ -2205,13 +2204,23 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get an array of Subscription Ids for specified slot Index.
-     * @param slotIndex the slot index.
-     * @return subscription Ids or null if the given slot Index is not valid or there are no active
-     * subscriptions in the slot.
+     * Get an array of subscription ids for specified logical SIM slot Index.
+     *
+     * @param slotIndex The logical SIM slot index.
+     *
+     * @return subscription Ids or {@code null} if the given slot index is not valid or there are
+     * no active subscription in the slot. In the implementation today, there will be no more
+     * than one subscriptions per logical SIM slot.
+     *
+     * @deprecated Use {@link #getSubscriptionId(int)} instead.
      */
+    @Deprecated
     @Nullable
     public int[] getSubscriptionIds(int slotIndex) {
+        int subId = getSubscriptionId(slotIndex);
+        if (!isValidSubscriptionId(subId)) {
+            return null;
+        }
         return new int[]{getSubscriptionId(slotIndex)};
     }
 
@@ -2238,12 +2247,10 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get the subscription id for specified slot index.
+     * Get the subscription id for specified logical SIM slot index.
      *
-     * @param slotIndex Logical SIM slot index.
+     * @param slotIndex The logical SIM slot index.
      * @return The subscription id. {@link #INVALID_SUBSCRIPTION_ID} if SIM is absent.
-     *
-     * @hide
      */
     public static int getSubscriptionId(int slotIndex) {
         if (!isValidSlotIndex(slotIndex)) {
