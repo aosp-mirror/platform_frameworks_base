@@ -34,6 +34,7 @@ import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.os.UserHandle
 import android.os.UserManager
+import androidx.test.ext.truth.content.IntentSubject.assertThat
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.R
@@ -42,6 +43,7 @@ import com.android.systemui.notetask.NoteTaskController.Companion.EXTRA_SHORTCUT
 import com.android.systemui.notetask.NoteTaskController.Companion.SHORTCUT_ID
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskActivity
+import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.mockito.any
@@ -524,6 +526,24 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         verify(shortcutManager).disableShortcuts(listOf(SHORTCUT_ID))
         verify(shortcutManager, never()).enableShortcuts(any())
         verify(shortcutManager, never()).updateShortcuts(any())
+    }
+    // endregion
+
+    // startregion startNoteTaskProxyActivityForUser
+    @Test
+    fun startNoteTaskProxyActivityForUser_shouldStartLaunchNoteTaskProxyActivityWithExpectedUser() {
+        val user0 = UserHandle.of(0)
+        createNoteTaskController().startNoteTaskProxyActivityForUser(user0)
+
+        val intentCaptor = argumentCaptor<Intent>()
+        verify(context).startActivityAsUser(intentCaptor.capture(), eq(user0))
+        intentCaptor.value.let { intent ->
+            assertThat(intent)
+                .hasComponent(
+                    ComponentName(context, LaunchNoteTaskManagedProfileProxyActivity::class.java)
+                )
+            assertThat(intent).hasFlags(FLAG_ACTIVITY_NEW_TASK)
+        }
     }
     // endregion
 

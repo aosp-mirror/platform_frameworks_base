@@ -39,6 +39,7 @@ import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutInfoAsUser
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.getDefaultRoleHolderAsUser
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
+import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.wm.shell.bubbles.Bubble
@@ -94,6 +95,18 @@ constructor(
         }
     }
 
+    /** Starts [LaunchNoteTaskProxyActivity] on the given [user]. */
+    fun startNoteTaskProxyActivityForUser(user: UserHandle) {
+        context.startActivityAsUser(
+            Intent().apply {
+                component =
+                    ComponentName(context, LaunchNoteTaskManagedProfileProxyActivity::class.java)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            },
+            user
+        )
+    }
+
     /**
      * Shows a note task. How the task is shown will depend on when the method is invoked.
      *
@@ -146,7 +159,7 @@ constructor(
             when (info.launchMode) {
                 is NoteTaskLaunchMode.AppBubble -> {
                     // TODO: provide app bubble icon
-                    bubbles.showOrHideAppBubble(intent, userTracker.userHandle, null /* icon */)
+                    bubbles.showOrHideAppBubble(intent, user, null /* icon */)
                     // App bubble logging happens on `onBubbleExpandChanged`.
                     logDebug { "onShowNoteTask - opened as app bubble: $info" }
                 }

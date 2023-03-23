@@ -354,6 +354,7 @@ android_library {
         "androidx.test.uiautomator_uiautomator",
         "mockito-target-extended-minus-junit4",
         "androidx.test.ext.junit",
+        "androidx.test.ext.truth",
     ],
     libs: [
         "android.test.runner",

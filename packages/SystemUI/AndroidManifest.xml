@@ -983,6 +983,16 @@
             android:excludeFromRecents="true"
             android:resizeableActivity="false"
             android:theme="@android:style/Theme.NoDisplay" />
+
+        <!-- LaunchNoteTaskManagedProfileProxyActivity MUST NOT be exported because it allows caller
+             to specify an Android user when launching the default notes app. -->
+        <activity
+            android:name=".notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity"
+            android:exported="false"
+            android:enabled="true"
+            android:excludeFromRecents="true"
+            android:resizeableActivity="false"
+            android:theme="@android:style/Theme.NoDisplay" />
         <!-- endregion -->
 
         <!-- started from ControlsRequestReceiver -->

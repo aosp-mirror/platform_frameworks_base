@@ -171,6 +171,18 @@
             android:exported="false"
             android:permission="com.android.systemui.permission.SELF"
             android:excludeFromRecents="true" />
+
+        <activity
+            android:name="com.android.systemui.notetask.shortcut.LaunchNoteTaskActivity"
+            android:exported="false"
+            android:permission="com.android.systemui.permission.SELF"
+            android:excludeFromRecents="true" />
+
+        <activity
+            android:name="com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity"
+            android:exported="false"
+            android:permission="com.android.systemui.permission.SELF"
+            android:excludeFromRecents="true" />
     </application>
 
     <instrumentation android:name="android.testing.TestableInstrumentation"
