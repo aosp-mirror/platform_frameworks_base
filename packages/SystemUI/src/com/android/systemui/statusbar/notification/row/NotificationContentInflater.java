@@ -439,6 +439,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         CancellationSignal cancellationSignal = new CancellationSignal();
         cancellationSignal.setOnCancelListener(
                 () -> runningInflations.values().forEach(CancellationSignal::cancel));
+
         return cancellationSignal;
     }
 
@@ -711,6 +712,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     public static class AsyncInflationTask extends AsyncTask<Void, Void, InflationProgress>
             implements InflationCallback, InflationTask {
 
+        private static final long IMG_PRELOAD_TIMEOUT_MS = 1000L;
         private final NotificationEntry mEntry;
         private final Context mContext;
         private final boolean mInflateSynchronously;
@@ -804,7 +806,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                         recoveredBuilder, mIsLowPriority, mUsesIncreasedHeight,
                         mUsesIncreasedHeadsUpHeight, packageContext);
                 InflatedSmartReplyState previousSmartReplyState = mRow.getExistingSmartReplyState();
-                return inflateSmartReplyViews(
+                InflationProgress result = inflateSmartReplyViews(
                         inflationProgress,
                         mReInflateFlags,
                         mEntry,
@@ -812,6 +814,11 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                         packageContext,
                         previousSmartReplyState,
                         mSmartRepliesInflater);
+
+                // wait for image resolver to finish preloading
+                mRow.getImageResolver().waitForPreloadedImages(IMG_PRELOAD_TIMEOUT_MS);
+
+                return result;
             } catch (Exception e) {
                 mError = e;
                 return null;
@@ -846,6 +853,9 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 mCallback.handleInflationException(mRow.getEntry(),
                         new InflationException("Couldn't inflate contentViews" + e));
             }
+
+            // Cancel any image loading tasks, not useful any more
+            mRow.getImageResolver().cancelRunningTasks();
         }
 
         @Override
@@ -872,6 +882,9 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             // Notify the resolver that the inflation task has finished,
             // try to purge unnecessary cached entries.
             mRow.getImageResolver().purgeCache();
+
+            // Cancel any image loading tasks that have not completed at this point
+            mRow.getImageResolver().cancelRunningTasks();
         }
 
         private static class RtlEnabledContext extends ContextWrapper {
