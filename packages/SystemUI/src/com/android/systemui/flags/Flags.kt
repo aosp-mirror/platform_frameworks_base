@@ -516,7 +516,7 @@ object Flags {
     @JvmField
     val ENABLE_MOVE_FLOATING_WINDOW_IN_TABLETOP =
         sysPropBooleanFlag(
-            1116, "persist.wm.debug.enable_move_floating_window_in_tabletop", default = false)
+            1116, "persist.wm.debug.enable_move_floating_window_in_tabletop", default = true)
 
     // 1200 - predictive back
     @Keep
