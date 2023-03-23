@@ -30,25 +30,31 @@
         <item name="android:activityCloseExitAnimation">@anim/forced_resizable_exit</item>
     </style>
 
+    <style name="DesktopModeHandleMenuActionButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">52dp</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textFontWeight">500</item>
+        <item name="android:textColor">@color/desktop_mode_caption_menu_text_color</item>
+        <item name="android:drawablePadding">16dp</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+    </style>
+
+    <style name="DesktopModeHandleMenuWindowingButton">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:padding">14dp</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:background">?android:selectableItemBackgroundBorderless</item>
+    </style>
+
     <style name="CaptionButtonStyle">
         <item name="android:layout_width">32dp</item>
         <item name="android:layout_height">32dp</item>
         <item name="android:layout_margin">5dp</item>
         <item name="android:padding">4dp</item>
-    </style>
-
-    <style name="CaptionWindowingButtonStyle">
-        <item name="android:layout_width">40dp</item>
-        <item name="android:layout_height">40dp</item>
-        <item name="android:padding">4dp</item>
-    </style>
-
-    <style name="CaptionMenuButtonStyle" parent="@style/Widget.AppCompat.Button.Borderless">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">52dp</item>
-        <item name="android:layout_marginStart">10dp</item>
-        <item name="android:padding">4dp</item>
-        <item name="android:gravity">start|center_vertical</item>
     </style>
 
     <style name="DockedDividerBackground">
