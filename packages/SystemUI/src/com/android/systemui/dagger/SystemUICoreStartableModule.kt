@@ -25,7 +25,6 @@ import com.android.systemui.SliceBroadcastRelayHandler
 import com.android.systemui.accessibility.SystemActions
 import com.android.systemui.accessibility.WindowMagnification
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.biometrics.UdfpsOverlay
 import com.android.systemui.clipboardoverlay.ClipboardListener
 import com.android.systemui.controls.dagger.StartControlsStartableModule
 import com.android.systemui.dagger.qualifiers.PerUser
@@ -228,12 +227,6 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(KeyguardLiftController::class)
     abstract fun bindKeyguardLiftController(sysui: KeyguardLiftController): CoreStartable
-
-    /** Inject into UdfpsOverlay.  */
-    @Binds
-    @IntoMap
-    @ClassKey(UdfpsOverlay::class)
-    abstract fun bindUdfpsOverlay(sysui: UdfpsOverlay): CoreStartable
 
     /** Inject into MediaTttSenderCoordinator. */
     @Binds
