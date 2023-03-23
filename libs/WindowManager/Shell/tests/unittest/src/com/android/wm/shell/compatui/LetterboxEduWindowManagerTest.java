@@ -31,14 +31,12 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.TaskInfo;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
+import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.SurfaceControlViewHost;
@@ -53,6 +51,7 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -67,6 +66,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.function.Consumer;
+
 /**
  * Tests for {@link LetterboxEduWindowManager}.
  *
@@ -80,8 +81,10 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     private static final int USER_ID_1 = 1;
     private static final int USER_ID_2 = 2;
 
-    private static final String PREF_KEY_1 = String.valueOf(USER_ID_1);
-    private static final String PREF_KEY_2 = String.valueOf(USER_ID_2);
+    private static final String TEST_COMPAT_UI_SHARED_PREFERENCES = "test_compat_ui_configuration";
+
+    private static final String TEST_HAS_SEEN_LETTERBOX_SHARED_PREFERENCES =
+            "test_has_seen_letterbox";
 
     private static final int TASK_ID = 1;
 
@@ -103,46 +106,34 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     @Mock private ShellTaskOrganizer.TaskListener mTaskListener;
     @Mock private SurfaceControlViewHost mViewHost;
     @Mock private Transitions mTransitions;
-    @Mock private Runnable mOnDismissCallback;
+    @Mock private Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> mOnDismissCallback;
     @Mock private DockStateReader mDockStateReader;
 
-    private SharedPreferences mSharedPreferences;
-    @Nullable
-    private Boolean mInitialPrefValue1 = null;
-    @Nullable
-    private Boolean mInitialPrefValue2 = null;
+    private CompatUIConfiguration mCompatUIConfiguration;
+    private TestShellExecutor mExecutor;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mExecutor = new TestShellExecutor();
+        mCompatUIConfiguration = new CompatUIConfiguration(mContext, mExecutor) {
 
-        mSharedPreferences = mContext.getSharedPreferences(
-                LetterboxEduWindowManager.HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME,
-                Context.MODE_PRIVATE);
-        if (mSharedPreferences.contains(PREF_KEY_1)) {
-            mInitialPrefValue1 = mSharedPreferences.getBoolean(PREF_KEY_1, /* default= */ false);
-            mSharedPreferences.edit().remove(PREF_KEY_1).apply();
-        }
-        if (mSharedPreferences.contains(PREF_KEY_2)) {
-            mInitialPrefValue2 = mSharedPreferences.getBoolean(PREF_KEY_2, /* default= */ false);
-            mSharedPreferences.edit().remove(PREF_KEY_2).apply();
-        }
+            @Override
+            protected String getCompatUISharedPreferenceName() {
+                return TEST_COMPAT_UI_SHARED_PREFERENCES;
+            }
+
+            @Override
+            protected String getHasSeenLetterboxEducationSharedPreferencedName() {
+                return TEST_HAS_SEEN_LETTERBOX_SHARED_PREFERENCES;
+            }
+        };
     }
 
     @After
     public void tearDown() {
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        if (mInitialPrefValue1 == null) {
-            editor.remove(PREF_KEY_1);
-        } else {
-            editor.putBoolean(PREF_KEY_1, mInitialPrefValue1);
-        }
-        if (mInitialPrefValue2 == null) {
-            editor.remove(PREF_KEY_2);
-        } else {
-            editor.putBoolean(PREF_KEY_2, mInitialPrefValue2);
-        }
-        editor.apply();
+        mContext.deleteSharedPreferences(TEST_COMPAT_UI_SHARED_PREFERENCES);
+        mContext.deleteSharedPreferences(TEST_HAS_SEEN_LETTERBOX_SHARED_PREFERENCES);
     }
 
     @Test
@@ -166,8 +157,8 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
 
     @Test
     public void testCreateLayout_taskBarEducationIsShowing_doesNotCreateLayout() {
-        LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */
-                true, USER_ID_1, /* isTaskbarEduShowing= */ true);
+        LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true,
+                USER_ID_1, /* isTaskbarEduShowing= */ true);
 
         assertFalse(windowManager.createLayout(/* canShow= */ true));
 
@@ -180,7 +171,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
 
         assertTrue(windowManager.createLayout(/* canShow= */ false));
 
-        assertFalse(mSharedPreferences.getBoolean(PREF_KEY_1, /* default= */ false));
+        assertFalse(mCompatUIConfiguration.getHasSeenLetterboxEducation(USER_ID_1));
         assertNull(windowManager.mLayout);
     }
 
@@ -201,7 +192,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         spyOn(dialogTitle);
 
         // The education shouldn't be marked as seen until enter animation is done.
-        assertFalse(mSharedPreferences.getBoolean(PREF_KEY_1, /* default= */ false));
+        assertFalse(mCompatUIConfiguration.getHasSeenLetterboxEducation(USER_ID_1));
         // Clicking the layout does nothing until enter animation is done.
         layout.performClick();
         verify(mAnimationController, never()).startExitAnimation(any(), any());
@@ -210,7 +201,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
 
         verifyAndFinishEnterAnimation(layout);
 
-        assertTrue(mSharedPreferences.getBoolean(PREF_KEY_1, /* default= */ false));
+        assertFalse(mCompatUIConfiguration.getHasSeenLetterboxEducation(USER_ID_1));
         verify(dialogTitle).sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
         // Exit animation should start following a click on the layout.
         layout.performClick();
@@ -218,13 +209,16 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         // Window manager isn't released until exit animation is done.
         verify(windowManager, never()).release();
 
+        // After dismissed the user has seen the dialog
+        assertTrue(mCompatUIConfiguration.getHasSeenLetterboxEducation(USER_ID_1));
+
         // Verify multiple clicks are ignored.
         layout.performClick();
 
         verifyAndFinishExitAnimation(layout);
 
         verify(windowManager).release();
-        verify(mOnDismissCallback).run();
+        verify(mOnDismissCallback).accept(any());
     }
 
     @Test
@@ -236,7 +230,10 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
 
         assertNotNull(windowManager.mLayout);
         verifyAndFinishEnterAnimation(windowManager.mLayout);
-        assertTrue(mSharedPreferences.getBoolean(PREF_KEY_1, /* default= */ false));
+
+        // We dismiss
+        windowManager.mLayout.findViewById(R.id.letterbox_education_dialog_dismiss_button)
+                .performClick();
 
         windowManager.release();
         windowManager = createWindowManager(/* eligible= */ true,
@@ -254,7 +251,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
 
         assertNotNull(windowManager.mLayout);
         verifyAndFinishEnterAnimation(windowManager.mLayout);
-        assertTrue(mSharedPreferences.getBoolean(PREF_KEY_1, /* default= */ false));
+        assertTrue(mCompatUIConfiguration.getHasSeenLetterboxEducation(USER_ID_1));
     }
 
     @Test
@@ -271,7 +268,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         mRunOnIdleCaptor.getValue().run();
 
         verify(mAnimationController, never()).startEnterAnimation(any(), any());
-        assertFalse(mSharedPreferences.getBoolean(PREF_KEY_1, /* default= */ false));
+        assertFalse(mCompatUIConfiguration.getHasSeenLetterboxEducation(USER_ID_1));
     }
 
     @Test
@@ -297,7 +294,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
                 mTaskListener, /* canShow= */ true));
 
         verify(windowManager).release();
-        verify(mOnDismissCallback, never()).run();
+        verify(mOnDismissCallback, never()).accept(any());
         verify(mAnimationController, never()).startExitAnimation(any(), any());
         assertNull(windowManager.mLayout);
     }
@@ -395,8 +392,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     }
 
     private LetterboxEduWindowManager createWindowManager(boolean eligible, boolean isDocked) {
-        return createWindowManager(eligible, USER_ID_1, /* isTaskbarEduShowing= */
-                false, isDocked);
+        return createWindowManager(eligible, USER_ID_1, /* isTaskbarEduShowing= */ false, isDocked);
     }
 
     private LetterboxEduWindowManager createWindowManager(boolean eligible, int userId,
@@ -410,9 +406,8 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         LetterboxEduWindowManager
                 windowManager = new LetterboxEduWindowManager(mContext,
                 createTaskInfo(eligible, userId), mSyncTransactionQueue, mTaskListener,
-                createDisplayLayout(), mTransitions, mOnDismissCallback,
-                mAnimationController, mDockStateReader);
-
+                createDisplayLayout(), mTransitions, mOnDismissCallback, mAnimationController,
+                mDockStateReader, mCompatUIConfiguration);
         spyOn(windowManager);
         doReturn(mViewHost).when(windowManager).createSurfaceViewHost();
         doReturn(isTaskbarEduShowing).when(windowManager).isTaskbarEduShowing();
