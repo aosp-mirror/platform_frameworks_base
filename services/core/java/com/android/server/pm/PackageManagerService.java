@@ -4885,13 +4885,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mHandler.post(() -> {
                 final int id = verificationId >= 0 ? verificationId : -verificationId;
                 final PackageVerificationState state = mPendingVerification.get(id);
-                if (state == null || state.timeoutExtended() || !state.checkRequiredVerifierUid(
-                        callingUid)) {
-                    // Only allow calls from required verifiers.
+                if (state == null || !state.extendTimeout(callingUid)) {
+                    // Invalid uid or already extended.
                     return;
                 }
-
-                state.extendTimeout();
 
                 final PackageVerificationResponse response = new PackageVerificationResponse(
                         verificationCodeAtTimeout, callingUid);
