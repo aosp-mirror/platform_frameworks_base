@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"Η εφαρμογή εγκαταστάθηκε."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Θέλετε να εγκαταστήσετε αυτήν την εφαρμογή;"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Θέλετε να ενημερώσετε αυτήν την εφαρμογή;"</string>
+    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Η εφαρμογή δεν εγκαταστάθηκε."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Η εγκατάσταση του πακέτου αποκλείστηκε."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Η εφαρμογή δεν εγκαταστάθηκε, επειδή το πακέτο είναι σε διένεξη με κάποιο υπάρχον πακέτο."</string>
@@ -41,6 +43,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Δεν είναι δυνατή η εγκατάσταση άγνωστων εφαρμογών από αυτόν τον χρήστη"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Δεν επιτρέπεται η εγκατάσταση εφαρμογών σε αυτόν τον χρήστη"</string>
     <string name="ok" msgid="7871959885003339302">"ΟΚ"</string>
+    <!-- no translation found for update_anyway (8792432341346261969) -->
+    <skip />
     <string name="manage_applications" msgid="5400164782453975580">"Διαχ. εφαρμογών"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Δεν υπάρχει χώρος"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Δεν ήταν δυνατή η εγκατάσταση της εφαρμογής <xliff:g id="APP_NAME">%1$s</xliff:g>. Απελευθερώστε λίγο χώρο και προσπαθήστε ξανά."</string>
