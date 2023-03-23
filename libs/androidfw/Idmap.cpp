@@ -294,12 +294,12 @@ std::unique_ptr<LoadedIdmap> LoadedIdmap::Load(StringPiece idmap_path, StringPie
                                dtohl(header->version), kIdmapCurrentVersion);
     return {};
   }
+  std::optional<std::string_view> target_path = ReadString(&data_ptr, &data_size, "target path");
+    if (!target_path) {
+      return {};
+    }
   std::optional<std::string_view> overlay_path = ReadString(&data_ptr, &data_size, "overlay path");
   if (!overlay_path) {
-    return {};
-  }
-  std::optional<std::string_view> target_path = ReadString(&data_ptr, &data_size, "target path");
-  if (!target_path) {
     return {};
   }
   if (!ReadString(&data_ptr, &data_size, "target name") ||
@@ -364,7 +364,7 @@ std::unique_ptr<LoadedIdmap> LoadedIdmap::Load(StringPiece idmap_path, StringPie
   return std::unique_ptr<LoadedIdmap>(
       new LoadedIdmap(std::string(idmap_path), header, data_header, target_entries,
                       target_inline_entries, target_inline_entry_values, configurations,
-                      overlay_entries, std::move(idmap_string_pool), *target_path, *overlay_path));
+                      overlay_entries, std::move(idmap_string_pool), *overlay_path, *target_path));
 }
 
 bool LoadedIdmap::IsUpToDate() const {
