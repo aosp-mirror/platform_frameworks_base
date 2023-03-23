@@ -547,9 +547,10 @@
     <color name="accessibility_color_inversion_background">#546E7A</color>
 
     <!-- Fullscreen magnification thumbnail color -->
-    <color name="accessibility_magnification_thumbnail_stroke_color">#E0E0E0</color>
-    <color name="accessibility_magnification_thumbnail_background_color">#FCFCFC</color>
-    <color name="accessibility_magnification_thumbnail_color">#252525</color>
+    <color name="accessibility_magnification_thumbnail_stroke_color">#0C0C0C</color>
+    <color name="accessibility_magnification_thumbnail_background_color">#B3FFFFFF</color>
+    <color name="accessibility_magnification_thumbnail_container_background_color">#99000000</color>
+    <color name="accessibility_magnification_thumbnail_container_stroke_color">#FFFFFF</color>
 
     <!-- Color of camera light when camera is in use -->
     <color name="camera_privacy_light_day">#FFFFFF</color>
