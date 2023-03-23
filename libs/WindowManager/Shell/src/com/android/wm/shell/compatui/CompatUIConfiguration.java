@@ -39,11 +39,11 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
             "enable_letterbox_restart_confirmation_dialog";
 
     private static final String KEY_ENABLE_LETTERBOX_REACHABILITY_EDUCATION =
-            "enable_letterbox_reachability_education";
+            "enable_letterbox_education_for_reachability";
 
     private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_RESTART_DIALOG = true;
 
-    private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_REACHABILITY_EDUCATION = false;
+    private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_REACHABILITY_EDUCATION = true;
 
     /**
      * The name of the {@link SharedPreferences} that holds information about compat ui.
