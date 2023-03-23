@@ -140,8 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"ৱাই-ফাই"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"ৱাই-ফাই কলিং"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"ৱাই-ফাই কল"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"অফ হৈ আছে"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"ৱাই-ফাইৰ জৰিয়তে কল কৰক"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"ম’বাইল নেটৱৰ্কৰ জৰিয়তে কল কৰক"</string>
@@ -2325,12 +2324,9 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ সমল দেখুৱাবলৈ দুয়োখন ডিছপ্লে’ ব্যৱহাৰ কৰি আছে"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ডিভাইচটো অতি বেছি গৰম হৈছে"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"আপোনাৰ ফ’নটো অতি বেছি গৰম হোৱাৰ বাবে ডুৱেল স্ক্ৰীন উপলব্ধ নহয়"</string>
-    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
-    <skip />
-    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
-    <skip />
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen উপলব্ধ নহয়"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"বেটাৰী সঞ্চয়কাৰী অন হৈ থকাৰ কাৰণে Dual Screen সুবিধাটো উপলব্ধ নহয়। আপুনি ছেটিঙত এই সুবিধাটো অফ কৰিব পাৰে।"</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"ছেটিঙলৈ যাওক"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"অফ কৰক"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> কনফিগাৰ কৰা হৈছে"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"কীব’ৰ্ডৰ লে’আউট <xliff:g id="LAYOUT_1">%s</xliff:g> হিচাপে ছেট কৰা হৈছে। সলনি কৰিবলৈ টিপক।"</string>

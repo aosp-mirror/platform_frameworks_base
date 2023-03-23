@@ -140,8 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi 통화"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wi-Fi 통화"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"꺼짐"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Wi-Fi를 통해 통화"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"모바일 네트워크를 통해 통화"</string>
@@ -2325,12 +2324,9 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 두 화면을 모두 사용하여 콘텐츠를 표시합니다."</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"기기 온도가 너무 높음"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"휴대전화 온도가 너무 높아지고 있으므로 듀얼 스크린을 사용할 수 없습니다."</string>
-    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
-    <skip />
-    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
-    <skip />
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen을 사용할 수 없음"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"절전 모드가 사용 설정되어 있어 Dual Screen을 사용할 수 없습니다. 설정에서 이 기능을 사용 중지할 수 있습니다."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"설정으로 이동"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"사용 중지"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g>에 설정 완료됨"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%s</xliff:g>(으)로 설정됩니다. 변경하려면 탭하세요."</string>
