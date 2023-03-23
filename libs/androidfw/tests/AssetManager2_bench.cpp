@@ -228,10 +228,12 @@ static void BM_AssetManagerSetConfigurationFramework(benchmark::State& state) {
 
   ResTable_config config;
   memset(&config, 0, sizeof(config));
+  std::vector<ResTable_config> configs;
+  configs.push_back(config);
 
   while (state.KeepRunning()) {
-    config.sdkVersion = ~config.sdkVersion;
-    assets.SetConfiguration(config);
+    configs[0].sdkVersion = ~configs[0].sdkVersion;
+    assets.SetConfigurations(configs);
   }
 }
 BENCHMARK(BM_AssetManagerSetConfigurationFramework);
