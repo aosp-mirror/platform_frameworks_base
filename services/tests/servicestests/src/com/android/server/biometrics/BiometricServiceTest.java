@@ -65,7 +65,6 @@ import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
-import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
@@ -145,8 +144,6 @@ public class BiometricServiceTest {
     @Mock
     private ISessionListener mSessionListener;
     @Mock
-    private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
-    @Mock
     private AuthSessionCoordinator mAuthSessionCoordinator;
 
     BiometricContextProvider mBiometricContextProvider;
@@ -184,9 +181,8 @@ public class BiometricServiceTest {
         when(mWindowManager.getDefaultDisplay()).thenReturn(
                 new Display(DisplayManagerGlobal.getInstance(), Display.DEFAULT_DISPLAY,
                         new DisplayInfo(), DEFAULT_DISPLAY_ADJUSTMENTS));
-        when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
         mBiometricContextProvider = new BiometricContextProvider(mContext, mWindowManager,
-                mAmbientDisplayConfiguration, mStatusBarService, null /* handler */,
+                mStatusBarService, null /* handler */,
                 mAuthSessionCoordinator);
         when(mInjector.getBiometricContext(any())).thenReturn(mBiometricContextProvider);
 
