@@ -18,6 +18,7 @@ package com.android.server.locksettings.recoverablekeystore.storage;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
@@ -122,14 +123,14 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
     }
 
     private static int getDbVersion(Context context) {
-        // TODO(b/254335492): Check flag
+        // TODO(b/254335492): Update to version 7 and clean up code.
         return DATABASE_VERSION;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_KEYS_ENTRY);
-        if (db.getVersion() == 6) {
+        if (db.getVersion() == 6) { // always false
             db.execSQL(SQL_CREATE_USER_METADATA_ENTRY);
         } else {
             db.execSQL(SQL_CREATE_USER_METADATA_ENTRY_FOR_V7);
@@ -147,37 +148,47 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < 2) {
+        try {
+            if (oldVersion < 2) {
+                dropAllKnownTables(db); // Wipe database.
+                onCreate(db);
+                return;
+            }
+
+            if (oldVersion < 3 && newVersion >= 3) {
+                upgradeDbForVersion3(db);
+                oldVersion = 3;
+            }
+
+            if (oldVersion < 4 && newVersion >= 4) {
+                upgradeDbForVersion4(db);
+                oldVersion = 4;
+            }
+
+            if (oldVersion < 5 && newVersion >= 5) {
+                upgradeDbForVersion5(db);
+                oldVersion = 5;
+            }
+
+            if (oldVersion < 6 && newVersion >= 6) {
+                upgradeDbForVersion6(db);
+                oldVersion = 6;
+            }
+
+            if (oldVersion < 7 && newVersion >= 7) {
+                try {
+                    upgradeDbForVersion7(db);
+                } catch (SQLiteException e) {
+                    Log.w(TAG, "Column was added without version update - ignore error", e);
+                }
+                oldVersion = 7;
+            }
+        } catch (SQLiteException e) {
+            Log.e(TAG, "Recreating recoverablekeystore after unexpected upgrade error.", e);
             dropAllKnownTables(db); // Wipe database.
             onCreate(db);
             return;
         }
-
-        if (oldVersion < 3 && newVersion >= 3) {
-            upgradeDbForVersion3(db);
-            oldVersion = 3;
-        }
-
-        if (oldVersion < 4 && newVersion >= 4) {
-            upgradeDbForVersion4(db);
-            oldVersion = 4;
-        }
-
-        if (oldVersion < 5 && newVersion >= 5) {
-            upgradeDbForVersion5(db);
-            oldVersion = 5;
-        }
-
-        if (oldVersion < 6 && newVersion >= 6) {
-            upgradeDbForVersion6(db);
-            oldVersion = 6;
-        }
-
-        if (oldVersion < 7 && newVersion >= 7) {
-            upgradeDbForVersion7(db);
-            oldVersion = 7;
-        }
-
         if (oldVersion != newVersion) {
             Log.e(TAG, "Failed to update recoverablekeystore database to the most recent version");
         }
