@@ -2732,9 +2732,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         buffer, screenshotBuffer.getColorSpace());
             }
             SurfaceControl.Transaction t = wc.mWmService.mTransactionFactory.get();
-
-            t.setBuffer(snapshotSurface, buffer);
-            t.setDataSpace(snapshotSurface, screenshotBuffer.getColorSpace().getDataSpace());
+            TransitionAnimation.configureScreenshotLayer(t, snapshotSurface, screenshotBuffer);
             t.show(snapshotSurface);
 
             // Place it on top of anything else in the container.
