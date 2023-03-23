@@ -14,6 +14,7 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.bluetooth.BluetoothAdapter;
 import android.testing.LeakCheck;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -23,6 +24,7 @@ import com.android.systemui.statusbar.policy.BluetoothController.Callback;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public class FakeBluetoothController extends BaseLeakChecker<Callback> implements
         BluetoothController {
@@ -109,5 +111,17 @@ public class FakeBluetoothController extends BaseLeakChecker<Callback> implement
     @Override
     public List<CachedBluetoothDevice> getConnectedDevices() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public void addOnMetadataChangedListener(CachedBluetoothDevice device, Executor executor,
+            BluetoothAdapter.OnMetadataChangedListener listener) {
+
+    }
+
+    @Override
+    public void removeOnMetadataChangedListener(CachedBluetoothDevice device,
+            BluetoothAdapter.OnMetadataChangedListener listener) {
+
     }
 }
