@@ -790,9 +790,9 @@
     <string name="controls_dialog_message" msgid="342066938390663844">"Soovitas <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Seade on lukustatud"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Kas soovite seadmete juhtelemente lukustuskuval kuvada ja kasutada?"</string>
-    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Võite lukustuskuvale oma väliste seadmete juhtelemendid lisada.\n\nTeie seadmerakendus võib võimaldada teil teatud seadmeid ilma telefoni või tahvelarvutit avamata hallata.\n\nSaate igal ajal seadetes muudatusi teha."</string>
-    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Kas soovite seadmeid lukustuskuva kaudu hallata?"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Võite teatud seadmeid ilma telefoni või tahvelarvutit avamata hallata.\n\nTeie seadmerakendus määrab, milliseid seadmeid saab sel viisil hallata."</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Võite lukustuskuvale oma väliste seadmete juhtelemendid lisada.\n\nTeie seadmerakendus võib võimaldada teil teatud seadmeid ilma telefoni või tahvelarvutit avamata juhtida.\n\nSaate igal ajal seadetes muudatusi teha."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Kas soovite seadmeid lukustuskuva kaudu juhtida?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Võite teatud seadmeid ilma telefoni või tahvelarvutit avamata juhtida.\n\nTeie seadmerakendus määrab, milliseid seadmeid saab sel viisil juhtida."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Tänan, ei"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Jah"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN-kood sisaldab tähti või sümboleid"</string>
