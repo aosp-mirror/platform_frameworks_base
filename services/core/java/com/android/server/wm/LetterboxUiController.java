@@ -319,6 +319,10 @@ final class LetterboxUiController {
             mLetterbox.destroy();
             mLetterbox = null;
         }
+        if (mLetterboxConfigListener != null) {
+            mLetterboxConfigListener.onRemoved();
+            mLetterboxConfigListener = null;
+        }
     }
 
     void onMovedToDisplay(int displayId) {
