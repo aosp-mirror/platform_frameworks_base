@@ -1297,6 +1297,17 @@ public class TransitionAnimation {
         return set;
     }
 
+    /** Sets the default attributes of the screenshot layer used for animation. */
+    public static void configureScreenshotLayer(SurfaceControl.Transaction t, SurfaceControl layer,
+            ScreenCapture.ScreenshotHardwareBuffer buffer) {
+        t.setBuffer(layer, buffer.getHardwareBuffer());
+        t.setDataSpace(layer, buffer.getColorSpace().getDataSpace());
+        // Avoid showing dimming effect for HDR content when running animation.
+        if (buffer.containsHdrLayers()) {
+            t.setDimmingEnabled(layer, false);
+        }
+    }
+
     /** Returns whether the hardware buffer passed in is marked as protected. */
     public static boolean hasProtectedContent(HardwareBuffer hardwareBuffer) {
         return (hardwareBuffer.getUsage() & HardwareBuffer.USAGE_PROTECTED_CONTENT)
