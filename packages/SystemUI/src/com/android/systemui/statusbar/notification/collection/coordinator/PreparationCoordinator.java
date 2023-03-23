@@ -359,7 +359,8 @@ public class PreparationCoordinator implements Coordinator {
     }
 
     NotifInflater.Params getInflaterParams(NotifUiAdjustment adjustment, String reason) {
-        return new NotifInflater.Params(adjustment.isMinimized(), reason);
+        return new NotifInflater.Params(adjustment.isMinimized(), reason,
+                adjustment.isSnoozeEnabled());
     }
 
     private void abortInflation(NotificationEntry entry, String reason) {
