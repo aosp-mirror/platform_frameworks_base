@@ -39,15 +39,15 @@ constructor(
 ) {
 
     companion object {
-        @VisibleForTesting val RESTART_NAP_KEY = "restart_nap_after_start"
+        @VisibleForTesting val RESTART_SLEEP_KEY = "restart_nap_after_start"
     }
 
     private var inited = false
 
     val listener =
         object : StatusBarStateController.StateListener {
-            override fun onDreamingChanged(isDreaming: Boolean) {
-                storeSleepState(isDreaming)
+            override fun onDozingChanged(isDozing: Boolean) {
+                storeSleepState(isDozing)
             }
         }
 
@@ -67,9 +67,13 @@ constructor(
     fun maybeRestartSleep() {
         bgExecutor.executeDelayed(
             {
-                if (settings.getBool(RESTART_NAP_KEY, false)) {
+                if (settings.getBool(RESTART_SLEEP_KEY, false)) {
                     Log.d("RestartDozeListener", "Restarting sleep state")
-                    powerManager.wakeUp(systemClock.uptimeMillis())
+                    powerManager.wakeUp(
+                        systemClock.uptimeMillis(),
+                        PowerManager.WAKE_REASON_APPLICATION,
+                        "RestartDozeListener"
+                    )
                     powerManager.goToSleep(systemClock.uptimeMillis())
                 }
             },
@@ -78,6 +82,6 @@ constructor(
     }
 
     private fun storeSleepState(sleeping: Boolean) {
-        bgExecutor.execute { settings.putBool(RESTART_NAP_KEY, sleeping) }
+        bgExecutor.execute { settings.putBool(RESTART_SLEEP_KEY, sleeping) }
     }
 }

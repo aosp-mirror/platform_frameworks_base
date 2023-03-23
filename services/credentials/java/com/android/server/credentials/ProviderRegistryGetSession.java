@@ -76,6 +76,24 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
                 requestOption);
     }
 
+    /** Creates a new provider session to be used by the request session. */
+    @Nullable
+    public static ProviderRegistryGetSession createNewSession(
+            @NonNull Context context,
+            @UserIdInt int userId,
+            @NonNull PrepareGetRequestSession getRequestSession,
+            @NonNull CallingAppInfo callingAppInfo,
+            @NonNull String credentialProviderPackageName,
+            @NonNull CredentialOption requestOption) {
+        return new ProviderRegistryGetSession(
+                context,
+                userId,
+                getRequestSession,
+                callingAppInfo,
+                credentialProviderPackageName,
+                requestOption);
+    }
+
     @NonNull
     private final Map<String, CredentialEntry> mUiCredentialEntries = new HashMap<>();
     @NonNull
@@ -92,6 +110,23 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
     protected ProviderRegistryGetSession(@NonNull Context context,
             @NonNull int userId,
             @NonNull GetRequestSession session,
+            @NonNull CallingAppInfo callingAppInfo,
+            @NonNull String servicePackageName,
+            @NonNull CredentialOption requestOption) {
+        super(context, requestOption, session,
+                new ComponentName(servicePackageName, servicePackageName) ,
+                userId, null);
+        mCredentialDescriptionRegistry = CredentialDescriptionRegistry.forUser(userId);
+        mCallingAppInfo = callingAppInfo;
+        mCredentialProviderPackageName = servicePackageName;
+        mFlattenedRequestOptionString = requestOption
+                .getCredentialRetrievalData()
+                .getString(CredentialOption.FLATTENED_REQUEST);
+    }
+
+    protected ProviderRegistryGetSession(@NonNull Context context,
+            @NonNull int userId,
+            @NonNull PrepareGetRequestSession session,
             @NonNull CallingAppInfo callingAppInfo,
             @NonNull String servicePackageName,
             @NonNull CredentialOption requestOption) {

@@ -235,7 +235,10 @@
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.GET_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- role holder APIs -->
     <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS" />
+    <uses-permission android:name="android.permission.OBSERVE_ROLE_HOLDERS" />
 
     <!-- It's like, reality, but, you know, virtual -->
     <uses-permission android:name="android.permission.ACCESS_VR_MANAGER" />
@@ -344,9 +347,19 @@
 
     <uses-permission android:name="android.permission.MONITOR_KEYBOARD_BACKLIGHT" />
 
+    <!-- Intent Chooser -->
+    <permission
+        android:name="android.permission.ADD_CHOOSER_PINS"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="android.permission.ADD_CHOOSER_PINS" />
+    <permission
+        android:name="android.permission.RECEIVE_CHOOSER_PIN_MIGRATION"
+        android:protectionLevel="signature" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
+    <protected-broadcast android:name="com.android.systemui.action.ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG" />
     <protected-broadcast android:name="com.android.systemui.STARTED" />
 
     <application
@@ -632,12 +645,6 @@
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
         </activity>
-        <activity-alias
-            android:name=".UsbDebuggingActivityAlias"
-            android:permission="android.permission.DUMP"
-            android:targetActivity=".usb.UsbDebuggingActivity"
-            android:exported="true">
-        </activity-alias>
         <activity android:name=".usb.UsbDebuggingSecondaryUserActivity"
             android:theme="@style/Theme.SystemUI.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"

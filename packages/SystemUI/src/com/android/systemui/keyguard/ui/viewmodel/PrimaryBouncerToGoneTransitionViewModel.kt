@@ -81,9 +81,7 @@ constructor(
             )
             .map {
                 if (willRunDismissFromKeyguard) {
-                    ScrimAlpha(
-                        notificationsAlpha = 1f,
-                    )
+                    ScrimAlpha()
                 } else if (leaveShadeOpen) {
                     ScrimAlpha(
                         behindAlpha = 1f,

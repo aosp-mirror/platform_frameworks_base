@@ -3056,14 +3056,14 @@ public class UserManager {
     }
 
     /**
-     * See {@link com.android.server.pm.UserManagerInternal#getDisplayAssignedToUser(int)}.
+     * See {@link com.android.server.pm.UserManagerInternal#getMainDisplayAssignedToUser(int)}.
      *
      * @hide
      */
     @TestApi
-    public int getDisplayIdAssignedToUser() {
+    public int getMainDisplayIdAssignedToUser() {
         try {
-            return mService.getDisplayIdAssignedToUser();
+            return mService.getMainDisplayIdAssignedToUser();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

@@ -29,6 +29,7 @@ android_test {
 
     srcs: [
         "src/**/*.java",
+        ":FrameworksCoreTestDoubles-sources",
     ],
 
     static_libs: [

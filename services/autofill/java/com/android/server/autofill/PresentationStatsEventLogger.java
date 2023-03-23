@@ -26,6 +26,12 @@ import static android.view.autofill.AutofillManager.COMMIT_REASON_VIEW_CLICKED;
 import static android.view.autofill.AutofillManager.COMMIT_REASON_VIEW_COMMITTED;
 
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_FAILURE;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_RESULT_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_SUCCESS;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_TYPE__AUTHENTICATION_TYPE_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_TYPE__DATASET_AUTHENTICATION;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_TYPE__FULL_AUTHENTICATION;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__DIALOG;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__INLINE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__MENU;
@@ -84,6 +90,32 @@ public final class PresentationStatsEventLogger {
     @Retention(RetentionPolicy.SOURCE)
     public @interface NotShownReason {}
 
+    /**
+     * Reasons why presentation was not shown. These are wrappers around
+     * {@link com.android.os.AtomsProto.AutofillPresentationEventReported.AuthenticationType}.
+     */
+    @IntDef(prefix = {"AUTHENTICATION_TYPE"}, value = {
+            AUTHENTICATION_TYPE_UNKNOWN,
+            AUTHENTICATION_TYPE_DATASET_AUTHENTICATION,
+            AUTHENTICATION_TYPE_FULL_AUTHENTICATION
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AuthenticationType {
+    }
+
+    /**
+     * Reasons why presentation was not shown. These are wrappers around
+     * {@link com.android.os.AtomsProto.AutofillPresentationEventReported.AuthenticationResult}.
+     */
+    @IntDef(prefix = {"AUTHENTICATION_RESULT"}, value = {
+            AUTHENTICATION_RESULT_UNKNOWN,
+            AUTHENTICATION_RESULT_SUCCESS,
+            AUTHENTICATION_RESULT_FAILURE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AuthenticationResult {
+    }
+
     public static final int NOT_SHOWN_REASON_ANY_SHOWN =
             AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__ANY_SHOWN;
     public static final int NOT_SHOWN_REASON_VIEW_FOCUS_CHANGED =
@@ -104,6 +136,20 @@ public final class PresentationStatsEventLogger {
             AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_SESSION_COMMITTED_PREMATURELY;
     public static final int NOT_SHOWN_REASON_UNKNOWN =
             AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_UNKNOWN_REASON;
+
+    public static final int AUTHENTICATION_TYPE_UNKNOWN =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_TYPE__AUTHENTICATION_TYPE_UNKNOWN;
+    public static final int AUTHENTICATION_TYPE_DATASET_AUTHENTICATION =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_TYPE__DATASET_AUTHENTICATION;
+    public static final int AUTHENTICATION_TYPE_FULL_AUTHENTICATION =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_TYPE__FULL_AUTHENTICATION;
+
+    public static final int AUTHENTICATION_RESULT_UNKNOWN =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_RESULT_UNKNOWN;
+    public static final int AUTHENTICATION_RESULT_SUCCESS =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_SUCCESS;
+    public static final int AUTHENTICATION_RESULT_FAILURE =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_FAILURE;
 
     private final int mSessionId;
     private Optional<PresentationStatsEventInternal> mEventInternal;
@@ -146,7 +192,7 @@ public final class PresentationStatsEventLogger {
     }
 
     public void maybeSetAvailableCount(@Nullable List<Dataset> datasetList,
-                                       AutofillId currentViewId) {
+            AutofillId currentViewId) {
         mEventInternal.ifPresent(event -> {
             int availableCount = getDatasetCountForAutofillId(datasetList, currentViewId);
             event.mAvailableCount = availableCount;
@@ -155,7 +201,7 @@ public final class PresentationStatsEventLogger {
     }
 
     public void maybeSetCountShown(@Nullable List<Dataset> datasetList,
-                                   AutofillId currentViewId) {
+            AutofillId currentViewId) {
         mEventInternal.ifPresent(event -> {
             int countShown = getDatasetCountForAutofillId(datasetList, currentViewId);
             event.mCountShown = countShown;
@@ -166,7 +212,7 @@ public final class PresentationStatsEventLogger {
     }
 
     private static int getDatasetCountForAutofillId(@Nullable List<Dataset> datasetList,
-                                                    AutofillId currentViewId) {
+            AutofillId currentViewId) {
         int availableCount = 0;
         if (datasetList != null) {
             for (int i = 0; i < datasetList.size(); i++) {
@@ -293,6 +339,43 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    /**
+     * Set authentication_type as long as mEventInternal presents.
+     */
+    public void maybeSetAuthenticationType(@AuthenticationType int val) {
+        mEventInternal.ifPresent(event -> {
+            event.mAuthenticationType = val;
+        });
+    }
+
+    /**
+     * Set authentication_result as long as mEventInternal presents.
+     */
+    public void maybeSetAuthenticationResult(@AuthenticationResult int val) {
+        mEventInternal.ifPresent(event -> {
+            event.mAuthenticationResult = val;
+        });
+    }
+
+    /**
+     * Set latency_authentication_ui_display_millis as long as mEventInternal presents.
+     */
+    public void maybeSetLatencyAuthenticationUiDisplayMillis(int val) {
+        mEventInternal.ifPresent(event -> {
+            event.mLatencyAuthenticationUiDisplayMillis = val;
+        });
+    }
+
+    /**
+     * Set latency_dataset_display_millis as long as mEventInternal presents.
+     */
+    public void maybeSetLatencyDatasetDisplayMillis(int val) {
+        mEventInternal.ifPresent(event -> {
+            event.mLatencyDatasetDisplayMillis = val;
+        });
+    }
+
+
     public void logAndEndEvent() {
         if (!mEventInternal.isPresent()) {
             Slog.w(TAG, "Shouldn't be logging AutofillPresentationEventReported again for same "
@@ -322,7 +405,12 @@ public final class PresentationStatsEventLogger {
                     + " mSelectedDatasetId=" + event.mSelectedDatasetId
                     + " mDialogDismissed=" + event.mDialogDismissed
                     + " mNegativeCtaButtonClicked=" + event.mNegativeCtaButtonClicked
-                    + " mPositiveCtaButtonClicked=" + event.mPositiveCtaButtonClicked);
+                    + " mPositiveCtaButtonClicked=" + event.mPositiveCtaButtonClicked
+                    + " mAuthenticationType=" + event.mAuthenticationType
+                    + " mAuthenticationResult=" + event.mAuthenticationResult
+                    + " mLatencyAuthenticationUiDisplayMillis="
+                    + event.mLatencyAuthenticationUiDisplayMillis
+                    + " mLatencyDatasetDisplayMillis=" + event.mLatencyDatasetDisplayMillis);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -351,11 +439,15 @@ public final class PresentationStatsEventLogger {
                 event.mSelectedDatasetId,
                 event.mDialogDismissed,
                 event.mNegativeCtaButtonClicked,
-                event.mPositiveCtaButtonClicked);
+                event.mPositiveCtaButtonClicked,
+                event.mAuthenticationType,
+                event.mAuthenticationResult,
+                event.mLatencyAuthenticationUiDisplayMillis,
+                event.mLatencyDatasetDisplayMillis);
         mEventInternal = Optional.empty();
     }
 
-    private final class PresentationStatsEventInternal {
+    private static final class PresentationStatsEventInternal {
         int mRequestId;
         @NotShownReason int mNoPresentationReason = NOT_SHOWN_REASON_UNKNOWN;
         boolean mIsDatasetAvailable;
@@ -376,6 +468,10 @@ public final class PresentationStatsEventLogger {
         boolean mDialogDismissed = false;
         boolean mNegativeCtaButtonClicked = false;
         boolean mPositiveCtaButtonClicked = false;
+        int mAuthenticationType = AUTHENTICATION_TYPE_UNKNOWN;
+        int mAuthenticationResult = AUTHENTICATION_RESULT_UNKNOWN;
+        int mLatencyAuthenticationUiDisplayMillis = -1;
+        int mLatencyDatasetDisplayMillis = -1;
 
         PresentationStatsEventInternal() {}
     }

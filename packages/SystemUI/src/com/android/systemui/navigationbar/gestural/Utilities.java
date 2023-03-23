@@ -22,9 +22,10 @@ import android.view.MotionEvent;
 
 public final class Utilities {
 
-    public static boolean isTrackpadMotionEvent(boolean isTrackpadGestureBackEnabled,
+    public static boolean isTrackpadThreeFingerSwipe(boolean isTrackpadGestureFeaturesEnabled,
             MotionEvent event) {
-        return isTrackpadGestureBackEnabled
-                && event.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE;
+        return isTrackpadGestureFeaturesEnabled
+                && event.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE
+                && event.getPointerCount() == 3;
     }
 }

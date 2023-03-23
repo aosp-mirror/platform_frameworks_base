@@ -37,11 +37,14 @@ import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.ExtendedMockito.never
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.TestShellExecutor
+import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.ShellExecutor
+import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
@@ -73,7 +76,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Mock lateinit var testExecutor: ShellExecutor
     @Mock lateinit var shellController: ShellController
+    @Mock lateinit var displayController: DisplayController
     @Mock lateinit var shellTaskOrganizer: ShellTaskOrganizer
+    @Mock lateinit var syncQueue: SyncTransactionQueue
+    @Mock lateinit var rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
     @Mock lateinit var transitions: Transitions
 
     lateinit var mockitoSession: StaticMockitoSession
@@ -105,7 +111,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
             context,
             shellInit,
             shellController,
+            displayController,
             shellTaskOrganizer,
+            syncQueue,
+            rootTaskDisplayAreaOrganizer,
             transitions,
             desktopModeTaskRepository,
             TestShellExecutor()

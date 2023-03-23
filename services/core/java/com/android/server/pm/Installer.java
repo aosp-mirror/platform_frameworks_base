@@ -821,8 +821,10 @@ public class Installer extends SystemService {
      * Creates an oat dir for given package and instruction set.
      */
     public void createOatDir(String packageName, String oatDir, String dexInstructionSet)
-            throws InstallerException, LegacyDexoptDisabledException {
-        checkLegacyDexoptDisabled();
+            throws InstallerException {
+        // This method should be allowed even if ART Service is enabled, because it's used for
+        // creating oat dirs before creating hard links for partial installation.
+        // TODO(b/274658735): Add an ART Service API to support hard linking.
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.createOatDir(packageName, oatDir, dexInstructionSet);
@@ -1177,7 +1179,7 @@ public class Installer extends SystemService {
         // TODO(b/260124949): Remove the legacy dexopt code paths, i.e. this exception and all code
         // that may throw it.
         public LegacyDexoptDisabledException() {
-            super("Invalid call to legacy dexopt installd method while ART Service is in use.");
+            super("Invalid call to legacy dexopt method while ART Service is in use.");
         }
     }
 

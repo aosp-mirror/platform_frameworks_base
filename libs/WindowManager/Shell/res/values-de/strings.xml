@@ -68,8 +68,7 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Nach unten rechts verschieben"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Einstellungen für <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Bubble schließen"</string>
-    <!-- no translation found for bubbles_dont_bubble (3216183855437329223) -->
-    <skip />
+    <string name="bubbles_dont_bubble" msgid="3216183855437329223">"Keine Bubbles zulassen"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Unterhaltung nicht als Bubble anzeigen"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Bubbles zum Chatten verwenden"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Neue Unterhaltungen erscheinen als unverankerte Symbole, „Bubbles“ genannt. Wenn du eine Bubble öffnen möchtest, tippe sie an. Wenn du sie verschieben möchtest, zieh an ihr."</string>

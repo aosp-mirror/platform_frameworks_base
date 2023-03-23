@@ -4885,13 +4885,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mHandler.post(() -> {
                 final int id = verificationId >= 0 ? verificationId : -verificationId;
                 final PackageVerificationState state = mPendingVerification.get(id);
-                if (state == null || state.timeoutExtended() || !state.checkRequiredVerifierUid(
-                        callingUid)) {
-                    // Only allow calls from required verifiers.
+                if (state == null || !state.extendTimeout(callingUid)) {
+                    // Invalid uid or already extended.
                     return;
                 }
-
-                state.extendTimeout();
 
                 final PackageVerificationResponse response = new PackageVerificationResponse(
                         verificationCodeAtTimeout, callingUid);
@@ -5561,32 +5558,18 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public void registerDexModule(String packageName, String dexModulePath,
                 boolean isSharedModule,
                 IDexModuleRegisterCallback callback) {
-            if (useArtService()) {
-                // ART Service currently doesn't support this explicit dexopting and instead relies
-                // on background dexopt for secondary dex files. This API is problematic since it
-                // doesn't provide the correct classloader context.
-                Slog.i(TAG,
-                        "Ignored unsupported registerDexModule call for " + dexModulePath + " in "
-                                + packageName);
-                return;
-            }
-
-            int userId = UserHandle.getCallingUserId();
-            ApplicationInfo ai = snapshot().getApplicationInfo(packageName, /*flags*/ 0, userId);
-            DexManager.RegisterDexModuleResult result;
-            if (ai == null) {
-                Slog.w(PackageManagerService.TAG,
-                        "Registering a dex module for a package that does not exist for the" +
-                                " calling user. package=" + packageName + ", user=" + userId);
-                result = new DexManager.RegisterDexModuleResult(false, "Package not installed");
-            } else {
-                try {
-                    result = mDexManager.registerDexModule(
-                            ai, dexModulePath, isSharedModule, userId);
-                } catch (LegacyDexoptDisabledException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            // ART Service doesn't support this explicit dexopting and instead relies on background
+            // dexopt for secondary dex files. For compat parity between ART Service and the legacy
+            // code it's disabled for both.
+            //
+            // Also, this API is problematic anyway since it doesn't provide the correct classloader
+            // context, so it is hard to produce dexopt artifacts that the runtime can load
+            // successfully.
+            Slog.i(TAG,
+                    "Ignored unsupported registerDexModule call for " + dexModulePath + " in "
+                            + packageName);
+            DexManager.RegisterDexModuleResult result = new DexManager.RegisterDexModuleResult(
+                    false, "registerDexModule call not supported since Android U");
 
             if (callback != null) {
                 mHandler.post(() -> {

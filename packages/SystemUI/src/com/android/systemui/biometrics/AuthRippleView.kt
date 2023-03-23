@@ -54,12 +54,11 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
     private var lockScreenColorVal = Color.WHITE
     private val fadeDuration = 83L
     private val retractDuration = 400L
-    private var alphaInDuration: Long = 0
     private val dwellShader = DwellRippleShader()
     private val dwellPaint = Paint()
     private val rippleShader = RippleShader()
     private val ripplePaint = Paint()
-    private var unlockedRippleAnimator: AnimatorSet? = null
+    private var unlockedRippleAnimator: Animator? = null
     private var fadeDwellAnimator: Animator? = null
     private var retractDwellAnimator: Animator? = null
     private var dwellPulseOutAnimator: Animator? = null
@@ -85,12 +84,12 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         }
 
     init {
-        rippleShader.color = 0xffffffff.toInt() // default color
         rippleShader.rawProgress = 0f
         rippleShader.pixelDensity = resources.displayMetrics.density
         rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
         updateRippleFadeParams()
         ripplePaint.shader = rippleShader
+        setLockScreenColor(0xffffffff.toInt()) // default color
 
         dwellShader.color = 0xffffffff.toInt() // default color
         dwellShader.progress = 0f
@@ -109,10 +108,6 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         radius = maxOf(location.x, location.y, width - location.x, height - location.y).toFloat()
         dwellOrigin = location
         dwellRadius = sensorRadius * 1.5f
-    }
-
-    fun setAlphaInDuration(duration: Long) {
-        alphaInDuration = duration
     }
 
     /**
@@ -253,7 +248,6 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
 
                 override fun onAnimationEnd(animation: Animator?) {
                     drawDwell = false
-                    resetRippleAlpha()
                 }
             })
             start()
@@ -277,22 +271,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
             }
         }
 
-        val alphaInAnimator = ValueAnimator.ofInt(0, 62).apply {
-            duration = alphaInDuration
-            addUpdateListener { animator ->
-                rippleShader.color = ColorUtils.setAlphaComponent(
-                    rippleShader.color,
-                    animator.animatedValue as Int
-                )
-                invalidate()
-            }
-        }
-
-        unlockedRippleAnimator = AnimatorSet().apply {
-            playTogether(
-                rippleAnimator,
-                alphaInAnimator
-            )
+        unlockedRippleAnimator = rippleAnimator.apply {
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?) {
                     drawRipple = true
@@ -310,17 +289,12 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         unlockedRippleAnimator?.start()
     }
 
-    fun resetRippleAlpha() {
-        rippleShader.color = ColorUtils.setAlphaComponent(
-                rippleShader.color,
-                255
-        )
-    }
-
     fun setLockScreenColor(color: Int) {
         lockScreenColorVal = color
-        rippleShader.color = lockScreenColorVal
-        resetRippleAlpha()
+        rippleShader.color = ColorUtils.setAlphaComponent(
+                lockScreenColorVal,
+                62
+        )
     }
 
     fun updateDwellRippleColor(isDozing: Boolean) {

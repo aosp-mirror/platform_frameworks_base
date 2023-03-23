@@ -64,6 +64,10 @@
     <!-- The number of rows in the QuickSettings -->
     <integer name="quick_settings_max_rows">4</integer>
 
+    <!-- If the dp width of the available space is <= this value, potentially adjust the number
+         of media recommendation items-->
+    <integer name="default_qs_media_rec_width_dp">380</integer>
+
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
 
     <!-- The default tiles to display in QuickSettings -->

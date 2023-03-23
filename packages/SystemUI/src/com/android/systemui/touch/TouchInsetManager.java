@@ -21,6 +21,7 @@ import android.graphics.Region;
 import android.util.Log;
 import android.view.AttachedSurfaceControl;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.concurrent.futures.CallbackToFutureAdapter;
 
@@ -118,7 +119,9 @@ public class TouchInsetManager {
                         affectedSurfaces.put(surface, Region.obtain());
                     }
                     final Rect boundaries = new Rect();
-                    view.getBoundsOnScreen(boundaries);
+                    view.getDrawingRect(boundaries);
+                    ((ViewGroup) view.getRootView())
+                            .offsetDescendantRectToMyCoords(view, boundaries);
                     affectedSurfaces.get(surface).op(boundaries, Region.Op.UNION);
                 });
                 mManager.setTouchRegions(this, affectedSurfaces);

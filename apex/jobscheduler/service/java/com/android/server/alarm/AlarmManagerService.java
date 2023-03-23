@@ -618,13 +618,13 @@ public class AlarmManagerService extends SystemService {
         static final int REMOVE_REASON_LISTENER_BINDER_DIED = 5;
         static final int REMOVE_REASON_LISTENER_CACHED = 6;
 
-        final String mTag;
+        final Alarm.Snapshot mAlarmSnapshot;
         final long mWhenRemovedElapsed;
         final long mWhenRemovedRtc;
         final int mRemoveReason;
 
         RemovedAlarm(Alarm a, int removeReason, long nowRtc, long nowElapsed) {
-            mTag = a.statsTag;
+            mAlarmSnapshot = new Alarm.Snapshot(a);
             mRemoveReason = removeReason;
             mWhenRemovedRtc = nowRtc;
             mWhenRemovedElapsed = nowElapsed;
@@ -656,13 +656,21 @@ public class AlarmManagerService extends SystemService {
         }
 
         void dump(IndentingPrintWriter pw, long nowElapsed, SimpleDateFormat sdf) {
-            pw.print("[tag", mTag);
-            pw.print("reason", removeReasonToString(mRemoveReason));
+            pw.increaseIndent();
+
+            pw.print("Reason", removeReasonToString(mRemoveReason));
             pw.print("elapsed=");
             TimeUtils.formatDuration(mWhenRemovedElapsed, nowElapsed, pw);
             pw.print(" rtc=");
             pw.print(sdf.format(new Date(mWhenRemovedRtc)));
-            pw.println("]");
+            pw.println();
+
+            pw.println("Snapshot:");
+            pw.increaseIndent();
+            mAlarmSnapshot.dump(pw, nowElapsed);
+            pw.decreaseIndent();
+
+            pw.decreaseIndent();
         }
     }
 
@@ -3088,7 +3096,9 @@ public class AlarmManagerService extends SystemService {
                         + " does not belong to the calling uid " + callingUid);
             }
             synchronized (mLock) {
-                removeLocked(callingPackage, REMOVE_REASON_ALARM_CANCELLED);
+                removeAlarmsInternalLocked(
+                        a -> (a.matches(callingPackage) && a.creatorUid == callingUid),
+                        REMOVE_REASON_ALARM_CANCELLED);
             }
         }
 
@@ -3503,15 +3513,16 @@ public class AlarmManagerService extends SystemService {
             }
 
             if (mRemovalHistory.size() > 0) {
-                pw.println("Removal history: ");
+                pw.println("Removal history:");
                 pw.increaseIndent();
                 for (int i = 0; i < mRemovalHistory.size(); i++) {
                     UserHandle.formatUid(pw, mRemovalHistory.keyAt(i));
                     pw.println(":");
                     pw.increaseIndent();
                     final RemovedAlarm[] historyForUid = mRemovalHistory.valueAt(i).toArray();
-                    for (final RemovedAlarm removedAlarm : historyForUid) {
-                        removedAlarm.dump(pw, nowELAPSED, sdf);
+                    for (int index = historyForUid.length - 1; index >= 0; index--) {
+                        pw.print("#" + (historyForUid.length - index) + ": ");
+                        historyForUid[index].dump(pw, nowELAPSED, sdf);
                     }
                     pw.decreaseIndent();
                 }
@@ -4285,10 +4296,25 @@ public class AlarmManagerService extends SystemService {
         }
     }
 
-    boolean lookForPackageLocked(String packageName) {
-        final ArrayList<Alarm> allAlarms = mAlarmStore.asList();
-        for (final Alarm alarm : allAlarms) {
-            if (alarm.matches(packageName)) {
+    @GuardedBy("mLock")
+    boolean lookForPackageLocked(String packageName, int uid) {
+        // This is called extremely rarely, e.g. when the user opens the force-stop page in settings
+        // so the loops using an iterator should be fine.
+        for (final Alarm alarm : mAlarmStore.asList()) {
+            if (alarm.matches(packageName) && alarm.creatorUid == uid) {
+                return true;
+            }
+        }
+        final ArrayList<Alarm> alarmsForUid = mPendingBackgroundAlarms.get(uid);
+        if (alarmsForUid != null) {
+            for (final Alarm alarm : alarmsForUid) {
+                if (alarm.matches(packageName)) {
+                    return true;
+                }
+            }
+        }
+        for (final Alarm alarm : mPendingNonWakeupAlarms) {
+            if (alarm.matches(packageName) && alarm.creatorUid == uid) {
                 return true;
             }
         }
@@ -5269,7 +5295,7 @@ public class AlarmManagerService extends SystemService {
                     case Intent.ACTION_QUERY_PACKAGE_RESTART:
                         pkgList = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
                         for (String packageName : pkgList) {
-                            if (lookForPackageLocked(packageName)) {
+                            if (lookForPackageLocked(packageName, uid)) {
                                 setResultCode(Activity.RESULT_OK);
                                 return;
                             }

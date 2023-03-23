@@ -303,6 +303,10 @@ constructor(
 
     /** Tell the bouncer to start the pre hide animation. */
     fun startDisappearAnimation(runnable: Runnable) {
+        if (willRunDismissFromKeyguard()) {
+            runnable.run()
+            return
+        }
         val finishRunnable = Runnable {
             runnable.run()
             repository.setPrimaryStartDisappearAnimation(null)

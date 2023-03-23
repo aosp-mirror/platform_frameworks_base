@@ -347,31 +347,13 @@ final class ConversionUtils {
 
     private static boolean isValidHalProgramSelector(
             android.hardware.broadcastradio.ProgramSelector sel) {
-        if (sel.primaryId.type != IdentifierType.AMFM_FREQUENCY_KHZ
-                && sel.primaryId.type != IdentifierType.RDS_PI
-                && sel.primaryId.type != IdentifierType.HD_STATION_ID_EXT
-                && sel.primaryId.type != IdentifierType.DAB_SID_EXT
-                && sel.primaryId.type != IdentifierType.DRMO_SERVICE_ID
-                && sel.primaryId.type != IdentifierType.SXM_SERVICE_ID
-                && !isVendorIdentifierType(sel.primaryId.type)) {
-            return false;
-        }
-        if (sel.primaryId.type == IdentifierType.DAB_SID_EXT) {
-            boolean hasEnsemble = false;
-            boolean hasFrequency = false;
-            for (int i = 0; i < sel.secondaryIds.length; i++) {
-                if (sel.secondaryIds[i].type == IdentifierType.DAB_ENSEMBLE) {
-                    hasEnsemble = true;
-                } else if (sel.secondaryIds[i].type == IdentifierType.DAB_FREQUENCY_KHZ) {
-                    hasFrequency = true;
-                }
-                if (hasEnsemble && hasFrequency) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        return true;
+        return sel.primaryId.type == IdentifierType.AMFM_FREQUENCY_KHZ
+                || sel.primaryId.type == IdentifierType.RDS_PI
+                || sel.primaryId.type == IdentifierType.HD_STATION_ID_EXT
+                || sel.primaryId.type == IdentifierType.DAB_SID_EXT
+                || sel.primaryId.type == IdentifierType.DRMO_SERVICE_ID
+                || sel.primaryId.type == IdentifierType.SXM_SERVICE_ID
+                || isVendorIdentifierType(sel.primaryId.type);
     }
 
     @Nullable

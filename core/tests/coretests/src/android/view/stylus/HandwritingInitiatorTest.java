@@ -269,6 +269,41 @@ public class HandwritingInitiatorTest {
     }
 
     @Test
+    public void onTouchEvent_startHandwriting_delegate_touchEventsHandled() {
+        // There is no delegator view and the delegate callback does nothing so handwriting will not
+        // be started. This is so we can test how touch events are handled before handwriting is
+        // started.
+        mTestView1.setHandwritingDelegatorCallback(() -> {});
+
+        final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
+        final int y = (sHwArea1.top + sHwArea1.bottom) / 2;
+        MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y, 0);
+        boolean onTouchEventResult1 = mHandwritingInitiator.onTouchEvent(stylusEvent1);
+
+        final int x2 = x1 + mHandwritingSlop / 2;
+        MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y, 0);
+        boolean onTouchEventResult2 = mHandwritingInitiator.onTouchEvent(stylusEvent2);
+
+        final int x3 = x2 + mHandwritingSlop * 2;
+        MotionEvent stylusEvent3 = createStylusEvent(ACTION_MOVE, x3, y, 0);
+        boolean onTouchEventResult3 = mHandwritingInitiator.onTouchEvent(stylusEvent3);
+
+        final int x4 = x3 + mHandwritingSlop * 2;
+        MotionEvent stylusEvent4 = createStylusEvent(ACTION_MOVE, x4, y, 0);
+        boolean onTouchEventResult4 = mHandwritingInitiator.onTouchEvent(stylusEvent4);
+
+        assertThat(onTouchEventResult1).isFalse();
+        // stylusEvent2 does not trigger delegation since the touch slop distance has not been
+        // exceeded. onTouchEvent should return false so that the event is dispatched to the view
+        // tree.
+        assertThat(onTouchEventResult2).isFalse();
+        // After delegation is triggered by stylusEvent3, onTouchEvent should return true for
+        // ACTION_MOVE events so that the events are not dispatched to the view tree.
+        assertThat(onTouchEventResult3).isTrue();
+        assertThat(onTouchEventResult4).isTrue();
+    }
+
+    @Test
     public void onTouchEvent_notStartHandwriting_whenHandwritingNotAvailable() {
         final Rect rect = new Rect(600, 600, 900, 900);
         final View testView = createView(rect, true /* autoHandwritingEnabled */,

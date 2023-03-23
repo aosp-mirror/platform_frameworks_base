@@ -1362,12 +1362,10 @@ public class UsbPortManager implements IBinder.DeathRecipient {
         }
     }
 
-    // Need to create new version to prevent double counting existing stats due
-    // to new broadcast
     private void logToStatsdComplianceWarnings(PortInfo portInfo) {
-        if (portInfo.mUsbPortStatus == null) {
-            FrameworkStatsLog.write(FrameworkStatsLog.USB_COMPLIANCE_WARNINGS_REPORTED,
-                portInfo.mUsbPort.getId(), new int[0]);
+        // Don't report if there isn't anything to report
+        if (portInfo.mUsbPortStatus == null
+                || portInfo.mUsbPortStatus.getComplianceWarnings().length == 0) {
             return;
         }
 

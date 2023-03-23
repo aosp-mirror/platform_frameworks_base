@@ -97,7 +97,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SelectionBehavior.SELECTION_BEHAVIOR_NONE,
-            SELECTION_BEHAVIOR_TRANSFER,
+            SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER,
             SelectionBehavior.SELECTION_BEHAVIOR_GO_TO_APP
     })
     public @interface SelectionBehavior {

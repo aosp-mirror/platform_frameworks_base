@@ -42,8 +42,9 @@ import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ICreateCredentialCallback;
 import android.credentials.ICredentialManager;
 import android.credentials.IGetCredentialCallback;
-import android.credentials.IGetPendingCredentialCallback;
+import android.credentials.IPrepareGetCredentialCallback;
 import android.credentials.ISetEnabledProvidersCallback;
+import android.credentials.PrepareGetCredentialResponseInternal;
 import android.credentials.RegisterCredentialDescriptionRequest;
 import android.credentials.UnregisterCredentialDescriptionRequest;
 import android.credentials.ui.IntentFactory;
@@ -307,6 +308,29 @@ public final class CredentialManagerService
         return providerSessions;
     }
 
+    @SuppressWarnings("GuardedBy") // ErrorProne requires initiateProviderSessionForRequestLocked
+    // to be guarded by 'service.mLock', which is the same as mLock.
+    private List<ProviderSession> initiateProviderSessionsWithActiveContainers(
+            PrepareGetRequestSession session,
+            Set<Pair<CredentialOption, CredentialDescriptionRegistry.FilterResult>>
+                    activeCredentialContainers) {
+        List<ProviderSession> providerSessions = new ArrayList<>();
+        for (Pair<CredentialOption, CredentialDescriptionRegistry.FilterResult> result :
+                activeCredentialContainers) {
+            ProviderSession providerSession = ProviderRegistryGetSession.createNewSession(
+                    mContext,
+                    UserHandle.getCallingUserId(),
+                    session,
+                    session.mClientAppInfo,
+                    result.second.mPackageName,
+                    result.first);
+            providerSessions.add(providerSession);
+            session.addProviderSession(providerSession.getComponentName(), providerSession);
+        }
+        return providerSessions;
+    }
+
+
     @NonNull
     private Set<Pair<CredentialOption, CredentialDescriptionRegistry.FilterResult>>
             getFilteredResultFromRegistry(List<CredentialOption> options) {
@@ -443,17 +467,118 @@ public final class CredentialManagerService
         }
 
         @Override
-        public ICancellationSignal executeGetPendingCredential(
+        public ICancellationSignal executePrepareGetCredential(
                 GetCredentialRequest request,
-                IGetPendingCredentialCallback callback,
+                IPrepareGetCredentialCallback prepareGetCredentialCallback,
+                IGetCredentialCallback getCredentialCallback,
                 final String callingPackage) {
-            // TODO(b/273308895): implement
-
+            final long timestampBegan = System.nanoTime();
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
+            if (request.getOrigin() != null) {
+                // Check privileged permissions
+                mContext.enforceCallingPermission(CREDENTIAL_MANAGER_SET_ORIGIN, null);
+            }
             enforcePermissionForAllowedProviders(request);
 
+            final int userId = UserHandle.getCallingUserId();
+            final int callingUid = Binder.getCallingUid();
+            enforceCallingPackage(callingPackage, callingUid);
+
+            final PrepareGetRequestSession session =
+                    new PrepareGetRequestSession(
+                            getContext(),
+                            userId,
+                            callingUid,
+                            prepareGetCredentialCallback,
+                            getCredentialCallback,
+                            request,
+                            constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
+                            CancellationSignal.fromTransport(cancelTransport),
+                            timestampBegan);
+
+            processGetCredential(request, prepareGetCredentialCallback, session);
+
             return cancelTransport;
+        }
+
+        private void processGetCredential(
+                GetCredentialRequest request,
+                IPrepareGetCredentialCallback callback,
+                PrepareGetRequestSession session) {
+            List<ProviderSession> providerSessions;
+
+            if (isCredentialDescriptionApiEnabled()) {
+                List<CredentialOption> optionsThatRequireActiveCredentials =
+                        request.getCredentialOptions().stream()
+                                .filter(
+                                        getCredentialOption ->
+                                                !TextUtils.isEmpty(
+                                                        getCredentialOption
+                                                                .getCredentialRetrievalData()
+                                                                .getString(
+                                                                        CredentialOption
+                                                                                .FLATTENED_REQUEST,
+                                                                        null)))
+                                .toList();
+
+                List<CredentialOption> optionsThatDoNotRequireActiveCredentials =
+                        request.getCredentialOptions().stream()
+                                .filter(
+                                        getCredentialOption ->
+                                                TextUtils.isEmpty(
+                                                        getCredentialOption
+                                                                .getCredentialRetrievalData()
+                                                                .getString(
+                                                                        CredentialOption
+                                                                                .FLATTENED_REQUEST,
+                                                                        null)))
+                                .toList();
+
+                List<ProviderSession> sessionsWithoutRemoteService =
+                        initiateProviderSessionsWithActiveContainers(
+                                session,
+                                getFilteredResultFromRegistry(optionsThatRequireActiveCredentials));
+
+                List<ProviderSession> sessionsWithRemoteService =
+                        initiateProviderSessions(
+                                session,
+                                optionsThatDoNotRequireActiveCredentials.stream()
+                                        .map(CredentialOption::getType)
+                                        .collect(Collectors.toList()));
+
+                Set<ProviderSession> all = new LinkedHashSet<>();
+                all.addAll(sessionsWithRemoteService);
+                all.addAll(sessionsWithoutRemoteService);
+
+                providerSessions = new ArrayList<>(all);
+            } else {
+                // Initiate all provider sessions
+                providerSessions =
+                        initiateProviderSessions(
+                                session,
+                                request.getCredentialOptions().stream()
+                                        .map(CredentialOption::getType)
+                                        .collect(Collectors.toList()));
+            }
+
+            if (providerSessions.isEmpty()) {
+                try {
+                    // TODO: fix
+                    callback.onResponse(new PrepareGetCredentialResponseInternal(
+                            false, null, false, false, null));
+                } catch (RemoteException e) {
+                    Log.i(
+                            TAG,
+                            "Issue invoking onError on IGetCredentialCallback "
+                                    + "callback: "
+                                    + e.getMessage());
+                }
+            }
+
+            finalizeAndEmitInitialPhaseMetric(session);
+            // TODO(b/271135048) - May still be worth emitting in the empty cases above.
+            providerSessions.forEach(ProviderSession::invokeSession);
         }
 
         private void processGetCredential(

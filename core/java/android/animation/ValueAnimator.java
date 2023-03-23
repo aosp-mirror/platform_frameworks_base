@@ -199,13 +199,6 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     private boolean mStarted = false;
 
     /**
-     * Tracks whether we've notified listeners of the onAnimationStart() event. This can be
-     * complex to keep track of since we notify listeners at different times depending on
-     * startDelay and whether start() was called before end().
-     */
-    private boolean mStartListenersCalled = false;
-
-    /**
      * Flag that denotes whether the animation is set up and ready to go. Used to
      * set up animation that has not yet been started.
      */
@@ -1108,30 +1101,6 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         }
     }
 
-    private void notifyStartListeners(boolean isReversing) {
-        if (mListeners != null && !mStartListenersCalled) {
-            ArrayList<AnimatorListener> tmpListeners =
-                    (ArrayList<AnimatorListener>) mListeners.clone();
-            int numListeners = tmpListeners.size();
-            for (int i = 0; i < numListeners; ++i) {
-                tmpListeners.get(i).onAnimationStart(this, isReversing);
-            }
-        }
-        mStartListenersCalled = true;
-    }
-
-    private void notifyEndListeners(boolean isReversing) {
-        if (mListeners != null && mStartListenersCalled) {
-            ArrayList<AnimatorListener> tmpListeners =
-                    (ArrayList<AnimatorListener>) mListeners.clone();
-            int numListeners = tmpListeners.size();
-            for (int i = 0; i < numListeners; ++i) {
-                tmpListeners.get(i).onAnimationEnd(this, isReversing);
-            }
-        }
-        mStartListenersCalled = false;
-    }
-
     /**
      * Start the animation playing. This version of start() takes a boolean flag that indicates
      * whether the animation should play in reverse. The flag is usually false, but may be set
@@ -1148,6 +1117,10 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     private void start(boolean playBackwards) {
         if (Looper.myLooper() == null) {
             throw new AndroidRuntimeException("Animators may only be run on Looper threads");
+        }
+        if (playBackwards == mResumed && mSelfPulse == !mSuppressSelfPulseRequested && mStarted) {
+            // already started
+            return;
         }
         mReversing = playBackwards;
         mSelfPulse = !mSuppressSelfPulseRequested;
@@ -1219,23 +1192,14 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         // Only cancel if the animation is actually running or has been started and is about
         // to run
         // Only notify listeners if the animator has actually started
-        if ((mStarted || mRunning) && mListeners != null) {
+        if ((mStarted || mRunning || mStartListenersCalled) && mListeners != null) {
             if (!mRunning) {
                 // If it's not yet running, then start listeners weren't called. Call them now.
                 notifyStartListeners(mReversing);
             }
-            int listenersSize = mListeners.size();
-            if (listenersSize > 0) {
-                ArrayList<AnimatorListener> tmpListeners =
-                        (ArrayList<AnimatorListener>) mListeners.clone();
-                for (int i = 0; i < listenersSize; i++) {
-                    AnimatorListener listener = tmpListeners.get(i);
-                    listener.onAnimationCancel(this);
-                }
-            }
+            notifyListeners(AnimatorCaller.ON_CANCEL, false);
         }
         endAnimation();
-
     }
 
     @Override
@@ -1338,11 +1302,11 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             // If it's not yet running, then start listeners weren't called. Call them now.
             notifyStartListeners(mReversing);
         }
-        mRunning = false;
-        mStarted = false;
         mLastFrameTime = -1;
         mFirstFrameTime = -1;
         mStartTime = -1;
+        mRunning = false;
+        mStarted = false;
         notifyEndListeners(mReversing);
         // mReversing needs to be reset *after* notifying the listeners for the end callbacks.
         mReversing = false;
@@ -1435,12 +1399,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
                 done = true;
             } else if (newIteration && !lastIterationFinished) {
                 // Time to repeat
-                if (mListeners != null) {
-                    int numListeners = mListeners.size();
-                    for (int i = 0; i < numListeners; ++i) {
-                        mListeners.get(i).onAnimationRepeat(this);
-                    }
-                }
+                notifyListeners(AnimatorCaller.ON_REPEAT, false);
             } else if (lastIterationFinished) {
                 done = true;
             }
@@ -1493,13 +1452,8 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             iteration = Math.min(iteration, mRepeatCount);
             lastIteration = Math.min(lastIteration, mRepeatCount);
 
-            if (iteration != lastIteration) {
-                if (mListeners != null) {
-                    int numListeners = mListeners.size();
-                    for (int i = 0; i < numListeners; ++i) {
-                        mListeners.get(i).onAnimationRepeat(this);
-                    }
-                }
+            if (notify && iteration != lastIteration) {
+                notifyListeners(AnimatorCaller.ON_REPEAT, false);
             }
         }
 
@@ -1697,11 +1651,8 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         for (int i = 0; i < numValues; ++i) {
             mValues[i].calculateValue(fraction);
         }
-        if (mUpdateListeners != null) {
-            int numListeners = mUpdateListeners.size();
-            for (int i = 0; i < numListeners; ++i) {
-                mUpdateListeners.get(i).onAnimationUpdate(this);
-            }
+        if (mSeekFraction >= 0 || mStartListenersCalled) {
+            callOnList(mUpdateListeners, AnimatorCaller.ON_UPDATE, this, false);
         }
     }
 
@@ -1718,7 +1669,6 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         anim.mRunning = false;
         anim.mPaused = false;
         anim.mResumed = false;
-        anim.mStartListenersCalled = false;
         anim.mStartTime = -1;
         anim.mStartTimeCommitted = false;
         anim.mAnimationEndRequested = false;

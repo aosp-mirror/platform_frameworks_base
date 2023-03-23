@@ -23,10 +23,10 @@ package android.hardware.biometrics;
  * @hide
  */
 oneway interface IBiometricContextListener {
-    // Called when doze or awake (screen on) status changes.
+    // Called when aod or awake (screen on) status changes.
     // These may be called while the device is still transitioning to the new state
     // (i.e. about to become awake or enter doze)
-    void onDozeChanged(boolean isDozing, boolean isAwake);
+    void onDozeChanged(boolean isAod, boolean isAwake);
 
     @VintfStability
     @Backing(type="int")
@@ -39,4 +39,8 @@ oneway interface IBiometricContextListener {
 
     // Called when the fold state of the device changes.
     void onFoldChanged(FoldState FoldState);
+
+    // Called when the display state of the device changes.
+    // Where `displayState` is defined in AuthenticateOptions.DisplayState
+    void onDisplayStateChanged(int displayState);
 }

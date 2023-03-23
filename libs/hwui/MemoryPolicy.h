@@ -54,6 +54,7 @@ struct MemoryPolicy {
     // collection
     bool purgeScratchOnly = true;
     // EXPERIMENTAL: Whether or not to trigger releasing GPU context when all contexts are stopped
+    // WARNING: Enabling this option can lead to instability, see b/266626090
     bool releaseContextOnStoppedOnly = false;
 };
 

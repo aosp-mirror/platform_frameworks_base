@@ -212,6 +212,9 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
                 mMessagingUtil.isImportantMessaging(entry.getSbn(), entry.getImportance());
         final boolean isLowPriority = inflaterParams.isLowPriority();
 
+        // Set show snooze action
+        row.setShowSnooze(inflaterParams.getShowSnooze());
+
         RowContentBindParams params = mRowContentBindStage.getStageParams(entry);
         params.requireContentViews(FLAG_CONTENT_VIEW_CONTRACTED);
         params.requireContentViews(FLAG_CONTENT_VIEW_EXPANDED);

@@ -115,7 +115,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
             repository.sendTransitionStep(step(1f))
 
             assertThat(values.size).isEqualTo(4)
-            values.forEach { assertThat(it).isEqualTo(ScrimAlpha(notificationsAlpha = 1f)) }
+            values.forEach { assertThat(it).isEqualTo(ScrimAlpha()) }
 
             job.cancel()
         }

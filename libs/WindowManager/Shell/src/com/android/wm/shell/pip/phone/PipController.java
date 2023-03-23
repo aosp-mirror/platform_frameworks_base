@@ -163,6 +163,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             this::onKeepClearAreasChangedCallback;
 
     private void onKeepClearAreasChangedCallback() {
+        if (mIsKeyguardShowingOrAnimating) {
+            // early bail out if the change was caused by keyguard showing up
+            return;
+        }
         if (!mEnablePipKeepClearAlgorithm) {
             // early bail out if the keep clear areas feature is disabled
             return;
@@ -186,6 +190,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private void updatePipPositionForKeepClearAreas() {
         if (!mEnablePipKeepClearAlgorithm) {
             // early bail out if the keep clear areas feature is disabled
+            return;
+        }
+        if (mIsKeyguardShowingOrAnimating) {
+            // early bail out if the change was caused by keyguard showing up
             return;
         }
         // only move if we're in PiP or transitioning into PiP
@@ -639,9 +647,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         DisplayLayout pendingLayout = mDisplayController
                                 .getDisplayLayout(mPipDisplayLayoutState.getDisplayId());
                         if (mIsInFixedRotation
+                                || mIsKeyguardShowingOrAnimating
                                 || pendingLayout.rotation()
                                 != mPipBoundsState.getDisplayLayout().rotation()) {
-                            // bail out if there is a pending rotation or fixed rotation change
+                            // bail out if there is a pending rotation or fixed rotation change or
+                            // there's a keyguard present
                             return;
                         }
                         int oldMaxMovementBound = mPipBoundsState.getMovementBounds().bottom;
@@ -936,10 +946,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     mPipBoundsState.getDisplayBounds().right,
                     mPipBoundsState.getDisplayBounds().bottom);
             mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG, rect);
-            updatePipPositionForKeepClearAreas();
         } else {
             mPipBoundsState.removeNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG);
         }
+        updatePipPositionForKeepClearAreas();
     }
 
     private void setLauncherAppIconSize(int iconSizePx) {

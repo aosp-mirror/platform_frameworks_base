@@ -18,7 +18,7 @@ package com.android.systemui.navigationbar.gestural;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 
 import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
-import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadMotionEvent;
+import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadThreeFingerSwipe;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -177,7 +177,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private final OverviewProxyService mOverviewProxyService;
     private final SysUiState mSysUiState;
     private Runnable mStateChangeCallback;
-    private Consumer<Boolean> mButtonForceVisibleCallback;
+    private Consumer<Boolean> mButtonForcedVisibleCallback;
 
     private final PluginManager mPluginManager;
     private final ProtoTracer mProtoTracer;
@@ -244,8 +244,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private boolean mIsBackGestureAllowed;
     private boolean mGestureBlockingActivityRunning;
     private boolean mIsNewBackAffordanceEnabled;
-    private boolean mIsTrackpadGestureBackEnabled;
-    private boolean mIsButtonForceVisible;
+    private boolean mIsTrackpadGestureFeaturesEnabled;
+    private boolean mIsButtonForcedVisible;
 
     private InputMonitor mInputMonitor;
     private InputChannelCompat.InputEventReceiver mInputEventReceiver;
@@ -412,8 +412,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mStateChangeCallback = callback;
     }
 
-    public void setButtonForceVisibleChangeCallback(Consumer<Boolean> callback) {
-        mButtonForceVisibleCallback = callback;
+    public void setButtonForcedVisibleChangeCallback(Consumer<Boolean> callback) {
+        mButtonForcedVisibleCallback = callback;
     }
 
     public int getEdgeWidthLeft() {
@@ -428,13 +428,14 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         Resources res = mNavigationModeController.getCurrentUserContext().getResources();
         mEdgeWidthLeft = mGestureNavigationSettingsObserver.getLeftSensitivity(res);
         mEdgeWidthRight = mGestureNavigationSettingsObserver.getRightSensitivity(res);
-        final boolean previousForceVisible = mIsButtonForceVisible;
-        mIsButtonForceVisible =
+        final boolean previousForcedVisible = mIsButtonForcedVisible;
+        mIsButtonForcedVisible =
                 mGestureNavigationSettingsObserver.areNavigationButtonForcedVisible();
-        if (previousForceVisible != mIsButtonForceVisible && mButtonForceVisibleCallback != null) {
-            mButtonForceVisibleCallback.accept(mIsButtonForceVisible);
+        if (previousForcedVisible != mIsButtonForcedVisible
+                && mButtonForcedVisibleCallback != null) {
+            mButtonForcedVisibleCallback.accept(mIsButtonForcedVisible);
         }
-        mIsBackGestureAllowed = !mIsButtonForceVisible;
+        mIsBackGestureAllowed = !mIsButtonForcedVisible;
 
         final DisplayMetrics dm = res.getDisplayMetrics();
         final float defaultGestureHeight = res.getDimension(
@@ -590,7 +591,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
             // Add a nav bar panel window
             mIsNewBackAffordanceEnabled = mFeatureFlags.isEnabled(Flags.NEW_BACK_AFFORDANCE);
-            mIsTrackpadGestureBackEnabled = mFeatureFlags.isEnabled(
+            mIsTrackpadGestureFeaturesEnabled = mFeatureFlags.isEnabled(
                     Flags.TRACKPAD_GESTURE_FEATURES);
             resetEdgeBackPlugin();
             mPluginManager.addPluginListener(
@@ -633,6 +634,10 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
     public boolean isHandlingGestures() {
         return mIsEnabled && mIsBackGestureAllowed;
+    }
+
+    public boolean isButtonForcedVisible() {
+        return mIsButtonForcedVisible;
     }
 
     /**
@@ -883,7 +888,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     }
 
     private void onMotionEvent(MotionEvent ev) {
-        boolean isTrackpadEvent = isTrackpadMotionEvent(mIsTrackpadGestureBackEnabled, ev);
+        boolean isTrackpadEvent = isTrackpadThreeFingerSwipe(mIsTrackpadGestureFeaturesEnabled, ev);
         int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
             if (DEBUG_MISSING_GESTURE) {

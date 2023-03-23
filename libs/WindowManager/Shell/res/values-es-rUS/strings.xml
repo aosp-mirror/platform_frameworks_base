@@ -68,8 +68,7 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Ubicar abajo a la derecha"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Configuración de <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Descartar burbuja"</string>
-    <!-- no translation found for bubbles_dont_bubble (3216183855437329223) -->
-    <skip />
+    <string name="bubbles_dont_bubble" msgid="3216183855437329223">"No mostrar burbujas"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"No mostrar la conversación en burbuja"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chat con burbujas"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Las conversaciones nuevas aparecen como elementos flotantes o burbujas. Presiona para abrir la burbuja. Arrástrala para moverla."</string>

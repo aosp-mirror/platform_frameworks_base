@@ -24,11 +24,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
+@SmallTest
 public class UniformOptionsTest {
     private static final String TAG = UniformOptionsTest.class.getSimpleName();
 
     @Test
-    @SmallTest
     public void testGetBinsCount() {
         Histogram.UniformOptions options1 = new Histogram.UniformOptions(1, 100, 1000);
         assertEquals(3, options1.getBinsCount());
@@ -38,25 +38,21 @@ public class UniformOptionsTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    @SmallTest
     public void testConstructZeroBinsCount() {
         new Histogram.UniformOptions(0, 100, 1000);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    @SmallTest
     public void testConstructNegativeBinsCount() {
         new Histogram.UniformOptions(-1, 100, 1000);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    @SmallTest
     public void testConstructMaxValueLessThanMinValue() {
         new Histogram.UniformOptions(10, 1000, 100);
     }
 
     @Test
-    @SmallTest
     public void testBinIndexForRangeEqual1() {
         Histogram.UniformOptions options = new Histogram.UniformOptions(10, 1, 11);
         for (int i = 0, bins = options.getBinsCount(); i < bins; i++) {
@@ -65,7 +61,6 @@ public class UniformOptionsTest {
     }
 
     @Test
-    @SmallTest
     public void testBinIndexForRangeEqual2() {
         Histogram.UniformOptions options = new Histogram.UniformOptions(10, 1, 21);
         for (int i = 0, bins = options.getBinsCount(); i < bins; i++) {
@@ -75,7 +70,6 @@ public class UniformOptionsTest {
     }
 
     @Test
-    @SmallTest
     public void testBinIndexForRangeEqual5() {
         Histogram.UniformOptions options = new Histogram.UniformOptions(2, 0, 10);
         assertEquals(4, options.getBinsCount());
@@ -87,7 +81,6 @@ public class UniformOptionsTest {
     }
 
     @Test
-    @SmallTest
     public void testBinIndexForRangeEqual10() {
         Histogram.UniformOptions options = new Histogram.UniformOptions(10, 1, 101);
         assertEquals(0, options.getBinForSample(0));
@@ -101,7 +94,6 @@ public class UniformOptionsTest {
     }
 
     @Test
-    @SmallTest
     public void testBinIndexForRangeEqual90() {
         final int binCount = 10;
         final int minValue = 100;

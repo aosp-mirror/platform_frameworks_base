@@ -62,7 +62,8 @@ class MediaOutputDialogReceiver @Inject constructor(
 
     private fun launchMediaOutputBroadcastDialogIfPossible(packageName: String?) {
         if (!packageName.isNullOrEmpty()) {
-            mediaOutputBroadcastDialogFactory.create(packageName, false)
+            mediaOutputBroadcastDialogFactory.create(
+                    packageName, aboveStatusBar = true, view = null)
         } else if (DEBUG) {
             Log.e(TAG, "Unable to launch media output broadcast dialog. Package name is empty.")
         }

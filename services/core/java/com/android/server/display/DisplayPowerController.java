@@ -1056,10 +1056,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
 
         float userLux = BrightnessMappingStrategy.NO_USER_LUX;
-        float userBrightness = BrightnessMappingStrategy.NO_USER_BRIGHTNESS;
+        float userNits = -1;
         if (mInteractiveModeBrightnessMapper != null) {
             userLux = mInteractiveModeBrightnessMapper.getUserLux();
-            userBrightness = mInteractiveModeBrightnessMapper.getUserBrightness();
+            float userBrightness = mInteractiveModeBrightnessMapper.getUserBrightness();
+            userNits = mInteractiveModeBrightnessMapper.convertToNits(userBrightness);
         }
 
         final boolean isIdleScreenBrightnessEnabled = resources.getBoolean(
@@ -1178,6 +1179,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
             if (mAutomaticBrightnessController != null) {
                 mAutomaticBrightnessController.stop();
+            }
+            float userBrightness = BrightnessMappingStrategy.NO_USER_BRIGHTNESS;
+            if (userNits >= 0) {
+                userBrightness = mInteractiveModeBrightnessMapper.convertToFloatScale(userNits);
+                if (userBrightness == PowerManager.BRIGHTNESS_INVALID_FLOAT) {
+                    userBrightness = BrightnessMappingStrategy.NO_USER_BRIGHTNESS;
+                }
             }
             mAutomaticBrightnessController = mInjector.getAutomaticBrightnessController(
                     this, handler.getLooper(), mSensorManager, mLightSensor,

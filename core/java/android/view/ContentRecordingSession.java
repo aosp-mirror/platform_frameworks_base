@@ -25,7 +25,6 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DataClass;
 
 import java.lang.annotation.Retention;
@@ -72,9 +71,16 @@ public final class ContentRecordingSession implements Parcelable {
      * If {@link #getContentToRecord()} is {@link RecordContent#RECORD_CONTENT_TASK}, then
      * represents the {@link android.window.WindowContainerToken} of the Task to record.
      */
-    @VisibleForTesting
     @Nullable
     private IBinder mTokenToRecord = null;
+
+    /**
+     * When {@code true}, no mirroring should take place until the user has re-granted access to
+     * the consent token. When {@code false}, recording can begin immediately.
+     *
+     * <p>Only set on the server side to sanitize any input from the client process.
+     */
+    private boolean mWaitingToRecord = false;
 
     /**
      * Default instance, with recording the display.
@@ -109,9 +115,10 @@ public final class ContentRecordingSession implements Parcelable {
     }
 
     /**
-     * Returns {@code true} when both sessions are for the same display.
+     * Returns {@code true} when both sessions are on the same
+     * {@link android.hardware.display.VirtualDisplay}.
      */
-    public static boolean isSameDisplay(ContentRecordingSession session,
+    public static boolean isProjectionOnSameDisplay(ContentRecordingSession session,
             ContentRecordingSession incomingSession) {
         return session != null && incomingSession != null
                 && session.getDisplayId() == incomingSession.getDisplayId();
@@ -156,7 +163,8 @@ public final class ContentRecordingSession implements Parcelable {
     /* package-private */ ContentRecordingSession(
             int displayId,
             @RecordContent int contentToRecord,
-            @VisibleForTesting @Nullable IBinder tokenToRecord) {
+            @Nullable IBinder tokenToRecord,
+            boolean waitingToRecord) {
         this.mDisplayId = displayId;
         this.mContentToRecord = contentToRecord;
 
@@ -169,8 +177,7 @@ public final class ContentRecordingSession implements Parcelable {
         }
 
         this.mTokenToRecord = tokenToRecord;
-        com.android.internal.util.AnnotationValidations.validate(
-                VisibleForTesting.class, null, mTokenToRecord);
+        this.mWaitingToRecord = waitingToRecord;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -200,8 +207,19 @@ public final class ContentRecordingSession implements Parcelable {
      * represents the {@link android.window.WindowContainerToken} of the Task to record.
      */
     @DataClass.Generated.Member
-    public @VisibleForTesting @Nullable IBinder getTokenToRecord() {
+    public @Nullable IBinder getTokenToRecord() {
         return mTokenToRecord;
+    }
+
+    /**
+     * When {@code true}, no mirroring should take place until the user has re-granted access to
+     * the consent token. When {@code false}, recording can begin immediately.
+     *
+     * <p>Only set on the server side to sanitize any input from the client process.
+     */
+    @DataClass.Generated.Member
+    public boolean isWaitingToRecord() {
+        return mWaitingToRecord;
     }
 
     /**
@@ -240,10 +258,20 @@ public final class ContentRecordingSession implements Parcelable {
      * represents the {@link android.window.WindowContainerToken} of the Task to record.
      */
     @DataClass.Generated.Member
-    public @NonNull ContentRecordingSession setTokenToRecord(@VisibleForTesting @NonNull IBinder value) {
+    public @NonNull ContentRecordingSession setTokenToRecord(@NonNull IBinder value) {
         mTokenToRecord = value;
-        com.android.internal.util.AnnotationValidations.validate(
-                VisibleForTesting.class, null, mTokenToRecord);
+        return this;
+    }
+
+    /**
+     * When {@code true}, no mirroring should take place until the user has re-granted access to
+     * the consent token. When {@code false}, recording can begin immediately.
+     *
+     * <p>Only set on the server side to sanitize any input from the client process.
+     */
+    @DataClass.Generated.Member
+    public @NonNull ContentRecordingSession setWaitingToRecord( boolean value) {
+        mWaitingToRecord = value;
         return this;
     }
 
@@ -256,7 +284,8 @@ public final class ContentRecordingSession implements Parcelable {
         return "ContentRecordingSession { " +
                 "displayId = " + mDisplayId + ", " +
                 "contentToRecord = " + recordContentToString(mContentToRecord) + ", " +
-                "tokenToRecord = " + mTokenToRecord +
+                "tokenToRecord = " + mTokenToRecord + ", " +
+                "waitingToRecord = " + mWaitingToRecord +
         " }";
     }
 
@@ -275,7 +304,8 @@ public final class ContentRecordingSession implements Parcelable {
         return true
                 && mDisplayId == that.mDisplayId
                 && mContentToRecord == that.mContentToRecord
-                && java.util.Objects.equals(mTokenToRecord, that.mTokenToRecord);
+                && java.util.Objects.equals(mTokenToRecord, that.mTokenToRecord)
+                && mWaitingToRecord == that.mWaitingToRecord;
     }
 
     @Override
@@ -288,6 +318,7 @@ public final class ContentRecordingSession implements Parcelable {
         _hash = 31 * _hash + mDisplayId;
         _hash = 31 * _hash + mContentToRecord;
         _hash = 31 * _hash + java.util.Objects.hashCode(mTokenToRecord);
+        _hash = 31 * _hash + Boolean.hashCode(mWaitingToRecord);
         return _hash;
     }
 
@@ -298,6 +329,7 @@ public final class ContentRecordingSession implements Parcelable {
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
         byte flg = 0;
+        if (mWaitingToRecord) flg |= 0x8;
         if (mTokenToRecord != null) flg |= 0x4;
         dest.writeByte(flg);
         dest.writeInt(mDisplayId);
@@ -317,6 +349,7 @@ public final class ContentRecordingSession implements Parcelable {
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
         byte flg = in.readByte();
+        boolean waitingToRecord = (flg & 0x8) != 0;
         int displayId = in.readInt();
         int contentToRecord = in.readInt();
         IBinder tokenToRecord = (flg & 0x4) == 0 ? null : (IBinder) in.readStrongBinder();
@@ -333,8 +366,7 @@ public final class ContentRecordingSession implements Parcelable {
         }
 
         this.mTokenToRecord = tokenToRecord;
-        com.android.internal.util.AnnotationValidations.validate(
-                VisibleForTesting.class, null, mTokenToRecord);
+        this.mWaitingToRecord = waitingToRecord;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -362,7 +394,8 @@ public final class ContentRecordingSession implements Parcelable {
 
         private int mDisplayId;
         private @RecordContent int mContentToRecord;
-        private @VisibleForTesting @Nullable IBinder mTokenToRecord;
+        private @Nullable IBinder mTokenToRecord;
+        private boolean mWaitingToRecord;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -400,17 +433,31 @@ public final class ContentRecordingSession implements Parcelable {
          * represents the {@link android.window.WindowContainerToken} of the Task to record.
          */
         @DataClass.Generated.Member
-        public @NonNull Builder setTokenToRecord(@VisibleForTesting @NonNull IBinder value) {
+        public @NonNull Builder setTokenToRecord(@NonNull IBinder value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x4;
             mTokenToRecord = value;
             return this;
         }
 
+        /**
+         * When {@code true}, no mirroring should take place until the user has re-granted access to
+         * the consent token. When {@code false}, recording can begin immediately.
+         *
+         * <p>Only set on the server side to sanitize any input from the client process.
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setWaitingToRecord(boolean value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x8;
+            mWaitingToRecord = value;
+            return this;
+        }
+
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull ContentRecordingSession build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x8; // Mark builder used
+            mBuilderFieldsSet |= 0x10; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x1) == 0) {
                 mDisplayId = INVALID_DISPLAY;
@@ -421,15 +468,19 @@ public final class ContentRecordingSession implements Parcelable {
             if ((mBuilderFieldsSet & 0x4) == 0) {
                 mTokenToRecord = null;
             }
+            if ((mBuilderFieldsSet & 0x8) == 0) {
+                mWaitingToRecord = false;
+            }
             ContentRecordingSession o = new ContentRecordingSession(
                     mDisplayId,
                     mContentToRecord,
-                    mTokenToRecord);
+                    mTokenToRecord,
+                    mWaitingToRecord);
             return o;
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x8) != 0) {
+            if ((mBuilderFieldsSet & 0x10) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }
@@ -437,10 +488,10 @@ public final class ContentRecordingSession implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1645803878639L,
+            time = 1678817765846L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/ContentRecordingSession.java",
-            inputSignatures = "public static final  int RECORD_CONTENT_DISPLAY\npublic static final  int RECORD_CONTENT_TASK\nprivate  int mDisplayId\nprivate @android.view.ContentRecordingSession.RecordContent int mContentToRecord\nprivate @com.android.internal.annotations.VisibleForTesting @android.annotation.Nullable android.os.IBinder mTokenToRecord\npublic static  android.view.ContentRecordingSession createDisplaySession(android.os.IBinder)\npublic static  android.view.ContentRecordingSession createTaskSession(android.os.IBinder)\npublic static  boolean isValid(android.view.ContentRecordingSession)\npublic static  boolean isSameDisplay(android.view.ContentRecordingSession,android.view.ContentRecordingSession)\nclass ContentRecordingSession extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genToString=true, genSetters=true, genEqualsHashCode=true)")
+            inputSignatures = "public static final  int RECORD_CONTENT_DISPLAY\npublic static final  int RECORD_CONTENT_TASK\nprivate  int mDisplayId\nprivate @android.view.ContentRecordingSession.RecordContent int mContentToRecord\nprivate @android.annotation.Nullable android.os.IBinder mTokenToRecord\nprivate  boolean mWaitingToRecord\npublic static  android.view.ContentRecordingSession createDisplaySession(android.os.IBinder)\npublic static  android.view.ContentRecordingSession createTaskSession(android.os.IBinder)\npublic static  boolean isValid(android.view.ContentRecordingSession)\npublic static  boolean isProjectionOnSameDisplay(android.view.ContentRecordingSession,android.view.ContentRecordingSession)\nclass ContentRecordingSession extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genToString=true, genSetters=true, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}
 

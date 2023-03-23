@@ -18,7 +18,7 @@
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:sharedUserId="android.uid.system"
-    package="com.android.systemui" >
+    package="com.android.systemui.tests" >
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
@@ -64,7 +64,7 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".wmshell.BubblesTestActivity"
+        <activity android:name="com.android.systemui.wmshell.BubblesTestActivity"
             android:allowEmbedded="true"
             android:documentLaunchMode="always"
             android:excludeFromRecents="true"
@@ -88,7 +88,7 @@
                   android:excludeFromRecents="true"
                   />
 
-        <activity android:name=".settings.brightness.BrightnessDialogTest$TestDialog"
+        <activity android:name="com.android.systemui.settings.brightness.BrightnessDialogTest$TestDialog"
             android:exported="false"
             android:excludeFromRecents="true"
             />
@@ -115,19 +115,19 @@
                   android:exported="false" />
 
         <!-- started from UsbDeviceSettingsManager -->
-        <activity android:name=".usb.UsbPermissionActivityTest$UsbPermissionActivityTestable"
+        <activity android:name="com.android.systemui.usb.UsbPermissionActivityTest$UsbPermissionActivityTestable"
                   android:exported="false"
                   android:theme="@style/Theme.SystemUI.Dialog.Alert"
                   android:finishOnCloseSystemDialogs="true"
                   android:excludeFromRecents="true" />
 
-        <activity android:name=".user.CreateUserActivityTest$CreateUserActivityTestable"
+        <activity android:name="com.android.systemui.user.CreateUserActivityTest$CreateUserActivityTestable"
             android:exported="false"
             android:theme="@style/Theme.SystemUI.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true" />
 
-        <activity android:name=".sensorprivacy.SensorUseStartedActivityTest$SensorUseStartedActivityTestable"
+        <activity android:name="com.android.systemui.sensorprivacy.SensorUseStartedActivityTest$SensorUseStartedActivityTestable"
                   android:exported="false"
                   android:theme="@style/Theme.SystemUI.Dialog.Alert"
                   android:finishOnCloseSystemDialogs="true"
