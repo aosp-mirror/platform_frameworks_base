@@ -1034,10 +1034,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mEventTime = event.mEventTime;
         mPackageName = event.mPackageName;
         if (event.mRecords != null) {
-            final int recordCount = event.mRecords.size();
-            mRecords = new ArrayList<>(recordCount);
-            for (int i = 0; i < recordCount; i++) {
-                final AccessibilityRecord record = event.mRecords.get(i);
+            mRecords = new ArrayList<>(event.mRecords.size());
+            for (AccessibilityRecord record : event.mRecords) {
                 final AccessibilityRecord recordClone = new AccessibilityRecord(record);
                 mRecords.add(recordClone);
             }
@@ -1057,9 +1055,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         super.setSealed(sealed);
         final List<AccessibilityRecord> records = mRecords;
         if (records != null) {
-            final int recordCount = records.size();
-            for (int i = 0; i < recordCount; i++) {
-                AccessibilityRecord record = records.get(i);
+            for (AccessibilityRecord record : records) {
                 record.setSealed(sealed);
             }
         }

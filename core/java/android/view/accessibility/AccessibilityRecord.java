@@ -198,8 +198,7 @@ public class AccessibilityRecord {
      *
      * @see AccessibilityNodeInfo#getParent(int) for a description of prefetching.
      */
-    @Nullable
-    public AccessibilityNodeInfo getSource(
+    public @Nullable AccessibilityNodeInfo getSource(
             @AccessibilityNodeInfo.PrefetchingStrategy int prefetchingStrategy) {
         enforceSealed();
         if ((mConnectionId == UNDEFINED)
