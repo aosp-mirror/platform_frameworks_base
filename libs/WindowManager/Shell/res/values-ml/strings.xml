@@ -68,8 +68,7 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ചുവടെ വലതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ക്രമീകരണം"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"ബബിൾ ഡിസ്മിസ് ചെയ്യൂ"</string>
-    <!-- no translation found for bubbles_dont_bubble (3216183855437329223) -->
-    <skip />
+    <string name="bubbles_dont_bubble" msgid="3216183855437329223">"ബബിൾ ചെയ്യരുത്"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"സംഭാഷണം ബബിൾ ചെയ്യരുത്"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"ബബിളുകൾ ഉപയോഗിച്ച് ചാറ്റ് ചെയ്യുക"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"പുതിയ സംഭാഷണങ്ങൾ ഫ്ലോട്ടിംഗ് ഐക്കണുകളോ ബബിളുകളോ ആയി ദൃശ്യമാവുന്നു. ബബിൾ തുറക്കാൻ ടാപ്പ് ചെയ്യൂ. ഇത് നീക്കാൻ വലിച്ചിടുക."</string>
