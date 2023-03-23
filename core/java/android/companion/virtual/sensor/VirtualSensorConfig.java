@@ -50,14 +50,25 @@ public final class VirtualSensorConfig implements Parcelable {
     private final String mName;
     @Nullable
     private final String mVendor;
+    private final float mMaximumRange;
+    private final float mResolution;
+    private final float mPower;
+    private final int mMinDelay;
+    private final int mMaxDelay;
 
     private final int mFlags;
 
     private VirtualSensorConfig(int type, @NonNull String name, @Nullable String vendor,
+            float maximumRange, float resolution, float power, int minDelay, int maxDelay,
             int flags) {
         mType = type;
         mName = name;
         mVendor = vendor;
+        mMaximumRange = maximumRange;
+        mResolution = resolution;
+        mPower = power;
+        mMinDelay = minDelay;
+        mMaxDelay = maxDelay;
         mFlags = flags;
     }
 
@@ -65,6 +76,11 @@ public final class VirtualSensorConfig implements Parcelable {
         mType = parcel.readInt();
         mName = parcel.readString8();
         mVendor = parcel.readString8();
+        mMaximumRange = parcel.readFloat();
+        mResolution = parcel.readFloat();
+        mPower = parcel.readFloat();
+        mMinDelay = parcel.readInt();
+        mMaxDelay = parcel.readInt();
         mFlags = parcel.readInt();
     }
 
@@ -78,6 +94,11 @@ public final class VirtualSensorConfig implements Parcelable {
         parcel.writeInt(mType);
         parcel.writeString8(mName);
         parcel.writeString8(mVendor);
+        parcel.writeFloat(mMaximumRange);
+        parcel.writeFloat(mResolution);
+        parcel.writeFloat(mPower);
+        parcel.writeInt(mMinDelay);
+        parcel.writeInt(mMaxDelay);
         parcel.writeInt(mFlags);
     }
 
@@ -106,6 +127,47 @@ public final class VirtualSensorConfig implements Parcelable {
     @Nullable
     public String getVendor() {
         return mVendor;
+    }
+
+    /**
+     * Returns maximum range of the sensor in the sensor's unit.
+     * @see Sensor#getMaximumRange
+     */
+    public float getMaximumRange() {
+        return mMaximumRange;
+    }
+
+    /**
+     * Returns The resolution of the sensor in the sensor's unit.
+     * @see Sensor#getResolution
+     */
+    public float getResolution() {
+        return mResolution;
+    }
+
+    /**
+     * Returns The power in mA used by this sensor while in use.
+     * @see Sensor#getPower
+     */
+    public float getPower() {
+        return mPower;
+    }
+
+    /**
+     * Returns The minimum delay allowed between two events in microseconds, or zero depending on
+     * the sensor type.
+     * @see Sensor#getMinDelay
+     */
+    public int getMinDelay() {
+        return mMinDelay;
+    }
+
+    /**
+     * Returns The maximum delay between two sensor events in microseconds.
+     * @see Sensor#getMaxDelay
+     */
+    public int getMaxDelay() {
+        return mMaxDelay;
     }
 
     /**
@@ -157,6 +219,11 @@ public final class VirtualSensorConfig implements Parcelable {
         private final String mName;
         @Nullable
         private String mVendor;
+        private float mMaximumRange;
+        private float mResolution;
+        private float mPower;
+        private int mMinDelay;
+        private int mMaxDelay;
         private int mFlags;
         @SensorDirectChannel.RateLevel
         int mHighestDirectReportRateLevel;
@@ -193,7 +260,8 @@ public final class VirtualSensorConfig implements Parcelable {
                 throw new IllegalArgumentException("Highest direct report rate level is "
                         + "required for sensors with direct channel support.");
             }
-            return new VirtualSensorConfig(mType, mName, mVendor, mFlags);
+            return new VirtualSensorConfig(mType, mName, mVendor, mMaximumRange, mResolution,
+                    mPower, mMinDelay, mMaxDelay, mFlags);
         }
 
         /**
@@ -202,6 +270,56 @@ public final class VirtualSensorConfig implements Parcelable {
         @NonNull
         public VirtualSensorConfig.Builder setVendor(@Nullable String vendor) {
             mVendor = vendor;
+            return this;
+        }
+
+        /**
+         * Sets the maximum range of the sensor in the sensor's unit.
+         * @see Sensor#getMaximumRange
+         */
+        @NonNull
+        public VirtualSensorConfig.Builder setMaximumRange(float maximumRange) {
+            mMaximumRange = maximumRange;
+            return this;
+        }
+
+        /**
+         * Sets the resolution of the sensor in the sensor's unit.
+         * @see Sensor#getResolution
+         */
+        @NonNull
+        public VirtualSensorConfig.Builder setResolution(float resolution) {
+            mResolution = resolution;
+            return this;
+        }
+
+        /**
+         * Sets the power in mA used by this sensor while in use.
+         * @see Sensor#getPower
+         */
+        @NonNull
+        public VirtualSensorConfig.Builder setPower(float power) {
+            mPower = power;
+            return this;
+        }
+
+        /**
+         * Sets the minimum delay allowed between two events in microseconds.
+         * @see Sensor#getMinDelay
+         */
+        @NonNull
+        public VirtualSensorConfig.Builder setMinDelay(int minDelay) {
+            mMinDelay = minDelay;
+            return this;
+        }
+
+        /**
+         * Sets the maximum delay between two sensor events in microseconds.
+         * @see Sensor#getMaxDelay
+         */
+        @NonNull
+        public VirtualSensorConfig.Builder setMaxDelay(int maxDelay) {
+            mMaxDelay = maxDelay;
             return this;
         }
 
