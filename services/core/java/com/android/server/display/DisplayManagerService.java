@@ -2589,9 +2589,7 @@ public final class DisplayManagerService extends SystemService {
 
     void setDisplayModeDirectorLoggingEnabled(boolean enabled) {
         synchronized (mSyncRoot) {
-            if (mDisplayModeDirector != null) {
-                mDisplayModeDirector.setLoggingEnabled(enabled);
-            }
+            mDisplayModeDirector.setLoggingEnabled(enabled);
         }
     }
 
@@ -2852,8 +2850,11 @@ public final class DisplayManagerService extends SystemService {
 
     private void dumpInternal(PrintWriter pw) {
         pw.println("DISPLAY MANAGER (dumpsys display)");
+        BrightnessTracker brightnessTrackerLocal;
 
         synchronized (mSyncRoot) {
+            brightnessTrackerLocal = mBrightnessTracker;
+
             pw.println("  mSafeMode=" + mSafeMode);
             pw.println("  mPendingTraversal=" + mPendingTraversal);
             pw.println("  mViewports=" + mViewports);
@@ -2926,10 +2927,6 @@ public final class DisplayManagerService extends SystemService {
             for (int i = 0; i < displayPowerControllerCount; i++) {
                 mDisplayPowerControllers.valueAt(i).dump(pw);
             }
-            if (mBrightnessTracker != null) {
-                pw.println();
-                mBrightnessTracker.dump(pw);
-            }
             pw.println();
             mPersistentDataStore.dump(pw);
 
@@ -2941,6 +2938,10 @@ public final class DisplayManagerService extends SystemService {
                 pw.print("Display " + mDisplayWindowPolicyControllers.keyAt(i) + ":");
                 mDisplayWindowPolicyControllers.valueAt(i).second.dump("  ", pw);
             }
+        }
+        if (brightnessTrackerLocal != null) {
+            pw.println();
+            brightnessTrackerLocal.dump(pw);
         }
         pw.println();
         mDisplayModeDirector.dump(pw);
