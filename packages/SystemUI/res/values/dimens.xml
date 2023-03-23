@@ -1632,11 +1632,11 @@
         .2
     </item>
 
-    <!-- The margins applied to the dream overlay container -->
-    <dimen name="dream_overlay_container_margin_start">0dp</dimen>
-    <dimen name="dream_overlay_container_margin_end">0dp</dimen>
-    <dimen name="dream_overlay_container_margin_top">0dp</dimen>
-    <dimen name="dream_overlay_container_margin_bottom">0dp</dimen>
+    <!-- The padding applied to the dream overlay container -->
+    <dimen name="dream_overlay_container_padding_start">0dp</dimen>
+    <dimen name="dream_overlay_container_padding_end">0dp</dimen>
+    <dimen name="dream_overlay_container_padding_top">0dp</dimen>
+    <dimen name="dream_overlay_container_padding_bottom">0dp</dimen>
 
     <!-- The margin applied between complications -->
     <dimen name="dream_overlay_complication_margin">0dp</dimen>
