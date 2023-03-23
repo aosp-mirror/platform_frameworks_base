@@ -194,6 +194,14 @@ public class AutofillFeatureFlags {
             "should_enable_autofill_on_all_view_types";
 
     /**
+     * Whether to enable multi-line filter when checking if view is autofillable
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_MULTILINE_FILTER_ENABLED =
+            "multiline_filter_enabled";
+
+    /**
      * Whether include all autofill type not none views in assist structure
      *
      * @hide
@@ -438,6 +446,17 @@ public class AutofillFeatureFlags {
             DEVICE_CONFIG_INCLUDE_ALL_VIEWS_IN_ASSIST_STRUCTURE, false);
     }
 
+
+    /**
+     * Whether should enable multi-line filter
+     *
+     * @hide
+     */
+    public static boolean shouldEnableMultilineFilter() {
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_MULTILINE_FILTER_ENABLED, false);
+    }
 
     // START AUTOFILL PCC CLASSIFICATION FUNCTIONS
 
