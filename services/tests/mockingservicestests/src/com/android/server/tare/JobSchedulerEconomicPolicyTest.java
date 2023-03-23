@@ -149,6 +149,13 @@ public class JobSchedulerEconomicPolicyTest {
         assertEquals(EconomyManager.DEFAULT_JS_MAX_SATIATED_BALANCE_CAKES,
                 mEconomicPolicy.getMaxSatiatedBalance(0, pkgExempted));
 
+        final String pkgHeadlessSystemApp = "com.pkg.headless_system_app";
+        when(mIrs.isHeadlessSystemApp(eq(pkgHeadlessSystemApp))).thenReturn(true);
+        assertEquals(EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP_CAKES,
+                mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
+        assertEquals(EconomyManager.DEFAULT_JS_MAX_SATIATED_BALANCE_CAKES,
+                mEconomicPolicy.getMaxSatiatedBalance(0, pkgHeadlessSystemApp));
+
         final String pkgUpdater = "com.pkg.updater";
         when(mIrs.getAppUpdateResponsibilityCount(anyInt(), eq(pkgUpdater))).thenReturn(5);
         assertEquals(5 * EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER_CAKES
@@ -177,6 +184,8 @@ public class JobSchedulerEconomicPolicyTest {
         setDeviceConfigCakes(EconomyManager.KEY_JS_MAX_CONSUMPTION_LIMIT, arcToCake(25));
         setDeviceConfigCakes(EconomyManager.KEY_JS_MAX_SATIATED_BALANCE, arcToCake(10));
         setDeviceConfigCakes(EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED, arcToCake(6));
+        setDeviceConfigCakes(EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP,
+                arcToCake(5));
         setDeviceConfigCakes(EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP, arcToCake(4));
         setDeviceConfigCakes(EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER,
                 arcToCake(1));
@@ -191,6 +200,9 @@ public class JobSchedulerEconomicPolicyTest {
         final String pkgExempted = "com.pkg.exempted";
         when(mIrs.isPackageExempted(anyInt(), eq(pkgExempted))).thenReturn(true);
         assertEquals(arcToCake(6), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
+        final String pkgHeadlessSystemApp = "com.pkg.headless_system_app";
+        when(mIrs.isHeadlessSystemApp(eq(pkgHeadlessSystemApp))).thenReturn(true);
+        assertEquals(arcToCake(5), mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
         assertEquals(arcToCake(4), mEconomicPolicy.getMinSatiatedBalance(0, "com.any.other.app"));
         final String pkgUpdater = "com.pkg.updater";
         when(mIrs.getAppUpdateResponsibilityCount(anyInt(), eq(pkgUpdater))).thenReturn(3);
@@ -206,6 +218,8 @@ public class JobSchedulerEconomicPolicyTest {
         setDeviceConfigCakes(EconomyManager.KEY_JS_MAX_CONSUMPTION_LIMIT, arcToCake(-5));
         setDeviceConfigCakes(EconomyManager.KEY_JS_MAX_SATIATED_BALANCE, arcToCake(-1));
         setDeviceConfigCakes(EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED, arcToCake(-2));
+        setDeviceConfigCakes(EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP,
+                arcToCake(-3));
         setDeviceConfigCakes(EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP, arcToCake(-3));
         setDeviceConfigCakes(EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER,
                 arcToCake(-4));
@@ -220,6 +234,9 @@ public class JobSchedulerEconomicPolicyTest {
         final String pkgExempted = "com.pkg.exempted";
         when(mIrs.isPackageExempted(anyInt(), eq(pkgExempted))).thenReturn(true);
         assertEquals(arcToCake(0), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
+        final String pkgHeadlessSystemApp = "com.pkg.headless_system_app";
+        when(mIrs.isHeadlessSystemApp(eq(pkgHeadlessSystemApp))).thenReturn(true);
+        assertEquals(arcToCake(0), mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
         assertEquals(arcToCake(0), mEconomicPolicy.getMinSatiatedBalance(0, "com.any.other.app"));
         final String pkgUpdater = "com.pkg.updater";
         when(mIrs.getAppUpdateResponsibilityCount(anyInt(), eq(pkgUpdater))).thenReturn(5);
@@ -232,6 +249,8 @@ public class JobSchedulerEconomicPolicyTest {
         setDeviceConfigCakes(EconomyManager.KEY_JS_MAX_CONSUMPTION_LIMIT, arcToCake(3));
         setDeviceConfigCakes(EconomyManager.KEY_JS_MAX_SATIATED_BALANCE, arcToCake(10));
         setDeviceConfigCakes(EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED, arcToCake(11));
+        setDeviceConfigCakes(EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP,
+                arcToCake(12));
         setDeviceConfigCakes(EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP, arcToCake(13));
 
         assertEquals(arcToCake(5), mEconomicPolicy.getInitialSatiatedConsumptionLimit());
@@ -240,6 +259,7 @@ public class JobSchedulerEconomicPolicyTest {
         assertEquals(arcToCake(0), mEconomicPolicy.getMaxSatiatedBalance(0, pkgRestricted));
         assertEquals(arcToCake(13), mEconomicPolicy.getMaxSatiatedBalance(0, "com.any.other.app"));
         assertEquals(arcToCake(13), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
+        assertEquals(arcToCake(13), mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
         assertEquals(arcToCake(13), mEconomicPolicy.getMinSatiatedBalance(0, "com.any.other.app"));
     }
 }
