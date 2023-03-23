@@ -4493,6 +4493,12 @@
     <permission android:name="android.permission.CREDENTIAL_MANAGER_SET_ORIGIN"
         android:protectionLevel="normal" />
 
+    <!-- Allows a browser to invoke the set of query apis to get metadata about credential
+         candidates prepared during the CredentialManager.prepareGetCredential API.
+        <p>Protection level: normal -->
+    <permission android:name="android.permission.CREDENTIAL_MANAGER_QUERY_CANDIDATE_CREDENTIALS"
+                android:protectionLevel="normal" />
+
     <!-- Allows permission to use Credential Manager UI for providing and saving credentials
          @hide -->
     <permission android:name="android.permission.LAUNCH_CREDENTIAL_SELECTOR"
