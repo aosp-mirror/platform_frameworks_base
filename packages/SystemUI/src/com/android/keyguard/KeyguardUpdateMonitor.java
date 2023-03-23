@@ -3036,10 +3036,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                                 .setUserId(userId)
                                 .build());
             } else {
-                mLogger.v("startListeningForFingerprint - authenticate");
+                mLogger.v("startListeningForFingerprint");
                 mFpm.authenticate(null /* crypto */, mFingerprintCancelSignal,
-                        mFingerprintAuthenticationCallback, null /* handler */,
-                        FingerprintManager.SENSOR_ID_ANY, userId, 0 /* flags */);
+                        mFingerprintAuthenticationCallback,
+                        null /* handler */,
+                        new FingerprintAuthenticateOptions.Builder()
+                                .setUserId(userId)
+                                .build()
+                );
             }
             setFingerprintRunningState(BIOMETRIC_STATE_RUNNING);
         }
