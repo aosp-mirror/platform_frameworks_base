@@ -16,14 +16,17 @@
 
 package com.android.internal.app;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_PERSONAL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_WORK;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.internal.app.ResolverActivity.EXTRA_CALLING_USER;
 import static com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE;
 
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
@@ -78,6 +81,10 @@ public class IntentForwarderActivity extends Activity  {
 
     public static String FORWARD_INTENT_TO_MANAGED_PROFILE
             = "com.android.internal.app.ForwardIntentToManagedProfile";
+
+    @TestApi
+    public static final String EXTRA_SKIP_USER_CONFIRMATION =
+            "com.android.internal.app.EXTRA_SKIP_USER_CONFIRMATION";
 
     private static final Set<String> ALLOWED_TEXT_MESSAGE_SCHEMES
             = new HashSet<>(Arrays.asList("sms", "smsto", "mms", "mmsto"));
@@ -177,6 +184,15 @@ public class IntentForwarderActivity extends Activity  {
     private void maybeShowUserConsentMiniResolver(
             ResolveInfo target, Intent launchIntent, int targetUserId) {
         if (target == null || isIntentForwarderResolveInfo(target) || !isDeviceProvisioned()) {
+            finish();
+            return;
+        }
+
+        if (launchIntent.getBooleanExtra(EXTRA_SKIP_USER_CONFIRMATION, /* defaultValue= */ false)
+                && getCallingPackage() != null
+                && PERMISSION_GRANTED == getPackageManager().checkPermission(
+                        INTERACT_ACROSS_USERS, getCallingPackage())) {
+            startActivityAsCaller(launchIntent, targetUserId);
             finish();
             return;
         }
