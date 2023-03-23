@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_name (2809080280462257271) -->
-    <skip />
+    <string name="app_name" msgid="2809080280462257271">"Съобщения от оператора"</string>
     <string name="android_system_label" msgid="2797790869522345065">"Мобилен оператор"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"Мобилните данни са изразходвани"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"Мобилните ви данни са деактивирани"</string>
@@ -16,10 +15,8 @@
     <string name="ssl_error_example" msgid="6188711843183058764">"Например страницата за вход може да не принадлежи на показаната организация."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Продължаване през браузър въпреки това"</string>
     <string name="performance_boost_notification_channel" msgid="3475440855635538592">"Увеличаване на ефективността"</string>
-    <!-- no translation found for performance_boost_notification_title (3126203390685781861) -->
-    <skip />
-    <!-- no translation found for performance_boost_notification_detail (216569851036236346) -->
-    <skip />
+    <string name="performance_boost_notification_title" msgid="3126203390685781861">"Опции за 5G от оператора ви"</string>
+    <string name="performance_boost_notification_detail" msgid="216569851036236346">"За да видите опции за практическата си работа с приложението, посетете уебсайта на %s"</string>
     <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"Не сега"</string>
     <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"Управление"</string>
     <string name="slice_purchase_app_label" msgid="7170191659233241166">"Купете пакет за увеличаване на ефективността."</string>
