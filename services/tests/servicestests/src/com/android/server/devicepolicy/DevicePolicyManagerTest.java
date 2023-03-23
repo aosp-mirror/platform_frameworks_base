@@ -1398,8 +1398,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().userManager.getUserRestrictions()).thenReturn(new Bundle());
 
         // Now call clear.
-        doReturn(DpmMockContext.CALLER_SYSTEM_USER_UID).when(getServices().packageManager).
-                getPackageUidAsUser(eq(admin1.getPackageName()), anyInt());
+        getServices().addTestPackageUid(admin1.getPackageName(),
+                DpmMockContext.CALLER_SYSTEM_USER_UID);
 
         // But first pretend the user is locked.  Then it should fail.
         when(getServices().userManager.isUserUnlocked(anyInt())).thenReturn(false);
@@ -1495,9 +1495,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
 
         // Now call clear.
-        doReturn(DpmMockContext.CALLER_UID).when(getServices().packageManager).getPackageUidAsUser(
-                eq(admin1.getPackageName()),
-                anyInt());
+        getServices().addTestPackageUid(admin1.getPackageName(), DpmMockContext.CALLER_UID);
         assertExpectException(SecurityException.class,
                 /* messageRegex =*/ "clearDeviceOwner can only be called by the device owner",
                 () -> dpm.clearDeviceOwnerApp(admin1.getPackageName()));
@@ -1734,9 +1732,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 eq(userId));
         doReturn(true).when(getServices().ipackageManager).isPackageAvailable(packageName, userId);
         // Setup application UID with the PackageManager
-        doReturn(uid).when(getServices().packageManager).getPackageUidAsUser(
-                eq(packageName),
-                eq(userId));
+        getServices().addTestPackageUid(packageName, uid);
         // Associate packageName to uid
         doReturn(packageName).when(getServices().ipackageManager).getNameForUid(eq(uid));
         doReturn(new String[]{packageName})
@@ -3955,9 +3951,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertThat(dpms.hasUserSetupCompleted()).isFalse();
     }
 
-    private void clearDeviceOwner() throws Exception {
-        doReturn(DpmMockContext.CALLER_SYSTEM_USER_UID).when(getServices().packageManager)
-                .getPackageUidAsUser(eq(admin1.getPackageName()), anyInt());
+    private void clearDeviceOwner() {
+        getServices().addTestPackageUid(admin1.getPackageName(),
+                DpmMockContext.CALLER_SYSTEM_USER_UID);
 
         mAdmin1Context.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         runAsCaller(mAdmin1Context, dpms, dpm -> {
@@ -6321,7 +6317,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mAdmin1Context.binder.callingUid = DpmMockContext.CALLER_UID;
         setAsProfileOwner(admin1);
 
-        final DpmMockContext caller = new DpmMockContext(getServices(), mRealTestContext);
+        var caller = new DpmMockContext(getServices(), mRealTestContext);
         caller.packageName = "com.example.delegate";
         caller.binder.callingUid = setupPackageInPackageManager(caller.packageName,
                 CALLER_USER_HANDLE, 20988, ApplicationInfo.FLAG_HAS_CODE);
@@ -6965,6 +6961,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     @Test
     public void testIsPackageAllowedToAccessCalendar_adminNotAllowed() {
+        final String testPackage = "TEST_PACKAGE";
         setAsProfileOwner(admin1);
         dpm.setCrossProfileCalendarPackages(admin1, Collections.emptySet());
         when(getServices().settings.settingsSecureGetIntForUser(
@@ -6972,7 +6969,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 0, CALLER_USER_HANDLE)).thenReturn(1);
         mContext.permissions.add(permission.INTERACT_ACROSS_USERS);
 
-        assertThat(dpm.isPackageAllowedToAccessCalendar("TEST_PACKAGE")).isFalse();
+        assertThat(dpm.isPackageAllowedToAccessCalendar(testPackage)).isFalse();
     }
 
     @Test
@@ -6991,6 +6988,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testIsPackageAllowedToAccessCalendar_bothAllowed() {
         final String testPackage = "TEST_PACKAGE";
+        getServices().addTestPackageUid(testPackage, DpmMockContext.ANOTHER_UID);
         setAsProfileOwner(admin1);
         dpm.setCrossProfileCalendarPackages(admin1, null);
         when(getServices().settings.settingsSecureGetIntForUser(
@@ -7004,24 +7002,22 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     public void testIsPackageAllowedToAccessCalendar_requiresPermission() {
         final String testPackage = "TEST_PACKAGE";
+        getServices().addTestPackageUid(testPackage, DpmMockContext.ANOTHER_UID);
 
         assertExpectException(SecurityException.class, /* messageRegex= */ null,
                 () -> dpm.isPackageAllowedToAccessCalendar(testPackage));
     }
 
     @Test
-    public void testIsPackageAllowedToAccessCalendar_samePackageAndSameUser_noPermissionRequired()
-            throws Exception {
+    public void testIsPackageAllowedToAccessCalendar_samePackageAndSameUser_noPermissionRequired() {
         final String testPackage = "TEST_PACKAGE";
         setAsProfileOwner(admin1);
         dpm.setCrossProfileCalendarPackages(admin1, null);
         when(getServices().settings.settingsSecureGetIntForUser(
                 Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED,
                 0, CALLER_USER_HANDLE)).thenReturn(1);
-        doReturn(mContext.binder.callingUid)
-                .when(getServices().packageManager).getPackageUidAsUser(
-                eq(testPackage),
-                anyInt());
+
+        getServices().addTestPackageUid(testPackage, mContext.binder.callingUid);
 
         assertThat(dpm.isPackageAllowedToAccessCalendar(testPackage)).isTrue();
     }
