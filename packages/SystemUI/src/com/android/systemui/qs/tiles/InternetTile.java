@@ -478,13 +478,13 @@ public class InternetTile extends QSTileImpl<SignalState> {
                 synchronized (mSignalCallback.mWifiInfo) {
                     mSignalCallback.mWifiInfo.copyTo(mifiInfo);
                 }
-                handleUpdateCellularState(state, mifiInfo);
+                handleUpdateWifiState(state, mifiInfo);
             } else if (mLastTileState == LAST_STATE_ETHERNET) {
                 EthernetCallbackInfo ethernetInfo = new EthernetCallbackInfo();
                 synchronized (mSignalCallback.mEthernetInfo) {
                     mSignalCallback.mEthernetInfo.copyTo(ethernetInfo);
                 }
-                handleUpdateCellularState(state, ethernetInfo);
+                handleUpdateEthernetState(state, ethernetInfo);
             }
         }
     }
