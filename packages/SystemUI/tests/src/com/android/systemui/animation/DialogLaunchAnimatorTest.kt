@@ -268,6 +268,12 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun showFromDialogDoesNotCrashWhenShownFromRandomDialog() {
+        val dialog = createDialogAndShowFromDialog(animateFrom = TestDialog(context))
+        dialog.dismiss()
+    }
+
     private fun createAndShowDialog(
         animator: DialogLaunchAnimator = dialogLaunchAnimator,
     ): TestDialog {
