@@ -146,6 +146,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     // the background on first content update just in case it happens to be during a theme change.
     private boolean mUpdateSelfBackgroundOnUpdate = true;
     private boolean mIsSnoozed;
+    private boolean mShowSnooze = false;
     private boolean mIsFaded;
     private boolean mAnimatePinnedRoundness = false;
 
@@ -3734,5 +3735,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mUseRoundnessSourceTypes) {
             updateBaseRoundness();
         }
+    }
+
+    /** Set whether this notification may show a snooze action. */
+    public void setShowSnooze(boolean showSnooze) {
+        mShowSnooze = showSnooze;
+    }
+
+    /** Whether this notification may show a snooze action. */
+    public boolean getShowSnooze() {
+        return mShowSnooze;
     }
 }
