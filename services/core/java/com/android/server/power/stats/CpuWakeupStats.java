@@ -23,6 +23,7 @@ import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_WIFI;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerExecutor;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.IndentingPrintWriter;
@@ -55,6 +56,7 @@ public class CpuWakeupStats {
 
     private static final String SUBSYSTEM_ALARM_STRING = "Alarm";
     private static final String SUBSYSTEM_ALARM_WIFI = "Wifi";
+    private static final String TRACE_TRACK_WAKEUP_ATTRIBUTION = "wakeup_attribution";
     @VisibleForTesting
     static final long WAKEUP_REASON_HALF_WINDOW_MS = 500;
     private static final long WAKEUP_WRITE_DELAY_MS = TimeUnit.MINUTES.toMillis(2);
@@ -94,13 +96,15 @@ public class CpuWakeupStats {
         return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__UNKNOWN;
     }
 
-    private synchronized void logWakeupToStatsLog(Wakeup wakeupToLog) {
+    private synchronized void logWakeupAttribution(Wakeup wakeupToLog) {
         if (ArrayUtils.isEmpty(wakeupToLog.mDevices)) {
             FrameworkStatsLog.write(FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED,
                     FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__TYPE__TYPE_UNKNOWN,
                     FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__UNKNOWN,
                     null,
                     wakeupToLog.mElapsedMillis);
+            Trace.instantForTrack(Trace.TRACE_TAG_POWER, TRACE_TRACK_WAKEUP_ATTRIBUTION,
+                    wakeupToLog.mElapsedMillis + " --");
             return;
         }
 
@@ -112,6 +116,9 @@ public class CpuWakeupStats {
             Slog.wtf(TAG, "Unexpected null attribution found for " + wakeupToLog);
             return;
         }
+
+        final StringBuilder traceEventBuilder = new StringBuilder();
+
         for (int i = 0; i < wakeupAttribution.size(); i++) {
             final int subsystem = wakeupAttribution.keyAt(i);
             final SparseBooleanArray uidMap = wakeupAttribution.valueAt(i);
@@ -132,7 +139,19 @@ public class CpuWakeupStats {
                     subsystemToStatsReason(subsystem),
                     uids,
                     wakeupToLog.mElapsedMillis);
+
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_POWER)) {
+                if (i == 0) {
+                    traceEventBuilder.append(wakeupToLog.mElapsedMillis + " ");
+                }
+                traceEventBuilder.append((subsystemToString(subsystem)));
+                traceEventBuilder.append(":");
+                traceEventBuilder.append(Arrays.toString(uids));
+                traceEventBuilder.append(" ");
+            }
         }
+        Trace.instantForTrack(Trace.TRACE_TAG_POWER, TRACE_TRACK_WAKEUP_ATTRIBUTION,
+                traceEventBuilder.toString().trim());
     }
 
     /** Notes a wakeup reason as reported by SuspendControlService to battery stats. */
@@ -160,7 +179,7 @@ public class CpuWakeupStats {
         for (int i = lastIdx; i >= 0; i--) {
             mWakeupAttribution.removeAt(i);
         }
-        mHandler.postDelayed(() -> logWakeupToStatsLog(parsedWakeup), WAKEUP_WRITE_DELAY_MS);
+        mHandler.postDelayed(() -> logWakeupAttribution(parsedWakeup), WAKEUP_WRITE_DELAY_MS);
     }
 
     /** Notes a waking activity that could have potentially woken up the CPU. */
