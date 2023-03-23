@@ -20,6 +20,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -151,9 +153,11 @@ public class ChangeText extends Transition {
         captureValues(transitionValues);
     }
 
+    @Nullable
     @Override
-    public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
-            TransitionValues endValues) {
+    public Animator createAnimator(@NonNull ViewGroup sceneRoot,
+            @Nullable TransitionValues startValues,
+            @Nullable TransitionValues endValues) {
         if (startValues == null || endValues == null ||
                 !(startValues.view instanceof TextView) || !(endValues.view instanceof TextView)) {
             return null;

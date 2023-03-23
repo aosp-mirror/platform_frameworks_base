@@ -20,6 +20,8 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.Animator.AnimatorPauseListener;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -242,9 +244,11 @@ public abstract class Visibility extends Transition {
         return visInfo;
     }
 
+    @Nullable
     @Override
-    public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
-            TransitionValues endValues) {
+    public Animator createAnimator(@NonNull ViewGroup sceneRoot,
+            @Nullable TransitionValues startValues,
+            @Nullable TransitionValues endValues) {
         VisibilityInfo visInfo = getVisibilityChangeInfo(startValues, endValues);
         if (visInfo.visibilityChange
                 && (visInfo.startParent != null || visInfo.endParent != null)) {

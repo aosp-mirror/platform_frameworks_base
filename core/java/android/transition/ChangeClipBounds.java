@@ -19,6 +19,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.RectEvaluator;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -75,9 +77,11 @@ public class ChangeClipBounds extends Transition {
         captureValues(transitionValues);
     }
 
+    @Nullable
     @Override
-    public Animator createAnimator(final ViewGroup sceneRoot, TransitionValues startValues,
-            TransitionValues endValues) {
+    public Animator createAnimator(@NonNull final ViewGroup sceneRoot,
+            @Nullable TransitionValues startValues,
+            @Nullable TransitionValues endValues) {
         if (startValues == null || endValues == null
                 || !startValues.values.containsKey(PROPNAME_CLIP)
                 || !endValues.values.containsKey(PROPNAME_CLIP)) {
