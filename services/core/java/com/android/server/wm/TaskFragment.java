@@ -2498,13 +2498,18 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
     }
 
-    /** Records the starting bounds of the closing organized TaskFragment. */
-    void setClosingChangingStartBoundsIfNeeded() {
+    /**
+     * Returns {@code true} if the starting bounds of the closing organized TaskFragment is
+     * recorded. Otherwise, return {@code false}.
+     */
+    boolean setClosingChangingStartBoundsIfNeeded() {
         if (isOrganizedTaskFragment() && mDisplayContent != null
                 && mDisplayContent.mChangingContainers.remove(this)) {
             mDisplayContent.mClosingChangingContainers.put(
                     this, new Rect(mSurfaceFreezer.mFreezeBounds));
+            return true;
         }
+        return false;
     }
 
     @Override
