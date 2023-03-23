@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"Праграма ўсталявана."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Усталяваць гэту праграму?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Абнавіць гэту праграму?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Праграма не ўсталявана."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Усталяванне пакета заблакіравана."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Праграма не ўсталявана, таму што пакет канфліктуе з існуючым пакетам."</string>
@@ -41,6 +43,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Гэты карыстальнік не можа ўсталёўваць невядомыя праграмы"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Гэты карыстальнік не можа ўсталёўваць праграмы"</string>
     <string name="ok" msgid="7871959885003339302">"ОК"</string>
+    <!-- no translation found for update_anyway (8792432341346261969) -->
+    <skip />
     <string name="manage_applications" msgid="5400164782453975580">"Кіраваць"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Не хапае месца"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Не ўдалося ўсталяваць праграму \"<xliff:g id="APP_NAME">%1$s</xliff:g>\". Вызваліце месца і паўтарыце спробу."</string>

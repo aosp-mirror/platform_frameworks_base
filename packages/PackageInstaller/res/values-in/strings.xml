@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"Aplikasi terinstal."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Ingin menginstal aplikasi ini?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Ingin mengupdate aplikasi ini?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Aplikasi tidak terinstal."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paket diblokir sehingga tidak dapat diinstal."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikasi tidak diinstal karena paket ini bentrok dengan paket yang sudah ada."</string>
@@ -41,6 +43,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Aplikasi yang tidak dikenal tidak dapat diinstal oleh pengguna ini"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Pengguna ini tidak diizinkan menginstal aplikasi"</string>
     <string name="ok" msgid="7871959885003339302">"Oke"</string>
+    <!-- no translation found for update_anyway (8792432341346261969) -->
+    <skip />
     <string name="manage_applications" msgid="5400164782453975580">"Kelola aplikasi"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Kehabisan ruang penyimpanan"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak dapat diinstal. Kosongkan sebagian ruang dan coba lagi."</string>
