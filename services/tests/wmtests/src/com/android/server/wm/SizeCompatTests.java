@@ -425,7 +425,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 .setLaunchedFromUid(mActivity.getUid())
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
                 .build();
-        doReturn(true).when(translucentActivity).fillsParent();
+        doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
         // It should not be in SCM
         assertFalse(translucentActivity.inSizeCompatMode());
