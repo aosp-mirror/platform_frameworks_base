@@ -10145,11 +10145,11 @@ package android.net.wifi.sharedconnectivity.app {
   }
 
   public static final class SharedConnectivitySettingsState.Builder {
-    ctor public SharedConnectivitySettingsState.Builder(@NonNull android.content.Context);
+    ctor public SharedConnectivitySettingsState.Builder();
     method @NonNull public android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState build();
     method @NonNull public android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState.Builder setInstantTetherEnabled(boolean);
-    method @NonNull public android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState.Builder setInstantTetherSettingsPendingIntent(@NonNull android.content.Intent);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState.Builder setInstantTetherSettingsPendingIntent(@NonNull android.app.PendingIntent);
   }
 
 }
