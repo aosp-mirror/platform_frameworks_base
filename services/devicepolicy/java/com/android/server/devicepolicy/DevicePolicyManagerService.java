@@ -475,6 +475,7 @@ import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.net.module.util.ProxyUtils;
 import com.android.server.AlarmManagerInternal;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.PersistentDataBlockManagerInternal;
@@ -485,6 +486,7 @@ import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.DefaultCrossProfileIntentFilter;
 import com.android.server.pm.DefaultCrossProfileIntentFiltersUtils;
+import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.RestrictionsSet;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerInternal.UserRestrictionsListener;
@@ -1616,6 +1618,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         PackageManagerInternal getPackageManagerInternal() {
             return LocalServices.getService(PackageManagerInternal.class);
+        }
+
+        PackageManagerLocal getPackageManagerLocal() {
+            return LocalManagerRegistry.getManager(PackageManagerLocal.class);
         }
 
         ActivityTaskManagerInternal getActivityTaskManagerInternal() {
@@ -16354,19 +16360,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // The per-Q behavior was to not check the app-ops state.
             granted = mIPackageManager.checkPermission(permission, packageName, userId);
         } else {
-            try {
-                int uid = mInjector.getPackageManager().getPackageUidAsUser(
-                        packageName, userId);
-                if (PermissionChecker.checkPermissionForPreflight(mContext, permission,
-                        PermissionChecker.PID_UNKNOWN, uid, packageName)
-                        != PermissionChecker.PERMISSION_GRANTED) {
-                    granted = PackageManager.PERMISSION_DENIED;
+            try (var snapshot = mInjector.getPackageManagerLocal().withUnfilteredSnapshot()) {
+                var packageState = snapshot.getPackageStates().get(packageName);
+                if (packageState == null) {
+                    Slog.w(LOG_TAG, "Can't get permission state for missing package "
+                            + packageName);
+                    return DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT;
+                } else if (!packageState.getUserStateOrDefault(userId).isInstalled()) {
+                    Slog.w(LOG_TAG, "Can't get permission state for uninstalled package "
+                            + packageName);
+                    return DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT;
                 } else {
-                    granted = PackageManager.PERMISSION_GRANTED;
+                    if (PermissionChecker.checkPermissionForPreflight(mContext, permission,
+                            PermissionChecker.PID_UNKNOWN,
+                            UserHandle.getUid(userId, packageState.getAppId()), packageName)
+                            != PermissionChecker.PERMISSION_GRANTED) {
+                        granted = PackageManager.PERMISSION_DENIED;
+                    } else {
+                        granted = PackageManager.PERMISSION_GRANTED;
+                    }
                 }
-            } catch (NameNotFoundException e) {
-                // Package does not exit
-                return DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT;
             }
         }
         int permFlags = mInjector.getPackageManager().getPermissionFlags(
@@ -19344,23 +19357,29 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean isPackageAllowedToAccessCalendarForUser(String packageName,
-            int userHandle) {
+            @UserIdInt int userId) {
         if (!mHasFeature) {
             return false;
         }
         Preconditions.checkStringNotEmpty(packageName, "Package name is null or empty");
-        Preconditions.checkArgumentNonnegative(userHandle, "Invalid userId");
+        Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
 
-        final CallerIdentity caller = getCallerIdentity();
-        final int packageUid = mInjector.binderWithCleanCallingIdentity(() -> {
-            try {
-                return mInjector.getPackageManager().getPackageUidAsUser(packageName, userHandle);
-            } catch (NameNotFoundException e) {
-                Slogf.w(LOG_TAG, e,
-                        "Couldn't find package %s in user %d", packageName, userHandle);
-                return -1;
+        final int packageUid;
+        try (var snapshot = mInjector.getPackageManagerLocal().withUnfilteredSnapshot()) {
+            var packageState = snapshot.getPackageStates().get(packageName);
+            if (packageState == null) {
+                Slogf.w(LOG_TAG, "Couldn't find package %s in user %d", packageName,
+                        userId);
+                return false;
+            } else if (!packageState.getUserStateOrDefault(userId).isInstalled()) {
+                Slogf.w(LOG_TAG, "Couldn't find installed package %s in user %d", packageName,
+                        userId);
+                return false;
+            } else {
+                packageUid = UserHandle.getUid(userId, packageState.getAppId());
             }
-        });
+        }
+        final CallerIdentity caller = getCallerIdentity();
         if (caller.getUid() != packageUid) {
             Preconditions.checkCallAuthorization(
                     hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS)
@@ -19369,10 +19388,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         synchronized (getLockObject()) {
             if (mInjector.settingsSecureGetIntForUser(
-                    Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED, 0, userHandle) == 0) {
+                    Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED, 0, userId) == 0) {
                 return false;
             }
-            final ActiveAdmin admin = getProfileOwnerAdminLocked(userHandle);
+            final ActiveAdmin admin = getProfileOwnerAdminLocked(userId);
             if (admin != null) {
                 if (admin.mCrossProfileCalendarPackages == null) {
                     return true;
@@ -19726,16 +19745,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private boolean isCallingFromPackage(String packageName, int callingUid) {
-        return mInjector.binderWithCleanCallingIdentity(() -> {
-            try {
-                final int packageUid = mInjector.getPackageManager().getPackageUidAsUser(
-                        packageName, UserHandle.getUserId(callingUid));
-                return packageUid == callingUid;
-            } catch (NameNotFoundException e) {
-                Slogf.d(LOG_TAG, "Calling package not found", e);
+        try (var snapshot = mInjector.getPackageManagerLocal().withUnfilteredSnapshot()) {
+            var packageState = snapshot.getPackageStates().get(packageName);
+            var userId = UserHandle.getUserId(callingUid);
+            if (packageState == null) {
+                Slogf.d(LOG_TAG, "Calling UID " + callingUid + " not found");
                 return false;
+            } else if (!packageState.getUserStateOrDefault(userId).isInstalled()) {
+                Slogf.d(LOG_TAG, "Calling UID " + callingUid + " not installed");
+                return false;
+            } else {
+                return callingUid == UserHandle.getUid(userId, packageState.getAppId());
             }
-        });
+        }
     }
 
     private DevicePolicyConstants loadConstants() {
