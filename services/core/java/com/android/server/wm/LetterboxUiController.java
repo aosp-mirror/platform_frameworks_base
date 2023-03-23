@@ -1494,6 +1494,10 @@ final class LetterboxUiController {
         return mInheritedCompatDisplayInsets;
     }
 
+    void clearInheritedCompatDisplayInsets() {
+        mInheritedCompatDisplayInsets = null;
+    }
+
     /**
      * In case of translucent activities, it consumes the {@link ActivityRecord} of the first opaque
      * activity beneath using the given consumer and returns {@code true}.
