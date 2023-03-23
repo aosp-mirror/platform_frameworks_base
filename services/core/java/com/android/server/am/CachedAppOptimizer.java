@@ -1233,7 +1233,7 @@ public final class CachedAppOptimizer {
         }
 
         UidRecord uidRec = app.getUidRecord();
-        if (uidRec.isFrozen()) {
+        if (uidRec != null && uidRec.isFrozen()) {
             uidRec.setFrozen(false);
             mFreezeHandler.removeMessages(UID_FROZEN_STATE_CHANGED_MSG, app);
             reportOneUidFrozenStateChanged(app.uid, false);
