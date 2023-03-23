@@ -89,6 +89,7 @@ import com.android.server.policy.SoftRestrictedPermissionPolicy
 import libcore.util.EmptyArray
 import java.io.FileDescriptor
 import java.io.PrintWriter
+import java.util.Collections
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
@@ -1589,14 +1590,12 @@ class PermissionService(
                         }
                     }
 
-                    val isHardRestricted = permission.isHardRestricted && !isExempt
-                    newFlags = if (isHardRestricted) {
+                    newFlags = if (permission.isHardRestricted && !isExempt) {
                         newFlags or PermissionFlags.RESTRICTION_REVOKED
                     } else {
                         newFlags andInv PermissionFlags.RESTRICTION_REVOKED
                     }
-                    val isSoftRestricted = permission.isSoftRestricted && !isExempt
-                    newFlags = if (isSoftRestricted) {
+                    newFlags = if (permission.isSoftRestricted && !isExempt) {
                         newFlags or PermissionFlags.SOFT_RESTRICTED
                     } else {
                         newFlags andInv PermissionFlags.SOFT_RESTRICTED
@@ -1881,6 +1880,18 @@ class PermissionService(
         params: PermissionManagerServiceInternal.PackageInstalledParams,
         userId: Int
     ) {
+        if (params === PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT) {
+            // TODO: We should actually stop calling onPackageInstalled() when we are passing
+            //  PackageInstalledParams.DEFAULT in InstallPackageHelper, because there's actually no
+            //  installer in those  cases of system app installs, and the default params won't
+            //  allowlist any permissions which means the original UPGRADE_EXEMPT will be dropped
+            //  without any INSTALLER_EXEMPT added. However, we can't do that right now because the
+            //  old permission subsystem still depends on this method being called to set up the
+            //  permission state for the first time (which we are doing in onPackageAdded() or
+            //  onStorageVolumeMounted() now).
+            return
+        }
+
         synchronized(mountedStorageVolumes) {
             if (androidPackage.volumeUuid !in mountedStorageVolumes) {
                 // Wait for the storage volume to be mounted and batch the state mutation there.
@@ -1906,6 +1917,10 @@ class PermissionService(
                 packageManagerInternal.getPackageStateInternal(androidPackage.packageName)!!
             addAllowlistedRestrictedPermissionsUnchecked(androidPackage, packageState.appId,
                 params.allowlistedRestrictedPermissions, userId)
+            // Drop UPGRADE_EXEMPT for all permissions requested by this package since there's an
+            // installer and the installer has made a decision.
+            setAllowlistedRestrictedPermissionsUnchecked(androidPackage, packageState.appId,
+                Collections.emptyList(), PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE, userId)
             setRequestedPermissionStates(packageState, userId, params.permissionStates)
         }
     }

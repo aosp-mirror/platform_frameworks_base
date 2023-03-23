@@ -856,15 +856,29 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 }
             }
 
-            val isExempt = newFlags.hasAnyBit(PermissionFlags.MASK_EXEMPT)
-            val isHardRestricted = permission.isHardRestricted && !isExempt
-            newFlags = if (isHardRestricted) {
+            val wasExempt = newFlags.hasAnyBit(PermissionFlags.MASK_EXEMPT)
+            val wasRestricted = newFlags.hasAnyBit(PermissionFlags.MASK_RESTRICTED)
+            val isExempt = if (permission.isHardOrSoftRestricted && !wasExempt && !wasRestricted) {
+                // All restricted permissions start as exempt. If there's an installer for the
+                // package, we will drop this UPGRADE_EXEMPT flag when we receive the
+                // onPackageInstalled() callback and set up the INSTALLER_EXEMPT flags.
+                // UPGRADE_EXEMPT is chosen instead of other flags because it is the same flag that
+                // was assigned to pre-installed apps in RuntimePermissionsUpgradeController, and to
+                // apps with missing permission state.
+                // This way we make sure both pre-installed apps, and apps updated/installed after
+                // a rollback snapshot is taken, can get the allowlist for permissions that won't be
+                // allowlisted otherwise.
+                newFlags = newFlags or PermissionFlags.UPGRADE_EXEMPT
+                true
+            } else {
+                wasExempt
+            }
+            newFlags = if (permission.isHardRestricted && !isExempt) {
                 newFlags or PermissionFlags.RESTRICTION_REVOKED
             } else {
                 newFlags andInv PermissionFlags.RESTRICTION_REVOKED
             }
-            val isSoftRestricted = permission.isSoftRestricted && !isExempt
-            newFlags = if (isSoftRestricted) {
+            newFlags = if (permission.isSoftRestricted && !isExempt) {
                 newFlags or PermissionFlags.SOFT_RESTRICTED
             } else {
                 newFlags andInv PermissionFlags.SOFT_RESTRICTED
