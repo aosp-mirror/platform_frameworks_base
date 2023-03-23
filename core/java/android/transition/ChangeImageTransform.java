@@ -18,6 +18,8 @@ package android.transition;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -135,9 +137,11 @@ public class ChangeImageTransform extends Transition {
      * @return An Animator to move an ImageView or null if the View is not an ImageView,
      * the Drawable changed, the View is not VISIBLE, or there was no change.
      */
+    @Nullable
     @Override
-    public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
-            TransitionValues endValues) {
+    public Animator createAnimator(@NonNull ViewGroup sceneRoot,
+            @Nullable TransitionValues startValues,
+            @Nullable TransitionValues endValues) {
         if (startValues == null || endValues == null) {
             return null;
         }

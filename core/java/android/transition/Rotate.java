@@ -18,6 +18,8 @@ package android.transition;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -41,9 +43,11 @@ public class Rotate extends Transition {
         transitionValues.values.put(PROPNAME_ROTATION, transitionValues.view.getRotation());
     }
 
+    @Nullable
     @Override
-    public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
-            TransitionValues endValues) {
+    public Animator createAnimator(@NonNull ViewGroup sceneRoot,
+            @Nullable TransitionValues startValues,
+            @Nullable TransitionValues endValues) {
         if (startValues == null || endValues == null) {
             return null;
         }
