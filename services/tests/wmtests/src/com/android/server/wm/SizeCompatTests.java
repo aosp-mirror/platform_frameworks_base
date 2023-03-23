@@ -3077,9 +3077,41 @@ public class SizeCompatTests extends WindowTestsBase {
         assertTrue(mActivity.inSizeCompatMode());
 
         // Vertical reachability is disabled because the app does not match parent width
-        assertNotEquals(mActivity.getBounds().width(), mActivity.mDisplayContent.getBounds()
-                .width());
+        assertNotEquals(mActivity.getScreenResolvedBounds().width(),
+                mActivity.mDisplayContent.getBounds().width());
         assertFalse(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
+    }
+
+    @Test
+    public void testIsVerticalReachabilityEnabled_emptyBounds_true() {
+        setUpDisplaySizeWithApp(/* dw */ 1000, /* dh */ 2800);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mWm.mLetterboxConfiguration.setIsVerticalReachabilityEnabled(true);
+
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Set up activity with empty bounds to mock loading of app
+        mActivity.getWindowConfiguration().setBounds(null);
+        assertEquals(new Rect(0, 0, 0, 0), mActivity.getBounds());
+
+        // Vertical reachability is still enabled as resolved bounds is not empty
+        assertTrue(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
+    }
+
+    @Test
+    public void testIsHorizontalReachabilityEnabled_emptyBounds_true() {
+        setUpDisplaySizeWithApp(/* dw */ 2800, /* dh */ 1000);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mWm.mLetterboxConfiguration.setIsHorizontalReachabilityEnabled(true);
+
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+
+        // Set up activity with empty bounds to mock loading of app
+        mActivity.getWindowConfiguration().setBounds(null);
+        assertEquals(new Rect(0, 0, 0, 0), mActivity.getBounds());
+
+        // Horizontal reachability is still enabled as resolved bounds is not empty
+        assertTrue(mActivity.mLetterboxUiController.isHorizontalReachabilityEnabled());
     }
 
     @Test
@@ -3098,8 +3130,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertTrue(mActivity.inSizeCompatMode());
 
         // Horizontal reachability is disabled because the app does not match parent height
-        assertNotEquals(mActivity.getBounds().height(), mActivity.mDisplayContent.getBounds()
-                .height());
+        assertNotEquals(mActivity.getScreenResolvedBounds().height(),
+                mActivity.mDisplayContent.getBounds().height());
         assertFalse(mActivity.mLetterboxUiController.isHorizontalReachabilityEnabled());
     }
 
@@ -3119,8 +3151,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertTrue(mActivity.inSizeCompatMode());
 
         // Horizontal reachability is enabled because the app matches parent height
-        assertEquals(mActivity.getBounds().height(), mActivity.mDisplayContent.getBounds()
-                .height());
+        assertEquals(mActivity.getScreenResolvedBounds().height(),
+                mActivity.mDisplayContent.getBounds().height());
         assertTrue(mActivity.mLetterboxUiController.isHorizontalReachabilityEnabled());
     }
 
@@ -3140,7 +3172,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertTrue(mActivity.inSizeCompatMode());
 
         // Vertical reachability is enabled because the app matches parent width
-        assertEquals(mActivity.getBounds().width(), mActivity.mDisplayContent.getBounds().width());
+        assertEquals(mActivity.getScreenResolvedBounds().width(),
+                mActivity.mDisplayContent.getBounds().width());
         assertTrue(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
     }
 
