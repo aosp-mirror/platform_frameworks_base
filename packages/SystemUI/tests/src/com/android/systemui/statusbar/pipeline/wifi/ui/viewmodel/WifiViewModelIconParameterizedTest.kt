@@ -130,7 +130,7 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                     wifiConstants,
                 )
 
-            val iconFlow = underTest.home.wifiIcon
+            val iconFlow = underTest.wifiIcon
             val job = iconFlow.launchIn(this)
 
             // WHEN we set a certain network
