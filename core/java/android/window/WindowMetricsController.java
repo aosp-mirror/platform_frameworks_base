@@ -54,9 +54,6 @@ import java.util.function.Supplier;
  * @hide
  */
 public final class WindowMetricsController {
-    // TODO(b/151908239): Remove and always enable this if it is stable.
-    private static final boolean LAZY_WINDOW_INSETS = android.os.SystemProperties.getBoolean(
-            "persist.wm.debug.win_metrics_lazy_insets", true);
     private final Context mContext;
 
     public WindowMetricsController(@NonNull Context context) {
@@ -98,9 +95,7 @@ public final class WindowMetricsController {
         final IBinder token = Context.getToken(mContext);
         final Supplier<WindowInsets> insetsSupplier = () -> getWindowInsetsFromServerForDisplay(
                 mContext.getDisplayId(), token, bounds, isScreenRound, windowingMode);
-        return LAZY_WINDOW_INSETS
-                ? new WindowMetrics(new Rect(bounds), insetsSupplier, density)
-                : new WindowMetrics(new Rect(bounds), insetsSupplier.get(), density);
+        return new WindowMetrics(new Rect(bounds), insetsSupplier, density);
     }
 
     /**
