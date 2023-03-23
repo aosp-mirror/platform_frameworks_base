@@ -356,6 +356,33 @@ public final class BroadcastQueueModernImplTest {
     }
 
     /**
+     * Queue with a "normal" and "deferrable" broadcast is runnable at different times depending
+     * on process cached state; when cached it's delayed indefinitely.
+     */
+    @Test
+    public void testRunnableAt_Normal_Deferrable() {
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final BroadcastOptions options = BroadcastOptions.makeBasic()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
+        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane, options,
+                List.of(makeMockRegisteredReceiver()), false);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, false);
+
+        queue.setProcessCached(false);
+        final long notCachedRunnableAt = queue.getRunnableAt();
+        queue.setProcessCached(true);
+        final long cachedRunnableAt = queue.getRunnableAt();
+        assertThat(cachedRunnableAt).isGreaterThan(notCachedRunnableAt);
+        assertFalse(queue.isRunnable());
+        assertEquals(BroadcastProcessQueue.REASON_CACHED_INFINITE_DEFER,
+                queue.getRunnableAtReason());
+        assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
+    }
+
+    /**
      * Queue with a "normal" broadcast is runnable at different times depending
      * on process cached state; when cached it's delayed by some amount.
      */
@@ -365,8 +392,10 @@ public final class BroadcastQueueModernImplTest {
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane,
-                List.of(makeMockRegisteredReceiver()));
+        final BroadcastOptions options = BroadcastOptions.makeBasic()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_NONE);
+        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane, options,
+                List.of(makeMockRegisteredReceiver()), false);
         queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, false);
 
         queue.setProcessCached(false);
@@ -374,6 +403,8 @@ public final class BroadcastQueueModernImplTest {
         queue.setProcessCached(true);
         final long cachedRunnableAt = queue.getRunnableAt();
         assertThat(cachedRunnableAt).isGreaterThan(notCachedRunnableAt);
+        assertTrue(queue.isRunnable());
+        assertEquals(BroadcastProcessQueue.REASON_CACHED, queue.getRunnableAtReason());
         assertEquals(ProcessList.SCHED_GROUP_BACKGROUND, queue.getPreferredSchedulingGroupLocked());
     }
 
@@ -520,11 +551,13 @@ public final class BroadcastQueueModernImplTest {
     }
 
     @Test
-    public void testRunnableAt_Cached_Prioritized() {
+    public void testRunnableAt_Cached_Prioritized_NonDeferrable() {
         final List receivers = List.of(
                 withPriority(makeManifestReceiver(PACKAGE_RED, PACKAGE_RED), 10),
                 withPriority(makeManifestReceiver(PACKAGE_GREEN, PACKAGE_GREEN), -10));
-        doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), null,
+        final BroadcastOptions options = BroadcastOptions.makeBasic()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_NONE);
+        doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), options,
                 receivers, null, false), REASON_CONTAINS_PRIORITIZED);
     }
 
