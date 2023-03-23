@@ -4798,10 +4798,6 @@ public class AccountManagerService
             if (intent.getClipData() == null) {
                 intent.setClipData(ClipData.newPlainText(null, null));
             }
-            intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                    | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION));
             long bid = Binder.clearCallingIdentity();
             try {
                 PackageManager pm = mContext.getPackageManager();
@@ -4848,7 +4844,19 @@ public class AccountManagerService
             if (intent == null) {
                 return (simulateIntent == null);
             }
-            return intent.filterEquals(simulateIntent);
+            if (!intent.filterEquals(simulateIntent)) {
+                return false;
+            }
+
+            if (intent.getSelector() != simulateIntent.getSelector()) {
+                return false;
+            }
+
+            int prohibitedFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                    | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION;
+            return (simulateIntent.getFlags() & prohibitedFlags) == 0;
         }
 
         private boolean isExportedSystemActivity(ActivityInfo activityInfo) {
