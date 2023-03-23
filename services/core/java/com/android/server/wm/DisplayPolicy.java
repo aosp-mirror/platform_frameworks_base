@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.Display.TYPE_INTERNAL;
-import static android.view.InsetsFrameProvider.SOURCE_FRAME;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -1069,7 +1068,7 @@ public class DisplayPolicy {
                 // runtime as ensured in WMS. Make use of the index in the provider directly
                 // to access the latest provided size at runtime.
                 final TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider =
-                        getFrameProvider(win, provider, i);
+                        getFrameProvider(win, i);
                 final InsetsFrameProvider.InsetsSizeOverride[] overrides =
                         provider.getInsetsSizeOverrides();
                 final SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>>
@@ -1095,19 +1094,15 @@ public class DisplayPolicy {
         }
     }
 
-    @Nullable
     private TriConsumer<DisplayFrames, WindowContainer, Rect> getFrameProvider(WindowState win,
-            InsetsFrameProvider provider, int index) {
-        if (provider.getInsetsSize() == null && provider.getSource() == SOURCE_FRAME) {
-            return null;
-        }
+            int index) {
         return (displayFrames, windowContainer, inOutFrame) -> {
             final LayoutParams lp = win.mAttrs.forRotation(displayFrames.mRotation);
             final InsetsFrameProvider ifp = lp.providedInsets[index];
             InsetsFrameProvider.calculateInsetsFrame(displayFrames.mUnrestricted,
                     windowContainer.getBounds(), displayFrames.mDisplayCutoutSafe, inOutFrame,
                     ifp.getSource(), ifp.getInsetsSize(), lp.privateFlags,
-                    ifp.getMinimalInsetsSizeInDisplayCutoutSafe());
+                    ifp.getMinimalInsetsSizeInDisplayCutoutSafe(), win.mGivenContentInsets);
         };
     }
 
@@ -1120,7 +1115,8 @@ public class DisplayPolicy {
             InsetsFrameProvider.calculateInsetsFrame(displayFrames.mUnrestricted,
                     windowContainer.getBounds(), displayFrames.mDisplayCutoutSafe, inOutFrame,
                     ifp.getSource(), ifp.getInsetsSizeOverrides()[overrideIndex].getInsetsSize(),
-                    lp.privateFlags, null /* displayCutoutSafeInsetsSize */);
+                    lp.privateFlags, null /* displayCutoutSafeInsetsSize */,
+                    null /* givenContentInsets */);
         };
     }
 
