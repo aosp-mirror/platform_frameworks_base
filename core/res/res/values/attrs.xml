@@ -918,6 +918,10 @@
         <attr name="actionModeFindDrawable" format="reference" />
         <!-- Drawable to use for the Web Search action button in WebView selection action modes. -->
         <attr name="actionModeWebSearchDrawable" format="reference" />
+        <!-- Drawable to use for the Undo action button in WebView selection action modes. -->
+        <attr name="actionModeUndoDrawable" format="reference" />
+        <!-- Drawable to use for the Redo action button in WebView selection action modes. -->
+        <attr name="actionModeRedoDrawable" format="reference" />
 
         <!-- PopupWindow style to use for action modes when showing as a window overlay. -->
         <attr name="actionModePopupWindowStyle" format="reference" />

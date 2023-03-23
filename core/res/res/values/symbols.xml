@@ -5036,4 +5036,6 @@
   <java-symbol name="materialColorSurfaceContainer" type="attr"/>
   <java-symbol name="materialColorSurfaceContainer" type="attr"/>
 
+  <java-symbol type="attr" name="actionModeUndoDrawable" />
+  <java-symbol type="attr" name="actionModeRedoDrawable" />
 </resources>
