@@ -98,7 +98,7 @@ bool Properties::load() {
     debugOverdraw = false;
     std::string debugOverdrawProperty = base::GetProperty(PROPERTY_DEBUG_OVERDRAW, "");
     if (debugOverdrawProperty != "") {
-        INIT_LOGD("  Overdraw debug enabled: %s", debugOverdrawProperty);
+        INIT_LOGD("  Overdraw debug enabled: %s", debugOverdrawProperty.c_str());
         if (debugOverdrawProperty == "show") {
             debugOverdraw = true;
             overdrawColorSet = OverdrawColorSet::Default;
