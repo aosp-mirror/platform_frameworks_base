@@ -60,6 +60,9 @@ per-file SurfaceView.java = file:/services/core/java/com/android/server/wm/OWNER
 per-file SurfaceHolder.java = file:/graphics/java/android/graphics/OWNERS
 per-file SurfaceHolder.java = file:/services/core/java/com/android/server/wm/OWNERS
 
+# Text
+per-file HandwritingInitiator.java = file:/core/java/android/text/OWNERS
+
 # View
 per-file View.java = file:/services/accessibility/OWNERS
 per-file View.java = file:/core/java/android/service/autofill/OWNERS
