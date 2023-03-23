@@ -1069,7 +1069,7 @@ public abstract class ContentResolver implements ContentInterface {
         }
 
         try {
-            return provider.getStreamTypes(url, mimeTypeFilter);
+            return provider.getStreamTypes(mContext.getAttributionSource(), url, mimeTypeFilter);
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
