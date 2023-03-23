@@ -108,6 +108,15 @@ interface IActivityManager {
     int getUidProcessState(int uid, in String callingPackage);
     @UnsupportedAppUsage
     int checkPermission(in String permission, int pid, int uid);
+
+    /** Logs start of an API call to associate with an FGS, used for FGS Type Metrics */
+    void logFgsApiBegin(int apiType, int appUid, int appPid);
+
+    /** Logs stop of an API call to associate with an FGS, used for FGS Type Metrics */
+    void logFgsApiEnd(int apiType, int appUid, int appPid);
+
+    /** Logs API state change to associate with an FGS, used for FGS Type Metrics */
+    void logFgsApiStateChanged(int apiType, int state, int appUid, int appPid);
     // =============== End of transactions used on native side as well ============================
 
     // Special low-level communication with activity manager.
@@ -870,16 +879,6 @@ interface IActivityManager {
     /** Returns if the service is a short-service is still "alive" and past the timeout. */
     boolean shouldServiceTimeOut(in ComponentName className, in IBinder token);
 
-    /** Logs start of an API call to associate with an FGS, used for FGS Type Metrics */
-    void logFgsApiBegin(int apiType, int appUid, int appPid);
-
-    /** Logs stop of an API call to associate with an FGS, used for FGS Type Metrics */
-    void logFgsApiEnd(int apiType, int appUid, int appPid);
-
-    /** Logs API state change to associate with an FGS, used for FGS Type Metrics */
-    void logFgsApiStateChanged(int apiType, int state, int appUid, int appPid);
-
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
     void registerUidFrozenStateChangedCallback(in IUidFrozenStateChangedCallback callback);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
     void unregisterUidFrozenStateChangedCallback(in IUidFrozenStateChangedCallback callback);
