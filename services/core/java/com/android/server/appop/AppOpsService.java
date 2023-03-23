@@ -157,10 +157,10 @@ import com.android.server.LockGuard;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemServiceManager;
 import com.android.server.pm.PackageList;
+import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
-import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.component.ParsedAttribution;
 import com.android.server.policy.AppOpsPolicy;
 
@@ -366,6 +366,9 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     /** Package Manager internal. Access via {@link #getPackageManagerInternal()} */
     private @Nullable PackageManagerInternal mPackageManagerInternal;
+
+    /** Package Manager local. Access via {@link #getPackageManagerLocal()} */
+    private @Nullable PackageManagerLocal mPackageManagerLocal;
 
     /** User Manager internal. Access via {@link #getUserManagerInternal()} */
     private @Nullable UserManagerInternal mUserManagerInternal;
@@ -1189,42 +1192,64 @@ public class AppOpsService extends IAppOpsService.Stub {
     /**
      * Initialize uid state objects for state contained in the checking service.
      */
-    private void initializeUidStates() {
+    @VisibleForTesting
+    void initializeUidStates() {
         UserManagerInternal umi = getUserManagerInternal();
-        int[] userIds = umi.getUserIds();
         synchronized (this) {
-            for (int i = 0; i < userIds.length; i++) {
-                int userId = userIds[i];
-                initializeUserUidStatesLocked(userId);
+            int[] userIds = umi.getUserIds();
+            try (PackageManagerLocal.UnfilteredSnapshot snapshot =
+                         getPackageManagerLocal().withUnfilteredSnapshot()) {
+                Map<String, PackageState> packageStates = snapshot.getPackageStates();
+                for (int i = 0; i < userIds.length; i++) {
+                    int userId = userIds[i];
+                    initializeUserUidStatesLocked(userId, packageStates);
+                }
             }
         }
     }
 
     private void initializeUserUidStates(int userId) {
         synchronized (this) {
-            initializeUserUidStatesLocked(userId);
+            try (PackageManagerLocal.UnfilteredSnapshot snapshot =
+                    getPackageManagerLocal().withUnfilteredSnapshot()) {
+                initializeUserUidStatesLocked(userId, snapshot.getPackageStates());
+            }
         }
     }
 
-    private void initializeUserUidStatesLocked(int userId) {
-        ArrayMap<String, ? extends PackageStateInternal> packageStates =
-                getPackageManagerInternal().getPackageStates();
-        for (int j = 0; j < packageStates.size(); j++) {
-            PackageStateInternal packageState = packageStates.valueAt(j);
-            int uid = UserHandle.getUid(userId, packageState.getAppId());
-            UidState uidState = getUidStateLocked(uid, true);
-            String packageName = packageStates.keyAt(j);
-            Ops ops = new Ops(packageName, uidState);
-            uidState.pkgOps.put(packageName, ops);
+    private void initializeUserUidStatesLocked(int userId, Map<String,
+            PackageState> packageStates) {
+        for (Map.Entry<String, PackageState> entry : packageStates.entrySet()) {
+            int appId = entry.getValue().getAppId();
+            String packageName = entry.getKey();
 
-            SparseIntArray packageModes =
-                    mAppOpsCheckingService.getNonDefaultPackageModes(packageName, userId);
-            for (int k = 0; k < packageModes.size(); k++) {
-                int code = packageModes.get(k);
+            initializePackageUidStateLocked(userId, appId, packageName);
+        }
+    }
+
+    /*
+      Be careful not to clear any existing data; only want to add objects that don't already exist.
+     */
+    private void initializePackageUidStateLocked(int userId, int appId, String packageName) {
+        int uid = UserHandle.getUid(userId, appId);
+        UidState uidState = getUidStateLocked(uid, true);
+        Ops ops = uidState.pkgOps.get(packageName);
+        if (ops == null) {
+            ops = new Ops(packageName, uidState);
+            uidState.pkgOps.put(packageName, ops);
+        }
+
+        SparseIntArray packageModes =
+                mAppOpsCheckingService.getNonDefaultPackageModes(packageName, userId);
+        for (int k = 0; k < packageModes.size(); k++) {
+            int code = packageModes.keyAt(k);
+
+            if (ops.indexOfKey(code) < 0) {
                 ops.put(code, new Op(uidState, packageName, code, uid));
             }
-            uidState.evalForegroundOps();
         }
+
+        uidState.evalForegroundOps();
     }
 
     /**
@@ -3646,6 +3671,20 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         return mPackageManagerInternal;
+    }
+
+    /**
+     * @return {@link PackageManagerLocal}
+     */
+    private @NonNull PackageManagerLocal getPackageManagerLocal() {
+        if (mPackageManagerLocal == null) {
+            mPackageManagerLocal = LocalManagerRegistry.getManager(PackageManagerLocal.class);
+        }
+        if (mPackageManagerLocal == null) {
+            throw new IllegalStateException("PackageManagerLocal not loaded");
+        }
+
+        return mPackageManagerLocal;
     }
 
     /**
