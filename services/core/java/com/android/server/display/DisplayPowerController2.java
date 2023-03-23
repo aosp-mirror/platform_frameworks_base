@@ -1507,10 +1507,11 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             // TODO(b/216365040): The decision to prevent HBM for HDR in low power mode should be
             // done in HighBrightnessModeController.
             if (mHbmController.getHighBrightnessMode() == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR
-                    && (mBrightnessReason.getModifier() & BrightnessReason.MODIFIER_DIMMED) == 0
-                    && (mBrightnessReason.getModifier() & BrightnessReason.MODIFIER_LOW_POWER)
+                    && (mBrightnessReasonTemp.getModifier() & BrightnessReason.MODIFIER_DIMMED) == 0
+                    && (mBrightnessReasonTemp.getModifier() & BrightnessReason.MODIFIER_LOW_POWER)
                     == 0) {
-                // We want to scale HDR brightness level with the SDR level
+                // We want to scale HDR brightness level with the SDR level, we also need to restore
+                // SDR brightness immediately when entering dim or low power mode.
                 animateValue = mHbmController.getHdrBrightnessValue();
             }
 
