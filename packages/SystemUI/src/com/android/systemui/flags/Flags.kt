@@ -233,6 +233,10 @@ object Flags {
     @JvmField
     val PREVENT_BYPASS_KEYGUARD = unreleasedFlag(230, "prevent_bypass_keyguard")
 
+    /** Whether to use a new data source for intents to run on keyguard dismissal. */
+    @JvmField
+    val REFACTOR_KEYGUARD_DISMISS_INTENT = unreleasedFlag(231, "refactor_keyguard_dismiss_intent")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
