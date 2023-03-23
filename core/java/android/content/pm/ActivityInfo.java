@@ -1087,6 +1087,20 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             254631730L; // buganizer id
 
     /**
+     * This change id enables compat policy that ignores app requested orientation in
+     * response to an app calling {@link android.app.Activity#setRequestedOrientation} more
+     * than twice in one second if an activity is not letterboxed for fixed orientation.
+     * See com.android.server.wm.LetterboxUiController#shouldIgnoreRequestedOrientation
+     * for details.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED =
+            273509367L; // buganizer id
+
+    /**
      * This change id forces the packages it is applied to never have Display API sandboxing
      * applied for a letterbox or SCM activity. The Display APIs will continue to provide
      * DisplayArea bounds.
