@@ -523,6 +523,10 @@ applications that come with the platform
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
     </privapp-permissions>
 
+    <privapp-permissions package="com.android.soundpicker">
+        <permission name="android.permission.INTERACT_ACROSS_USERS" />
+    </privapp-permissions>
+
     <privapp-permissions package="com.android.tv">
         <permission name="android.permission.CHANGE_HDMI_CEC_ACTIVE_SOURCE"/>
         <permission name="android.permission.DVB_DEVICE"/>
