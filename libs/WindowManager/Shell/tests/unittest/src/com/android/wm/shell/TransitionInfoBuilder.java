@@ -38,8 +38,15 @@ public class TransitionInfoBuilder {
 
     public TransitionInfoBuilder(@WindowManager.TransitionType int type,
             @WindowManager.TransitionFlags int flags) {
+        this(type, flags, false /* asNoOp */);
+    }
+
+    public TransitionInfoBuilder(@WindowManager.TransitionType int type,
+            @WindowManager.TransitionFlags int flags, boolean asNoOp) {
         mInfo = new TransitionInfo(type, flags);
-        mInfo.addRootLeash(DISPLAY_ID, createMockSurface(true /* valid */), 0, 0);
+        if (!asNoOp) {
+            mInfo.addRootLeash(DISPLAY_ID, createMockSurface(true /* valid */), 0, 0);
+        }
     }
 
     public TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode,
