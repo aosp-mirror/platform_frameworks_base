@@ -19,13 +19,20 @@ package com.android.systemui.multishade.domain.interactor
 import android.content.Context
 import android.view.MotionEvent
 import android.view.ViewConfiguration
+import com.android.systemui.classifier.Classifier
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.multishade.shared.math.isZero
 import com.android.systemui.multishade.shared.model.ProxiedInputModel
+import com.android.systemui.plugins.FalsingManager
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -39,15 +46,27 @@ class MultiShadeMotionEventInteractor
 constructor(
     @Application private val applicationContext: Context,
     @Application private val applicationScope: CoroutineScope,
-    private val interactor: MultiShadeInteractor,
+    private val multiShadeInteractor: MultiShadeInteractor,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val bouncerInteractor: PrimaryBouncerInteractor,
+    private val falsingManager: FalsingManager,
 ) {
 
     private val isAnyShadeExpanded: StateFlow<Boolean> =
-        interactor.isAnyShadeExpanded.stateIn(
+        multiShadeInteractor.isAnyShadeExpanded.stateIn(
             scope = applicationScope,
             started = SharingStarted.Eagerly,
             initialValue = false,
         )
+    private val isBouncerShowing: StateFlow<Boolean> =
+        keyguardTransitionInteractor
+            .transitionValue(state = KeyguardState.PRIMARY_BOUNCER)
+            .map { !it.isZero() }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
 
     private var interactionState: InteractionState? = null
 
@@ -65,6 +84,10 @@ constructor(
             return false
         }
 
+        if (isBouncerShowing.value) {
+            return false
+        }
+
         return when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 // Record where the pointer was placed and which pointer it was.
@@ -75,7 +98,7 @@ constructor(
                         currentY = event.y,
                         pointerId = event.getPointerId(0),
                         isDraggingHorizontally = false,
-                        isDraggingVertically = false,
+                        draggedVertically = Dragged.NONE,
                     )
 
                 false
@@ -85,16 +108,25 @@ constructor(
                     val pointerIndex = event.findPointerIndex(it.pointerId)
                     val currentX = event.getX(pointerIndex)
                     val currentY = event.getY(pointerIndex)
-                    if (!it.isDraggingHorizontally && !it.isDraggingVertically) {
-                        val xDistanceTravelled = abs(currentX - it.initialX)
-                        val yDistanceTravelled = abs(currentY - it.initialY)
+                    if (!it.isDraggingHorizontally && it.draggedVertically == Dragged.NONE) {
+                        val xDistanceTravelled = currentX - it.initialX
+                        val yDistanceTravelled = currentY - it.initialY
                         val touchSlop = ViewConfiguration.get(applicationContext).scaledTouchSlop
                         interactionState =
                             when {
-                                yDistanceTravelled > touchSlop ->
-                                    it.copy(isDraggingVertically = true)
-                                xDistanceTravelled > touchSlop ->
-                                    it.copy(isDraggingHorizontally = true)
+                                abs(yDistanceTravelled) > touchSlop ->
+                                    it.copy(
+                                        draggedVertically =
+                                            if (yDistanceTravelled > 0) {
+                                                Dragged.SHADE
+                                            } else {
+                                                Dragged.BOUNCER
+                                            }
+                                    )
+                                abs(xDistanceTravelled) > touchSlop ->
+                                    it.copy(
+                                        isDraggingHorizontally = true,
+                                    )
                                 else -> interactionState
                             }
                     }
@@ -124,7 +156,7 @@ constructor(
         return when (event.actionMasked) {
             MotionEvent.ACTION_MOVE -> {
                 interactionState?.let {
-                    if (it.isDraggingVertically) {
+                    if (it.draggedVertically != Dragged.NONE) {
                         val pointerIndex = event.findPointerIndex(it.pointerId)
                         val previousY = it.currentY
                         val currentY = event.getY(pointerIndex)
@@ -133,32 +165,48 @@ constructor(
                                 currentY = currentY,
                             )
 
-                        val yDragAmountPx = currentY - previousY
-                        if (yDragAmountPx != 0f) {
-                            interactor.sendProxiedInput(
-                                ProxiedInputModel.OnDrag(
-                                    xFraction = event.x / viewWidthPx,
-                                    yDragAmountPx = yDragAmountPx,
-                                )
-                            )
+                        when (it.draggedVertically) {
+                            Dragged.SHADE -> {
+                                val yDragAmountPx = currentY - previousY
+
+                                if (yDragAmountPx != 0f) {
+                                    multiShadeInteractor.sendProxiedInput(
+                                        ProxiedInputModel.OnDrag(
+                                            xFraction = event.x / viewWidthPx,
+                                            yDragAmountPx = yDragAmountPx,
+                                        )
+                                    )
+                                }
+                                true
+                            }
+                            Dragged.BOUNCER -> {
+                                bouncerInteractor.show(isScrimmed = true)
+                                false
+                            }
+                            else -> false
                         }
+                    } else {
+                        false
                     }
                 }
-
-                true
+                    ?: false
             }
             MotionEvent.ACTION_UP -> {
-                if (interactionState.isDraggingVertically()) {
+                if (interactionState?.draggedVertically == Dragged.SHADE) {
                     // We finished dragging. Record that so the multi-shade framework can issue a
                     // fling, if the velocity reached in the drag was high enough, for example.
-                    interactor.sendProxiedInput(ProxiedInputModel.OnDragEnd)
+                    multiShadeInteractor.sendProxiedInput(ProxiedInputModel.OnDragEnd)
+
+                    if (falsingManager.isFalseTouch(Classifier.SHADE_DRAG)) {
+                        multiShadeInteractor.collapseAll()
+                    }
                 }
 
                 interactionState = null
                 true
             }
             MotionEvent.ACTION_CANCEL -> {
-                if (interactionState.isDraggingVertically()) {
+                if (interactionState?.draggedVertically == Dragged.SHADE) {
                     // Our drag gesture was canceled by the system. This happens primarily in one of
                     // two occasions: (a) the parent view has decided to intercept the gesture
                     // itself and/or route it to a different child view or (b) the pointer has
@@ -166,7 +214,15 @@ constructor(
                     // we pass the cancellation event to the multi-shade framework to record it.
                     // Doing that allows the multi-shade framework to know that the gesture ended to
                     // allow new gestures to be accepted.
-                    interactor.sendProxiedInput(ProxiedInputModel.OnDragCancel)
+                    multiShadeInteractor.sendProxiedInput(ProxiedInputModel.OnDragCancel)
+
+                    if (falsingManager.isFalseTouch(Classifier.SHADE_DRAG)) {
+                        multiShadeInteractor.collapseAll()
+                    }
+                } else if (interactionState?.draggedVertically == Dragged.BOUNCER) {
+                    if (falsingManager.isFalseTouch(Classifier.BOUNCER_UNLOCK)) {
+                        bouncerInteractor.hide()
+                    }
                 }
 
                 interactionState = null
@@ -181,11 +237,23 @@ constructor(
         val initialY: Float,
         val currentY: Float,
         val pointerId: Int,
+        /** Whether the current gesture is dragging horizontally. */
         val isDraggingHorizontally: Boolean,
-        val isDraggingVertically: Boolean,
+        /** The UI component that is being dragged vertically, if any. */
+        val draggedVertically: Dragged,
     )
 
+    /** Enumerates the UI components that can be dragged by the user. */
+    private enum class Dragged {
+        /** The bouncer is being dragged by the user. */
+        BOUNCER,
+        /** A shade is being dragged by the user. */
+        SHADE,
+        /** No UI component is being dragged by the user. */
+        NONE,
+    }
+
     private fun InteractionState?.isDraggingVertically(): Boolean {
-        return this?.isDraggingVertically == true
+        return this?.draggedVertically != Dragged.NONE
     }
 }
