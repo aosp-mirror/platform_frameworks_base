@@ -5249,7 +5249,7 @@ public class Notification implements Parcelable
             boolean hasSecondLine = showProgress;
             if (p.hasTitle()) {
                 contentView.setViewVisibility(p.mTitleViewId, View.VISIBLE);
-                contentView.setTextViewText(p.mTitleViewId, processTextSpans(p.mTitle));
+                contentView.setTextViewText(p.mTitleViewId, ensureColorSpanContrast(p.mTitle, p));
                 setTextViewColorPrimary(contentView, p.mTitleViewId, p);
             } else if (p.mTitleViewId != R.id.title) {
                 // This alternate title view ID is not cleared by resetStandardTemplate
@@ -5259,7 +5259,7 @@ public class Notification implements Parcelable
             if (p.mText != null && p.mText.length() != 0
                     && (!showProgress || p.mAllowTextWithProgress)) {
                 contentView.setViewVisibility(p.mTextViewId, View.VISIBLE);
-                contentView.setTextViewText(p.mTextViewId, processTextSpans(p.mText));
+                contentView.setTextViewText(p.mTextViewId, ensureColorSpanContrast(p.mText, p));
                 setTextViewColorSecondary(contentView, p.mTextViewId, p);
                 hasSecondLine = true;
             } else if (p.mTextViewId != R.id.text) {
@@ -5284,13 +5284,6 @@ public class Notification implements Parcelable
                     RemoteViews.MARGIN_TOP, marginDimen);
             contentView.setViewLayoutMarginDimen(R.id.notification_headerless_view_column,
                     RemoteViews.MARGIN_BOTTOM, marginDimen);
-        }
-
-        private CharSequence processTextSpans(CharSequence text) {
-            if (mInNightMode) {
-                return ContrastColorUtil.clearColorSpans(text);
-            }
-            return text;
         }
 
         private void setTextViewColorPrimary(RemoteViews contentView, @IdRes int id,
@@ -5544,9 +5537,8 @@ public class Notification implements Parcelable
                 headerText = mN.extras.getCharSequence(EXTRA_INFO_TEXT);
             }
             if (!TextUtils.isEmpty(headerText)) {
-                // TODO: Remove the span entirely to only have the string with propper formating.
-                contentView.setTextViewText(R.id.header_text, processTextSpans(
-                        processLegacyText(headerText)));
+                contentView.setTextViewText(R.id.header_text, ensureColorSpanContrast(
+                        processLegacyText(headerText), p));
                 setTextViewColorSecondary(contentView, R.id.header_text, p);
                 contentView.setViewVisibility(R.id.header_text, View.VISIBLE);
                 if (hasTextToLeft) {
@@ -5567,8 +5559,8 @@ public class Notification implements Parcelable
                 return false;
             }
             if (!TextUtils.isEmpty(p.mHeaderTextSecondary)) {
-                contentView.setTextViewText(R.id.header_text_secondary, processTextSpans(
-                        processLegacyText(p.mHeaderTextSecondary)));
+                contentView.setTextViewText(R.id.header_text_secondary, ensureColorSpanContrast(
+                        processLegacyText(p.mHeaderTextSecondary), p));
                 setTextViewColorSecondary(contentView, R.id.header_text_secondary, p);
                 contentView.setViewVisibility(R.id.header_text_secondary, View.VISIBLE);
                 if (hasTextToLeft) {
@@ -5809,7 +5801,7 @@ public class Notification implements Parcelable
                 big.setViewVisibility(R.id.notification_material_reply_text_1_container,
                         View.VISIBLE);
                 big.setTextViewText(R.id.notification_material_reply_text_1,
-                        processTextSpans(replyText[0].getText()));
+                        ensureColorSpanContrast(replyText[0].getText(), p));
                 setTextViewColorSecondary(big, R.id.notification_material_reply_text_1, p);
                 big.setViewVisibility(R.id.notification_material_reply_progress,
                         showSpinner ? View.VISIBLE : View.GONE);
@@ -5821,7 +5813,7 @@ public class Notification implements Parcelable
                         && p.maxRemoteInputHistory > 1) {
                     big.setViewVisibility(R.id.notification_material_reply_text_2, View.VISIBLE);
                     big.setTextViewText(R.id.notification_material_reply_text_2,
-                            processTextSpans(replyText[1].getText()));
+                            ensureColorSpanContrast(replyText[1].getText(), p));
                     setTextViewColorSecondary(big, R.id.notification_material_reply_text_2, p);
 
                     if (replyText.length > 2 && !TextUtils.isEmpty(replyText[2].getText())
@@ -5829,7 +5821,7 @@ public class Notification implements Parcelable
                         big.setViewVisibility(
                                 R.id.notification_material_reply_text_3, View.VISIBLE);
                         big.setTextViewText(R.id.notification_material_reply_text_3,
-                                processTextSpans(replyText[2].getText()));
+                                ensureColorSpanContrast(replyText[2].getText(), p));
                         setTextViewColorSecondary(big, R.id.notification_material_reply_text_3, p);
                     }
                 }
@@ -6243,9 +6235,9 @@ public class Notification implements Parcelable
                                 fullLengthColor, notifBackgroundColor);
                     }
                     // Remove full-length color spans and ensure text contrast with the button fill.
-                    title = ensureColorSpanContrast(title, buttonFillColor);
+                    title = ContrastColorUtil.ensureColorSpanContrast(title, buttonFillColor);
                 }
-                button.setTextViewText(R.id.action0, processTextSpans(title));
+                button.setTextViewText(R.id.action0, ensureColorSpanContrast(title, p));
                 int textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
                         buttonFillColor, mInNightMode);
                 if (tombstone) {
@@ -6270,8 +6262,8 @@ public class Notification implements Parcelable
                     button.setIntDimen(R.id.action0, "setMinimumWidth", minWidthDimen);
                 }
             } else {
-                button.setTextViewText(R.id.action0, processTextSpans(
-                        processLegacyText(action.title)));
+                button.setTextViewText(R.id.action0, ensureColorSpanContrast(
+                        action.title, p));
                 button.setTextColor(R.id.action0, getStandardActionColor(p));
             }
             // CallStyle notifications add action buttons which don't actually exist in mActions,
@@ -6348,72 +6340,12 @@ public class Notification implements Parcelable
          * Ensures contrast on color spans against a background color.
          * Note that any full-length color spans will be removed instead of being contrasted.
          *
-         * @param charSequence the charSequence on which the spans are
-         * @param background the background color to ensure the contrast against
-         * @return the contrasted charSequence
          * @hide
          */
         @VisibleForTesting
-        public static CharSequence ensureColorSpanContrast(CharSequence charSequence,
-                int background) {
-            if (charSequence instanceof Spanned) {
-                Spanned ss = (Spanned) charSequence;
-                Object[] spans = ss.getSpans(0, ss.length(), Object.class);
-                SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
-                for (Object span : spans) {
-                    Object resultSpan = span;
-                    int spanStart = ss.getSpanStart(span);
-                    int spanEnd = ss.getSpanEnd(span);
-                    boolean fullLength = (spanEnd - spanStart) == charSequence.length();
-                    if (resultSpan instanceof CharacterStyle) {
-                        resultSpan = ((CharacterStyle) span).getUnderlying();
-                    }
-                    if (resultSpan instanceof TextAppearanceSpan) {
-                        TextAppearanceSpan originalSpan = (TextAppearanceSpan) resultSpan;
-                        ColorStateList textColor = originalSpan.getTextColor();
-                        if (textColor != null) {
-                            if (fullLength) {
-                                // Let's drop the color from the span
-                                textColor = null;
-                            } else {
-                                int[] colors = textColor.getColors();
-                                int[] newColors = new int[colors.length];
-                                for (int i = 0; i < newColors.length; i++) {
-                                    boolean isBgDark = isColorDark(background);
-                                    newColors[i] = ContrastColorUtil.ensureLargeTextContrast(
-                                            colors[i], background, isBgDark);
-                                }
-                                textColor = new ColorStateList(textColor.getStates().clone(),
-                                        newColors);
-                            }
-                            resultSpan = new TextAppearanceSpan(
-                                    originalSpan.getFamily(),
-                                    originalSpan.getTextStyle(),
-                                    originalSpan.getTextSize(),
-                                    textColor,
-                                    originalSpan.getLinkTextColor());
-                        }
-                    } else if (resultSpan instanceof ForegroundColorSpan) {
-                        if (fullLength) {
-                            resultSpan = null;
-                        } else {
-                            ForegroundColorSpan originalSpan = (ForegroundColorSpan) resultSpan;
-                            int foregroundColor = originalSpan.getForegroundColor();
-                            boolean isBgDark = isColorDark(background);
-                            foregroundColor = ContrastColorUtil.ensureLargeTextContrast(
-                                    foregroundColor, background, isBgDark);
-                            resultSpan = new ForegroundColorSpan(foregroundColor);
-                        }
-                    } else {
-                        resultSpan = span;
-                    }
-                    if (resultSpan != null) {
-                        builder.setSpan(resultSpan, spanStart, spanEnd, ss.getSpanFlags(span));
-                    }
-                }
-                return builder;
-            }
-            return charSequence;
+        public CharSequence ensureColorSpanContrast(CharSequence charSequence,
+                StandardTemplateParams p) {
+            return ContrastColorUtil.ensureColorSpanContrast(charSequence, getBackgroundColor(p));
         }
 
         /**
@@ -7549,8 +7481,8 @@ public class Notification implements Parcelable
             RemoteViews contentView = getStandardView(mBuilder.getBigPictureLayoutResource(),
                     p, null /* result */);
             if (mSummaryTextSet) {
-                contentView.setTextViewText(R.id.text, mBuilder.processTextSpans(
-                        mBuilder.processLegacyText(mSummaryText)));
+                contentView.setTextViewText(R.id.text, mBuilder.ensureColorSpanContrast(
+                        mBuilder.processLegacyText(mSummaryText), p));
                 mBuilder.setTextViewColorSecondary(contentView, R.id.text, p);
                 contentView.setViewVisibility(R.id.text, View.VISIBLE);
             }
@@ -8197,6 +8129,13 @@ public class Notification implements Parcelable
         @Override
         public void addExtras(Bundle extras) {
             super.addExtras(extras);
+            addExtras(extras, false, 0);
+        }
+
+        /**
+         * @hide
+         */
+        public void addExtras(Bundle extras, boolean ensureContrast, int backgroundColor) {
             if (mUser != null) {
                 // For legacy usages
                 extras.putCharSequence(EXTRA_SELF_DISPLAY_NAME, mUser.getName());
@@ -8205,11 +8144,13 @@ public class Notification implements Parcelable
             if (mConversationTitle != null) {
                 extras.putCharSequence(EXTRA_CONVERSATION_TITLE, mConversationTitle);
             }
-            if (!mMessages.isEmpty()) { extras.putParcelableArray(EXTRA_MESSAGES,
-                    Message.getBundleArrayForMessages(mMessages));
+            if (!mMessages.isEmpty()) {
+                extras.putParcelableArray(EXTRA_MESSAGES,
+                        getBundleArrayForMessages(mMessages, ensureContrast, backgroundColor));
             }
-            if (!mHistoricMessages.isEmpty()) { extras.putParcelableArray(EXTRA_HISTORIC_MESSAGES,
-                    Message.getBundleArrayForMessages(mHistoricMessages));
+            if (!mHistoricMessages.isEmpty()) {
+                extras.putParcelableArray(EXTRA_HISTORIC_MESSAGES, getBundleArrayForMessages(
+                        mHistoricMessages, ensureContrast, backgroundColor));
             }
             if (mShortcutIcon != null) {
                 extras.putParcelable(EXTRA_CONVERSATION_ICON, mShortcutIcon);
@@ -8218,6 +8159,20 @@ public class Notification implements Parcelable
 
             fixTitleAndTextExtras(extras);
             extras.putBoolean(EXTRA_IS_GROUP_CONVERSATION, mIsGroupConversation);
+        }
+
+        private static Bundle[] getBundleArrayForMessages(List<Message> messages,
+                boolean ensureContrast, int backgroundColor) {
+            Bundle[] bundles = new Bundle[messages.size()];
+            final int N = messages.size();
+            for (int i = 0; i < N; i++) {
+                final Message m = messages.get(i);
+                if (ensureContrast) {
+                    m.ensureColorContrast(backgroundColor);
+                }
+                bundles[i] = m.toBundle();
+            }
+            return bundles;
         }
 
         private void fixTitleAndTextExtras(Bundle extras) {
@@ -8431,7 +8386,7 @@ public class Notification implements Parcelable
                 mBuilder.setTextViewColorSecondary(contentView, R.id.app_name_divider, p);
             }
 
-            addExtras(mBuilder.mN.extras);
+            addExtras(mBuilder.mN.extras, true, mBuilder.getBackgroundColor(p));
             contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
                     mBuilder.getSmallIconColor(p));
             contentView.setInt(R.id.status_bar_latest_event_content, "setSenderTextColor",
@@ -8577,7 +8532,7 @@ public class Notification implements Parcelable
             static final String KEY_EXTRAS_BUNDLE = "extras";
             static final String KEY_REMOTE_INPUT_HISTORY = "remote_input_history";
 
-            private final CharSequence mText;
+            private CharSequence mText;
             private final long mTimestamp;
             @Nullable
             private final Person mSender;
@@ -8686,6 +8641,15 @@ public class Notification implements Parcelable
             }
 
             /**
+             * Updates TextAppearance spans in the message text so it has sufficient contrast
+             * against its background.
+             * @hide
+             */
+            public void ensureColorContrast(int backgroundColor) {
+                mText = ContrastColorUtil.ensureColorSpanContrast(mText, backgroundColor);
+            }
+
+            /**
              * Get the text to be used for this message, or the fallback text if a type and content
              * Uri have been set
              */
@@ -8776,15 +8740,6 @@ public class Notification implements Parcelable
                     bundle.putBoolean(KEY_REMOTE_INPUT_HISTORY, mRemoteInputHistory);
                 }
                 return bundle;
-            }
-
-            static Bundle[] getBundleArrayForMessages(List<Message> messages) {
-                Bundle[] bundles = new Bundle[messages.size()];
-                final int N = messages.size();
-                for (int i = 0; i < N; i++) {
-                    bundles[i] = messages.get(i).toBundle();
-                }
-                return bundles;
             }
 
             /**
@@ -9001,7 +8956,7 @@ public class Notification implements Parcelable
                 if (!TextUtils.isEmpty(str)) {
                     contentView.setViewVisibility(rowIds[i], View.VISIBLE);
                     contentView.setTextViewText(rowIds[i],
-                            mBuilder.processTextSpans(mBuilder.processLegacyText(str)));
+                            mBuilder.ensureColorSpanContrast(mBuilder.processLegacyText(str), p));
                     mBuilder.setTextViewColorSecondary(contentView, rowIds[i], p);
                     contentView.setViewPadding(rowIds[i], 0, topPadding, 0, 0);
                     if (first) {
