@@ -28,6 +28,7 @@ import android.graphics.Region;
 import android.testing.AndroidTestingRunner;
 import android.view.AttachedSurfaceControl;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
 
@@ -48,6 +49,9 @@ import org.mockito.MockitoAnnotations;
 public class TouchInsetManagerTest extends SysuiTestCase {
     @Mock
     private AttachedSurfaceControl mAttachedSurfaceControl;
+
+    @Mock
+    private ViewGroup mRootView;
 
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -228,10 +232,11 @@ public class TouchInsetManagerTest extends SysuiTestCase {
     private View createView(Rect bounds) {
         final Rect rect = new Rect(bounds);
         final View view = Mockito.mock(View.class);
+        when(view.getRootView()).thenReturn(mRootView);
         doAnswer(invocation -> {
             ((Rect) invocation.getArgument(0)).set(rect);
             return null;
-        }).when(view).getBoundsOnScreen(any());
+        }).when(view).getDrawingRect(any());
         when(view.isAttachedToWindow()).thenReturn(true);
         when(view.getRootSurfaceControl()).thenReturn(mAttachedSurfaceControl);
 
