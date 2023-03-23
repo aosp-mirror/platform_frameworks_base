@@ -52,4 +52,10 @@ interface IProtected {
 
     @EnforcePermission(anyOf={"INTERNET", "VIBRATE"})
     void ProtectedByInternetOrVibrate();
+
+    @RequiresNoPermission
+    void NotProtected();
+
+    @PermissionManuallyEnforced
+    void ManuallyProtected();
 }
