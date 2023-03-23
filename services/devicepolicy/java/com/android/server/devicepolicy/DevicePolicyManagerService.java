@@ -16626,10 +16626,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         SENSOR_PERMISSIONS.add(Manifest.permission.BACKGROUND_CAMERA);
         SENSOR_PERMISSIONS.add(Manifest.permission.RECORD_BACKGROUND_AUDIO);
         SENSOR_PERMISSIONS.add(Manifest.permission.BODY_SENSORS_BACKGROUND);
-        SENSOR_PERMISSIONS.add(
-                Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE);
-        SENSOR_PERMISSIONS.add(
-                    Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE_BACKGROUND);
     }
 
     private boolean canGrantPermission(CallerIdentity caller, String permission,
