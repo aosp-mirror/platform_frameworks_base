@@ -1227,7 +1227,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // transferred. If transition is transient, IME won't be moved during the transition and
         // the tasks are still live, so we take the snapshot at the end of the transition instead.
         if (mTransientLaunches == null) {
-            mController.mSnapshotController.onTransitionReady(mType, mParticipants);
+            for (int i = mParticipants.size() - 1; i >= 0; --i) {
+                final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
+                if (ar == null || ar.getTask() == null
+                        || ar.getTask().isVisibleRequested()) continue;
+                mController.mSnapshotController.mTaskSnapshotController.recordSnapshot(
+                        ar.getTask(), false /* allowSnapshotHome */);
+            }
         }
 
         // This is non-null only if display has changes. It handles the visible windows that don't
