@@ -59,6 +59,8 @@ import com.android.credentialmanager.common.ui.SheetContainerCard
 import com.android.credentialmanager.common.ui.SnackbarActionText
 import com.android.credentialmanager.common.ui.HeadlineText
 import com.android.credentialmanager.common.ui.CredentialListSectionHeader
+import com.android.credentialmanager.common.ui.HeadlineIcon
+import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.Snackbar
 import com.android.credentialmanager.common.ui.setTransparentSystemBarsColor
 import com.android.credentialmanager.common.ui.setBottomSheetSystemBarsColor
@@ -167,22 +169,42 @@ fun PrimarySelectionCard(
         providerDisplayInfo.sortedUserNameToCredentialEntryList
     val authenticationEntryList = providerDisplayInfo.authenticationEntryList
     SheetContainerCard {
+        // When only one provider (not counting the remote-only provider) exists, display that
+        // provider's icon + name up top.
+        if (providerInfoList.size <= 2) { // It's only possible to be the single provider case
+                                          // if we are started with no more than 2 providers.
+            val nonRemoteProviderList = providerInfoList.filter(
+                { it.credentialEntryList.isNotEmpty() || it.authenticationEntryList.isNotEmpty() }
+            )
+            if (nonRemoteProviderList.size == 1) {
+                val providerInfo = nonRemoteProviderList.firstOrNull() // First should always work
+                                                                       // but just to be safe.
+                if (providerInfo != null) {
+                    item {
+                        HeadlineIcon(
+                            bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
+                            tint = Color.Unspecified,
+                        )
+                    }
+                    item { Divider(thickness = 4.dp, color = Color.Transparent) }
+                    item { LargeLabelTextOnSurfaceVariant(text = providerInfo.displayName) }
+                    item { Divider(thickness = 16.dp, color = Color.Transparent) }
+                }
+            }
+        }
+
+        val hasSingleEntry = (sortedUserNameToCredentialEntryList.size == 1 &&
+            authenticationEntryList.isEmpty()) || (sortedUserNameToCredentialEntryList.isEmpty() &&
+            authenticationEntryList.size == 1)
         item {
             HeadlineText(
                 text = stringResource(
-                    if (sortedUserNameToCredentialEntryList
-                            .size == 1 && authenticationEntryList.isEmpty()
-                    ) {
-                        if (sortedUserNameToCredentialEntryList.first()
-                                .sortedCredentialEntryList.first().credentialType
+                    if (hasSingleEntry) {
+                        if (sortedUserNameToCredentialEntryList.firstOrNull()
+                                ?.sortedCredentialEntryList?.first()?.credentialType
                             == CredentialType.PASSKEY
                         ) R.string.get_dialog_title_use_passkey_for
                         else R.string.get_dialog_title_use_sign_in_for
-                    } else if (
-                        sortedUserNameToCredentialEntryList
-                            .isEmpty() && authenticationEntryList.size == 1
-                    ) {
-                        R.string.get_dialog_title_use_sign_in_for
                     } else R.string.get_dialog_title_choose_sign_in_for,
                     requestDisplayInfo.appName
                 ),
