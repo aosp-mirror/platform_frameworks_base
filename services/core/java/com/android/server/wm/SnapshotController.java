@@ -213,8 +213,12 @@ class SnapshotController {
 
     void notifyAppVisibilityChanged(ActivityRecord appWindowToken, boolean visible) {
         if (!visible && hasTransitionStateConsumer(TASK_CLOSE)) {
+            final Task task = appWindowToken.getTask();
+            if (task == null || task.isVisibleRequested()) {
+                return;
+            }
             // close task transition
-            addTransitionRecord(TASK_CLOSE, false /*open*/, appWindowToken.getTask());
+            addTransitionRecord(TASK_CLOSE, false /*open*/, task);
             mActivitySnapshotController.preTransitionStart();
             notifyTransition(TASK_CLOSE);
             mActivitySnapshotController.postTransitionStart();

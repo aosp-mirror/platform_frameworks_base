@@ -191,6 +191,9 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
      * Prepare to handle on transition start. Clear all temporary fields.
      */
     void preTransitionStart() {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
         resetTmpFields();
     }
 
@@ -283,6 +286,9 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
      * Called when the visibility of an app changes outside the regular app transition flow.
      */
     void notifyAppVisibilityChanged(ActivityRecord appWindowToken, boolean visible) {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
         if (!visible) {
             resetTmpFields();
             addBelowTopActivityIfExist(appWindowToken.getTask(), mPendingRemoveActivity,
