@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="learn_more" msgid="4690632085667273811">"കൂടുതലറിയുക"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"സ്ക്രീൻഷോട്ട്"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ചിത്രം അയച്ചു"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നു..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ഔദ്യോഗിക പ്രൊഫൈലിലേക്ക് സ്ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നു…"</string>
@@ -871,8 +870,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# നിയന്ത്രണം ചേർത്തു.}other{# നിയന്ത്രണങ്ങൾ ചേർത്തു.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"നീക്കം ചെയ്‌തു"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> ചേർക്കണോ?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"ഏതൊക്കെ നിയന്ത്രണങ്ങളും ഉള്ളടക്കവും ഇവിടെ ദൃശ്യമാകണമെന്ന് <xliff:g id="APPNAME">%s</xliff:g> എന്നതിന് തിരഞ്ഞെടുക്കാനാകും."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> എന്നതിനുള്ള നിയന്ത്രണങ്ങൾ നീക്കം ചെയ്യണോ?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"പ്രിയപ്പെട്ടതാക്കി"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"പ്രിയപ്പെട്ടതാക്കി, സ്ഥാനം <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -1067,7 +1065,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="add" msgid="81036585205287996">"ചേർക്കുക"</string>
     <string name="manage_users" msgid="1823875311934643849">"ഉപയോക്താക്കളെ മാനേജ് ചെയ്യുക"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"സ്പ്ലിറ്റ് സ്ക്രീനിലേക്ക് വലിച്ചിടുന്നതിനെ ഈ അറിയിപ്പ് പിന്തുണയ്ക്കുന്നില്ല."</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"സ്പ്ലിറ്റ് സ്ക്രീനിലേക്ക് വലിച്ചിടുന്നതിനെ ഈ അറിയിപ്പ് പിന്തുണയ്ക്കുന്നില്ല"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"വൈഫൈ ലഭ്യമല്ല"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"മുൻഗണനാ മോഡ്"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"അലാറം സജ്ജീകരിച്ചു"</string>

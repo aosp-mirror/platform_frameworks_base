@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Habilitar USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Más información"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Captura de pantalla"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock inhabilitado"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ha enviado una imagen"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Guardando captura..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Guardando captura en el perfil de trabajo…"</string>
@@ -871,8 +870,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# control añadido.}many{# controles añadidos.}other{# controles añadidos.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Quitado"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"¿Añadir <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> puede elegir qué controles y contenido se muestran aquí."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"¿Quitar los controles de <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Añadido a favoritos"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Añadido a favoritos (posición <xliff:g id="NUMBER">%d</xliff:g>)"</string>
@@ -1067,7 +1065,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"editar"</string>
     <string name="add" msgid="81036585205287996">"Añadir"</string>
     <string name="manage_users" msgid="1823875311934643849">"Gestionar usuarios"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"Esta notificación no se puede arrastrar a la pantalla dividida."</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"Esta notificación no se puede arrastrar a la pantalla dividida"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi no disponible"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Modo prioritario"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarma añadida"</string>
@@ -1089,7 +1087,7 @@
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"¿Permitir que <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> acceda a todos los registros del dispositivo?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Permitir el acceso una vez"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"No permitir"</string>
-    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Los registros del dispositivo documentan lo que sucede en tu dispositivo. Las aplicaciones pueden usar estos registros para encontrar y solucionar problemas.\n\nComo algunos registros pueden contener información sensible, es mejor que solo permitas que accedan a ellos las aplicaciones en las que confíes. \n\nAunque no permitas que esta aplicación acceda a todos los registros del dispositivo, aún podrá acceder a sus propios registros. El fabricante de tu dispositivo aún puede acceder a algunos registros o información de tu dispositivo."</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Los registros del dispositivo documentan lo que sucede en tu dispositivo. Las aplicaciones pueden usar estos registros para encontrar y solucionar problemas.\n\nComo algunos registros pueden contener información sensible, es mejor que solo permitas que accedan a ellos las aplicaciones en las que confíes. \n\nAunque no permitas que esta aplicación acceda a todos los registros del dispositivo, podrá seguir accediendo a sus propios registros. Es posible que el fabricante del dispositivo pueda acceder a algunos registros o información de tu dispositivo. Más información"</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Más información"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Más información en <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Abrir <xliff:g id="APPNAME">%1$s</xliff:g>"</string>

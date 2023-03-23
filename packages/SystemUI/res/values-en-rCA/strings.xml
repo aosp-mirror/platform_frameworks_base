@@ -870,8 +870,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# control added.}other{# controls added.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Removed"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Add <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> can choose which controls and content show here."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Remove controls for <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Favorited"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Favorited, position <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -1066,7 +1065,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"edit"</string>
     <string name="add" msgid="81036585205287996">"Add"</string>
     <string name="manage_users" msgid="1823875311934643849">"Manage users"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"This notification does not support dragging to Splitscreen."</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"This notification does not support dragging to split screen"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi unavailable"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Priority mode"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarm set"</string>
