@@ -2048,8 +2048,9 @@ public class OomAdjuster {
             // around switching between two apps. However, we don't want to keep the
             // process in this privileged state indefinitely. Eventually, allow the
             // app to be demoted to cached.
-            if ((state.getSetProcState() == PROCESS_STATE_LAST_ACTIVITY
-                    && (state.getLastStateTime() + mConstants.MAX_PREVIOUS_TIME) < now)) {
+            if (procState >= PROCESS_STATE_LAST_ACTIVITY
+                    && state.getSetProcState() == PROCESS_STATE_LAST_ACTIVITY
+                    && (state.getLastStateTime() + mConstants.MAX_PREVIOUS_TIME) < now) {
                 procState = PROCESS_STATE_LAST_ACTIVITY;
                 schedGroup = SCHED_GROUP_BACKGROUND;
                 state.setAdjType("previous-expired");
