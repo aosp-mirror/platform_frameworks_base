@@ -17,14 +17,14 @@
 package android.credentials;
 
 import android.app.PendingIntent;
-import android.credentials.GetPendingCredentialResponse;
+import android.credentials.PrepareGetCredentialResponseInternal;
 
 /**
- * Listener for a executeGetPendingCredential request.
+ * Listener for a executePrepareGetCredential request.
  *
  * @hide
  */
-interface IGetPendingCredentialCallback {
-    oneway void onResponse(in GetPendingCredentialResponse response);
+interface IPrepareGetCredentialCallback {
+    oneway void onResponse(in PrepareGetCredentialResponseInternal response);
     oneway void onError(String errorType, String message);
 }

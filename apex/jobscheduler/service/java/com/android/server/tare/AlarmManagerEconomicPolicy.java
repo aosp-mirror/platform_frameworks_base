@@ -38,6 +38,7 @@ import static android.app.tare.EconomyManager.DEFAULT_AM_MAX_CONSUMPTION_LIMIT_C
 import static android.app.tare.EconomyManager.DEFAULT_AM_MAX_SATIATED_BALANCE_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_AM_MIN_CONSUMPTION_LIMIT_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_EXEMPTED_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_MAX_CAKES;
@@ -77,6 +78,7 @@ import static android.app.tare.EconomyManager.KEY_AM_MAX_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.KEY_AM_MAX_SATIATED_BALANCE;
 import static android.app.tare.EconomyManager.KEY_AM_MIN_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED;
+import static android.app.tare.EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP;
 import static android.app.tare.EconomyManager.KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP;
 import static android.app.tare.EconomyManager.KEY_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT;
 import static android.app.tare.EconomyManager.KEY_AM_REWARD_NOTIFICATION_INTERACTION_MAX;
@@ -145,6 +147,7 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
     };
 
     private long mMinSatiatedBalanceExempted;
+    private long mMinSatiatedBalanceHeadlessSystemApp;
     private long mMinSatiatedBalanceOther;
     private long mMaxSatiatedBalance;
     private long mInitialSatiatedConsumptionLimit;
@@ -178,6 +181,9 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
         }
         if (mIrs.isPackageExempted(userId, pkgName)) {
             return mMinSatiatedBalanceExempted;
+        }
+        if (mIrs.isHeadlessSystemApp(pkgName)) {
+            return mMinSatiatedBalanceHeadlessSystemApp;
         }
         // TODO: take other exemptions into account
         return mMinSatiatedBalanceOther;
@@ -242,9 +248,14 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
 
         mMinSatiatedBalanceOther = getConstantAsCake(mParser, properties,
             KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP, DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP_CAKES);
+        mMinSatiatedBalanceHeadlessSystemApp = getConstantAsCake(mParser, properties,
+                KEY_AM_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP,
+                DEFAULT_AM_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP_CAKES,
+                mMinSatiatedBalanceOther);
         mMinSatiatedBalanceExempted = getConstantAsCake(mParser, properties,
-            KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED, DEFAULT_AM_MIN_SATIATED_BALANCE_EXEMPTED_CAKES,
-            mMinSatiatedBalanceOther);
+                KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED,
+                DEFAULT_AM_MIN_SATIATED_BALANCE_EXEMPTED_CAKES,
+                mMinSatiatedBalanceHeadlessSystemApp);
         mMaxSatiatedBalance = getConstantAsCake(mParser, properties,
             KEY_AM_MAX_SATIATED_BALANCE, DEFAULT_AM_MAX_SATIATED_BALANCE_CAKES,
             Math.max(arcToCake(1), mMinSatiatedBalanceExempted));

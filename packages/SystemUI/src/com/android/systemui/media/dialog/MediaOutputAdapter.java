@@ -16,10 +16,6 @@
 
 package com.android.systemui.media.dialog;
 
-import static android.media.RouteListingPreference.Item.SUBTEXT_AD_ROUTING_DISALLOWED;
-import static android.media.RouteListingPreference.Item.SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED;
-import static android.media.RouteListingPreference.Item.SUBTEXT_SUBSCRIPTION_REQUIRED;
-
 import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_GO_TO_APP;
 import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_NONE;
 import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
@@ -535,11 +531,12 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         @DoNotInline
         static Drawable getDeviceStatusIconBasedOnSelectionBehavior(MediaDevice device,
                 Context context) {
-            switch (device.getSubtext()) {
-                case SUBTEXT_AD_ROUTING_DISALLOWED:
-                case SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED:
+            switch (device.getSelectionBehavior()) {
+                case SELECTION_BEHAVIOR_NONE:
                     return context.getDrawable(R.drawable.media_output_status_failed);
-                case SUBTEXT_SUBSCRIPTION_REQUIRED:
+                case SELECTION_BEHAVIOR_TRANSFER:
+                    return null;
+                case SELECTION_BEHAVIOR_GO_TO_APP:
                     return context.getDrawable(R.drawable.media_output_status_help);
             }
             return null;

@@ -141,8 +141,9 @@ public class CredentialManagerTest {
 
     @Test
     public void testGetCredential_nullRequest() {
+        GetCredentialRequest nullRequest = null;
         assertThrows(NullPointerException.class,
-                () -> mCredentialManager.getCredential(null, mMockActivity, null, mExecutor,
+                () -> mCredentialManager.getCredential(nullRequest, mMockActivity, null, mExecutor,
                         result -> {
                         }));
     }

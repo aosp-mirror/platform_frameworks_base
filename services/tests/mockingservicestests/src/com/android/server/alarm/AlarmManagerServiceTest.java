@@ -3875,4 +3875,52 @@ public final class AlarmManagerServiceTest {
         assertAndHandleMessageSync(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED);
         assertEquals(2, mService.mAlarmsPerUid.get(TEST_CALLING_UID_2));
     }
+
+    @Test
+    public void lookForPackageLocked() throws Exception {
+        final String package2 = "test.package.2";
+        final int uid2 = 359712;
+        setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + 10, getNewMockPendingIntent());
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 15,
+                getNewMockPendingIntent(uid2, package2));
+
+        doReturn(true).when(mService).checkAllowNonWakeupDelayLocked(anyLong());
+
+        assertTrue(mService.lookForPackageLocked(TEST_CALLING_PACKAGE, TEST_CALLING_UID));
+        assertTrue(mService.lookForPackageLocked(package2, uid2));
+
+        mNowElapsedTest += 10;  // Advance time past the first alarm only.
+        mTestTimer.expire();
+
+        assertTrue(mService.lookForPackageLocked(TEST_CALLING_PACKAGE, TEST_CALLING_UID));
+        assertTrue(mService.lookForPackageLocked(package2, uid2));
+
+        // The non-wakeup alarm is sent on interactive state change: false -> true.
+        mService.interactiveStateChangedLocked(false);
+        mService.interactiveStateChangedLocked(true);
+
+        assertFalse(mService.lookForPackageLocked(TEST_CALLING_PACKAGE, TEST_CALLING_UID));
+        assertTrue(mService.lookForPackageLocked(package2, uid2));
+
+        mNowElapsedTest += 10; // Advance time past the second alarm.
+        mTestTimer.expire();
+
+        assertFalse(mService.lookForPackageLocked(TEST_CALLING_PACKAGE, TEST_CALLING_UID));
+        assertFalse(mService.lookForPackageLocked(package2, uid2));
+    }
+
+    @Test
+    public void onQueryPackageRestart() {
+        final String[] packages = {"p1", "p2", "p3"};
+        final int uid = 5421;
+        final Intent packageAdded = new Intent(Intent.ACTION_QUERY_PACKAGE_RESTART)
+                .setData(Uri.fromParts("package", packages[0], null))
+                .putExtra(Intent.EXTRA_PACKAGES, packages)
+                .putExtra(Intent.EXTRA_UID, uid);
+        mPackageChangesReceiver.onReceive(mMockContext, packageAdded);
+
+        for (String p : packages) {
+            verify(mService).lookForPackageLocked(p, uid);
+        }
+    }
 }

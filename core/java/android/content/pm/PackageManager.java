@@ -10134,25 +10134,9 @@ public abstract class PackageManager {
 
     /**
      * Register an application dex module with the package manager.
-     * The package manager will keep track of the given module for future optimizations.
      *
-     * Dex module optimizations will disable the classpath checking at runtime. The client bares
-     * the responsibility to ensure that the static assumptions on classes in the optimized code
-     * hold at runtime (e.g. there's no duplicate classes in the classpath).
-     *
-     * Note that the package manager already keeps track of dex modules loaded with
-     * {@link dalvik.system.DexClassLoader} and {@link dalvik.system.PathClassLoader}.
-     * This can be called for an eager registration.
-     *
-     * The call might take a while and the results will be posted on the main thread, using
-     * the given callback.
-     *
-     * If the module is intended to be shared with other apps, make sure that the file
-     * permissions allow for it.
-     * If at registration time the permissions allow for others to read it, the module would
-     * be marked as a shared module which might undergo a different optimization strategy.
-     * (usually shared modules will generated larger optimizations artifacts,
-     * taking more disk space).
+     * This call no longer does anything. If a callback is given it is called with a false success
+     * value.
      *
      * @param dexModulePath the absolute path of the dex module.
      * @param callback if not null, {@link DexModuleRegisterCallback#onDexModuleRegistered} will

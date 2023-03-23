@@ -43,6 +43,7 @@ import static android.app.tare.EconomyManager.DEFAULT_JS_MAX_CONSUMPTION_LIMIT_C
 import static android.app.tare.EconomyManager.DEFAULT_JS_MAX_SATIATED_BALANCE_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_CONSUMPTION_LIMIT_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP_CAKES;
 import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_APP_INSTALL_INSTANT_CAKES;
@@ -90,6 +91,7 @@ import static android.app.tare.EconomyManager.KEY_JS_MAX_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.KEY_JS_MAX_SATIATED_BALANCE;
 import static android.app.tare.EconomyManager.KEY_JS_MIN_CONSUMPTION_LIMIT;
 import static android.app.tare.EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED;
+import static android.app.tare.EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP;
 import static android.app.tare.EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER;
 import static android.app.tare.EconomyManager.KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP;
 import static android.app.tare.EconomyManager.KEY_JS_REWARD_APP_INSTALL_INSTANT;
@@ -158,6 +160,7 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
     };
 
     private long mMinSatiatedBalanceExempted;
+    private long mMinSatiatedBalanceHeadlessSystemApp;
     private long mMinSatiatedBalanceOther;
     private long mMinSatiatedBalanceIncrementalAppUpdater;
     private long mMaxSatiatedBalance;
@@ -194,6 +197,8 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
         final long baseBalance;
         if (mIrs.isPackageExempted(userId, pkgName)) {
             baseBalance = mMinSatiatedBalanceExempted;
+        } else if (mIrs.isHeadlessSystemApp(pkgName)) {
+            baseBalance = mMinSatiatedBalanceHeadlessSystemApp;
         } else {
             baseBalance = mMinSatiatedBalanceOther;
         }
@@ -276,9 +281,14 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
 
         mMinSatiatedBalanceOther = getConstantAsCake(mParser, properties,
             KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP, DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP_CAKES);
+        mMinSatiatedBalanceHeadlessSystemApp = getConstantAsCake(mParser, properties,
+                KEY_JS_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP,
+                DEFAULT_JS_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP_CAKES,
+                mMinSatiatedBalanceOther);
         mMinSatiatedBalanceExempted = getConstantAsCake(mParser, properties,
-            KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED, DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED_CAKES,
-            mMinSatiatedBalanceOther);
+                KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED,
+                DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED_CAKES,
+                mMinSatiatedBalanceHeadlessSystemApp);
         mMinSatiatedBalanceIncrementalAppUpdater = getConstantAsCake(mParser, properties,
                 KEY_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER,
                 DEFAULT_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER_CAKES);

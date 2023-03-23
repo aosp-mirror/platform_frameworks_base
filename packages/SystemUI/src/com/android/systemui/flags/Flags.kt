@@ -226,7 +226,7 @@ object Flags {
     /** Whether to inflate the bouncer view on a background thread. */
     // TODO(b/272091103): Tracking Bug
     @JvmField
-    val ASYNC_INFLATE_BOUNCER = unreleasedFlag(229, "async_inflate_bouncer", teamfood = true)
+    val ASYNC_INFLATE_BOUNCER = unreleasedFlag(229, "async_inflate_bouncer", teamfood = false)
 
     /** Whether to inflate the bouncer view on a background thread. */
     // TODO(b/273341787): Tracking Bug
@@ -251,20 +251,12 @@ object Flags {
     // TODO(b/270223352): Tracking Bug
     @JvmField
     val HIDE_SMARTSPACE_ON_DREAM_OVERLAY =
-        unreleasedFlag(
-            404,
-            "hide_smartspace_on_dream_overlay",
-            teamfood = true
-    )
+        releasedFlag(404, "hide_smartspace_on_dream_overlay")
 
     // TODO(b/271460958): Tracking Bug
     @JvmField
     val SHOW_WEATHER_COMPLICATION_ON_DREAM_OVERLAY =
-        unreleasedFlag(
-            405,
-            "show_weather_complication_on_dream_overlay",
-            teamfood = true
-        )
+        releasedFlag(405, "show_weather_complication_on_dream_overlay")
 
     // 500 - quick settings
 
@@ -426,6 +418,11 @@ object Flags {
         1004,
         "enable_low_light_clock_undocked", teamfood = true)
 
+    // TODO(b/273509374): Tracking Bug
+    @JvmField
+    val ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS = unreleasedFlag(1006,
+        "always_show_home_controls_on_dreams")
+
     // 1100 - windowing
     @Keep
     @JvmField
@@ -517,7 +514,7 @@ object Flags {
     @JvmField
     val ENABLE_MOVE_FLOATING_WINDOW_IN_TABLETOP =
         sysPropBooleanFlag(
-            1116, "persist.wm.debug.enable_move_floating_window_in_tabletop", default = false)
+            1116, "persist.wm.debug.enable_move_floating_window_in_tabletop", default = true)
 
     // 1200 - predictive back
     @Keep
