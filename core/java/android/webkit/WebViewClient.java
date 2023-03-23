@@ -455,6 +455,9 @@ public class WebViewClient {
      * {@link HttpAuthHandler} to set the WebView's response to the request.
      * The default behavior is to cancel the request.
      *
+     * <p class="note"><b>Note:</b> The supplied HttpAuthHandler must be used on
+     * the UI thread.
+     *
      * @param view the WebView that is initiating the callback
      * @param handler the HttpAuthHandler used to set the WebView's response
      * @param host the host requiring authentication

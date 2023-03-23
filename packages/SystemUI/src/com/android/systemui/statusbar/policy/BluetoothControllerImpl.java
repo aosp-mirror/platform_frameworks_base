@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.WeakHashMap;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -78,6 +79,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     private final H mHandler;
     private int mState;
 
+    private final BluetoothAdapter mAdapter;
     /**
      */
     @Inject
@@ -88,7 +90,8 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
             BluetoothLogger logger,
             @Background Looper bgLooper,
             @Main Looper mainLooper,
-            @Nullable LocalBluetoothManager localBluetoothManager) {
+            @Nullable LocalBluetoothManager localBluetoothManager,
+            @Nullable BluetoothAdapter bluetoothAdapter) {
         mDumpManager = dumpManager;
         mLogger = logger;
         mLocalBluetoothManager = localBluetoothManager;
@@ -103,6 +106,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mCurrentUser = userTracker.getUserId();
         mDumpManager.registerDumpable(TAG, this);
+        mAdapter = bluetoothAdapter;
     }
 
     @Override
@@ -410,6 +414,30 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         mCachedState.remove(cachedDevice);
         updateConnected();
         mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
+    }
+
+    public void addOnMetadataChangedListener(
+            @NonNull CachedBluetoothDevice cachedDevice,
+            Executor executor,
+            BluetoothAdapter.OnMetadataChangedListener listener
+    ) {
+        if (mAdapter == null) return;
+        mAdapter.addOnMetadataChangedListener(
+                cachedDevice.getDevice(),
+                executor,
+                listener
+        );
+    }
+
+    public void removeOnMetadataChangedListener(
+            @NonNull CachedBluetoothDevice cachedDevice,
+            BluetoothAdapter.OnMetadataChangedListener listener
+    ) {
+        if (mAdapter == null) return;
+        mAdapter.removeOnMetadataChangedListener(
+                cachedDevice.getDevice(),
+                listener
+        );
     }
 
     private ActuallyCachedState getCachedState(CachedBluetoothDevice device) {

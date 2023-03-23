@@ -59,7 +59,7 @@ public class TabletopModeController implements
      */
     private static final boolean ENABLE_MOVE_FLOATING_WINDOW_IN_TABLETOP =
             SystemProperties.getBoolean(
-                    "persist.wm.debug.enable_move_floating_window_in_tabletop", false);
+                    "persist.wm.debug.enable_move_floating_window_in_tabletop", true);
 
     /**
      * Prefer the {@link #PREFERRED_TABLETOP_HALF_TOP} if this flag is enabled,
