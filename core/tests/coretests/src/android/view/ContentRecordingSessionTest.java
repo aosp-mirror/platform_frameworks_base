@@ -89,20 +89,22 @@ public class ContentRecordingSessionTest {
     }
 
     @Test
-    public void testIsSameDisplay() {
-        assertThat(ContentRecordingSession.isSameDisplay(null, null)).isFalse();
+    public void testIsProjectionOnSameDisplay() {
+        assertThat(ContentRecordingSession.isProjectionOnSameDisplay(null, null)).isFalse();
         ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
                 WINDOW_TOKEN);
         session.setDisplayId(DEFAULT_DISPLAY);
-        assertThat(ContentRecordingSession.isSameDisplay(session, null)).isFalse();
+        assertThat(ContentRecordingSession.isProjectionOnSameDisplay(session, null)).isFalse();
 
         ContentRecordingSession incomingSession = ContentRecordingSession.createDisplaySession(
                 WINDOW_TOKEN);
         incomingSession.setDisplayId(DEFAULT_DISPLAY);
-        assertThat(ContentRecordingSession.isSameDisplay(session, incomingSession)).isTrue();
+        assertThat(ContentRecordingSession.isProjectionOnSameDisplay(session,
+                incomingSession)).isTrue();
 
         incomingSession.setDisplayId(DEFAULT_DISPLAY + 1);
-        assertThat(ContentRecordingSession.isSameDisplay(session, incomingSession)).isFalse();
+        assertThat(ContentRecordingSession.isProjectionOnSameDisplay(session,
+                incomingSession)).isFalse();
     }
 
     @Test
