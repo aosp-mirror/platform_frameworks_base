@@ -635,12 +635,6 @@
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
         </activity>
-        <activity-alias
-            android:name=".UsbDebuggingActivityAlias"
-            android:permission="android.permission.DUMP"
-            android:targetActivity=".usb.UsbDebuggingActivity"
-            android:exported="true">
-        </activity-alias>
         <activity android:name=".usb.UsbDebuggingSecondaryUserActivity"
             android:theme="@style/Theme.SystemUI.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
