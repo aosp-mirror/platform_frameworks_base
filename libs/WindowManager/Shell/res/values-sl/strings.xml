@@ -68,8 +68,7 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Premakni spodaj desno"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Nastavitve za <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Opusti oblaček"</string>
-    <!-- no translation found for bubbles_dont_bubble (3216183855437329223) -->
-    <skip />
+    <string name="bubbles_dont_bubble" msgid="3216183855437329223">"Ne prikazuj oblačkov aplikacij"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Pogovora ne prikaži v oblačku"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Klepet z oblački"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Novi pogovori so prikazani kot lebdeče ikone ali oblački. Če želite odpreti oblaček, se ga dotaknite. Če ga želite premakniti, ga povlecite."</string>

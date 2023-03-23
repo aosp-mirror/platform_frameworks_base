@@ -68,8 +68,7 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"오른쪽 하단으로 이동"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> 설정"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"대화창 닫기"</string>
-    <!-- no translation found for bubbles_dont_bubble (3216183855437329223) -->
-    <skip />
+    <string name="bubbles_dont_bubble" msgid="3216183855437329223">"도움말 풍선 중지"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"대화를 대화창으로 표시하지 않기"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"대화창으로 채팅하기"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"새로운 대화가 플로팅 아이콘인 대화창으로 표시됩니다. 대화창을 열려면 탭하세요. 드래그하여 이동할 수 있습니다."</string>
