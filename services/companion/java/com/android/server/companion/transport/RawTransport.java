@@ -36,6 +36,9 @@ class RawTransport extends Transport {
 
     @Override
     public void start() {
+        if (DEBUG) {
+            Slog.d(TAG, "Starting raw transport.");
+        }
         new Thread(() -> {
             try {
                 while (!mStopped) {
@@ -44,7 +47,7 @@ class RawTransport extends Transport {
             } catch (IOException e) {
                 if (!mStopped) {
                     Slog.w(TAG, "Trouble during transport", e);
-                    stop();
+                    close();
                 }
             }
         }).start();
@@ -52,8 +55,19 @@ class RawTransport extends Transport {
 
     @Override
     public void stop() {
+        if (DEBUG) {
+            Slog.d(TAG, "Stopping raw transport.");
+        }
         mStopped = true;
+    }
 
+    @Override
+    public void close() {
+        stop();
+
+        if (DEBUG) {
+            Slog.d(TAG, "Closing raw transport.");
+        }
         IoUtils.closeQuietly(mRemoteIn);
         IoUtils.closeQuietly(mRemoteOut);
     }
@@ -79,15 +93,17 @@ class RawTransport extends Transport {
     }
 
     private void receiveMessage() throws IOException {
-        final byte[] headerBytes = new byte[HEADER_LENGTH];
-        Streams.readFully(mRemoteIn, headerBytes);
-        final ByteBuffer header = ByteBuffer.wrap(headerBytes);
-        final int message = header.getInt();
-        final int sequence = header.getInt();
-        final int length = header.getInt();
-        final byte[] data = new byte[length];
-        Streams.readFully(mRemoteIn, data);
+        synchronized (mRemoteIn) {
+            final byte[] headerBytes = new byte[HEADER_LENGTH];
+            Streams.readFully(mRemoteIn, headerBytes);
+            final ByteBuffer header = ByteBuffer.wrap(headerBytes);
+            final int message = header.getInt();
+            final int sequence = header.getInt();
+            final int length = header.getInt();
+            final byte[] data = new byte[length];
+            Streams.readFully(mRemoteIn, data);
 
-        handleMessage(message, sequence, data);
+            handleMessage(message, sequence, data);
+        }
     }
 }
