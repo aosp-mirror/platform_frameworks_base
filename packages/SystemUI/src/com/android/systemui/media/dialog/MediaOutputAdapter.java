@@ -340,7 +340,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             updateDeviceStatusIcon(deviceStatusIcon);
                             mStatusIcon.setVisibility(View.VISIBLE);
                         }
-                        updateTwoLineLayoutContentAlpha(
+                        updateSingleLineLayoutContentAlpha(
                                 updateClickActionBasedOnSelectionBehavior(device)
                                         ? DEVICE_CONNECTED_ALPHA : DEVICE_DISCONNECTED_ALPHA);
                     } else {
@@ -361,6 +361,12 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             mSubTitleText.setAlpha(alphaValue);
             mTitleIcon.setAlpha(alphaValue);
             mTwoLineTitleText.setAlpha(alphaValue);
+            mStatusIcon.setAlpha(alphaValue);
+        }
+
+        private void updateSingleLineLayoutContentAlpha(float alphaValue) {
+            mTitleIcon.setAlpha(alphaValue);
+            mTitleText.setAlpha(alphaValue);
             mStatusIcon.setAlpha(alphaValue);
         }
 
