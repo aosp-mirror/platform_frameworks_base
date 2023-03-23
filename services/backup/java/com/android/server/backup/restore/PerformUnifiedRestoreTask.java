@@ -57,6 +57,7 @@ import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.backup.BackupAgentTimeoutParameters;
+import com.android.server.backup.BackupAndRestoreFeatureFlags;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.BackupUtils;
 import com.android.server.backup.OperationStorage;
@@ -168,11 +169,13 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     private final BackupEligibilityRules mBackupEligibilityRules;
 
     @VisibleForTesting
-    PerformUnifiedRestoreTask(UserBackupManagerService backupManagerService) {
+    PerformUnifiedRestoreTask(
+            UserBackupManagerService backupManagerService,
+            TransportConnection transportConnection) {
         mListener = null;
         mAgentTimeoutParameters = null;
         mOperationStorage = null;
-        mTransportConnection = null;
+        mTransportConnection = transportConnection;
         mTransportManager = null;
         mEphemeralOpToken = 0;
         mUserId = 0;
@@ -731,13 +734,18 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                             ParcelFileDescriptor.MODE_TRUNCATE);
 
             if (transport.getRestoreData(stage) != BackupTransport.TRANSPORT_OK) {
-                // Transport-level failure, so we wind everything up and
-                // terminate the restore operation.
+                // Transport-level failure. This failure could be specific to package currently in
+                // restore.
                 Slog.e(TAG, "Error getting restore data for " + packageName);
                 EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                 stage.close();
                 downloadFile.delete();
-                executeNextState(UnifiedRestoreState.FINAL);
+                UnifiedRestoreState nextState =
+                        BackupAndRestoreFeatureFlags
+                                .getUnifiedRestoreContinueAfterTransportFailureInKvRestore()
+                                ? UnifiedRestoreState.RUNNING_QUEUE
+                                : UnifiedRestoreState.FINAL;
+                executeNextState(nextState);
                 return;
             }
 
@@ -1358,6 +1366,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
     }
 
+    @VisibleForTesting
     void executeNextState(UnifiedRestoreState nextState) {
         if (MORE_DEBUG) {
             Slog.i(TAG, " => executing next step on "
@@ -1367,6 +1376,26 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         Message msg = backupManagerService.getBackupHandler().obtainMessage(
                 MSG_BACKUP_RESTORE_STEP, this);
         backupManagerService.getBackupHandler().sendMessage(msg);
+    }
+
+    @VisibleForTesting
+    UnifiedRestoreState getCurrentUnifiedRestoreStateForTesting() {
+        return mState;
+    }
+
+    @VisibleForTesting
+    void setCurrentUnifiedRestoreStateForTesting(UnifiedRestoreState state) {
+        mState = state;
+    }
+
+    @VisibleForTesting
+    void setStateDirForTesting(File stateDir) {
+        mStateDir = stateDir;
+    }
+
+    @VisibleForTesting
+    void initiateOneRestoreForTesting(PackageInfo app, long appVersionCode) {
+        initiateOneRestore(app, appVersionCode);
     }
 
     // restore observer support

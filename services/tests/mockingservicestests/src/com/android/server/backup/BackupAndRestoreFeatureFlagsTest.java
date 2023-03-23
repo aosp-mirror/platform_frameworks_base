@@ -104,4 +104,24 @@ public class BackupAndRestoreFeatureFlagsTest {
         assertThat(BackupAndRestoreFeatureFlags.getFullBackupUtilsRouteBufferSizeBytes())
                 .isEqualTo(5678);
     }
+
+    @Test
+    public void getUnifiedRestoreContinueAfterTransportFailureInKvRestore_notSet_returnsDefault() {
+        assertThat(
+                BackupAndRestoreFeatureFlags
+                        .getUnifiedRestoreContinueAfterTransportFailureInKvRestore())
+                .isEqualTo(true);
+    }
+
+    @Test
+    public void getUnifiedRestoreContinueAfterTransportFailureInKvRestore_set_returnsSetValue() {
+        DeviceConfig.setProperty(/*namespace=*/ "backup_and_restore",
+                /*name=*/ "unified_restore_continue_after_transport_failure_in_kv_restore",
+                /*value=*/ "false", /*makeDefault=*/ false);
+
+        assertThat(
+                BackupAndRestoreFeatureFlags
+                        .getUnifiedRestoreContinueAfterTransportFailureInKvRestore())
+                .isEqualTo(false);
+    }
 }
