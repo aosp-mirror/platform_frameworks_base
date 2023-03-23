@@ -21,12 +21,15 @@ import android.test.suitebuilder.annotation.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.never
@@ -58,36 +61,37 @@ class RestartDozeListenerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testStoreDreamState_onDreamingStarted() {
-        listener.onDreamingChanged(true)
+    fun testStoreDreamState_onDozingStarted() {
+        listener.onDozingChanged(true)
         executor.runAllReady()
-        assertThat(settings.getBool(RestartDozeListener.RESTART_NAP_KEY)).isTrue()
+        assertThat(settings.getBool(RestartDozeListener.RESTART_SLEEP_KEY)).isTrue()
     }
 
     @Test
-    fun testStoreDreamState_onDreamingStopped() {
-        listener.onDreamingChanged(false)
+    fun testStoreDozeState_onDozingStopped() {
+        listener.onDozingChanged(false)
         executor.runAllReady()
-        assertThat(settings.getBool(RestartDozeListener.RESTART_NAP_KEY)).isFalse()
+        assertThat(settings.getBool(RestartDozeListener.RESTART_SLEEP_KEY)).isFalse()
     }
 
     @Test
-    fun testRestoreDreamState_dreamingShouldStart() {
-        settings.putBool(RestartDozeListener.RESTART_NAP_KEY, true)
+    fun testRestoreDozeState_dozingShouldStart() {
+        settings.putBool(RestartDozeListener.RESTART_SLEEP_KEY, true)
         restartDozeListener.maybeRestartSleep()
         executor.advanceClockToLast()
         executor.runAllReady()
-        verify(powerManager).wakeUp(clock.uptimeMillis())
+        verify(powerManager)
+            .wakeUp(eq(clock.uptimeMillis()), eq(PowerManager.WAKE_REASON_APPLICATION), anyString())
         verify(powerManager).goToSleep(clock.uptimeMillis())
     }
 
     @Test
-    fun testRestoreDreamState_dreamingShouldNot() {
-        settings.putBool(RestartDozeListener.RESTART_NAP_KEY, false)
+    fun testRestoreDozeState_dozingShouldNotStart() {
+        settings.putBool(RestartDozeListener.RESTART_SLEEP_KEY, false)
         restartDozeListener.maybeRestartSleep()
         executor.advanceClockToLast()
         executor.runAllReady()
-        verify(powerManager, never()).wakeUp(anyLong())
+        verify(powerManager, never()).wakeUp(anyLong(), anyInt(), anyString())
         verify(powerManager, never()).goToSleep(anyLong())
     }
 }
