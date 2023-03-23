@@ -166,7 +166,8 @@ public abstract class JobService extends Service {
      *               the job in the {@link #onStartJob(JobParameters)} callback.
      * @param wantsReschedule {@code true} if this job should be rescheduled according
      *     to the back-off criteria specified when it was first scheduled; {@code false}
-     *     otherwise.
+     *     otherwise. When {@code false} is returned for a periodic job,
+     *     the job will be rescheduled according to its periodic policy.
      */
     public final void jobFinished(JobParameters params, boolean wantsReschedule) {
         mEngine.jobFinished(params, wantsReschedule);
@@ -217,7 +218,7 @@ public abstract class JobService extends Service {
      * {@link android.app.job.JobInfo.Builder#setRequiredNetworkType(int)}, yet while your
      * job was executing the user toggled WiFi. Another example is if you had specified
      * {@link android.app.job.JobInfo.Builder#setRequiresDeviceIdle(boolean)}, and the phone left
-     * its idle maintenance window. There are many other reasons a job can be stopped early besides
+     * its idle state. There are many other reasons a job can be stopped early besides
      * constraints no longer being satisfied. {@link JobParameters#getStopReason()} will return the
      * reason this method was called. You are solely responsible for the behavior of your
      * application upon receipt of this message; your app will likely start to misbehave if you
@@ -241,7 +242,8 @@ public abstract class JobService extends Service {
      *               included.
      * @return {@code true} to indicate to the JobManager whether you'd like to reschedule
      * this job based on the retry criteria provided at job creation-time; or {@code false}
-     * to end the job entirely.  Regardless of the value returned, your job must stop executing.
+     * to end the job entirely (or, for a periodic job, to reschedule it according to its
+     * requested periodic criteria). Regardless of the value returned, your job must stop executing.
      */
     public abstract boolean onStopJob(JobParameters params);
 
