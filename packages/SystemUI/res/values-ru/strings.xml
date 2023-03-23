@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Добавлен # элемент управления.}one{Добавлен # элемент управления.}few{Добавлено # элемента управления.}many{Добавлено # элементов управления.}other{Добавлено # элемента управления.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Удалено"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Добавить приложение \"<xliff:g id="APPNAME">%s</xliff:g>\"?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"Приложение \"<xliff:g id="APPNAME">%s</xliff:g>\" может выбирать, какой контент и настройки будут здесь показываться."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Удалить приложение \"<xliff:g id="APPNAME">%s</xliff:g>\" с панели управления устройствами?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Добавлено в избранное"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Добавлено в избранное на позицию <xliff:g id="NUMBER">%d</xliff:g>"</string>
