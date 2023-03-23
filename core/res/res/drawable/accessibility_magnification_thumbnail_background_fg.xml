@@ -16,11 +16,14 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
   <item>
     <shape android:shape="rectangle">
+      <!-- We draw the border as a foreground too so the thumbnail doesn't encroach and overlap
+          the rounded corners.
+          We also draw it on the background, otherwise you can see a tiny bit of the black fill
+          poking out around the white border. -->
       <stroke
           android:width="@dimen/accessibility_magnification_thumbnail_container_stroke_width"
           android:color="@color/accessibility_magnification_thumbnail_container_stroke_color" />
       <corners android:radius="8dp"/>
-      <solid android:color="@color/accessibility_magnification_thumbnail_container_background_color" />
     </shape>
   </item>
 </layer-list>

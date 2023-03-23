@@ -4515,10 +4515,13 @@
   <!-- FullScreenMagnification thumbnail -->
   <java-symbol type="layout" name="thumbnail_background_view" />
   <java-symbol type="drawable" name="accessibility_magnification_thumbnail_background_bg" />
+  <java-symbol type="drawable" name="accessibility_magnification_thumbnail_background_fg" />
   <java-symbol type="drawable" name="accessibility_magnification_thumbnail_bg" />
   <java-symbol type="color" name="accessibility_magnification_thumbnail_stroke_color" />
   <java-symbol type="color" name="accessibility_magnification_thumbnail_background_color" />
-  <java-symbol type="color" name="accessibility_magnification_thumbnail_color" />
+  <java-symbol type="color" name="accessibility_magnification_thumbnail_container_background_color" />
+  <java-symbol type="color" name="accessibility_magnification_thumbnail_container_stroke_color" />
+  <java-symbol type="dimen" name="accessibility_magnification_thumbnail_container_stroke_width" />
   <java-symbol type="dimen" name="accessibility_magnification_thumbnail_padding" />
   <java-symbol type="id" name="accessibility_magnification_thumbnail_view" />
   <!-- Package with global data query permissions for AppSearch -->
