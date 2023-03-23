@@ -1170,6 +1170,10 @@ public class DisplayRotation {
                 mDisplayPolicy.isCarDockEnablesAccelerometer();
         final boolean deskDockEnablesAccelerometer =
                 mDisplayPolicy.isDeskDockEnablesAccelerometer();
+        final boolean deskDockRespectsNoSensorAndLockedWithoutAccelerometer =
+                mDisplayPolicy.isDeskDockRespectsNoSensorAndLockedWithoutAccelerometer()
+                        && (orientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED
+                                || orientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 
         final int preferredRotation;
         if (!isDefaultDisplay) {
@@ -1188,7 +1192,8 @@ public class DisplayRotation {
         } else if ((dockMode == Intent.EXTRA_DOCK_STATE_DESK
                 || dockMode == Intent.EXTRA_DOCK_STATE_LE_DESK
                 || dockMode == Intent.EXTRA_DOCK_STATE_HE_DESK)
-                && (deskDockEnablesAccelerometer || mDeskDockRotation >= 0)) {
+                && (deskDockEnablesAccelerometer || mDeskDockRotation >= 0)
+                && !deskDockRespectsNoSensorAndLockedWithoutAccelerometer) {
             // Ignore sensor when in desk dock unless explicitly enabled.
             // This case can override the behavior of NOSENSOR, and can also
             // enable 180 degree rotation while docked.
