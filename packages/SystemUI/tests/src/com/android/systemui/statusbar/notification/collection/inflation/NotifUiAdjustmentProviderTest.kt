@@ -22,6 +22,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -53,6 +54,7 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
     private val secureSettings: SecureSettings = mock()
     private val uri = FakeSettings().getUriFor(SHOW_NOTIFICATION_SNOOZE)
     private val dirtyListener: Runnable = mock()
+    private val userTracker: UserTracker = mock()
 
     private val section = NotifSection(mock(), 0)
     private val entry = NotificationEntryBuilder()
@@ -67,13 +69,14 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
         secureSettings,
         lockscreenUserManager,
         sectionStyleProvider,
+        userTracker
     )
 
     @Before
     fun setup() {
         verifyNoMoreInteractions(secureSettings)
         adjustmentProvider.addDirtyListener(dirtyListener)
-        verify(secureSettings).getInt(eq(SHOW_NOTIFICATION_SNOOZE), any())
+        verify(secureSettings).getIntForUser(eq(SHOW_NOTIFICATION_SNOOZE), any(), any())
         contentObserver = withArgCaptor {
             verify(secureSettings).registerContentObserverForUser(
                 eq(SHOW_NOTIFICATION_SNOOZE), capture(), any()
@@ -105,18 +108,20 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
     fun onChangeWillQueryThenNotifyDirty() {
         contentObserver.onChange(false, listOf(uri), 0, 0)
         with(inOrder(secureSettings, dirtyListener)) {
-            verify(secureSettings).getInt(eq(SHOW_NOTIFICATION_SNOOZE), any())
+            verify(secureSettings).getIntForUser(eq(SHOW_NOTIFICATION_SNOOZE), any(), any())
             verify(dirtyListener).run()
         }
     }
 
     @Test
     fun changingSnoozeChangesProvidedAdjustment() {
-        whenever(secureSettings.getInt(eq(SHOW_NOTIFICATION_SNOOZE), any())).thenReturn(0)
+        whenever(secureSettings.getIntForUser(eq(SHOW_NOTIFICATION_SNOOZE), any(), any()))
+            .thenReturn(0)
         val original = adjustmentProvider.calculateAdjustment(entry)
         assertThat(original.isSnoozeEnabled).isFalse()
 
-        whenever(secureSettings.getInt(eq(SHOW_NOTIFICATION_SNOOZE), any())).thenReturn(1)
+        whenever(secureSettings.getIntForUser(eq(SHOW_NOTIFICATION_SNOOZE), any(), any()))
+            .thenReturn(1)
         contentObserver.onChange(false, listOf(uri), 0, 0)
         val withSnoozing = adjustmentProvider.calculateAdjustment(entry)
         assertThat(withSnoozing.isSnoozeEnabled).isTrue()
