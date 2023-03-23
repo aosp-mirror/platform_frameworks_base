@@ -841,7 +841,8 @@ public final class PendingIntent implements Parcelable {
     /**
      * Perform the operation associated with this PendingIntent.
      *
-     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -855,7 +856,8 @@ public final class PendingIntent implements Parcelable {
      *
      * @param code Result code to supply back to the PendingIntent's target.
      *
-     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -875,7 +877,8 @@ public final class PendingIntent implements Parcelable {
      * original Intent. If flag {@link #FLAG_IMMUTABLE} was set when this
      * pending intent was created, this argument will be ignored.
      *
-     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -892,6 +895,11 @@ public final class PendingIntent implements Parcelable {
      * @param options Additional options the caller would like to provide to modify the
      * sending behavior.  May be built from an {@link ActivityOptions} to apply to an
      * activity start.
+     *
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String)
+     *
+     * @throws CanceledException Throws CanceledException if the PendingIntent
+     * is no longer allowing more intents to be sent through it.
      */
     public void send(@Nullable Bundle options) throws CanceledException {
         send(null, 0, null, null, null, null, options);
@@ -908,7 +916,8 @@ public final class PendingIntent implements Parcelable {
      * should happen.  If null, the callback will happen from the thread
      * pool of the process.
      *
-     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -942,11 +951,8 @@ public final class PendingIntent implements Parcelable {
      * should happen.  If null, the callback will happen from the thread
      * pool of the process.
      *
-     * @see #send()
-     * @see #send(int)
-     * @see #send(Context, int, Intent)
-     * @see #send(int, android.app.PendingIntent.OnFinished, Handler)
-     * @see #send(Context, int, Intent, OnFinished, Handler, String)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -985,11 +991,8 @@ public final class PendingIntent implements Parcelable {
      * {@link Context#sendBroadcast(Intent, String) Context.sendOrderedBroadcast(Intent, String)}.
      * If null, no permission is required.
      *
-     * @see #send()
-     * @see #send(int)
-     * @see #send(Context, int, Intent)
-     * @see #send(int, android.app.PendingIntent.OnFinished, Handler)
-     * @see #send(Context, int, Intent, OnFinished, Handler)
+     * @see #send(Context, int, Intent, android.app.PendingIntent.OnFinished, Handler, String,
+     *          Bundle)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
@@ -1031,12 +1034,6 @@ public final class PendingIntent implements Parcelable {
      * If null, no permission is required.
      * @param options Additional options the caller would like to provide to modify the sending
      * behavior.  May be built from an {@link ActivityOptions} to apply to an activity start.
-     *
-     * @see #send()
-     * @see #send(int)
-     * @see #send(Context, int, Intent)
-     * @see #send(int, android.app.PendingIntent.OnFinished, Handler)
-     * @see #send(Context, int, Intent, OnFinished, Handler)
      *
      * @throws CanceledException Throws CanceledException if the PendingIntent
      * is no longer allowing more intents to be sent through it.
