@@ -977,6 +977,8 @@ final class LetterboxUiController {
      * </ul>
      */
     private boolean isHorizontalReachabilityEnabled(Configuration parentConfiguration) {
+        // Use screen resolved bounds which uses resolved bounds or size compat bounds
+        // as activity bounds can sometimes be empty
         return mLetterboxConfiguration.getIsHorizontalReachabilityEnabled()
                 && parentConfiguration.windowConfiguration.getWindowingMode()
                         == WINDOWING_MODE_FULLSCREEN
@@ -984,7 +986,7 @@ final class LetterboxUiController {
                         && mActivityRecord.getOrientationForReachability() == ORIENTATION_PORTRAIT)
                 // Check whether the activity fills the parent vertically.
                 && parentConfiguration.windowConfiguration.getAppBounds().height()
-                        <= mActivityRecord.getBounds().height();
+                        <= mActivityRecord.getScreenResolvedBounds().height();
     }
 
     @VisibleForTesting
@@ -1004,6 +1006,8 @@ final class LetterboxUiController {
      * </ul>
      */
     private boolean isVerticalReachabilityEnabled(Configuration parentConfiguration) {
+        // Use screen resolved bounds which uses resolved bounds or size compat bounds
+        // as activity bounds can sometimes be empty
         return mLetterboxConfiguration.getIsVerticalReachabilityEnabled()
                 && parentConfiguration.windowConfiguration.getWindowingMode()
                         == WINDOWING_MODE_FULLSCREEN
@@ -1011,7 +1015,7 @@ final class LetterboxUiController {
                         && mActivityRecord.getOrientationForReachability() == ORIENTATION_LANDSCAPE)
                 // Check whether the activity fills the parent horizontally.
                 && parentConfiguration.windowConfiguration.getBounds().width()
-                        == mActivityRecord.getBounds().width();
+                        == mActivityRecord.getScreenResolvedBounds().width();
     }
 
     @VisibleForTesting
