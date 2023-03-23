@@ -1255,7 +1255,7 @@
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen, mens du konfigurerer dit fingeraftryk."</string>
     <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Sluk skærmen for at afslutte konfigurationen"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Deaktiver"</string>
-    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vil du bekræfte dit fingeraftryk?"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vil du verificere dit fingeraftryk?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen for at bekræfte dit fingeraftryk."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Sluk skærm"</string>
     <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Fortsæt"</string>

@@ -8071,6 +8071,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mSizeCompatScale = 1f;
         mSizeCompatBounds = null;
         mCompatDisplayInsets = null;
+        mLetterboxUiController.clearInheritedCompatDisplayInsets();
     }
 
     @VisibleForTesting
@@ -8384,6 +8385,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final int dy = (int) (screenPosY / mSizeCompatScale + 0.5f) - screenPosY;
             offsetBounds(resolvedConfig, dx, dy);
         }
+    }
+
+    @NonNull Rect getScreenResolvedBounds() {
+        final Configuration resolvedConfig = getResolvedOverrideConfiguration();
+        final Rect resolvedBounds = resolvedConfig.windowConfiguration.getBounds();
+        return mSizeCompatBounds != null ? mSizeCompatBounds : resolvedBounds;
     }
 
     void recomputeConfiguration() {

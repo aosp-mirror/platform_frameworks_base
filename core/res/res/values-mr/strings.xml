@@ -587,11 +587,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"एरर ऑथेंटिकेट करत आहे"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"स्क्रीन लॉक वापरा"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"पुढे सुरू ठेवण्यासाठी तुमचे स्क्रीन लॉक एंटर करा"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"सेन्सरवर जोरात दाबा"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"सेन्सरवर जोरात प्रेस करा"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"फिंगरप्रिंट ओळखता आली नाही. पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"फिंगरप्रिंट सेन्सर स्वच्छ करा आणि पुन्हा प्रयत्न करा"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"सेन्सर स्वच्छ करा आणि पुन्हा प्रयत्न करा"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेन्सरवर जोरात दाबा"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेन्सरवर जोरात प्रेस करा"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"बोट खूप सावकाश हलविले. कृपया पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"दुसरी फिंगरप्रिंट वापरून पहा"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"खूप प्रखर"</string>
