@@ -577,7 +577,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Permet que l\'aplicació llegeixi les ubicacions de les teves col·leccions multimèdia."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Utilitza la biometria"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Fes servir la biometria o el bloqueig de pantalla"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifica que ets tu"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifica la teva identitat"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Utilitza la teva biometria per continuar"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Utilitza la biometria o el bloqueig de pantalla per continuar"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Maquinari biomètric no disponible"</string>
@@ -1232,7 +1232,7 @@
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"Escala"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"Mostra sempre"</string>
     <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Torna a activar-ho a Configuració del sistema &gt; Aplicacions &gt; Baixades."</string>
-    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admet la mida de pantalla actual i és possible que funcioni de manera inesperada."</string>
+    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admet la mida de visualització actual i és possible que funcioni de manera inesperada."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Mostra sempre"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> es va crear per a una versió incompatible del sistema operatiu Android i pot funcionar de manera inesperada. És possible que hi hagi disponible una versió actualitzada de l\'aplicació."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Mostra sempre"</string>
