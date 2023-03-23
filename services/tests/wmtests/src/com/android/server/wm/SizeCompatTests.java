@@ -3698,7 +3698,6 @@ public class SizeCompatTests extends WindowTestsBase {
 
     @Test
     public void testUpdateResolvedBoundsVerticalPosition_tabletop() {
-
         // Set up a display in portrait with a fixed-orientation LANDSCAPE app
         setUpDisplaySizeWithApp(1400, 2800);
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
@@ -3720,16 +3719,15 @@ public class SizeCompatTests extends WindowTestsBase {
         setFoldablePosture(false /* isHalfFolded */, false /* isTabletop */);
 
         assertEquals(letterboxNoFold, mActivity.getBounds());
-
     }
 
     @Test
-    public void testUpdateResolvedBoundsHorizontalPosition_book() {
-
+    public void testUpdateResolvedBoundsHorizontalPosition_bookModeEnabled() {
         // Set up a display in landscape with a fixed-orientation PORTRAIT app
         setUpDisplaySizeWithApp(2800, 1400);
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        mActivity.mWmService.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(
+        mWm.mLetterboxConfiguration.setIsAutomaticReachabilityInBookModeEnabled(true);
+        mWm.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(
                 1.0f /*letterboxVerticalPositionMultiplier*/);
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
 
@@ -3747,7 +3745,28 @@ public class SizeCompatTests extends WindowTestsBase {
         setFoldablePosture(false /* isHalfFolded */, false /* isTabletop */);
 
         assertEquals(letterboxNoFold, mActivity.getBounds());
+    }
 
+    @Test
+    public void testUpdateResolvedBoundsHorizontalPosition_bookModeDisabled_centered() {
+        // Set up a display in landscape with a fixed-orientation PORTRAIT app
+        setUpDisplaySizeWithApp(2800, 1400);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mWm.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(0.5f);
+        prepareUnresizable(mActivity, 1.75f, SCREEN_ORIENTATION_PORTRAIT);
+
+        Rect letterboxNoFold = new Rect(1000, 0, 1800, 1400);
+        assertEquals(letterboxNoFold, mActivity.getBounds());
+
+        // Make the activity full-screen
+        mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+
+        // Stay centered and bounds don't change
+        setFoldablePosture(true /* isHalfFolded */, false /* isTabletop */);
+        assertEquals(letterboxNoFold, mActivity.getBounds());
+
+        setFoldablePosture(false /* isHalfFolded */, false /* isTabletop */);
+        assertEquals(letterboxNoFold, mActivity.getBounds());
     }
 
     private void setFoldablePosture(ActivityRecord activity, boolean isHalfFolded,
