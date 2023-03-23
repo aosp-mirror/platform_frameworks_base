@@ -237,7 +237,6 @@ public class PreferencesHelper implements RankingConfig {
                     Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
                     NotificationManagerService.REVIEW_NOTIF_STATE_SHOULD_SHOW);
         }
-        ArrayList<PermissionHelper.PackagePermission> pkgPerms = new ArrayList<>();
         synchronized (mPackagePreferences) {
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                 tag = parser.getName();
@@ -255,18 +254,9 @@ public class PreferencesHelper implements RankingConfig {
                         String name = parser.getAttributeValue(null, ATT_NAME);
                         if (!TextUtils.isEmpty(name)) {
                             restorePackage(parser, forRestore, userId, name, upgradeForBubbles,
-                                    migrateToPermission, pkgPerms);
+                                    migrateToPermission);
                         }
                     }
-                }
-            }
-        }
-        if (migrateToPermission) {
-            for (PackagePermission p : pkgPerms) {
-                try {
-                    mPermissionHelper.setNotificationPermission(p);
-                } catch (Exception e) {
-                    Slog.e(TAG, "could not migrate setting for " + p.packageName, e);
                 }
             }
         }
@@ -275,7 +265,7 @@ public class PreferencesHelper implements RankingConfig {
     @GuardedBy("mPackagePreferences")
     private void restorePackage(TypedXmlPullParser parser, boolean forRestore,
             @UserIdInt int userId, String name, boolean upgradeForBubbles,
-            boolean migrateToPermission, ArrayList<PermissionHelper.PackagePermission> pkgPerms) {
+            boolean migrateToPermission) {
         try {
             int uid = parser.getAttributeInt(null, ATT_UID, UNKNOWN_UID);
             if (forRestore) {
@@ -382,14 +372,6 @@ public class PreferencesHelper implements RankingConfig {
             if (migrateToPermission) {
                 r.importance = appImportance;
                 r.migrateToPm = true;
-                if (r.uid != UNKNOWN_UID) {
-                    // Don't call into permission system until we have a valid uid
-                    PackagePermission pkgPerm = new PackagePermission(
-                            r.pkg, UserHandle.getUserId(r.uid),
-                            r.importance != IMPORTANCE_NONE,
-                            hasUserConfiguredSettings(r));
-                    pkgPerms.add(pkgPerm);
-                }
             }
         } catch (Exception e) {
             Slog.w(TAG, "Failed to restore pkg", e);
@@ -2676,6 +2658,31 @@ public class PreferencesHelper implements RankingConfig {
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
                 for (NotificationChannel channel : r.channels.values()) {
                     channel.unlockFields(USER_LOCKED_IMPORTANCE);
+                }
+            }
+        }
+    }
+
+    public void migrateNotificationPermissions(List<UserInfo> users) {
+        for (UserInfo user : users) {
+            List<PackageInfo> packages = mPm.getInstalledPackagesAsUser(
+                    PackageManager.PackageInfoFlags.of(PackageManager.MATCH_ALL),
+                    user.getUserHandle().getIdentifier());
+            for (PackageInfo pi : packages) {
+                synchronized (mPackagePreferences) {
+                    PackagePreferences p = getOrCreatePackagePreferencesLocked(
+                            pi.packageName, pi.applicationInfo.uid);
+                    if (p.migrateToPm && p.uid != UNKNOWN_UID) {
+                        try {
+                            PackagePermission pkgPerm = new PackagePermission(
+                                    p.pkg, UserHandle.getUserId(p.uid),
+                                    p.importance != IMPORTANCE_NONE,
+                                    hasUserConfiguredSettings(p));
+                            mPermissionHelper.setNotificationPermission(pkgPerm);
+                        } catch (Exception e) {
+                            Slog.e(TAG, "could not migrate setting for " + p.pkg, e);
+                        }
+                    }
                 }
             }
         }

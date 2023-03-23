@@ -27503,24 +27503,15 @@ package android.nfc {
 
   public final class NfcAdapter {
     method public void disableForegroundDispatch(android.app.Activity);
-    method @Deprecated public void disableForegroundNdefPush(android.app.Activity);
     method public void disableReaderMode(android.app.Activity);
     method public void enableForegroundDispatch(android.app.Activity, android.app.PendingIntent, android.content.IntentFilter[], String[][]);
-    method @Deprecated public void enableForegroundNdefPush(android.app.Activity, android.nfc.NdefMessage);
     method public void enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle);
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
     method @Nullable public android.nfc.NfcAntennaInfo getNfcAntennaInfo();
     method public boolean ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler);
-    method @Deprecated public boolean invokeBeam(android.app.Activity);
     method public boolean isEnabled();
-    method @Deprecated public boolean isNdefPushEnabled();
     method public boolean isSecureNfcEnabled();
     method public boolean isSecureNfcSupported();
-    method @Deprecated public void setBeamPushUris(android.net.Uri[], android.app.Activity);
-    method @Deprecated public void setBeamPushUrisCallback(android.nfc.NfcAdapter.CreateBeamUrisCallback, android.app.Activity);
-    method @Deprecated public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, android.app.Activity...);
-    method @Deprecated public void setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...);
-    method @Deprecated public void setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...);
     field public static final String ACTION_ADAPTER_STATE_CHANGED = "android.nfc.action.ADAPTER_STATE_CHANGED";
     field public static final String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
     field @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public static final String ACTION_PREFERRED_PAYMENT_CHANGED = "android.nfc.action.PREFERRED_PAYMENT_CHANGED";
@@ -43311,6 +43302,7 @@ package android.telephony {
     method public int getActiveSubscriptionInfoCountMax();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.telephony.SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telephony.SubscriptionInfo> getActiveSubscriptionInfoList();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, "carrier privileges"}) public java.util.List<android.telephony.SubscriptionInfo> getAllSubscriptionInfoList();
     method @NonNull public java.util.List<android.telephony.SubscriptionInfo> getCompleteActiveSubscriptionInfoList();
     method public static int getDefaultDataSubscriptionId();
     method public static int getDefaultSmsSubscriptionId();
@@ -43322,7 +43314,8 @@ package android.telephony {
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE", "carrier privileges"}) public String getPhoneNumber(int, int);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE", "carrier privileges"}) public String getPhoneNumber(int);
     method public static int getSlotIndex(int);
-    method @Nullable public int[] getSubscriptionIds(int);
+    method public static int getSubscriptionId(int);
+    method @Deprecated @Nullable public int[] getSubscriptionIds(int);
     method @NonNull public java.util.List<android.telephony.SubscriptionPlan> getSubscriptionPlans(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telephony.SubscriptionInfo> getSubscriptionsInGroup(@NonNull android.os.ParcelUuid);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isActiveSubscriptionId(int);

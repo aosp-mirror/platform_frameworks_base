@@ -4334,6 +4334,22 @@ public class CarrierConfigManager {
             "min_udp_port_4500_nat_timeout_sec_int";
 
     /**
+     * The preferred IKE protocol for ESP packets.
+     *
+     * This will be used by Android platform VPNs to select preferred encapsulation type and IP
+     * protocol type. The possible customization values are:
+     *
+     * AUTO IP VERSION and ENCAPSULATION TYPE SELECTION : "0"
+     * IPv4 UDP                                         : "40"
+     * IPv6 ESP                                         : "61"
+     *
+     * See the {@code PREFERRED_IKE_PROTOCOL_} constants in
+     * {@link com.android.server.connectivity.Vpn}.
+     * @hide
+     */
+    public static final String KEY_PREFERRED_IKE_PROTOCOL_INT = "preferred_ike_protocol_int";
+
+    /**
      * Specifies whether the system should prefix the EAP method to the anonymous identity.
      * The following prefix will be added if this key is set to TRUE:
      *   EAP-AKA: "0"
@@ -7880,6 +7896,16 @@ public class CarrierConfigManager {
         public static final String KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY =
                 KEY_PREFIX + "epdg_address_priority_int_array";
 
+        /**
+         * A priority list of PLMN to be used in EPDG_ADDRESS_PLMN. Possible values are {@link
+         * #EPDG_PLMN_RPLMN}, {@link #EPDG_PLMN_HPLMN}, {@link #EPDG_PLMN_EHPLMN_ALL}, {@link
+         * #EPDG_PLMN_EHPLMN_FIRST}
+         *
+         * @hide
+         */
+        public static final String KEY_EPDG_PLMN_PRIORITY_INT_ARRAY =
+                KEY_PREFIX + "epdg_plmn_priority_int_array";
+
         /** Epdg static IP address or FQDN */
         public static final String KEY_EPDG_STATIC_ADDRESS_STRING =
                 KEY_PREFIX + "epdg_static_address_string";
@@ -8081,6 +8107,36 @@ public class CarrierConfigManager {
         public static final int EPDG_ADDRESS_VISITED_COUNTRY = 4;
 
         /** @hide */
+        @IntDef({
+                EPDG_PLMN_RPLMN,
+                EPDG_PLMN_HPLMN,
+                EPDG_PLMN_EHPLMN_ALL,
+                EPDG_PLMN_EHPLMN_FIRST
+        })
+        public @interface EpdgAddressPlmnType {}
+
+        /**
+         * Use the Registered PLMN
+         * @hide
+         */
+        public static final int EPDG_PLMN_RPLMN = 0;
+        /**
+         * Use the PLMN derived from IMSI
+         * @hide
+         */
+        public static final int EPDG_PLMN_HPLMN = 1;
+        /**
+         * Use all EHPLMN from SIM EF files
+         * @hide
+         */
+        public static final int EPDG_PLMN_EHPLMN_ALL = 2;
+        /**
+         * Use the first EHPLMN from SIM EF files
+         * @hide
+         */
+        public static final int EPDG_PLMN_EHPLMN_FIRST = 3;
+
+        /** @hide */
         @IntDef({ID_TYPE_FQDN, ID_TYPE_RFC822_ADDR, ID_TYPE_KEY_ID})
         public @interface IkeIdType {}
 
@@ -8215,6 +8271,12 @@ public class CarrierConfigManager {
             defaults.putIntArray(
                     KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY,
                     new int[] {EPDG_ADDRESS_PLMN, EPDG_ADDRESS_STATIC});
+            defaults.putIntArray(
+                    KEY_EPDG_PLMN_PRIORITY_INT_ARRAY,
+                    new int[]{
+                            EPDG_PLMN_RPLMN,
+                            EPDG_PLMN_HPLMN,
+                            EPDG_PLMN_EHPLMN_ALL});
             defaults.putStringArray(KEY_MCC_MNCS_STRING_ARRAY, new String[] {});
             defaults.putInt(KEY_IKE_LOCAL_ID_TYPE_INT, ID_TYPE_RFC822_ADDR);
             defaults.putInt(KEY_IKE_REMOTE_ID_TYPE_INT, ID_TYPE_FQDN);
@@ -9210,6 +9272,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
         sDefaults.putInt(KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT, 300);
+        sDefaults.putInt(KEY_PREFERRED_IKE_PROTOCOL_INT, 0);
         // Default wifi configurations.
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putBoolean(ENABLE_EAP_METHOD_PREFIX_BOOL, false);
