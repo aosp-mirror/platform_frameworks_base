@@ -325,7 +325,12 @@ public final class SQLiteSession {
                         mConnection.execute("BEGIN EXCLUSIVE;", null,
                                 cancellationSignal); // might throw
                         break;
+                    case TRANSACTION_MODE_DEFERRED:
+                        mConnection.execute("BEGIN DEFERRED;", null,
+                                cancellationSignal); // might throw
+                        break;
                     default:
+                        // Per SQLite documentation, this executes in DEFERRED mode.
                         mConnection.execute("BEGIN;", null, cancellationSignal); // might throw
                         break;
                 }

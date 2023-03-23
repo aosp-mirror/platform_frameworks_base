@@ -675,6 +675,30 @@ public final class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
+     * Begins a transaction in DEFERRED mode.
+     * <p>
+     * Transactions can be nested. When the outer transaction is ended all of the work done in
+     * that transaction and all of the nested transactions will be committed or rolled back. The
+     * changes will be rolled back if any transaction is ended without being marked as clean (by
+     * calling setTransactionSuccessful). Otherwise they will be committed.
+     * <p>
+     * Here is the standard idiom for transactions:
+     *
+     * <pre>
+     *   db.beginTransactionDeferred();
+     *   try {
+     *     ...
+     *     db.setTransactionSuccessful();
+     *   } finally {
+     *     db.endTransaction();
+     *   }
+     * </pre>
+     */
+    public void beginTransactionDeferred() {
+        beginTransactionWithListenerDeferred(null);
+    }
+
+    /**
      * Begins a transaction in EXCLUSIVE mode.
      * <p>
      * Transactions can be nested.
@@ -699,7 +723,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * commits, or is rolled back, either explicitly or by a call to
      * {@link #yieldIfContendedSafely}.
      */
-    public void beginTransactionWithListener(SQLiteTransactionListener transactionListener) {
+    public void beginTransactionWithListener(
+            @Nullable SQLiteTransactionListener transactionListener) {
         beginTransaction(transactionListener, true);
     }
 
@@ -728,19 +753,53 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            explicitly or by a call to {@link #yieldIfContendedSafely}.
      */
     public void beginTransactionWithListenerNonExclusive(
-            SQLiteTransactionListener transactionListener) {
+            @Nullable SQLiteTransactionListener transactionListener) {
         beginTransaction(transactionListener, false);
+    }
+
+    /**
+     * Begins a transaction in DEFERRED mode.
+     * <p>
+     * Transactions can be nested. When the outer transaction is ended all of the work done in
+     * that transaction and all of the nested transactions will be committed or rolled back. The
+     * changes will be rolled back if any transaction is ended without being marked as clean (by
+     * calling setTransactionSuccessful). Otherwise they will be committed.
+     * <p>
+     * Here is the standard idiom for transactions:
+     *
+     * <pre>
+     *   db.beginTransactionDeferred();
+     *   try {
+     *     ...
+     *     db.setTransactionSuccessful();
+     *   } finally {
+     *     db.endTransaction();
+     *   }
+     * </pre>
+     */
+    public void beginTransactionWithListenerDeferred(
+            @Nullable SQLiteTransactionListener transactionListener) {
+        beginTransaction(transactionListener, SQLiteSession.TRANSACTION_MODE_DEFERRED);
     }
 
     @UnsupportedAppUsage
     private void beginTransaction(SQLiteTransactionListener transactionListener,
             boolean exclusive) {
+        beginTransaction(transactionListener,
+                exclusive ? SQLiteSession.TRANSACTION_MODE_EXCLUSIVE :
+                SQLiteSession.TRANSACTION_MODE_IMMEDIATE);
+    }
+
+    /**
+     * Begin a transaction with the specified mode.  Valid modes are
+     * {@link SquLiteSession.TRANSACTION_MODE_DEFERRED},
+     * {@link SquLiteSession.TRANSACTION_MODE_IMMEDIATE}, and
+     * {@link SquLiteSession.TRANSACTION_MODE_EXCLUSIVE}.
+     */
+    private void beginTransaction(@Nullable SQLiteTransactionListener listener, int mode) {
         acquireReference();
         try {
-            getThreadSession().beginTransaction(
-                    exclusive ? SQLiteSession.TRANSACTION_MODE_EXCLUSIVE :
-                            SQLiteSession.TRANSACTION_MODE_IMMEDIATE,
-                    transactionListener,
+            getThreadSession().beginTransaction(mode, listener,
                     getThreadDefaultConnectionFlags(false /*readOnly*/), null);
         } finally {
             releaseReference();
@@ -3113,4 +3172,3 @@ public final class SQLiteDatabase extends SQLiteClosable {
         ContentResolver.onDbCorruption(tag, message, stacktrace);
     }
 }
-
