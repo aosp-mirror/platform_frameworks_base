@@ -465,22 +465,36 @@ public final class JobServiceContext implements ServiceConnection {
                     mExecutionStartTimeElapsed - job.enqueueTime,
                     job.getJob().isUserInitiated(),
                     job.shouldTreatAsUserInitiatedJob());
+            final String sourcePackage = job.getSourcePackageName();
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
+                final String componentPackage = job.getServiceComponent().getPackageName();
+                String traceTag = "*job*<" + job.getSourceUid() + ">" + sourcePackage;
+                if (!sourcePackage.equals(componentPackage)) {
+                    traceTag += ":" + componentPackage;
+                }
+                traceTag += "/" + job.getServiceComponent().getShortClassName();
+                if (!componentPackage.equals(job.serviceProcessName)) {
+                    traceTag += "$" + job.serviceProcessName;
+                }
+                if (job.getNamespace() != null) {
+                    traceTag += "@" + job.getNamespace();
+                }
+                traceTag += "#" + job.getJobId();
+
                 // Use the context's ID to distinguish traces since there'll only be one job
                 // running per context.
                 Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
-                        job.getTag(), getId());
+                        traceTag, getId());
             }
             try {
                 mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
             } catch (RemoteException e) {
                 // Whatever.
             }
-            final String jobPackage = job.getSourcePackageName();
             final int jobUserId = job.getSourceUserId();
             UsageStatsManagerInternal usageStats =
                     LocalServices.getService(UsageStatsManagerInternal.class);
-            usageStats.setLastJobRunTime(jobPackage, jobUserId, mExecutionStartTimeElapsed);
+            usageStats.setLastJobRunTime(sourcePackage, jobUserId, mExecutionStartTimeElapsed);
             mAvailable = false;
             mStoppedReason = null;
             mStoppedTime = 0;
