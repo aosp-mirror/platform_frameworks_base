@@ -41,6 +41,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
@@ -103,6 +104,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Mock private SecureSettings mSecureSettings;
     @Spy private FakeNotifInflater mNotifInflater = new FakeNotifInflater();
     private final SectionStyleProvider mSectionStyleProvider = new SectionStyleProvider();
+    @Mock private UserTracker mUserTracker;
 
     private NotifUiAdjustmentProvider mAdjustmentProvider;
 
@@ -118,7 +120,8 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
                 mHandler,
                 mSecureSettings,
                 mLockscreenUserManager,
-                mSectionStyleProvider);
+                mSectionStyleProvider,
+                mUserTracker);
         mEntry = getNotificationEntryBuilder().setParent(ROOT_ENTRY).build();
         mInflationError = new Exception(TEST_MESSAGE);
         mErrorManager = new NotifInflationErrorManager();
