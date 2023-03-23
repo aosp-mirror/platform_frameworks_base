@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics.domain.interactor
 
+import android.hardware.biometrics.AuthenticateOptions
 import android.hardware.biometrics.IBiometricContextListener
 import android.util.Log
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
@@ -23,7 +24,8 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.WakefulnessLifecycle
-import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
@@ -39,6 +41,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
@@ -49,14 +52,17 @@ import kotlinx.coroutines.launch
  */
 interface LogContextInteractor {
 
-    /** If the device is dozing. */
-    val isDozing: Flow<Boolean>
+    /** If the device is showing aod. */
+    val isAod: Flow<Boolean>
 
     /** If the device is currently awake with the screen on. */
     val isAwake: Flow<Boolean>
 
     /** Current device fold state, defined as [IBiometricContextListener.FoldState]. */
     val foldState: Flow<Int>
+
+    /** Current display state, defined as [AuthenticateOptions.DisplayState] */
+    val displayState: Flow<Int>
 
     /**
      * Add a permanent context listener.
@@ -72,46 +78,41 @@ class LogContextInteractorImpl
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val statusBarStateController: StatusBarStateController,
-    private val wakefulnessLifecycle: WakefulnessLifecycle,
     private val foldProvider: FoldStateProvider,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) : LogContextInteractor {
 
     init {
         foldProvider.start()
     }
 
-    override val isDozing =
-        conflatedCallbackFlow {
-                val callback =
-                    object : StatusBarStateController.StateListener {
-                        override fun onDozingChanged(isDozing: Boolean) {
-                            trySendWithFailureLogging(isDozing, TAG)
-                        }
-                    }
-
-                statusBarStateController.addCallback(callback)
-                trySendWithFailureLogging(statusBarStateController.isDozing, TAG)
-                awaitClose { statusBarStateController.removeCallback(callback) }
+    override val displayState =
+        keyguardTransitionInteractor.startedKeyguardTransitionStep.map {
+            when (it.to) {
+                KeyguardState.LOCKSCREEN,
+                KeyguardState.OCCLUDED,
+                KeyguardState.ALTERNATE_BOUNCER,
+                KeyguardState.PRIMARY_BOUNCER -> AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN
+                KeyguardState.AOD -> AuthenticateOptions.DISPLAY_STATE_AOD
+                KeyguardState.OFF,
+                KeyguardState.DOZING -> AuthenticateOptions.DISPLAY_STATE_NO_UI
+                KeyguardState.DREAMING -> AuthenticateOptions.DISPLAY_STATE_SCREENSAVER
+                else -> AuthenticateOptions.DISPLAY_STATE_UNKNOWN
             }
-            .distinctUntilChanged()
+        }
+
+    override val isAod =
+        displayState.map { it == AuthenticateOptions.DISPLAY_STATE_AOD }.distinctUntilChanged()
 
     override val isAwake =
-        conflatedCallbackFlow {
-                val callback =
-                    object : WakefulnessLifecycle.Observer {
-                        override fun onFinishedWakingUp() {
-                            trySendWithFailureLogging(true, TAG)
-                        }
-
-                        override fun onStartedGoingToSleep() {
-                            trySendWithFailureLogging(false, TAG)
-                        }
-                    }
-
-                wakefulnessLifecycle.addObserver(callback)
-                trySendWithFailureLogging(wakefulnessLifecycle.isAwake, TAG)
-                awaitClose { wakefulnessLifecycle.removeObserver(callback) }
+        displayState
+            .map {
+                when (it) {
+                    AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN,
+                    AuthenticateOptions.DISPLAY_STATE_SCREENSAVER,
+                    AuthenticateOptions.DISPLAY_STATE_UNKNOWN -> true
+                    else -> false
+                }
             }
             .distinctUntilChanged()
 
@@ -146,14 +147,20 @@ constructor(
 
     override fun addBiometricContextListener(listener: IBiometricContextListener): Job {
         return applicationScope.launch {
-            combine(isDozing, isAwake) { doze, awake -> doze to awake }
-                .onEach { (doze, awake) -> listener.onDozeChanged(doze, awake) }
+            combine(isAod, isAwake) { doze, awake -> doze to awake }
+                .onEach { (aod, awake) -> listener.onDozeChanged(aod, awake) }
                 .catch { t -> Log.w(TAG, "failed to notify new doze state", t) }
                 .launchIn(this)
 
             foldState
                 .onEach { state -> listener.onFoldChanged(state) }
                 .catch { t -> Log.w(TAG, "failed to notify new fold state", t) }
+                .launchIn(this)
+
+            displayState
+                .distinctUntilChanged()
+                .onEach { state -> listener.onDisplayStateChanged(state) }
+                .catch { t -> Log.w(TAG, "failed to notify new display state", t) }
                 .launchIn(this)
 
             listener.asBinder().linkToDeath({ cancel() }, 0)
