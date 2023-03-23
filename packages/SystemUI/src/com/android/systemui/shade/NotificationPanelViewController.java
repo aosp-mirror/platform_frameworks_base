@@ -2733,7 +2733,6 @@ public final class NotificationPanelViewController implements Dumpable {
     public void setIsLaunchAnimationRunning(boolean running) {
         boolean wasRunning = mIsLaunchAnimationRunning;
         mIsLaunchAnimationRunning = running;
-        mCentralSurfaces.updateIsKeyguard();
         if (wasRunning != mIsLaunchAnimationRunning) {
             mShadeExpansionStateManager.notifyLaunchingActivityChanged(running);
         }
@@ -3803,10 +3802,6 @@ public final class NotificationPanelViewController implements Dumpable {
 
     public boolean isCollapsing() {
         return mClosing || mIsLaunchAnimationRunning;
-    }
-
-    public boolean isLaunchAnimationRunning() {
-        return mIsLaunchAnimationRunning;
     }
 
     public boolean isTracking() {
