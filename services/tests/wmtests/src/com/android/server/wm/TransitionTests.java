@@ -46,7 +46,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealM
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.wm.SnapshotController.TASK_CLOSE;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
@@ -1383,8 +1382,6 @@ public class TransitionTests extends WindowTestsBase {
     @Test
     public void testTransientLaunch() {
         spyOn(mWm.mSnapshotController.mTaskSnapshotController);
-        mWm.mSnapshotController.registerTransitionStateConsumer(TASK_CLOSE,
-                mWm.mSnapshotController.mTaskSnapshotController::handleTaskClose);
         final ArrayList<ActivityRecord> enteringAnimReports = new ArrayList<>();
         final TransitionController controller = new TestTransitionController(mAtm) {
             @Override

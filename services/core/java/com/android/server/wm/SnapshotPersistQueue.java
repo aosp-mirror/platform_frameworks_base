@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.graphics.Bitmap.CompressFormat.JPEG;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -26,6 +27,7 @@ import android.annotation.TestApi;
 import android.graphics.Bitmap;
 import android.os.Process;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.window.TaskSnapshot;
@@ -249,6 +251,7 @@ class SnapshotPersistQueue {
 
         @Override
         void write() {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "StoreWriteQueueItem");
             if (!mPersistInfoProvider.createDirectory(mUserId)) {
                 Slog.e(TAG, "Unable to create snapshot directory for user dir="
                         + mPersistInfoProvider.getDirectory(mUserId));
@@ -263,6 +266,7 @@ class SnapshotPersistQueue {
             if (failed) {
                 deleteSnapshot(mId, mUserId, mPersistInfoProvider);
             }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
         boolean writeProto() {
@@ -373,7 +377,9 @@ class SnapshotPersistQueue {
 
         @Override
         void write() {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "DeleteWriteQueueItem");
             deleteSnapshot(mId, mUserId, mPersistInfoProvider);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 }
