@@ -19,6 +19,7 @@ package com.android.server.biometrics.log;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.biometrics.AuthenticateOptions;
 import android.hardware.biometrics.common.OperationContext;
 import android.view.Surface;
 
@@ -69,6 +70,10 @@ public interface BiometricContext {
     /** Current device display rotation. */
     @Surface.Rotation
     int getCurrentRotation();
+
+    /** Current display state. */
+    @AuthenticateOptions.DisplayState
+    int getDisplayState();
 
     /**
      * Subscribe to context changes.

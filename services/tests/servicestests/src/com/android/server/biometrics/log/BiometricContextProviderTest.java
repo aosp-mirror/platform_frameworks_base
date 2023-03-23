@@ -34,7 +34,6 @@ import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricContextListener.FoldState;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.OperationReason;
-import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -77,8 +76,6 @@ public class BiometricContextProviderTest {
     @Mock
     private ISessionListener mSessionListener;
     @Mock
-    private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
-    @Mock
     private WindowManager mWindowManager;
 
     private OperationContextExt mOpContext = new OperationContextExt();
@@ -87,12 +84,11 @@ public class BiometricContextProviderTest {
 
     @Before
     public void setup() throws RemoteException {
-        when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
         when(mWindowManager.getDefaultDisplay()).thenReturn(
                 new Display(DisplayManagerGlobal.getInstance(), Display.DEFAULT_DISPLAY,
                         new DisplayInfo(), DEFAULT_DISPLAY_ADJUSTMENTS));
         mProvider = new BiometricContextProvider(mContext, mWindowManager,
-                mAmbientDisplayConfiguration, mStatusBarService, null /* handler */,
+                mStatusBarService, null /* handler */,
                 null /* authSessionCoordinator */);
         ArgumentCaptor<IBiometricContextListener> captor =
                 ArgumentCaptor.forClass(IBiometricContextListener.class);
@@ -106,27 +102,21 @@ public class BiometricContextProviderTest {
 
     @Test
     public void testIsAod() throws RemoteException {
-        mListener.onDozeChanged(true /* isDozing */, false /* isAwake */);
+        mListener.onDozeChanged(true /* isAod */, false /* isAwake */);
         assertThat(mProvider.isAod()).isTrue();
-        mListener.onDozeChanged(false /* isDozing */, false /* isAwake */);
-        assertThat(mProvider.isAod()).isFalse();
-
-        when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(false);
-        mListener.onDozeChanged(true /* isDozing */, false /* isAwake */);
-        assertThat(mProvider.isAod()).isFalse();
-        mListener.onDozeChanged(false /* isDozing */, false /* isAwake */);
+        mListener.onDozeChanged(false /* isAod */, false /* isAwake */);
         assertThat(mProvider.isAod()).isFalse();
     }
 
     @Test
     public void testIsAwake() throws RemoteException {
-        mListener.onDozeChanged(false /* isDozing */, true /* isAwake */);
+        mListener.onDozeChanged(false /* isAod */, true /* isAwake */);
         assertThat(mProvider.isAwake()).isTrue();
-        mListener.onDozeChanged(false /* isDozing */, false /* isAwake */);
+        mListener.onDozeChanged(false /* isAod */, false /* isAwake */);
         assertThat(mProvider.isAwake()).isFalse();
-        mListener.onDozeChanged(true /* isDozing */, true /* isAwake */);
+        mListener.onDozeChanged(true /* isAod */, true /* isAwake */);
         assertThat(mProvider.isAwake()).isTrue();
-        mListener.onDozeChanged(true /* isDozing */, false /* isAwake */);
+        mListener.onDozeChanged(true /* isAod */, false /* isAwake */);
         assertThat(mProvider.isAwake()).isFalse();
     }
 

@@ -2159,8 +2159,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         keyguardIsVisible();
 
         verifyFaceAuthenticateCall();
-        verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt(), anyInt(),
-                anyInt());
+        verifyFingerprintAuthenticateCall();
 
         final CancellationSignal faceCancel = spy(mKeyguardUpdateMonitor.mFaceCancelSignal);
         final CancellationSignal fpCancel = spy(mKeyguardUpdateMonitor.mFingerprintCancelSignal);
@@ -2627,8 +2626,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void verifyFingerprintAuthenticateCall() {
-        verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt(), anyInt(),
-                anyInt());
+        verify(mFingerprintManager).authenticate(any(), any(), any(), any(), any());
     }
 
     private void verifyFingerprintDetectNeverCalled() {

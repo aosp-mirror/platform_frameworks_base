@@ -31,7 +31,6 @@ import android.hardware.face.FaceAuthenticateOptions.AuthenticateReason
 import android.os.PowerManager
 import android.os.PowerManager.WAKE_REASON_UNKNOWN
 import android.util.Log
-import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.FaceAuthUiEvent
 
@@ -40,11 +39,11 @@ import com.android.keyguard.FaceAuthUiEvent
  * [FaceAuthenticateOptions].
  */
 data class SysUiFaceAuthenticateOptions(
-        val userId: Int,
-        private val faceAuthUiEvent: UiEventLogger.UiEventEnum,
-        @PowerManager.WakeReason val wakeReason: Int = WAKE_REASON_UNKNOWN
+    val userId: Int,
+    private val faceAuthUiEvent: UiEventLogger.UiEventEnum,
+    @PowerManager.WakeReason val wakeReason: Int = WAKE_REASON_UNKNOWN
 ) {
-    val authenticateReason = setAuthenticateReason(faceAuthUiEvent)
+    private val authenticateReason = setAuthenticateReason(faceAuthUiEvent)
 
     /**
      * The [FaceAuthUiEvent] for this operation. This method converts the UiEvent to the framework
