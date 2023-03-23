@@ -159,6 +159,8 @@ import com.android.systemui.util.ViewController;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.Map;
@@ -166,8 +168,6 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Contains logic for a navigation bar view.
@@ -245,12 +245,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     private boolean mTransientShown;
     private boolean mTransientShownFromGestureOnSystemBar;
-    /**
-     * This is to indicate whether the navigation bar button is forced visible. This is true
-     * when the setup wizard is on display. When that happens, the window frame should be provided
-     * as insets size directly.
-     */
-    private boolean mIsButtonForceVisible;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
     private LightBarController mLightBarController;
     private final LightBarController mMainLightBarController;
@@ -679,8 +673,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mView.setTouchHandler(mTouchHandler);
         setNavBarMode(mNavBarMode);
         mEdgeBackGestureHandler.setStateChangeCallback(mView::updateStates);
-        mEdgeBackGestureHandler.setButtonForceVisibleChangeCallback((forceVisible) -> {
-            mIsButtonForceVisible = forceVisible;
+        mEdgeBackGestureHandler.setButtonForcedVisibleChangeCallback((forceVisible) -> {
             repositionNavigationBar(mCurrentRotation);
         });
         mNavigationBarTransitions.addListener(this::onBarTransition);
@@ -1721,7 +1714,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                         .setInsetsSizeOverrides(new InsetsFrameProvider.InsetsSizeOverride[] {
                                 new InsetsFrameProvider.InsetsSizeOverride(
                                         TYPE_INPUT_METHOD, null)});
-        if (insetsHeight != -1 && !mIsButtonForceVisible) {
+        if (insetsHeight != -1 && !mEdgeBackGestureHandler.isButtonForcedVisible()) {
             navBarProvider.setInsetsSize(Insets.of(0, 0, 0, insetsHeight));
         }
 
