@@ -44,6 +44,7 @@ import android.util.SparseArray;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -377,7 +378,8 @@ class LocaleManagerBackupHelper {
         // Restore the locale immediately
         try {
             mLocaleManagerService.setApplicationLocales(pkgName, userId,
-                    LocaleList.forLanguageTags(localesInfo.mLocales), localesInfo.mSetFromDelegate);
+                    LocaleList.forLanguageTags(localesInfo.mLocales), localesInfo.mSetFromDelegate,
+                    FrameworkStatsLog.APPLICATION_LOCALES_CHANGED__CALLER__CALLER_BACKUP_RESTORE);
             if (DEBUG) {
                 Slog.d(TAG, "Restored locales=" + localesInfo.mLocales + " fromDelegate="
                         + localesInfo.mSetFromDelegate + " for package=" + pkgName);
@@ -662,7 +664,9 @@ class LocaleManagerBackupHelper {
         try {
             LocaleConfig localeConfig = new LocaleConfig(
                     mContext.createPackageContextAsUser(packageName, 0, UserHandle.of(userId)));
-            mLocaleManagerService.removeUnsupportedAppLocales(packageName, userId, localeConfig);
+            mLocaleManagerService.removeUnsupportedAppLocales(packageName, userId, localeConfig,
+                    FrameworkStatsLog
+                            .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_APP_UPDATE_LOCALES_CHANGE);
         } catch (PackageManager.NameNotFoundException e) {
             Slog.e(TAG, "Can not found the package name : " + packageName + " / " + e);
         }
