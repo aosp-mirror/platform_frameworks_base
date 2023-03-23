@@ -996,7 +996,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 mAudioManager, mPowerExemptionManager, mKeyGuardManager, mFeatureFlags);
         MediaOutputBroadcastDialog dialog = new MediaOutputBroadcastDialog(mContext, true,
                 broadcastSender, controller);
-        mDialogLaunchAnimator.showFromView(dialog, mediaOutputDialog);
+        dialog.show();
     }
 
     String getBroadcastName() {
