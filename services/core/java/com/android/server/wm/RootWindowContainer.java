@@ -2281,11 +2281,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     resumedOnDisplay[0] |= curResult;
                     return;
                 }
-                if (rootTask.getDisplayArea().isTopRootTask(rootTask)
-                        && topRunningActivity.isState(RESUMED)) {
-                    // Kick off any lingering app transitions from the MoveTaskToFront
-                    // operation, but only consider the top task and root-task on that
-                    // display.
+                if (topRunningActivity.isState(RESUMED)
+                        && topRunningActivity == rootTask.getDisplayArea().topRunningActivity()) {
+                    // Kick off any lingering app transitions form the MoveTaskToFront operation,
+                    // but only consider the top activity on that display.
                     rootTask.executeAppTransition(targetOptions);
                 } else {
                     resumedOnDisplay[0] |= topRunningActivity.makeActiveIfNeeded(target);
