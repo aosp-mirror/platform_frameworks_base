@@ -809,7 +809,7 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    override fun onOrientationChange() {
+    override fun onSizeChange() {
         selectionItem?.let {
             when (selectedItem) {
                 is SelectedItem.StructureItem -> createListView(it)
