@@ -62,6 +62,11 @@
     <integer name="auto_data_switch_validation_max_retry">7</integer>
     <java-symbol type="integer" name="auto_data_switch_validation_max_retry" />
 
+    <!-- Boolean indicating whether ping test is required to pass on the target data SIM before the
+         device automatically switch to it. -->
+    <bool name="auto_data_switch_ping_test_before_switch">true</bool>
+    <java-symbol type="bool" name="auto_data_switch_ping_test_before_switch" />
+
     <!-- Boolean indicating whether the Iwlan data service supports persistence of iwlan ipsec
          tunnels across service restart. If iwlan tunnels are not persisted across restart,
          Framework will clean up dangling data connections when service restarts -->
