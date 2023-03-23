@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
+@file:OptIn(InternalNoteTaskApi::class)
+
 package com.android.systemui.notetask
 
 import android.app.role.RoleManager
+import android.app.role.RoleManager.ROLE_NOTES
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.os.UserHandle
 import android.util.Log
+import com.android.systemui.notetask.NoteTaskRoleManagerExt.getDefaultRoleHolderAsUser
 import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
 
@@ -36,10 +40,9 @@ constructor(
         entryPoint: NoteTaskEntryPoint? = null,
         isKeyguardLocked: Boolean = false,
     ): NoteTaskInfo? {
-        // TODO(b/267634412): Select UserHandle depending on where the user initiated note-taking.
         val user = userTracker.userHandle
-        val packageName =
-            roleManager.getRoleHoldersAsUser(RoleManager.ROLE_NOTES, user).firstOrNull()
+
+        val packageName = roleManager.getDefaultRoleHolderAsUser(ROLE_NOTES, user)
 
         if (packageName.isNullOrEmpty()) return null
 
