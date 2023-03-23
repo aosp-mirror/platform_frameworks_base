@@ -6806,7 +6806,9 @@ public class AudioManager {
 
     /**
      * @hide
-     * Sets the computed sound dose value to {@code csd}
+     * Sets the computed sound dose value to {@code csd}. A negative value will
+     * reset all the CSD related timeouts: after a momentary exposure warning and
+     * before the momentary exposure reaches RS2 (see IEC62368-1 10.6.5)
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
@@ -6850,7 +6852,7 @@ public class AudioManager {
 
     /**
      * @hide
-     * Returns whether CSD is enabled on this device.
+     * Returns whether CSD is enabled and supported by the HAL on this device.
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
