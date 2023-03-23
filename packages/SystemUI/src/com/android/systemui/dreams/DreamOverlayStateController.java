@@ -27,6 +27,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.Complication;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.policy.CallbackController;
 
 import java.util.ArrayList;
@@ -104,12 +106,24 @@ public class DreamOverlayStateController implements
 
     private final Collection<Complication> mComplications = new HashSet();
 
+    private final FeatureFlags mFeatureFlags;
+
+    private final int mSupportedTypes;
+
     @VisibleForTesting
     @Inject
     public DreamOverlayStateController(@Main Executor executor,
-            @Named(DREAM_OVERLAY_ENABLED) boolean overlayEnabled) {
+            @Named(DREAM_OVERLAY_ENABLED) boolean overlayEnabled,
+            FeatureFlags featureFlags) {
         mExecutor = executor;
         mOverlayEnabled = overlayEnabled;
+        mFeatureFlags = featureFlags;
+        if (mFeatureFlags.isEnabled(Flags.ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS)) {
+            mSupportedTypes = Complication.COMPLICATION_TYPE_NONE
+                    | Complication.COMPLICATION_TYPE_HOME_CONTROLS;
+        } else {
+            mSupportedTypes = Complication.COMPLICATION_TYPE_NONE;
+        }
         if (DEBUG) {
             Log.d(TAG, "Dream overlay enabled:" + mOverlayEnabled);
         }
@@ -181,7 +195,7 @@ public class DreamOverlayStateController implements
                     if (mShouldShowComplications) {
                         return (requiredTypes & getAvailableComplicationTypes()) == requiredTypes;
                     }
-                    return requiredTypes == Complication.COMPLICATION_TYPE_NONE;
+                    return (requiredTypes & mSupportedTypes) == requiredTypes;
                 })
                 .collect(Collectors.toCollection(HashSet::new))
                 : mComplications);
