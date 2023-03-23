@@ -618,13 +618,13 @@ public class AlarmManagerService extends SystemService {
         static final int REMOVE_REASON_LISTENER_BINDER_DIED = 5;
         static final int REMOVE_REASON_LISTENER_CACHED = 6;
 
-        final String mTag;
+        final Alarm.Snapshot mAlarmSnapshot;
         final long mWhenRemovedElapsed;
         final long mWhenRemovedRtc;
         final int mRemoveReason;
 
         RemovedAlarm(Alarm a, int removeReason, long nowRtc, long nowElapsed) {
-            mTag = a.statsTag;
+            mAlarmSnapshot = new Alarm.Snapshot(a);
             mRemoveReason = removeReason;
             mWhenRemovedRtc = nowRtc;
             mWhenRemovedElapsed = nowElapsed;
@@ -656,13 +656,21 @@ public class AlarmManagerService extends SystemService {
         }
 
         void dump(IndentingPrintWriter pw, long nowElapsed, SimpleDateFormat sdf) {
-            pw.print("[tag", mTag);
-            pw.print("reason", removeReasonToString(mRemoveReason));
+            pw.increaseIndent();
+
+            pw.print("Reason", removeReasonToString(mRemoveReason));
             pw.print("elapsed=");
             TimeUtils.formatDuration(mWhenRemovedElapsed, nowElapsed, pw);
             pw.print(" rtc=");
             pw.print(sdf.format(new Date(mWhenRemovedRtc)));
-            pw.println("]");
+            pw.println();
+
+            pw.println("Snapshot:");
+            pw.increaseIndent();
+            mAlarmSnapshot.dump(pw, nowElapsed);
+            pw.decreaseIndent();
+
+            pw.decreaseIndent();
         }
     }
 
@@ -3505,15 +3513,16 @@ public class AlarmManagerService extends SystemService {
             }
 
             if (mRemovalHistory.size() > 0) {
-                pw.println("Removal history: ");
+                pw.println("Removal history:");
                 pw.increaseIndent();
                 for (int i = 0; i < mRemovalHistory.size(); i++) {
                     UserHandle.formatUid(pw, mRemovalHistory.keyAt(i));
                     pw.println(":");
                     pw.increaseIndent();
                     final RemovedAlarm[] historyForUid = mRemovalHistory.valueAt(i).toArray();
-                    for (final RemovedAlarm removedAlarm : historyForUid) {
-                        removedAlarm.dump(pw, nowELAPSED, sdf);
+                    for (int index = historyForUid.length - 1; index >= 0; index--) {
+                        pw.print("#" + (historyForUid.length - index) + ": ");
+                        historyForUid[index].dump(pw, nowELAPSED, sdf);
                     }
                     pw.decreaseIndent();
                 }
