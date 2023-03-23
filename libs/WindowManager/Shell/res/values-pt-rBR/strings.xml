@@ -68,8 +68,7 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Mover para canto inferior direito"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Configurações de <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Dispensar balão"</string>
-    <!-- no translation found for bubbles_dont_bubble (3216183855437329223) -->
-    <skip />
+    <string name="bubbles_dont_bubble" msgid="3216183855437329223">"Parar de mostrar balões"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Não criar balões de conversa"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Converse usando balões"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Novas conversas aparecerão como ícones flutuantes, ou balões. Toque para abrir o balão. Arraste para movê-lo."</string>
