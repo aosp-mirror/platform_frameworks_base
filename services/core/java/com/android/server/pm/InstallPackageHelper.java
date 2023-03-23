@@ -2093,9 +2093,25 @@ final class InstallPackageHelper {
                     // The caller explicitly specified INSTALL_ALL_USERS flag.
                     // Thus, updating the settings to install the app for all users.
                     for (int currentUserId : allUsers) {
-                        ps.setInstalled(true, currentUserId);
-                        ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId,
+                        // If the app is already installed for the currentUser,
+                        // keep it as installed as we might be updating the app at this place.
+                        // If not currently installed, check if the currentUser is restricted by
+                        // DISALLOW_INSTALL_APPS or DISALLOW_DEBUGGING_FEATURES device policy.
+                        // Install / update the app if the user isn't restricted. Skip otherwise.
+                        final boolean installedForCurrentUser = ArrayUtils.contains(
+                                installedForUsers, currentUserId);
+                        final boolean restrictedByPolicy =
+                                mPm.isUserRestricted(currentUserId,
+                                        UserManager.DISALLOW_INSTALL_APPS)
+                                || mPm.isUserRestricted(currentUserId,
+                                        UserManager.DISALLOW_DEBUGGING_FEATURES);
+                        if (installedForCurrentUser || !restrictedByPolicy) {
+                            ps.setInstalled(true, currentUserId);
+                            ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, currentUserId,
                                 installerPackageName);
+                        } else {
+                            ps.setInstalled(false, currentUserId);
+                        }
                     }
                 }
 
