@@ -1856,6 +1856,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                 for (int i = 0; i < callbackCount; i++) {
                     OnOpModeChangedListener callback = callbacks.valueAt(i);
 
+                    if (!callback.isWatchingUid(uid)) {
+                        continue;
+                    }
+
                     if (onlyForeground && (callback.getFlags()
                             & WATCH_FOREGROUND_CHANGES) == 0) {
                         continue;
