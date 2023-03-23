@@ -1746,37 +1746,6 @@
         android:protectionLevel="dangerous"
         android:permissionFlags="hardRestricted" />
 
-    <!-- @TestApi Allows an application to access wrist temperature data from the watch sensors.
-        <p class="note"><strong>Note: </strong> This permission is for Wear OS only.
-        <p>Protection level: dangerous
-        @hide
-        -->
-    <permission android:name="android.permission.BODY_SENSORS_WRIST_TEMPERATURE"
-                android:permissionGroup="android.permission-group.UNDEFINED"
-                android:label="@string/permlab_bodySensorsWristTemperature"
-                android:description="@string/permdesc_bodySensorsWristTemperature"
-                android:backgroundPermission="android.permission.BODY_SENSORS_WRIST_TEMPERATURE_BACKGROUND"
-                android:protectionLevel="dangerous" />
-
-    <!-- @TestApi Allows an application to access wrist temperature data from the watch sensors.
-         If you're requesting this permission, you must also request
-         {@link #BODY_SENSORS_WRIST_TEMPERATURE}. Requesting this permission by itself doesn't
-         give you wrist temperature body sensors access.
-         <p class="note"><strong>Note: </strong> This permission is for Wear OS only.
-         <p>Protection level: dangerous
-
-         <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record allowlists the permission. For more details see
-         {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
-         @hide
-    -->
-    <permission android:name="android.permission.BODY_SENSORS_WRIST_TEMPERATURE_BACKGROUND"
-                android:permissionGroup="android.permission-group.UNDEFINED"
-                android:label="@string/permlab_bodySensors_wristTemperature_background"
-                android:description="@string/permdesc_bodySensors_wristTemperature_background"
-                android:protectionLevel="dangerous"
-                android:permissionFlags="hardRestricted" />
-
     <!-- Allows an app to use fingerprint hardware.
          <p>Protection level: normal
          @deprecated Applications should request {@link
