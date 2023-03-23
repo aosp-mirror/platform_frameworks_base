@@ -64,6 +64,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -504,6 +506,33 @@ public class SizeCompatTests extends WindowTestsBase {
                 false /* isTabletop */);
         verify(mActivity).recomputeConfiguration();
         assertEquals(translucentActivity.getBounds(), mActivity.getBounds());
+    }
+
+    @Test
+    public void testTranslucentActivity_clearSizeCompatMode_inheritedCompatDisplayInsetsCleared() {
+        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
+        setUpDisplaySizeWithApp(2800, 1400);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        prepareUnresizable(mActivity, -1f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
+        // Rotate to put activity in size compat mode.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+        assertTrue(mActivity.inSizeCompatMode());
+
+        // We launch a transparent activity
+        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setLaunchedFromUid(mActivity.getUid())
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .build();
+        doReturn(false).when(translucentActivity).fillsParent();
+        mTask.addChild(translucentActivity);
+
+        // The transparent activity inherits the compat display insets of the opaque activity
+        // beneath it
+        assertNotNull(translucentActivity.getCompatDisplayInsets());
+
+        // Clearing SCM should also clear the inherited compat display insets
+        translucentActivity.clearSizeCompatMode();
+        assertNull(translucentActivity.getCompatDisplayInsets());
     }
 
     @Test
