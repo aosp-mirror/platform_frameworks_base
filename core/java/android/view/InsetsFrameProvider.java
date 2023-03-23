@@ -293,7 +293,7 @@ public class InsetsFrameProvider implements Parcelable {
     public static void calculateInsetsFrame(Rect displayFrame, Rect containerBounds,
             Rect displayCutoutSafe, Rect inOutFrame, int source, Insets insetsSize,
             @WindowManager.LayoutParams.PrivateFlags int privateFlags,
-            Insets displayCutoutSafeInsetsSize) {
+            Insets displayCutoutSafeInsetsSize, Rect givenContentInsets) {
         boolean extendByCutout = false;
         if (source == InsetsFrameProvider.SOURCE_DISPLAY) {
             inOutFrame.set(displayFrame);
@@ -301,16 +301,20 @@ public class InsetsFrameProvider implements Parcelable {
             inOutFrame.set(containerBounds);
         } else {
             extendByCutout = (privateFlags & PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT) != 0;
-        }
-        if (insetsSize == null) {
-            return;
+            if (givenContentInsets != null) {
+                inOutFrame.inset(givenContentInsets);
+            }
         }
         if (displayCutoutSafeInsetsSize != null) {
             sTmpRect2.set(inOutFrame);
         }
-        calculateInsetsFrame(inOutFrame, insetsSize);
+        if (insetsSize != null) {
+            calculateInsetsFrame(inOutFrame, insetsSize);
+        }
 
-        if (extendByCutout) {
+        if (extendByCutout && insetsSize != null) {
+            // Only extend if the insets size is not null. Otherwise, the frame has already been
+            // extended by the display cutout during layout process.
             WindowLayout.extendFrameByCutout(displayCutoutSafe, displayFrame, inOutFrame, sTmpRect);
         }
 
