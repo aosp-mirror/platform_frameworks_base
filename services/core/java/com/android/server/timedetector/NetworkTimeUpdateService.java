@@ -415,8 +415,14 @@ public class NetworkTimeUpdateService extends Binder {
             logToDebugAndDumpsys("forceRefreshForTests: refreshSuccessful=" + refreshSuccessful);
 
             if (refreshSuccessful) {
-                makeNetworkTimeSuggestion(mNtpTrustedTime.getCachedTimeResult(),
-                        "EngineImpl.forceRefreshForTests()", refreshCallbacks);
+                TimeResult cachedTimeResult = mNtpTrustedTime.getCachedTimeResult();
+                if (cachedTimeResult == null) {
+                    logToDebugAndDumpsys(
+                            "forceRefreshForTests: cachedTimeResult unexpectedly null");
+                } else {
+                    makeNetworkTimeSuggestion(cachedTimeResult,
+                            "EngineImpl.forceRefreshForTests()", refreshCallbacks);
+                }
             }
             return refreshSuccessful;
         }
