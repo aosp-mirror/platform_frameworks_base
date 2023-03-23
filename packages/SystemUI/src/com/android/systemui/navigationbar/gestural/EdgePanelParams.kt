@@ -2,6 +2,7 @@ package com.android.systemui.navigationbar.gestural
 
 import android.content.res.Resources
 import android.util.TypedValue
+import androidx.core.animation.Interpolator
 import androidx.core.animation.PathInterpolator
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.systemui.R
@@ -77,21 +78,23 @@ data class EdgePanelParams(private var resources: Resources) {
     var swipeProgressThreshold: Float = 0f
         private set
 
-    lateinit var entryWidthInterpolator: PathInterpolator
+    lateinit var entryWidthInterpolator: Interpolator
         private set
-    lateinit var entryWidthTowardsEdgeInterpolator: PathInterpolator
+    lateinit var entryWidthTowardsEdgeInterpolator: Interpolator
         private set
-    lateinit var activeWidthInterpolator: PathInterpolator
+    lateinit var activeWidthInterpolator: Interpolator
         private set
-    lateinit var arrowAngleInterpolator: PathInterpolator
+    lateinit var arrowAngleInterpolator: Interpolator
         private set
-    lateinit var translationInterpolator: PathInterpolator
+    lateinit var horizontalTranslationInterpolator: Interpolator
         private set
-    lateinit var farCornerInterpolator: PathInterpolator
+    lateinit var verticalTranslationInterpolator: Interpolator
         private set
-    lateinit var edgeCornerInterpolator: PathInterpolator
+    lateinit var farCornerInterpolator: Interpolator
         private set
-    lateinit var heightInterpolator: PathInterpolator
+    lateinit var edgeCornerInterpolator: Interpolator
+        private set
+    lateinit var heightInterpolator: Interpolator
         private set
 
     init {
@@ -125,9 +128,10 @@ data class EdgePanelParams(private var resources: Resources) {
 
         entryWidthInterpolator = PathInterpolator(.19f, 1.27f, .71f, .86f)
         entryWidthTowardsEdgeInterpolator = PathInterpolator(1f, -3f, 1f, 1.2f)
-        activeWidthInterpolator = PathInterpolator(.7f, .06f, .34f, .97f)
+        activeWidthInterpolator = PathInterpolator(.56f, -0.39f, .18f, 1.46f)
         arrowAngleInterpolator = entryWidthInterpolator
-        translationInterpolator = PathInterpolator(0.2f, 1.0f, 1.0f, 1.0f)
+        horizontalTranslationInterpolator = PathInterpolator(0.2f, 1.0f, 1.0f, 1.0f)
+        verticalTranslationInterpolator = PathInterpolator(.5f, 1.15f, .41f, .94f)
         farCornerInterpolator = PathInterpolator(.03f, .19f, .14f, 1.09f)
         edgeCornerInterpolator = PathInterpolator(0f, 1.11f, .85f, .84f)
         heightInterpolator = PathInterpolator(1f, .05f, .9f, -0.29f)
@@ -147,7 +151,7 @@ data class EdgePanelParams(private var resources: Resources) {
                 scale = getDimenFloat(R.dimen.navigation_edge_entry_scale),
                 scalePivotX = getDimen(R.dimen.navigation_edge_pre_threshold_background_width),
                 horizontalTranslationSpring = entryActiveHorizontalTranslationSpring,
-                verticalTranslationSpring = createSpring(10000f, 0.9f),
+                verticalTranslationSpring = createSpring(30000f, 1f),
                 scaleSpring = createSpring(120f, 0.8f),
                 arrowDimens = ArrowDimens(
                         length = getDimen(R.dimen.navigation_edge_entry_arrow_length),
@@ -174,7 +178,6 @@ data class EdgePanelParams(private var resources: Resources) {
                         height = getDimen(R.dimen.navigation_edge_entry_background_height),
                         edgeCornerRadius = getDimen(R.dimen.navigation_edge_entry_edge_corners),
                         farCornerRadius = getDimen(R.dimen.navigation_edge_entry_far_corners),
-                        alphaSpring = createSpring(1100f, 1f),
                         widthSpring = createSpring(450f, 0.65f),
                         heightSpring = createSpring(1500f, 0.45f),
                         farCornerRadiusSpring = createSpring(300f, 0.5f),
@@ -269,10 +272,10 @@ data class EdgePanelParams(private var resources: Resources) {
                         heightSpring = flungCommittedHeightSpring,
                         edgeCornerRadiusSpring = flungCommittedEdgeCornerSpring,
                         farCornerRadiusSpring = flungCommittedFarCornerSpring,
-                        alphaSpring = createSpring(1100f, 1f),
+                        alphaSpring = createSpring(1400f, 1f),
                 ),
                 scale = 0.85f,
-                scaleSpring = createSpring(1150f, 1f),
+                scaleSpring = createSpring(6000f, 1f),
         )
 
         flungIndicator = committedIndicator.copy(
