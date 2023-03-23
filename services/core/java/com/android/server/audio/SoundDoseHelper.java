@@ -21,6 +21,8 @@ import static com.android.server.audio.AudioService.MIN_STREAM_VOLUME;
 import static com.android.server.audio.AudioService.MSG_SET_DEVICE_VOLUME;
 import static com.android.server.audio.AudioService.SAFE_MEDIA_VOLUME_MSG_START;
 
+import static java.lang.Math.floor;
+
 import android.annotation.NonNull;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -94,6 +96,8 @@ public class SoundDoseHelper {
 
     private static final int MOMENTARY_EXPOSURE_TIMEOUT_MS = (20 * 3600 * 1000); // 20 hours
 
+    private static final int MOMENTARY_EXPOSURE_TIMEOUT_UNINITIALIZED = -1;
+
     // 30s after boot completed
     private static final int SAFE_VOLUME_CONFIGURE_TIMEOUT_MS = 30000;
 
@@ -147,6 +151,9 @@ public class SoundDoseHelper {
      */
     private final SparseIntArray mSafeMediaVolumeDevices = new SparseIntArray();
 
+    /** Used for testing to enforce safe media on all devices */
+    private boolean mForceSafeMediaOnAllDevices = false;
+
     // mMusicActiveMs is the cumulative time of music activity since safe volume was disabled.
     // When this time reaches UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX, the safe media volume is re-enabled
     // automatically. mMusicActiveMs is rounded to a multiple of MUSIC_ACTIVE_POLL_PERIOD_MS.
@@ -170,7 +177,7 @@ public class SoundDoseHelper {
     private float mCurrentCsd = 0.f;
 
     @GuardedBy("mCsdStateLock")
-    private long mLastMomentaryExposureTimeMs = -1;
+    private long mLastMomentaryExposureTimeMs = MOMENTARY_EXPOSURE_TIMEOUT_UNINITIALIZED;
 
     // dose at which the next dose reached warning occurs
     @GuardedBy("mCsdStateLock")
@@ -364,6 +371,7 @@ public class SoundDoseHelper {
         SoundDoseRecord[] doseRecordsArray;
         synchronized (mCsdStateLock) {
             mCurrentCsd = csd;
+            mNextCsdWarning = (float) floor(csd + 1.0);
 
             mDoseRecords.clear();
 
@@ -386,6 +394,22 @@ public class SoundDoseHelper {
             soundDose.resetCsd(csd, doseRecordsArray);
         } catch (RemoteException e) {
             Log.e(TAG, "Exception while setting the CSD value", e);
+        }
+    }
+
+    void resetCsdTimeouts() {
+        if (!mEnableCsd) {
+            return;
+        }
+
+        synchronized (mSafeMediaVolumeStateLock) {
+            mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_ACTIVE;
+            mMusicActiveMs = 0;
+            saveMusicActiveMs();
+        }
+
+        synchronized (mCsdStateLock) {
+            mLastMomentaryExposureTimeMs = MOMENTARY_EXPOSURE_TIMEOUT_UNINITIALIZED;
         }
     }
 
@@ -423,10 +447,27 @@ public class SoundDoseHelper {
         } catch (RemoteException e) {
             Log.e(TAG, "Exception while forcing CSD computation on all devices", e);
         }
+
+        mForceSafeMediaOnAllDevices = computeCsdOnAllDevices;
     }
 
     boolean isCsdEnabled() {
-        return mEnableCsd;
+        if (!mEnableCsd) {
+            return false;
+        }
+
+        final ISoundDose soundDose = mSoundDose.get();
+        if (soundDose == null) {
+            Log.w(TAG, "Sound dose interface not initialized");
+            return false;
+        }
+
+        try {
+            return soundDose.isSoundDoseHalSupported();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception while forcing CSD computation on all devices", e);
+        }
+        return false;
     }
 
     /*package*/ int safeMediaVolumeIndex(int device) {
@@ -490,7 +531,7 @@ public class SoundDoseHelper {
     private boolean checkSafeMediaVolume_l(int streamType, int index, int device) {
         return (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE)
                     && (AudioService.mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC)
-                    && safeDevicesContains(device)
+                    && (safeDevicesContains(device) || mForceSafeMediaOnAllDevices)
                     && (index > safeMediaVolumeIndex(device));
     }
 
