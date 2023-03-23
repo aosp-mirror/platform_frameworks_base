@@ -41,6 +41,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager.RunningTaskInfo;
@@ -416,6 +417,17 @@ public class DesktopModeControllerTest extends ShellTestCase {
                 mock(IBinder.class),
                 new TransitionRequestInfo(TRANSIT_TO_FRONT, trigger, null /* remote */));
         assertThat(wct).isNotNull();
+    }
+
+    @Test
+    public void testHandleTransitionRequest_taskOpen_doesNotStartAnotherTransition() {
+        RunningTaskInfo trigger = new RunningTaskInfo();
+        trigger.token = new MockToken().token();
+        trigger.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        mController.handleRequest(
+                mock(IBinder.class),
+                new TransitionRequestInfo(TRANSIT_OPEN, trigger, null /* remote */));
+        verifyZeroInteractions(mTransitions);
     }
 
     private DesktopModeController createController() {
