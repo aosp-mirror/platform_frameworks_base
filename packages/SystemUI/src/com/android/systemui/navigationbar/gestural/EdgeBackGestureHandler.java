@@ -177,7 +177,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private final OverviewProxyService mOverviewProxyService;
     private final SysUiState mSysUiState;
     private Runnable mStateChangeCallback;
-    private Consumer<Boolean> mButtonForceVisibleCallback;
+    private Consumer<Boolean> mButtonForcedVisibleCallback;
 
     private final PluginManager mPluginManager;
     private final ProtoTracer mProtoTracer;
@@ -245,7 +245,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private boolean mGestureBlockingActivityRunning;
     private boolean mIsNewBackAffordanceEnabled;
     private boolean mIsTrackpadGestureFeaturesEnabled;
-    private boolean mIsButtonForceVisible;
+    private boolean mIsButtonForcedVisible;
 
     private InputMonitor mInputMonitor;
     private InputChannelCompat.InputEventReceiver mInputEventReceiver;
@@ -412,8 +412,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mStateChangeCallback = callback;
     }
 
-    public void setButtonForceVisibleChangeCallback(Consumer<Boolean> callback) {
-        mButtonForceVisibleCallback = callback;
+    public void setButtonForcedVisibleChangeCallback(Consumer<Boolean> callback) {
+        mButtonForcedVisibleCallback = callback;
     }
 
     public int getEdgeWidthLeft() {
@@ -428,13 +428,14 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         Resources res = mNavigationModeController.getCurrentUserContext().getResources();
         mEdgeWidthLeft = mGestureNavigationSettingsObserver.getLeftSensitivity(res);
         mEdgeWidthRight = mGestureNavigationSettingsObserver.getRightSensitivity(res);
-        final boolean previousForceVisible = mIsButtonForceVisible;
-        mIsButtonForceVisible =
+        final boolean previousForcedVisible = mIsButtonForcedVisible;
+        mIsButtonForcedVisible =
                 mGestureNavigationSettingsObserver.areNavigationButtonForcedVisible();
-        if (previousForceVisible != mIsButtonForceVisible && mButtonForceVisibleCallback != null) {
-            mButtonForceVisibleCallback.accept(mIsButtonForceVisible);
+        if (previousForcedVisible != mIsButtonForcedVisible
+                && mButtonForcedVisibleCallback != null) {
+            mButtonForcedVisibleCallback.accept(mIsButtonForcedVisible);
         }
-        mIsBackGestureAllowed = !mIsButtonForceVisible;
+        mIsBackGestureAllowed = !mIsButtonForcedVisible;
 
         final DisplayMetrics dm = res.getDisplayMetrics();
         final float defaultGestureHeight = res.getDimension(
@@ -633,6 +634,10 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
     public boolean isHandlingGestures() {
         return mIsEnabled && mIsBackGestureAllowed;
+    }
+
+    public boolean isButtonForcedVisible() {
+        return mIsButtonForcedVisible;
     }
 
     /**
