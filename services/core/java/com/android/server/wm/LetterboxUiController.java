@@ -242,6 +242,8 @@ final class LetterboxUiController {
 
     private boolean mIsRelauchingAfterRequestedOrientationChanged;
 
+    private boolean mDoubleTapEvent;
+
     LetterboxUiController(WindowManagerService wmService, ActivityRecord activityRecord) {
         mLetterboxConfiguration = wmService.mLetterboxConfiguration;
         // Given activityRecord may not be fully constructed since LetterboxUiController
@@ -834,6 +836,12 @@ final class LetterboxUiController {
         }
     }
 
+    boolean isFromDoubleTap() {
+        final boolean isFromDoubleTap = mDoubleTapEvent;
+        mDoubleTapEvent = false;
+        return isFromDoubleTap;
+    }
+
     SurfaceControl getLetterboxParentSurface() {
         if (mActivityRecord.isInLetterboxAnimation()) {
             return mActivityRecord.getTask().getSurfaceControl();
@@ -1011,7 +1019,7 @@ final class LetterboxUiController {
                                 : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__LEFT_TO_CENTER;
             logLetterboxPositionChange(changeToLog);
         }
-
+        mDoubleTapEvent = true;
         // TODO(197549949): Add animation for transition.
         mActivityRecord.recomputeConfiguration();
     }
@@ -1050,7 +1058,7 @@ final class LetterboxUiController {
                                 : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__TOP_TO_CENTER;
             logLetterboxPositionChange(changeToLog);
         }
-
+        mDoubleTapEvent = true;
         // TODO(197549949): Add animation for transition.
         mActivityRecord.recomputeConfiguration();
     }
