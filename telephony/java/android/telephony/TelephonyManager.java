@@ -17027,4 +17027,44 @@ public class TelephonyManager {
         }
         return TelephonyManager.SIM_STATE_UNKNOWN;
     }
+
+    /**
+     * Convert SIM state into string.
+     *
+     * @param state SIM state.
+     * @return SIM state in string format.
+     *
+     * @hide
+     */
+    @NonNull
+    public static String simStateToString(@SimState int state) {
+        switch (state) {
+            case TelephonyManager.SIM_STATE_UNKNOWN:
+                return "UNKNOWN";
+            case TelephonyManager.SIM_STATE_ABSENT:
+                return "ABSENT";
+            case TelephonyManager.SIM_STATE_PIN_REQUIRED:
+                return "PIN_REQUIRED";
+            case TelephonyManager.SIM_STATE_PUK_REQUIRED:
+                return "PUK_REQUIRED";
+            case TelephonyManager.SIM_STATE_NETWORK_LOCKED:
+                return "NETWORK_LOCKED";
+            case TelephonyManager.SIM_STATE_READY:
+                return "READY";
+            case TelephonyManager.SIM_STATE_NOT_READY:
+                return "NOT_READY";
+            case TelephonyManager.SIM_STATE_PERM_DISABLED:
+                return "PERM_DISABLED";
+            case TelephonyManager.SIM_STATE_CARD_IO_ERROR:
+                return "CARD_IO_ERROR";
+            case TelephonyManager.SIM_STATE_CARD_RESTRICTED:
+                return "CARD_RESTRICTED";
+            case TelephonyManager.SIM_STATE_LOADED:
+                return "LOADED";
+            case TelephonyManager.SIM_STATE_PRESENT:
+                return "PRESENT";
+            default:
+                return "UNKNOWN(" + state + ")";
+        }
+    }
 }
