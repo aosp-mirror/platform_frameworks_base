@@ -230,7 +230,7 @@ class ScreenRotationAnimation {
         } else if ((mEndWidth > mStartWidth) == (mEndHeight > mStartHeight)
                 && (mEndWidth != mStartWidth || mEndHeight != mStartHeight)) {
             // Display resizes without rotation change.
-            final float scale = Math.max((float) mEndWidth / mStartHeight,
+            final float scale = Math.max((float) mEndWidth / mStartWidth,
                     (float) mEndHeight / mStartHeight);
             matrix.setScale(scale, scale);
         }
