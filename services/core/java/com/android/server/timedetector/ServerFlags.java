@@ -69,6 +69,7 @@ public final class ServerFlags {
             KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
             KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE,
             KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE,
+            KEY_TIME_ZONE_DETECTOR_AUTO_DETECTION_ENABLED_DEFAULT,
             KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED,
             KEY_ENHANCED_METRICS_COLLECTION_ENABLED,
     })
@@ -152,6 +153,14 @@ public final class ServerFlags {
     public static final @DeviceConfigKey String
             KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT =
             "location_time_zone_detection_setting_enabled_default";
+
+    /**
+     * The key to alter a device's "automatic time zone detection enabled" setting default value.
+     * This flag is only intended for internal testing.
+     */
+    public static final @DeviceConfigKey String
+            KEY_TIME_ZONE_DETECTOR_AUTO_DETECTION_ENABLED_DEFAULT =
+            "time_zone_detector_auto_detection_enabled_default";
 
     /**
      * The key to control support for time zone detection falling back to telephony detection under
