@@ -134,6 +134,7 @@ import com.android.server.Watchdog;
 import com.android.server.pm.ApexManager;
 import com.android.server.pm.KnownPackages;
 import com.android.server.pm.PackageInstallerService;
+import com.android.server.pm.PackageManagerTracedLock;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -252,7 +253,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             new ArraySet<>();
 
     /** Lock to protect internal data access */
-    private final Object mLock = new Object();
+    private final PackageManagerTracedLock mLock = new PackageManagerTracedLock();
 
     /** Internal connection to the package manager */
     private final PackageManagerInternal mPackageManagerInt;
