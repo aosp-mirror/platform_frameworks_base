@@ -212,6 +212,10 @@ final class LetterboxConfiguration {
     // otherwise the apps get blacked out when they are resumed and do not have focus yet.
     private boolean mIsCompatFakeFocusEnabled;
 
+    // Whether should use split screen aspect ratio for the activity when camera compat treatment
+    // is enabled and activity is connected to the camera in fullscreen.
+    private final boolean mIsCameraCompatSplitScreenAspectRatioEnabled;
+
     // Whether camera compatibility treatment is enabled.
     // See DisplayRotationCompatPolicy for context.
     private final boolean mIsCameraCompatTreatmentEnabled;
@@ -300,6 +304,8 @@ final class LetterboxConfiguration {
                 R.bool.config_letterboxIsEnabledForTranslucentActivities);
         mIsCameraCompatTreatmentEnabled = mContext.getResources().getBoolean(
                 R.bool.config_isWindowManagerCameraCompatTreatmentEnabled);
+        mIsCameraCompatSplitScreenAspectRatioEnabled = mContext.getResources().getBoolean(
+                R.bool.config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled);
         mIsCompatFakeFocusEnabled = mContext.getResources().getBoolean(
                 R.bool.config_isCompatFakeFocusEnabled);
         mIsPolicyForIgnoringRequestedOrientationEnabled = mContext.getResources().getBoolean(
@@ -1120,6 +1126,14 @@ final class LetterboxConfiguration {
      */
     boolean isPolicyForIgnoringRequestedOrientationEnabled() {
         return mIsPolicyForIgnoringRequestedOrientationEnabled;
+    }
+
+    /**
+     * Whether should use split screen aspect ratio for the activity when camera compat treatment
+     * is enabled and activity is connected to the camera in fullscreen.
+     */
+    boolean isCameraCompatSplitScreenAspectRatioEnabled() {
+        return mIsCameraCompatSplitScreenAspectRatioEnabled;
     }
 
     /** Whether camera compatibility treatment is enabled. */

@@ -390,13 +390,7 @@ final class LetterboxUiController {
                         + mActivityRecord);
                 return true;
             }
-            DisplayContent displayContent = mActivityRecord.mDisplayContent;
-            if (displayContent == null) {
-                return false;
-            }
-            if (displayContent.mDisplayRotationCompatPolicy != null
-                    && displayContent.mDisplayRotationCompatPolicy
-                    .isTreatmentEnabledForActivity(mActivityRecord)) {
+            if (isCameraCompatTreatmentActive()) {
                 Slog.w(TAG, "Ignoring orientation update to "
                         + screenOrientationToString(requestedOrientation)
                         + " due to camera compat treatment for " + mActivityRecord);
@@ -632,6 +626,16 @@ final class LetterboxUiController {
                         .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true),
                 mIsOverrideCameraCompatDisableForceRotationEnabled,
                 mBooleanPropertyCameraCompatAllowForceRotation);
+    }
+
+    private boolean isCameraCompatTreatmentActive() {
+        DisplayContent displayContent = mActivityRecord.mDisplayContent;
+        if (displayContent == null) {
+            return false;
+        }
+        return displayContent.mDisplayRotationCompatPolicy != null
+                && displayContent.mDisplayRotationCompatPolicy
+                        .isTreatmentEnabledForActivity(mActivityRecord);
     }
 
     private boolean isCompatChangeEnabled(long overrideChangeId) {
@@ -896,13 +900,35 @@ final class LetterboxUiController {
     }
 
     float getFixedOrientationLetterboxAspectRatio(@NonNull Configuration parentConfiguration) {
-        // Don't resize to split screen size when half folded if letterbox position is centered
+        return shouldUseSplitScreenAspectRatio(parentConfiguration)
+                ? getSplitScreenAspectRatio()
+                : mActivityRecord.shouldCreateCompatDisplayInsets()
+                        ? getDefaultMinAspectRatioForUnresizableApps()
+                        : getDefaultMinAspectRatio();
+    }
+
+    void recomputeConfigurationForCameraCompatIfNeeded() {
+        if (isOverrideOrientationOnlyForCameraEnabled()
+                || isCameraCompatSplitScreenAspectRatioAllowed()) {
+            mActivityRecord.recomputeConfiguration();
+        }
+    }
+
+    /**
+     * Whether we use split screen aspect ratio for the activity when camera compat treatment
+     * is active because the corresponding config is enabled and activity supports resizing.
+     */
+    private boolean isCameraCompatSplitScreenAspectRatioAllowed() {
+        return mLetterboxConfiguration.isCameraCompatSplitScreenAspectRatioEnabled()
+                && !mActivityRecord.shouldCreateCompatDisplayInsets();
+    }
+
+    private boolean shouldUseSplitScreenAspectRatio(@NonNull Configuration parentConfiguration) {
         return isDisplayFullScreenAndSeparatingHinge()
-                    && getHorizontalPositionMultiplier(parentConfiguration) != 0.5f
-                        ? getSplitScreenAspectRatio()
-                        : mActivityRecord.shouldCreateCompatDisplayInsets()
-                            ? getDefaultMinAspectRatioForUnresizableApps()
-                            : getDefaultMinAspectRatio();
+                // Don't resize to split screen size when half folded and centered
+                && getHorizontalPositionMultiplier(parentConfiguration) != 0.5f
+                        || isCameraCompatSplitScreenAspectRatioAllowed()
+                                && isCameraCompatTreatmentActive();
     }
 
     private float getDefaultMinAspectRatioForUnresizableApps() {
