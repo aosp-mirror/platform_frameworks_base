@@ -125,7 +125,8 @@ import java.util.function.Predicate;
 final class LetterboxUiController {
 
     private static final Predicate<ActivityRecord> FIRST_OPAQUE_NOT_FINISHING_ACTIVITY_PREDICATE =
-            activityRecord -> activityRecord.fillsParent() && !activityRecord.isFinishing();
+            activityRecord -> activityRecord.fillsParent() && !activityRecord.isFinishing()
+                    && activityRecord.nowVisible;
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "LetterboxUiController" : TAG_ATM;
 
