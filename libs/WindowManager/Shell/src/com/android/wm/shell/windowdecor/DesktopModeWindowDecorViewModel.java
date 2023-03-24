@@ -307,6 +307,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (id == R.id.back_button) {
                 mTaskOperations.injectBackKey();
             } else if (id == R.id.caption_handle || id == R.id.open_menu_button) {
+                moveTaskToFront(mTaskOrganizer.getRunningTaskInfo(mTaskId));
                 decoration.createHandleMenu();
             } else if (id == R.id.desktop_button) {
                 mDesktopModeController.ifPresent(c -> c.setDesktopModeActive(true));
@@ -327,7 +328,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             if (id != R.id.caption_handle && id != R.id.desktop_mode_caption) {
                 return false;
             }
+            moveTaskToFront(mTaskOrganizer.getRunningTaskInfo(mTaskId));
             return mDragDetector.onMotionEvent(e);
+        }
+
+        private void moveTaskToFront(RunningTaskInfo taskInfo) {
+            if (!taskInfo.isFocused) {
+                mDesktopTasksController.ifPresent(c -> c.moveTaskToFront(taskInfo));
+                mDesktopModeController.ifPresent(c -> c.moveTaskToFront(taskInfo));
+            }
         }
 
         /**
