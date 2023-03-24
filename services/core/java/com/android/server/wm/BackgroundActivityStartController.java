@@ -20,6 +20,7 @@ import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.provider.DeviceConfig.NAMESPACE_WINDOW_MANAGER;
 
+import static com.android.internal.util.Preconditions.checkState;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -45,6 +46,7 @@ import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Slog;
 
+
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.PendingIntentRecord;
 
@@ -59,6 +61,9 @@ public class BackgroundActivityStartController {
 
     private static final String TAG =
             TAG_WITH_CLASS_NAME ? "BackgroundActivityStartController" : TAG_ATM;
+    public static final String VERDICT_ALLOWED = "Activity start allowed";
+    public static final String VERDICT_WOULD_BE_ALLOWED_IF_SENDER_GRANTS_BAL =
+            "Activity start would be allowed if the sender granted BAL privileges";
 
     private final ActivityTaskManagerService mService;
     private final ActivityTaskSupervisor mSupervisor;
@@ -234,10 +239,6 @@ public class BackgroundActivityStartController {
         // don't abort if the callingUid has a visible window or is a persistent system process
         final int callingUidProcState = mService.mActiveUids.getUidState(callingUid);
         final boolean callingUidHasAnyVisibleWindow = mService.hasActiveVisibleWindow(callingUid);
-        final boolean isCallingUidForeground =
-                callingUidHasAnyVisibleWindow
-                        || callingUidProcState == ActivityManager.PROCESS_STATE_TOP
-                        || callingUidProcState == ActivityManager.PROCESS_STATE_BOUND_TOP;
         final boolean isCallingUidPersistentSystemProcess =
                 callingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
 
@@ -266,11 +267,6 @@ public class BackgroundActivityStartController {
                 (callingUid == realCallingUid)
                         ? callingUidHasAnyVisibleWindow
                         : mService.hasActiveVisibleWindow(realCallingUid);
-        final boolean isRealCallingUidForeground =
-                (callingUid == realCallingUid)
-                        ? isCallingUidForeground
-                        : realCallingUidHasAnyVisibleWindow
-                                || realCallingUidProcState == ActivityManager.PROCESS_STATE_TOP;
         final int realCallingAppId = UserHandle.getAppId(realCallingUid);
         final boolean isRealCallingUidPersistentSystemProcess =
                 (callingUid == realCallingUid)
@@ -297,75 +293,63 @@ public class BackgroundActivityStartController {
         final BackgroundStartPrivileges balAllowedByPiSender =
                 PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
                         checkedOptions, realCallingUid);
-        if (balAllowedByPiSender.allowsBackgroundActivityStarts()
-                && realCallingUid != callingUid) {
-            final boolean useCallerPermission =
-                    PendingIntentRecord.isPendingIntentBalAllowedByPermission(checkedOptions);
-            if (useCallerPermission
-                    && ActivityManager.checkComponentPermission(
-                                    android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
-                                    realCallingUid,
-                                    -1,
-                                    true)
-                            == PackageManager.PERMISSION_GRANTED) {
-                return logStartAllowedAndReturnCode(BAL_ALLOW_PENDING_INTENT,
-                        /*background*/ false, callingUid, realCallingUid, intent,
-                        "realCallingUid has BAL permission. realCallingUid: " + realCallingUid);
-            }
 
-            // don't abort if the realCallingUid has a visible window
-            // TODO(b/171459802): We should check appSwitchAllowed also
-            if (realCallingUidHasAnyVisibleWindow) {
-                return logStartAllowedAndReturnCode(BAL_ALLOW_PENDING_INTENT,
-                        /*background*/ false, callingUid, realCallingUid, intent,
-                        "realCallingUid has visible (non-toast) window. realCallingUid: "
-                                + realCallingUid);
-            }
-            // if the realCallingUid is a persistent system process, abort if the IntentSender
-            // wasn't allowed to start an activity
-            if (isRealCallingUidPersistentSystemProcess
-                    && backgroundStartPrivileges.allowsBackgroundActivityStarts()) {
-                return logStartAllowedAndReturnCode(BAL_ALLOW_PENDING_INTENT,
-                        /*background*/ false, callingUid, realCallingUid, intent,
-                        "realCallingUid is persistent system process AND intent "
-                                + "sender allowed (allowBackgroundActivityStart = true). "
-                                + "realCallingUid: " + realCallingUid);
-            }
-            // don't abort if the realCallingUid is an associated companion app
-            if (mService.isAssociatedCompanionApp(
-                    UserHandle.getUserId(realCallingUid), realCallingUid)) {
-                return logStartAllowedAndReturnCode(BAL_ALLOW_PENDING_INTENT,
-                        /*background*/ false, callingUid, realCallingUid, intent,
-                        "realCallingUid is a companion app. "
-                                + "realCallingUid: " + realCallingUid);
-            }
+        final boolean logVerdictChangeByPiDefaultChange = checkedOptions == null
+                || checkedOptions.getPendingIntentBackgroundActivityStartMode()
+                        == ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+        final boolean considerPiRules = logVerdictChangeByPiDefaultChange
+                || balAllowedByPiSender.allowsBackgroundActivityStarts();
+        final String verdictLogForPiSender =
+                balAllowedByPiSender.allowsBackgroundActivityStarts() ? VERDICT_ALLOWED
+                        : VERDICT_WOULD_BE_ALLOWED_IF_SENDER_GRANTS_BAL;
+
+        @BalCode int resultIfPiSenderAllowsBal = BAL_BLOCK;
+        if (realCallingUid != callingUid && considerPiRules) {
+            resultIfPiSenderAllowsBal = checkPiBackgroundActivityStart(callingUid, realCallingUid,
+                backgroundStartPrivileges, intent, checkedOptions,
+                realCallingUidHasAnyVisibleWindow, isRealCallingUidPersistentSystemProcess,
+                verdictLogForPiSender);
+        }
+        if (resultIfPiSenderAllowsBal != BAL_BLOCK
+                && balAllowedByPiSender.allowsBackgroundActivityStarts()
+                && !logVerdictChangeByPiDefaultChange) {
+            // The result is to allow (because the sender allows BAL) and we are not interested in
+            // logging differences, so just return.
+            return resultIfPiSenderAllowsBal;
         }
         if (useCallingUidState) {
             // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
             if (ActivityTaskManagerService.checkPermission(START_ACTIVITIES_FROM_BACKGROUND,
                     callingPid, callingUid) == PERMISSION_GRANTED) {
                 return logStartAllowedAndReturnCode(BAL_ALLOW_PERMISSION,
-                        /*background*/ true, callingUid, realCallingUid, intent,
-                        "START_ACTIVITIES_FROM_BACKGROUND permission granted");
+                    resultIfPiSenderAllowsBal, balAllowedByPiSender,
+                    /*background*/ true, callingUid, realCallingUid, intent,
+                    "START_ACTIVITIES_FROM_BACKGROUND permission granted");
             }
             // don't abort if the caller has the same uid as the recents component
             if (mSupervisor.mRecentTasks.isCallerRecents(callingUid)) {
-                return logStartAllowedAndReturnCode(BAL_ALLOW_ALLOWLISTED_COMPONENT,
-                        /*background*/ true, callingUid, realCallingUid,
-                        intent, "Recents Component");
+                return logStartAllowedAndReturnCode(
+                    BAL_ALLOW_ALLOWLISTED_COMPONENT,
+                    resultIfPiSenderAllowsBal, balAllowedByPiSender,
+                    /*background*/ true, callingUid, realCallingUid,
+                    intent, "Recents Component");
             }
             // don't abort if the callingUid is the device owner
             if (mService.isDeviceOwner(callingUid)) {
-                return logStartAllowedAndReturnCode(BAL_ALLOW_ALLOWLISTED_COMPONENT,
-                        /*background*/ true, callingUid, realCallingUid,
-                        intent, "Device Owner");
+                return logStartAllowedAndReturnCode(
+                    BAL_ALLOW_ALLOWLISTED_COMPONENT,
+                    resultIfPiSenderAllowsBal, balAllowedByPiSender,
+                    /*background*/ true, callingUid, realCallingUid,
+                    intent, "Device Owner");
             }
             // don't abort if the callingUid has companion device
             final int callingUserId = UserHandle.getUserId(callingUid);
             if (mService.isAssociatedCompanionApp(callingUserId, callingUid)) {
-                return logStartAllowedAndReturnCode(BAL_ALLOW_ALLOWLISTED_COMPONENT,
-                        /*background*/ true, callingUid, realCallingUid,
-                        intent, "Companion App");
+                return logStartAllowedAndReturnCode(
+                    BAL_ALLOW_ALLOWLISTED_COMPONENT,
+                    resultIfPiSenderAllowsBal, balAllowedByPiSender,
+                    /*background*/ true, callingUid, realCallingUid,
+                    intent, "Companion App");
             }
             // don't abort if the callingUid has SYSTEM_ALERT_WINDOW permission
             if (mService.hasSystemAlertWindowPermission(callingUid, callingPid, callingPackage)) {
@@ -374,18 +358,19 @@ public class BackgroundActivityStartController {
                         "Background activity start for "
                                 + callingPackage
                                 + " allowed because SYSTEM_ALERT_WINDOW permission is granted.");
-                return logStartAllowedAndReturnCode(BAL_ALLOW_SAW_PERMISSION,
-                        /*background*/ true, callingUid, realCallingUid,
-                        intent, "SYSTEM_ALERT_WINDOW permission is granted");
+                return logStartAllowedAndReturnCode(
+                    BAL_ALLOW_SAW_PERMISSION,
+                    resultIfPiSenderAllowsBal, balAllowedByPiSender,
+                    /*background*/ true, callingUid, realCallingUid,
+                    intent, "SYSTEM_ALERT_WINDOW permission is granted");
             }
             // don't abort if the callingUid and callingPackage have the
             // OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop
             if (isSystemExemptFlagEnabled() && mService.getAppOpsManager().checkOpNoThrow(
-                    AppOpsManager.OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
-                    callingUid,
-                    callingPackage)
-                    == AppOpsManager.MODE_ALLOWED) {
+                        AppOpsManager.OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
+                        callingUid, callingPackage) == AppOpsManager.MODE_ALLOWED) {
                 return logStartAllowedAndReturnCode(BAL_ALLOW_PERMISSION,
+                        resultIfPiSenderAllowsBal, balAllowedByPiSender,
                         /*background*/ true, callingUid, realCallingUid, intent,
                         "OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop is granted");
             }
@@ -395,78 +380,119 @@ public class BackgroundActivityStartController {
         // up and alive. If that's the case, we retrieve the WindowProcessController for the send()
         // caller if caller allows, so that we can make the decision based on its state.
         int callerAppUid = callingUid;
-        if (callerApp == null && balAllowedByPiSender.allowsBackgroundActivityStarts()) {
+        boolean callerAppBasedOnPiSender = callerApp == null && considerPiRules
+                && resultIfPiSenderAllowsBal == BAL_BLOCK;
+        if (callerAppBasedOnPiSender) {
             callerApp = mService.getProcessController(realCallingPid, realCallingUid);
             callerAppUid = realCallingUid;
         }
         // don't abort if the callerApp or other processes of that uid are allowed in any way
         if (callerApp != null && useCallingUidState) {
             // first check the original calling process
-            @BalCode int balAllowedForCaller = callerApp
+            final @BalCode int balAllowedForCaller = callerApp
                     .areBackgroundActivityStartsAllowed(appSwitchState);
             if (balAllowedForCaller != BAL_BLOCK) {
-                return logStartAllowedAndReturnCode(balAllowedForCaller,
+                if (callerAppBasedOnPiSender) {
+                    resultIfPiSenderAllowsBal = logStartAllowedAndReturnCode(balAllowedForCaller,
                         /*background*/ true, callingUid, realCallingUid, intent,
                         "callerApp process (pid = " + callerApp.getPid()
-                                + ", uid = " + callerAppUid + ") is allowed");
-            }
-            // only if that one wasn't allowed, check the other ones
-            final ArraySet<WindowProcessController> uidProcesses =
+                            + ", uid = " + callerAppUid + ") is allowed", verdictLogForPiSender);
+                } else {
+                    return logStartAllowedAndReturnCode(balAllowedForCaller,
+                        resultIfPiSenderAllowsBal, balAllowedByPiSender,
+                        /*background*/ true, callingUid, realCallingUid, intent,
+                        "callerApp process (pid = " + callerApp.getPid()
+                            + ", uid = " + callerAppUid + ") is allowed");
+                }
+            } else {
+                // only if that one wasn't allowed, check the other ones
+                final ArraySet<WindowProcessController> uidProcesses =
                     mService.mProcessMap.getProcesses(callerAppUid);
-            if (uidProcesses != null) {
-                for (int i = uidProcesses.size() - 1; i >= 0; i--) {
-                    final WindowProcessController proc = uidProcesses.valueAt(i);
-                    int balAllowedForUid = proc.areBackgroundActivityStartsAllowed(appSwitchState);
-                    if (proc != callerApp
-                            && balAllowedForUid != BAL_BLOCK) {
-                        return logStartAllowedAndReturnCode(balAllowedForUid,
-                                /*background*/ true, callingUid, realCallingUid, intent,
-                                "process" + proc.getPid()
-                                        + " from uid " + callerAppUid + " is allowed");
+                if (uidProcesses != null) {
+                    for (int i = uidProcesses.size() - 1; i >= 0; i--) {
+                        final WindowProcessController proc = uidProcesses.valueAt(i);
+                        int balAllowedForUid = proc.areBackgroundActivityStartsAllowed(
+                                appSwitchState);
+                        if (proc != callerApp && balAllowedForUid != BAL_BLOCK) {
+                            if (callerAppBasedOnPiSender) {
+                                resultIfPiSenderAllowsBal = logStartAllowedAndReturnCode(
+                                    balAllowedForUid,
+                                    /*background*/ true, callingUid, realCallingUid, intent,
+                                    "process" + proc.getPid() + " from uid " + callerAppUid
+                                        + " is allowed", verdictLogForPiSender);
+                                break;
+                            } else {
+                                return logStartAllowedAndReturnCode(balAllowedForUid,
+                                    resultIfPiSenderAllowsBal, balAllowedByPiSender,
+                                    /*background*/ true, callingUid, realCallingUid, intent,
+                                    "process" + proc.getPid() + " from uid " + callerAppUid
+                                        + " is allowed");
+                            }
+                        }
                     }
                 }
             }
+            if (callerAppBasedOnPiSender) {
+                // If caller app was based on PI sender, this result is part of
+                // resultIfPiSenderAllowsBal
+                if (resultIfPiSenderAllowsBal != BAL_BLOCK
+                        && balAllowedByPiSender.allowsBackgroundActivityStarts()
+                        && !logVerdictChangeByPiDefaultChange) {
+                    // The result is to allow (because the sender allows BAL) and we are not
+                    // interested in logging differences, so just return.
+                    return resultIfPiSenderAllowsBal;
+                }
+            } else {
+                // If caller app was NOT based on PI sender and we found a allow reason we should
+                // have returned already
+                checkState(balAllowedForCaller == BAL_BLOCK,
+                        "balAllowedForCaller = " + balAllowedForCaller + " (should have returned)");
+            }
+        }
+        // If we are here, it means all exemptions not based on PI sender failed, so we'll block
+        // unless resultIfPiSenderAllowsBal is an allow and the PI sender allows BAL
+
+        String stateDumpLog = " [callingPackage: " + callingPackage
+                + "; callingUid: " + callingUid
+                + "; appSwitchState: " + appSwitchState
+                + "; callingUidHasAnyVisibleWindow: " + callingUidHasAnyVisibleWindow
+                + "; callingUidProcState: " + DebugUtils.valueToString(
+                        ActivityManager.class, "PROCESS_STATE_", callingUidProcState)
+                + "; isCallingUidPersistentSystemProcess: " + isCallingUidPersistentSystemProcess
+                + "; balAllowedByPiSender: " + balAllowedByPiSender
+                + "; realCallingUid: " + realCallingUid
+                + "; realCallingUidHasAnyVisibleWindow: " + realCallingUidHasAnyVisibleWindow
+                + "; realCallingUidProcState: " + DebugUtils.valueToString(
+                        ActivityManager.class, "PROCESS_STATE_", realCallingUidProcState)
+                + "; isRealCallingUidPersistentSystemProcess: "
+                        + isRealCallingUidPersistentSystemProcess
+                + "; originatingPendingIntent: " + originatingPendingIntent
+                + "; backgroundStartPrivileges: " + backgroundStartPrivileges
+                + "; intent: " + intent
+                + "; callerApp: " + callerApp
+                + "; inVisibleTask: " + (callerApp != null && callerApp.hasActivityInVisibleTask())
+                + "]";
+        if (resultIfPiSenderAllowsBal != BAL_BLOCK) {
+            // We should have returned before if !logVerdictChangeByPiDefaultChange
+            checkState(logVerdictChangeByPiDefaultChange,
+                    "resultIfPiSenderAllowsBal = " + balCodeToString(resultIfPiSenderAllowsBal)
+                        + " at the end but logVerdictChangeByPiDefaultChange = false");
+            if (balAllowedByPiSender.allowsBackgroundActivityStarts()) {
+                // The verdict changed from block to allow, PI sender default change is off and
+                // we'd block if it were on
+                Slog.wtf(TAG, "With BAL hardening this activity start would be blocked!"
+                        + stateDumpLog);
+                return resultIfPiSenderAllowsBal;
+            } else {
+                // The verdict changed from allow (resultIfPiSenderAllowsBal) to block, PI sender
+                // default change is on (otherwise we would have fallen into if above) and we'd
+                // allow if it were off
+                Slog.wtf(TAG, "Without BAL hardening this activity start would NOT be allowed!"
+                        + stateDumpLog);
+            }
         }
         // anything that has fallen through would currently be aborted
-        Slog.w(
-                TAG,
-                "Background activity launch blocked [callingPackage: "
-                        + callingPackage
-                        + "; callingUid: "
-                        + callingUid
-                        + "; appSwitchState: "
-                        + appSwitchState
-                        + "; isCallingUidForeground: "
-                        + isCallingUidForeground
-                        + "; callingUidHasAnyVisibleWindow: "
-                        + callingUidHasAnyVisibleWindow
-                        + "; callingUidProcState: "
-                        + DebugUtils.valueToString(
-                                ActivityManager.class, "PROCESS_STATE_", callingUidProcState)
-                        + "; isCallingUidPersistentSystemProcess: "
-                        + isCallingUidPersistentSystemProcess
-                        + "; realCallingUid: "
-                        + realCallingUid
-                        + "; isRealCallingUidForeground: "
-                        + isRealCallingUidForeground
-                        + "; realCallingUidHasAnyVisibleWindow: "
-                        + realCallingUidHasAnyVisibleWindow
-                        + "; realCallingUidProcState: "
-                        + DebugUtils.valueToString(
-                                ActivityManager.class, "PROCESS_STATE_", realCallingUidProcState)
-                        + "; isRealCallingUidPersistentSystemProcess: "
-                        + isRealCallingUidPersistentSystemProcess
-                        + "; originatingPendingIntent: "
-                        + originatingPendingIntent
-                        + "; backgroundStartPrivileges: "
-                        + backgroundStartPrivileges
-                        + "; intent: "
-                        + intent
-                        + "; callerApp: "
-                        + callerApp
-                        + "; inVisibleTask: "
-                        + (callerApp != null && callerApp.hasActivityInVisibleTask())
-                        + "]");
+        Slog.w(TAG, "Background activity launch blocked" + stateDumpLog);
         // log aborted activity start to TRON
         if (mService.isActivityStartsLoggingEnabled()) {
             mSupervisor
@@ -486,6 +512,51 @@ public class BackgroundActivityStartController {
         return BAL_BLOCK;
     }
 
+    private @BalCode int checkPiBackgroundActivityStart(int callingUid, int realCallingUid,
+            BackgroundStartPrivileges backgroundStartPrivileges, Intent intent,
+            ActivityOptions checkedOptions, boolean realCallingUidHasAnyVisibleWindow,
+            boolean isRealCallingUidPersistentSystemProcess, String verdictLog) {
+        final boolean useCallerPermission =
+                PendingIntentRecord.isPendingIntentBalAllowedByPermission(checkedOptions);
+        if (useCallerPermission
+                && ActivityManager.checkComponentPermission(
+                                android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
+                realCallingUid, -1, true) == PackageManager.PERMISSION_GRANTED) {
+            return logStartAllowedAndReturnCode(BAL_ALLOW_PENDING_INTENT,
+                /*background*/ false, callingUid, realCallingUid, intent,
+                "realCallingUid has BAL permission. realCallingUid: " + realCallingUid,
+                verdictLog);
+        }
+
+        // don't abort if the realCallingUid has a visible window
+        // TODO(b/171459802): We should check appSwitchAllowed also
+        if (realCallingUidHasAnyVisibleWindow) {
+            return logStartAllowedAndReturnCode(BAL_ALLOW_PENDING_INTENT,
+                    /*background*/ false, callingUid, realCallingUid, intent,
+                    "realCallingUid has visible (non-toast) window. realCallingUid: "
+                            + realCallingUid, verdictLog);
+        }
+        // if the realCallingUid is a persistent system process, abort if the IntentSender
+        // wasn't allowed to start an activity
+        if (isRealCallingUidPersistentSystemProcess
+                && backgroundStartPrivileges.allowsBackgroundActivityStarts()) {
+            return logStartAllowedAndReturnCode(BAL_ALLOW_PENDING_INTENT,
+                    /*background*/ false, callingUid, realCallingUid, intent,
+                    "realCallingUid is persistent system process AND intent "
+                            + "sender allowed (allowBackgroundActivityStart = true). "
+                            + "realCallingUid: " + realCallingUid, verdictLog);
+        }
+        // don't abort if the realCallingUid is an associated companion app
+        if (mService.isAssociatedCompanionApp(
+                UserHandle.getUserId(realCallingUid), realCallingUid)) {
+            return logStartAllowedAndReturnCode(BAL_ALLOW_PENDING_INTENT,
+                    /*background*/ false, callingUid, realCallingUid, intent,
+                    "realCallingUid is a companion app. "
+                            + "realCallingUid: " + realCallingUid, verdictLog);
+        }
+        return BAL_BLOCK;
+    }
+
     static @BalCode int logStartAllowedAndReturnCode(@BalCode int code, boolean background,
             int callingUid, int realCallingUid, Intent intent, int pid, String msg) {
         return logStartAllowedAndReturnCode(code, background, callingUid, realCallingUid, intent,
@@ -494,16 +565,43 @@ public class BackgroundActivityStartController {
 
     static @BalCode int logStartAllowedAndReturnCode(@BalCode int code, boolean background,
             int callingUid, int realCallingUid, Intent intent, String msg) {
+        return logStartAllowedAndReturnCode(code, background, callingUid, realCallingUid, intent,
+            msg, VERDICT_ALLOWED);
+    }
+
+    /**
+     * Logs the start and returns one of the provided codes depending on if the PI sender allows
+     * using its BAL privileges.
+     */
+    static @BalCode int logStartAllowedAndReturnCode(@BalCode int result,
+            @BalCode int resultIfPiSenderAllowsBal, BackgroundStartPrivileges balAllowedByPiSender,
+            boolean background, int callingUid, int realCallingUid, Intent intent, String msg) {
+        if (resultIfPiSenderAllowsBal != BAL_BLOCK
+                && balAllowedByPiSender.allowsBackgroundActivityStarts()) {
+            // resultIfPiSenderAllowsBal was already logged, so just return
+            return resultIfPiSenderAllowsBal;
+        }
+        return logStartAllowedAndReturnCode(result, background, callingUid, realCallingUid,
+            intent, msg, VERDICT_ALLOWED);
+    }
+
+
+    static @BalCode int logStartAllowedAndReturnCode(@BalCode int code, boolean background,
+            int callingUid, int realCallingUid, Intent intent, String msg, String verdict) {
         statsLogBalAllowed(code, callingUid, realCallingUid, intent);
         if (DEBUG_ACTIVITY_STARTS) {
             StringBuilder builder = new StringBuilder();
             if (background) {
                 builder.append("Background ");
             }
-            builder.append("Activity start allowed: " + msg + ". callingUid: " + callingUid + ". ");
+            builder.append(verdict + ": " + msg + ". callingUid: " + callingUid + ". ");
             builder.append("BAL Code: ");
             builder.append(balCodeToString(code));
-            Slog.d(TAG,  builder.toString());
+            if (verdict.equals(VERDICT_ALLOWED)) {
+                Slog.i(TAG, builder.toString());
+            } else {
+                Slog.d(TAG, builder.toString());
+            }
         }
         return code;
     }
