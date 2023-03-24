@@ -374,6 +374,13 @@ class Task extends TaskFragment {
      *  determining the order when restoring. */
     long mLastTimeMoved;
 
+    /**
+     * If it is set, the processes belong to the task will be killed when one of its activity
+     * reports that Activity#onDestroy is done and the task no longer contains perceptible
+     * components. This should only be set on a leaf task.
+     */
+    boolean mKillProcessesOnDestroyed;
+
     /** If original intent did not allow relinquishing task identity, save that information */
     private boolean mNeverRelinquishIdentity = true;
 
@@ -1323,6 +1330,20 @@ class Task extends TaskFragment {
         // Probably a task that contains other tasks, so return the intent for the top task?
         final Task topTask = getTopMostTask();
         return (topTask != this && topTask != null) ? topTask.getBaseIntent() : null;
+    }
+
+    /**
+     * Returns the package name which stands for this task. It is empty string if no activities
+     * have been added to this task.
+     */
+    @NonNull
+    String getBasePackageName() {
+        final Intent intent = getBaseIntent();
+        if (intent == null) {
+            return "";
+        }
+        final ComponentName componentName = intent.getComponent();
+        return componentName != null ? componentName.getPackageName() : "";
     }
 
     /** Returns the first non-finishing activity from the bottom. */
@@ -3678,6 +3699,9 @@ class Task extends TaskFragment {
         }
         if (mSharedStartingData != null) {
             pw.println(prefix + "mSharedStartingData=" + mSharedStartingData);
+        }
+        if (mKillProcessesOnDestroyed) {
+            pw.println(prefix + "mKillProcessesOnDestroyed=true");
         }
         pw.print(prefix); pw.print("taskId=" + mTaskId);
         pw.println(" rootTaskId=" + getRootTaskId());
