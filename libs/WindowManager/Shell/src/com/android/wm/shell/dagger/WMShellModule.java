@@ -54,6 +54,7 @@ import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
+import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
@@ -676,12 +677,20 @@ public abstract class WMShellModule {
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             Transitions transitions,
+            EnterDesktopTaskTransitionHandler transitionHandler,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return new DesktopTasksController(context, shellInit, shellController, displayController,
                 shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer, transitions,
-                desktopModeTaskRepository, mainExecutor);
+                transitionHandler, desktopModeTaskRepository, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static EnterDesktopTaskTransitionHandler provideEnterDesktopModeTaskTransitionHandler(
+            Transitions transitions) {
+        return new EnterDesktopTaskTransitionHandler(transitions);
     }
 
     @WMSingleton
