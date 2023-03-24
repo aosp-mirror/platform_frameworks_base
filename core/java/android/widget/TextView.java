@@ -11467,7 +11467,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             changed = true;
         }
 
-        if (requestRectWithoutFocus && isFocused()) {
+        if (requestRectWithoutFocus || isFocused()) {
             // This offsets because getInterestingRect() is in terms of viewport coordinates, but
             // requestRectangleOnScreen() is in terms of content coordinates.
 
