@@ -3333,7 +3333,12 @@ package android.companion.virtual.sensor {
     method public int describeContents();
     method public int getDirectChannelTypesSupported();
     method public int getHighestDirectReportRateLevel();
+    method public int getMaxDelay();
+    method public float getMaximumRange();
+    method public int getMinDelay();
     method @NonNull public String getName();
+    method public float getPower();
+    method public float getResolution();
     method public int getType();
     method @Nullable public String getVendor();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -3345,6 +3350,11 @@ package android.companion.virtual.sensor {
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig build();
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setDirectChannelTypesSupported(int);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setHighestDirectReportRateLevel(int);
+    method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setMaxDelay(int);
+    method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setMaximumRange(float);
+    method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setMinDelay(int);
+    method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setPower(float);
+    method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setResolution(float);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setVendor(@Nullable String);
   }
 
