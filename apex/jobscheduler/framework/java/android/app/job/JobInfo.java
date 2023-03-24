@@ -2344,11 +2344,7 @@ public class JobInfo implements Parcelable {
             // UIDTs
             if (networkRequest == null) {
                 throw new IllegalArgumentException(
-                        "A user-initaited data transfer job must specify a valid network type");
-            }
-            if (backoffPolicy == BACKOFF_POLICY_LINEAR) {
-                throw new IllegalArgumentException(
-                        "A user-initiated data transfer job cannot have a linear backoff policy.");
+                        "A user-initiated data transfer job must specify a valid network type");
             }
         }
     }
