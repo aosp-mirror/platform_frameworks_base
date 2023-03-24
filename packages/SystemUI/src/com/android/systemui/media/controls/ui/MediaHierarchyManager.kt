@@ -317,13 +317,16 @@ constructor(
 
     /**
      * Returns the amount of translationY of the media container, during the current guided
-     * transformation, if running. If there is no guided transformation running, it will return 0.
+     * transformation, if running. If there is no guided transformation running, it will return -1.
      */
     fun getGuidedTransformationTranslationY(): Int {
         if (!isCurrentlyInGuidedTransformation()) {
             return -1
         }
-        val startHost = getHost(previousLocation) ?: return 0
+        val startHost = getHost(previousLocation)
+        if (startHost == null || !startHost.visible) {
+            return 0
+        }
         return targetBounds.top - startHost.currentBounds.top
     }
 
