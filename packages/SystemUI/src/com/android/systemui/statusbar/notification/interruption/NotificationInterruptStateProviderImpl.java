@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.interruption;
 
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD;
+import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA;
 import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR;
 import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.HUN_SNOOZE_BYPASSED_POTENTIALLY_SUPPRESSED_FSI;
 
@@ -81,6 +82,9 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     public enum NotificationInterruptEvent implements UiEventLogger.UiEventEnum {
         @UiEvent(doc = "FSI suppressed for suppressive GroupAlertBehavior")
         FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR(1235),
+
+        @UiEvent(doc = "FSI suppressed for suppressive BubbleMetadata")
+        FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA(1353),
 
         @UiEvent(doc = "FSI suppressed for requiring neither HUN nor keyguard")
         FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD(1236),
@@ -273,6 +277,16 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                     suppressedByDND);
         }
 
+        // If the notification has suppressive BubbleMetadata, block FSI and warn.
+        Notification.BubbleMetadata bubbleMetadata = sbn.getNotification().getBubbleMetadata();
+        if (bubbleMetadata != null && bubbleMetadata.isNotificationSuppressed()) {
+            // b/274759612: Detect and report an event when a notification has both an FSI and a
+            // suppressive BubbleMetadata, and now correctly block the FSI from firing.
+            return getDecisionGivenSuppression(
+                    FullScreenIntentDecision.NO_FSI_SUPPRESSIVE_BUBBLE_METADATA,
+                    suppressedByDND);
+        }
+
         // Notification is coming from a suspended package, block FSI
         if (entry.getRanking().isSuspended()) {
             return getDecisionGivenSuppression(FullScreenIntentDecision.NO_FSI_SUSPENDED,
@@ -350,6 +364,14 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                         packageName);
                 mLogger.logNoFullscreenWarning(entry,
                         decision + ": GroupAlertBehavior will prevent HUN");
+                return;
+            case NO_FSI_SUPPRESSIVE_BUBBLE_METADATA:
+                android.util.EventLog.writeEvent(0x534e4554, "274759612", uid,
+                        "bubbleMetadata");
+                mUiEventLogger.log(FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA, uid,
+                        packageName);
+                mLogger.logNoFullscreenWarning(entry,
+                        decision + ": BubbleMetadata may prevent HUN");
                 return;
             case NO_FSI_NO_HUN_OR_KEYGUARD:
                 android.util.EventLog.writeEvent(0x534e4554, "231322873", uid,
