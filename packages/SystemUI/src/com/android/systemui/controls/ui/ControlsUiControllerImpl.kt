@@ -604,7 +604,7 @@ class ControlsUiControllerImpl @Inject constructor (
             setCompoundDrawablesRelative(selected.icon, null, null, null)
         }
 
-        val anchor = parent.requireViewById<ViewGroup>(R.id.controls_header)
+        val anchor = parent.requireViewById<View>(R.id.app_or_structure_spinner)
         if (items.size == 1) {
             spinner.setBackground(null)
             anchor.setOnClickListener(null)
@@ -617,10 +617,7 @@ class ControlsUiControllerImpl @Inject constructor (
 
         anchor.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View) {
-                popup = GlobalActionsPopupMenu(
-                        popupThemedContext,
-                        true /* isDropDownMode */
-                ).apply {
+                popup = ControlsPopupMenu(popupThemedContext).apply {
                     setAnchorView(anchor)
                     setAdapter(adapter)
 
@@ -868,22 +865,24 @@ internal data class SelectionItem(
     }
 }
 
-private class ItemAdapter(
-    val parentContext: Context,
-    val resource: Int
-) : ArrayAdapter<SelectionItem>(parentContext, resource) {
+private class ItemAdapter(parentContext: Context, val resource: Int) :
+        ArrayAdapter<SelectionItem>(parentContext, resource) {
 
-    val layoutInflater = LayoutInflater.from(context)
+    private val layoutInflater = LayoutInflater.from(context)!!
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val item = getItem(position)
+        val item: SelectionItem = getItem(position)!!
         val view = convertView ?: layoutInflater.inflate(resource, parent, false)
-        view.requireViewById<TextView>(R.id.controls_spinner_item).apply {
-            setText(item.getTitle())
-        }
-        view.requireViewById<ImageView>(R.id.app_icon).apply {
-            setImageDrawable(item.icon)
+        with(view.tag as? ViewHolder ?: ViewHolder(view).also { view.tag = it }) {
+            titleView.text = item.getTitle()
+            iconView.setImageDrawable(item.icon)
         }
         return view
+    }
+
+    private class ViewHolder(itemView: View) {
+
+        val titleView: TextView = itemView.requireViewById(R.id.controls_spinner_item)
+        val iconView: ImageView = itemView.requireViewById(R.id.app_icon)
     }
 }
