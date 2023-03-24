@@ -7873,4 +7873,15 @@ public abstract class Context {
     public boolean isConfigurationContext() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
+
+    /**
+     * Closes temporary system dialogs. Some examples of temporary system dialogs are the
+     * notification window-shade and the recent tasks dialog.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS)
+    public void closeSystemDialogs() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 }
