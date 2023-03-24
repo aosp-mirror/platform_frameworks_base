@@ -17,9 +17,13 @@
 package com.android.server.appop;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+
+import java.io.PrintWriter;
 
 /**
  * Logging decorator for {@link AppOpsCheckingServiceInterface}.
@@ -130,15 +134,83 @@ public class AppOpsCheckingServiceLoggingDecorator implements AppOpsCheckingServ
     }
 
     @Override
-    public SparseBooleanArray getForegroundOps(int uid) {
-        Log.i(LOG_TAG, "getForegroundOps(uid = " + uid + ")");
-        return mService.getForegroundOps(uid);
+    public void startWatchingOpModeChanged(@NonNull OnOpModeChangedListener changedListener,
+            int op) {
+        Log.i(LOG_TAG, "startWatchingOpModeChanged(changedListener = " + changedListener + ", op = "
+                + op + ")");
+        mService.startWatchingOpModeChanged(changedListener, op);
     }
 
     @Override
-    public SparseBooleanArray getForegroundOps(String packageName, int userId) {
-        Log.i(LOG_TAG, "getForegroundOps(packageName = " + packageName + ", userId = " + userId
+    public void startWatchingPackageModeChanged(@NonNull OnOpModeChangedListener changedListener,
+            @NonNull String packageName) {
+        Log.i(LOG_TAG, "startWatchingPackageModeChanged(changedListener = " + changedListener
+                + ", packageName = " + packageName + ")");
+        mService.startWatchingPackageModeChanged(changedListener, packageName);
+    }
+
+    @Override
+    public void removeListener(@NonNull OnOpModeChangedListener changedListener) {
+        Log.i(LOG_TAG, "removeListener(changedListener = " + changedListener + ")");
+        mService.removeListener(changedListener);
+    }
+
+    @Override
+    public ArraySet<OnOpModeChangedListener> getOpModeChangedListeners(int op) {
+        Log.i(LOG_TAG, "getOpModeChangedListeners(op = " + op + ")");
+        return mService.getOpModeChangedListeners(op);
+    }
+
+    @Override
+    public ArraySet<OnOpModeChangedListener> getPackageModeChangedListeners(
+            @NonNull String packageName) {
+        Log.i(LOG_TAG, "getPackageModeChangedListeners(packageName = " + packageName + ")");
+        return mService.getPackageModeChangedListeners(packageName);
+    }
+
+    @Override
+    public void notifyWatchersOfChange(int op, int uid) {
+        Log.i(LOG_TAG, "notifyWatchersOfChange(op = " + op + ", uid = " + uid + ")");
+        mService.notifyWatchersOfChange(op, uid);
+    }
+
+    @Override
+    public void notifyOpChanged(@NonNull OnOpModeChangedListener changedListener, int op, int uid,
+            @Nullable String packageName) {
+        Log.i(LOG_TAG, "notifyOpChanged(changedListener = " + changedListener + ", op = " + op
+                + ", uid = " + uid + ", packageName = " + packageName + ")");
+        mService.notifyOpChanged(changedListener, op, uid, packageName);
+    }
+
+    @Override
+    public void notifyOpChangedForAllPkgsInUid(int op, int uid, boolean onlyForeground,
+            @Nullable OnOpModeChangedListener callbackToIgnore) {
+        Log.i(LOG_TAG, "notifyOpChangedForAllPkgsInUid(op = " + op + ", uid = " + uid
+                + ", onlyForeground = " + onlyForeground + ", callbackToIgnore = "
+                + callbackToIgnore + ")");
+        mService.notifyOpChangedForAllPkgsInUid(op, uid, onlyForeground, callbackToIgnore);
+    }
+
+    @Override
+    public SparseBooleanArray evalForegroundUidOps(int uid, SparseBooleanArray foregroundOps) {
+        Log.i(LOG_TAG, "evalForegroundUidOps(uid = " + uid + ", foregroundOps = " + foregroundOps
                 + ")");
-        return mService.getForegroundOps(packageName, userId);
+        return mService.evalForegroundUidOps(uid, foregroundOps);
+    }
+
+    @Override
+    public SparseBooleanArray evalForegroundPackageOps(String packageName,
+            SparseBooleanArray foregroundOps, int userId) {
+        Log.i(LOG_TAG, "evalForegroundPackageOps(packageName = " + packageName
+                + ", foregroundOps = " + foregroundOps + ", userId = " + userId + ")");
+        return mService.evalForegroundPackageOps(packageName, foregroundOps, userId);
+    }
+
+    @Override
+    public boolean dumpListeners(int dumpOp, int dumpUid, String dumpPackage,
+            PrintWriter printWriter) {
+        Log.i(LOG_TAG, "dumpListeners(dumpOp = " + dumpOp + ", dumpUid = " + dumpUid
+                + ", dumpPackage = " + dumpPackage + ", printWriter = " + printWriter + ")");
+        return mService.dumpListeners(dumpOp, dumpUid, dumpPackage, printWriter);
     }
 }
