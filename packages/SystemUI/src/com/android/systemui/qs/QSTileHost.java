@@ -600,7 +600,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             if (tile.isEmpty()) continue;
             if (tile.equals("default")) {
                 if (!addedDefault) {
-                    List<String> defaultSpecs = QSHost.getDefaultSpecs(context);
+                    List<String> defaultSpecs = QSHost.getDefaultSpecs(context.getResources());
                     for (String spec : defaultSpecs) {
                         if (!addedSpecs.contains(spec)) {
                             tiles.add(spec);

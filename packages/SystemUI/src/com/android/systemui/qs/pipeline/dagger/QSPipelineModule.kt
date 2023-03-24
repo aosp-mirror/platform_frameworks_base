@@ -16,15 +16,32 @@
 
 package com.android.systemui.qs.pipeline.dagger
 
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository
+import com.android.systemui.qs.pipeline.data.repository.TileSpecSettingsRepository
+import com.android.systemui.qs.pipeline.prototyping.PrototypeCoreStartable
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 
 @Module
 abstract class QSPipelineModule {
+
+    /** Implementation for [TileSpecRepository] */
+    @Binds
+    abstract fun provideTileSpecRepository(impl: TileSpecSettingsRepository): TileSpecRepository
+
+    @Binds
+    @IntoMap
+    @ClassKey(PrototypeCoreStartable::class)
+    abstract fun providePrototypeCoreStartable(startable: PrototypeCoreStartable): CoreStartable
+
     companion object {
         /**
          * Provides a logging buffer for all logs related to the new Quick Settings pipeline to log
