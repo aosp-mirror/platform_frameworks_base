@@ -150,7 +150,7 @@ public class AlarmManagerEconomicPolicyTest {
                 mEconomicPolicy.getMaxSatiatedBalance(0, pkgExempted));
 
         final String pkgHeadlessSystemApp = "com.pkg.headless_system_app";
-        when(mIrs.isHeadlessSystemApp(eq(pkgHeadlessSystemApp))).thenReturn(true);
+        when(mIrs.isHeadlessSystemApp(anyInt(), eq(pkgHeadlessSystemApp))).thenReturn(true);
         assertEquals(EconomyManager.DEFAULT_AM_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP_CAKES,
                 mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
         assertEquals(EconomyManager.DEFAULT_AM_MAX_SATIATED_BALANCE_CAKES,
@@ -184,7 +184,7 @@ public class AlarmManagerEconomicPolicyTest {
         when(mIrs.isPackageExempted(anyInt(), eq(pkgExempted))).thenReturn(true);
         assertEquals(arcToCake(9), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
         final String pkgHeadlessSystemApp = "com.pkg.headless_system_app";
-        when(mIrs.isHeadlessSystemApp(eq(pkgHeadlessSystemApp))).thenReturn(true);
+        when(mIrs.isHeadlessSystemApp(anyInt(), eq(pkgHeadlessSystemApp))).thenReturn(true);
         assertEquals(arcToCake(8), mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
         assertEquals(arcToCake(7), mEconomicPolicy.getMinSatiatedBalance(0, "com.any.other.app"));
     }
@@ -212,7 +212,7 @@ public class AlarmManagerEconomicPolicyTest {
         when(mIrs.isPackageExempted(anyInt(), eq(pkgExempted))).thenReturn(true);
         assertEquals(arcToCake(0), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
         final String pkgHeadlessSystemApp = "com.pkg.headless_system_app";
-        when(mIrs.isHeadlessSystemApp(eq(pkgHeadlessSystemApp))).thenReturn(true);
+        when(mIrs.isHeadlessSystemApp(anyInt(), eq(pkgHeadlessSystemApp))).thenReturn(true);
         assertEquals(arcToCake(0), mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
         assertEquals(arcToCake(0), mEconomicPolicy.getMinSatiatedBalance(0, "com.any.other.app"));
 
