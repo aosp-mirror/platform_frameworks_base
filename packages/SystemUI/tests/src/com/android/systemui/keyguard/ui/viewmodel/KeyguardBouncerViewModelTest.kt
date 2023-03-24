@@ -125,4 +125,26 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
         assertThat(sideFpsIsShowing).isEqualTo(true)
         job.cancel()
     }
+
+    @Test
+    fun isShowing() = runTest {
+        var isShowing: Boolean? = null
+        val job = underTest.isShowing.onEach { isShowing = it }.launchIn(this)
+        repository.setPrimaryShow(true)
+        // Run the tasks that are pending at this point of virtual time.
+        runCurrent()
+        assertThat(isShowing).isEqualTo(true)
+        job.cancel()
+    }
+
+    @Test
+    fun isNotShowing() = runTest {
+        var isShowing: Boolean? = null
+        val job = underTest.isShowing.onEach { isShowing = it }.launchIn(this)
+        repository.setPrimaryShow(false)
+        // Run the tasks that are pending at this point of virtual time.
+        runCurrent()
+        assertThat(isShowing).isEqualTo(false)
+        job.cancel()
+    }
 }
