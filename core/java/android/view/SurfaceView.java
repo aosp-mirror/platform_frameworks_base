@@ -33,7 +33,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.RenderNode;
@@ -851,10 +850,14 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             }
             mParentSurfaceSequenceId = viewRoot.getSurfaceSequenceId();
 
-            if (mViewVisibility) {
-                surfaceUpdateTransaction.show(mSurfaceControl);
-            } else {
-                surfaceUpdateTransaction.hide(mSurfaceControl);
+            // Only control visibility if we're not hardware-accelerated. Otherwise we'll
+            // let renderthread drive since offscreen SurfaceControls should not be visible.
+            if (!isHardwareAccelerated()) {
+                if (mViewVisibility) {
+                    surfaceUpdateTransaction.show(mSurfaceControl);
+                } else {
+                    surfaceUpdateTransaction.hide(mSurfaceControl);
+                }
             }
 
             updateBackgroundVisibility(surfaceUpdateTransaction);
@@ -1417,12 +1420,10 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     private final Rect mRTLastReportedPosition = new Rect();
-    private final Point mRTLastReportedSurfaceSize = new Point();
 
     private class SurfaceViewPositionUpdateListener implements RenderNode.PositionUpdateListener {
         private final int mRtSurfaceWidth;
         private final int mRtSurfaceHeight;
-        private boolean mRtFirst = true;
         private final SurfaceControl.Transaction mPositionChangedTransaction =
                 new SurfaceControl.Transaction();
 
@@ -1433,15 +1434,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
         @Override
         public void positionChanged(long frameNumber, int left, int top, int right, int bottom) {
-            if (!mRtFirst && (mRTLastReportedPosition.left == left
-                    && mRTLastReportedPosition.top == top
-                    && mRTLastReportedPosition.right == right
-                    && mRTLastReportedPosition.bottom == bottom
-                    && mRTLastReportedSurfaceSize.x == mRtSurfaceWidth
-                    && mRTLastReportedSurfaceSize.y == mRtSurfaceHeight)) {
-                return;
-            }
-            mRtFirst = false;
             try {
                 if (DEBUG_POSITION) {
                     Log.d(TAG, String.format(
@@ -1452,8 +1444,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 }
                 synchronized (mSurfaceControlLock) {
                     if (mSurfaceControl == null) return;
+
                     mRTLastReportedPosition.set(left, top, right, bottom);
-                    mRTLastReportedSurfaceSize.set(mRtSurfaceWidth, mRtSurfaceHeight);
                     onSetSurfacePositionAndScale(mPositionChangedTransaction, mSurfaceControl,
                             mRTLastReportedPosition.left /*positionLeft*/,
                             mRTLastReportedPosition.top /*positionTop*/,
@@ -1461,10 +1453,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                                     / (float) mRtSurfaceWidth /*postScaleX*/,
                             mRTLastReportedPosition.height()
                                     / (float) mRtSurfaceHeight /*postScaleY*/);
-                    if (mViewVisibility) {
-                        // b/131239825
-                        mPositionChangedTransaction.show(mSurfaceControl);
-                    }
+
+                    mPositionChangedTransaction.show(mSurfaceControl);
                 }
                 applyOrMergeTransaction(mPositionChangedTransaction, frameNumber);
             } catch (Exception ex) {
@@ -1490,7 +1480,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                         System.identityHashCode(this), frameNumber));
             }
             mRTLastReportedPosition.setEmpty();
-            mRTLastReportedSurfaceSize.set(-1, -1);
 
             // positionLost can be called while UI thread is un-paused.
             synchronized (mSurfaceControlLock) {

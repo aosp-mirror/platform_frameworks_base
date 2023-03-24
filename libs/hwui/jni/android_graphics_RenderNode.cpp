@@ -605,15 +605,25 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             }
             mPreviousPosition = bounds;
 
-#ifdef __ANDROID__ // Layoutlib does not support CanvasContext
-            incStrong(0);
-            auto functor = std::bind(
-                std::mem_fn(&PositionListenerTrampoline::doUpdatePositionAsync), this,
-                (jlong) info.canvasContext.getFrameNumber(),
-                (jint) bounds.left, (jint) bounds.top,
-                (jint) bounds.right, (jint) bounds.bottom);
+            ATRACE_NAME("Update SurfaceView position");
 
-            info.canvasContext.enqueueFrameWork(std::move(functor));
+#ifdef __ANDROID__ // Layoutlib does not support CanvasContext
+            JNIEnv* env = jnienv();
+            // Update the new position synchronously. We cannot defer this to
+            // a worker pool to process asynchronously because the UI thread
+            // may be unblocked by the time a worker thread can process this,
+            // In particular if the app removes a view from the view tree before
+            // this callback is dispatched, then we lose the position
+            // information for this frame.
+            jboolean keepListening = env->CallStaticBooleanMethod(
+                    gPositionListener.clazz, gPositionListener.callPositionChanged, mListener,
+                    static_cast<jlong>(info.canvasContext.getFrameNumber()),
+                    static_cast<jint>(bounds.left), static_cast<jint>(bounds.top),
+                    static_cast<jint>(bounds.right), static_cast<jint>(bounds.bottom));
+            if (!keepListening) {
+                env->DeleteGlobalRef(mListener);
+                mListener = nullptr;
+            }
 #endif
         }
 
@@ -628,7 +638,14 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             ATRACE_NAME("SurfaceView position lost");
             JNIEnv* env = jnienv();
 #ifdef __ANDROID__ // Layoutlib does not support CanvasContext
-            // TODO: Remember why this is synchronous and then make a comment
+            // Update the lost position synchronously. We cannot defer this to
+            // a worker pool to process asynchronously because the UI thread
+            // may be unblocked by the time a worker thread can process this,
+            // In particular if a view's rendernode is readded to the scene
+            // before this callback is dispatched, then we report that we lost
+            // position information on the wrong frame, which can be problematic
+            // for views like SurfaceView which rely on RenderNode callbacks
+            // for driving visibility.
             jboolean keepListening = env->CallStaticBooleanMethod(
                     gPositionListener.clazz, gPositionListener.callPositionLost, mListener,
                     info ? info->canvasContext.getFrameNumber() : 0);
@@ -706,23 +723,6 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                 }
 #endif
             }
-        }
-
-        void doUpdatePositionAsync(jlong frameNumber, jint left, jint top,
-                jint right, jint bottom) {
-            ATRACE_NAME("Update SurfaceView position");
-
-            JNIEnv* env = jnienv();
-            jboolean keepListening = env->CallStaticBooleanMethod(
-                    gPositionListener.clazz, gPositionListener.callPositionChanged, mListener,
-                    frameNumber, left, top, right, bottom);
-            if (!keepListening) {
-                env->DeleteGlobalRef(mListener);
-                mListener = nullptr;
-            }
-
-            // We need to release ourselves here
-            decStrong(0);
         }
 
         JavaVM* mVm;
