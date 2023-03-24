@@ -147,10 +147,12 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     // These callbacks are called on the update thread
     private final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
             new PipAnimationController.PipAnimationCallback() {
+        private boolean mIsCancelled;
         @Override
         public void onPipAnimationStart(TaskInfo taskInfo,
                 PipAnimationController.PipTransitionAnimator animator) {
             final int direction = animator.getTransitionDirection();
+            mIsCancelled = false;
             sendOnPipTransitionStarted(direction);
         }
 
@@ -158,6 +160,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         public void onPipAnimationEnd(TaskInfo taskInfo, SurfaceControl.Transaction tx,
                 PipAnimationController.PipTransitionAnimator animator) {
             final int direction = animator.getTransitionDirection();
+            if (mIsCancelled) {
+                sendOnPipTransitionFinished(direction);
+                return;
+            }
             final int animationType = animator.getAnimationType();
             final Rect destinationBounds = animator.getDestinationBounds();
             if (isInPipDirection(direction) && animator.getContentOverlayLeash() != null) {
@@ -196,6 +202,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         public void onPipAnimationCancel(TaskInfo taskInfo,
                 PipAnimationController.PipTransitionAnimator animator) {
             final int direction = animator.getTransitionDirection();
+            mIsCancelled = true;
             if (isInPipDirection(direction) && animator.getContentOverlayLeash() != null) {
                 fadeOutAndRemoveOverlay(animator.getContentOverlayLeash(),
                         animator::clearContentOverlay, true /* withStartDelay */);
