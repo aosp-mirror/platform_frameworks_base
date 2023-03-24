@@ -41,6 +41,7 @@ import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_V
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
+import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -189,7 +190,28 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
     @Test
     public void testShouldIgnoreOrientationRequestLoop_overrideDisabled_returnsFalse() {
+        doReturn(true).when(mLetterboxConfiguration)
+                .isPolicyForIgnoringRequestedOrientationEnabled();
         doReturn(false).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
+        // Request 3 times to simulate orientation request loop
+        for (int i = 0; i <= MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i++) {
+            assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
+                    /* expectedCount */ 0);
+        }
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED})
+    public void testShouldIgnoreOrientationRequestLoop_propertyIsFalseAndOverride_returnsFalse()
+            throws Exception {
+        doReturn(true).when(mLetterboxConfiguration)
+                .isPolicyForIgnoringRequestedOrientationEnabled();
+        mockThatProperty(PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED,
+                /* value */ false);
+        doReturn(false).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
+
+        mController = new LetterboxUiController(mWm, mActivity);
+
         // Request 3 times to simulate orientation request loop
         for (int i = 0; i <= MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i++) {
             assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
@@ -200,7 +222,10 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED})
     public void testShouldIgnoreOrientationRequestLoop_isLetterboxed_returnsFalse() {
+        doReturn(true).when(mLetterboxConfiguration)
+                .isPolicyForIgnoringRequestedOrientationEnabled();
         doReturn(true).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
+
         // Request 3 times to simulate orientation request loop
         for (int i = 0; i <= MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i++) {
             assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
@@ -211,7 +236,10 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED})
     public void testShouldIgnoreOrientationRequestLoop_noLoop_returnsFalse() {
+        doReturn(true).when(mLetterboxConfiguration)
+                .isPolicyForIgnoringRequestedOrientationEnabled();
         doReturn(false).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
+
         // No orientation request loop
         assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
                 /* expectedCount */ 0);
@@ -221,7 +249,10 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED})
     public void testShouldIgnoreOrientationRequestLoop_timeout_returnsFalse()
             throws InterruptedException {
+        doReturn(true).when(mLetterboxConfiguration)
+                .isPolicyForIgnoringRequestedOrientationEnabled();
         doReturn(false).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
+
         for (int i = MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i > 0; i--) {
             assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
                     /* expectedCount */ 0);
@@ -232,7 +263,10 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED})
     public void testShouldIgnoreOrientationRequestLoop_returnsTrue() {
+        doReturn(true).when(mLetterboxConfiguration)
+                .isPolicyForIgnoringRequestedOrientationEnabled();
         doReturn(false).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
+
         for (int i = 0; i < MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i++) {
             assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
                     /* expectedCount */ i);
