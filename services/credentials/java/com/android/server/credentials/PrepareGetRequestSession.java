@@ -227,7 +227,9 @@ public class PrepareGetRequestSession extends RequestSession<GetCredentialReques
                     try {
                         mPrepareGetCredentialCallback.onResponse(
                                 new PrepareGetCredentialResponseInternal(
-                                        false, null, false, false, getUiIntent()));
+                                        false, null,
+                                        false, false,
+                                        getUiIntent()));
                     } catch (Exception e) {
                         Log.e(TAG, "EXCEPTION while mPendingCallback.onResponse", e);
                     }
