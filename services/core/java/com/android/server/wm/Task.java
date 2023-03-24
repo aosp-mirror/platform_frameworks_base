@@ -1450,14 +1450,22 @@ class Task extends TaskFragment {
 
         // Only set this based on the first activity
         if (!hadActivity) {
-            if (r.getActivityType() == ACTIVITY_TYPE_UNDEFINED) {
+            int activityOverrideType =
+                    r.getRequestedOverrideConfiguration().windowConfiguration.getActivityType();
+            if (activityOverrideType == ACTIVITY_TYPE_UNDEFINED) {
                 // Normally non-standard activity type for the activity record will be set when the
                 // object is created, however we delay setting the standard application type until
                 // this point so that the task can set the type for additional activities added in
                 // the else condition below.
-                r.setActivityType(ACTIVITY_TYPE_STANDARD);
+                activityOverrideType = activityType != ACTIVITY_TYPE_UNDEFINED ? activityType
+                        : ACTIVITY_TYPE_STANDARD;
+                // Set the Activity's requestedOverrideConfiguration directly to reduce
+                // WC#onConfigurationChanged calls since it will be called while setting the
+                // Task's activity type below.
+                r.getRequestedOverrideConfiguration().windowConfiguration.setActivityType(
+                        activityOverrideType);
             }
-            setActivityType(r.getActivityType());
+            setActivityType(activityOverrideType);
             isPersistable = r.isPersistable();
             mCallingUid = r.launchedFromUid;
             mCallingPackage = r.launchedFromPackage;
@@ -5799,8 +5807,6 @@ class Task extends TaskFragment {
             final int activityType = getActivityType();
             task = new Task.Builder(mAtmService)
                     .setTaskId(taskId)
-                    .setActivityType(activityType != ACTIVITY_TYPE_UNDEFINED ? activityType
-                            : ACTIVITY_TYPE_STANDARD)
                     .setActivityInfo(info)
                     .setActivityOptions(options)
                     .setIntent(intent)
