@@ -17,6 +17,7 @@
 package com.android.server.dreams;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
+import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
 
 import android.app.ActivityTaskManager;
 import android.app.BroadcastOptions;
@@ -69,9 +70,9 @@ final class DreamController {
     private final ActivityTaskManager mActivityTaskManager;
 
     private final Intent mDreamingStartedIntent = new Intent(Intent.ACTION_DREAMING_STARTED)
-            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | FLAG_RECEIVER_FOREGROUND);
     private final Intent mDreamingStoppedIntent = new Intent(Intent.ACTION_DREAMING_STOPPED)
-            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | FLAG_RECEIVER_FOREGROUND);
     private static final String DREAMING_DELIVERY_GROUP_NAMESPACE = UUID.randomUUID().toString();
     private static final String DREAMING_DELIVERY_GROUP_KEY = UUID.randomUUID().toString();
     private final Bundle mDreamingStartedStoppedOptions = createDreamingStartedStoppedOptions();
