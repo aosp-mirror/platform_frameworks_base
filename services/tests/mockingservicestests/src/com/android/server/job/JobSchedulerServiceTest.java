@@ -340,6 +340,50 @@ public class JobSchedulerServiceTest {
     /**
      * Confirm that
      * {@link JobSchedulerService#getRescheduleJobForFailureLocked(JobStatus, int, int)}
+     * returns a job that is no longer allowed to run as a user-initiated job after it hits
+     * the cumulative execution limit.
+     */
+    @Test
+    public void testGetRescheduleJobForFailure_cumulativeExecution() {
+        JobStatus originalJob = createJobStatus("testGetRescheduleJobForFailure",
+                createJobInfo()
+                        .setUserInitiated(true)
+                        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
+        assertTrue(originalJob.shouldTreatAsUserInitiatedJob());
+
+        // Cumulative time = 0
+        JobStatus rescheduledJob = mService.getRescheduleJobForFailureLocked(originalJob,
+                JobParameters.STOP_REASON_UNDEFINED,
+                JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        assertTrue(rescheduledJob.shouldTreatAsUserInitiatedJob());
+
+        // Cumulative time = 50% of limit
+        rescheduledJob.incrementCumulativeExecutionTime(
+                mService.mConstants.RUNTIME_CUMULATIVE_UI_LIMIT_MS / 2);
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_UNDEFINED,
+                JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        assertTrue(rescheduledJob.shouldTreatAsUserInitiatedJob());
+
+        // Cumulative time = 99.999999% of limit
+        rescheduledJob.incrementCumulativeExecutionTime(
+                mService.mConstants.RUNTIME_CUMULATIVE_UI_LIMIT_MS / 2 - 1);
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_UNDEFINED,
+                JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        assertTrue(rescheduledJob.shouldTreatAsUserInitiatedJob());
+
+        // Cumulative time = 100+% of limit
+        rescheduledJob.incrementCumulativeExecutionTime(2);
+        rescheduledJob = mService.getRescheduleJobForFailureLocked(rescheduledJob,
+                JobParameters.STOP_REASON_UNDEFINED,
+                JobParameters.INTERNAL_STOP_REASON_UNKNOWN);
+        assertFalse(rescheduledJob.shouldTreatAsUserInitiatedJob());
+    }
+
+    /**
+     * Confirm that
+     * {@link JobSchedulerService#getRescheduleJobForFailureLocked(JobStatus, int, int)}
      * returns a job with the correct delay and deadline constraints.
      */
     @Test

@@ -375,6 +375,11 @@ public final class JobStatus {
      * and is thus considered demoted from whatever privileged state it had in the past.
      */
     public static final int INTERNAL_FLAG_DEMOTED_BY_USER = 1 << 1;
+    /**
+     * Flag for {@link #mInternalFlags}: this job is demoted by the system
+     * from running as a user-initiated job.
+     */
+    public static final int INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ = 1 << 2;
 
     /** Minimum difference between start and end time to have flexible constraint */
     @VisibleForTesting
@@ -384,6 +389,12 @@ public final class JobStatus {
      * as opposed to {@link JobInfo#flags} that's set by callers.
      */
     private int mInternalFlags;
+
+    /**
+     * The cumulative amount of time this job has run for, including previous executions.
+     * This is reset for periodic jobs upon a successful job execution.
+     */
+    private long mCumulativeExecutionTimeMs;
 
     // These are filled in by controllers when preparing for execution.
     public ArraySet<Uri> changedUris;
@@ -550,7 +561,8 @@ public final class JobStatus {
             int sourceUserId, int standbyBucket, @Nullable String namespace, String tag,
             int numFailures, int numSystemStops,
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
-            long lastSuccessfulRunTime, long lastFailedRunTime, int internalFlags,
+            long lastSuccessfulRunTime, long lastFailedRunTime, long cumulativeExecutionTimeMs,
+            int internalFlags,
             int dynamicConstraints) {
         this.job = job;
         this.callingUid = callingUid;
@@ -650,6 +662,8 @@ public final class JobStatus {
             mReadyDynamicSatisfied = false;
         }
 
+        mCumulativeExecutionTimeMs = cumulativeExecutionTimeMs;
+
         mLastSuccessfulRunTime = lastSuccessfulRunTime;
         mLastFailedRunTime = lastFailedRunTime;
 
@@ -684,6 +698,7 @@ public final class JobStatus {
                 jobStatus.getSourceTag(), jobStatus.getNumFailures(), jobStatus.getNumSystemStops(),
                 jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed(),
                 jobStatus.getLastSuccessfulRunTime(), jobStatus.getLastFailedRunTime(),
+                jobStatus.getCumulativeExecutionTimeMs(),
                 jobStatus.getInternalFlags(), jobStatus.mDynamicConstraints);
         mPersistedUtcTimes = jobStatus.mPersistedUtcTimes;
         if (jobStatus.mPersistedUtcTimes != null) {
@@ -711,13 +726,15 @@ public final class JobStatus {
             int standbyBucket, @Nullable String namespace, String sourceTag,
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
             long lastSuccessfulRunTime, long lastFailedRunTime,
+            long cumulativeExecutionTimeMs,
             Pair<Long, Long> persistedExecutionTimesUTC,
             int innerFlags, int dynamicConstraints) {
         this(job, callingUid, sourcePkgName, sourceUserId,
                 standbyBucket, namespace,
                 sourceTag, /* numFailures */ 0, /* numSystemStops */ 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
-                lastSuccessfulRunTime, lastFailedRunTime, innerFlags, dynamicConstraints);
+                lastSuccessfulRunTime, lastFailedRunTime, cumulativeExecutionTimeMs,
+                innerFlags, dynamicConstraints);
 
         // Only during initial inflation do we record the UTC-timebase execution bounds
         // read from the persistent store.  If we ever have to recreate the JobStatus on
@@ -735,14 +752,16 @@ public final class JobStatus {
     public JobStatus(JobStatus rescheduling,
             long newEarliestRuntimeElapsedMillis,
             long newLatestRuntimeElapsedMillis, int numFailures, int numSystemStops,
-            long lastSuccessfulRunTime, long lastFailedRunTime) {
+            long lastSuccessfulRunTime, long lastFailedRunTime,
+            long cumulativeExecutionTimeMs) {
         this(rescheduling.job, rescheduling.getUid(),
                 rescheduling.getSourcePackageName(), rescheduling.getSourceUserId(),
                 rescheduling.getStandbyBucket(), rescheduling.getNamespace(),
                 rescheduling.getSourceTag(), numFailures, numSystemStops,
                 newEarliestRuntimeElapsedMillis,
                 newLatestRuntimeElapsedMillis,
-                lastSuccessfulRunTime, lastFailedRunTime, rescheduling.getInternalFlags(),
+                lastSuccessfulRunTime, lastFailedRunTime, cumulativeExecutionTimeMs,
+                rescheduling.getInternalFlags(),
                 rescheduling.mDynamicConstraints);
     }
 
@@ -780,6 +799,7 @@ public final class JobStatus {
                 standbyBucket, namespace, tag, /* numFailures */ 0, /* numSystemStops */ 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
+                /* cumulativeExecutionTime */ 0,
                 /*innerFlags=*/ 0, /* dynamicConstraints */ 0);
     }
 
@@ -1312,6 +1332,14 @@ public final class JobStatus {
         return job.isPersisted();
     }
 
+    public long getCumulativeExecutionTimeMs() {
+        return mCumulativeExecutionTimeMs;
+    }
+
+    public void incrementCumulativeExecutionTime(long incrementMs) {
+        mCumulativeExecutionTimeMs += incrementMs;
+    }
+
     public long getEarliestRunTime() {
         return earliestRunTimeElapsedMillis;
     }
@@ -1405,7 +1433,8 @@ public final class JobStatus {
      */
     public boolean shouldTreatAsUserInitiatedJob() {
         return getJob().isUserInitiated()
-                && (getInternalFlags() & INTERNAL_FLAG_DEMOTED_BY_USER) == 0;
+                && (getInternalFlags() & INTERNAL_FLAG_DEMOTED_BY_USER) == 0
+                && (getInternalFlags() & INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ) == 0;
     }
 
     /**
@@ -2655,6 +2684,11 @@ public final class JobStatus {
         pw.print(", original latest=");
         formatRunTime(pw, mOriginalLatestRunTimeElapsedMillis, NO_LATEST_RUNTIME, nowElapsed);
         pw.println();
+        if (mCumulativeExecutionTimeMs != 0) {
+            pw.print("Cumulative execution time=");
+            TimeUtils.formatDuration(mCumulativeExecutionTimeMs, pw);
+            pw.println();
+        }
         if (numFailures != 0) {
             pw.print("Num failures: "); pw.println(numFailures);
         }
