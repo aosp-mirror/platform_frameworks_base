@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("OPT_IN_USAGE")
+
 package com.android.systemui.coroutines
 
 import kotlin.coroutines.CoroutineContext
@@ -43,20 +45,55 @@ fun <T> TestScope.collectLastValue(
     context: CoroutineContext = EmptyCoroutineContext,
     start: CoroutineStart = CoroutineStart.DEFAULT,
 ): FlowValue<T?> {
-    var lastValue: T? = null
-    backgroundScope.launch(context, start) { flow.collect { lastValue = it } }
-    return FlowValueImpl {
+    val values by
+        collectValues(
+            flow = flow,
+            context = context,
+            start = start,
+        )
+    return FlowValueImpl { values.lastOrNull() }
+}
+
+/**
+ * Collect [flow] in a new [Job] and return a getter for the collection of values collected.
+ *
+ * ```
+ * fun myTest() = runTest {
+ *   // ...
+ *   val values by collectValues(underTest.flow)
+ *   assertThat(values).isEqualTo(listOf(expected1, expected2, ...))
+ * }
+ * ```
+ */
+fun <T> TestScope.collectValues(
+    flow: Flow<T>,
+    context: CoroutineContext = EmptyCoroutineContext,
+    start: CoroutineStart = CoroutineStart.DEFAULT,
+): FlowValues<T> {
+    val values = mutableListOf<T>()
+    backgroundScope.launch(context, start) { flow.collect(values::add) }
+    return FlowValuesImpl {
         runCurrent()
-        lastValue
+        values.toList()
     }
 }
 
 /** @see collectLastValue */
-interface FlowValue<T> : ReadOnlyProperty<Any?, T?> {
-    operator fun invoke(): T?
+interface FlowValue<T> : ReadOnlyProperty<Any?, T> {
+    operator fun invoke(): T
 }
 
-private class FlowValueImpl<T>(private val block: () -> T?) : FlowValue<T> {
-    override operator fun invoke(): T? = block()
-    override fun getValue(thisRef: Any?, property: KProperty<*>): T? = invoke()
+/** @see collectValues */
+interface FlowValues<T> : ReadOnlyProperty<Any?, List<T>> {
+    operator fun invoke(): List<T>
+}
+
+private class FlowValueImpl<T>(private val block: () -> T) : FlowValue<T> {
+    override operator fun invoke(): T = block()
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T = invoke()
+}
+
+private class FlowValuesImpl<T>(private val block: () -> List<T>) : FlowValues<T> {
+    override operator fun invoke(): List<T> = block()
+    override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> = invoke()
 }
