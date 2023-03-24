@@ -232,6 +232,13 @@ class GetFlowUtils {
                         ))
                     }
                     is PublicKeyCredentialEntry -> {
+                        val passkeyUsername = credentialEntry.username.toString()
+                        val passkeyDisplayName = credentialEntry.displayName?.toString() ?: ""
+                        val (username, displayName) = userAndDisplayNameForPasskey(
+                            passkeyUsername = passkeyUsername,
+                            passkeyDisplayName = passkeyDisplayName,
+                        )
+
                         result.add(CredentialEntryInfo(
                             providerId = providerId,
                             providerDisplayName = providerLabel,
@@ -241,8 +248,8 @@ class GetFlowUtils {
                             fillInIntent = it.frameworkExtrasIntent,
                             credentialType = CredentialType.PASSKEY,
                             credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
-                            userName = credentialEntry.username.toString(),
-                            displayName = credentialEntry.displayName?.toString(),
+                            userName = username,
+                            displayName = displayName,
                             icon = credentialEntry.icon.loadDrawable(context),
                             shouldTintIcon = credentialEntry.isDefaultIcon,
                             lastUsedTimeMillis = credentialEntry.lastUsedTime,
@@ -646,21 +653,52 @@ class CreateFlowUtils {
             preferImmediatelyAvailableCredentials: Boolean,
         ): RequestDisplayInfo? {
             val json = JSONObject(requestJson)
-            var name = ""
-            var displayName = ""
+            var passkeyUsername = ""
+            var passkeyDisplayName = ""
             if (json.has("user")) {
                 val user: JSONObject = json.getJSONObject("user")
-                name = user.getString("name")
-                displayName = user.getString("displayName")
+                passkeyUsername = user.getString("name")
+                passkeyDisplayName = user.getString("displayName")
             }
+            val (username, displayname) = userAndDisplayNameForPasskey(
+                passkeyUsername = passkeyUsername,
+                passkeyDisplayName = passkeyDisplayName,
+            )
             return RequestDisplayInfo(
-                name,
-                displayName,
+                username,
+                displayname,
                 CredentialType.PASSKEY,
                 appLabel,
                 context.getDrawable(R.drawable.ic_passkey_24) ?: return null,
                 preferImmediatelyAvailableCredentials,
             )
         }
+    }
+}
+
+/**
+ * Returns the actual username and display name for the UI display purpose for the passkey use case.
+ *
+ * Passkey has some special requirements:
+ * 1) display-name on top (turned into UI username) if one is available, username on second line.
+ * 2) username on top if display-name is not available.
+ * 3) don't show username on second line if username == display-name
+ */
+private fun userAndDisplayNameForPasskey(
+    passkeyUsername: String,
+    passkeyDisplayName: String,
+): Pair<String, String> {
+    if (!TextUtils.isEmpty(passkeyUsername) && !TextUtils.isEmpty(passkeyDisplayName)) {
+        if (passkeyUsername == passkeyDisplayName) {
+            return Pair(passkeyUsername, "")
+        } else {
+            return Pair(passkeyDisplayName, passkeyUsername)
+        }
+    } else if (!TextUtils.isEmpty(passkeyUsername)) {
+        return Pair(passkeyUsername, passkeyDisplayName)
+    } else if (!TextUtils.isEmpty(passkeyDisplayName)) {
+        return Pair(passkeyDisplayName, passkeyUsername)
+    } else {
+        return Pair(passkeyDisplayName, passkeyUsername)
     }
 }
