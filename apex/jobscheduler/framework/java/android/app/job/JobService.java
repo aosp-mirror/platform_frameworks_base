@@ -424,11 +424,14 @@ public abstract class JobService extends Service {
      * 10 seconds after {@link #onStartJob(JobParameters)} is called,
      * the system will trigger an ANR and stop this job.
      *
+     * The notification must provide an accurate description of the work that the job is doing
+     * and, if possible, the state of the work.
+     *
      * <p>
      * Note that certain types of jobs
-     * (e.g. {@link JobInfo.Builder#setDataTransfer data transfer jobs}) may require the
-     * notification to have certain characteristics and their documentation will state
-     * any such requirements.
+     * (e.g. {@link JobInfo.Builder#setEstimatedNetworkBytes(long, long) data transfer jobs})
+     * may require the notification to have certain characteristics
+     * and their documentation will state any such requirements.
      *
      * <p>
      * JobScheduler will not remember this notification after the job has finished running,
