@@ -312,6 +312,20 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     }
 
     /**
+     * Moves a specifc task to the front.
+     * @param taskInfo the task to show in front.
+     */
+    public void moveTaskToFront(RunningTaskInfo taskInfo) {
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.reorder(taskInfo.token, true /* onTop */);
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mTransitions.startTransition(TRANSIT_TO_FRONT, wct, null);
+        } else {
+            mShellTaskOrganizer.applyTransaction(wct);
+        }
+    }
+
+    /**
      * Turn desktop mode on or off
      * @param active the desired state for desktop mode setting
      */
