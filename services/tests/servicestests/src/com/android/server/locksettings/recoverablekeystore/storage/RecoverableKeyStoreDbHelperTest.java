@@ -157,6 +157,20 @@ public class RecoverableKeyStoreDbHelperTest {
         checkAllColumns_latest();
     }
 
+    @Test
+    public void onUpgradeToV7_ignoresDuplicateColumnError() throws Exception {
+        mDatabaseHelper.onCreate(mDatabase);
+        mDatabaseHelper.onUpgrade(mDatabase, 6, 7);
+        checkAllColumns_latest();
+    }
+
+    @Test
+    public void onUpgradeToV7_recreatesDatabaseAfterFailure() throws Exception {
+        mDatabaseHelper.onCreate(mDatabase);
+        mDatabaseHelper.onUpgrade(mDatabase, 1, 7);
+        checkAllColumns_latest();
+    }
+
     private boolean isRootOfTrustTableAvailable() {
         ContentValues values = new ContentValues();
         values.put(RootOfTrustEntry.COLUMN_NAME_USER_ID, TEST_USER_ID);

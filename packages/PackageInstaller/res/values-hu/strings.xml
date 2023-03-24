@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"Alkalmazás telepítve."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Telepíti ezt az alkalmazást?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Frissíti ezt az alkalmazást?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Az alkalmazás nincs telepítve."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"A csomag telepítését letiltotta a rendszer."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"A nem csomagként telepített alkalmazás ütközik egy már létező csomaggal."</string>
@@ -41,6 +43,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Ez a felhasználó nem telepíthet ismeretlen alkalmazásokat"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Ez a felhasználó nem telepíthet alkalmazásokat"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <!-- no translation found for update_anyway (8792432341346261969) -->
+    <skip />
     <string name="manage_applications" msgid="5400164782453975580">"Alkalmazáskezelés"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Nincs elég hely"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazást nem lehet telepíteni. Szabadítson fel egy kis helyet, és próbálkozzon újra."</string>

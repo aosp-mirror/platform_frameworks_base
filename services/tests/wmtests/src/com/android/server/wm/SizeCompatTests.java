@@ -52,6 +52,7 @@ import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANG
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
+import static com.android.server.wm.ActivityRecord.State.DESTROYED;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -64,6 +65,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -171,6 +174,26 @@ public class SizeCompatTests extends WindowTestsBase {
     private void setUpDisplaySizeWithApp(int dw, int dh) {
         final TestDisplayContent.Builder builder = new TestDisplayContent.Builder(mAtm, dw, dh);
         setUpApp(builder.build());
+    }
+
+    @Test
+    public void testCleanLetterboxConfigListenerWhenTranslucentIsDestroyed() {
+        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
+        setUpDisplaySizeWithApp(2000, 1000);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        // Translucent Activity
+        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setLaunchedFromUid(mActivity.getUid())
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .build();
+        doReturn(false).when(translucentActivity).fillsParent();
+        mTask.addChild(translucentActivity);
+
+        translucentActivity.setState(DESTROYED, "testing");
+        translucentActivity.removeImmediately();
+
+        assertFalse(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
     }
 
     @Test
@@ -446,7 +469,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 .setLaunchedFromUid(mActivity.getUid())
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
                 .build();
-        doReturn(true).when(translucentActivity).fillsParent();
+        doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
         // It should not be in SCM
         assertFalse(translucentActivity.inSizeCompatMode());
@@ -504,6 +527,33 @@ public class SizeCompatTests extends WindowTestsBase {
                 false /* isTabletop */);
         verify(mActivity).recomputeConfiguration();
         assertEquals(translucentActivity.getBounds(), mActivity.getBounds());
+    }
+
+    @Test
+    public void testTranslucentActivity_clearSizeCompatMode_inheritedCompatDisplayInsetsCleared() {
+        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
+        setUpDisplaySizeWithApp(2800, 1400);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        prepareUnresizable(mActivity, -1f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
+        // Rotate to put activity in size compat mode.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+        assertTrue(mActivity.inSizeCompatMode());
+
+        // We launch a transparent activity
+        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setLaunchedFromUid(mActivity.getUid())
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .build();
+        doReturn(false).when(translucentActivity).fillsParent();
+        mTask.addChild(translucentActivity);
+
+        // The transparent activity inherits the compat display insets of the opaque activity
+        // beneath it
+        assertNotNull(translucentActivity.getCompatDisplayInsets());
+
+        // Clearing SCM should also clear the inherited compat display insets
+        translucentActivity.clearSizeCompatMode();
+        assertNull(translucentActivity.getCompatDisplayInsets());
     }
 
     @Test
@@ -3113,9 +3163,41 @@ public class SizeCompatTests extends WindowTestsBase {
         assertTrue(mActivity.inSizeCompatMode());
 
         // Vertical reachability is disabled because the app does not match parent width
-        assertNotEquals(mActivity.getBounds().width(), mActivity.mDisplayContent.getBounds()
-                .width());
+        assertNotEquals(mActivity.getScreenResolvedBounds().width(),
+                mActivity.mDisplayContent.getBounds().width());
         assertFalse(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
+    }
+
+    @Test
+    public void testIsVerticalReachabilityEnabled_emptyBounds_true() {
+        setUpDisplaySizeWithApp(/* dw */ 1000, /* dh */ 2800);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mWm.mLetterboxConfiguration.setIsVerticalReachabilityEnabled(true);
+
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Set up activity with empty bounds to mock loading of app
+        mActivity.getWindowConfiguration().setBounds(null);
+        assertEquals(new Rect(0, 0, 0, 0), mActivity.getBounds());
+
+        // Vertical reachability is still enabled as resolved bounds is not empty
+        assertTrue(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
+    }
+
+    @Test
+    public void testIsHorizontalReachabilityEnabled_emptyBounds_true() {
+        setUpDisplaySizeWithApp(/* dw */ 2800, /* dh */ 1000);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mWm.mLetterboxConfiguration.setIsHorizontalReachabilityEnabled(true);
+
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+
+        // Set up activity with empty bounds to mock loading of app
+        mActivity.getWindowConfiguration().setBounds(null);
+        assertEquals(new Rect(0, 0, 0, 0), mActivity.getBounds());
+
+        // Horizontal reachability is still enabled as resolved bounds is not empty
+        assertTrue(mActivity.mLetterboxUiController.isHorizontalReachabilityEnabled());
     }
 
     @Test
@@ -3134,8 +3216,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertTrue(mActivity.inSizeCompatMode());
 
         // Horizontal reachability is disabled because the app does not match parent height
-        assertNotEquals(mActivity.getBounds().height(), mActivity.mDisplayContent.getBounds()
-                .height());
+        assertNotEquals(mActivity.getScreenResolvedBounds().height(),
+                mActivity.mDisplayContent.getBounds().height());
         assertFalse(mActivity.mLetterboxUiController.isHorizontalReachabilityEnabled());
     }
 
@@ -3155,8 +3237,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertTrue(mActivity.inSizeCompatMode());
 
         // Horizontal reachability is enabled because the app matches parent height
-        assertEquals(mActivity.getBounds().height(), mActivity.mDisplayContent.getBounds()
-                .height());
+        assertEquals(mActivity.getScreenResolvedBounds().height(),
+                mActivity.mDisplayContent.getBounds().height());
         assertTrue(mActivity.mLetterboxUiController.isHorizontalReachabilityEnabled());
     }
 
@@ -3176,7 +3258,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertTrue(mActivity.inSizeCompatMode());
 
         // Vertical reachability is enabled because the app matches parent width
-        assertEquals(mActivity.getBounds().width(), mActivity.mDisplayContent.getBounds().width());
+        assertEquals(mActivity.getScreenResolvedBounds().width(),
+                mActivity.mDisplayContent.getBounds().width());
         assertTrue(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
     }
 

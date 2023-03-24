@@ -2124,9 +2124,9 @@ public final class JobStatus {
             sb.append(" READY");
         } else {
             sb.append(" satisfied:0x").append(Integer.toHexString(satisfiedConstraints));
+            final int requiredConstraints = mRequiredConstraintsOfInterest | IMPLICIT_CONSTRAINTS;
             sb.append(" unsatisfied:0x").append(Integer.toHexString(
-                    (satisfiedConstraints & (mRequiredConstraintsOfInterest | IMPLICIT_CONSTRAINTS))
-                            ^ mRequiredConstraintsOfInterest));
+                    (satisfiedConstraints & requiredConstraints) ^ requiredConstraints));
         }
         sb.append("}");
         return sb.toString();

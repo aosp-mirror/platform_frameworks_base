@@ -25,7 +25,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.InputEvent;
@@ -88,8 +87,6 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     private final FlingAnimationUtils mFlingAnimationUtils;
     private final FlingAnimationUtils mFlingAnimationUtilsClosing;
-
-    private final DisplayMetrics mDisplayMetrics;
 
     private Boolean mCapture;
     private Boolean mExpanded;
@@ -161,7 +158,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                     // (0).
                     final float dragDownAmount = e2.getY() - e1.getY();
                     final float screenTravelPercentage = Math.abs(e1.getY() - e2.getY())
-                            / mCentralSurfaces.get().getDisplayHeight();
+                            / mTouchSession.getBounds().height();
                     setPanelExpansion(mBouncerInitiallyShowing
                             ? screenTravelPercentage : 1 - screenTravelPercentage, dragDownAmount);
                     return true;
@@ -202,7 +199,6 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
 
     @Inject
     public BouncerSwipeTouchHandler(
-            DisplayMetrics displayMetrics,
             ScrimManager scrimManager,
             Optional<CentralSurfaces> centralSurfaces,
             NotificationShadeWindowController notificationShadeWindowController,
@@ -214,7 +210,6 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                     FlingAnimationUtils flingAnimationUtilsClosing,
             @Named(SWIPE_TO_BOUNCER_START_REGION) float swipeRegionPercentage,
             UiEventLogger uiEventLogger) {
-        mDisplayMetrics = displayMetrics;
         mCentralSurfaces = centralSurfaces;
         mScrimManager = scrimManager;
         mNotificationShadeWindowController = notificationShadeWindowController;
@@ -227,19 +222,20 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
     }
 
     @Override
-    public void getTouchInitiationRegion(Region region) {
+    public void getTouchInitiationRegion(Rect bounds, Region region) {
+        final int width = bounds.width();
+        final int height = bounds.height();
+
         if (mCentralSurfaces.map(CentralSurfaces::isBouncerShowing).orElse(false)) {
-            region.op(new Rect(0, 0, mDisplayMetrics.widthPixels,
+            region.op(new Rect(0, 0, width,
                             Math.round(
-                                    mDisplayMetrics.heightPixels * mBouncerZoneScreenPercentage)),
+                                    height * mBouncerZoneScreenPercentage)),
                     Region.Op.UNION);
         } else {
             region.op(new Rect(0,
-                            Math.round(
-                                    mDisplayMetrics.heightPixels
-                                            * (1 - mBouncerZoneScreenPercentage)),
-                            mDisplayMetrics.widthPixels,
-                            mDisplayMetrics.heightPixels),
+                            Math.round(height * (1 - mBouncerZoneScreenPercentage)),
+                            width,
+                            height),
                     Region.Op.UNION);
         }
     }
@@ -356,7 +352,7 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
         }
 
         // The animation utils deal in pixel units, rather than expansion height.
-        final float viewHeight = mCentralSurfaces.get().getDisplayHeight();
+        final float viewHeight = mTouchSession.getBounds().height();
         final float currentHeight = viewHeight * mCurrentExpansion;
         final float targetHeight = viewHeight * expansion;
         final float expansionHeight = targetHeight - currentHeight;

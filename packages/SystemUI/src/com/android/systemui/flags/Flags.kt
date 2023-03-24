@@ -414,9 +414,9 @@ object Flags {
 
     @JvmField
     // TODO(b/271428141): Tracking Bug
-    val ENABLE_LOW_LIGHT_CLOCK_UNDOCKED = unreleasedFlag(
+    val ENABLE_LOW_LIGHT_CLOCK_UNDOCKED = releasedFlag(
         1004,
-        "enable_low_light_clock_undocked", teamfood = true)
+        "enable_low_light_clock_undocked")
 
     // TODO(b/273509374): Tracking Bug
     @JvmField
@@ -609,6 +609,9 @@ object Flags {
     // TODO(b/267355521) Tracking Bug
     val SHARESHEET_SCROLLABLE_IMAGE_PREVIEW =
         releasedFlag(1504, "sharesheet_scrollable_image_preview")
+
+    // TODO(b/274137694) Tracking Bug
+    val CHOOSER_MIGRATION_ENABLED = unreleasedFlag(1505, "chooser_migration_enabled")
 
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")

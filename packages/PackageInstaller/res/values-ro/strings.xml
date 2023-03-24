@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"Aplicație instalată."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vrei să instalezi această aplicație?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vrei să actualizezi această aplicație?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Aplicația nu a fost instalată."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Instalarea pachetului a fost blocată."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplicația nu a fost instalată deoarece pachetul intră în conflict cu un pachet existent."</string>
@@ -41,6 +43,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Aplicațiile necunoscute nu pot fi instalate de acest utilizator"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Acest utilizator nu are permisiunea să instaleze aplicații"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <!-- no translation found for update_anyway (8792432341346261969) -->
+    <skip />
     <string name="manage_applications" msgid="5400164782453975580">"Gestionează"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Spațiu de stocare insuficient"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Aplicația <xliff:g id="APP_NAME">%1$s</xliff:g> nu a putut fi instalată. Eliberează spațiu și încearcă din nou."</string>

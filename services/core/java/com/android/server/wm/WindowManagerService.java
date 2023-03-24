@@ -8703,7 +8703,13 @@ public class WindowManagerService extends IWindowManager.Stub
         } else {
             h.touchableRegion.set(region);
             h.replaceTouchableRegionWithCrop = false;
-            h.setTouchableRegionCrop(surface);
+
+            // Task managers may need to receive input events around task layers to resize tasks.
+            final int permissionResult = mContext.checkPermission(
+                    permission.MANAGE_ACTIVITY_TASKS, callingPid, callingUid);
+            if (permissionResult != PackageManager.PERMISSION_GRANTED) {
+                h.setTouchableRegionCrop(surface);
+            }
         }
 
         final SurfaceControl.Transaction t = mTransactionFactory.get();

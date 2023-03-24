@@ -470,7 +470,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
 
         taskViewConsumerCaptor.value.accept(taskView)
 
-        underTest.onOrientationChange()
+        underTest.onSizeChange()
         verify(taskView).onLocationChanged()
     }
 

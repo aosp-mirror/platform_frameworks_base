@@ -384,12 +384,19 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
                 // Cannot be wrap_content as this determines the actual window size
                 width, height,
                 TYPE_APPLICATION_OVERLAY,
-                FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL,
+                getWindowManagerLayoutParamsFlags(),
                 PixelFormat.TRANSLUCENT);
         winParams.token = new Binder();
         winParams.setTitle(getClass().getSimpleName() + mTaskId);
         winParams.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION | PRIVATE_FLAG_TRUSTED_OVERLAY;
         return winParams;
+    }
+
+    /**
+     * @return Flags to use for the {@link WindowManager} layout
+     */
+    protected int getWindowManagerLayoutParamsFlags() {
+        return FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL;
     }
 
     protected final String getTag() {

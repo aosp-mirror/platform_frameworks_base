@@ -30,19 +30,27 @@ import android.hardware.input.InputManager.OnTabletModeChangedListener;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
 import android.hardware.lights.LightsRequest;
+import android.os.Binder;
 import android.os.CombinedVibration;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IVibratorStateListener;
+import android.os.InputEventInjectionSync;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.os.VibratorManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.InputDevice;
+import android.view.InputEvent;
+import android.view.InputMonitor;
+import android.view.PointerIcon;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.SomeArgs;
@@ -355,6 +363,42 @@ public final class InputManagerGlobal {
                 ids[i] = mInputDevices.keyAt(i);
             }
             return ids;
+        }
+    }
+
+    /**
+     * @see InputManager#isInputDeviceEnabled(int)
+     */
+    public boolean isInputDeviceEnabled(int id) {
+        try {
+            return mIm.isInputDeviceEnabled(id);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not check enabled status of input device with id = " + id);
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#enableInputDevice(int)
+     */
+    public void enableInputDevice(int id) {
+        try {
+            mIm.enableInputDevice(id);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not enable input device with id = " + id);
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#disableInputDevice(int)
+     */
+    public void disableInputDevice(int id) {
+        try {
+            mIm.disableInputDevice(id);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not disable input device with id = " + id);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -672,7 +716,7 @@ public final class InputManagerGlobal {
      * @see InputManager#getInputDeviceBatteryState(int, boolean)
      */
     @NonNull
-    BatteryState getInputDeviceBatteryState(int deviceId, boolean hasBattery) {
+    public BatteryState getInputDeviceBatteryState(int deviceId, boolean hasBattery) {
         if (!hasBattery) {
             return new LocalBatteryState();
         }
@@ -835,7 +879,7 @@ public final class InputManagerGlobal {
      * @see InputManager#getInputDeviceSensorManager(int)
      */
     @NonNull
-    SensorManager getInputDeviceSensorManager(int deviceId) {
+    public SensorManager getInputDeviceSensorManager(int deviceId) {
         if (mInputDeviceSensorManager == null) {
             mInputDeviceSensorManager = new InputDeviceSensorManager(this);
         }
@@ -980,6 +1024,21 @@ public final class InputManagerGlobal {
         }
     }
 
+    /**
+     * @see InputManager#getInputDeviceVibrator(int, int)
+     */
+    public Vibrator getInputDeviceVibrator(int deviceId, int vibratorId) {
+        return new InputDeviceVibrator(deviceId, vibratorId);
+    }
+
+    /**
+     * @see InputManager#getInputDeviceVibratorManager(int)
+     */
+    @NonNull
+    public VibratorManager getInputDeviceVibratorManager(int deviceId) {
+        return new InputDeviceVibratorManager(deviceId);
+    }
+
     /*
      * Get the list of device vibrators
      * @return The list of vibrators IDs
@@ -1055,6 +1114,160 @@ public final class InputManagerGlobal {
             return mIm.unregisterVibratorStateListener(deviceId, listener);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#deviceHasKeys(int, int[])
+     */
+    public boolean[] deviceHasKeys(int id, int[] keyCodes) {
+        boolean[] ret = new boolean[keyCodes.length];
+        try {
+            mIm.hasKeys(id, InputDevice.SOURCE_ANY, keyCodes, ret);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return ret;
+    }
+
+    /**
+     * @see InputManager#getKeyCodeforKeyLocation(int, int)
+     */
+    public int getKeyCodeForKeyLocation(int deviceId, int locationKeyCode) {
+        try {
+            return mIm.getKeyCodeForKeyLocation(deviceId, locationKeyCode);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#injectInputEvent(InputEvent, int, int)
+     */
+
+    public boolean injectInputEvent(InputEvent event, int mode, int targetUid) {
+        if (event == null) {
+            throw new IllegalArgumentException("event must not be null");
+        }
+        if (mode != InputEventInjectionSync.NONE
+                && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
+                && mode != InputEventInjectionSync.WAIT_FOR_RESULT) {
+            throw new IllegalArgumentException("mode is invalid");
+        }
+
+        try {
+            return mIm.injectInputEventToTarget(event, mode, targetUid);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#injectInputEvent(InputEvent, int)
+     */
+    public boolean injectInputEvent(InputEvent event, int mode) {
+        return injectInputEvent(event, mode, Process.INVALID_UID);
+    }
+
+    /**
+     * @see InputManager#setPointerIconType(int)
+     */
+    public void setPointerIconType(int iconId) {
+        try {
+            mIm.setPointerIconType(iconId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#setCustomPointerIcon(PointerIcon)
+     */
+    public void setCustomPointerIcon(PointerIcon icon) {
+        try {
+            mIm.setCustomPointerIcon(icon);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#requestPointerCapture(IBinder, boolean)
+     */
+    void requestPointerCapture(IBinder windowToken, boolean enable) {
+        try {
+            mIm.requestPointerCapture(windowToken, enable);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see Inputmanager#monitorGestureInput(String, int)
+     */
+    InputMonitor monitorGestureInput(String name, int displayId) {
+        try {
+            return mIm.monitorGestureInput(new Binder(), name, displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#addUniqueIdAssociation(String, String)
+     */
+    void addUniqueIdAssociation(@NonNull String inputPort, @NonNull String displayUniqueId) {
+        try {
+            mIm.addUniqueIdAssociation(inputPort, displayUniqueId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#removeUniqueIdAssociation(String)
+     */
+    public void removeUniqueIdAssociation(@NonNull String inputPort) {
+        try {
+            mIm.removeUniqueIdAssociation(inputPort);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#getInputDeviceBluetoothAddress(int)
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @Nullable
+    public String getInputDeviceBluetoothAddress(int deviceId) {
+        try {
+            return mIm.getInputDeviceBluetoothAddress(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#cancelCurrentTouch()
+     */
+    void cancelCurrentTouch() {
+        try {
+            mIm.cancelCurrentTouch();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#pilferPointers(IBinder)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_INPUT)
+    void pilferPointers(IBinder inputChannelToken) {
+        try {
+            mIm.pilferPointers(inputChannelToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }

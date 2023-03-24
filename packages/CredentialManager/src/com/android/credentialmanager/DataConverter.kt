@@ -29,7 +29,6 @@ import android.credentials.ui.Entry
 import android.credentials.ui.GetCredentialProviderData
 import android.credentials.ui.RequestInfo
 import android.graphics.drawable.Drawable
-import android.service.credentials.CredentialEntry
 import android.text.TextUtils
 import android.util.Log
 import com.android.credentialmanager.common.Constants
@@ -57,6 +56,7 @@ import androidx.credentials.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDEN
 import androidx.credentials.provider.Action
 import androidx.credentials.provider.AuthenticationAction
 import androidx.credentials.provider.CreateEntry
+import androidx.credentials.provider.CredentialEntry
 import androidx.credentials.provider.CustomCredentialEntry
 import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry

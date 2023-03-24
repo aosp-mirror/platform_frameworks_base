@@ -90,6 +90,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.comparePackageSig
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
 import static com.android.server.pm.PackageManagerServiceUtils.compressedFileExists;
 import static com.android.server.pm.PackageManagerServiceUtils.deriveAbiOverride;
+import static com.android.server.pm.PackageManagerServiceUtils.isInstalledByAdb;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.makeDirRecursive;
 import static com.android.server.pm.SharedUidMigration.BEST_EFFORT;
@@ -333,7 +334,7 @@ final class InstallPackageHelper {
         if (installSource != null) {
             // If this is part of a standard install, set the initiating package name, else rely on
             // previous device state.
-            if (installSource.mInitiatingPackageName != null) {
+            if (!isInstalledByAdb(installSource.mInitiatingPackageName)) {
                 final PackageSetting ips = mPm.mSettings.getPackageLPr(
                         installSource.mInitiatingPackageName);
                 if (ips != null) {
@@ -4276,10 +4277,14 @@ final class InstallPackageHelper {
                     deletePackageHelper.deletePackageLIF(parsedPackage.getPackageName(), null, true,
                             mPm.mUserManager.getUserIds(), 0, null, false);
                 }
-            } else if (newPkgVersionGreater) {
+            } else if (newPkgVersionGreater || newSharedUserSetting) {
                 // The application on /system is newer than the application on /data.
                 // Simply remove the application on /data [keeping application data]
                 // and replace it with the version on /system.
+                // Also, if the sharedUserSetting of the application on /system is different
+                // from the sharedUserSetting on data, we should trust the sharedUserSetting
+                // on /system, even if the application version on /system is smaller than
+                // the version on /data.
                 logCriticalInfo(Log.WARN,
                         "System package enabled;"
                                 + " name: " + pkgSetting.getPackageName()

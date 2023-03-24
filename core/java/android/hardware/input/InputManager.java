@@ -34,12 +34,10 @@ import android.content.Context;
 import android.hardware.BatteryState;
 import android.hardware.SensorManager;
 import android.hardware.lights.LightsManager;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.InputEventInjectionSync;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Vibrator;
@@ -392,12 +390,7 @@ public final class InputManager {
      * @hide
      */
     public boolean isInputDeviceEnabled(int id) {
-        try {
-            return mIm.isInputDeviceEnabled(id);
-        } catch (RemoteException ex) {
-            Log.w(TAG, "Could not check enabled status of input device with id = " + id);
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.isInputDeviceEnabled(id);
     }
 
     /**
@@ -411,12 +404,7 @@ public final class InputManager {
      * @hide
      */
     public void enableInputDevice(int id) {
-        try {
-            mIm.enableInputDevice(id);
-        } catch (RemoteException ex) {
-            Log.w(TAG, "Could not enable input device with id = " + id);
-            throw ex.rethrowFromSystemServer();
-        }
+        mGlobal.enableInputDevice(id);
     }
 
     /**
@@ -430,12 +418,7 @@ public final class InputManager {
      * @hide
      */
     public void disableInputDevice(int id) {
-        try {
-            mIm.disableInputDevice(id);
-        } catch (RemoteException ex) {
-            Log.w(TAG, "Could not disable input device with id = " + id);
-            throw ex.rethrowFromSystemServer();
-        }
+        mGlobal.disableInputDevice(id);
     }
 
     /**
@@ -1007,13 +990,7 @@ public final class InputManager {
      * @hide
      */
     public boolean[] deviceHasKeys(int id, int[] keyCodes) {
-        boolean[] ret = new boolean[keyCodes.length];
-        try {
-            mIm.hasKeys(id, InputDevice.SOURCE_ANY, keyCodes, ret);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        return ret;
+        return mGlobal.deviceHasKeys(id, keyCodes);
     }
 
     /**
@@ -1038,11 +1015,7 @@ public final class InputManager {
      * @hide
      */
     public int getKeyCodeForKeyLocation(int deviceId, int locationKeyCode) {
-        try {
-            return mIm.getKeyCodeForKeyLocation(deviceId, locationKeyCode);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return mGlobal.getKeyCodeForKeyLocation(deviceId, locationKeyCode);
     }
 
     /**
@@ -1075,20 +1048,7 @@ public final class InputManager {
      */
     @RequiresPermission(Manifest.permission.INJECT_EVENTS)
     public boolean injectInputEvent(InputEvent event, int mode, int targetUid) {
-        if (event == null) {
-            throw new IllegalArgumentException("event must not be null");
-        }
-        if (mode != InputEventInjectionSync.NONE
-                && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
-                && mode != InputEventInjectionSync.WAIT_FOR_RESULT) {
-            throw new IllegalArgumentException("mode is invalid");
-        }
-
-        try {
-            return mIm.injectInputEventToTarget(event, mode, targetUid);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.injectInputEvent(event, mode, targetUid);
     }
 
     /**
@@ -1114,7 +1074,7 @@ public final class InputManager {
     @RequiresPermission(Manifest.permission.INJECT_EVENTS)
     @UnsupportedAppUsage
     public boolean injectInputEvent(InputEvent event, int mode) {
-        return injectInputEvent(event, mode, Process.INVALID_UID);
+        return mGlobal.injectInputEvent(event, mode);
     }
 
     /**
@@ -1149,20 +1109,12 @@ public final class InputManager {
      */
     @UnsupportedAppUsage
     public void setPointerIconType(int iconId) {
-        try {
-            mIm.setPointerIconType(iconId);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        mGlobal.setPointerIconType(iconId);
     }
 
     /** @hide */
     public void setCustomPointerIcon(PointerIcon icon) {
-        try {
-            mIm.setCustomPointerIcon(icon);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        mGlobal.setCustomPointerIcon(icon);
     }
 
     /**
@@ -1191,11 +1143,7 @@ public final class InputManager {
      * @hide
      */
     public void requestPointerCapture(IBinder windowToken, boolean enable) {
-        try {
-            mIm.requestPointerCapture(windowToken, enable);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        mGlobal.requestPointerCapture(windowToken, enable);
     }
 
     /**
@@ -1204,11 +1152,7 @@ public final class InputManager {
      * @hide
      */
     public InputMonitor monitorGestureInput(String name, int displayId) {
-        try {
-            return mIm.monitorGestureInput(new Binder(), name, displayId);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return mGlobal.monitorGestureInput(name, displayId);
     }
 
     /**
@@ -1313,12 +1257,9 @@ public final class InputManager {
      * @hide
      */
     @TestApi
-    public void addUniqueIdAssociation(@NonNull String inputPort, @NonNull String displayUniqueId) {
-        try {
-            mIm.addUniqueIdAssociation(inputPort, displayUniqueId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+    public void addUniqueIdAssociation(@NonNull String inputPort,
+            @NonNull String displayUniqueId) {
+        mGlobal.addUniqueIdAssociation(inputPort, displayUniqueId);
     }
 
     /**
@@ -1331,11 +1272,7 @@ public final class InputManager {
      */
     @TestApi
     public void removeUniqueIdAssociation(@NonNull String inputPort) {
-        try {
-            mIm.removeUniqueIdAssociation(inputPort);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mGlobal.removeUniqueIdAssociation(inputPort);
     }
 
     /**
@@ -1361,11 +1298,7 @@ public final class InputManager {
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     @Nullable
     public String getInputDeviceBluetoothAddress(int deviceId) {
-        try {
-            return mIm.getInputDeviceBluetoothAddress(deviceId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return mGlobal.getInputDeviceBluetoothAddress(deviceId);
     }
 
     /**
@@ -1423,11 +1356,7 @@ public final class InputManager {
      * @hide
      */
     public void cancelCurrentTouch() {
-        try {
-            mIm.cancelCurrentTouch();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mGlobal.cancelCurrentTouch();
     }
 
     /**
@@ -1451,11 +1380,7 @@ public final class InputManager {
      */
     @RequiresPermission(Manifest.permission.MONITOR_INPUT)
     public void pilferPointers(IBinder inputChannelToken) {
-        try {
-            mIm.pilferPointers(inputChannelToken);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mGlobal.pilferPointers(inputChannelToken);
     }
 
     /**

@@ -44,6 +44,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.ModelParams;
+import android.hardware.soundtrigger.ConversionUtil;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
@@ -63,6 +64,7 @@ import android.media.permission.SafeCloseable;
 import android.media.soundtrigger.ISoundTriggerDetectionService;
 import android.media.soundtrigger.ISoundTriggerDetectionServiceClient;
 import android.media.soundtrigger.SoundTriggerDetectionService;
+import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -72,6 +74,8 @@ import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -88,11 +92,13 @@ import com.android.server.utils.EventLogger;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -215,14 +221,29 @@ public class SoundTriggerService extends SystemService {
         }
     }
 
+    // Must be called with cleared binder context.
+    private static List<ModuleProperties> listUnderlyingModuleProperties(
+            Identity originatorIdentity) {
+        Identity middlemanIdentity = new Identity();
+        middlemanIdentity.packageName = ActivityThread.currentOpPackageName();
+        var service = ISoundTriggerMiddlewareService.Stub.asInterface(
+                ServiceManager.waitForService(Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE));
+        try {
+            return Arrays.stream(service.listModulesAsMiddleman(middlemanIdentity,
+                                                                originatorIdentity))
+                    .map(desc -> ConversionUtil.aidl2apiModuleDescriptor(desc))
+                    .collect(Collectors.toList());
+        } catch (RemoteException e) {
+            throw new ServiceSpecificException(SoundTrigger.STATUS_DEAD_OBJECT);
+        }
+    }
+
     private SoundTriggerHelper newSoundTriggerHelper(ModuleProperties moduleProperties) {
         Identity middlemanIdentity = new Identity();
         middlemanIdentity.packageName = ActivityThread.currentOpPackageName();
         Identity originatorIdentity = IdentityContext.getNonNull();
 
-        ArrayList<ModuleProperties> moduleList = new ArrayList<>();
-        SoundTrigger.listModulesAsMiddleman(moduleList, middlemanIdentity,
-                                        originatorIdentity);
+        List<ModuleProperties> moduleList = listUnderlyingModuleProperties(originatorIdentity);
 
         // Don't fail existing CTS tests which run without a ST module
         final int moduleId = (moduleProperties != null) ?
@@ -241,12 +262,8 @@ public class SoundTriggerService extends SystemService {
                                         moduleId, statusListener, null /* handler */,
                                         middlemanIdentity, originatorIdentity),
                 moduleId,
-                () -> {
-                    ArrayList<ModuleProperties> modulePropList = new ArrayList<>();
-                    SoundTrigger.listModulesAsMiddleman(modulePropList, middlemanIdentity,
-                                                    originatorIdentity);
-                    return modulePropList;
-                });
+                () -> listUnderlyingModuleProperties(originatorIdentity)
+                );
     }
 
     class SoundTriggerServiceStub extends ISoundTriggerService.Stub {
@@ -276,12 +293,7 @@ public class SoundTriggerService extends SystemService {
         public List<ModuleProperties> listModuleProperties(@NonNull Identity originatorIdentity) {
             try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
                     originatorIdentity)) {
-                Identity middlemanIdentity = new Identity();
-                middlemanIdentity.packageName = ActivityThread.currentOpPackageName();
-                ArrayList<ModuleProperties> moduleList = new ArrayList<>();
-                SoundTrigger.listModulesAsMiddleman(moduleList, middlemanIdentity,
-                                                originatorIdentity);
-                return moduleList;
+                return listUnderlyingModuleProperties(originatorIdentity);
             }
         }
     }
@@ -1647,17 +1659,10 @@ public class SoundTriggerService extends SystemService {
 
         @Override
         public List<ModuleProperties> listModuleProperties(Identity originatorIdentity) {
-            ArrayList<ModuleProperties> moduleList = new ArrayList<>();
             try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
                     originatorIdentity)) {
-                Identity middlemanIdentity = new Identity();
-                middlemanIdentity.uid = Binder.getCallingUid();
-                middlemanIdentity.pid = Binder.getCallingPid();
-                middlemanIdentity.packageName = ActivityThread.currentOpPackageName();
-                SoundTrigger.listModulesAsMiddleman(moduleList, middlemanIdentity,
-                                                originatorIdentity);
+                return listUnderlyingModuleProperties(originatorIdentity);
             }
-            return moduleList;
         }
 
         @Override

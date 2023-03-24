@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"Program geïnstalleer."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Wil jy hierdie program installeer?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Wil jy hierdie program opdateer?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Program nie geïnstalleer nie."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Die installering van die pakket is geblokkeer."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Program is nie geïnstalleer nie omdat pakket met \'n bestaande pakket bots."</string>
@@ -41,6 +43,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Hierdie gebruiker kan nie onbekende programme installeer nie"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Hierdie gebruiker word nie toegelaat om programme te installeer nie"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <!-- no translation found for update_anyway (8792432341346261969) -->
+    <skip />
     <string name="manage_applications" msgid="5400164782453975580">"Bestuur programme"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Geen spasie oor nie"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> kon nie geïnstalleer word nie. Maak spasie beskikbaar en probeer weer."</string>

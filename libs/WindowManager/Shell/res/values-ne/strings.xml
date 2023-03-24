@@ -68,8 +68,7 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"पुछारमा दायाँतिर सार्नुहोस्"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> का सेटिङहरू"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"बबल खारेज गर्नुहोस्"</string>
-    <!-- no translation found for bubbles_dont_bubble (3216183855437329223) -->
-    <skip />
+    <string name="bubbles_dont_bubble" msgid="3216183855437329223">"बबल नदेखाइयोस्"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"वार्तालाप बबलको रूपमा नदेखाइयोस्"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"बबलहरू प्रयोग गरी कुराकानी गर्नुहोस्"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"नयाँ वार्तालापहरू तैरने आइकन वा बबलका रूपमा देखिन्छन्। बबल खोल्न ट्याप गर्नुहोस्। बबल सार्न सो बबललाई ड्र्याग गर्नुहोस्।"</string>

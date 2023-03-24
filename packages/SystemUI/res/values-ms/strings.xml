@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Dayakan USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Ketahui lebih lanjut"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Tangkapan skrin"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Lanjutkan Buka Kunci dilumpuhkan"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"menghantar imej"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Menyimpan tangkapan skrin..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Menyimpan tangkapan skrin ke profil kerja…"</string>
@@ -871,8 +870,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# kawalan ditambah.}other{# kawalan ditambah.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Dialih keluar"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Tambahkan <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g>boleh memilih kawalan dan kandungan yang dipaparkan di sini."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Alih keluar kawalan untuk <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Digemari"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Digemari, kedudukan <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -1067,7 +1065,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"edit"</string>
     <string name="add" msgid="81036585205287996">"Tambah"</string>
     <string name="manage_users" msgid="1823875311934643849">"Urus pengguna"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"Pemberitahuan ini tidak menyokong penyeretan ke Skrin pisah."</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"Pemberitahuan ini tidak menyokong penyeretan kepada skrin pisah"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi dimatikan"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Mod keutamaan"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Penggera ditetapkan"</string>

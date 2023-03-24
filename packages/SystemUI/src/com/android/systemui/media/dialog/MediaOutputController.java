@@ -395,7 +395,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             launchIntent.putExtra(EXTRA_ROUTE_ID, routeId);
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mCallback.dismissDialog();
-            mContext.startActivity(launchIntent);
             mActivityStarter.startActivity(launchIntent, true, controller);
         }
     }
@@ -996,7 +995,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 mAudioManager, mPowerExemptionManager, mKeyGuardManager, mFeatureFlags);
         MediaOutputBroadcastDialog dialog = new MediaOutputBroadcastDialog(mContext, true,
                 broadcastSender, controller);
-        mDialogLaunchAnimator.showFromView(dialog, mediaOutputDialog);
+        dialog.show();
     }
 
     String getBroadcastName() {

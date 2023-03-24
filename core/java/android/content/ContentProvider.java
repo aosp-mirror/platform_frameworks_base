@@ -302,10 +302,11 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
 
         @Override
         public String getType(AttributionSource attributionSource, Uri uri) {
-            // getCallingPackage() isn't available in getType(), as the javadoc states.
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             traceBegin(TRACE_TAG_DATABASE, "getType: ", uri.getAuthority());
+            final AttributionSource original = setCallingAttributionSource(
+                    attributionSource);
             try {
                 if (checkGetTypePermission(attributionSource, uri)
                         == PermissionChecker.PERMISSION_GRANTED) {
@@ -346,6 +347,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             } finally {
+                setCallingAttributionSource(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
             }
         }
@@ -405,16 +407,20 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
 
         @Override
         public void getTypeAnonymousAsync(Uri uri, RemoteCallback callback) {
+            // getCallingPackage() isn't available in getTypeAnonymous(), as the javadoc states.
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
+            traceBegin(TRACE_TAG_DATABASE, "getTypeAnonymous: ", uri.getAuthority());
             final Bundle result = new Bundle();
             try {
                 result.putString(ContentResolver.REMOTE_CALLBACK_RESULT, getTypeAnonymous(uri));
             } catch (Exception e) {
                 result.putParcelable(ContentResolver.REMOTE_CALLBACK_ERROR,
                         new ParcelableException(e));
+            } finally {
+                callback.sendResult(result);
+                Trace.traceEnd(TRACE_TAG_DATABASE);
             }
-            callback.sendResult(result);
         }
 
         @Override
@@ -629,16 +635,19 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public String[] getStreamTypes(Uri uri, String mimeTypeFilter) {
-            // getCallingPackage() isn't available in getType(), as the javadoc states.
+        public String[] getStreamTypes(AttributionSource attributionSource,
+                Uri uri, String mimeTypeFilter) {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             traceBegin(TRACE_TAG_DATABASE, "getStreamTypes: ", uri.getAuthority());
+            final AttributionSource original = setCallingAttributionSource(
+                    attributionSource);
             try {
                 return mInterface.getStreamTypes(uri, mimeTypeFilter);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             } finally {
+                setCallingAttributionSource(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
             }
         }
@@ -1114,7 +1123,10 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * currently processing a request.
      * <p>
      * This will always return {@code null} when processing
-     * {@link #getType(Uri)} or {@link #getStreamTypes(Uri, String)} requests.
+     * {@link #getTypeAnonymous(Uri)} requests
+     *
+     * For {@link #getType(Uri)}  requests, this will be only available for cases, where
+     * the caller can be identified. See {@link #getTypeAnonymous(Uri)}
      *
      * @see Binder#getCallingUid()
      * @see Context#grantUriPermission(String, Uri, int)
@@ -1154,7 +1166,10 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * a request of the request is for the default attribution.
      * <p>
      * This will always return {@code null} when processing
-     * {@link #getType(Uri)} or {@link #getStreamTypes(Uri, String)} requests.
+     * {@link #getTypeAnonymous(Uri)} requests
+     *
+     * For {@link #getType(Uri)}  requests, this will be only available for cases, where
+     * the caller can be identified. See {@link #getTypeAnonymous(Uri)}
      *
      * @see #getCallingPackage
      */
@@ -1181,7 +1196,10 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * {@code null} if not currently processing a request.
      * <p>
      * This will always return {@code null} when processing
-     * {@link #getType(Uri)} or {@link #getStreamTypes(Uri, String)} requests.
+     * {@link #getTypeAnonymous(Uri)} requests
+     *
+     * For {@link #getType(Uri)}  requests, this will be only available for cases, where
+     * the caller can be identified. See {@link #getTypeAnonymous(Uri)}
      *
      * @see Binder#getCallingUid()
      * @see Context#grantUriPermission(String, Uri, int)

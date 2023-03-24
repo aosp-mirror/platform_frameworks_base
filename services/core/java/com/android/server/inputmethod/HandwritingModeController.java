@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UiThread;
 import android.hardware.input.InputManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -55,17 +56,20 @@ final class HandwritingModeController {
     public static final String TAG = HandwritingModeController.class.getSimpleName();
     // TODO(b/210039666): flip the flag.
     static final boolean DEBUG = true;
+    // Use getHandwritingBufferSize() and not this value directly.
     private static final int EVENT_BUFFER_SIZE = 100;
     // A longer event buffer used for handwriting delegation
     // TODO(b/210039666): make this device touch sampling rate dependent.
-    private static final int LONG_EVENT_BUFFER = EVENT_BUFFER_SIZE * 20;
+    // Use getHandwritingBufferSize() and not this value directly.
+    private static final int LONG_EVENT_BUFFER_SIZE = EVENT_BUFFER_SIZE * 20;
+    private static final long HANDWRITING_DELEGATION_IDLE_TIMEOUT_MS = 3000;
 
     // This must be the looper for the UiThread.
     private final Looper mLooper;
     private final InputManagerInternal mInputManagerInternal;
     private final WindowManagerInternal mWindowManagerInternal;
 
-    private List<MotionEvent> mHandwritingBuffer;
+    private ArrayList<MotionEvent> mHandwritingBuffer;
     private InputEventReceiver mHandwritingEventReceiver;
     private Runnable mInkWindowInitRunnable;
     private boolean mRecordingGesture;
@@ -73,6 +77,8 @@ final class HandwritingModeController {
     // when set, package names are used for handwriting delegation.
     private @Nullable String mDelegatePackageName;
     private @Nullable String mDelegatorPackageName;
+    private Runnable mDelegationIdleTimeoutRunnable;
+    private Handler mDelegationIdleTimeoutHandler;
 
     private HandwritingEventReceiverSurface mHandwritingSurface;
 
@@ -110,7 +116,7 @@ final class HandwritingModeController {
         mCurrentDisplayId = displayId;
 
         if (mHandwritingBuffer == null) {
-            mHandwritingBuffer = new ArrayList<>(EVENT_BUFFER_SIZE);
+            mHandwritingBuffer = new ArrayList<>(getHandwritingBufferSize());
         }
 
         if (DEBUG) Slog.d(TAG, "Initializing handwriting spy monitor for display: " + displayId);
@@ -159,8 +165,8 @@ final class HandwritingModeController {
             @NonNull String delegatePackageName, @NonNull String delegatorPackageName) {
         mDelegatePackageName = delegatePackageName;
         mDelegatorPackageName = delegatorPackageName;
-        ((ArrayList) mHandwritingBuffer).ensureCapacity(LONG_EVENT_BUFFER);
-        // TODO(b/210039666): cancel delegation after a timeout or next input method client binding.
+        mHandwritingBuffer.ensureCapacity(getHandwritingBufferSize());
+        scheduleHandwritingDelegationTimeout();
     }
 
     @Nullable String getDelegatePackageName() {
@@ -171,6 +177,32 @@ final class HandwritingModeController {
         return mDelegatorPackageName;
     }
 
+    private void scheduleHandwritingDelegationTimeout() {
+        if (mDelegationIdleTimeoutHandler == null) {
+            mDelegationIdleTimeoutHandler = new Handler(mLooper);
+        } else {
+            mDelegationIdleTimeoutHandler.removeCallbacks(mDelegationIdleTimeoutRunnable);
+        }
+        mDelegationIdleTimeoutRunnable =  () -> {
+            Slog.d(TAG, "Stylus handwriting delegation idle timed-out.");
+            clearPendingHandwritingDelegation();
+            if (mHandwritingBuffer != null) {
+                mHandwritingBuffer.forEach(MotionEvent::recycle);
+                mHandwritingBuffer.clear();
+                mHandwritingBuffer.trimToSize();
+                mHandwritingBuffer.ensureCapacity(getHandwritingBufferSize());
+            }
+        };
+        mDelegationIdleTimeoutHandler.postDelayed(
+                mDelegationIdleTimeoutRunnable, HANDWRITING_DELEGATION_IDLE_TIMEOUT_MS);
+    }
+
+    private int getHandwritingBufferSize() {
+        if (mDelegatePackageName != null && mDelegatorPackageName != null) {
+            return LONG_EVENT_BUFFER_SIZE;
+        }
+        return EVENT_BUFFER_SIZE;
+    }
     /**
      * Clear any pending handwriting delegation info.
      */
@@ -178,6 +210,11 @@ final class HandwritingModeController {
         if (DEBUG) {
             Slog.d(TAG, "clearPendingHandwritingDelegation");
         }
+        if (mDelegationIdleTimeoutHandler != null) {
+            mDelegationIdleTimeoutHandler.removeCallbacks(mDelegationIdleTimeoutRunnable);
+            mDelegationIdleTimeoutHandler = null;
+        }
+        mDelegationIdleTimeoutRunnable = null;
         mDelegatorPackageName = null;
         mDelegatePackageName = null;
     }
@@ -322,7 +359,7 @@ final class HandwritingModeController {
             return;
         }
 
-        if (mHandwritingBuffer.size() >= EVENT_BUFFER_SIZE) {
+        if (mHandwritingBuffer.size() >= getHandwritingBufferSize()) {
             if (DEBUG) {
                 Slog.w(TAG, "Current gesture exceeds the buffer capacity."
                         + " The rest of the gesture will not be recorded.");

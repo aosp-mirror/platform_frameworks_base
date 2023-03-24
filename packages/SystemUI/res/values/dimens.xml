@@ -1405,10 +1405,6 @@
     -->
     <dimen name="split_shade_scrim_transition_distance">300dp</dimen>
 
-    <!-- Alpha in duration in ms for the auth ripple to become fully vislble. If set to 0,
-         it is immediately visible. -->
-    <integer name="auth_ripple_alpha_in_duration">100</integer>
-
     <dimen name="people_space_widget_radius">28dp</dimen>
     <dimen name="people_space_image_radius">20dp</dimen>
     <dimen name="people_space_messages_count_radius">12dp</dimen>
@@ -1674,11 +1670,11 @@
         .2
     </item>
 
-    <!-- The margins applied to the dream overlay container -->
-    <dimen name="dream_overlay_container_margin_start">0dp</dimen>
-    <dimen name="dream_overlay_container_margin_end">0dp</dimen>
-    <dimen name="dream_overlay_container_margin_top">0dp</dimen>
-    <dimen name="dream_overlay_container_margin_bottom">0dp</dimen>
+    <!-- The padding applied to the dream overlay container -->
+    <dimen name="dream_overlay_container_padding_start">0dp</dimen>
+    <dimen name="dream_overlay_container_padding_end">0dp</dimen>
+    <dimen name="dream_overlay_container_padding_top">0dp</dimen>
+    <dimen name="dream_overlay_container_padding_bottom">0dp</dimen>
 
     <!-- The margin applied between complications -->
     <dimen name="dream_overlay_complication_margin">0dp</dimen>
