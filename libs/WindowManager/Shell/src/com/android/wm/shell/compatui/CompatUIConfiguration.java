@@ -39,22 +39,41 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
             "enable_letterbox_restart_confirmation_dialog";
 
     private static final String KEY_ENABLE_LETTERBOX_REACHABILITY_EDUCATION =
-            "enable_letterbox_reachability_education";
+            "enable_letterbox_education_for_reachability";
 
     private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_RESTART_DIALOG = true;
 
-    private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_REACHABILITY_EDUCATION = false;
+    private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_REACHABILITY_EDUCATION = true;
 
     /**
-     * The name of the {@link SharedPreferences} that holds which user has seen the Restart
-     * confirmation dialog.
+     * The name of the {@link SharedPreferences} that holds information about compat ui.
      */
-    private static final String DONT_SHOW_RESTART_DIALOG_PREF_NAME = "dont_show_restart_dialog";
+    private static final String COMPAT_UI_SHARED_PREFERENCES = "dont_show_restart_dialog";
 
     /**
-     * The {@link SharedPreferences} instance for {@link #DONT_SHOW_RESTART_DIALOG_PREF_NAME}.
+     * The name of the {@link SharedPreferences} that holds which user has seen the Letterbox
+     * Education dialog.
      */
-    private final SharedPreferences mSharedPreferences;
+    private static final String HAS_SEEN_LETTERBOX_EDUCATION_SHARED_PREFERENCES =
+            "has_seen_letterbox_education";
+
+    /**
+     * Key prefix for the {@link SharedPreferences} entries related to the reachability
+     * education.
+     */
+    private static final String HAS_SEEN_REACHABILITY_EDUCATION_KEY_PREFIX =
+            "has_seen_reachability_education";
+
+    /**
+     * The {@link SharedPreferences} instance for the restart dialog and the reachability
+     * education.
+     */
+    private final SharedPreferences mCompatUISharedPreferences;
+
+    /**
+     * The {@link SharedPreferences} instance for the letterbox education dialog.
+     */
+    private final SharedPreferences mLetterboxEduSharedPreferences;
 
     // Whether the extended restart dialog is enabled
     private boolean mIsRestartDialogEnabled;
@@ -88,8 +107,10 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
                 DEFAULT_VALUE_ENABLE_LETTERBOX_REACHABILITY_EDUCATION);
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_APP_COMPAT, mainExecutor,
                 this);
-        mSharedPreferences = context.getSharedPreferences(DONT_SHOW_RESTART_DIALOG_PREF_NAME,
+        mCompatUISharedPreferences = context.getSharedPreferences(getCompatUISharedPreferenceName(),
                 Context.MODE_PRIVATE);
+        mLetterboxEduSharedPreferences = context.getSharedPreferences(
+                getHasSeenLetterboxEducationSharedPreferencedName(), Context.MODE_PRIVATE);
     }
 
     /**
@@ -122,20 +143,53 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
         mIsReachabilityEducationOverrideEnabled = enabled;
     }
 
-    boolean getDontShowRestartDialogAgain(TaskInfo taskInfo) {
-        final int userId = taskInfo.userId;
-        final String packageName = taskInfo.topActivity.getPackageName();
-        return mSharedPreferences.getBoolean(
-                getDontShowAgainRestartKey(userId, packageName), /* default= */ false);
-    }
-
     void setDontShowRestartDialogAgain(TaskInfo taskInfo) {
-        final int userId = taskInfo.userId;
-        final String packageName = taskInfo.topActivity.getPackageName();
-        mSharedPreferences.edit().putBoolean(getDontShowAgainRestartKey(userId, packageName),
+        mCompatUISharedPreferences.edit().putBoolean(
+                getDontShowAgainRestartKey(taskInfo.userId, taskInfo.topActivity.getPackageName()),
                 true).apply();
     }
 
+    boolean shouldShowRestartDialogAgain(TaskInfo taskInfo) {
+        return !mCompatUISharedPreferences.getBoolean(getDontShowAgainRestartKey(taskInfo.userId,
+                taskInfo.topActivity.getPackageName()), /* default= */ false);
+    }
+
+    void setDontShowReachabilityEducationAgain(TaskInfo taskInfo) {
+        mCompatUISharedPreferences.edit().putBoolean(
+                getDontShowAgainReachabilityEduKey(taskInfo.userId,
+                        taskInfo.topActivity.getPackageName()), true).apply();
+    }
+
+    boolean shouldShowReachabilityEducation(@NonNull TaskInfo taskInfo) {
+        return getHasSeenLetterboxEducation(taskInfo.userId)
+                && !mCompatUISharedPreferences.getBoolean(
+                getDontShowAgainReachabilityEduKey(taskInfo.userId,
+                        taskInfo.topActivity.getPackageName()), /* default= */false);
+    }
+
+    boolean getHasSeenLetterboxEducation(int userId) {
+        return mLetterboxEduSharedPreferences
+                .getBoolean(getDontShowLetterboxEduKey(userId), /* default= */ false);
+    }
+
+    void setSeenLetterboxEducation(int userId) {
+        mLetterboxEduSharedPreferences.edit().putBoolean(getDontShowLetterboxEduKey(userId),
+                true).apply();
+    }
+
+    protected String getCompatUISharedPreferenceName() {
+        return COMPAT_UI_SHARED_PREFERENCES;
+    }
+
+    protected String getHasSeenLetterboxEducationSharedPreferencedName() {
+        return HAS_SEEN_LETTERBOX_EDUCATION_SHARED_PREFERENCES;
+    }
+
+    /**
+     * Updates the {@link DeviceConfig} state for the CompatUI
+     * @param properties Contains the complete collection of properties which have changed for a
+     *                   single namespace. This includes only those which were added, updated,
+     */
     @Override
     public void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {
         if (properties.getKeyset().contains(KEY_ENABLE_LETTERBOX_RESTART_DIALOG)) {
@@ -150,6 +204,14 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
                     KEY_ENABLE_LETTERBOX_REACHABILITY_EDUCATION,
                     DEFAULT_VALUE_ENABLE_LETTERBOX_REACHABILITY_EDUCATION);
         }
+    }
+
+    private static String getDontShowAgainReachabilityEduKey(int userId, String packageName) {
+        return HAS_SEEN_REACHABILITY_EDUCATION_KEY_PREFIX + "_" + packageName + "@" + userId;
+    }
+
+    private static String getDontShowLetterboxEduKey(int userId) {
+        return String.valueOf(userId);
     }
 
     private String getDontShowAgainRestartKey(int userId, String packageName) {

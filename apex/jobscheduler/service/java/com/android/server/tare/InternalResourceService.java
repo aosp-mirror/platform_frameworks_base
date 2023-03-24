@@ -205,6 +205,11 @@ public class InternalResourceService extends SystemService {
     @GuardedBy("mLock")
     private final SparseArrayMap<String, ArraySet<String>> mInstallers = new SparseArrayMap<>();
 
+    /** The package name of the wellbeing app. */
+    @GuardedBy("mLock")
+    @Nullable
+    private String mWellbeingPackage;
+
     private volatile boolean mHasBattery = true;
     @EconomyManager.EnabledMode
     private volatile int mEnabledMode;
@@ -493,6 +498,20 @@ public class InternalResourceService extends SystemService {
                 return mEnabledMode;
             }
             return ENABLED_MODE_OFF;
+        }
+    }
+
+    boolean isHeadlessSystemApp(@NonNull String pkgName) {
+        if (pkgName == null) {
+            Slog.wtfStack(TAG, "isHeadlessSystemApp called with null package");
+            return false;
+        }
+        synchronized (mLock) {
+            // The wellbeing app is pre-set on the device, not expected to be interacted with
+            // much by the user, but can be expected to do work in the background on behalf of
+            // the user. As such, it's a pseudo-headless system app, so treat it as a headless
+            // system app.
+            return pkgName.equals(mWellbeingPackage);
         }
     }
 
@@ -1097,6 +1116,9 @@ public class InternalResourceService extends SystemService {
         }
         synchronized (mLock) {
             registerListeners();
+            // As of Android UDC, users can't change the wellbeing package, so load it once
+            // as soon as possible and don't bother trying to update it afterwards.
+            mWellbeingPackage = mPackageManager.getWellbeingPackageName();
             mCurrentBatteryLevel = getCurrentBatteryLevel();
             // Get the current battery presence, if available. This would succeed if TARE is
             // toggled long after boot.

@@ -18,12 +18,13 @@ package com.android.wm.shell.compatui;
 
 import static android.provider.Settings.Secure.LAUNCHER_TASKBAR_EDUCATION_SHOWING;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.TaskInfo;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.provider.Settings;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
@@ -38,29 +39,18 @@ import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.transition.Transitions;
 
+import java.util.function.Consumer;
+
 /**
  * Window manager for the Letterbox Education.
  */
-public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
+class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     /**
      * The Letterbox Education should be the topmost child of the Task in case there can be more
      * than one child.
      */
     public static final int Z_ORDER = Integer.MAX_VALUE;
-
-    /**
-     * The name of the {@link SharedPreferences} that holds which user has seen the Letterbox
-     * Education dialog.
-     */
-    @VisibleForTesting
-    static final String HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME =
-            "has_seen_letterbox_education";
-
-    /**
-     * The {@link SharedPreferences} instance for {@link #HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME}.
-     */
-    private final SharedPreferences mSharedPreferences;
 
     private final DialogAnimationController<LetterboxEduDialogLayout> mAnimationController;
 
@@ -73,6 +63,10 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
      */
     private final int mUserId;
 
+    private final Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> mOnDismissCallback;
+
+    private final CompatUIConfiguration mCompatUIConfiguration;
+
     // Remember the last reported state in case visibility changes due to keyguard or IME updates.
     private boolean mEligibleForLetterboxEducation;
 
@@ -80,7 +74,8 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
     @VisibleForTesting
     LetterboxEduDialogLayout mLayout;
 
-    private final Runnable mOnDismissCallback;
+    @NonNull
+    private TaskInfo mTaskInfo;
 
     /**
      * The vertical margin between the dialog container and the task stable bounds (excluding
@@ -90,33 +85,35 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     private final DockStateReader mDockStateReader;
 
-    public LetterboxEduWindowManager(Context context, TaskInfo taskInfo,
+    LetterboxEduWindowManager(Context context, TaskInfo taskInfo,
             SyncTransactionQueue syncQueue, ShellTaskOrganizer.TaskListener taskListener,
             DisplayLayout displayLayout, Transitions transitions,
-            Runnable onDismissCallback, DockStateReader dockStateReader) {
+            Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> onDismissCallback,
+            DockStateReader dockStateReader, CompatUIConfiguration compatUIConfiguration) {
         this(context, taskInfo, syncQueue, taskListener, displayLayout, transitions,
                 onDismissCallback,
                 new DialogAnimationController<>(context, /* tag */ "LetterboxEduWindowManager"),
-                dockStateReader);
+                dockStateReader, compatUIConfiguration);
     }
 
     @VisibleForTesting
     LetterboxEduWindowManager(Context context, TaskInfo taskInfo,
             SyncTransactionQueue syncQueue, ShellTaskOrganizer.TaskListener taskListener,
-            DisplayLayout displayLayout, Transitions transitions, Runnable onDismissCallback,
+            DisplayLayout displayLayout, Transitions transitions,
+            Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> onDismissCallback,
             DialogAnimationController<LetterboxEduDialogLayout> animationController,
-            DockStateReader dockStateReader) {
+            DockStateReader dockStateReader, CompatUIConfiguration compatUIConfiguration) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
+        mTaskInfo = taskInfo;
         mTransitions = transitions;
         mOnDismissCallback = onDismissCallback;
         mAnimationController = animationController;
         mUserId = taskInfo.userId;
-        mEligibleForLetterboxEducation = taskInfo.topActivityEligibleForLetterboxEducation;
-        mSharedPreferences = mContext.getSharedPreferences(HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME,
-                Context.MODE_PRIVATE);
         mDialogVerticalMargin = (int) mContext.getResources().getDimension(
                 R.dimen.letterbox_education_dialog_margin);
         mDockStateReader = dockStateReader;
+        mCompatUIConfiguration = compatUIConfiguration;
+        mEligibleForLetterboxEducation = taskInfo.topActivityEligibleForLetterboxEducation;
     }
 
     @Override
@@ -142,8 +139,8 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
         //   the controller will create a new instance of this class since this one isn't eligible).
         // - If the layout isn't null then it was previously showing, and we shouldn't check if the
         //   user has seen the letterbox education before.
-        return mEligibleForLetterboxEducation && !isTaskbarEduShowing()
-                && (mLayout != null || !getHasSeenLetterboxEducation())
+        return mEligibleForLetterboxEducation && !isTaskbarEduShowing() && (mLayout != null
+                || !mCompatUIConfiguration.getHasSeenLetterboxEducation(mUserId))
                 && !mDockStateReader.isDocked();
     }
 
@@ -192,7 +189,6 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
             // Dialog has already been released.
             return;
         }
-        setSeenLetterboxEducation();
         mLayout.setDismissOnClickListener(this::onDismiss);
         // Focus on the dialog title for accessibility.
         mLayout.getDialogTitle().sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
@@ -202,10 +198,11 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
         if (mLayout == null) {
             return;
         }
+        mCompatUIConfiguration.setSeenLetterboxEducation(mUserId);
         mLayout.setDismissOnClickListener(null);
         mAnimationController.startExitAnimation(mLayout, () -> {
             release();
-            mOnDismissCallback.run();
+            mOnDismissCallback.accept(Pair.create(mTaskInfo, getTaskListener()));
         });
     }
 
@@ -218,6 +215,7 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
     @Override
     public boolean updateCompatInfo(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener,
             boolean canShow) {
+        mTaskInfo = taskInfo;
         mEligibleForLetterboxEducation = taskInfo.topActivityEligibleForLetterboxEducation;
 
         return super.updateCompatInfo(taskInfo, taskListener, canShow);
@@ -246,18 +244,6 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
         final Rect taskBounds = getTaskBounds();
         return getWindowLayoutParams(/* width= */ taskBounds.width(), /* height= */
                 taskBounds.height());
-    }
-
-    private boolean getHasSeenLetterboxEducation() {
-        return mSharedPreferences.getBoolean(getPrefKey(), /* default= */ false);
-    }
-
-    private void setSeenLetterboxEducation() {
-        mSharedPreferences.edit().putBoolean(getPrefKey(), true).apply();
-    }
-
-    private String getPrefKey() {
-        return String.valueOf(mUserId);
     }
 
     @VisibleForTesting

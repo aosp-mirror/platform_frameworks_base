@@ -3560,6 +3560,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     private void dumpWallpaper(WallpaperData wallpaper, PrintWriter pw) {
+        if (wallpaper == null) {
+            pw.println(" (null entry)");
+        }
         pw.print(" User "); pw.print(wallpaper.userId);
         pw.print(": id="); pw.print(wallpaper.wallpaperId);
         pw.print(": mWhich="); pw.print(wallpaper.mWhich);

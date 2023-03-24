@@ -414,9 +414,11 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             boolean hasChangingApp = false;
             final TransitionUtil.LeafTaskFilter leafTaskFilter =
                     new TransitionUtil.LeafTaskFilter();
+            boolean hasTaskChange = false;
             for (int i = 0; i < info.getChanges().size(); ++i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
                 final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+                hasTaskChange = hasTaskChange || taskInfo != null;
                 final boolean isLeafTask = leafTaskFilter.test(change);
                 if (TransitionUtil.isOpeningType(change.getMode())) {
                     if (mRecentsTask != null && mRecentsTask.equals(change.getContainer())) {
@@ -520,7 +522,12 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 didMergeThings = true;
                 mState = STATE_NEW_TASK;
             }
-            if (!didMergeThings) {
+            if (!hasTaskChange) {
+                // Activity only transition, so consume the merge as it doesn't affect the rest of
+                // recents.
+                Slog.d(TAG, "Got an activity only transition during recents, so apply directly");
+                mergeActivityOnly(info, t);
+            } else if (!didMergeThings) {
                 // Didn't recognize anything in incoming transition so don't merge it.
                 Slog.w(TAG, "Don't know how to merge this transition.");
                 return;
@@ -535,6 +542,19 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 mListener.onTasksAppeared(appearedTargets);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error sending appeared tasks to recents animation", e);
+            }
+        }
+
+        /** For now, just set-up a jump-cut to the new activity. */
+        private void mergeActivityOnly(TransitionInfo info, SurfaceControl.Transaction t) {
+            for (int i = 0; i < info.getChanges().size(); ++i) {
+                final TransitionInfo.Change change = info.getChanges().get(i);
+                if (TransitionUtil.isOpeningType(change.getMode())) {
+                    t.show(change.getLeash());
+                    t.setAlpha(change.getLeash(), 1.f);
+                } else if (TransitionUtil.isClosingType(change.getMode())) {
+                    t.hide(change.getLeash());
+                }
             }
         }
 

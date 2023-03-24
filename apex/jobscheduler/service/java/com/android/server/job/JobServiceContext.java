@@ -35,7 +35,6 @@ import android.app.job.JobProtoEnums;
 import android.app.job.JobWorkItem;
 import android.app.usage.UsageStatsManagerInternal;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
 import android.content.Context;
@@ -97,9 +96,7 @@ public final class JobServiceContext implements ServiceConnection {
      * Whether to trigger an ANR when apps are slow to respond on pre-UDC APIs and functionality.
      */
     @ChangeId
-    @Disabled
-    // TODO(258236856): Enable after test is fixed
-    // @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     private static final long ANR_PRE_UDC_APIS_ON_SLOW_RESPONSES = 258236856L;
 
     private static final String TAG = "JobServiceContext";
@@ -465,22 +462,36 @@ public final class JobServiceContext implements ServiceConnection {
                     mExecutionStartTimeElapsed - job.enqueueTime,
                     job.getJob().isUserInitiated(),
                     job.shouldTreatAsUserInitiatedJob());
+            final String sourcePackage = job.getSourcePackageName();
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
+                final String componentPackage = job.getServiceComponent().getPackageName();
+                String traceTag = "*job*<" + job.getSourceUid() + ">" + sourcePackage;
+                if (!sourcePackage.equals(componentPackage)) {
+                    traceTag += ":" + componentPackage;
+                }
+                traceTag += "/" + job.getServiceComponent().getShortClassName();
+                if (!componentPackage.equals(job.serviceProcessName)) {
+                    traceTag += "$" + job.serviceProcessName;
+                }
+                if (job.getNamespace() != null) {
+                    traceTag += "@" + job.getNamespace();
+                }
+                traceTag += "#" + job.getJobId();
+
                 // Use the context's ID to distinguish traces since there'll only be one job
                 // running per context.
                 Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
-                        job.getTag(), getId());
+                        traceTag, getId());
             }
             try {
                 mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
             } catch (RemoteException e) {
                 // Whatever.
             }
-            final String jobPackage = job.getSourcePackageName();
             final int jobUserId = job.getSourceUserId();
             UsageStatsManagerInternal usageStats =
                     LocalServices.getService(UsageStatsManagerInternal.class);
-            usageStats.setLastJobRunTime(jobPackage, jobUserId, mExecutionStartTimeElapsed);
+            usageStats.setLastJobRunTime(sourcePackage, jobUserId, mExecutionStartTimeElapsed);
             mAvailable = false;
             mStoppedReason = null;
             mStoppedTime = 0;

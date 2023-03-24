@@ -981,6 +981,10 @@ public class WindowManagerShellCommand extends ShellCommand {
                     runSetBooleanFlag(pw, mLetterboxConfiguration
                             ::setIsVerticalReachabilityEnabled);
                     break;
+                case "--isAutomaticReachabilityInBookModeEnabled":
+                    runSetBooleanFlag(pw, mLetterboxConfiguration
+                            ::setIsAutomaticReachabilityInBookModeEnabled);
+                    break;
                 case "--defaultPositionForHorizontalReachability":
                     runSetLetterboxDefaultPositionForHorizontalReachability(pw);
                     break;
@@ -1183,6 +1187,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             mLetterboxConfiguration.resetLetterboxHorizontalPositionMultiplier();
             mLetterboxConfiguration.resetIsHorizontalReachabilityEnabled();
             mLetterboxConfiguration.resetIsVerticalReachabilityEnabled();
+            mLetterboxConfiguration.resetEnabledAutomaticReachabilityInBookMode();
             mLetterboxConfiguration.resetDefaultPositionForHorizontalReachability();
             mLetterboxConfiguration.resetDefaultPositionForVerticalReachability();
             mLetterboxConfiguration.resetIsEducationEnabled();
@@ -1218,6 +1223,8 @@ public class WindowManagerShellCommand extends ShellCommand {
                     + mLetterboxConfiguration.getIsHorizontalReachabilityEnabled());
             pw.println("Is vertical reachability enabled: "
                     + mLetterboxConfiguration.getIsVerticalReachabilityEnabled());
+            pw.println("Is automatic reachability in book mode enabled: "
+                    + mLetterboxConfiguration.getIsAutomaticReachabilityInBookModeEnabled());
             pw.println("Default position for horizontal reachability: "
                     + LetterboxConfiguration.letterboxHorizontalReachabilityPositionToString(
                             mLetterboxConfiguration.getDefaultPositionForHorizontalReachability()));

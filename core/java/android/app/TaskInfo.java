@@ -49,6 +49,12 @@ public class TaskInfo {
     private static final String TAG = "TaskInfo";
 
     /**
+     * The value to use when the property has not a specific value.
+     * @hide
+     */
+    public static final int PROPERTY_VALUE_UNSET = -1;
+
+    /**
      * The id of the user the task was running as if this is a leaf task. The id of the current
      * running user of the system otherwise.
      * @hide
@@ -230,6 +236,40 @@ public class TaskInfo {
     public boolean topActivityEligibleForLetterboxEducation;
 
     /**
+     * Whether the double tap is enabled
+     * @hide
+     */
+    public boolean isLetterboxDoubleTapEnabled;
+
+    /**
+     * If {@link isLetterboxDoubleTapEnabled} it contains the current letterbox vertical position or
+     * {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise.
+     * @hide
+     */
+    public int topActivityLetterboxVerticalPosition;
+
+    /**
+     * If {@link isLetterboxDoubleTapEnabled} it contains the current letterbox vertical position or
+     * {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise.
+     * @hide
+     */
+    public int topActivityLetterboxHorizontalPosition;
+
+    /**
+     * If {@link isLetterboxDoubleTapEnabled} it contains the current width of the letterboxed
+     * activity or {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise
+     * @hide
+     */
+    public int topActivityLetterboxWidth;
+
+    /**
+     * If {@link isLetterboxDoubleTapEnabled} it contains the current height of the letterboxed
+     * activity or {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise
+     * @hide
+     */
+    public int topActivityLetterboxHeight;
+
+    /**
      * Whether this task is resizable. Unlike {@link #resizeMode} (which is what the top activity
      * supports), this is what the system actually uses for resizability based on other policy and
      * developer options.
@@ -407,7 +447,8 @@ public class TaskInfo {
     /** @hide */
     public boolean hasCompatUI() {
         return hasCameraCompatControl() || topActivityInSizeCompat
-                || topActivityEligibleForLetterboxEducation;
+                || topActivityEligibleForLetterboxEducation
+                || isLetterboxDoubleTapEnabled;
     }
 
     /**
@@ -456,6 +497,12 @@ public class TaskInfo {
                 && isResizeable == that.isResizeable
                 && supportsMultiWindow == that.supportsMultiWindow
                 && displayAreaFeatureId == that.displayAreaFeatureId
+                && isLetterboxDoubleTapEnabled == that.isLetterboxDoubleTapEnabled
+                && topActivityLetterboxVerticalPosition == that.topActivityLetterboxVerticalPosition
+                && topActivityLetterboxWidth == that.topActivityLetterboxWidth
+                && topActivityLetterboxHeight == that.topActivityLetterboxHeight
+                && topActivityLetterboxHorizontalPosition
+                    == that.topActivityLetterboxHorizontalPosition
                 && Objects.equals(positionInParent, that.positionInParent)
                 && Objects.equals(pictureInPictureParams, that.pictureInPictureParams)
                 && Objects.equals(shouldDockBigOverlays, that.shouldDockBigOverlays)
@@ -484,6 +531,12 @@ public class TaskInfo {
                 && topActivityInSizeCompat == that.topActivityInSizeCompat
                 && topActivityEligibleForLetterboxEducation
                     == that.topActivityEligibleForLetterboxEducation
+                && isLetterboxDoubleTapEnabled == that.isLetterboxDoubleTapEnabled
+                && topActivityLetterboxVerticalPosition == that.topActivityLetterboxVerticalPosition
+                && topActivityLetterboxHorizontalPosition
+                    == that.topActivityLetterboxHorizontalPosition
+                && topActivityLetterboxWidth == that.topActivityLetterboxWidth
+                && topActivityLetterboxHeight == that.topActivityLetterboxHeight
                 && cameraCompatControlState == that.cameraCompatControlState
                 // Bounds are important if top activity has compat controls.
                 && (!hasCompatUI() || configuration.windowConfiguration.getBounds()
@@ -538,6 +591,11 @@ public class TaskInfo {
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
         displayAreaFeatureId = source.readInt();
         cameraCompatControlState = source.readInt();
+        isLetterboxDoubleTapEnabled = source.readBoolean();
+        topActivityLetterboxVerticalPosition = source.readInt();
+        topActivityLetterboxHorizontalPosition = source.readInt();
+        topActivityLetterboxWidth = source.readInt();
+        topActivityLetterboxHeight = source.readInt();
     }
 
     /**
@@ -585,6 +643,11 @@ public class TaskInfo {
         dest.writeTypedObject(mTopActivityLocusId, flags);
         dest.writeInt(displayAreaFeatureId);
         dest.writeInt(cameraCompatControlState);
+        dest.writeBoolean(isLetterboxDoubleTapEnabled);
+        dest.writeInt(topActivityLetterboxVerticalPosition);
+        dest.writeInt(topActivityLetterboxHorizontalPosition);
+        dest.writeInt(topActivityLetterboxWidth);
+        dest.writeInt(topActivityLetterboxHeight);
     }
 
     @Override
@@ -620,6 +683,12 @@ public class TaskInfo {
                 + " topActivityInSizeCompat=" + topActivityInSizeCompat
                 + " topActivityEligibleForLetterboxEducation= "
                         + topActivityEligibleForLetterboxEducation
+                + " topActivityLetterboxed= " + isLetterboxDoubleTapEnabled
+                + " topActivityLetterboxVerticalPosition= " + topActivityLetterboxVerticalPosition
+                + " topActivityLetterboxHorizontalPosition= "
+                        + topActivityLetterboxHorizontalPosition
+                + " topActivityLetterboxWidth=" + topActivityLetterboxWidth
+                + " topActivityLetterboxHeight=" + topActivityLetterboxHeight
                 + " locusId=" + mTopActivityLocusId
                 + " displayAreaFeatureId=" + displayAreaFeatureId
                 + " cameraCompatControlState="

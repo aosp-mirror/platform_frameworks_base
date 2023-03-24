@@ -16,4 +16,4 @@
 
 package android.credentials;
 
-parcelable GetPendingCredentialResponse;
+parcelable PrepareGetCredentialResponseInternal;

@@ -755,6 +755,11 @@
          we rely on gravity to determine the effective orientation. -->
     <bool name="config_deskDockEnablesAccelerometer">true</bool>
 
+    <!-- Control whether nosensor and locked orientation requests are respected from the app when
+         config_deskDockEnablesAccelerometer is set to false.
+         TODO(b/274763533): Consider making true by default and removing this. -->
+    <bool name="config_deskRespectsNoSensorAndLockedWithoutAccelerometer">false</bool>
+
     <!-- Car dock behavior -->
 
     <!-- The number of degrees to rotate the display when the device is in a car dock.
@@ -5497,6 +5502,10 @@
 
     <!-- Whether vertical reachability repositioning is allowed for letterboxed fullscreen apps. -->
     <bool name="config_letterboxIsVerticalReachabilityEnabled">false</bool>
+
+    <!-- Whether book mode automatic horizontal reachability positioning is allowed for letterboxed
+        fullscreen apps -->
+    <bool name="config_letterboxIsAutomaticReachabilityInBookModeEnabled">false</bool>
 
     <!-- Default horizontal position of the letterboxed app window when reachability is
         enabled and an app is fullscreen in landscape device orientation. When reachability is
