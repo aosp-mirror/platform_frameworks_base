@@ -55,7 +55,8 @@ public:
     void registerProximityActiveListener();
     void unregisterProximityActiveListener();
     jint registerRuntimeSensor(JNIEnv* env, jint deviceId, jint type, jstring name, jstring vendor,
-                               jint flags, jobject callback);
+                               jfloat maximumRange, jfloat resolution, jfloat power, jint minDelay,
+                               jint maxDelay, jint flags, jobject callback);
     void unregisterRuntimeSensor(jint handle);
     jboolean sendRuntimeSensorEvent(JNIEnv* env, jint handle, jint type, jlong timestamp,
                                     jfloatArray values);
@@ -119,7 +120,9 @@ void NativeSensorService::unregisterProximityActiveListener() {
 }
 
 jint NativeSensorService::registerRuntimeSensor(JNIEnv* env, jint deviceId, jint type, jstring name,
-                                                jstring vendor, jint flags, jobject callback) {
+                                                jstring vendor, jfloat maximumRange,
+                                                jfloat resolution, jfloat power, jint minDelay,
+                                                jint maxDelay, jint flags, jobject callback) {
     if (mService == nullptr) {
         ALOGD("Dropping registerRuntimeSensor, sensor service not available.");
         return -1;
@@ -130,6 +133,11 @@ jint NativeSensorService::registerRuntimeSensor(JNIEnv* env, jint deviceId, jint
             .vendor = env->GetStringUTFChars(vendor, 0),
             .version = sizeof(sensor_t),
             .type = type,
+            .maxRange = maximumRange,
+            .resolution = resolution,
+            .power = power,
+            .minDelay = minDelay,
+            .maxDelay = maxDelay,
 #ifdef __LP64__
             .flags = static_cast<uint64_t>(flags),
 #else
@@ -299,10 +307,12 @@ static void unregisterProximityActiveListenerNative(JNIEnv* env, jclass, jlong p
 }
 
 static jint registerRuntimeSensorNative(JNIEnv* env, jclass, jlong ptr, jint deviceId, jint type,
-                                        jstring name, jstring vendor, jint flags,
-                                        jobject callback) {
+                                        jstring name, jstring vendor, jfloat maximumRange,
+                                        jfloat resolution, jfloat power, jint minDelay,
+                                        jint maxDelay, jint flags, jobject callback) {
     auto* service = reinterpret_cast<NativeSensorService*>(ptr);
-    return service->registerRuntimeSensor(env, deviceId, type, name, vendor, flags, callback);
+    return service->registerRuntimeSensor(env, deviceId, type, name, vendor, maximumRange,
+                                          resolution, power, minDelay, maxDelay, flags, callback);
 }
 
 static void unregisterRuntimeSensorNative(JNIEnv* env, jclass, jlong ptr, jint handle) {
@@ -324,7 +334,7 @@ static const JNINativeMethod methods[] = {
         {"unregisterProximityActiveListenerNative", "(J)V",
          reinterpret_cast<void*>(unregisterProximityActiveListenerNative)},
         {"registerRuntimeSensorNative",
-         "(JIILjava/lang/String;Ljava/lang/String;IL" RUNTIME_SENSOR_CALLBACK_CLASS ";)I",
+         "(JIILjava/lang/String;Ljava/lang/String;FFFIIIL" RUNTIME_SENSOR_CALLBACK_CLASS ";)I",
          reinterpret_cast<void*>(registerRuntimeSensorNative)},
         {"unregisterRuntimeSensorNative", "(JI)V",
          reinterpret_cast<void*>(unregisterRuntimeSensorNative)},

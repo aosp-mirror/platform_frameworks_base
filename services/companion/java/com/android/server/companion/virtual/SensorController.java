@@ -104,8 +104,9 @@ public class SensorController {
         }
         final int handle = mSensorManagerInternal.createRuntimeSensor(mVirtualDeviceId,
                 config.getType(), config.getName(),
-                config.getVendor() == null ? "" : config.getVendor(), config.getFlags(),
-                mRuntimeSensorCallback);
+                config.getVendor() == null ? "" : config.getVendor(), config.getMaximumRange(),
+                config.getResolution(), config.getPower(), config.getMinDelay(),
+                config.getMaxDelay(), config.getFlags(), mRuntimeSensorCallback);
         if (handle <= 0) {
             throw new SensorCreationException("Received an invalid virtual sensor handle.");
         }
