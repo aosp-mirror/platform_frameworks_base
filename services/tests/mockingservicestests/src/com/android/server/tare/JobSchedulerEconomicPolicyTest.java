@@ -150,7 +150,7 @@ public class JobSchedulerEconomicPolicyTest {
                 mEconomicPolicy.getMaxSatiatedBalance(0, pkgExempted));
 
         final String pkgHeadlessSystemApp = "com.pkg.headless_system_app";
-        when(mIrs.isHeadlessSystemApp(eq(pkgHeadlessSystemApp))).thenReturn(true);
+        when(mIrs.isHeadlessSystemApp(anyInt(), eq(pkgHeadlessSystemApp))).thenReturn(true);
         assertEquals(EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP_CAKES,
                 mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
         assertEquals(EconomyManager.DEFAULT_JS_MAX_SATIATED_BALANCE_CAKES,
@@ -201,7 +201,7 @@ public class JobSchedulerEconomicPolicyTest {
         when(mIrs.isPackageExempted(anyInt(), eq(pkgExempted))).thenReturn(true);
         assertEquals(arcToCake(6), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
         final String pkgHeadlessSystemApp = "com.pkg.headless_system_app";
-        when(mIrs.isHeadlessSystemApp(eq(pkgHeadlessSystemApp))).thenReturn(true);
+        when(mIrs.isHeadlessSystemApp(anyInt(), eq(pkgHeadlessSystemApp))).thenReturn(true);
         assertEquals(arcToCake(5), mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
         assertEquals(arcToCake(4), mEconomicPolicy.getMinSatiatedBalance(0, "com.any.other.app"));
         final String pkgUpdater = "com.pkg.updater";
@@ -235,7 +235,7 @@ public class JobSchedulerEconomicPolicyTest {
         when(mIrs.isPackageExempted(anyInt(), eq(pkgExempted))).thenReturn(true);
         assertEquals(arcToCake(0), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
         final String pkgHeadlessSystemApp = "com.pkg.headless_system_app";
-        when(mIrs.isHeadlessSystemApp(eq(pkgHeadlessSystemApp))).thenReturn(true);
+        when(mIrs.isHeadlessSystemApp(anyInt(), eq(pkgHeadlessSystemApp))).thenReturn(true);
         assertEquals(arcToCake(0), mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
         assertEquals(arcToCake(0), mEconomicPolicy.getMinSatiatedBalance(0, "com.any.other.app"));
         final String pkgUpdater = "com.pkg.updater";

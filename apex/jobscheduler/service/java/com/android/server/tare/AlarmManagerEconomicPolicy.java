@@ -182,7 +182,7 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
         if (mIrs.isPackageExempted(userId, pkgName)) {
             return mMinSatiatedBalanceExempted;
         }
-        if (mIrs.isHeadlessSystemApp(pkgName)) {
+        if (mIrs.isHeadlessSystemApp(userId, pkgName)) {
             return mMinSatiatedBalanceHeadlessSystemApp;
         }
         // TODO: take other exemptions into account
