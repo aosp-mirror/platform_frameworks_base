@@ -100,6 +100,7 @@ import static android.content.res.Configuration.EMPTY;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
+import static android.content.res.Configuration.UI_MODE_TYPE_DESK;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.content.res.Configuration.UI_MODE_TYPE_VR_HEADSET;
 import static android.os.Build.VERSION_CODES.HONEYCOMB;
@@ -836,6 +837,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private int mLastDropInputMode = DropInputMode.NONE;
     /** Whether the input to this activity will be dropped during the current playing animation. */
     private boolean mIsInputDroppedForAnimation;
+
+    /**
+     * Whether the application has desk mode resources. Calculated and cached when
+     * {@link #hasDeskResources()} is called.
+     */
+    @Nullable
+    private Boolean mHasDeskResources;
 
     boolean mHandleExitSplashScreen;
     @TransferSplashScreenState
@@ -9553,7 +9561,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             configChanged |= CONFIG_UI_MODE;
         }
 
-        return (changes&(~configChanged)) != 0;
+        // TODO(b/274944389): remove workaround after long-term solution is implemented
+        // Don't restart due to desk mode change if the app does not have desk resources.
+        if (mWmService.mSkipActivityRelaunchWhenDocking && onlyDeskInUiModeChanged(changesConfig)
+                && !hasDeskResources()) {
+            configChanged |= CONFIG_UI_MODE;
+        }
+
+        return (changes & (~configChanged)) != 0;
     }
 
     /**
@@ -9564,6 +9579,50 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Configuration currentConfig = getConfiguration();
         return changes == CONFIG_UI_MODE && (isInVrUiMode(currentConfig)
             != isInVrUiMode(lastReportedConfig));
+    }
+
+    /**
+     * Returns true if the uiMode configuration changed, and desk mode
+     * ({@link android.content.res.Configuration#UI_MODE_TYPE_DESK}) was the only change to uiMode.
+     */
+    private boolean onlyDeskInUiModeChanged(Configuration lastReportedConfig) {
+        final Configuration currentConfig = getConfiguration();
+
+        boolean deskModeChanged = isInDeskUiMode(currentConfig) != isInDeskUiMode(
+                lastReportedConfig);
+        // UI mode contains fields other than the UI mode type, so determine if any other fields
+        // changed.
+        boolean uiModeOtherFieldsChanged =
+                (currentConfig.uiMode & ~UI_MODE_TYPE_MASK) != (lastReportedConfig.uiMode
+                        & ~UI_MODE_TYPE_MASK);
+
+        return deskModeChanged && !uiModeOtherFieldsChanged;
+    }
+
+    /**
+     * Determines whether or not the application has desk mode resources.
+     */
+    boolean hasDeskResources() {
+        if (mHasDeskResources != null) {
+            // We already determined this, return the cached value.
+            return mHasDeskResources;
+        }
+
+        mHasDeskResources = false;
+        try {
+            Resources packageResources = mAtmService.mContext.createPackageContextAsUser(
+                    packageName, 0, UserHandle.of(mUserId)).getResources();
+            for (Configuration sizeConfiguration :
+                    packageResources.getSizeAndUiModeConfigurations()) {
+                if (isInDeskUiMode(sizeConfiguration)) {
+                    mHasDeskResources = true;
+                    break;
+                }
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.w(TAG, "Exception thrown during checking for desk resources " + this, e);
+        }
+        return mHasDeskResources;
     }
 
     private int getConfigurationChanges(Configuration lastReportedConfig) {
@@ -9895,6 +9954,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private static boolean isInVrUiMode(Configuration config) {
         return (config.uiMode & UI_MODE_TYPE_MASK) == UI_MODE_TYPE_VR_HEADSET;
+    }
+
+    private static boolean isInDeskUiMode(Configuration config) {
+        return (config.uiMode & UI_MODE_TYPE_MASK) == UI_MODE_TYPE_DESK;
     }
 
     String getProcessName() {
