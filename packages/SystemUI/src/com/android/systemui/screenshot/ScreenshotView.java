@@ -36,7 +36,6 @@ import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.app.BroadcastOptions;
 import android.app.Notification;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -91,7 +90,6 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -798,49 +796,36 @@ public class ScreenshotView extends FrameLayout implements
     void setChipIntents(ScreenshotController.SavedImageData imageData) {
         mShareChip.setOnClickListener(v -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SHARE_TAPPED, 0, mPackageName);
-            if (mFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
-                prepareSharedTransition();
+            prepareSharedTransition();
 
-                Intent shareIntent;
-                if (mFlags.isEnabled(Flags.SCREENSHOT_METADATA) && mScreenshotData != null
-                        && mScreenshotData.getContextUrl() != null) {
-                    shareIntent = ActionIntentCreator.INSTANCE.createShareIntentWithExtraText(
-                            imageData.uri, mScreenshotData.getContextUrl().toString());
-                } else {
-                    shareIntent = ActionIntentCreator.INSTANCE.createShareIntentWithSubject(
-                            imageData.uri, imageData.subject);
-                }
-                mActionExecutor.launchIntentAsync(shareIntent,
-                        imageData.shareTransition.get().bundle,
-                        imageData.owner.getIdentifier(), false);
+            Intent shareIntent;
+            if (mFlags.isEnabled(Flags.SCREENSHOT_METADATA) && mScreenshotData != null
+                    && mScreenshotData.getContextUrl() != null) {
+                shareIntent = ActionIntentCreator.INSTANCE.createShareIntentWithExtraText(
+                        imageData.uri, mScreenshotData.getContextUrl().toString());
             } else {
-                startSharedTransition(imageData.shareTransition.get());
+                shareIntent = ActionIntentCreator.INSTANCE.createShareIntentWithSubject(
+                        imageData.uri, imageData.subject);
             }
+            mActionExecutor.launchIntentAsync(shareIntent,
+                    imageData.shareTransition.get().bundle,
+                    imageData.owner.getIdentifier(), false);
         });
         mEditChip.setOnClickListener(v -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED, 0, mPackageName);
-            if (mFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
-                prepareSharedTransition();
-                mActionExecutor.launchIntentAsync(
-                        ActionIntentCreator.INSTANCE.createEditIntent(imageData.uri, mContext),
-                        imageData.editTransition.get().bundle,
-                        imageData.owner.getIdentifier(), true);
-            } else {
-                startSharedTransition(imageData.editTransition.get());
-            }
+            prepareSharedTransition();
+            mActionExecutor.launchIntentAsync(
+                    ActionIntentCreator.INSTANCE.createEditIntent(imageData.uri, mContext),
+                    imageData.editTransition.get().bundle,
+                    imageData.owner.getIdentifier(), true);
         });
         mScreenshotPreview.setOnClickListener(v -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED, 0, mPackageName);
-            if (mFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
-                prepareSharedTransition();
-                mActionExecutor.launchIntentAsync(
-                        ActionIntentCreator.INSTANCE.createEditIntent(imageData.uri, mContext),
-                        imageData.editTransition.get().bundle,
-                        imageData.owner.getIdentifier(), true);
-            } else {
-                startSharedTransition(
-                        imageData.editTransition.get());
-            }
+            prepareSharedTransition();
+            mActionExecutor.launchIntentAsync(
+                    ActionIntentCreator.INSTANCE.createEditIntent(imageData.uri, mContext),
+                    imageData.editTransition.get().bundle,
+                    imageData.owner.getIdentifier(), true);
         });
         if (mQuickShareChip != null) {
             if (imageData.quickShareAction != null) {
@@ -1113,22 +1098,6 @@ public class ScreenshotView extends FrameLayout implements
         setAlpha(1);
         mScreenshotStatic.setAlpha(1);
         mScreenshotData = null;
-    }
-
-    private void startSharedTransition(ActionTransition transition) {
-        try {
-            mPendingSharedTransition = true;
-            transition.action.actionIntent.send(mInteractiveBroadcastOption);
-
-            // fade out non-preview UI
-            createScreenshotFadeDismissAnimation().start();
-        } catch (PendingIntent.CanceledException e) {
-            mPendingSharedTransition = false;
-            if (transition.onCancelRunnable != null) {
-                transition.onCancelRunnable.run();
-            }
-            Log.e(TAG, "Intent cancelled", e);
-        }
     }
 
     private void prepareSharedTransition() {
