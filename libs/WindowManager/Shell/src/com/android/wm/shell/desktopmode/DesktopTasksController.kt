@@ -191,6 +191,17 @@ class DesktopTasksController(
         }
     }
 
+    /** Move a task to the front **/
+    fun moveTaskToFront(taskInfo: ActivityManager.RunningTaskInfo) {
+        val wct = WindowContainerTransaction()
+        wct.reorder(taskInfo.token, true)
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            transitions.startTransition(TRANSIT_TO_FRONT, wct, null /* handler */)
+        } else {
+            shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
     /**
      * Get windowing move for a given `taskId`
      *
