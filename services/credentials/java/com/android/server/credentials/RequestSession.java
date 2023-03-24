@@ -236,16 +236,26 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
     }
 
     void getProviderDataAndInitiateUi() {
+        ArrayList<ProviderData> providerDataList = getProviderDataForUi();
+        if (!providerDataList.isEmpty()) {
+            Log.i(TAG, "provider list not empty about to initiate ui");
+            MetricUtilities.logApiCalled(mProviders, ++mSequenceCounter);
+            launchUiWithProviderData(providerDataList);
+        }
+    }
+
+    @NonNull
+    protected ArrayList<ProviderData> getProviderDataForUi() {
         Log.i(TAG, "In getProviderDataAndInitiateUi");
         Log.i(TAG, "In getProviderDataAndInitiateUi providers size: " + mProviders.size());
+        ArrayList<ProviderData> providerDataList = new ArrayList<>();
 
         if (isSessionCancelled()) {
             MetricUtilities.logApiCalled(mProviders, ++mSequenceCounter);
             finishSession(/*propagateCancellation=*/true);
-            return;
+            return providerDataList;
         }
 
-        ArrayList<ProviderData> providerDataList = new ArrayList<>();
         for (ProviderSession session : mProviders.values()) {
             Log.i(TAG, "preparing data for : " + session.getComponentName());
             ProviderData providerData = session.prepareUiData();
@@ -254,11 +264,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
                 providerDataList.add(providerData);
             }
         }
-        if (!providerDataList.isEmpty()) {
-            Log.i(TAG, "provider list not empty about to initiate ui");
-            MetricUtilities.logApiCalled(mProviders, ++mSequenceCounter);
-            launchUiWithProviderData(providerDataList);
-        }
+        return providerDataList;
     }
 
     protected void collectFinalPhaseMetricStatus(boolean hasException,
