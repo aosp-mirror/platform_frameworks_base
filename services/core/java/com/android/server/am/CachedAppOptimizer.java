@@ -941,11 +941,14 @@ public final class CachedAppOptimizer {
         FileReader fr = null;
 
         try {
-            fr = new FileReader(getFreezerCheckPath());
+            String path = getFreezerCheckPath();
+            Slog.d(TAG_AM, "Checking cgroup freezer: " + path);
+            fr = new FileReader(path);
             char state = (char) fr.read();
 
             if (state == '1' || state == '0') {
                 // Also check freezer binder ioctl
+                Slog.d(TAG_AM, "Checking binder freezer ioctl");
                 getBinderFreezeInfo(Process.myPid());
                 supported = true;
             } else {
@@ -967,6 +970,7 @@ public final class CachedAppOptimizer {
             }
         }
 
+        Slog.d(TAG_AM, "Freezer supported: " + supported);
         return supported;
     }
 
