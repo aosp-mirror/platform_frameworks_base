@@ -1486,15 +1486,15 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private void onPanelExpansionChanged(ShadeExpansionChangeEvent event) {
         float fraction = event.getFraction();
         boolean tracking = event.getTracking();
-        boolean isExpanded = event.getExpanded();
         dispatchPanelExpansionForKeyguardDismiss(fraction, tracking);
+
+        if (getNotificationPanelViewController() != null) {
+            getNotificationPanelViewController().updateSystemUiStateFlags();
+        }
 
         if (fraction == 0 || fraction == 1) {
             if (getNavigationBarView() != null) {
                 getNavigationBarView().onStatusBarPanelStateChanged();
-            }
-            if (getNotificationPanelViewController() != null) {
-                getNotificationPanelViewController().updateSystemUiStateFlags();
             }
         }
     }
