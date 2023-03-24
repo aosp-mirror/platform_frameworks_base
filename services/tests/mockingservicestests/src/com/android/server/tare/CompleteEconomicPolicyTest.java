@@ -207,7 +207,7 @@ public class CompleteEconomicPolicyTest {
         when(mIrs.isPackageExempted(anyInt(), eq(pkgExempted))).thenReturn(true);
         assertEquals(arcToCake(13), mEconomicPolicy.getMinSatiatedBalance(0, pkgExempted));
         final String pkgHeadlessSystemApp = "com.pkg.headless_system_app";
-        when(mIrs.isHeadlessSystemApp(eq(pkgHeadlessSystemApp))).thenReturn(true);
+        when(mIrs.isHeadlessSystemApp(anyInt(), eq(pkgHeadlessSystemApp))).thenReturn(true);
         assertEquals(arcToCake(10), mEconomicPolicy.getMinSatiatedBalance(0, pkgHeadlessSystemApp));
         assertEquals(arcToCake(5), mEconomicPolicy.getMinSatiatedBalance(0, "com.any.other.app"));
     }
