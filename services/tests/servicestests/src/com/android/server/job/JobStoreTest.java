@@ -478,6 +478,7 @@ public class JobStoreTest {
                 0 /* sourceUserId */, 0, "someNamespace", "someTag",
                 invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
+                0 /* cumulativeExecutionTime */,
                 persistedExecutionTimesUTC, 0 /* innerFlag */, 0 /* dynamicConstraints */);
 
         mTaskStoreUnderTest.add(js);
@@ -512,6 +513,21 @@ public class JobStoreTest {
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
         assertEquals("Bias not correctly persisted.", 42, loaded.getBias());
+    }
+
+    @Test
+    public void testCumulativeExecutionTimePersisted() throws Exception {
+        JobInfo ji = new Builder(53, mComponent).setPersisted(true).build();
+        final JobStatus js = JobStatus.createFromJobInfo(ji, SOME_UID, null, -1, null, null);
+        js.incrementCumulativeExecutionTime(1234567890);
+        mTaskStoreUnderTest.add(js);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Cumulative execution time not correctly persisted.",
+                1234567890, loaded.getCumulativeExecutionTimeMs());
     }
 
     @Test
@@ -852,6 +868,9 @@ public class JobStoreTest {
                 expected.getEarliestRunTime(), actual.getEarliestRunTime());
         compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
                 expected.getLatestRunTimeElapsed(), actual.getLatestRunTimeElapsed());
+
+        assertEquals(expected.getCumulativeExecutionTimeMs(),
+                actual.getCumulativeExecutionTimeMs());
 
         assertEquals(expected.hasWorkLocked(), actual.hasWorkLocked());
         if (expected.hasWorkLocked()) {
