@@ -84,29 +84,39 @@ class FontScalingDialog(
 
         seekBarWithIconButtonsView.setOnSeekBarChangeListener(
             object : OnSeekBarChangeListener {
+                var isTrackingTouch = false
+
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                    if (progress != lastProgress) {
-                        if (!fontSizeHasBeenChangedFromTile) {
-                            backgroundExecutor.execute { updateSecureSettingsIfNeeded() }
-                            fontSizeHasBeenChangedFromTile = true
-                        }
-
-                        backgroundExecutor.execute { updateFontScale(strEntryValues[progress]) }
-
-                        lastProgress = progress
+                    if (!isTrackingTouch) {
+                        // The seekbar progress is changed by icon buttons
+                        changeFontSize(progress)
                     }
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {
-                    // Do nothing
+                    isTrackingTouch = true
                 }
 
                 override fun onStopTrackingTouch(seekBar: SeekBar) {
-                    // Do nothing
+                    isTrackingTouch = false
+                    changeFontSize(seekBar.progress)
                 }
             }
         )
         doneButton.setOnClickListener { dismiss() }
+    }
+
+    private fun changeFontSize(progress: Int) {
+        if (progress != lastProgress) {
+            if (!fontSizeHasBeenChangedFromTile) {
+                backgroundExecutor.execute { updateSecureSettingsIfNeeded() }
+                fontSizeHasBeenChangedFromTile = true
+            }
+
+            backgroundExecutor.execute { updateFontScale(strEntryValues[progress]) }
+
+            lastProgress = progress
+        }
     }
 
     private fun fontSizeValueToIndex(value: Float): Int {
