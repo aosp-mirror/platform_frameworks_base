@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.policy.HeadsUpManager
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
@@ -43,6 +44,7 @@ import org.mockito.Mockito.anyFloat
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoMoreInteractions
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
@@ -59,6 +61,7 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
     private val screenOffAnimationController: ScreenOffAnimationController = mock()
     private val logger: NotificationWakeUpCoordinatorLogger = mock()
     private val stackScrollerController: NotificationStackScrollLayoutController = mock()
+    private val wakeUpListener: NotificationWakeUpCoordinator.WakeUpListener = mock()
 
     private lateinit var notificationWakeUpCoordinator: NotificationWakeUpCoordinator
     private lateinit var statusBarStateCallback: StatusBarStateController.StateListener
@@ -205,6 +208,76 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
         verify(stackScrollerController, never()).setDozeAmount(anyFloat())
         verify(stackScrollerController, never()).setHideAmount(anyFloat(), anyFloat())
         assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isFalse()
+    }
+
+    @Test
+    fun verifyWakeUpListenerCallbacksWhenDozing() {
+        // prime internal state as dozing, then add the listener
+        setDozeAmount(1f)
+        notificationWakeUpCoordinator.addListener(wakeUpListener)
+
+        setDozeAmount(0.5f)
+        verify(wakeUpListener).onFullyHiddenChanged(eq(false))
+        verifyNoMoreInteractions(wakeUpListener)
+        clearInvocations(wakeUpListener)
+
+        setDozeAmount(0f)
+        verifyNoMoreInteractions(wakeUpListener)
+
+        setDozeAmount(0.5f)
+        verifyNoMoreInteractions(wakeUpListener)
+
+        setDozeAmount(1f)
+        verify(wakeUpListener).onFullyHiddenChanged(eq(true))
+        verifyNoMoreInteractions(wakeUpListener)
+    }
+
+    @Test
+    fun verifyWakeUpListenerCallbacksWhenDelayingAnimation() {
+        // prime internal state as dozing, then add the listener
+        setDozeAmount(1f)
+        notificationWakeUpCoordinator.addListener(wakeUpListener)
+
+        // setWakingUp() doesn't do anything yet
+        notificationWakeUpCoordinator.setWakingUp(true, requestDelayedAnimation = true)
+        verifyNoMoreInteractions(wakeUpListener)
+
+        // verify further doze amount changes have no effect
+        setDozeAmount(0.5f)
+        verifyNoMoreInteractions(wakeUpListener)
+
+        // advancing to just before the start time should not invoke the listener
+        animatorTestRule.advanceTimeBy(delayedDozeDelay - 1)
+        verifyNoMoreInteractions(wakeUpListener)
+
+        animatorTestRule.advanceTimeBy(1)
+        verify(wakeUpListener).onDelayedDozeAmountAnimationRunning(eq(true))
+        verifyNoMoreInteractions(wakeUpListener)
+        clearInvocations(wakeUpListener)
+
+        // input doze amount change to 0 has no effect
+        setDozeAmount(0.0f)
+        verifyNoMoreInteractions(wakeUpListener)
+
+        // Advancing the delay to 50% will cause notifications to no longer be fully hidden
+        animatorTestRule.advanceTimeBy(delayedDozeDuration / 2)
+        verify(wakeUpListener).onFullyHiddenChanged(eq(false))
+        verifyNoMoreInteractions(wakeUpListener)
+        clearInvocations(wakeUpListener)
+
+        // Now advance delay to 99.x% completion; notifications become fully visible
+        animatorTestRule.advanceTimeBy(delayedDozeDuration / 2 - 1)
+        verifyNoMoreInteractions(wakeUpListener)
+
+        // advance to 100%; animation no longer running
+        animatorTestRule.advanceTimeBy(1)
+        verify(wakeUpListener).onDelayedDozeAmountAnimationRunning(eq(false))
+        verifyNoMoreInteractions(wakeUpListener)
+        clearInvocations(wakeUpListener)
+
+        // Now advance delay to 200% completion -- should not invoke anything else
+        animatorTestRule.advanceTimeBy(delayedDozeDuration)
+        verifyNoMoreInteractions(wakeUpListener)
     }
 
     @Test

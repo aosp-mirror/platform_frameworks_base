@@ -39,8 +39,8 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController.OnBypassSta
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
-import com.android.systemui.util.doOnCancel
 import com.android.systemui.util.doOnEnd
+import com.android.systemui.util.doOnStart
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
@@ -357,6 +357,11 @@ constructor(
      * [requestDelayedAnimation] is used to request that we delay the start of the wakeup animation
      * in order to wait for a potential fingerprint authentication to arrive, since unlocking during
      * the wakeup animation looks chaotic.
+     *
+     * If called with [wakingUp] and [requestDelayedAnimation] both `true`, the [WakeUpListener]s
+     * are guaranteed to receive at least one [WakeUpListener.onDelayedDozeAmountAnimationRunning]
+     * call with `false` at some point in the near future. A call with `true` before that will
+     * happen if the animation is not already running.
      */
     fun setWakingUp(
         wakingUp: Boolean,
@@ -379,8 +384,13 @@ constructor(
                 interpolator = InterpolatorsAndroidX.LINEAR
                 duration = StackStateAnimator.ANIMATION_DURATION_WAKEUP.toLong()
                 startDelay = WAKEUP_ANIMATION_DELAY_MS.toLong()
-                doOnEnd { delayedDozeAmountAnimator = null }
-                doOnCancel { delayedDozeAmountAnimator = null }
+                doOnStart {
+                    wakeUpListeners.forEach { it.onDelayedDozeAmountAnimationRunning(true) }
+                }
+                doOnEnd {
+                    delayedDozeAmountAnimator = null
+                    wakeUpListeners.forEach { it.onDelayedDozeAmountAnimationRunning(false) }
+                }
                 start()
             }
     }
@@ -597,8 +607,8 @@ constructor(
         pw.println("canShowPulsingHuns: $canShowPulsingHuns")
     }
 
-    fun logClockTransitionAnimationStarting(delayWakeUpAnimation: Boolean) {
-        logger.logClockTransitionAnimationStarting(delayWakeUpAnimation)
+    fun logDelayingClockWakeUpAnimation(delayingAnimation: Boolean) {
+        logger.logDelayingClockWakeUpAnimation(delayingAnimation)
     }
 
     interface WakeUpListener {
@@ -611,6 +621,12 @@ constructor(
          * @param expandingChanged if the user has started or stopped expanding
          */
         @JvmDefault fun onPulseExpansionChanged(expandingChanged: Boolean) {}
+
+        /**
+         * Called when the animator started by [scheduleDelayedDozeAmountAnimation] begins running
+         * after the start delay, or after it ends/is cancelled.
+         */
+        @JvmDefault fun onDelayedDozeAmountAnimationRunning(running: Boolean) {}
     }
 
     companion object {

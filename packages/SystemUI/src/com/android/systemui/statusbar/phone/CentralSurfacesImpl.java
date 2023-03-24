@@ -3564,6 +3564,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     }
                 }
 
+                mNotificationPanelViewController.setWillPlayDelayedDozeAmountAnimation(
+                        mShouldDelayWakeUpAnimation);
                 mWakeUpCoordinator.setWakingUp(
                         /* wakingUp= */ true,
                         mShouldDelayWakeUpAnimation);

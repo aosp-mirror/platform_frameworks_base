@@ -589,6 +589,12 @@ public final class NotificationPanelViewController implements Dumpable {
     private boolean mGestureWaitForTouchSlop;
     private boolean mIgnoreXTouchSlop;
     private boolean mExpandLatencyTracking;
+    /**
+     * Whether we're waking up and will play the delayed doze animation in
+     * {@link NotificationWakeUpCoordinator}. If so, we'll want to keep the clock centered until the
+     * delayed doze animation starts.
+     */
+    private boolean mWillPlayDelayedDozeAmountAnimation = false;
     private final DreamingToLockscreenTransitionViewModel mDreamingToLockscreenTransitionViewModel;
     private final OccludedToLockscreenTransitionViewModel mOccludedToLockscreenTransitionViewModel;
     private final LockscreenToDreamingTransitionViewModel mLockscreenToDreamingTransitionViewModel;
@@ -1044,6 +1050,12 @@ public final class NotificationPanelViewController implements Dumpable {
                     // Position the notifications while dragging down while pulsing
                     requestScrollerTopPaddingUpdate(false /* animate */);
                 }
+            }
+
+            @Override
+            public void onDelayedDozeAmountAnimationRunning(boolean running) {
+                // On running OR finished, the animation is no longer waiting to play
+                setWillPlayDelayedDozeAmountAnimation(false);
             }
         });
 
@@ -1641,9 +1653,26 @@ public final class NotificationPanelViewController implements Dumpable {
             // Pulsing notification appears on the right. Move clock left to avoid overlap.
             return false;
         }
+        if (mWillPlayDelayedDozeAmountAnimation) {
+            return true;
+        }
         // "Visible" notifications are actually not visible on AOD (unless pulsing), so it is safe
         // to center the clock without overlap.
         return isOnAod();
+    }
+
+    /**
+     * Notify us that {@link NotificationWakeUpCoordinator} is going to play the doze wakeup
+     * animation after a delay. If so, we'll keep the clock centered until that animation starts.
+     */
+    public void setWillPlayDelayedDozeAmountAnimation(boolean willPlay) {
+        if (mWillPlayDelayedDozeAmountAnimation == willPlay) return;
+
+        mWillPlayDelayedDozeAmountAnimation = willPlay;
+        mWakeUpCoordinator.logDelayingClockWakeUpAnimation(willPlay);
+
+        // Once changing this value, see if we should move the clock.
+        positionClockAndNotifications();
     }
 
     private boolean isOnAod() {
