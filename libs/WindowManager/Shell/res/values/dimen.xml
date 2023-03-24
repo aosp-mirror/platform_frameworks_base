@@ -330,9 +330,6 @@
     <!-- The margin between the reachability dialog container and its parent. -->
     <dimen name="letterbox_reachability_education_dialog_margin">16dp</dimen>
 
-    <!-- The width of each item in the reachability education -->
-    <dimen name="letterbox_reachability_education_item_width">118dp</dimen>
-
     <!-- The size of the icon in the item of reachability education -->
     <dimen name="letterbox_reachability_education_item_image_size">24dp</dimen>
 
