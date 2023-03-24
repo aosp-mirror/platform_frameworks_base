@@ -8392,7 +8392,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 try {
                     AppGlobals.getPackageManager().setComponentEnabledSetting(cName,
                             PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0,
-                            UserHandle.USER_SYSTEM);
+                            UserHandle.USER_SYSTEM, "am");
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
                 }

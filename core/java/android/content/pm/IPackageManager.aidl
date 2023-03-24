@@ -356,12 +356,13 @@ interface IPackageManager {
      */
     @UnsupportedAppUsage
     void setComponentEnabledSetting(in ComponentName componentName,
-            in int newState, in int flags, int userId);
+            in int newState, in int flags, int userId, String callingPackage);
 
     /**
      * As per {@link android.content.pm.PackageManager#setComponentEnabledSettings}.
      */
-    void setComponentEnabledSettings(in List<ComponentEnabledSetting> settings, int userId);
+    void setComponentEnabledSettings(in List<ComponentEnabledSetting> settings, int userId,
+            String callingPackage);
 
     /**
      * As per {@link android.content.pm.PackageManager#getComponentEnabledSetting}.
