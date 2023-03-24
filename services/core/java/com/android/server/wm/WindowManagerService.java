@@ -552,6 +552,16 @@ public class WindowManagerService extends IWindowManager.Stub
     // everything else on screen). Otherwise, it will be put under always-on-top stacks.
     final boolean mAssistantOnTopOfDream;
 
+    /**
+     * If true, don't relaunch the activity upon receiving a configuration change to transition to
+     * or from the {@link UI_MODE_TYPE_DESK} uiMode, which is sent when docking. The configuration
+     * change will still be sent regardless, only the relaunch is skipped. Apps with desk resources
+     * are exempt from this and will behave like normal, since they may expect the relaunch upon the
+     * desk uiMode change.
+     */
+    @VisibleForTesting
+    boolean mSkipActivityRelaunchWhenDocking;
+
     final boolean mLimitedAlphaCompositing;
     final int mMaxUiWidth;
 
@@ -1226,6 +1236,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_perDisplayFocusEnabled);
         mAssistantOnTopOfDream = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistantOnTopOfDream);
+        mSkipActivityRelaunchWhenDocking = context.getResources()
+                .getBoolean(R.bool.config_skipActivityRelaunchWhenDocking);
 
         mLetterboxConfiguration = new LetterboxConfiguration(
                 // Using SysUI context to have access to Material colors extracted from Wallpaper.
