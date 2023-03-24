@@ -234,7 +234,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         val serviceInfo2 = setUpPanel(panel2)
 
         `when`(authorizedPanelsRepository.getAuthorizedPanels())
-                .thenReturn(setOf(packageName1, packageName2))
+            .thenReturn(setOf(packageName1, packageName2))
 
         underTest.show(parent, {}, context)
 
@@ -245,7 +245,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         captor.value.onServicesUpdated(listOf(serviceInfo1, serviceInfo2))
         FakeExecutor.exhaustExecutors(uiExecutor, bgExecutor)
 
-        val header: View = parent.requireViewById(R.id.controls_header)
+        val header: View = parent.requireViewById(R.id.app_or_structure_spinner)
         assertThat(header.isClickable).isTrue()
         assertThat(header.hasOnClickListeners()).isTrue()
     }
