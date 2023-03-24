@@ -291,6 +291,10 @@ class WallpaperController {
         return mWallpaperTarget;
     }
 
+    WindowState getPrevWallpaperTarget() {
+        return mPrevWallpaperTarget;
+    }
+
     boolean isWallpaperTarget(WindowState win) {
         return win == mWallpaperTarget;
     }
@@ -589,12 +593,10 @@ class WallpaperController {
         }
     }
 
-    Bundle sendWindowWallpaperCommand(
-            WindowState window, String action, int x, int y, int z, Bundle extras, boolean sync) {
-        if (window == mWallpaperTarget || window == mPrevWallpaperTarget) {
-            sendWindowWallpaperCommand(action, x, y, z, extras, sync);
-        }
-
+    Bundle sendWindowWallpaperCommandUnchecked(
+            WindowState window, String action, int x, int y, int z,
+            Bundle extras, boolean sync) {
+        sendWindowWallpaperCommand(action, x, y, z, extras, sync);
         return null;
     }
 

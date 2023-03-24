@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.ALWAYS_UPDATE_WALLPAPER;
 import static android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.Manifest.permission.HIDE_OVERLAY_WINDOWS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
@@ -112,6 +113,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     final boolean mCanCreateSystemApplicationOverlay;
     final boolean mCanHideNonSystemOverlayWindows;
     final boolean mCanSetUnrestrictedGestureExclusion;
+    final boolean mCanAlwaysUpdateWallpaper;
     private AlertWindowNotification mAlertWindowNotification;
     private boolean mShowingAlertWindowNotificationAllowed;
     private boolean mClientDead = false;
@@ -143,6 +145,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                         == PERMISSION_GRANTED;
         mCanSetUnrestrictedGestureExclusion =
                 service.mContext.checkCallingOrSelfPermission(SET_UNRESTRICTED_GESTURE_EXCLUSION)
+                        == PERMISSION_GRANTED;
+        mCanAlwaysUpdateWallpaper =
+                service.mContext.checkCallingOrSelfPermission(ALWAYS_UPDATE_WALLPAPER)
                         == PERMISSION_GRANTED;
         mShowingAlertWindowNotificationAllowed = mService.mShowAlertWindowNotifications;
         mDragDropController = mService.mDragDropController;
@@ -621,8 +626,15 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             final long ident = Binder.clearCallingIdentity();
             try {
                 final WindowState windowState = mService.windowForClientLocked(this, window, true);
-                return windowState.getDisplayContent().mWallpaperController
-                        .sendWindowWallpaperCommand(windowState, action, x, y, z, extras, sync);
+                WallpaperController wallpaperController =
+                        windowState.getDisplayContent().mWallpaperController;
+                if (mCanAlwaysUpdateWallpaper
+                        || windowState == wallpaperController.getWallpaperTarget()
+                        || windowState == wallpaperController.getPrevWallpaperTarget()) {
+                    return wallpaperController.sendWindowWallpaperCommandUnchecked(
+                            windowState, action, x, y, z, extras, sync);
+                }
+                return null;
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
