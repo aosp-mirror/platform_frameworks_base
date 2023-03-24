@@ -1591,7 +1591,6 @@
     <dimen name="dream_overlay_bottom_affordance_radius">32dp</dimen>
     <dimen name="dream_overlay_bottom_affordance_padding">14dp</dimen>
     <dimen name="dream_overlay_complication_clock_time_text_size">86dp</dimen>
-    <dimen name="dream_overlay_complication_clock_time_translation_y">28dp</dimen>
     <dimen name="dream_overlay_complication_clock_subtitle_text_size">24sp</dimen>
     <dimen name="dream_overlay_complication_preview_text_size">36sp</dimen>
     <dimen name="dream_overlay_complication_preview_icon_padding">28dp</dimen>
@@ -1692,6 +1691,7 @@
     <dimen name="dream_overlay_clock_ambient_text_shadow_dx">0dp</dimen>
     <dimen name="dream_overlay_clock_ambient_text_shadow_dy">0dp</dimen>
     <dimen name="dream_overlay_clock_ambient_text_shadow_radius">1dp</dimen>
+    <dimen name="dream_overlay_clock_text_descent_extra_padding">1dp</dimen>
 
     <!-- Shadow for dream overlay status bar complications -->
     <dimen name="dream_overlay_status_bar_key_text_shadow_dx">0.5dp</dimen>
