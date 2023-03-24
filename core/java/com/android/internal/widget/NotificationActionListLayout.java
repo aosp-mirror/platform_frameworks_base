@@ -361,13 +361,15 @@ public class NotificationActionListLayout extends LinearLayout {
             // same padding on bottom and at end
             int paddingBottom = getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.notification_content_margin_end);
-            height = mEmphasizedHeight;
             int buttonPaddingInternal = getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.button_inset_vertical_material);
             setPaddingRelative(getPaddingStart(),
                     paddingTop - buttonPaddingInternal,
                     getPaddingEnd(),
                     paddingBottom - buttonPaddingInternal);
+
+            setMinimumHeight(mEmphasizedHeight);
+            height = ViewGroup.LayoutParams.WRAP_CONTENT;
         } else {
             setPaddingRelative(getPaddingStart(),
                     mDefaultPaddingTop,
