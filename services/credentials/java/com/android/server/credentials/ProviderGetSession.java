@@ -95,7 +95,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         android.credentials.GetCredentialRequest filteredRequest =
                 filterOptions(providerInfo.getCapabilities(),
                         getRequestSession.mClientRequest,
-                        providerInfo.getComponentName());
+                        providerInfo);
         if (filteredRequest != null) {
             Map<String, CredentialOption> beginGetOptionToCredentialOptionMap =
                     new HashMap<>();
@@ -120,7 +120,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     }
 
     /** Creates a new provider session to be used by the request session. */
-    @Nullable public static ProviderGetSession createNewSession(
+    @Nullable
+    public static ProviderGetSession createNewSession(
             Context context,
             @UserIdInt int userId,
             CredentialProviderInfo providerInfo,
@@ -129,7 +130,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         android.credentials.GetCredentialRequest filteredRequest =
                 filterOptions(providerInfo.getCapabilities(),
                         getRequestSession.mClientRequest,
-                        providerInfo.getComponentName());
+                        providerInfo);
         if (filteredRequest != null) {
             Map<String, CredentialOption> beginGetOptionToCredentialOptionMap =
                     new HashMap<>();
@@ -178,12 +179,13 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     private static android.credentials.GetCredentialRequest filterOptions(
             List<String> providerCapabilities,
             android.credentials.GetCredentialRequest clientRequest,
-            ComponentName componentName
+            CredentialProviderInfo info
     ) {
         List<CredentialOption> filteredOptions = new ArrayList<>();
         for (CredentialOption option : clientRequest.getCredentialOptions()) {
             if (providerCapabilities.contains(option.getType())
-                    && isProviderAllowed(option, componentName)) {
+                    && isProviderAllowed(option, info.getComponentName())
+                    && checkSystemProviderRequirement(option, info.isSystemProvider())) {
                 Log.i(TAG, "In createProviderRequest - capability found : "
                         + option.getType());
                 filteredOptions.add(option);
@@ -207,6 +209,15 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 componentName)) {
             Log.d(TAG, "Provider allow list specified but does not contain this provider: "
                     + componentName.flattenToString());
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean checkSystemProviderRequirement(CredentialOption option,
+            boolean isSystemProvider) {
+        if (option.isSystemProviderRequired() && !isSystemProvider) {
+            Log.d(TAG, "System provider required, but this service is not a system provider");
             return false;
         }
         return true;
