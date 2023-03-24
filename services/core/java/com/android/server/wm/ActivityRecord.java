@@ -10522,11 +10522,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean isSyncFinished() {
-        if (task != null && mTransitionController.isTransientHide(task)) {
-            // The activity keeps visibleRequested but may be hidden later, so no need to wait for
-            // it to be drawn.
-            return true;
-        }
         if (!super.isSyncFinished()) return false;
         if (mDisplayContent != null && mDisplayContent.mUnknownAppVisibilityController
                 .isVisibilityUnknown(this)) {
