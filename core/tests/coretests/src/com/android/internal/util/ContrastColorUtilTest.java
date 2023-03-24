@@ -20,13 +20,34 @@ import static androidx.core.graphics.ColorUtils.calculateContrast;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.TextAppearanceSpan;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+
+import com.android.internal.R;
 
 import junit.framework.TestCase;
 
+import org.junit.Before;
+import org.junit.Test;
+
 public class ContrastColorUtilTest extends TestCase {
+
+    private Context mContext;
+
+    @Before
+    public void setUp() {
+        mContext = InstrumentationRegistry.getContext();
+    }
 
     @SmallTest
     public void testEnsureTextContrastAgainstDark() {
@@ -68,6 +89,91 @@ public class ContrastColorUtilTest extends TestCase {
 
         int selfContrastColor = ContrastColorUtil.ensureTextContrast(lightBg, lightBg, false);
         assertContrastIsWithinRange(selfContrastColor, lightBg, 4.5, 4.75);
+    }
+
+    public void testBuilder_ensureColorSpanContrast_removesAllFullLengthColorSpans() {
+        Spannable text = new SpannableString("blue text with yellow and green");
+        text.setSpan(new ForegroundColorSpan(Color.YELLOW), 15, 21,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(new ForegroundColorSpan(Color.BLUE), 0, text.length(),
+                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        TextAppearanceSpan taSpan = new TextAppearanceSpan(mContext,
+                R.style.TextAppearance_DeviceDefault_Notification_Title);
+        assertThat(taSpan.getTextColor()).isNotNull();  // it must be set to prove it is cleared.
+        text.setSpan(taSpan, 0, text.length(),
+                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        text.setSpan(new ForegroundColorSpan(Color.GREEN), 26, 31,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        Spannable result = (Spannable) ContrastColorUtil.ensureColorSpanContrast(text, Color.BLACK);
+        Object[] spans = result.getSpans(0, result.length(), Object.class);
+        assertThat(spans).hasLength(3);
+
+        assertThat(result.getSpanStart(spans[0])).isEqualTo(15);
+        assertThat(result.getSpanEnd(spans[0])).isEqualTo(21);
+        assertThat(((ForegroundColorSpan) spans[0]).getForegroundColor()).isEqualTo(Color.YELLOW);
+
+        assertThat(result.getSpanStart(spans[1])).isEqualTo(0);
+        assertThat(result.getSpanEnd(spans[1])).isEqualTo(31);
+        assertThat(spans[1]).isNotSameInstanceAs(taSpan);  // don't mutate the existing span
+        assertThat(((TextAppearanceSpan) spans[1]).getFamily()).isEqualTo(taSpan.getFamily());
+        assertThat(((TextAppearanceSpan) spans[1]).getTextColor()).isNull();
+
+        assertThat(result.getSpanStart(spans[2])).isEqualTo(26);
+        assertThat(result.getSpanEnd(spans[2])).isEqualTo(31);
+        assertThat(((ForegroundColorSpan) spans[2]).getForegroundColor()).isEqualTo(Color.GREEN);
+    }
+
+    public void testBuilder_ensureColorSpanContrast_partialLength_adjusted() {
+        int background = 0xFFFF0101;  // Slightly lighter red
+        CharSequence text = new SpannableStringBuilder()
+                .append("text with ")
+                .append("some red", new ForegroundColorSpan(Color.RED),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        CharSequence result = ContrastColorUtil.ensureColorSpanContrast(text, background);
+
+        // ensure the span has been updated to have > 1.3:1 contrast ratio with fill color
+        Object[] spans = ((Spannable) result).getSpans(0, result.length(), Object.class);
+        assertThat(spans).hasLength(1);
+        int foregroundColor = ((ForegroundColorSpan) spans[0]).getForegroundColor();
+        assertContrastIsWithinRange(foregroundColor, background, 3, 3.2);
+    }
+
+    public void testBuilder_ensureColorSpanContrast_worksWithComplexInput() {
+        Spannable text = new SpannableString("blue text with yellow and green and cyan");
+        text.setSpan(new ForegroundColorSpan(Color.YELLOW), 15, 21,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(new ForegroundColorSpan(Color.BLUE), 0, text.length(),
+                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        // cyan TextAppearanceSpan
+        TextAppearanceSpan taSpan = new TextAppearanceSpan(mContext,
+                R.style.TextAppearance_DeviceDefault_Notification_Title);
+        taSpan = new TextAppearanceSpan(taSpan.getFamily(), taSpan.getTextStyle(),
+                taSpan.getTextSize(), ColorStateList.valueOf(Color.CYAN), null);
+        text.setSpan(taSpan, 36, 40,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setSpan(new ForegroundColorSpan(Color.GREEN), 26, 31,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        Spannable result = (Spannable) ContrastColorUtil.ensureColorSpanContrast(text, Color.GRAY);
+        Object[] spans = result.getSpans(0, result.length(), Object.class);
+        assertThat(spans).hasLength(3);
+
+        assertThat(result.getSpanStart(spans[0])).isEqualTo(15);
+        assertThat(result.getSpanEnd(spans[0])).isEqualTo(21);
+        assertThat(((ForegroundColorSpan) spans[0]).getForegroundColor()).isEqualTo(Color.YELLOW);
+
+        assertThat(result.getSpanStart(spans[1])).isEqualTo(36);
+        assertThat(result.getSpanEnd(spans[1])).isEqualTo(40);
+        assertThat(spans[1]).isNotSameInstanceAs(taSpan);  // don't mutate the existing span
+        assertThat(((TextAppearanceSpan) spans[1]).getFamily()).isEqualTo(taSpan.getFamily());
+        ColorStateList newCyanList = ((TextAppearanceSpan) spans[1]).getTextColor();
+        assertThat(newCyanList).isNotNull();
+        assertContrastIsWithinRange(newCyanList.getDefaultColor(), Color.GRAY, 3, 3.2);
+
+        assertThat(result.getSpanStart(spans[2])).isEqualTo(26);
+        assertThat(result.getSpanEnd(spans[2])).isEqualTo(31);
+        int newGreen = ((ForegroundColorSpan) spans[2]).getForegroundColor();
+        assertThat(newGreen).isNotEqualTo(Color.GREEN);
+        assertContrastIsWithinRange(newGreen, Color.GRAY, 3, 3.2);
     }
 
     public static void assertContrastIsWithinRange(int foreground, int background,
