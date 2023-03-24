@@ -271,7 +271,7 @@ constructor(
      * other transport type is active, because then we expect there not to be validation.
      */
     override val isDefaultConnectionFailed: StateFlow<Boolean> =
-        mobileConnectionsRepo.defaultMobileNetworkConnectivity
+        defaultMobileNetworkConnectivity
             .mapLatest { connectivityModel ->
                 if (!connectivityModel.isConnected) {
                     false

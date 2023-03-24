@@ -347,6 +347,37 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             job.cancel()
         }
 
+    /** Regression test for b/275076959. */
+    @Test
+    fun failedConnection_dataSwitchInSameGroup_notFailed() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job =
+                underTest.isDefaultConnectionFailed.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.setMobileConnectivity(
+                MobileConnectivityModel(
+                    isConnected = true,
+                    isValidated = true,
+                )
+            )
+
+            // WHEN there's a data change in the same subscription group
+            connectionsRepository.activeSubChangedInGroupEvent.emit(Unit)
+            connectionsRepository.setMobileConnectivity(
+                MobileConnectivityModel(
+                    // Keep the connection as connected, just not validated
+                    isConnected = true,
+                    isValidated = false,
+                )
+            )
+
+            // THEN the default connection is *not* marked as failed because of forced validation
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
     @Test
     fun alwaysShowDataRatIcon_configHasTrue() =
         testScope.runTest {
