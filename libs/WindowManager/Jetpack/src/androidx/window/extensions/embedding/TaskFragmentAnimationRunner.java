@@ -214,7 +214,8 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
                 openingWholeScreenBounds.union(target.screenSpaceBounds);
             } else {
                 closingTargets.add(target);
-                closingWholeScreenBounds.union(target.screenSpaceBounds);
+                // Union the start bounds since this may be the ClosingChanging animation.
+                closingWholeScreenBounds.union(target.startBounds);
             }
         }
 

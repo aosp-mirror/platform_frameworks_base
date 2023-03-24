@@ -1336,14 +1336,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // If we are losing visibility, then a snapshot isn't necessary and we are no-longer
         // part of a change transition.
         if (!visible) {
+            boolean skipUnfreeze = false;
             if (asTaskFragment() != null) {
                 // If the organized TaskFragment is closing while resizing, we want to keep track of
                 // its starting bounds to make sure the animation starts at the correct position.
                 // This should be called before unfreeze() because we record the starting bounds
                 // in SurfaceFreezer.
-                asTaskFragment().setClosingChangingStartBoundsIfNeeded();
+                skipUnfreeze = asTaskFragment().setClosingChangingStartBoundsIfNeeded();
             }
-            mSurfaceFreezer.unfreeze(getSyncTransaction());
+
+            if (!skipUnfreeze) {
+                mSurfaceFreezer.unfreeze(getSyncTransaction());
+            }
         }
         WindowContainer parent = getParent();
         if (parent != null) {
