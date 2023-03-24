@@ -47,9 +47,11 @@ import com.android.server.credentials.metrics.EntryEnum;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -338,6 +340,11 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         }
     }
 
+    @NonNull
+    protected Set<String> getCredentialEntryTypes() {
+        return mProviderResponseDataHandler.getCredentialEntryTypes();
+    }
+
     @Override // Call from request session to data to be shown on the UI
     @Nullable
     protected GetCredentialProviderData prepareUiData() throws IllegalArgumentException {
@@ -575,6 +582,9 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         private final Map<String, Pair<Action, AuthenticationEntry>> mUiAuthenticationEntries =
                 new HashMap<>();
 
+        @NonNull
+        private final Set<String> mCredentialEntryTypes = new HashSet<>();
+
         @Nullable
         private Pair<String, Pair<RemoteEntry, Entry>> mUiRemoteEntry = null;
 
@@ -607,6 +617,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                     id, credentialEntry.getSlice(),
                     setUpFillInIntent(credentialEntry.getBeginGetCredentialOptionId()));
             mUiCredentialEntries.put(id, new Pair<>(credentialEntry, entry));
+            mCredentialEntryTypes.add(credentialEntry.getType());
         }
 
         public void addAction(Action action) {
@@ -701,6 +712,11 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             return response.getCredentialEntries().isEmpty() && response.getActions().isEmpty()
                     && response.getAuthenticationActions().isEmpty()
                     && response.getRemoteCredentialEntry() == null;
+        }
+
+        @NonNull
+        public Set<String> getCredentialEntryTypes() {
+            return mCredentialEntryTypes;
         }
 
         @Nullable
