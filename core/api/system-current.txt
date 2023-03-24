@@ -4987,6 +4987,7 @@ package android.hardware.input {
   public final class VirtualKeyEvent implements android.os.Parcelable {
     method public int describeContents();
     method public int getAction();
+    method public long getEventTimeNanos();
     method public int getKeyCode();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int ACTION_DOWN = 0; // 0x0
@@ -4998,6 +4999,7 @@ package android.hardware.input {
     ctor public VirtualKeyEvent.Builder();
     method @NonNull public android.hardware.input.VirtualKeyEvent build();
     method @NonNull public android.hardware.input.VirtualKeyEvent.Builder setAction(int);
+    method @NonNull public android.hardware.input.VirtualKeyEvent.Builder setEventTimeNanos(long);
     method @NonNull public android.hardware.input.VirtualKeyEvent.Builder setKeyCode(int);
   }
 
@@ -5035,6 +5037,7 @@ package android.hardware.input {
     method public int describeContents();
     method public int getAction();
     method public int getButtonCode();
+    method public long getEventTimeNanos();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int ACTION_BUTTON_PRESS = 11; // 0xb
     field public static final int ACTION_BUTTON_RELEASE = 12; // 0xc
@@ -5051,6 +5054,7 @@ package android.hardware.input {
     method @NonNull public android.hardware.input.VirtualMouseButtonEvent build();
     method @NonNull public android.hardware.input.VirtualMouseButtonEvent.Builder setAction(int);
     method @NonNull public android.hardware.input.VirtualMouseButtonEvent.Builder setButtonCode(int);
+    method @NonNull public android.hardware.input.VirtualMouseButtonEvent.Builder setEventTimeNanos(long);
   }
 
   public final class VirtualMouseConfig extends android.hardware.input.VirtualInputDeviceConfig implements android.os.Parcelable {
@@ -5066,6 +5070,7 @@ package android.hardware.input {
 
   public final class VirtualMouseRelativeEvent implements android.os.Parcelable {
     method public int describeContents();
+    method public long getEventTimeNanos();
     method public float getRelativeX();
     method public float getRelativeY();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -5075,12 +5080,14 @@ package android.hardware.input {
   public static final class VirtualMouseRelativeEvent.Builder {
     ctor public VirtualMouseRelativeEvent.Builder();
     method @NonNull public android.hardware.input.VirtualMouseRelativeEvent build();
+    method @NonNull public android.hardware.input.VirtualMouseRelativeEvent.Builder setEventTimeNanos(long);
     method @NonNull public android.hardware.input.VirtualMouseRelativeEvent.Builder setRelativeX(float);
     method @NonNull public android.hardware.input.VirtualMouseRelativeEvent.Builder setRelativeY(float);
   }
 
   public final class VirtualMouseScrollEvent implements android.os.Parcelable {
     method public int describeContents();
+    method public long getEventTimeNanos();
     method public float getXAxisMovement();
     method public float getYAxisMovement();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -5090,6 +5097,7 @@ package android.hardware.input {
   public static final class VirtualMouseScrollEvent.Builder {
     ctor public VirtualMouseScrollEvent.Builder();
     method @NonNull public android.hardware.input.VirtualMouseScrollEvent build();
+    method @NonNull public android.hardware.input.VirtualMouseScrollEvent.Builder setEventTimeNanos(long);
     method @NonNull public android.hardware.input.VirtualMouseScrollEvent.Builder setXAxisMovement(@FloatRange(from=-1.0F, to=1.0f) float);
     method @NonNull public android.hardware.input.VirtualMouseScrollEvent.Builder setYAxisMovement(@FloatRange(from=-1.0F, to=1.0f) float);
   }
@@ -5115,6 +5123,7 @@ package android.hardware.input {
   public final class VirtualTouchEvent implements android.os.Parcelable {
     method public int describeContents();
     method public int getAction();
+    method public long getEventTimeNanos();
     method public float getMajorAxisSize();
     method public int getPointerId();
     method public float getPressure();
@@ -5135,6 +5144,7 @@ package android.hardware.input {
     ctor public VirtualTouchEvent.Builder();
     method @NonNull public android.hardware.input.VirtualTouchEvent build();
     method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setAction(int);
+    method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setEventTimeNanos(long);
     method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setMajorAxisSize(@FloatRange(from=0.0f) float);
     method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setPointerId(@IntRange(from=0, to=0x10 - 1) int);
     method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setPressure(@FloatRange(from=0.0f) float);
