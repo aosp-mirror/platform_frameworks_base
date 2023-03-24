@@ -1484,4 +1484,15 @@ public class ContextWrapper extends Context {
         // Do nothing if the callback hasn't been registered to Application Context by
         // super.unregisterComponentCallbacks() for Application that is targeting prior to T.
     }
+
+    /**
+     * Closes temporary system dialogs. Some examples of temporary system dialogs are the
+     * notification window-shade and the recent tasks dialog.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS)
+    public void closeSystemDialogs() {
+        mBase.closeSystemDialogs();
+    }
 }
