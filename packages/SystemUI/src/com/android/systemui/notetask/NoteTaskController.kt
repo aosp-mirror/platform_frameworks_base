@@ -18,6 +18,7 @@
 
 package com.android.systemui.notetask
 
+import android.app.ActivityManager
 import android.app.KeyguardManager
 import android.app.admin.DevicePolicyManager
 import android.app.role.OnRoleHoldersChangedListener
@@ -40,6 +41,7 @@ import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutIn
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.getDefaultRoleHolderAsUser
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.Bubbles
@@ -67,6 +69,7 @@ constructor(
     private val optionalBubbles: Optional<Bubbles>,
     private val userManager: UserManager,
     private val keyguardManager: KeyguardManager,
+    private val activityManager: ActivityManager,
     @NoteTaskEnabledKey private val isEnabled: Boolean,
     private val devicePolicyManager: DevicePolicyManager,
     private val userTracker: UserTracker,
@@ -151,9 +154,13 @@ constructor(
                     logDebug { "onShowNoteTask - opened as app bubble: $info" }
                 }
                 is NoteTaskLaunchMode.Activity -> {
-                    context.startActivityAsUser(intent, user)
-                    eventLogger.logNoteTaskOpened(info)
-                    logDebug { "onShowNoteTask - opened as activity: $info" }
+                    if (activityManager.isInForeground(info.packageName)) {
+                        logDebug { "onShowNoteTask - already opened as activity: $info" }
+                    } else {
+                        context.startActivityAsUser(intent, user)
+                        eventLogger.logNoteTaskOpened(info)
+                        logDebug { "onShowNoteTask - opened as activity: $info" }
+                    }
                 }
             }
             logDebug { "onShowNoteTask - success: $info" }
