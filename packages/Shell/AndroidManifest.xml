@@ -148,7 +148,7 @@
     <uses-permission android:name="android.permission.LOCATION_BYPASS" />
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG" />
-    <uses-permission android:name="android.permission.ALLOWLISTED_WRITE_DEVICE_CONFIG" />
+    <uses-permission android:name="android.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.READ_WRITE_SYNC_DISABLED_MODE_CONFIG" />
     <uses-permission android:name="android.permission.MONITOR_DEVICE_CONFIG_ACCESS" />
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
