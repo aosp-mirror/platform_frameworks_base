@@ -16,6 +16,8 @@
 
 package com.android.systemui.classifier;
 
+import static com.android.systemui.classifier.FalsingModule.IS_FOLDABLE_DEVICE;
+
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
@@ -30,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Acts as a cache and utility class for FalsingClassifiers.
@@ -46,6 +49,7 @@ public class FalsingDataProvider {
     private BatteryController mBatteryController;
     private final FoldStateListener mFoldStateListener;
     private final DockManager mDockManager;
+    private boolean mIsFoldableDevice;
     private final float mXdpi;
     private final float mYdpi;
     private final List<SessionListener> mSessionListeners = new ArrayList<>();
@@ -70,7 +74,8 @@ public class FalsingDataProvider {
             DisplayMetrics displayMetrics,
             BatteryController batteryController,
             FoldStateListener foldStateListener,
-            DockManager dockManager) {
+            DockManager dockManager,
+            @Named(IS_FOLDABLE_DEVICE) boolean isFoldableDevice) {
         mXdpi = displayMetrics.xdpi;
         mYdpi = displayMetrics.ydpi;
         mWidthPixels = displayMetrics.widthPixels;
@@ -78,6 +83,7 @@ public class FalsingDataProvider {
         mBatteryController = batteryController;
         mFoldStateListener = foldStateListener;
         mDockManager = dockManager;
+        mIsFoldableDevice = isFoldableDevice;
 
         FalsingClassifier.logInfo("xdpi, ydpi: " + getXdpi() + ", " + getYdpi());
         FalsingClassifier.logInfo("width, height: " + getWidthPixels() + ", " + getHeightPixels());
@@ -417,7 +423,7 @@ public class FalsingDataProvider {
     }
 
     public boolean isUnfolded() {
-        return Boolean.FALSE.equals(mFoldStateListener.getFolded());
+        return mIsFoldableDevice && Boolean.FALSE.equals(mFoldStateListener.getFolded());
     }
 
     /** Implement to be alerted abotu the beginning and ending of falsing tracking. */
