@@ -66,6 +66,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -117,6 +119,18 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mExecutor = new TestShellExecutor();
         mCompatUIConfiguration = new CompatUIConfiguration(mContext, mExecutor) {
+
+            final Set<Integer> mHasSeenSet = new HashSet<>();
+
+            @Override
+            boolean getHasSeenLetterboxEducation(int userId) {
+                return mHasSeenSet.contains(userId);
+            }
+
+            @Override
+            void setSeenLetterboxEducation(int userId) {
+                mHasSeenSet.add(userId);
+            }
 
             @Override
             protected String getCompatUISharedPreferenceName() {
