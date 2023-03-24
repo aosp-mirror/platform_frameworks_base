@@ -45,6 +45,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.content.res.Configuration.UI_MODE_TYPE_DESK;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Process.NOBODY_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -487,6 +488,62 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         verify(mAtm.getLifecycleManager(), never())
                 .scheduleTransaction(any(), any(), isA(ActivityConfigurationChangeItem.class));
+    }
+
+    @Test
+    public void testDeskModeChange_doesNotRelaunch() throws RemoteException {
+        mWm.mSkipActivityRelaunchWhenDocking = true;
+
+        final ActivityRecord activity = createActivityWithTask();
+        // The activity will already be relaunching out of the gate, finish the relaunch so we can
+        // test properly.
+        activity.finishRelaunching();
+        // Clear out any calls to scheduleTransaction from launching the activity.
+        reset(mAtm.getLifecycleManager());
+
+        final Task task = activity.getTask();
+        activity.setState(RESUMED, "Testing");
+
+        // Send a desk UI mode config update.
+        final Configuration newConfig = new Configuration(task.getConfiguration());
+        newConfig.uiMode |= UI_MODE_TYPE_DESK;
+        task.onRequestedOverrideConfigurationChanged(newConfig);
+        ensureActivityConfiguration(activity);
+
+        // The activity shouldn't start relaunching since it doesn't have any desk resources.
+        assertFalse(activity.isRelaunching());
+
+        // The configuration change is still sent to the activity, even if it doesn't relaunch.
+        final ActivityConfigurationChangeItem expected =
+                ActivityConfigurationChangeItem.obtain(newConfig);
+        verify(mAtm.getLifecycleManager()).scheduleTransaction(
+                eq(activity.app.getThread()), eq(activity.token), eq(expected));
+    }
+
+    @Test
+    public void testDeskModeChange_relaunchesWithDeskResources() {
+        mWm.mSkipActivityRelaunchWhenDocking = true;
+
+        final ActivityRecord activity = createActivityWithTask();
+        // The activity will already be relaunching out of the gate, finish the relaunch so we can
+        // test properly.
+        activity.finishRelaunching();
+
+        // Activities with desk resources should get relaunched when a UI_MODE_TYPE_DESK change
+        // comes in.
+        doReturn(true).when(activity).hasDeskResources();
+
+        final Task task = activity.getTask();
+        activity.setState(RESUMED, "Testing");
+
+        // Send a desk UI mode config update.
+        final Configuration newConfig = new Configuration(task.getConfiguration());
+        newConfig.uiMode |= UI_MODE_TYPE_DESK;
+        task.onRequestedOverrideConfigurationChanged(newConfig);
+        ensureActivityConfiguration(activity);
+
+        // The activity will relaunch since it has desk resources.
+        assertTrue(activity.isRelaunching());
     }
 
     @Test

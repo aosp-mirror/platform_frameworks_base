@@ -5398,6 +5398,12 @@
          treatment for stretched issues in camera viewfinder. -->
     <bool name="config_isCameraCompatControlForStretchedIssuesEnabled">false</bool>
 
+    <!-- Docking is a uiMode configuration change and will cause activities to relaunch if it's not
+         handled. If true, the configuration change will be sent but activities will not be
+         relaunched upon docking. Apps with desk resources will behave like normal, since they may
+         expect the relaunch upon the desk uiMode change. -->
+    <bool name="config_skipActivityRelaunchWhenDocking">false</bool>
+
     <!-- If true, hide the display cutout with display area -->
     <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>
 
