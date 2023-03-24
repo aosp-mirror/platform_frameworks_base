@@ -38,6 +38,8 @@ import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.StopUserOnSwitch;
+import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_FROZEN;
+import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_UNFROZEN;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_CREATED;
@@ -7930,9 +7932,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void registerUidFrozenStateChangedCallback(
             @NonNull IUidFrozenStateChangedCallback callback) {
+        Preconditions.checkNotNull(callback, "callback cannot be null");
         enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
                 "registerUidFrozenStateChangedCallback()");
-        Preconditions.checkNotNull(callback, "callback cannot be null");
         synchronized (mUidFrozenStateChangedCallbackList) {
             final boolean registered = mUidFrozenStateChangedCallbackList.register(callback);
             if (!registered) {
@@ -7950,12 +7952,45 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void unregisterUidFrozenStateChangedCallback(
             @NonNull IUidFrozenStateChangedCallback callback) {
+        Preconditions.checkNotNull(callback, "callback cannot be null");
         enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
                 "unregisterUidFrozenStateChangedCallback()");
-        Preconditions.checkNotNull(callback, "callback cannot be null");
         synchronized (mUidFrozenStateChangedCallbackList) {
             mUidFrozenStateChangedCallbackList.unregister(callback);
         }
+    }
+
+    /**
+     * Query the frozen state of a list of UIDs.
+     *
+     * @param uids the array of UIDs which the client would like to know the frozen state of.
+     * @return An array containing the frozen state for each requested UID, by index. Will be set
+     *               to {@link UidFrozenStateChangedCallback#UID_FROZEN_STATE_FROZEN}
+     *               if the UID is frozen. If the UID is not frozen or not found,
+     *               {@link UidFrozenStateChangedCallback#UID_FROZEN_STATE_UNFROZEN}
+     *               will be set.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    @Override
+    public @NonNull int[] getUidFrozenState(@NonNull int[] uids) {
+        Preconditions.checkNotNull(uids, "uid array cannot be null");
+        enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                "getUidFrozenState()");
+
+        final int[] frozenStates = new int[uids.length];
+        synchronized (mProcLock) {
+            for (int i = 0; i < uids.length; i++) {
+                final UidRecord uidRec = mProcessList.mActiveUids.get(uids[i]);
+                if (uidRec != null && uidRec.areAllProcessesFrozen()) {
+                    frozenStates[i] = UID_FROZEN_STATE_FROZEN;
+                } else {
+                    frozenStates[i] = UID_FROZEN_STATE_UNFROZEN;
+                }
+            }
+        }
+        return frozenStates;
     }
 
     /**
