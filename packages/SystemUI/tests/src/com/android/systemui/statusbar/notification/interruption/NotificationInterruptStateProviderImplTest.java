@@ -435,9 +435,27 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                 .isFalse();
     }
 
+
+    @Test
+    public void testShouldNotFullScreen_isSuppressedByBubbleMetadata() throws RemoteException {
+        NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
+        Notification.BubbleMetadata bubbleMetadata = new Notification.BubbleMetadata.Builder("foo")
+                .setSuppressNotification(true).build();
+        entry.getSbn().getNotification().setBubbleMetadata(bubbleMetadata);
+        when(mPowerManager.isInteractive()).thenReturn(false);
+        when(mDreamManager.isDreaming()).thenReturn(true);
+        when(mStatusBarStateController.getState()).thenReturn(KEYGUARD);
+
+        assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
+                .isFalse();
+    }
+
     @Test
     public void testShouldFullScreen_notInteractive() throws RemoteException {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
+        Notification.BubbleMetadata bubbleMetadata = new Notification.BubbleMetadata.Builder("foo")
+                .setSuppressNotification(false).build();
+        entry.getSbn().getNotification().setBubbleMetadata(bubbleMetadata);
         when(mPowerManager.isInteractive()).thenReturn(false);
         when(mDreamManager.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
