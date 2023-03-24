@@ -1039,6 +1039,25 @@ public class ShellTransitionTests extends ShellTestCase {
         verify(observer, times(0)).onTransitionFinished(eq(transitToken3), anyBoolean());
     }
 
+    @Test
+    public void testEmptyTransitionStillReportsKeyguardGoingAway() {
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        IBinder transitToken = new Binder();
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+
+        // Make a no-op transition
+        TransitionInfo info = new TransitionInfoBuilder(
+                TRANSIT_OPEN, TRANSIT_FLAG_KEYGUARD_GOING_AWAY, true /* noOp */).build();
+        transitions.onTransitionReady(transitToken, info, mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class));
+
+        // If keyguard-going-away flag set, then it shouldn't be aborted.
+        assertEquals(1, mDefaultHandler.activeCount());
+    }
+
     class ChangeBuilder {
         final TransitionInfo.Change mChange;
 

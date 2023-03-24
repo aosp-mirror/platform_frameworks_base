@@ -2696,6 +2696,17 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         mInteractionJankMonitor.end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
                         return;
                     }
+                    if (apps == null || apps.length == 0) {
+                        Slog.e(TAG, "Keyguard exit without a corresponding app to show.");
+                        try {
+                            finishedCallback.onAnimationFinished();
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "RemoteException");
+                        } finally {
+                            mInteractionJankMonitor.end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
+                        }
+                        return;
+                    }
 
                     // TODO(bc-unlock): Sample animation, just to apply alpha animation on the app.
                     final SyncRtSurfaceTransactionApplier applier =
