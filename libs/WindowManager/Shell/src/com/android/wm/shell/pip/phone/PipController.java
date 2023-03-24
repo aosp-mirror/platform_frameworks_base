@@ -783,7 +783,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     mPipAnimationController.getCurrentAnimator();
             if (animator != null && animator.isRunning()) {
                 // cancel any running animator, as it is using stale display layout information
-                PipAnimationController.quietCancel(animator);
+                animator.cancel();
             }
             onDisplayChangedUncheck(layout, saveRestoreSnapFraction);
         }
