@@ -130,7 +130,7 @@ class RestartDialogWindowManager extends CompatUIWindowManagerAbstract {
     protected boolean eligibleToShowLayout() {
         // We don't show this dialog if the user has explicitly selected so clicking on a checkbox.
         return mRequestRestartDialog && !isTaskbarEduShowing() && (mLayout != null
-                || !mCompatUIConfiguration.getDontShowRestartDialogAgain(mTaskInfo));
+                || mCompatUIConfiguration.shouldShowRestartDialogAgain(mTaskInfo));
     }
 
     @Override

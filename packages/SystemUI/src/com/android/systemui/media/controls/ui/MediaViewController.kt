@@ -96,6 +96,7 @@ constructor(
 
     /** A listener when the current dimensions of the player change */
     lateinit var sizeChangedListener: () -> Unit
+    lateinit var configurationChangeListener: () -> Unit
     private var firstRefresh: Boolean = true
     @VisibleForTesting private var transitionLayout: TransitionLayout? = null
     private val layoutController = TransitionLayoutController()
@@ -194,6 +195,10 @@ constructor(
                                     R.dimen.qs_media_session_height_expanded
                                 )
                         }
+                    }
+                    if (this@MediaViewController::configurationChangeListener.isInitialized) {
+                        configurationChangeListener.invoke()
+                        refreshState()
                     }
                 }
             }

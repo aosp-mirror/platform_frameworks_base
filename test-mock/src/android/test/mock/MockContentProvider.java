@@ -140,7 +140,8 @@ public class MockContentProvider extends ContentProvider {
         }
 
         @Override
-        public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException {
+        public String[] getStreamTypes(AttributionSource attributionSource,
+                Uri url, String mimeTypeFilter) throws RemoteException {
             return MockContentProvider.this.getStreamTypes(url, mimeTypeFilter);
         }
 

@@ -1151,7 +1151,7 @@ public class Instrumentation {
         }
 
         UserManager userManager = mInstrContext.getSystemService(UserManager.class);
-        int userDisplayId = userManager.getDisplayIdAssignedToUser();
+        int userDisplayId = userManager.getMainDisplayIdAssignedToUser();
         if (VERBOSE) {
             Log.v(TAG, "setDisplayIfNeeded(" + event + "): eventDisplayId=" + eventDisplayId
                     + ", user=" + mInstrContext.getUser() + ", userDisplayId=" + userDisplayId);

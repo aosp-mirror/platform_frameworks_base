@@ -13,10 +13,6 @@
   <string name="assistant_utterance">Assistant</string>
   <!-- String defining the label for the accessibility settings button -->
   <string name="a11y_settings_label">Accessibility Settings</string>
-  <!-- String defining the label for the volume button -->
-  <string name="volume_label">Volume</string>
-  <!-- String defining utterance for the volume button for screen readers -->
-  <string name="volume_utterance">Volume controls</string>
   <!-- String defining the label for the power button -->
   <string name="power_label">Power</string>
   <!-- String defining utterance for the power button for screen readers -->

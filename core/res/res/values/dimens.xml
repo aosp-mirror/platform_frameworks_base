@@ -609,6 +609,9 @@
     <!-- padding of fullscreen magnification thumbnail -->
     <dimen name="accessibility_magnification_thumbnail_padding">12dp</dimen>
 
+    <!-- width of the border of the magnification thumbnail -->
+    <dimen name="accessibility_magnification_thumbnail_container_stroke_width">4dp</dimen>
+
     <!-- The padding ratio of the Accessibility icon foreground drawable -->
     <item name="accessibility_icon_foreground_padding_ratio" type="dimen">21.88%</item>
 

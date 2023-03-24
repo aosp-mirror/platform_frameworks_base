@@ -32,6 +32,8 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BlendMode;
 import android.graphics.Color;
@@ -54,6 +56,7 @@ import android.os.Process;
 import android.os.Trace;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -468,6 +471,7 @@ public class MediaControlPanel {
         TransitionLayout recommendations = vh.getRecommendations();
 
         mMediaViewController.attach(recommendations, MediaViewController.TYPE.RECOMMENDATION);
+        mMediaViewController.configurationChangeListener = this::updateRecommendationsVisibility;
 
         mRecommendationViewHolder.getRecommendations().setOnLongClickListener(v -> {
             if (mFalsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) return true;
@@ -1364,6 +1368,7 @@ public class MediaControlPanel {
 
         boolean hasTitle = false;
         boolean hasSubtitle = false;
+        int fittedRecsNum = getNumberOfFittedRecommendations();
         for (int itemIndex = 0; itemIndex < NUM_REQUIRED_RECOMMENDATIONS; itemIndex++) {
             SmartspaceAction recommendation = recommendations.get(itemIndex);
 
@@ -1444,12 +1449,20 @@ public class MediaControlPanel {
 
         // If there's no subtitles and/or titles for any of the albums, hide those views.
         ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
+        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
         final boolean titlesVisible = hasTitle;
         final boolean subtitlesVisible = hasSubtitle;
-        mRecommendationViewHolder.getMediaTitles().forEach((titleView) ->
-                setVisibleAndAlpha(expandedSet, titleView.getId(), titlesVisible));
-        mRecommendationViewHolder.getMediaSubtitles().forEach((subtitleView) ->
-                setVisibleAndAlpha(expandedSet, subtitleView.getId(), subtitlesVisible));
+        mRecommendationViewHolder.getMediaTitles().forEach((titleView) -> {
+            setVisibleAndAlpha(expandedSet, titleView.getId(), titlesVisible);
+            setVisibleAndAlpha(collapsedSet, titleView.getId(), titlesVisible);
+        });
+        mRecommendationViewHolder.getMediaSubtitles().forEach((subtitleView) -> {
+            setVisibleAndAlpha(expandedSet, subtitleView.getId(), subtitlesVisible);
+            setVisibleAndAlpha(collapsedSet, subtitleView.getId(), subtitlesVisible);
+        });
+
+        // Media covers visibility.
+        setMediaCoversVisibility(fittedRecsNum);
 
         // Guts
         Runnable onDismissClickedRunnable = () -> {
@@ -1484,6 +1497,51 @@ public class MediaControlPanel {
             mMediaViewController.refreshState();
         }
         Trace.endSection();
+    }
+
+    private Unit updateRecommendationsVisibility() {
+        int fittedRecsNum = getNumberOfFittedRecommendations();
+        setMediaCoversVisibility(fittedRecsNum);
+        return Unit.INSTANCE;
+    }
+
+    private void setMediaCoversVisibility(int fittedRecsNum) {
+        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
+        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
+        List<ViewGroup> mediaCoverContainers = mRecommendationViewHolder.getMediaCoverContainers();
+        // Hide media cover that cannot fit in the recommendation card.
+        for (int itemIndex = 0; itemIndex < NUM_REQUIRED_RECOMMENDATIONS; itemIndex++) {
+            setVisibleAndAlpha(expandedSet, mediaCoverContainers.get(itemIndex).getId(),
+                    itemIndex < fittedRecsNum);
+            setVisibleAndAlpha(collapsedSet, mediaCoverContainers.get(itemIndex).getId(),
+                    itemIndex < fittedRecsNum);
+        }
+    }
+
+    @VisibleForTesting
+    protected int getNumberOfFittedRecommendations() {
+        Resources res = mContext.getResources();
+        Configuration config = res.getConfiguration();
+        int defaultDpWidth = res.getInteger(R.integer.default_qs_media_rec_width_dp);
+        int recCoverWidth = res.getDimensionPixelSize(R.dimen.qs_media_rec_album_width)
+                + res.getDimensionPixelSize(R.dimen.qs_media_info_spacing) * 2;
+
+        // On landscape, media controls should take half of the screen width.
+        int displayAvailableDpWidth = config.screenWidthDp;
+        if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            displayAvailableDpWidth = displayAvailableDpWidth / 2;
+        }
+        int fittedNum;
+        if (displayAvailableDpWidth > defaultDpWidth) {
+            int recCoverDefaultWidth = res.getDimensionPixelSize(
+                    R.dimen.qs_media_rec_default_width);
+            fittedNum = recCoverDefaultWidth / recCoverWidth;
+        } else {
+            int displayAvailableWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    displayAvailableDpWidth, res.getDisplayMetrics());
+            fittedNum = displayAvailableWidth / recCoverWidth;
+        }
+        return Math.min(fittedNum, NUM_REQUIRED_RECOMMENDATIONS);
     }
 
     private void fetchAndUpdateRecommendationColors(Drawable appIcon) {

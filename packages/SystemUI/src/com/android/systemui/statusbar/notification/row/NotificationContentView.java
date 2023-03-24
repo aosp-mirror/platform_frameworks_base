@@ -26,7 +26,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
@@ -1440,11 +1439,9 @@ public class NotificationContentView extends FrameLayout implements Notification
         if (snoozeButton == null || actionContainer == null) {
             return;
         }
-        final boolean showSnooze = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.SHOW_NOTIFICATION_SNOOZE, 0) == 1;
         // Notification.Builder can 'disable' the snooze button to prevent it from being shown here
         boolean snoozeDisabled = !snoozeButton.isEnabled();
-        if (!showSnooze || snoozeDisabled) {
+        if (!mContainingNotification.getShowSnooze() || snoozeDisabled) {
             snoozeButton.setVisibility(GONE);
             return;
         }

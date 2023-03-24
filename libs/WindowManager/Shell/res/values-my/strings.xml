@@ -68,8 +68,7 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ညာအောက်ခြေသို့ ရွှေ့ပါ"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ဆက်တင်များ"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"ပူဖောင်းကွက် ပယ်ရန်"</string>
-    <!-- no translation found for bubbles_dont_bubble (3216183855437329223) -->
-    <skip />
+    <string name="bubbles_dont_bubble" msgid="3216183855437329223">"ပူဖောင်းကွက် မပြပါနှင့်"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"စကားဝိုင်းကို ပူဖောင်းကွက် မပြုလုပ်ပါနှင့်"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"ပူဖောင်းကွက် သုံး၍ ချတ်လုပ်ခြင်း"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"စကားဝိုင်းအသစ်များကို မျောနေသည့် သင်္ကေတများ သို့မဟုတ် ပူဖောင်းကွက်များအဖြစ် မြင်ရပါမည်။ ပူဖောင်းကွက်ကိုဖွင့်ရန် တို့ပါ။ ရွှေ့ရန် ၎င်းကို ဖိဆွဲပါ။"</string>

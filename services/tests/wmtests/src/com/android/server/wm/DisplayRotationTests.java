@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -790,7 +792,7 @@ public class DisplayRotationTests {
         // ... until half-fold
         mTarget.foldStateChanged(DeviceStateController.DeviceState.HALF_FOLDED);
         assertTrue(waitForUiHandler());
-        verify(sMockWm).updateRotation(false, false);
+        verify(sMockWm).updateRotation(anyBoolean(), anyBoolean());
         assertTrue(waitForUiHandler());
         assertEquals(Surface.ROTATION_0, mTarget.rotationForOrientation(
                 SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
@@ -798,7 +800,7 @@ public class DisplayRotationTests {
         // ... then transition back to flat
         mTarget.foldStateChanged(DeviceStateController.DeviceState.OPEN);
         assertTrue(waitForUiHandler());
-        verify(sMockWm, atLeast(1)).updateRotation(false, false);
+        verify(sMockWm, atLeast(1)).updateRotation(anyBoolean(), anyBoolean());
         assertTrue(waitForUiHandler());
         assertEquals(Surface.ROTATION_270, mTarget.rotationForOrientation(
                 SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
@@ -863,6 +865,23 @@ public class DisplayRotationTests {
 
         assertEquals(Surface.ROTATION_270, mTarget.rotationForOrientation(
                 SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_90));
+    }
+
+    @Test
+    public void testIgnoresDeskDockRotation_whenNoSensorAndLockedRespected() throws Exception {
+        mBuilder.setDeskDockRotation(Surface.ROTATION_270).build();
+        when(mMockDisplayPolicy.isDeskDockRespectsNoSensorAndLockedWithoutAccelerometer())
+                .thenReturn(true);
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false, false);
+
+        when(mMockDisplayPolicy.getDockMode()).thenReturn(Intent.EXTRA_DOCK_STATE_DESK);
+
+        freezeRotation(Surface.ROTATION_90);
+
+        assertEquals(Surface.ROTATION_90, mTarget.rotationForOrientation(
+                SCREEN_ORIENTATION_LOCKED, Surface.ROTATION_90));
+        assertEquals(Surface.ROTATION_0, mTarget.rotationForOrientation(
+                SCREEN_ORIENTATION_NOSENSOR, Surface.ROTATION_90));
     }
 
     @Test

@@ -184,6 +184,10 @@ final class LetterboxConfiguration {
     // portrait device orientation.
     private boolean mIsVerticalReachabilityEnabled;
 
+    // Whether book mode automatic horizontal reachability positioning is allowed for letterboxed
+    // fullscreen apps in landscape device orientation.
+    private boolean mIsAutomaticReachabilityInBookModeEnabled;
+
     // Whether education is allowed for letterboxed fullscreen apps.
     private boolean mIsEducationEnabled;
 
@@ -277,6 +281,8 @@ final class LetterboxConfiguration {
                 R.bool.config_letterboxIsHorizontalReachabilityEnabled);
         mIsVerticalReachabilityEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsVerticalReachabilityEnabled);
+        mIsAutomaticReachabilityInBookModeEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsAutomaticReachabilityInBookModeEnabled);
         mDefaultPositionForHorizontalReachability =
                 readLetterboxHorizontalReachabilityPositionFromConfig(mContext, false);
         mDefaultPositionForVerticalReachability =
@@ -681,6 +687,14 @@ final class LetterboxConfiguration {
         return mIsVerticalReachabilityEnabled;
     }
 
+    /*
+     * Whether automatic horizontal reachability repositioning in book mode is allowed for
+     * letterboxed fullscreen apps in landscape device orientation.
+     */
+    boolean getIsAutomaticReachabilityInBookModeEnabled() {
+        return mIsAutomaticReachabilityInBookModeEnabled;
+    }
+
     /**
      * Overrides whether horizontal reachability repositioning is allowed for letterboxed fullscreen
      * apps in landscape device orientation.
@@ -695,6 +709,14 @@ final class LetterboxConfiguration {
      */
     void setIsVerticalReachabilityEnabled(boolean enabled) {
         mIsVerticalReachabilityEnabled = enabled;
+    }
+
+    /**
+     * Overrides whether automatic horizontal reachability repositioning in book mode is allowed for
+     * letterboxed fullscreen apps in landscape device orientation.
+     */
+    void setIsAutomaticReachabilityInBookModeEnabled(boolean enabled) {
+        mIsAutomaticReachabilityInBookModeEnabled = enabled;
     }
 
     /**
@@ -715,6 +737,16 @@ final class LetterboxConfiguration {
     void resetIsVerticalReachabilityEnabled() {
         mIsVerticalReachabilityEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsVerticalReachabilityEnabled);
+    }
+
+    /**
+     * Resets whether automatic horizontal reachability repositioning in book mode is
+     * allowed for letterboxed fullscreen apps in landscape device orientation to
+     * {@link R.bool.config_letterboxIsAutomaticReachabilityInBookModeEnabled}.
+     */
+    void resetEnabledAutomaticReachabilityInBookMode() {
+        mIsAutomaticReachabilityInBookModeEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsAutomaticReachabilityInBookModeEnabled);
     }
 
     /*
