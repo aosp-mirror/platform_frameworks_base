@@ -81,6 +81,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Mock lateinit var syncQueue: SyncTransactionQueue
     @Mock lateinit var rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
     @Mock lateinit var transitions: Transitions
+    @Mock lateinit var transitionHandler: EnterDesktopTaskTransitionHandler
 
     lateinit var mockitoSession: StaticMockitoSession
     lateinit var controller: DesktopTasksController
@@ -116,6 +117,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             syncQueue,
             rootTaskDisplayAreaOrganizer,
             transitions,
+            transitionHandler,
             desktopModeTaskRepository,
             TestShellExecutor()
         )
