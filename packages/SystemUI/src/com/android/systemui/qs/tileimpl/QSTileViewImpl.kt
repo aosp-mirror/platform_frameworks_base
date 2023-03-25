@@ -310,9 +310,15 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     override fun onStateChanged(state: QSTile.State) {
-        post {
-            handleStateChanged(state)
-        }
+        // We cannot use the handler here because sometimes, the views are not attached (if they
+        // are in a page that the ViewPager hasn't attached). Instead, we use a runnable where
+        // all its instances are `equal` to each other, so they can be used to remove them from the
+        // queue.
+        // This means that at any given time there's at most one enqueued runnable to change state.
+        // However, as we only ever care about the last state posted, this is fine.
+        val runnable = StateChangeRunnable(state.copy())
+        removeCallbacks(runnable)
+        post(runnable)
     }
 
     override fun getDetailY(): Int {
@@ -650,6 +656,23 @@ open class QSTileViewImpl @JvmOverloads constructor(
             secondaryLabel.currentTextColor,
             chevronView.imageTintList?.defaultColor ?: 0
     )
+
+    inner class StateChangeRunnable(private val state: QSTile.State) : Runnable {
+        override fun run() {
+            handleStateChanged(state)
+        }
+
+        // We want all instances of this runnable to be equal to each other, so they can be used to
+        // remove previous instances from the Handler/RunQueue of this view
+        override fun equals(other: Any?): Boolean {
+            return other is StateChangeRunnable
+        }
+
+        // This makes sure that all instances have the same hashcode (because they are `equal`)
+        override fun hashCode(): Int {
+            return StateChangeRunnable::class.hashCode()
+        }
+    }
 }
 
 fun constrainSquishiness(squish: Float): Float {
