@@ -44,6 +44,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.app.compat.CompatChanges;
@@ -780,6 +781,12 @@ public class LocationManagerService extends ILocationManager.Stub implements
     public void registerLocationListener(String provider, LocationRequest request,
             ILocationListener listener, String packageName, @Nullable String attributionTag,
             String listenerId) {
+        ActivityManagerInternal managerInternal =
+                LocalServices.getService(ActivityManagerInternal.class);
+        if (managerInternal != null) {
+            managerInternal.logFgsApiBegin(ActivityManager.FOREGROUND_SERVICE_API_TYPE_LOCATION,
+                    Binder.getCallingUid(), Binder.getCallingPid());
+        }
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
                 listenerId);
         int permissionLevel = LocationPermissions.getPermissionLevel(mContext, identity.getUid(),
@@ -937,6 +944,12 @@ public class LocationManagerService extends ILocationManager.Stub implements
 
     @Override
     public void unregisterLocationListener(ILocationListener listener) {
+        ActivityManagerInternal managerInternal =
+                LocalServices.getService(ActivityManagerInternal.class);
+        if (managerInternal != null) {
+            managerInternal.logFgsApiEnd(ActivityManager.FOREGROUND_SERVICE_API_TYPE_LOCATION,
+                            Binder.getCallingUid(), Binder.getCallingPid());
+        }
         for (LocationProviderManager manager : mProviderManagers) {
             manager.unregisterLocationRequest(listener);
         }
