@@ -96,10 +96,11 @@ public class RingtonePlayer implements CoreStartable {
                 @Nullable VolumeShaper.Configuration volumeShaperConfig) {
             mToken = token;
 
-            mRingtone = new Ringtone(getContextForUser(user), false);
-            mRingtone.setAudioAttributesField(aa);
-            mRingtone.setUri(uri, volumeShaperConfig);
-            mRingtone.reinitializeActivePlayer();
+            mRingtone = new Ringtone.Builder(getContextForUser(user), Ringtone.MEDIA_SOUND, aa)
+                    .setUri(uri)
+                    .setLocalOnly()
+                    .setVolumeShaperConfig(volumeShaperConfig)
+                    .build();
         }
 
         @Override
