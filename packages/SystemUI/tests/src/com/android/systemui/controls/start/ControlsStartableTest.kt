@@ -17,13 +17,18 @@
 
 package com.android.systemui.controls.start
 
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ApplicationInfo
 import android.content.pm.ServiceInfo
+import android.os.UserManager
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
@@ -34,14 +39,20 @@ import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
+import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.never
@@ -58,6 +69,8 @@ class ControlsStartableTest : SysuiTestCase() {
     @Mock private lateinit var controlsListingController: ControlsListingController
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var authorizedPanelsRepository: AuthorizedPanelsRepository
+    @Mock private lateinit var userManager: UserManager
+    @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
 
     private val preferredPanelsRepository = FakeSelectedComponentRepository()
 
@@ -67,13 +80,27 @@ class ControlsStartableTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(authorizedPanelsRepository.getPreferredPackages()).thenReturn(setOf())
+        whenever(userManager.isUserUnlocked(anyInt())).thenReturn(true)
 
         fakeExecutor = FakeExecutor(FakeSystemClock())
     }
 
     @Test
     fun testDisabledNothingIsCalled() {
-        createStartable(enabled = false).start()
+        createStartable(enabled = false).apply {
+            start()
+            onBootCompleted()
+        }
+
+        verifyZeroInteractions(controlsController, controlsListingController, userTracker)
+    }
+
+    @Test
+    fun testNothingCalledOnStart() {
+        createStartable(enabled = true).start()
+
+        fakeExecutor.advanceClockToLast()
+        fakeExecutor.runAllReady()
 
         verifyZeroInteractions(controlsController, controlsListingController, userTracker)
     }
@@ -84,7 +111,7 @@ class ControlsStartableTest : SysuiTestCase() {
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true))
         setUpControlsListingControls(listings)
 
-        createStartable(enabled = true).start()
+        createStartable(enabled = true).onBootCompleted()
         fakeExecutor.runAllReady()
 
         verify(controlsController, never()).setPreferredSelection(any())
@@ -97,7 +124,7 @@ class ControlsStartableTest : SysuiTestCase() {
         `when`(controlsController.getPreferredSelection()).thenReturn(SelectedItem.EMPTY_SELECTION)
         setUpControlsListingControls(emptyList())
 
-        createStartable(enabled = true).start()
+        createStartable(enabled = true).onBootCompleted()
         fakeExecutor.runAllReady()
 
         verify(controlsController, never()).setPreferredSelection(any())
@@ -111,7 +138,7 @@ class ControlsStartableTest : SysuiTestCase() {
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT, "not panel", hasPanel = false))
         setUpControlsListingControls(listings)
 
-        createStartable(enabled = true).start()
+        createStartable(enabled = true).onBootCompleted()
         fakeExecutor.runAllReady()
 
         verify(controlsController, never()).setPreferredSelection(any())
@@ -126,7 +153,7 @@ class ControlsStartableTest : SysuiTestCase() {
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true))
         setUpControlsListingControls(listings)
 
-        createStartable(enabled = true).start()
+        createStartable(enabled = true).onBootCompleted()
         fakeExecutor.runAllReady()
 
         verify(controlsController, never()).setPreferredSelection(any())
@@ -140,7 +167,7 @@ class ControlsStartableTest : SysuiTestCase() {
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true))
         setUpControlsListingControls(listings)
 
-        createStartable(enabled = true).start()
+        createStartable(enabled = true).onBootCompleted()
         fakeExecutor.runAllReady()
 
         verify(controlsController).setPreferredSelection(listings[0].toPanelItem())
@@ -158,7 +185,7 @@ class ControlsStartableTest : SysuiTestCase() {
             )
         setUpControlsListingControls(listings)
 
-        createStartable(enabled = true).start()
+        createStartable(enabled = true).onBootCompleted()
         fakeExecutor.runAllReady()
 
         verify(controlsController).setPreferredSelection(listings[0].toPanelItem())
@@ -176,20 +203,66 @@ class ControlsStartableTest : SysuiTestCase() {
             )
         setUpControlsListingControls(listings)
 
-        createStartable(enabled = true).start()
+        createStartable(enabled = true).onBootCompleted()
         fakeExecutor.runAllReady()
 
         verify(controlsController).setPreferredSelection(listings[1].toPanelItem())
     }
 
     @Test
-    fun testPreferredSelectionIsPanel_bindOnStart() {
+    fun testPreferredSelectionIsPanel_bindOnBoot() {
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true))
         setUpControlsListingControls(listings)
         `when`(controlsController.getPreferredSelection()).thenReturn(listings[0].toPanelItem())
 
-        createStartable(enabled = true).start()
+        createStartable(enabled = true).onBootCompleted()
         fakeExecutor.runAllReady()
+
+        verify(controlsController).bindComponentForPanel(TEST_COMPONENT_PANEL)
+    }
+
+    @Test
+    fun testPreferredSelectionIsPanel_userNotUnlocked_notBind() {
+        whenever(userManager.isUserUnlocked(anyInt())).thenReturn(false)
+
+        val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true))
+        setUpControlsListingControls(listings)
+        `when`(controlsController.getPreferredSelection()).thenReturn(listings[0].toPanelItem())
+
+        createStartable(enabled = true).onBootCompleted()
+        fakeExecutor.runAllReady()
+
+        verify(controlsController, never()).bindComponentForPanel(TEST_COMPONENT_PANEL)
+    }
+
+    @Test
+    fun testPreferredSelectionIsPanel_userNotUnlocked_broadcastRegistered_broadcastSentBinds() {
+        whenever(userManager.isUserUnlocked(anyInt())).thenReturn(false)
+
+        val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true))
+        setUpControlsListingControls(listings)
+        `when`(controlsController.getPreferredSelection()).thenReturn(listings[0].toPanelItem())
+
+        createStartable(enabled = true).onBootCompleted()
+        fakeExecutor.runAllReady()
+
+        val intentFilterCaptor = argumentCaptor<IntentFilter>()
+        val receiverCaptor = argumentCaptor<BroadcastReceiver>()
+
+        verify(broadcastDispatcher)
+            .registerReceiver(
+                capture(receiverCaptor),
+                capture(intentFilterCaptor),
+                eq(fakeExecutor),
+                nullable(),
+                anyInt(),
+                nullable()
+            )
+        assertThat(intentFilterCaptor.value.matchAction(Intent.ACTION_USER_UNLOCKED)).isTrue()
+
+        // User is unlocked
+        whenever(userManager.isUserUnlocked(anyInt())).thenReturn(true)
+        receiverCaptor.value.onReceive(mock(), Intent(Intent.ACTION_USER_UNLOCKED))
 
         verify(controlsController).bindComponentForPanel(TEST_COMPONENT_PANEL)
     }
@@ -201,7 +274,7 @@ class ControlsStartableTest : SysuiTestCase() {
         `when`(controlsController.getPreferredSelection())
             .thenReturn(SelectedItem.PanelItem("panel", TEST_COMPONENT_PANEL))
 
-        createStartable(enabled = true).start()
+        createStartable(enabled = true).onBootCompleted()
         fakeExecutor.runAllReady()
 
         verify(controlsController, never()).bindComponentForPanel(any())
@@ -213,7 +286,7 @@ class ControlsStartableTest : SysuiTestCase() {
         setUpControlsListingControls(listings)
         `when`(controlsController.getPreferredSelection()).thenReturn(SelectedItem.EMPTY_SELECTION)
 
-        createStartable(enabled = true).start()
+        createStartable(enabled = true).onBootCompleted()
         fakeExecutor.runAllReady()
 
         verify(controlsController, never()).bindComponentForPanel(any())
@@ -228,7 +301,7 @@ class ControlsStartableTest : SysuiTestCase() {
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true))
         `when`(controlsListingController.getCurrentServices()).thenReturn(listings)
 
-        createStartable(enabled = true).start()
+        createStartable(enabled = true).onBootCompleted()
 
         verify(controlsController, never()).setPreferredSelection(any())
     }
@@ -258,6 +331,8 @@ class ControlsStartableTest : SysuiTestCase() {
             userTracker,
             authorizedPanelsRepository,
             preferredPanelsRepository,
+            userManager,
+            broadcastDispatcher,
         )
     }
 
