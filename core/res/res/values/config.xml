@@ -5050,6 +5050,11 @@
          of known compatibility issues. -->
     <string-array name="config_highRefreshRateBlacklist"></string-array>
 
+    <!-- The list of packages to force slowJpegMode for Apps using Camera API1 -->
+    <string-array name="config_forceSlowJpegModeList" translatable="false">
+        <!-- Add packages here -->
+    </string-array>
+
     <!-- Whether or not to hide the navigation bar when the soft keyboard is visible in order to
          create additional screen real estate outside beyond the keyboard. Note that the user needs
          to have a confirmed way to dismiss the keyboard when desired. -->
@@ -5416,6 +5421,10 @@
         orientation activities connected to the camera in fullscreen and showing a tooltip in
         split screen. -->
     <bool name="config_isWindowManagerCameraCompatTreatmentEnabled">false</bool>
+
+    <!-- Whether should use split screen aspect ratio for the activity when camera compat treatment
+        is enabled and activity is connected to the camera in fullscreen. -->
+    <bool name="config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled">false</bool>
 
     <!-- Whether a camera compat controller is enabled to allow the user to apply or revert
          treatment for stretched issues in camera viewfinder. -->

@@ -143,7 +143,7 @@ object Flags {
      * the digits when the clock moves.
      */
     @JvmField
-    val STEP_CLOCK_ANIMATION = releasedFlag(212, "step_clock_animation")
+    val STEP_CLOCK_ANIMATION = unreleasedFlag(212, "step_clock_animation", teamfood = true)
 
     /**
      * Migration from the legacy isDozing/dozeAmount paths to the new KeyguardTransitionRepository
@@ -427,6 +427,11 @@ object Flags {
     val ENABLE_LOW_LIGHT_CLOCK_UNDOCKED = unreleasedFlag(
         1004,
         "enable_low_light_clock_undocked", teamfood = true)
+
+    // TODO(b/273509374): Tracking Bug
+    @JvmField
+    val ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS = unreleasedFlag(1006,
+        "always_show_home_controls_on_dreams")
 
     // 1100 - windowing
     @Keep
