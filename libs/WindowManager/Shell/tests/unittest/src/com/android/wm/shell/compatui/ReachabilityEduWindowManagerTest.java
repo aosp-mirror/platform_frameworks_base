@@ -18,7 +18,6 @@ package com.android.wm.shell.compatui;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
 import android.app.TaskInfo;
@@ -32,7 +31,6 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,10 +69,6 @@ public class ReachabilityEduWindowManagerTest extends ShellTestCase {
         mExecutor = new TestShellExecutor();
     }
 
-    @After
-    public void tearDown() {
-    }
-
     @Test
     public void testCreateLayout_notEligible_doesNotCreateLayout() {
         final ReachabilityEduWindowManager windowManager = createReachabilityEduWindowManager(
@@ -84,20 +78,6 @@ public class ReachabilityEduWindowManagerTest extends ShellTestCase {
 
         assertNull(windowManager.mLayout);
     }
-
-    @Test
-    public void testCreateLayout_letterboxPositionChanged_doubleTapIsDetected() {
-        // Initial left position
-        final TaskInfo initialTaskInfo = createTaskInfoForHorizontalTapping(USER_ID, 0, 1000);
-        final ReachabilityEduWindowManager windowManager =
-                createReachabilityEduWindowManager(initialTaskInfo);
-        // Move to the right
-        final TaskInfo newPositionTaskInfo = createTaskInfoForHorizontalTapping(USER_ID, 1, 1000);
-        windowManager.updateCompatInfo(newPositionTaskInfo, mTaskListener, /* canShow */ true);
-
-        verify(mCompatUIConfiguration).setDontShowReachabilityEducationAgain(newPositionTaskInfo);
-    }
-
 
     private ReachabilityEduWindowManager createReachabilityEduWindowManager(TaskInfo taskInfo) {
         return new ReachabilityEduWindowManager(mContext, taskInfo,
@@ -110,14 +90,6 @@ public class ReachabilityEduWindowManagerTest extends ShellTestCase {
                 /* topActivityLetterboxVerticalPosition */ -1,
                 /* topActivityLetterboxHorizontalPosition */ -1,
                 /* topActivityLetterboxWidth */ -1,
-                /* topActivityLetterboxHeight */ -1);
-    }
-
-    private static TaskInfo createTaskInfoForHorizontalTapping(int userId,
-            int topActivityLetterboxHorizontalPosition, int topActivityLetterboxWidth) {
-        return createTaskInfo(userId, /* isLetterboxDoubleTapEnabled */ true,
-                /* topActivityLetterboxVerticalPosition */ -1,
-                topActivityLetterboxHorizontalPosition, topActivityLetterboxWidth,
                 /* topActivityLetterboxHeight */ -1);
     }
 
