@@ -53,6 +53,9 @@ final class LetterboxConfiguration {
      */
     static final float MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO = 1.0f;
 
+    /** Letterboxed app window position multiplier indicating center position. */
+    static final float LETTERBOX_POSITION_MULTIPLIER_CENTER = 0.5f;
+
     /** Enum for Letterbox background type. */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({LETTERBOX_BACKGROUND_SOLID_COLOR, LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND,
