@@ -537,6 +537,15 @@ public class WindowMagnificationManagerTest {
     }
 
     @Test
+    public void removeMagnificationSettingsPanel_hasConnection_invokeConnectionMethod()
+            throws RemoteException {
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+
+        mWindowMagnificationManager.removeMagnificationSettingsPanel(TEST_DISPLAY);
+        verify(mMockConnection.getConnection()).removeMagnificationSettingsPanel(TEST_DISPLAY);
+    }
+
+    @Test
     public void pointersInWindow_magnifierEnabled_returnCorrectValue() throws RemoteException {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 3.0f, NaN, NaN);
