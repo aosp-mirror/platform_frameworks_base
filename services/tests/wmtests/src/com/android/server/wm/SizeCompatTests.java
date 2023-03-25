@@ -58,6 +58,7 @@ import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityRecord.State.STOPPED;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_POSITION_MULTIPLIER_CENTER;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -3768,6 +3769,27 @@ public class SizeCompatTests extends WindowTestsBase {
         setFoldablePosture(false /* isHalfFolded */, false /* isTabletop */);
 
         assertEquals(letterboxNoFold, mActivity.getBounds());
+    }
+
+    @Test
+    public void testGetFixedOrientationLetterboxAspectRatio_tabletop_centered() {
+        // Set up a display in portrait with a fixed-orientation LANDSCAPE app
+        setUpDisplaySizeWithApp(1400, 2800);
+        mWm.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(
+                LETTERBOX_POSITION_MULTIPLIER_CENTER);
+        mActivity.mWmService.mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(
+                1.0f /*letterboxVerticalPositionMultiplier*/);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+
+        setFoldablePosture(true /* isHalfFolded */, true /* isTabletop */);
+
+        Configuration parentConfig = mActivity.getParent().getConfiguration();
+
+        float actual = mActivity.mLetterboxUiController
+                .getFixedOrientationLetterboxAspectRatio(parentConfig);
+        float expected = mActivity.mLetterboxUiController.getSplitScreenAspectRatio();
+
+        assertEquals(expected, actual, 0.01);
     }
 
     @Test
