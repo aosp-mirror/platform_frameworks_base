@@ -264,7 +264,8 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
                                 Stream<CredentialEntry>>) filterResult
                         -> filterResult.mCredentialEntries.stream())
                 .collect(Collectors.toList());
-        updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED);
+        updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED,
+                /*source=*/ CredentialsSource.REGISTRY);
         // TODO(use metric later)
     }
 
