@@ -28,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -100,8 +101,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final Optional<BubblesManager> mBubblesManagerOptional;
     private final SmartReplyConstants mSmartReplyConstants;
     private final SmartReplyController mSmartReplyController;
-
     private final ExpandableNotificationRowDragController mDragController;
+    private final IStatusBarService mStatusBarService;
 
     @Inject
     public ExpandableNotificationRowController(
@@ -133,7 +134,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
             FeatureFlags featureFlags,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
             Optional<BubblesManager> bubblesManagerOptional,
-            ExpandableNotificationRowDragController dragController) {
+            ExpandableNotificationRowDragController dragController,
+            IStatusBarService statusBarService) {
         mView = view;
         mListContainer = listContainer;
         mRemoteInputViewSubcomponentFactory = rivSubcomponentFactory;
@@ -164,6 +166,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
         mMetricsLogger = metricsLogger;
         mSmartReplyConstants = smartReplyConstants;
         mSmartReplyController = smartReplyController;
+        mStatusBarService = statusBarService;
     }
 
     /**
@@ -194,7 +197,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mNotificationGutsManager,
                 mMetricsLogger,
                 mSmartReplyConstants,
-                mSmartReplyController
+                mSmartReplyController,
+                mStatusBarService
         );
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (mAllowLongPress) {
