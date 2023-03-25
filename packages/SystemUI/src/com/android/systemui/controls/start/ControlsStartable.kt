@@ -17,10 +17,15 @@
 
 package com.android.systemui.controls.start
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.UserHandle
+import android.os.UserManager
 import androidx.annotation.WorkerThread
 import com.android.systemui.CoreStartable
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
@@ -53,6 +58,8 @@ constructor(
         private val userTracker: UserTracker,
         private val authorizedPanelsRepository: AuthorizedPanelsRepository,
         private val selectedComponentRepository: SelectedComponentRepository,
+        private val userManager: UserManager,
+        private val broadcastDispatcher: BroadcastDispatcher,
 ) : CoreStartable {
 
     // These two controllers can only be accessed after `start` method once we've checked if the
@@ -71,7 +78,9 @@ constructor(
             }
         }
 
-    override fun start() {
+    override fun start() {}
+
+    override fun onBootCompleted() {
         if (!controlsComponent.isEnabled()) {
             // Controls is disabled, we don't need this anymore
             return
@@ -112,11 +121,30 @@ constructor(
     }
 
     private fun bindToPanel() {
+        if (userManager.isUserUnlocked(userTracker.userId)) {
+            bindToPanelInternal()
+        } else {
+            broadcastDispatcher.registerReceiver(
+                    receiver = object : BroadcastReceiver() {
+                        override fun onReceive(context: Context?, intent: Intent?) {
+                            if (userManager.isUserUnlocked(userTracker.userId)) {
+                                bindToPanelInternal()
+                                broadcastDispatcher.unregisterReceiver(this)
+                            }
+                        }
+                    },
+                    filter = IntentFilter(Intent.ACTION_USER_UNLOCKED),
+                    executor = executor,
+                    user = userTracker.userHandle,
+            )
+        }
+    }
+
+    private fun bindToPanelInternal() {
         val currentSelection = controlsController.getPreferredSelection()
         val panels =
-            controlsListingController.getCurrentServices().filter { it.panelActivity != null }
-        if (
-            currentSelection is SelectedItem.PanelItem &&
+                controlsListingController.getCurrentServices().filter { it.panelActivity != null }
+        if (currentSelection is SelectedItem.PanelItem &&
                 panels.firstOrNull { it.componentName == currentSelection.componentName } != null
         ) {
             controlsController.bindComponentForPanel(currentSelection.componentName)
