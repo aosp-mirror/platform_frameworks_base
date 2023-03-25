@@ -177,7 +177,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                             KeyguardTransitionInteractor(
                                 repository = FakeKeyguardTransitionRepository(),
                             ),
-                        bouncerInteractor = com.android.systemui.util.mockito.mock(),
                         falsingManager = FalsingManagerFake(),
                     )
                 },
