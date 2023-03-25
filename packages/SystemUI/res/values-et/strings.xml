@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Luba USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Lisateave"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Ekraanipilt"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock on keelatud"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"saatis kujutise"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Kuvatõmmise salvestamine ..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Ekraanipildi salvestamine tööprofiilile …"</string>
@@ -871,8 +870,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Lisati # juhtnupp.}other{Lisati # juhtnuppu.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Eemaldatud"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Kas lisada <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"Rakendus <xliff:g id="APPNAME">%s</xliff:g> saab valida, millised juhtelemendid ja milline sisu siin kuvatakse."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Kas soovite rakenduse <xliff:g id="APPNAME">%s</xliff:g> juhtelemendid eemaldada?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Lisatud lemmikuks"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Lisatud lemmikuks, positsioon <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -895,9 +893,9 @@
     <string name="controls_dialog_message" msgid="342066938390663844">"Soovitas <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Seade on lukustatud"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Kas soovite seadmete juhtelemente lukustuskuval kuvada ja kasutada?"</string>
-    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Võite lukustuskuvale oma väliste seadmete juhtelemendid lisada.\n\nTeie seadmerakendus võib võimaldada teil teatud seadmeid ilma telefoni või tahvelarvutit avamata hallata.\n\nSaate igal ajal seadetes muudatusi teha."</string>
-    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Kas soovite seadmeid lukustuskuva kaudu hallata?"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Võite teatud seadmeid ilma telefoni või tahvelarvutit avamata hallata. Teie seadmerakendus määrab, milliseid seadmeid saab sel viisil hallata."</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Võite lukustuskuvale oma väliste seadmete juhtelemendid lisada.\n\nTeie seadmerakendus võib võimaldada teil teatud seadmeid ilma telefoni või tahvelarvutit avamata juhtida.\n\nSaate igal ajal seadetes muudatusi teha."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Kas soovite seadmeid lukustuskuva kaudu juhtida?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Võite teatud seadmeid ilma telefoni või tahvelarvutit avamata juhtida. Teie seadmerakendus määrab, milliseid seadmeid saab sel viisil juhtida."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Tänan, ei"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Jah"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN-kood sisaldab tähti või sümboleid"</string>
@@ -1067,7 +1065,8 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"muutmine"</string>
     <string name="add" msgid="81036585205287996">"Lisa"</string>
     <string name="manage_users" msgid="1823875311934643849">"Kasutajate haldamine"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"See märguanne ei toeta jagatud ekraanikuvale lohistamist."</string>
+    <!-- no translation found for drag_split_not_supported (7173481676120546121) -->
+    <skip />
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"WiFi pole saadaval"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Režiim Prioriteetne"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarm on määratud"</string>

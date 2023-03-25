@@ -43,6 +43,7 @@ import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
+import static com.android.server.pm.PackageManagerServiceUtils.isInstalledByAdb;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
 import android.Manifest;
@@ -350,6 +351,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     static final boolean DEBUG_ABI_SELECTION = false;
     public static final boolean DEBUG_INSTANT = Build.IS_DEBUGGABLE;
+
+    static final String SHELL_PACKAGE_NAME = "com.android.shell";
 
     static final boolean HIDE_EPHEMERAL_APIS = false;
 
@@ -1330,10 +1333,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         final InstallSourceInfo installSourceInfo = snapshot.getInstallSourceInfo(packageName,
                 userId);
+        final String initiatingPackageName = installSourceInfo.getInitiatingPackageName();
         final String installerPackageName;
         if (installSourceInfo != null) {
-            if (!TextUtils.isEmpty(installSourceInfo.getInitiatingPackageName())) {
-                installerPackageName = installSourceInfo.getInitiatingPackageName();
+            if (!isInstalledByAdb(initiatingPackageName)) {
+                installerPackageName = initiatingPackageName;
             } else {
                 installerPackageName = installSourceInfo.getInstallingPackageName();
             }
@@ -3775,7 +3779,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     private void setEnabledSettings(List<ComponentEnabledSetting> settings, int userId,
-            String callingPackage) {
+            @NonNull String callingPackage) {
         final int callingUid = Binder.getCallingUid();
         // TODO: This method is not properly snapshotified beyond this call
         final Computer preLockSnapshot = snapshotComputer();
@@ -4047,11 +4051,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         boolean success = false;
         if (!setting.isComponent()) {
             // We're dealing with an application/package level state change
-            if (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
-                    || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
-                // Don't care about who enables an app.
-                callingPackage = null;
-            }
             pkgSetting.setEnabled(newState, userId, callingPackage);
             if ((newState == COMPONENT_ENABLED_STATE_DISABLED_USER
                     || newState == COMPONENT_ENABLED_STATE_DISABLED)
@@ -5810,21 +5809,28 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         @Override
         public void setComponentEnabledSetting(ComponentName componentName,
-                int newState, int flags, int userId) {
+                int newState, int flags, int userId, String callingPackage) {
             if (!mUserManager.exists(userId)) return;
+            if (callingPackage == null) {
+                callingPackage = Integer.toString(Binder.getCallingUid());
+            }
 
             setEnabledSettings(List.of(new PackageManager.ComponentEnabledSetting(componentName, newState, flags)),
-                    userId, null /* callingPackage */);
+                    userId, callingPackage);
         }
 
         @Override
-        public void setComponentEnabledSettings(List<PackageManager.ComponentEnabledSetting> settings, int userId) {
+        public void setComponentEnabledSettings(
+                List<PackageManager.ComponentEnabledSetting> settings, int userId,
+                String callingPackage) {
             if (!mUserManager.exists(userId)) return;
             if (settings == null || settings.isEmpty()) {
                 throw new IllegalArgumentException("The list of enabled settings is empty");
             }
-
-            setEnabledSettings(settings, userId, null /* callingPackage */);
+            if (callingPackage == null) {
+                callingPackage = Integer.toString(Binder.getCallingUid());
+            }
+            setEnabledSettings(settings, userId, callingPackage);
         }
 
         @Override

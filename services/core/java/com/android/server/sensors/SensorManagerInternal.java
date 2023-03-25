@@ -60,7 +60,8 @@ public abstract class SensorManagerInternal {
      * @return The sensor handle.
      */
     public abstract int createRuntimeSensor(int deviceId, int type, @NonNull String name,
-            @NonNull String vendor, int flags, @NonNull RuntimeSensorCallback callback);
+            @NonNull String vendor, float maximumRange, float resolution, float power,
+            int minDelay, int maxDelay, int flags, @NonNull RuntimeSensorCallback callback);
 
     /**
      * Unregisters the sensor with the given handle from the framework.

@@ -47,9 +47,11 @@ import com.android.server.credentials.metrics.EntryEnum;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -95,7 +97,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         android.credentials.GetCredentialRequest filteredRequest =
                 filterOptions(providerInfo.getCapabilities(),
                         getRequestSession.mClientRequest,
-                        providerInfo.getComponentName());
+                        providerInfo);
         if (filteredRequest != null) {
             Map<String, CredentialOption> beginGetOptionToCredentialOptionMap =
                     new HashMap<>();
@@ -120,7 +122,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     }
 
     /** Creates a new provider session to be used by the request session. */
-    @Nullable public static ProviderGetSession createNewSession(
+    @Nullable
+    public static ProviderGetSession createNewSession(
             Context context,
             @UserIdInt int userId,
             CredentialProviderInfo providerInfo,
@@ -129,7 +132,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         android.credentials.GetCredentialRequest filteredRequest =
                 filterOptions(providerInfo.getCapabilities(),
                         getRequestSession.mClientRequest,
-                        providerInfo.getComponentName());
+                        providerInfo);
         if (filteredRequest != null) {
             Map<String, CredentialOption> beginGetOptionToCredentialOptionMap =
                     new HashMap<>();
@@ -178,12 +181,13 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     private static android.credentials.GetCredentialRequest filterOptions(
             List<String> providerCapabilities,
             android.credentials.GetCredentialRequest clientRequest,
-            ComponentName componentName
+            CredentialProviderInfo info
     ) {
         List<CredentialOption> filteredOptions = new ArrayList<>();
         for (CredentialOption option : clientRequest.getCredentialOptions()) {
             if (providerCapabilities.contains(option.getType())
-                    && isProviderAllowed(option, componentName)) {
+                    && isProviderAllowed(option, info.getComponentName())
+                    && checkSystemProviderRequirement(option, info.isSystemProvider())) {
                 Log.i(TAG, "In createProviderRequest - capability found : "
                         + option.getType());
                 filteredOptions.add(option);
@@ -207,6 +211,15 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 componentName)) {
             Log.d(TAG, "Provider allow list specified but does not contain this provider: "
                     + componentName.flattenToString());
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean checkSystemProviderRequirement(CredentialOption option,
+            boolean isSystemProvider) {
+        if (option.isSystemProviderRequired() && !isSystemProvider) {
+            Log.d(TAG, "System provider required, but this service is not a system provider");
             return false;
         }
         return true;
@@ -325,6 +338,11 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             startCandidateMetrics();
             mRemoteCredentialService.onBeginGetCredential(mProviderRequest, this);
         }
+    }
+
+    @NonNull
+    protected Set<String> getCredentialEntryTypes() {
+        return mProviderResponseDataHandler.getCredentialEntryTypes();
     }
 
     @Override // Call from request session to data to be shown on the UI
@@ -564,6 +582,9 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         private final Map<String, Pair<Action, AuthenticationEntry>> mUiAuthenticationEntries =
                 new HashMap<>();
 
+        @NonNull
+        private final Set<String> mCredentialEntryTypes = new HashSet<>();
+
         @Nullable
         private Pair<String, Pair<RemoteEntry, Entry>> mUiRemoteEntry = null;
 
@@ -596,6 +617,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                     id, credentialEntry.getSlice(),
                     setUpFillInIntent(credentialEntry.getBeginGetCredentialOptionId()));
             mUiCredentialEntries.put(id, new Pair<>(credentialEntry, entry));
+            mCredentialEntryTypes.add(credentialEntry.getType());
         }
 
         public void addAction(Action action) {
@@ -690,6 +712,11 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             return response.getCredentialEntries().isEmpty() && response.getActions().isEmpty()
                     && response.getAuthenticationActions().isEmpty()
                     && response.getRemoteCredentialEntry() == null;
+        }
+
+        @NonNull
+        public Set<String> getCredentialEntryTypes() {
+            return mCredentialEntryTypes;
         }
 
         @Nullable

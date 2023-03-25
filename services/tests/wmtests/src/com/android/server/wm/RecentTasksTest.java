@@ -1032,6 +1032,17 @@ public class RecentTasksTest extends WindowTestsBase {
                 fail("Expected com.android.pkg1 tasks to be removed");
             }
         }
+
+        // If the task has a non-stopped activity, the removal will wait for its onDestroy.
+        final Task task = tasks.get(0);
+        final ActivityRecord top = new ActivityBuilder(mAtm).setTask(task).build();
+        top.lastVisibleTime = 123;
+        top.setState(ActivityRecord.State.RESUMED, "test");
+        mRecentTasks.removeTasksByPackageName(task.getBasePackageName(), TEST_USER_0_ID);
+        assertTrue(task.mKillProcessesOnDestroyed);
+        top.setState(ActivityRecord.State.DESTROYING, "test");
+        top.destroyed("test");
+        assertFalse(task.mKillProcessesOnDestroyed);
     }
 
     @Test

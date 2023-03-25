@@ -864,6 +864,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStatusBarSignalPolicy = statusBarSignalPolicy;
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mFeatureFlags = featureFlags;
+        mIsShortcutListSearchEnabled = featureFlags.isEnabled(Flags.SHORTCUT_LIST_SEARCH_LAYOUT);
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mMainExecutor = delayableExecutor;
         mMessageRouter = messageRouter;
@@ -872,7 +873,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mCameraLauncherLazy = cameraLauncherLazy;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mUserTracker = userTracker;
-        mIsShortcutListSearchEnabled = featureFlags.isEnabled(Flags.SHORTCUT_LIST_SEARCH_LAYOUT);
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -1485,15 +1485,15 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private void onPanelExpansionChanged(ShadeExpansionChangeEvent event) {
         float fraction = event.getFraction();
         boolean tracking = event.getTracking();
-        boolean isExpanded = event.getExpanded();
         dispatchPanelExpansionForKeyguardDismiss(fraction, tracking);
+
+        if (getNotificationPanelViewController() != null) {
+            getNotificationPanelViewController().updateSystemUiStateFlags();
+        }
 
         if (fraction == 0 || fraction == 1) {
             if (getNavigationBarView() != null) {
                 getNavigationBarView().onStatusBarPanelStateChanged();
-            }
-            if (getNotificationPanelViewController() != null) {
-                getNotificationPanelViewController().updateSystemUiStateFlags();
             }
         }
     }

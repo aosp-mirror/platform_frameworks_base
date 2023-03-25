@@ -46,6 +46,7 @@ import com.android.server.companion.AssociationStore;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -296,26 +297,32 @@ public class CompanionTransportManager {
         Slog.i(TAG, "Remote device SDK: " + remoteSdk + ", release:" + new String(remoteRelease));
 
         Transport transport = mTempTransport;
-        mTempTransport = null;
+        mTempTransport.stop();
 
         int sdk = Build.VERSION.SDK_INT;
         String release = Build.VERSION.RELEASE;
-        if (remoteSdk == NON_ANDROID) {
+        if (Build.isDebuggable()) {
+            // Debug builds cannot pass attestation verification. Use hardcoded key instead.
+            Slog.d(TAG, "Creating an unauthenticated secure channel");
+            final byte[] testKey = "CDM".getBytes(StandardCharsets.UTF_8);
+            transport = new SecureTransport(transport.getAssociationId(), transport.getFd(),
+                    mContext, testKey, null);
+        } else if (remoteSdk == NON_ANDROID) {
             // TODO: pass in a real preSharedKey
             transport = new SecureTransport(transport.getAssociationId(), transport.getFd(),
-                    mContext, null, null);
-        } else if (sdk < SECURE_CHANNEL_AVAILABLE_SDK
-                || remoteSdk < SECURE_CHANNEL_AVAILABLE_SDK) {
-            // TODO: depending on the release version, either
-            //       1) using a RawTransport for old T versions
-            //       2) or an Ukey2 handshaked transport for UKey2 backported T versions
-        } else {
+                    mContext, new byte[0], null);
+        } else if (sdk >= SECURE_CHANNEL_AVAILABLE_SDK
+                && remoteSdk >= SECURE_CHANNEL_AVAILABLE_SDK) {
             Slog.i(TAG, "Creating a secure channel");
             transport = new SecureTransport(transport.getAssociationId(), transport.getFd(),
                     mContext);
-            addMessageListenersToTransport(transport);
-            transport.start();
+        } else {
+            // TODO: depending on the release version, either
+            //       1) using a RawTransport for old T versions
+            //       2) or an Ukey2 handshaked transport for UKey2 backported T versions
         }
+        addMessageListenersToTransport(transport);
+        transport.start();
         mTransports.put(transport.getAssociationId(), transport);
         // Doesn't need to notifyTransportsChanged here, it'll be done in attachSystemDataTransport
     }

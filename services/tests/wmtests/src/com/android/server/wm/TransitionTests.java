@@ -1415,6 +1415,8 @@ public class TransitionTests extends WindowTestsBase {
         final Transition.ChangeInfo activity1ChangeInfo = closeTransition.mChanges.get(activity1);
         assertNotNull(activity1ChangeInfo);
         assertTrue(activity1ChangeInfo.hasChanged());
+        // No need to wait for the activity in transient hide task.
+        assertTrue(activity1.isSyncFinished());
 
         activity1.setVisibleRequested(false);
         activity2.setVisibleRequested(true);

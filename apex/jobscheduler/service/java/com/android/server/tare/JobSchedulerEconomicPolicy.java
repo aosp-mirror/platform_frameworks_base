@@ -197,7 +197,7 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
         final long baseBalance;
         if (mIrs.isPackageExempted(userId, pkgName)) {
             baseBalance = mMinSatiatedBalanceExempted;
-        } else if (mIrs.isHeadlessSystemApp(pkgName)) {
+        } else if (mIrs.isHeadlessSystemApp(userId, pkgName)) {
             baseBalance = mMinSatiatedBalanceHeadlessSystemApp;
         } else {
             baseBalance = mMinSatiatedBalanceOther;

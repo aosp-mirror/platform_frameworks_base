@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="learn_more" msgid="4690632085667273811">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"ಎಕ್ಸ್‌ಟೆಂಡ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ಚಿತ್ರವನ್ನು ಕಳುಹಿಸಲಾಗಿದೆ"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ಗೆ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
@@ -871,8 +870,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# ನಿಯಂತ್ರಣವನ್ನು ಸೇರಿಸಲಾಗಿದೆ.}one{# ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ.}other{# ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> ಅನ್ನು ಸೇರಿಸಬೇಕೆ?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> ಯಾವ ಕಂಟ್ರೋಲ್‌ಗಳು ಮತ್ತು ವಿಷಯವನ್ನು ತೋರಿಸುತ್ತದೆ ಎಂಬುದನ್ನು ಆಯ್ಕೆಮಾಡಬಹುದು."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> ಗಾಗಿ ನಿಯಂತ್ರಣಗಳನ್ನು ತೆಗೆದುಹಾಕಬೇಕೆ?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"ಮೆಚ್ಚಲಾಗಿರುವುದು"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"ಮೆಚ್ಚಲಾಗಿರುವುದು, ಸ್ಥಾನ <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -1067,7 +1065,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="add" msgid="81036585205287996">"ಸೇರಿಸಿ"</string>
     <string name="manage_users" msgid="1823875311934643849">"ಬಳಕೆದಾರರನ್ನು ನಿರ್ವಹಿಸಿ"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್‌ಗೆ ಡ್ರ್ಯಾಗ್ ಮಾಡುವುದನ್ನು ಈ ಅಧಿಸೂಚನೆಯು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್‌ಗೆ ಡ್ರ್ಯಾಗ್ ಮಾಡುವುದನ್ನು ಈ ನೋಟಿಫಿಕೇಶನ್ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"ವೈ-ಫೈ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"ಆದ್ಯತೆ ಮೋಡ್"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"ಅಲಾರಾಂ ಹೊಂದಿಸಲಾಗಿದೆ"</string>

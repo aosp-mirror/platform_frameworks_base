@@ -137,7 +137,7 @@ object Flags {
      * the digits when the clock moves.
      */
     @JvmField
-    val STEP_CLOCK_ANIMATION = releasedFlag(212, "step_clock_animation")
+    val STEP_CLOCK_ANIMATION = unreleasedFlag(212, "step_clock_animation", teamfood = true)
 
     /**
      * Migration from the legacy isDozing/dozeAmount paths to the new KeyguardTransitionRepository
@@ -569,10 +569,6 @@ object Flags {
     val TRACKPAD_GESTURE_COMMON = releasedFlag(1210, "trackpad_gesture_common")
 
     // 1300 - screenshots
-    // TODO(b/254513155): Tracking Bug
-    @JvmField
-    val SCREENSHOT_WORK_PROFILE_POLICY = releasedFlag(1301, "screenshot_work_profile_policy")
-
     // TODO(b/264916608): Tracking Bug
     @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata", teamfood = true)
 

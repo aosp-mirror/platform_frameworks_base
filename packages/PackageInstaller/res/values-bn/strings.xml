@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"অ্যাপটি ইনস্টল করা হয়ে গেছে।"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"আপনি কি এই অ্যাপটি ইনস্টল করতে চান?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"আপনি কি এই অ্যাপটি আপডেট করতে চান?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"অ্যাপটি ইনস্টল করা হয়নি।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ইনস্টল হওয়া থেকে প্যাকেজটিকে ব্লক করা হয়েছে।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"আগে থেকেই থাকা একটি প্যাকেজের সাথে প্যাকেজটির সমস্যা সৃষ্টি হওয়ায় অ্যাপটি ইনস্টল করা যায়নি।"</string>
@@ -41,6 +43,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"এই ব্যবহারকারী অজানা অ্যাপ ইনস্টল করতে পারেন না"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"এই ব্যবহারকারীর অ্যাপ ইনস্টল করার অনুমতি নেই"</string>
     <string name="ok" msgid="7871959885003339302">"ঠিক আছে"</string>
+    <!-- no translation found for update_anyway (8792432341346261969) -->
+    <skip />
     <string name="manage_applications" msgid="5400164782453975580">"অ্যাপ পরিচালনা"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"জায়গা খালি নেই"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> ইনস্টল করা যায়নি। কিছু পরিমাণ জায়গা খালি করে আবার চেষ্টা করুন।"</string>

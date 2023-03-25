@@ -63,6 +63,10 @@ final class DreamController {
     // Time to allow the dream to perform an exit transition when waking up.
     private static final int DREAM_FINISH_TIMEOUT = 5 * 1000;
 
+    // Extras used with ACTION_CLOSE_SYSTEM_DIALOGS broadcast
+    private static final String EXTRA_REASON_KEY = "reason";
+    private static final String EXTRA_REASON_VALUE = "dream";
+
     private final Context mContext;
     private final Handler mHandler;
     private final Listener mListener;
@@ -77,6 +81,7 @@ final class DreamController {
     private final Bundle mDreamingStartedStoppedOptions = createDreamingStartedStoppedOptions();
 
     private final Intent mCloseNotificationShadeIntent;
+    private final Bundle mCloseNotificationShadeOptions;
 
     private DreamRecord mCurrentDream;
 
@@ -96,7 +101,14 @@ final class DreamController {
         mListener = listener;
         mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
         mCloseNotificationShadeIntent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        mCloseNotificationShadeIntent.putExtra("reason", "dream");
+        mCloseNotificationShadeIntent.putExtra(EXTRA_REASON_KEY, EXTRA_REASON_VALUE);
+        mCloseNotificationShadeIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        mCloseNotificationShadeOptions = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeliveryGroupMatchingKey(Intent.ACTION_CLOSE_SYSTEM_DIALOGS,
+                        EXTRA_REASON_VALUE)
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
+                .toBundle();
     }
 
     /**
@@ -149,7 +161,8 @@ final class DreamController {
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "startDream");
         try {
             // Close the notification shade. No need to send to all, but better to be explicit.
-            mContext.sendBroadcastAsUser(mCloseNotificationShadeIntent, UserHandle.ALL);
+            mContext.sendBroadcastAsUser(mCloseNotificationShadeIntent, UserHandle.ALL,
+                    null /* receiverPermission */, mCloseNotificationShadeOptions);
 
             Slog.i(TAG, "Starting dream: name=" + name
                     + ", isPreviewMode=" + isPreviewMode + ", canDoze=" + canDoze

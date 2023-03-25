@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"ایپ انسٹال ہو گئی۔"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"کیا آپ یہ ایپ انسٹال کرنا چاہتے ہیں؟"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"کیا آپ یہ ایپ اپ ڈیٹ کرنا چاہتے ہیں؟"</string>
+    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"ایپ انسٹال نہیں ہوئی۔"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"پیکج کو انسٹال ہونے سے مسدود کر دیا گیا تھا۔"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ایپ انسٹال نہیں ہوئی کیونکہ پیکج ایک موجودہ پیکیج سے متصادم ہے۔"</string>
@@ -41,6 +43,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"یہ صارف نامعلوم ایپس کو انسٹال نہیں کر سکتا"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"اس صارف کو ایپس انسٹال کرنے کی اجازت نہیں ہے"</string>
     <string name="ok" msgid="7871959885003339302">"ٹھیک ہے"</string>
+    <!-- no translation found for update_anyway (8792432341346261969) -->
+    <skip />
     <string name="manage_applications" msgid="5400164782453975580">"ایپس منظم کریں"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"جگہ نہیں ہے"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> کو انسٹال نہیں کیا جا سکا۔ کچھ جگہ خالی کریں اور دوبارہ کوشش کریں۔"</string>

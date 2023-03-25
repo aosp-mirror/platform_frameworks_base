@@ -3619,6 +3619,17 @@ class ContextImpl extends Context {
         scheduleFinalCleanup(getClass().getName(), getOuterContext().getClass().getSimpleName());
     }
 
+    @Override
+    public void closeSystemDialogs() {
+        final Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        final Bundle options = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
+                .toBundle();
+        sendBroadcast(intent, null /* receiverPermission */, options);
+    }
+
     // ----------------------------------------------------------------------
     // ----------------------------------------------------------------------
     // ----------------------------------------------------------------------

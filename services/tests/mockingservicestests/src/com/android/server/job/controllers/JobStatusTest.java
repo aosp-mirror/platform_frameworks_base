@@ -374,28 +374,28 @@ public class JobStatusTest {
         int numFailures = 1;
         int numSystemStops = 0;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_MAX, job.getEffectivePriority());
 
         // 2+ failures, priority should be lowered as much as possible.
         numFailures = 2;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
         numFailures = 5;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
         numFailures = 8;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
 
         // System stops shouldn't factor in the downgrade.
         numSystemStops = 10;
         numFailures = 0;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_MAX, job.getEffectivePriority());
     }
 
@@ -412,44 +412,44 @@ public class JobStatusTest {
         int numFailures = 1;
         int numSystemStops = 0;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
 
         // Failures in [2,4), priority should be lowered slightly.
         numFailures = 2;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_DEFAULT, job.getEffectivePriority());
         numFailures = 3;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_DEFAULT, job.getEffectivePriority());
 
         // Failures in [4,6), priority should be lowered more.
         numFailures = 4;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
         numFailures = 5;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
 
         // 6+ failures, priority should be lowered as much as possible.
         numFailures = 6;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_MIN, job.getEffectivePriority());
         numFailures = 12;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_MIN, job.getEffectivePriority());
 
         // System stops shouldn't factor in the downgrade.
         numSystemStops = 10;
         numFailures = 0;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
     }
 
@@ -470,32 +470,32 @@ public class JobStatusTest {
         int numFailures = 1;
         int numSystemStops = 0;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
         numFailures = 4;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
         numFailures = 5;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
 
         // 6+ failures, priority should be lowered as much as possible.
         numFailures = 6;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_MIN, job.getEffectivePriority());
         numFailures = 12;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_MIN, job.getEffectivePriority());
 
         // System stops shouldn't factor in the downgrade.
         numSystemStops = 10;
         numFailures = 0;
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
-                numSystemStops, 0, 0);
+                numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
     }
 
@@ -515,16 +515,49 @@ public class JobStatusTest {
         job = createJobStatus(jobInfo);
 
         assertTrue(job.shouldTreatAsUserInitiatedJob());
+    }
+
+    @Test
+    public void testShouldTreatAsUserInitiated_userDemoted() {
+        JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setUserInitiated(true)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build();
+        JobStatus job = createJobStatus(jobInfo);
+
+        assertTrue(job.shouldTreatAsUserInitiatedJob());
 
         JobStatus rescheduledJob = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME,
-                0, 0, 0, 0);
+                0, 0, 0, 0, 0);
         assertTrue(rescheduledJob.shouldTreatAsUserInitiatedJob());
 
         job.addInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
         assertFalse(job.shouldTreatAsUserInitiatedJob());
 
         rescheduledJob = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME,
-                0, 0, 0, 0);
+                0, 0, 0, 0, 0);
+        assertFalse(rescheduledJob.shouldTreatAsUserInitiatedJob());
+    }
+
+    @Test
+    public void testShouldTreatAsUserInitiated_systemDemoted() {
+        JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setUserInitiated(true)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build();
+        JobStatus job = createJobStatus(jobInfo);
+
+        assertTrue(job.shouldTreatAsUserInitiatedJob());
+
+        JobStatus rescheduledJob = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME,
+                0, 0, 0, 0, 0);
+        assertTrue(rescheduledJob.shouldTreatAsUserInitiatedJob());
+
+        job.addInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ);
+        assertFalse(job.shouldTreatAsUserInitiatedJob());
+
+        rescheduledJob = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME,
+                0, 0, 0, 0, 0);
         assertFalse(rescheduledJob.shouldTreatAsUserInitiatedJob());
     }
 
@@ -1082,7 +1115,7 @@ public class JobStatusTest {
         final JobInfo job = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY).build();
         return new JobStatus(job, 0, null, -1, 0, null, null, earliestRunTimeElapsedMillis,
-                latestRunTimeElapsedMillis, 0, 0, null, 0, 0);
+                latestRunTimeElapsedMillis, 0, 0, 0, null, 0, 0);
     }
 
     private static JobStatus createJobStatus(JobInfo job) {
