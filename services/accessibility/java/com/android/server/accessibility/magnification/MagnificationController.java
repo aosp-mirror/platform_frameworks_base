@@ -167,13 +167,19 @@ public class MagnificationController implements WindowMagnificationManager.Callb
 
     @Override
     public void onPerformScaleAction(int displayId, float scale) {
-        getWindowMagnificationMgr().setScale(displayId, scale);
-        getWindowMagnificationMgr().persistScale(displayId);
+        if (getFullScreenMagnificationController().isActivated(displayId)) {
+            getFullScreenMagnificationController().setScaleAndCenter(displayId, scale,
+                    Float.NaN, Float.NaN, false, MAGNIFICATION_GESTURE_HANDLER_ID);
+            getFullScreenMagnificationController().persistScale(displayId);
+        } else if (getWindowMagnificationMgr().isWindowMagnifierEnabled(displayId)) {
+            getWindowMagnificationMgr().setScale(displayId, scale);
+            getWindowMagnificationMgr().persistScale(displayId);
+        }
     }
 
     @Override
     public void onAccessibilityActionPerformed(int displayId) {
-        updateMagnificationButton(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        updateMagnificationUIControls(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
     }
 
     @Override
@@ -190,21 +196,22 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         if (mMagnificationCapabilities != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL) {
             return;
         }
-        if (isActivated(displayId, mode)) {
-            getWindowMagnificationMgr().showMagnificationButton(displayId, mode);
-        }
+        updateMagnificationUIControls(displayId, mode);
     }
 
-    private void updateMagnificationButton(int displayId, int mode) {
+    private void updateMagnificationUIControls(int displayId, int mode) {
         final boolean isActivated = isActivated(displayId, mode);
-        final boolean showButton;
+        final boolean showUIControls;
         synchronized (mLock) {
-            showButton = isActivated && mMagnificationCapabilities
+            showUIControls = isActivated && mMagnificationCapabilities
                     == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
         }
-        if (showButton) {
+        if (showUIControls) {
+            // we only need to show magnification button, the settings panel showing should be
+            // triggered only on sysui side.
             getWindowMagnificationMgr().showMagnificationButton(displayId, mode);
         } else {
+            getWindowMagnificationMgr().removeMagnificationSettingsPanel(displayId);
             getWindowMagnificationMgr().removeMagnificationButton(displayId);
         }
     }
@@ -427,7 +434,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     public void onRequestMagnificationSpec(int displayId, int serviceId) {
         final WindowMagnificationManager windowMagnificationManager;
         synchronized (mLock) {
-            updateMagnificationButton(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+            updateMagnificationUIControls(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
             windowMagnificationManager = mWindowMagnificationMgr;
         }
         if (windowMagnificationManager != null) {
@@ -456,7 +463,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
             }
             logMagnificationUsageState(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW, duration);
         }
-        updateMagnificationButton(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        updateMagnificationUIControls(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
     }
 
     @Override
@@ -554,7 +561,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
             }
             logMagnificationUsageState(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN, duration);
         }
-        updateMagnificationButton(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        updateMagnificationUIControls(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
     }
 
     private void disableWindowMagnificationIfNeeded(int displayId) {
@@ -872,7 +879,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                         mAms.notifyMagnificationChanged(mDisplayId, region, configBuilder.build());
                     }
                 }
-                updateMagnificationButton(mDisplayId, mTargetMode);
+                updateMagnificationUIControls(mDisplayId, mTargetMode);
                 if (mTransitionCallBack != null) {
                     mTransitionCallBack.onResult(mDisplayId, success);
                 }
@@ -900,7 +907,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                 setExpiredAndRemoveFromListLocked();
                 setTransitionState(mDisplayId, null);
                 applyMagnificationModeLocked(mCurrentMode);
-                updateMagnificationButton(mDisplayId, mCurrentMode);
+                updateMagnificationUIControls(mDisplayId, mCurrentMode);
                 if (mTransitionCallBack != null) {
                     mTransitionCallBack.onResult(mDisplayId, true);
                 }
