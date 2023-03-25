@@ -19,6 +19,8 @@ package com.android.settingslib.spa.widget.preference
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AirplanemodeActive
@@ -140,6 +142,7 @@ internal fun InternalSwitchPreference(
         paddingVertical = paddingVertical,
         icon = icon,
     ) {
+        Spacer(Modifier.width(SettingsDimension.itemPaddingEnd))
         SettingsSwitch(
             checked = checked,
             changeable = changeable,

@@ -29,10 +29,7 @@ aidl_interface {
         },
     },
     srcs: [
-        "aidl/android/media/soundtrigger_middleware/ISoundTriggerCallback.aidl",
-        "aidl/android/media/soundtrigger_middleware/ISoundTriggerMiddlewareService.aidl",
-        "aidl/android/media/soundtrigger_middleware/ISoundTriggerModule.aidl",
-        "aidl/android/media/soundtrigger_middleware/SoundTriggerModuleDescriptor.aidl",
+        "aidl/android/media/soundtrigger_middleware/*.aidl",
     ],
     imports: [
         "android.media.audio.common.types-V2",

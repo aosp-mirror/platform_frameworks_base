@@ -82,14 +82,6 @@
       ]
     },
     {
-      "name": "TestablesTests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
-    },
-    {
       "name": "FrameworksCoreTests",
       "options": [
         {

@@ -32,6 +32,7 @@ import android.companion.virtual.sensor.IVirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensorConfig;
+import android.companion.virtual.sensor.VirtualSensorDirectChannelCallback;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -381,7 +382,8 @@ public final class VirtualDeviceParams implements Parcelable {
     }
 
     /**
-     * Returns the callback to get notified about changes in the sensor listeners.
+     * Returns the callback to get notified about changes in the sensor listeners or sensor direct
+     * channel configuration.
      * @hide
      */
     @Nullable
@@ -533,19 +535,29 @@ public final class VirtualDeviceParams implements Parcelable {
         private int mAudioRecordingSessionId = AUDIO_SESSION_ID_GENERATE;
 
         @NonNull private List<VirtualSensorConfig> mVirtualSensorConfigs = new ArrayList<>();
-        @Nullable
-        private IVirtualSensorCallback mVirtualSensorCallback;
+        @Nullable private Executor mVirtualSensorCallbackExecutor;
+        @Nullable private VirtualSensorCallback mVirtualSensorCallback;
+        @Nullable private Executor mVirtualSensorDirectChannelCallbackExecutor;
+        @Nullable private VirtualSensorDirectChannelCallback mVirtualSensorDirectChannelCallback;
 
         private static class VirtualSensorCallbackDelegate extends IVirtualSensorCallback.Stub {
             @NonNull
             private final Executor mExecutor;
             @NonNull
             private final VirtualSensorCallback mCallback;
+            @Nullable
+            private final Executor mDirectChannelExecutor;
+            @Nullable
+            private final VirtualSensorDirectChannelCallback mDirectChannelCallback;
 
             VirtualSensorCallbackDelegate(@NonNull @CallbackExecutor Executor executor,
-                    @NonNull VirtualSensorCallback callback) {
-                mCallback = callback;
+                    @NonNull VirtualSensorCallback callback,
+                    @Nullable @CallbackExecutor Executor directChannelExecutor,
+                    @Nullable VirtualSensorDirectChannelCallback directChannelCallback) {
                 mExecutor = executor;
+                mCallback = callback;
+                mDirectChannelExecutor = directChannelExecutor;
+                mDirectChannelCallback = directChannelCallback;
             }
 
             @Override
@@ -562,20 +574,29 @@ public final class VirtualDeviceParams implements Parcelable {
             @Override
             public void onDirectChannelCreated(int channelHandle,
                     @NonNull SharedMemory sharedMemory) {
-                mExecutor.execute(
-                        () -> mCallback.onDirectChannelCreated(channelHandle, sharedMemory));
+                if (mDirectChannelCallback != null && mDirectChannelExecutor != null) {
+                    mDirectChannelExecutor.execute(
+                            () -> mDirectChannelCallback.onDirectChannelCreated(channelHandle,
+                                    sharedMemory));
+                }
             }
 
             @Override
             public void onDirectChannelDestroyed(int channelHandle) {
-                mExecutor.execute(() -> mCallback.onDirectChannelDestroyed(channelHandle));
+                if (mDirectChannelCallback != null && mDirectChannelExecutor != null) {
+                    mDirectChannelExecutor.execute(
+                            () -> mDirectChannelCallback.onDirectChannelDestroyed(channelHandle));
+                }
             }
 
             @Override
             public void onDirectChannelConfigured(int channelHandle, @NonNull VirtualSensor sensor,
                     int rateLevel, int reportToken) {
-                mExecutor.execute(() -> mCallback.onDirectChannelConfigured(
-                        channelHandle, sensor, rateLevel, reportToken));
+                if (mDirectChannelCallback != null && mDirectChannelExecutor != null) {
+                    mDirectChannelExecutor.execute(
+                            () -> mDirectChannelCallback.onDirectChannelConfigured(
+                                    channelHandle, sensor, rateLevel, reportToken));
+                }
             }
         }
 
@@ -783,20 +804,37 @@ public final class VirtualDeviceParams implements Parcelable {
         }
 
         /**
-         * Sets the callback to get notified about changes in the sensor listeners.
+         * Sets the callback to get notified about changes in the sensor configuration.
          *
          * @param executor The executor where the callback is executed on.
          * @param callback The callback to get notified when the state of the sensor
-         * listeners has changed, see {@link VirtualSensorCallback}
+         * configuration has changed, see {@link VirtualSensorCallback}
          */
         @SuppressLint("MissingGetterMatchingBuilder")
         @NonNull
         public Builder setVirtualSensorCallback(
                 @NonNull @CallbackExecutor Executor executor,
                 @NonNull VirtualSensorCallback callback) {
-            mVirtualSensorCallback = new VirtualSensorCallbackDelegate(
-                    Objects.requireNonNull(executor),
-                    Objects.requireNonNull(callback));
+            mVirtualSensorCallbackExecutor = Objects.requireNonNull(executor);
+            mVirtualSensorCallback = Objects.requireNonNull(callback);
+            return this;
+        }
+
+        /**
+         * Sets the callback to get notified about changes in
+         * {@link android.hardware.SensorDirectChannel} configuration.
+         *
+         * @param executor The executor where the callback is executed on.
+         * @param callback The callback to get notified when the state of the sensor
+         * configuration has changed, see {@link VirtualSensorDirectChannelCallback}
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @NonNull
+        public Builder setVirtualSensorDirectChannelCallback(
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull VirtualSensorDirectChannelCallback callback) {
+            mVirtualSensorDirectChannelCallbackExecutor = Objects.requireNonNull(executor);
+            mVirtualSensorDirectChannelCallback = Objects.requireNonNull(callback);
             return this;
         }
 
@@ -857,6 +895,7 @@ public final class VirtualDeviceParams implements Parcelable {
          */
         @NonNull
         public VirtualDeviceParams build() {
+            VirtualSensorCallbackDelegate virtualSensorCallbackDelegate = null;
             if (!mVirtualSensorConfigs.isEmpty()) {
                 if (mDevicePolicies.get(POLICY_TYPE_SENSORS, DEVICE_POLICY_DEFAULT)
                         != DEVICE_POLICY_CUSTOM) {
@@ -868,6 +907,22 @@ public final class VirtualDeviceParams implements Parcelable {
                     throw new IllegalArgumentException(
                             "VirtualSensorCallback is required for creating virtual sensors.");
                 }
+
+                for (int i = 0; i < mVirtualSensorConfigs.size(); ++i) {
+                    if (mVirtualSensorConfigs.get(i).getDirectChannelTypesSupported() > 0) {
+                        if (mVirtualSensorDirectChannelCallback == null) {
+                            throw new IllegalArgumentException(
+                                    "VirtualSensorDirectChannelCallback is required for creating "
+                                            + "virtual sensors that support direct channel.");
+                        }
+                        break;
+                    }
+                }
+                virtualSensorCallbackDelegate = new VirtualSensorCallbackDelegate(
+                        mVirtualSensorCallbackExecutor,
+                        mVirtualSensorCallback,
+                        mVirtualSensorDirectChannelCallbackExecutor,
+                        mVirtualSensorDirectChannelCallback);
             }
 
             if ((mAudioPlaybackSessionId != AUDIO_SESSION_ID_GENERATE
@@ -901,7 +956,7 @@ public final class VirtualDeviceParams implements Parcelable {
                     mName,
                     mDevicePolicies,
                     mVirtualSensorConfigs,
-                    mVirtualSensorCallback,
+                    virtualSensorCallbackDelegate,
                     mAudioPlaybackSessionId,
                     mAudioRecordingSessionId);
         }

@@ -19,6 +19,7 @@
 package com.android.systemui.notetask.quickaffordance
 
 import android.hardware.input.InputSettings
+import android.os.UserManager
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import com.android.dx.mockito.inline.extended.ExtendedMockito
@@ -33,6 +34,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepo
 import com.android.systemui.notetask.NoteTaskController
 import com.android.systemui.notetask.NoteTaskEntryPoint
 import com.android.systemui.stylus.StylusManager
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -55,6 +57,7 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
     @Mock lateinit var controller: NoteTaskController
     @Mock lateinit var stylusManager: StylusManager
     @Mock lateinit var repository: KeyguardQuickAffordanceRepository
+    @Mock lateinit var userManager: UserManager
 
     private lateinit var mockitoSession: MockitoSession
 
@@ -66,12 +69,6 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
                 .mockStatic(InputSettings::class.java)
                 .strictness(Strictness.LENIENT)
                 .startMocking()
-
-        whenever(InputSettings.isStylusEverUsed(mContext)).then { true }
-        whenever(repository.selections).then {
-            val map = mapOf("" to listOf(createUnderTest()))
-            MutableStateFlow(map)
-        }
     }
 
     @After
@@ -84,6 +81,8 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
             context = context,
             controller = controller,
             stylusManager = stylusManager,
+            userManager = userManager,
+            keyguardMonitor = mock(),
             lazyRepository = { repository },
             isEnabled = isEnabled,
         )
@@ -98,47 +97,101 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
                 )
         )
 
+    // region lockScreenState
     @Test
-    fun lockScreenState_stylusUsed_noCustomShortcutSelected_shouldEmitVisible() = runTest {
-        val underTest = createUnderTest()
+    fun lockScreenState_stylusUsed_userUnlocked_isSelected_shouldEmitVisible() = runTest {
+        TestConfig()
+            .setStylusEverUsed(true)
+            .setUserUnlocked(true)
+            .setConfigSelections(mock<NoteTaskQuickAffordanceConfig>())
 
+        val underTest = createUnderTest()
         val actual by collectLastValue(underTest.lockScreenState)
 
         assertThat(actual).isEqualTo(createLockScreenStateVisible())
     }
 
     @Test
-    fun lockScreenState_noStylusEverUsed_noCustomShortcutSelected_shouldEmitVisible() = runTest {
-        whenever(InputSettings.isStylusEverUsed(mContext)).then { false }
-        val underTest = createUnderTest()
+    fun lockScreenState_stylusUnused_userUnlocked_isSelected_shouldEmitHidden() = runTest {
+        TestConfig()
+            .setStylusEverUsed(false)
+            .setUserUnlocked(true)
+            .setConfigSelections(mock<NoteTaskQuickAffordanceConfig>())
 
+        val underTest = createUnderTest()
+        val actual by collectLastValue(underTest.lockScreenState)
+
+        assertThat(actual).isEqualTo(LockScreenState.Hidden)
+    }
+
+    @Test
+    fun lockScreenState_stylusUsed_userLocked_isSelected_shouldEmitHidden() = runTest {
+        TestConfig()
+            .setStylusEverUsed(true)
+            .setUserUnlocked(false)
+            .setConfigSelections(mock<NoteTaskQuickAffordanceConfig>())
+
+        val underTest = createUnderTest()
+        val actual by collectLastValue(underTest.lockScreenState)
+
+        assertThat(actual).isEqualTo(LockScreenState.Hidden)
+    }
+
+    @Test
+    fun lockScreenState_stylusUsed_userUnlocked_noSelected_shouldEmitVisible() = runTest {
+        TestConfig().setStylusEverUsed(true).setUserUnlocked(true).setConfigSelections()
+
+        val underTest = createUnderTest()
         val actual by collectLastValue(underTest.lockScreenState)
 
         assertThat(actual).isEqualTo(createLockScreenStateVisible())
     }
 
     @Test
-    fun lockScreenState_stylusUsed_customShortcutSelected_shouldEmitVisible() = runTest {
-        whenever(repository.selections).then {
-            val map = mapOf<String, List<KeyguardQuickAffordanceConfig>>()
-            MutableStateFlow(map)
-        }
-        val underTest = createUnderTest()
+    fun lockScreenState_stylusUnused_userUnlocked_noSelected_shouldEmitHidden() = runTest {
+        TestConfig().setStylusEverUsed(false).setUserUnlocked(true).setConfigSelections()
 
+        val underTest = createUnderTest()
+        val actual by collectLastValue(underTest.lockScreenState)
+
+        assertThat(actual).isEqualTo(LockScreenState.Hidden)
+    }
+
+    @Test
+    fun lockScreenState_stylusUsed_userLocked_noSelected_shouldEmitHidden() = runTest {
+        TestConfig().setStylusEverUsed(true).setUserUnlocked(false).setConfigSelections()
+
+        val underTest = createUnderTest()
+        val actual by collectLastValue(underTest.lockScreenState)
+
+        assertThat(actual).isEqualTo(LockScreenState.Hidden)
+    }
+
+    @Test
+    fun lockScreenState_stylusUsed_userUnlocked_customSelections_shouldEmitVisible() = runTest {
+        TestConfig().setStylusEverUsed(true).setUserUnlocked(true).setConfigSelections(mock())
+
+        val underTest = createUnderTest()
         val actual by collectLastValue(underTest.lockScreenState)
 
         assertThat(actual).isEqualTo(createLockScreenStateVisible())
     }
 
     @Test
-    fun lockScreenState_noIsStylusEverUsed_noCustomShortcutSelected_shouldEmitHidden() = runTest {
-        whenever(InputSettings.isStylusEverUsed(mContext)).then { false }
-        whenever(repository.selections).then {
-            val map = mapOf<String, List<KeyguardQuickAffordanceConfig>>()
-            MutableStateFlow(map)
-        }
-        val underTest = createUnderTest()
+    fun lockScreenState_stylusUnused_userUnlocked_customSelections_shouldEmitHidden() = runTest {
+        TestConfig().setStylusEverUsed(false).setUserUnlocked(true).setConfigSelections(mock())
 
+        val underTest = createUnderTest()
+        val actual by collectLastValue(underTest.lockScreenState)
+
+        assertThat(actual).isEqualTo(LockScreenState.Hidden)
+    }
+
+    @Test
+    fun lockScreenState_stylusUsed_userLocked_customSelections_shouldEmitHidden() = runTest {
+        TestConfig().setStylusEverUsed(true).setUserUnlocked(false).setConfigSelections(mock())
+
+        val underTest = createUnderTest()
         val actual by collectLastValue(underTest.lockScreenState)
 
         assertThat(actual).isEqualTo(LockScreenState.Hidden)
@@ -146,12 +199,14 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
 
     @Test
     fun lockScreenState_isNotEnabled_shouldEmitHidden() = runTest {
-        val underTest = createUnderTest(isEnabled = false)
+        TestConfig().setStylusEverUsed(true).setUserUnlocked(true).setConfigSelections()
 
+        val underTest = createUnderTest(isEnabled = false)
         val actual by collectLastValue(underTest.lockScreenState)
 
         assertThat(actual).isEqualTo(LockScreenState.Hidden)
     }
+    // endregion
 
     @Test
     fun onTriggered_shouldLaunchNoteTask() {
@@ -160,5 +215,23 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
         underTest.onTriggered(expandable = null)
 
         verify(controller).showNoteTask(entryPoint = NoteTaskEntryPoint.QUICK_AFFORDANCE)
+    }
+
+    private inner class TestConfig {
+
+        fun setStylusEverUsed(value: Boolean) = also {
+            whenever(InputSettings.isStylusEverUsed(mContext)).thenReturn(value)
+        }
+
+        fun setUserUnlocked(value: Boolean) = also {
+            whenever(userManager.isUserUnlocked).thenReturn(value)
+        }
+
+        fun setConfigSelections(vararg values: KeyguardQuickAffordanceConfig) = also {
+            val slotKey = "bottom-right"
+            val configSnapshots = values.toList()
+            val map = mapOf(slotKey to configSnapshots)
+            whenever(repository.selections).thenReturn(MutableStateFlow(map))
+        }
     }
 }

@@ -815,8 +815,8 @@ public final class TvInputManagerService extends SystemService {
     }
 
     @GuardedBy("mLock")
-    private boolean createSessionInternalLocked(ITvInputService service, IBinder sessionToken,
-            int userId, AttributionSource tvAppAttributionSource) {
+    private boolean createSessionInternalLocked(
+            ITvInputService service, IBinder sessionToken, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         SessionState sessionState = userState.sessionStateMap.get(sessionToken);
         if (DEBUG) {
@@ -836,7 +836,7 @@ public final class TvInputManagerService extends SystemService {
                         callback, sessionState.inputId, sessionState.sessionId);
             } else {
                 service.createSession(channels[1], callback, sessionState.inputId,
-                        sessionState.sessionId, tvAppAttributionSource);
+                        sessionState.sessionId, sessionState.tvAppAttributionSource);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "error in createSession", e);
@@ -1547,7 +1547,7 @@ public final class TvInputManagerService extends SystemService {
                     IBinder sessionToken = new Binder();
                     SessionState sessionState = new SessionState(sessionToken, info.getId(),
                             info.getComponent(), isRecordingSession, client, seq, callingUid,
-                            callingPid, resolvedUserId, uniqueSessionId);
+                            callingPid, resolvedUserId, uniqueSessionId, tvAppAttributionSource);
 
                     // Add them to the global session state map of the current user.
                     userState.sessionStateMap.put(sessionToken, sessionState);
@@ -1559,8 +1559,8 @@ public final class TvInputManagerService extends SystemService {
                     serviceState.sessionTokens.add(sessionToken);
 
                     if (serviceState.service != null) {
-                        if (!createSessionInternalLocked(serviceState.service, sessionToken,
-                                    resolvedUserId, tvAppAttributionSource)) {
+                        if (!createSessionInternalLocked(
+                                    serviceState.service, sessionToken, resolvedUserId)) {
                             removeSessionStateLocked(sessionToken, resolvedUserId);
                         }
                     } else {
@@ -3135,6 +3135,7 @@ public final class TvInputManagerService extends SystemService {
         private final ComponentName componentName;
         private final boolean isRecordingSession;
         private final ITvInputClient client;
+        private final AttributionSource tvAppAttributionSource;
         private final int seq;
         /**
          * The {code UID} of the application that created the session.
@@ -3163,7 +3164,8 @@ public final class TvInputManagerService extends SystemService {
 
         private SessionState(IBinder sessionToken, String inputId, ComponentName componentName,
                 boolean isRecordingSession, ITvInputClient client, int seq, int callingUid,
-                int callingPid, int userId, String sessionId) {
+                int callingPid, int userId, String sessionId,
+                AttributionSource tvAppAttributionSource) {
             this.sessionToken = sessionToken;
             this.inputId = inputId;
             this.componentName = componentName;
@@ -3174,6 +3176,7 @@ public final class TvInputManagerService extends SystemService {
             this.callingPid = callingPid;
             this.userId = userId;
             this.sessionId = sessionId;
+            this.tvAppAttributionSource = tvAppAttributionSource;
         }
 
         @Override
@@ -3223,8 +3226,7 @@ public final class TvInputManagerService extends SystemService {
 
                 // And create sessions, if any.
                 for (IBinder sessionToken : serviceState.sessionTokens) {
-                    if (!createSessionInternalLocked(
-                                serviceState.service, sessionToken, mUserId, null)) {
+                    if (!createSessionInternalLocked(serviceState.service, sessionToken, mUserId)) {
                         tokensToBeRemoved.add(sessionToken);
                     }
                 }

@@ -206,6 +206,7 @@
     <color name="control_thumbnail_tint">#33000000</color>
     <color name="control_thumbnail_shadow_color">@*android:color/black</color>
     <color name="controls_task_view_bg">#CC191C1D</color>
+    <color name="control_popup_dim">#8A000000</color>
 
     <!-- Keyboard backlight indicator-->
     <color name="backlight_indicator_step_filled">#F6E388</color>

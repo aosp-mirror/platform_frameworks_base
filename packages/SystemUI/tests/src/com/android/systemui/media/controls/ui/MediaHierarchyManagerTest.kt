@@ -389,6 +389,15 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun getGuidedTransformationTranslationY_previousHostInvisible_returnsZero() {
+        goToLockscreen()
+        enterGuidedTransformation()
+        whenever(lockHost.visible).thenReturn(false)
+
+        assertThat(mediaHierarchyManager.getGuidedTransformationTranslationY()).isEqualTo(0)
+    }
+
+    @Test
     fun isCurrentlyInGuidedTransformation_hostsVisible_returnsTrue() {
         goToLockscreen()
         enterGuidedTransformation()

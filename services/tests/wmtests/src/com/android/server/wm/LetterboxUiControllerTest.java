@@ -826,6 +826,33 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         assertTrue(mController.shouldSendFakeFocus());
     }
 
+    @Test
+    public void testgetFixedOrientationLetterboxAspectRatio_splitScreenAspectEnabled() {
+        doReturn(true).when(mActivity.mWmService.mLetterboxConfiguration)
+                .isCameraCompatTreatmentEnabled(anyBoolean());
+        doReturn(true).when(mActivity.mWmService.mLetterboxConfiguration)
+                .isCameraCompatSplitScreenAspectRatioEnabled();
+        doReturn(false).when(mActivity.mWmService.mLetterboxConfiguration)
+                .getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox();
+        doReturn(1.5f).when(mActivity.mWmService.mLetterboxConfiguration)
+                .getFixedOrientationLetterboxAspectRatio();
+
+        // Recreate DisplayContent with DisplayRotationCompatPolicy
+        mActivity = setUpActivityWithComponent();
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertEquals(mController.getFixedOrientationLetterboxAspectRatio(
+                mActivity.getParent().getConfiguration()), 1.5f, /* delta */ 0.01);
+
+        spyOn(mDisplayContent.mDisplayRotationCompatPolicy);
+        doReturn(true).when(mDisplayContent.mDisplayRotationCompatPolicy)
+                .isTreatmentEnabledForActivity(eq(mActivity));
+
+        assertEquals(mController.getFixedOrientationLetterboxAspectRatio(
+                mActivity.getParent().getConfiguration()), mController.getSplitScreenAspectRatio(),
+                /* delta */  0.01);
+    }
+
     private void mockThatProperty(String propertyName, boolean value) throws Exception {
         Property property = new Property(propertyName, /* value */ value, /* packageName */ "",
                  /* className */ "");
