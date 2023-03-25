@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"Uhlelo lokusebenza olufakiwe."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Ingabe ufuna ukufaka le app?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Ingabe ufuna ukubuyekeza le app?"</string>
+    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"Uhlelo lokusebenza alufakiwe."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Iphakheji livinjiwe kusukela ekufakweni."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Uhlelo lokusebenza alufakiwe njengoba ukuphakheja kushayisana nephakheji elikhona."</string>
@@ -41,6 +43,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Izinhlelo zokusebenza ezingaziwa azikwazi ukufakwa ilo msebenzisi"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Lo msebenzisi akavunyelwe ukufaka izinhlelo zokusebenza"</string>
     <string name="ok" msgid="7871959885003339302">"KULUNGILE"</string>
+    <!-- no translation found for update_anyway (8792432341346261969) -->
+    <skip />
     <string name="manage_applications" msgid="5400164782453975580">"Phatha izinhlelo zokusebenza"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Iphelelwe yisikhala"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> ayikwazanga ukufakwa. Khulula isikhala bese uzama futhi."</string>

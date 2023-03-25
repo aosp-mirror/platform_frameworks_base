@@ -27,10 +27,12 @@ import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollectorFake
+import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.dock.DockManager
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
@@ -182,7 +184,13 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                     MultiShadeMotionEventInteractor(
                         applicationContext = context,
                         applicationScope = testScope.backgroundScope,
-                        interactor = multiShadeInteractor,
+                        multiShadeInteractor = multiShadeInteractor,
+                        keyguardTransitionInteractor =
+                            KeyguardTransitionInteractor(
+                                repository = FakeKeyguardTransitionRepository(),
+                            ),
+                        bouncerInteractor = mock(),
+                        falsingManager = FalsingManagerFake(),
                     )
                 },
             )

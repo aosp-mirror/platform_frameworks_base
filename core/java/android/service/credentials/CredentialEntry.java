@@ -20,7 +20,6 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.slice.Slice;
 import android.credentials.GetCredentialResponse;
@@ -44,19 +43,8 @@ import com.android.internal.util.Preconditions;
  * result should be set to {@link android.app.Activity#RESULT_OK}, and the
  * {@link CredentialProviderService#EXTRA_GET_CREDENTIAL_RESPONSE} must be set with a
  * {@link GetCredentialResponse} object.
- *
- * <p>Any class that derives this class must only add extra field values to the {@code slice}
- * object passed into the constructor. Any other field will not be parceled through. If the
- * derived class has custom parceling implementation, this class will not be able to unpack
- * the parcel without having access to that implementation.
- *
- * <p>While creating this entry, providers must set a {@code requestId} to be retrieved
- * from {@link BeginGetCredentialOption#getId()}, to determine for which request this entry is
- * being presented to the user. This will ensure that when user selects the entry, the correct
- * complete request is added to the {@link PendingIntent} mentioned above.
  */
-@SuppressLint("ParcelNotFinal")
-public class CredentialEntry implements Parcelable {
+public final class CredentialEntry implements Parcelable {
     /** The request option that corresponds to this entry. **/
     private final @Nullable String mBeginGetCredentialOptionId;
 

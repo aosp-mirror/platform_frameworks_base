@@ -42,6 +42,7 @@ import android.content.Context;
 import android.media.AudioFormat;
 import android.media.permission.Identity;
 import android.media.soundtrigger.Status;
+import android.media.soundtrigger_middleware.ISoundTriggerInjection;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.Build;
@@ -77,9 +78,11 @@ public class SoundTrigger {
     }
 
     /**
+     * Model architecture associated with a fake STHAL which can be injected.
+     * Used for testing purposes.
      * @hide
      */
-    public static final String FAKE_HAL_ARCH = "injection";
+    public static final String FAKE_HAL_ARCH = ISoundTriggerInjection.FAKE_HAL_ARCH;
 
     /**
      * Status code used when the operation succeeded

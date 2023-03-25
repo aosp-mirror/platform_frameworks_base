@@ -2895,6 +2895,9 @@
          mirror the content of the default display. -->
     <bool name="config_localDisplaysMirrorContent">true</bool>
 
+    <!-- When true, udfps vote is ignored. This feature is disabled by default. -->
+    <bool name="config_ignoreUdfpsVote">false</bool>
+
     <!-- Controls if local secondary displays should be private or not. Value specified in the array
          represents physical port address of each display and display in this list will be marked
          as private. {@see android.view.Display#FLAG_PRIVATE} -->
@@ -5582,9 +5585,19 @@
         split screen. -->
     <bool name="config_isWindowManagerCameraCompatTreatmentEnabled">false</bool>
 
+    <!-- Whether should use split screen aspect ratio for the activity when camera compat treatment
+        is enabled and activity is connected to the camera in fullscreen. -->
+    <bool name="config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled">false</bool>
+
     <!-- Whether a camera compat controller is enabled to allow the user to apply or revert
          treatment for stretched issues in camera viewfinder. -->
     <bool name="config_isCameraCompatControlForStretchedIssuesEnabled">false</bool>
+
+    <!-- Docking is a uiMode configuration change and will cause activities to relaunch if it's not
+         handled. If true, the configuration change will be sent but activities will not be
+         relaunched upon docking. Apps with desk resources will behave like normal, since they may
+         expect the relaunch upon the desk uiMode change. -->
+    <bool name="config_skipActivityRelaunchWhenDocking">false</bool>
 
     <!-- If true, hide the display cutout with display area -->
     <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>

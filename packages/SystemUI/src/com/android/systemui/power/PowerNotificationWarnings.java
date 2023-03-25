@@ -772,9 +772,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         mSaverConfirmation.dismiss();
                     }
                     // Also close the notification shade, if it's open.
-                    mBroadcastSender.sendBroadcast(
-                            new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-                                    .setFlags(Intent.FLAG_RECEIVER_FOREGROUND));
+                    mBroadcastSender.closeSystemDialogs();
 
                     final Uri uri = Uri.parse(getURL());
                     Context context = widget.getContext();

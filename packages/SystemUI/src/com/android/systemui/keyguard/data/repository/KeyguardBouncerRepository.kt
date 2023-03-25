@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.os.Build
+import android.util.Log
 import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 
 /**
  * Encapsulates app state for the lock screen primary and alternate bouncer.
@@ -231,6 +233,7 @@ constructor(
 
         primaryBouncerShow
             .logDiffsForTable(buffer, "", "PrimaryBouncerShow", false)
+            .onEach { Log.d(TAG, "Keyguard Bouncer is ${if (it) "showing" else "hiding."}") }
             .launchIn(applicationScope)
         primaryBouncerShowingSoon
             .logDiffsForTable(buffer, "", "PrimaryBouncerShowingSoon", false)
@@ -274,5 +277,6 @@ constructor(
 
     companion object {
         private const val NOT_VISIBLE = -1L
+        private const val TAG = "KeyguardBouncerRepositoryImpl"
     }
 }

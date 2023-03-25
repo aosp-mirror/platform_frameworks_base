@@ -832,9 +832,7 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_REQUEST_INITIAL_ACCESSIBILITY_FOCUS = 1 << 24;
 
-    private static final int BOOLEAN_PROPERTY_REQUEST_TOUCH_PASSTHROUGH = 1 << 25;
-
-    private static final int BOOLEAN_PROPERTY_ACCESSIBILITY_DATA_SENSITIVE = 1 << 26;
+    private static final int BOOLEAN_PROPERTY_ACCESSIBILITY_DATA_SENSITIVE = 1 << 25;
 
     /**
      * Bits that provide the id of a virtual descendant of a view.
@@ -2596,53 +2594,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setEditable(boolean editable) {
         setBooleanProperty(BOOLEAN_PROPERTY_EDITABLE, editable);
-    }
-
-    /**
-     * Gets whether this node is one of the candidates that wants touch interaction within its
-     * screen bounds to bypass the touch exploration and go straight to the underlying view
-     * hierarchy.
-     *
-     * <p>
-     * {@link android.accessibilityservice.AccessibilityService} could aggregate the {@link
-     * #getBoundsInScreen()} that has request touch passthrough, and/or doing complex calculation
-     * with other views that doesn't request touch passthrough, and call {@link
-     * AccessibilityService#setTouchExplorationPassthroughRegion(int, Region)} to bypass the touch
-     * interactions to the underlying views within the region.
-     * </p>
-     *
-     * @return True if the node wants touch interaction within its screen bounds to bypass touch
-     * exploration and go straight to the underlying view hierarchy; false otherwise.
-     */
-    public boolean hasRequestTouchPassthrough() {
-        return getBooleanProperty(BOOLEAN_PROPERTY_REQUEST_TOUCH_PASSTHROUGH);
-    }
-
-    /**
-     * Sets whether this node wants touch interaction within its screen bounds to bypass touch
-     * exploration and go straight to the underlying view hierarchy.
-     * <p>
-     *   <strong>Note:</strong> This property allows the
-     *   {@link android.accessibilityservice.AccessibilityService} to calculate the
-     *   aggregated touch passthrough region. App developers need to ensure that the
-     *   {@link #getBoundsInScreen()} of
-     *   the node align with the region they want touchable, and that child nodes overlapping these
-     *   bounds may cause that region to be reduced.
-     * </p>
-     *
-     * <p>
-     *   <strong>Note:</strong> Cannot be called from an
-     *   {@link android.accessibilityservice.AccessibilityService}.
-     *   This class is made immutable before being delivered to an AccessibilityService.
-     * </p>
-     *
-     * @param touchPassthrough True if the node wants touch interaction within its screen bounds
-     *                         to bypass touch exploration and go straight to the underlying view
-     *                         hierarchy.
-     * @throws IllegalStateException If called from an AccessibilityService.
-     */
-    public void setRequestTouchPassthrough(boolean touchPassthrough) {
-        setBooleanProperty(BOOLEAN_PROPERTY_REQUEST_TOUCH_PASSTHROUGH, touchPassthrough);
     }
 
     /**

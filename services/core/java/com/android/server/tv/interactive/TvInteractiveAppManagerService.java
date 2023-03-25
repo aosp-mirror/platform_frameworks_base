@@ -2887,7 +2887,7 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
-        public void onRequestScheduleRecording2(String inputId, String requestId, Uri channelUri,
+        public void onRequestScheduleRecording2(String requestId, String inputId, Uri channelUri,
                 long start, long duration, int repeat, Bundle params) {
             synchronized (mLock) {
                 if (DEBUG) {

@@ -224,7 +224,7 @@ class ActivityEmbeddingAnimationRunner {
                 openingWholeScreenBounds.union(change.getEndAbsBounds());
             } else {
                 closingChanges.add(change);
-                closingWholeScreenBounds.union(change.getEndAbsBounds());
+                closingWholeScreenBounds.union(change.getStartAbsBounds());
             }
         }
 

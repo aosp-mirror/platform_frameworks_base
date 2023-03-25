@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Ota USB käyttöön"</string>
     <string name="learn_more" msgid="4690632085667273811">"Lue lisää"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Kuvakaappaus"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock poistettu käytöstä"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"lähetti kuvan"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Tallennetaan kuvakaappausta..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Kuvakaappausta tallennetaan työprofiiliin…"</string>
@@ -1067,7 +1066,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"muokkaa"</string>
     <string name="add" msgid="81036585205287996">"Lisää"</string>
     <string name="manage_users" msgid="1823875311934643849">"Ylläpidä käyttäjiä"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"Ilmoitus ei tue jaetulle näytölle vetämistä."</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"Ilmoitus ei tue jaetulle näytölle vetämistä"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi ei ole saatavilla"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Tärkeät-tila"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Hälytys asetettu"</string>

@@ -17,7 +17,6 @@
 package android.service.credentials;
 
 import android.annotation.NonNull;
-import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.slice.Slice;
 import android.os.Parcel;
@@ -33,14 +32,8 @@ import android.os.Parcelable;
  * the {@link android.app.Activity} result should be set to {@link android.app.Activity#RESULT_OK},
  * and the {@link CredentialProviderService#EXTRA_CREATE_CREDENTIAL_RESPONSE} must be set with a
  * {@link android.credentials.CreateCredentialResponse} object.
- *
- * <p>Any class that derives this class must only add extra field values to the {@code slice}
- * object passed into the constructor. Any other field will not be parceled through. If the
- * derived class has custom parceling implementation, this class will not be able to unpack
- * the parcel without having access to that implementation.
  */
-@SuppressLint("ParcelNotFinal")
-public class CreateEntry implements Parcelable {
+public final class CreateEntry implements Parcelable {
     private final @NonNull Slice mSlice;
 
     private CreateEntry(@NonNull Parcel in) {

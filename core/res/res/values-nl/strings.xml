@@ -140,8 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wifi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Bellen via wifi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wifi-gesprek"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Uit"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Bellen via wifi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Bellen via mobiel netwerk"</string>
@@ -1701,9 +1700,9 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Toestaan dat <xliff:g id="SERVICE">%1$s</xliff:g> volledige controle over je apparaat heeft?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Volledige controle is gepast voor apps die je helpen met toegankelijkheid, maar niet voor de meeste apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Scherm bekijken en bedienen"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"De functie kan alle content op het scherm lezen en content bovenop andere apps weergeven."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Deze functie kan alle content op het scherm lezen en content bovenop andere apps weergeven."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Acties bekijken en uitvoeren"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"De functie kan je interacties met een app of een hardwaresensor bijhouden en namens jou met apps communiceren."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Deze functie kan je interacties met een app of een hardwaresensor bijhouden en namens jou met apps communiceren."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Toestaan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Weigeren"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tik op een functie om deze te gebruiken:"</string>
@@ -2325,12 +2324,9 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> gebruikt beide schermen om content te tonen"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Het apparaat is te warm"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dubbel scherm is niet beschikbaar, omdat je telefoon te warm wordt"</string>
-    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
-    <skip />
-    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
-    <skip />
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen is niet beschikbaar"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen is niet beschikbaar omdat Batterijbesparing aanstaat. Je kunt dit uitzetten via Instellingen."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Naar Instellingen"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Uitzetten"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> is ingesteld"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Toetsenbordindeling ingesteld op <xliff:g id="LAYOUT_1">%s</xliff:g>. Tik om te wijzigen."</string>

@@ -245,12 +245,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi-tilkoblingskode"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Tilkoblingen mislyktes"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Sørg for at enheten er koblet til samme nettverk."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Koble til enheten via Wifi ved å skanne en QR-kode"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Koble til enheten via wifi ved å skanne en QR-kode"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Kobler til enheten …"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Kunne ikke koble til enheten. Enten var QR-koden feil, eller enheten er ikke koblet til samme nettverk."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-adresse og port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skann QR-koden"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Koble til enheten via Wifi ved å skanne en QR-kode"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Koble til enheten via wifi ved å skanne en QR-kode"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Koble til et Wifi-nettverk"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, feilsøking, utvikler"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Snarvei til feilrapport"</string>

@@ -2324,12 +2324,9 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"কন্টেন্ট দেখানোর জন্য <xliff:g id="APP_NAME">%1$s</xliff:g> দুটি ডিসপ্লে ব্যবহার করছে"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ডিভাইস খুব গরম হয়ে গেছে"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"আপনার ফোন খুব বেশি গরম হয়ে যাচ্ছে বলে \'ডুয়াল স্ক্রিন\' উপলভ্য নেই"</string>
-    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
-    <skip />
-    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
-    <skip />
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen উপলভ্য নেই"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"\'ব্যাটারি সেভার\' চালু করা আছে বলে Dual Screen ফিচারের সুবিধা উপলভ্য হবে না। আপনি সেটিংস থেকে এটি বন্ধ করতে পারবেন।"</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"সেটিংসে যান"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"বন্ধ করুন"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> কনফিগার করা হয়েছে"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"কীবোর্ড লেআউট <xliff:g id="LAYOUT_1">%s</xliff:g>-এ সেট করা আছে। পরিবর্তন করতে ট্যাপ করুন।"</string>

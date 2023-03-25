@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB ਚਾਲੂ ਕਰੋ"</string>
     <string name="learn_more" msgid="4690632085667273811">"ਹੋਰ ਜਾਣੋ"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock ਨੂੰ ਬੰਦ ਕੀਤਾ ਗਿਆ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ਚਿੱਤਰ ਭੇਜਿਆ ਗਿਆ"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਸੁਰੱਖਿਅਤ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ \'ਤੇ ਰੱਖਿਅਤ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
@@ -1067,7 +1066,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="add" msgid="81036585205287996">"ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="manage_users" msgid="1823875311934643849">"ਵਰਤੋਂਕਾਰਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"ਇਹ ਸੂਚਨਾ ਸਪਲਿਟ ਸਕ੍ਰੀਨ \'ਤੇ ਘਸੀਟਣ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ ਹੈ।"</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"ਇਹ ਸੂਚਨਾ ਸਪਲਿਟ ਸਕ੍ਰੀਨ \'ਤੇ ਘਸੀਟਣ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ ਹੈ"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"ਵਾਈ-ਫਾਈ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"ਤਰਜੀਹੀ ਮੋਡ"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"ਅਲਾਰਮ ਸੈੱਟ ਹੈ"</string>
