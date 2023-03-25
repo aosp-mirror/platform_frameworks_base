@@ -77,6 +77,7 @@ import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_POSITION_MULTIPLIER_CENTER;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP;
@@ -241,6 +242,8 @@ final class LetterboxUiController {
     private final Boolean mBooleanPropertyFakeFocus;
 
     private boolean mIsRelauchingAfterRequestedOrientationChanged;
+
+    private boolean mDoubleTapEvent;
 
     LetterboxUiController(WindowManagerService wmService, ActivityRecord activityRecord) {
         mLetterboxConfiguration = wmService.mLetterboxConfiguration;
@@ -838,6 +841,12 @@ final class LetterboxUiController {
         }
     }
 
+    boolean isFromDoubleTap() {
+        final boolean isFromDoubleTap = mDoubleTapEvent;
+        mDoubleTapEvent = false;
+        return isFromDoubleTap;
+    }
+
     SurfaceControl getLetterboxParentSurface() {
         if (mActivityRecord.isInLetterboxAnimation()) {
             return mActivityRecord.getTask().getSurfaceControl();
@@ -932,11 +941,18 @@ final class LetterboxUiController {
     }
 
     private boolean shouldUseSplitScreenAspectRatio(@NonNull Configuration parentConfiguration) {
-        return isDisplayFullScreenAndSeparatingHinge()
-                // Don't resize to split screen size when half folded and centered
-                && getHorizontalPositionMultiplier(parentConfiguration) != 0.5f
-                        || isCameraCompatSplitScreenAspectRatioAllowed()
-                                && isCameraCompatTreatmentActive();
+        final boolean isBookMode = isDisplayFullScreenAndInPosture(
+                DeviceStateController.DeviceState.HALF_FOLDED,
+                /* isTabletop */ false);
+        final boolean isNotCenteredHorizontally = getHorizontalPositionMultiplier(
+                parentConfiguration) != LETTERBOX_POSITION_MULTIPLIER_CENTER;
+        final boolean isTabletopMode = isDisplayFullScreenAndInPosture(
+                DeviceStateController.DeviceState.HALF_FOLDED,
+                /* isTabletop */ true);
+        // Don't resize to split screen size when in book mode if letterbox position is centered
+        return ((isBookMode && isNotCenteredHorizontally) || isTabletopMode)
+                    || isCameraCompatSplitScreenAspectRatioAllowed()
+                        && isCameraCompatTreatmentActive();
     }
 
     private float getDefaultMinAspectRatioForUnresizableApps() {
@@ -996,7 +1012,7 @@ final class LetterboxUiController {
 
     @LetterboxConfiguration.LetterboxHorizontalReachabilityPosition
     int getLetterboxPositionForHorizontalReachability() {
-        final boolean isInFullScreenBookMode = isDisplayFullScreenAndSeparatingHinge();
+        final boolean isInFullScreenBookMode = isFullScreenAndBookModeEnabled();
         return mLetterboxConfiguration.getLetterboxPositionForHorizontalReachability(
                 isInFullScreenBookMode);
     }
@@ -1037,7 +1053,7 @@ final class LetterboxUiController {
                                 : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__LEFT_TO_CENTER;
             logLetterboxPositionChange(changeToLog);
         }
-
+        mDoubleTapEvent = true;
         // TODO(197549949): Add animation for transition.
         mActivityRecord.recomputeConfiguration();
     }
@@ -1076,7 +1092,7 @@ final class LetterboxUiController {
                                 : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__TOP_TO_CENTER;
             logLetterboxPositionChange(changeToLog);
         }
-
+        mDoubleTapEvent = true;
         // TODO(197549949): Add animation for transition.
         mActivityRecord.recomputeConfiguration();
     }
