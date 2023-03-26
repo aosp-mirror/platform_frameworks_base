@@ -32,6 +32,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -400,8 +401,10 @@ public class SharedConnectivityServiceTest {
     }
 
     private SharedConnectivitySettingsState buildSettingsState() {
-        return new SharedConnectivitySettingsState.Builder(mContext).setInstantTetherEnabled(true)
-                .setInstantTetherSettingsPendingIntent(new Intent())
+        return new SharedConnectivitySettingsState.Builder().setInstantTetherEnabled(true)
+                .setInstantTetherSettingsPendingIntent(
+                        PendingIntent.getActivity(mContext, 0, new Intent(),
+                                PendingIntent.FLAG_IMMUTABLE))
                 .setExtras(Bundle.EMPTY).build();
     }
 }

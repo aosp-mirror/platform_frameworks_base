@@ -206,7 +206,7 @@ public abstract class SharedConnectivityService extends Service {
                 // Done lazily since creating it needs a context.
                 if (mSettingsState == null) {
                     mSettingsState = new SharedConnectivitySettingsState
-                            .Builder(getApplicationContext())
+                            .Builder()
                             .setInstantTetherEnabled(false)
                             .setExtras(Bundle.EMPTY).build();
                 }
