@@ -559,7 +559,21 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    public void onPerformScaleAction_magnifierEnabled_handleScaleChange() throws RemoteException {
+    public void onPerformScaleAction_fullScreenMagnifierEnabled_handleScaleChange()
+            throws RemoteException {
+        final float newScale = 4.0f;
+        setMagnificationEnabled(MODE_FULLSCREEN);
+
+        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, newScale);
+
+        verify(mScreenMagnificationController).setScaleAndCenter(eq(TEST_DISPLAY), eq(newScale),
+                anyFloat(), anyFloat(), anyBoolean(), anyInt());
+        verify(mScreenMagnificationController).persistScale(eq(TEST_DISPLAY));
+    }
+
+    @Test
+    public void onPerformScaleAction_windowMagnifierEnabled_handleScaleChange()
+            throws RemoteException {
         final float newScale = 4.0f;
         setMagnificationEnabled(MODE_WINDOW);
 
@@ -1032,6 +1046,25 @@ public class MagnificationControllerTest {
         // The second time is triggered when the disable-magnification callback is triggered.
         verify(mWindowMagnificationManager, times(2)).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_WINDOW));
+    }
+
+    @Test
+    public void disableWindowMode_windowEnabled_removeMagnificationSettingsPanel()
+            throws RemoteException {
+        setMagnificationEnabled(MODE_WINDOW);
+
+        mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY, false);
+
+        verify(mWindowMagnificationManager).removeMagnificationSettingsPanel(eq(TEST_DISPLAY));
+    }
+
+    @Test
+    public void onFullScreenDeactivated_fullScreenEnabled_removeMagnificationSettingsPanel()
+            throws RemoteException {
+        setMagnificationEnabled(MODE_FULLSCREEN);
+        mScreenMagnificationController.reset(TEST_DISPLAY, /* animate= */ true);
+
+        verify(mWindowMagnificationManager).removeMagnificationSettingsPanel(eq(TEST_DISPLAY));
     }
 
     @Test

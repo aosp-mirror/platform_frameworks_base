@@ -2335,8 +2335,6 @@
     <string name="magnification_mode_switch_state_full_screen">Magnify full screen</string>
     <!-- A11y state description for magnification mode switch that device is in window mode. [CHAR LIMIT=NONE] -->
     <string name="magnification_mode_switch_state_window">Magnify part of screen</string>
-    <!-- Click action label for magnification switch. [CHAR LIMIT=NONE] -->
-    <string name="magnification_mode_switch_click_label">Switch</string>
     <!-- Click action label for magnification settings panel. [CHAR LIMIT=NONE] -->
     <string name="magnification_open_settings_click_label">Open magnification settings</string>
     <!-- Label of the corner of a rectangle that you can tap and drag to resize the magnification area. [CHAR LIMIT=NONE] -->
@@ -2372,6 +2370,8 @@
     <string name="accessibility_magnification_small">Small</string>
     <!-- Click action label for magnification panel large size [CHAR LIMIT=NONE]-->
     <string name="accessibility_magnification_large">Large</string>
+    <!-- Click action label for magnification panel full screen size [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_fullscreen">Full screen</string>
     <!-- Click action label for magnification panel Done [CHAR LIMIT=20]-->
     <string name="accessibility_magnification_done">Done</string>
     <!-- Click action label for edit magnification size [CHAR LIMIT=20]-->

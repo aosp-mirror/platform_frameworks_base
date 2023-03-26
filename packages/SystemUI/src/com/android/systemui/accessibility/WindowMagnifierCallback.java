@@ -62,10 +62,9 @@ interface WindowMagnifierCallback {
     void onMove(int displayId);
 
     /**
-     * Called when magnification mode changed.
+     * Called when magnification settings button clicked.
      *
      * @param displayId The logical display id.
-     * @param newMode Magnification mode.
      */
-    void onModeSwitch(int displayId, int newMode);
+    void onClickSettingsButton(int displayId);
 }
