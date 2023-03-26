@@ -35,6 +35,27 @@ import java.util.Map;
 
 /**
  * Manages the retrieval of certain types of {@link MediaProjection} tokens.
+ *
+ * <p><ol>An example flow of starting a media projection will be:
+ *     <li>Declare a foreground service with the type {@code mediaProjection} in
+ *     the {@code AndroidManifest.xml}.
+ *     </li>
+ *     <li>Create an intent by calling {@link MediaProjectionManager#createScreenCaptureIntent()}
+ *         and pass this intent to {@link Activity#startActivityForResult(Intent, int)}.
+ *     </li>
+ *     <li>On getting {@link Activity#onActivityResult(int, int, Intent)},
+ *         start the foreground service with the type
+ *         {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION}.
+ *     </li>
+ *     <li>Retrieve the media projection token by calling
+ *         {@link MediaProjectionManager#getMediaProjection(int, Intent)} with the result code and
+ *         intent from the {@link Activity#onActivityResult(int, int, Intent)} above.
+ *     </li>
+ *     <li>Start the screen capture session for media projection by calling
+ *         {@link MediaProjection#createVirtualDisplay(String, int, int, int, int, Surface,
+ *         android.hardware.display.VirtualDisplay.Callback, Handler)}.
+ *     </li>
+ * </ol>
  */
 @SystemService(Context.MEDIA_PROJECTION_SERVICE)
 public final class MediaProjectionManager {
@@ -169,6 +190,17 @@ public final class MediaProjectionManager {
      * FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION} in the
      * <a href="/guide/topics/manifest/service-element"><code>&lt;service&gt;</code></a> element of
      * the app's manifest file.
+     * </p>
+     * <p>
+     * For an app targeting SDK version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U} or
+     * later, the user must have granted the app with the permission to start a projection,
+     * before the app starts a foreground service with the type
+     * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION}.
+     * Additionally, the app must have started the foreground service with that type before calling
+     * this API here, or else it'll receive a {@link SecurityException} from this API call, unless
+     * it's a privileged app. Apps can request the permission via the
+     * {@link #createScreenCaptureIntent()} and {@link Activity#startActivityForResult(Intent, int)}
+     * (or similar APIs).
      * </p>
      *
      * @param resultCode The result code from {@link Activity#onActivityResult(int, int, Intent)
