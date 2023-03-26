@@ -296,6 +296,11 @@ class SplitScreenTransitions {
             Transitions.TransitionHandler handler,
             @Nullable TransitionConsumedCallback consumedCallback,
             @Nullable TransitionFinishedCallback finishedCallback) {
+        if (mPendingEnter != null) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
+                    + " skip to start enter split transition since it already exist. ");
+            return null;
+        }
         final IBinder transition = mTransitions.startTransition(transitType, wct, handler);
         setEnterTransition(transition, remoteTransition, consumedCallback, finishedCallback);
         return transition;
@@ -323,6 +328,12 @@ class SplitScreenTransitions {
     IBinder startDismissTransition(WindowContainerTransaction wct,
             Transitions.TransitionHandler handler, @SplitScreen.StageType int dismissTop,
             @SplitScreenController.ExitReason int reason) {
+        if (mPendingDismiss != null) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
+                    + " skip to start dismiss split transition since it already exist. reason to "
+                    + " dismiss = %s", exitReasonToString(reason));
+            return null;
+        }
         final int type = reason == EXIT_REASON_DRAG_DIVIDER
                 ? TRANSIT_SPLIT_DISMISS_SNAP : TRANSIT_SPLIT_DISMISS;
         IBinder transition = mTransitions.startTransition(type, wct, handler);
