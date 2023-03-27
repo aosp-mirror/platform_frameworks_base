@@ -16,11 +16,9 @@
 
 package com.android.server.appop;
 
-import android.util.ArraySet;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
-import java.io.PrintWriter;
 import java.util.Objects;
 
 /**
@@ -181,109 +179,24 @@ public class AppOpsServiceTestingShim implements AppOpsCheckingServiceInterface 
     }
 
     @Override
-    public void startWatchingOpModeChanged(OnOpModeChangedListener changedListener, int op) {
-        mOldImplementation.startWatchingOpModeChanged(changedListener, op);
-        mNewImplementation.startWatchingOpModeChanged(changedListener, op);
-    }
-
-    @Override
-    public void startWatchingPackageModeChanged(OnOpModeChangedListener changedListener,
-            String packageName) {
-        mOldImplementation.startWatchingPackageModeChanged(changedListener, packageName);
-        mNewImplementation.startWatchingPackageModeChanged(changedListener, packageName);
-    }
-
-    @Override
-    public void removeListener(OnOpModeChangedListener changedListener) {
-        mOldImplementation.removeListener(changedListener);
-        mNewImplementation.removeListener(changedListener);
-    }
-
-    @Override
-    public ArraySet<OnOpModeChangedListener> getOpModeChangedListeners(int op) {
-        ArraySet<OnOpModeChangedListener> oldVal = mOldImplementation.getOpModeChangedListeners(op);
-        ArraySet<OnOpModeChangedListener> newVal = mNewImplementation.getOpModeChangedListeners(op);
+    public SparseBooleanArray getForegroundOps(int uid) {
+        SparseBooleanArray oldVal = mOldImplementation.getForegroundOps(uid);
+        SparseBooleanArray newVal = mNewImplementation.getForegroundOps(uid);
 
         if (!Objects.equals(oldVal, newVal)) {
-            signalImplDifference("getOpModeChangedListeners");
+            signalImplDifference("getForegroundOps");
         }
 
         return newVal;
     }
 
     @Override
-    public ArraySet<OnOpModeChangedListener> getPackageModeChangedListeners(String packageName) {
-        ArraySet<OnOpModeChangedListener> oldVal = mOldImplementation
-                .getPackageModeChangedListeners(packageName);
-        ArraySet<OnOpModeChangedListener> newVal = mNewImplementation
-                .getPackageModeChangedListeners(packageName);
+    public SparseBooleanArray getForegroundOps(String packageName, int userId) {
+        SparseBooleanArray oldVal = mOldImplementation.getForegroundOps(packageName, userId);
+        SparseBooleanArray newVal = mNewImplementation.getForegroundOps(packageName, userId);
 
         if (!Objects.equals(oldVal, newVal)) {
-            signalImplDifference("getPackageModeChangedListeners");
-        }
-
-        return newVal;
-    }
-
-    @Override
-    public void notifyWatchersOfChange(int op, int uid) {
-        mOldImplementation.notifyWatchersOfChange(op, uid);
-        mNewImplementation.notifyWatchersOfChange(op, uid);
-    }
-
-    @Override
-    public void notifyOpChanged(OnOpModeChangedListener changedListener, int op, int uid,
-            String packageName) {
-        mOldImplementation.notifyOpChanged(changedListener, op, uid, packageName);
-        mNewImplementation.notifyOpChanged(changedListener, op, uid, packageName);
-    }
-
-    @Override
-    public void notifyOpChangedForAllPkgsInUid(int op, int uid, boolean onlyForeground,
-            OnOpModeChangedListener callbackToIgnore) {
-        mOldImplementation
-                .notifyOpChangedForAllPkgsInUid(op, uid, onlyForeground, callbackToIgnore);
-        mNewImplementation
-                .notifyOpChangedForAllPkgsInUid(op, uid, onlyForeground, callbackToIgnore);
-    }
-
-    @Override
-    public SparseBooleanArray evalForegroundUidOps(int uid, SparseBooleanArray foregroundOps) {
-        SparseBooleanArray oldVal = mOldImplementation.evalForegroundUidOps(uid, foregroundOps);
-        SparseBooleanArray newVal = mNewImplementation.evalForegroundUidOps(uid, foregroundOps);
-
-        if (!Objects.equals(oldVal, newVal)) {
-            signalImplDifference("evalForegroundUidOps");
-        }
-
-        return newVal;
-    }
-
-    @Override
-    public SparseBooleanArray evalForegroundPackageOps(String packageName,
-            SparseBooleanArray foregroundOps, int userId) {
-        SparseBooleanArray oldVal = mOldImplementation
-                .evalForegroundPackageOps(packageName, foregroundOps, userId);
-        SparseBooleanArray newVal = mNewImplementation
-                .evalForegroundPackageOps(packageName, foregroundOps, userId);
-
-        if (!Objects.equals(oldVal, newVal)) {
-            signalImplDifference("evalForegroundPackageOps");
-        }
-
-        return newVal;
-    }
-
-    @Override
-    public boolean dumpListeners(int dumpOp, int dumpUid, String dumpPackage,
-            PrintWriter printWriter) {
-        boolean oldVal = mOldImplementation
-                .dumpListeners(dumpOp, dumpUid, dumpPackage, printWriter);
-        boolean newVal = mNewImplementation
-                .dumpListeners(dumpOp, dumpUid, dumpPackage, printWriter);
-
-        if (oldVal != newVal) {
-            signalImplDifference("dumpListeners");
+            signalImplDifference("getForegroundOps");
         }
 
         return newVal;
