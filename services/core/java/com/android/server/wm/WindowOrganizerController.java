@@ -33,14 +33,14 @@ import static android.window.TaskFragmentOperation.OP_TYPE_SET_RELATIVE_BOUNDS;
 import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_UNKNOWN;
 import static android.window.WindowContainerTransaction.Change.CHANGE_RELATIVE_BOUNDS;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_FINISH_ACTIVITY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_LAUNCH_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_PENDING_INTENT;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_INSETS_FRAME_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
@@ -1055,28 +1055,24 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 taskDisplayArea.moveRootTaskBehindRootTask(thisTask.getRootTask(), restoreAt);
                 break;
             }
-            case HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER: {
-                final Rect insetsProviderWindowContainer = hop.getInsetsProviderFrame();
-                final WindowContainer container =
-                        WindowContainer.fromBinder(hop.getContainer());
+            case HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER: {
+                final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
                 if (container == null) {
                     Slog.e(TAG, "Attempt to add local insets source provider on unknown: "
-                                    + container);
+                            + container);
                     break;
                 }
-                container.addLocalRectInsetsSourceProvider(
-                        insetsProviderWindowContainer, hop.getInsetsTypes());
+                container.addLocalInsetsFrameProvider(hop.getInsetsFrameProvider());
                 break;
             }
-            case HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER: {
-                final WindowContainer container =
-                        WindowContainer.fromBinder(hop.getContainer());
+            case HIERARCHY_OP_TYPE_REMOVE_INSETS_FRAME_PROVIDER: {
+                final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
                 if (container == null) {
                     Slog.e(TAG, "Attempt to remove local insets source provider from unknown: "
                                     + container);
                     break;
                 }
-                container.removeLocalInsetsSourceProvider(hop.getInsetsTypes());
+                container.removeLocalInsetsFrameProvider(hop.getInsetsFrameProvider());
                 break;
             }
             case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP: {
