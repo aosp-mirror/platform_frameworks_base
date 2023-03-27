@@ -19,8 +19,31 @@ package com.android.credentialmanager.getflow
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toBitmap
+import com.android.compose.rememberSystemUiController
 import com.android.credentialmanager.CredentialSelectorViewModel
+import com.android.credentialmanager.R
+import com.android.credentialmanager.common.BaseEntry
+import com.android.credentialmanager.common.ProviderActivityState
+import com.android.credentialmanager.common.ui.CredentialContainerCard
+import com.android.credentialmanager.common.ui.HeadlineIcon
+import com.android.credentialmanager.common.ui.HeadlineText
+import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
+import com.android.credentialmanager.common.ui.ModalBottomSheet
+import com.android.credentialmanager.common.ui.SheetContainerCard
+import com.android.credentialmanager.common.ui.setBottomSheetSystemBarsColor
+import com.android.credentialmanager.logging.GetCredentialEvent
+import com.android.internal.logging.UiEventLogger
+
 
 @Composable
 fun GetGenericCredentialScreen(
@@ -28,5 +51,102 @@ fun GetGenericCredentialScreen(
         getCredentialUiState: GetCredentialUiState,
         providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
 ) {
-    // TODO(b/274129098): Implement Screen for mDocs
+    val sysUiController = rememberSystemUiController()
+    setBottomSheetSystemBarsColor(sysUiController)
+    ModalBottomSheet(
+        sheetContent = {
+            when (viewModel.uiState.providerActivityState) {
+                ProviderActivityState.NOT_APPLICABLE -> {
+                    PrimarySelectionCardGeneric(
+                            requestDisplayInfo = getCredentialUiState.requestDisplayInfo,
+                            providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
+                            providerInfoList = getCredentialUiState.providerInfoList,
+                            onEntrySelected = viewModel::getFlowOnEntrySelected,
+                            onLog = { viewModel.logUiEvent(it) },
+                    )
+                    viewModel.uiMetrics.log(GetCredentialEvent
+                            .CREDMAN_GET_CRED_SCREEN_PRIMARY_SELECTION)
+                }
+                ProviderActivityState.READY_TO_LAUNCH -> {
+                    // Launch only once per providerActivityState change so that the provider
+                    // UI will not be accidentally launched twice.
+                    LaunchedEffect(viewModel.uiState.providerActivityState) {
+                        viewModel.launchProviderUi(providerActivityLauncher)
+                    }
+                    viewModel.uiMetrics.log(GetCredentialEvent
+                            .CREDMAN_GET_CRED_PROVIDER_ACTIVITY_READY_TO_LAUNCH)
+                }
+                ProviderActivityState.PENDING -> {
+                    // Hide our content when the provider activity is active.
+                    viewModel.uiMetrics.log(GetCredentialEvent
+                            .CREDMAN_GET_CRED_PROVIDER_ACTIVITY_PENDING)
+                }
+            }
+        },
+        onDismiss = viewModel::onUserCancel,
+    )
+}
+
+@Composable
+fun PrimarySelectionCardGeneric(
+        requestDisplayInfo: RequestDisplayInfo,
+        providerDisplayInfo: ProviderDisplayInfo,
+        providerInfoList: List<ProviderInfo>,
+        onEntrySelected: (BaseEntry) -> Unit,
+        onLog: @Composable (UiEventLogger.UiEventEnum) -> Unit,
+) {
+    val sortedUserNameToCredentialEntryList =
+            providerDisplayInfo.sortedUserNameToCredentialEntryList
+    SheetContainerCard {
+        // When only one provider (not counting the remote-only provider) exists, display that
+        // provider's icon + name up top.
+        if (providerInfoList.size <= 2) { // It's only possible to be the single provider case
+            // if we are started with no more than 2 providers.
+            val nonRemoteProviderList = providerInfoList.filter(
+                { it.credentialEntryList.isNotEmpty() || it.authenticationEntryList.isNotEmpty() }
+            )
+            if (nonRemoteProviderList.size == 1) {
+                val providerInfo = nonRemoteProviderList.firstOrNull() // First should always work
+                // but just to be safe.
+                if (providerInfo != null) {
+                    item {
+                        HeadlineIcon(
+                                bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
+                                tint = Color.Unspecified,
+                        )
+                    }
+                    item { Divider(thickness = 4.dp, color = Color.Transparent) }
+                    item { LargeLabelTextOnSurfaceVariant(text = providerInfo.displayName) }
+                    item { Divider(thickness = 16.dp, color = Color.Transparent) }
+                }
+            }
+        }
+
+        item {
+            HeadlineText(
+                    text = stringResource(
+                            R.string.get_dialog_title_choose_option_for,
+                            requestDisplayInfo.appName
+                    ),
+            )
+        }
+        item { Divider(thickness = 24.dp, color = Color.Transparent) }
+        item {
+            CredentialContainerCard {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    // Show max 4 entries in this primary page
+                    sortedUserNameToCredentialEntryList.forEach {
+                        // TODO(b/275375861): fallback UI merges entries by account names.
+                        //  Need a strategy to be able to show all entries.
+                        CredentialEntryRow(
+                                credentialEntryInfo = it.sortedCredentialEntryList.first(),
+                                onEntrySelected = onEntrySelected,
+                                enforceOneLine = true,
+                        )
+                    }
+                }
+            }
+        }
+    }
+    onLog(GetCredentialEvent.CREDMAN_GET_CRED_PRIMARY_SELECTION_CARD)
 }
