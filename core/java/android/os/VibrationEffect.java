@@ -578,6 +578,30 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /**
+     * Ensures that the effect is repeating indefinitely or not. This is a lossy operation and
+     * should only be applied once to an original effect - it shouldn't be applied to the
+     * result of this method.
+     *
+     * <p>Non-repeating effects will be made repeating by looping the entire effect with the
+     * specified delay between each loop. The delay is added irrespective of whether the effect
+     * already has a delay at the beginning or end.
+     *
+     * <p>Repeating effects will be left with their native repeating portion if it should be
+     * repeating, and otherwise the loop index is removed, so that the entire effect plays once.
+     *
+     * @param wantRepeating Whether the effect is required to be repeating or not.
+     * @param loopDelayMs The milliseconds to pause between loops, if repeating is to be added to
+     *                    the effect. Ignored if {@code repeating==false} or the effect is already
+     *                    repeating itself. No delay is added if <= 0.
+     * @return this if the effect already satifies the repeating requirement, or a copy of this
+     *         adjusted to repeat or not repeat as appropriate.
+     * @hide
+     */
+    @NonNull
+    public abstract <T extends VibrationEffect> T applyRepeatingIndefinitely(
+            boolean wantRepeating, int loopDelayMs);
+
+    /**
      * Scale given vibration intensity by the given factor.
      *
      * @param intensity   relative intensity of the effect, must be between 0 and 1
@@ -857,6 +881,30 @@ public abstract class VibrationEffect implements Parcelable {
             Composed scaled = new Composed(scaledSegments, mRepeatIndex);
             scaled.validate();
             return scaled;
+        }
+
+        /** @hide */
+        @NonNull
+        @Override
+        public Composed applyRepeatingIndefinitely(boolean wantRepeating, int loopDelayMs) {
+            boolean isRepeating = mRepeatIndex >= 0;
+            if (isRepeating == wantRepeating) {
+                return this;
+            } else if (!wantRepeating) {
+                return new Composed(mSegments, -1);
+            } else if (loopDelayMs <= 0) {
+                // Loop with no delay: repeat at index zero.
+                return new Composed(mSegments, 0);
+            } else {
+                // Append a delay and loop. It doesn't matter that there's a delay on the
+                // end because the looping is always indefinite until cancelled.
+                ArrayList<VibrationEffectSegment> loopingSegments =
+                        new ArrayList<>(mSegments.size() + 1);
+                loopingSegments.addAll(mSegments);
+                loopingSegments.add(
+                        new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, loopDelayMs));
+                return new Composed(loopingSegments, 0);
+            }
         }
 
         @Override

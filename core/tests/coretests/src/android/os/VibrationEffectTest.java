@@ -50,6 +50,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -758,6 +759,109 @@ public class VibrationEffectTest {
         assertTrue(100 / 255f > ((StepSegment) scaledDown.getSegments().get(1)).getAmplitude());
     }
 
+    private void doTestApplyRepeatingWithNonRepeatingOriginal(@NotNull VibrationEffect original) {
+        assertTrue(original.getDuration() != Long.MAX_VALUE);
+        int loopDelayMs = 123;
+        assertEquals(original, original.applyRepeatingIndefinitely(false, loopDelayMs));
+
+        // Looping with no delay gets the raw repeated effect.
+        VibrationEffect loopingOriginal = VibrationEffect.startComposition()
+                .repeatEffectIndefinitely(original)
+                .compose();
+        assertEquals(Long.MAX_VALUE, loopingOriginal.getDuration());
+        assertEquals(loopingOriginal, original.applyRepeatingIndefinitely(true, 0));
+
+        VibrationEffect loopingPart = VibrationEffect.startComposition()
+                .addEffect(original)
+                .addOffDuration(Duration.ofMillis(loopDelayMs))
+                .compose();
+
+        VibrationEffect loopingWithDelay = VibrationEffect.startComposition()
+                .repeatEffectIndefinitely(loopingPart)
+                .compose();
+        assertEquals(Long.MAX_VALUE, loopingWithDelay.getDuration());
+        assertEquals(loopingWithDelay, original.applyRepeatingIndefinitely(true, loopDelayMs));
+    }
+
+    @Test
+    public void testApplyRepeatingIndefinitely_nonRepeatingOriginal() {
+        VibrationEffect oneshot = VibrationEffect.createOneShot(100, DEFAULT_AMPLITUDE);
+        doTestApplyRepeatingWithNonRepeatingOriginal(oneshot);
+
+        VibrationEffect predefined = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK);
+        doTestApplyRepeatingWithNonRepeatingOriginal(predefined);
+
+        VibrationEffect primitives = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                .compose();
+        doTestApplyRepeatingWithNonRepeatingOriginal(primitives);
+
+        VibrationEffect legacyWaveform = VibrationEffect.createWaveform(
+                new long[]{1, 2, 3}, new int[]{1, 2, 3}, -1);
+        doTestApplyRepeatingWithNonRepeatingOriginal(legacyWaveform);
+
+        // Test a mix of segments ending in a delay, for completeness.
+        doTestApplyRepeatingWithNonRepeatingOriginal(VibrationEffect.startComposition()
+                .addEffect(oneshot)
+                .addEffect(predefined)
+                .addEffect(primitives)
+                .addEffect(legacyWaveform)
+                .addOffDuration(Duration.ofMillis(1000))
+                .compose());
+    }
+
+    @Test
+    public void testApplyRepeatingIndefinitely_repeatingOriginalWaveform() {
+        // The delay parameter has no effect when the effect is already repeating.
+        int delayMs = 999;
+        VibrationEffect waveformNoRepeat = VibrationEffect.createWaveform(
+                new long[]{1, 2, 3}, new int[]{1, 2, 3}, -1);
+        VibrationEffect waveformFullRepeat = VibrationEffect.createWaveform(
+                new long[]{1, 2, 3}, new int[]{1, 2, 3}, 0);
+        assertEquals(waveformFullRepeat,
+                waveformFullRepeat.applyRepeatingIndefinitely(true, delayMs));
+        assertEquals(waveformNoRepeat,
+                waveformFullRepeat.applyRepeatingIndefinitely(false, delayMs));
+
+        VibrationEffect waveformOffsetRepeat = VibrationEffect.createWaveform(
+                new long[]{1, 2, 3}, new int[]{1, 2, 3}, 1);
+        assertEquals(waveformOffsetRepeat,
+                waveformOffsetRepeat.applyRepeatingIndefinitely(true, delayMs));
+        assertEquals(waveformNoRepeat,
+                waveformOffsetRepeat.applyRepeatingIndefinitely(false, delayMs));
+    }
+
+    @Test
+    public void testApplyRepeatingIndefinitely_repeatingOriginalComposition() {
+        // The delay parameter has no effect when the effect is already repeating.
+        int delayMs = 999;
+        VibrationEffect innerEffect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK)
+                .compose();
+
+        VibrationEffect repeatingOriginal = VibrationEffect.startComposition()
+                .repeatEffectIndefinitely(innerEffect)
+                .compose();
+        assertEquals(repeatingOriginal,
+                repeatingOriginal.applyRepeatingIndefinitely(true, delayMs));
+        assertEquals(innerEffect,
+                repeatingOriginal.applyRepeatingIndefinitely(false, delayMs));
+
+        VibrationEffect offsetOriginal = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD)
+                .repeatEffectIndefinitely(innerEffect)
+                .compose();
+        assertEquals(offsetOriginal,
+                offsetOriginal.applyRepeatingIndefinitely(true, delayMs));
+        assertEquals(VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_THUD)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK)
+                .compose(),
+                offsetOriginal.applyRepeatingIndefinitely(false, delayMs));
+    }
 
     @Test
     public void testDuration() {
