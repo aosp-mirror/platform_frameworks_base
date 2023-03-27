@@ -320,7 +320,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                             startingChild.onExpandedByGesture(
                                     true /* drag down is always an open */)
                         }
-                        notificationPanelController.animateToFullShade(delay)
+                        notificationPanelController.transitionToExpandedShade(delay)
                         callbacks.forEach { it.setTransitionToFullShadeAmount(0f,
                                 true /* animated */, delay) }
 
@@ -531,7 +531,7 @@ class LockscreenShadeTransitionController @Inject constructor(
             } else {
                 // Let's only animate notifications
                 animationHandler = { delay: Long ->
-                    notificationPanelController.animateToFullShade(delay)
+                    notificationPanelController.transitionToExpandedShade(delay)
                 }
             }
             goToLockedShadeInternal(expandedView, animationHandler,
@@ -649,7 +649,7 @@ class LockscreenShadeTransitionController @Inject constructor(
      */
     private fun performDefaultGoToFullShadeAnimation(delay: Long) {
         logger.logDefaultGoToFullShadeAnimation(delay)
-        notificationPanelController.animateToFullShade(delay)
+        notificationPanelController.transitionToExpandedShade(delay)
         animateAppear(delay)
     }
 

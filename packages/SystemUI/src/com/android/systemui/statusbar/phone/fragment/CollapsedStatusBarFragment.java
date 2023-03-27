@@ -509,7 +509,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     private boolean shouldHideNotificationIcons() {
         if (!mShadeExpansionStateManager.isClosed()
-                && mNotificationPanelViewController.hideStatusBarIconsWhenExpanded()) {
+                && mNotificationPanelViewController.shouldHideStatusBarIconsWhenExpanded()) {
             return true;
         }
 

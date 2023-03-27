@@ -57,6 +57,8 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 
+import dagger.Lazy;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,8 +67,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
 import java.util.Optional;
-
-import dagger.Lazy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -153,7 +153,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
         // Trying to open it does nothing.
         mSbcqCallbacks.animateExpandNotificationsPanel();
-        verify(mNotificationPanelViewController, never()).expandShadeToNotifications();
+        verify(mNotificationPanelViewController, never()).expandToNotifications();
         mSbcqCallbacks.animateExpandSettingsPanel(null);
         verify(mNotificationPanelViewController, never()).expand(anyBoolean());
     }
@@ -171,9 +171,9 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
         // Can now be opened.
         mSbcqCallbacks.animateExpandNotificationsPanel();
-        verify(mNotificationPanelViewController).expandShadeToNotifications();
+        verify(mNotificationPanelViewController).expandToNotifications();
         mSbcqCallbacks.animateExpandSettingsPanel(null);
-        verify(mNotificationPanelViewController).expandWithQs();
+        verify(mNotificationPanelViewController).expandToQs();
     }
 
     @Test

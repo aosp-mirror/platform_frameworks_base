@@ -64,7 +64,7 @@ public class BrightnessMirrorController
         mToggleSliderController = setMirrorLayout();
         mNotificationPanel = notificationPanelViewController;
         mDepthController = notificationShadeDepthController;
-        mNotificationPanel.setPanelAlphaEndAction(() -> {
+        mNotificationPanel.setAlphaChangeAnimationEndAction(() -> {
             mBrightnessMirror.setVisibility(View.INVISIBLE);
         });
         mVisibilityCallback = visibilityCallback;
@@ -74,13 +74,13 @@ public class BrightnessMirrorController
     public void showMirror() {
         mBrightnessMirror.setVisibility(View.VISIBLE);
         mVisibilityCallback.accept(true);
-        mNotificationPanel.setPanelAlpha(0, true /* animate */);
+        mNotificationPanel.setAlpha(0, true /* animate */);
         mDepthController.setBrightnessMirrorVisible(true);
     }
 
     public void hideMirror() {
         mVisibilityCallback.accept(false);
-        mNotificationPanel.setPanelAlpha(255, true /* animate */);
+        mNotificationPanel.setAlpha(255, true /* animate */);
         mDepthController.setBrightnessMirrorVisible(false);
     }
 
