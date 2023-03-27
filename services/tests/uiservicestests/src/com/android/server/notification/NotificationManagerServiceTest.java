@@ -40,7 +40,6 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
-import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_CALLS;
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_CONVERSATIONS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
@@ -95,6 +94,7 @@ import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
@@ -213,7 +213,6 @@ import android.widget.RemoteViews;
 
 import androidx.test.InstrumentationRegistry;
 
-import com.android.internal.app.IAppOpsService;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.Flag;
 import com.android.internal.config.sysui.TestableFlagResolver;
@@ -233,6 +232,8 @@ import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
+import com.android.server.notification.NotificationManagerService.PostNotificationTracker;
+import com.android.server.notification.NotificationManagerService.PostNotificationTrackerFactory;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.PermissionPolicyInternal;
@@ -346,6 +347,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private PermissionManager mPermissionManager;
     @Mock
     private DevicePolicyManagerInternal mDevicePolicyManager;
+    private final TestPostNotificationTrackerFactory mPostNotificationTrackerFactory =
+            new TestPostNotificationTrackerFactory();
 
     @Mock
     IIntentSender pi1;
@@ -382,8 +385,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Mock
     AppOpsManager mAppOpsManager;
     @Mock
-    IAppOpsService mAppOpsService;
-    @Mock
     private TestableNotificationManagerService.NotificationAssistantAccessGrantedCallback
             mNotificationAssistantAccessGrantedCallback;
     @Mock
@@ -418,6 +419,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         @Override
         public void hide() {
+        }
+    }
+
+    private class TestPostNotificationTrackerFactory implements PostNotificationTrackerFactory {
+
+        private final List<PostNotificationTracker> mCreatedTrackers = new ArrayList<>();
+
+        @Override
+        public PostNotificationTracker newTracker() {
+            PostNotificationTracker tracker = PostNotificationTrackerFactory.super.newTracker();
+            mCreatedTrackers.add(tracker);
+            return tracker;
         }
     }
 
@@ -554,10 +567,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mockLightsManager, mListeners, mAssistants, mConditionProviders, mCompanionMgr,
                 mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager, mGroupHelper, mAm, mAtm,
                 mAppUsageStats, mDevicePolicyManager, mUgm, mUgmInternal,
-                mAppOpsManager, mAppOpsService, mUm, mHistoryManager, mStatsManager,
+                mAppOpsManager, mUm, mHistoryManager, mStatsManager,
                 mock(TelephonyManager.class),
                 mAmi, mToastRateLimiter, mPermissionHelper, mock(UsageStatsManagerInternal.class),
-                mTelecomManager, mLogger, mTestFlagResolver, mPermissionManager);
+                mTelecomManager, mLogger, mTestFlagResolver, mPermissionManager,
+                mPostNotificationTrackerFactory);
         // Return first true for RoleObserver main-thread check
         when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY, mMainLooper);
@@ -640,11 +654,22 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @After
     public void assertNotificationRecordLoggerCallsValid() {
+        waitForIdle(); // Finish async work, including all logging calls done by Runnables.
         for (NotificationRecordLoggerFake.CallRecord call : mNotificationRecordLogger.getCalls()) {
             if (call.wasLogged) {
                 assertNotNull(call.event);
             }
         }
+        assertThat(mNotificationRecordLogger.getPendingLogs()).isEmpty();
+    }
+
+    @After
+    public void assertAllTrackersFinishedOrCancelled() {
+        // Verify that no trackers were left dangling.
+        for (PostNotificationTracker tracker : mPostNotificationTrackerFactory.mCreatedTrackers) {
+            assertThat(tracker.isOngoing()).isFalse();
+        }
+        mPostNotificationTrackerFactory.mCreatedTrackers.clear();
     }
 
     @After
@@ -1448,7 +1473,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         NotificationManagerService.PostNotificationRunnable runnable =
                 mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
-                        r.getUid(), SystemClock.elapsedRealtime());
+                        r.getUid(), mPostNotificationTrackerFactory.newTracker());
         runnable.run();
         waitForIdle();
 
@@ -1469,7 +1494,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         NotificationManagerService.PostNotificationRunnable runnable =
                 mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
-                        r.getUid(), SystemClock.elapsedRealtime());
+                        r.getUid(), mPostNotificationTrackerFactory.newTracker());
         runnable.run();
         waitForIdle();
 
@@ -1709,6 +1734,68 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void enqueueNotificationWithTag_usesAndFinishesTracker() throws Exception {
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testEnqueueNotificationWithTag_PopulatesGetActiveNotifications", 0,
+                generateNotificationRecord(null).getNotification(), 0);
+
+        assertThat(mPostNotificationTrackerFactory.mCreatedTrackers).hasSize(1);
+        assertThat(mPostNotificationTrackerFactory.mCreatedTrackers.get(0).isOngoing()).isTrue();
+
+        waitForIdle();
+
+        assertThat(mBinderService.getActiveNotifications(PKG)).hasLength(1);
+        assertThat(mPostNotificationTrackerFactory.mCreatedTrackers).hasSize(1);
+        assertThat(mPostNotificationTrackerFactory.mCreatedTrackers.get(0).isOngoing()).isFalse();
+    }
+
+    @Test
+    public void enqueueNotificationWithTag_throws_usesAndCancelsTracker() throws Exception {
+        // Simulate not enqueued due to rejected inputs.
+        assertThrows(Exception.class,
+                () -> mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                        "testEnqueueNotificationWithTag_PopulatesGetActiveNotifications", 0,
+                        /* notification= */ null, 0));
+
+        waitForIdle();
+
+        assertThat(mBinderService.getActiveNotifications(PKG)).hasLength(0);
+        assertThat(mPostNotificationTrackerFactory.mCreatedTrackers).hasSize(1);
+        assertThat(mPostNotificationTrackerFactory.mCreatedTrackers.get(0).isOngoing()).isFalse();
+    }
+
+    @Test
+    public void enqueueNotificationWithTag_notEnqueued_usesAndCancelsTracker() throws Exception {
+        // Simulate not enqueued due to snoozing inputs.
+        when(mSnoozeHelper.getSnoozeContextForUnpostedNotification(anyInt(), any(), any()))
+                .thenReturn("zzzzzzz");
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testEnqueueNotificationWithTag_PopulatesGetActiveNotifications", 0,
+                generateNotificationRecord(null).getNotification(), 0);
+        waitForIdle();
+
+        assertThat(mBinderService.getActiveNotifications(PKG)).hasLength(0);
+        assertThat(mPostNotificationTrackerFactory.mCreatedTrackers).hasSize(1);
+        assertThat(mPostNotificationTrackerFactory.mCreatedTrackers.get(0).isOngoing()).isFalse();
+    }
+
+    @Test
+    public void enqueueNotificationWithTag_notPosted_usesAndCancelsTracker() throws Exception {
+        // Simulate not posted due to blocked app.
+        when(mPermissionHelper.hasPermission(anyInt())).thenReturn(false);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testEnqueueNotificationWithTag_PopulatesGetActiveNotifications", 0,
+                generateNotificationRecord(null).getNotification(), 0);
+        waitForIdle();
+
+        assertThat(mBinderService.getActiveNotifications(PKG)).hasLength(0);
+        assertThat(mPostNotificationTrackerFactory.mCreatedTrackers).hasSize(1);
+        assertThat(mPostNotificationTrackerFactory.mCreatedTrackers.get(0).isOngoing()).isFalse();
+    }
+
+    @Test
     public void testCancelNonexistentNotification() throws Exception {
         mBinderService.cancelNotificationWithTag(PKG, PKG,
                 "testCancelNonexistentNotification", 0, 0);
@@ -1905,8 +1992,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.mSummaryByGroupKey.put("pkg", summary);
         mService.mAutobundledSummaries.put(0, new ArrayMap<>());
         mService.mAutobundledSummaries.get(0).put("pkg", summary.getKey());
+
         mService.updateAutobundledSummaryFlags(
                 0, "pkg", GroupHelper.BASE_FLAGS | FLAG_ONGOING_EVENT, false);
+        waitForIdle();
 
         assertTrue(summary.getSbn().isOngoing());
     }
@@ -1923,6 +2012,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.mSummaryByGroupKey.put("pkg", summary);
 
         mService.updateAutobundledSummaryFlags(0, "pkg", GroupHelper.BASE_FLAGS, false);
+        waitForIdle();
 
         assertFalse(summary.getSbn().isOngoing());
     }
@@ -4225,7 +4315,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addEnqueuedNotification(r);
         NotificationManagerService.PostNotificationRunnable runnable =
                 mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
-                        r.getUid(), SystemClock.elapsedRealtime());
+                        r.getUid(), mPostNotificationTrackerFactory.newTracker());
         runnable.run();
         waitForIdle();
 
@@ -4244,7 +4334,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationManagerService.PostNotificationRunnable runnable =
                 mService.new PostNotificationRunnable(update.getKey(),
                         update.getSbn().getPackageName(), update.getUid(),
-                        SystemClock.elapsedRealtime());
+                        mPostNotificationTrackerFactory.newTracker());
         runnable.run();
         waitForIdle();
 
@@ -4264,7 +4354,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationManagerService.PostNotificationRunnable runnable =
                 mService.new PostNotificationRunnable(update.getKey(),
                         update.getSbn().getPackageName(), update.getUid(),
-                        SystemClock.elapsedRealtime());
+                        mPostNotificationTrackerFactory.newTracker());
         runnable.run();
         waitForIdle();
 
@@ -4284,7 +4374,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationManagerService.PostNotificationRunnable runnable =
                 mService.new PostNotificationRunnable(update.getKey(),
                         update.getSbn().getPackageName(),
-                        update.getUid(), SystemClock.elapsedRealtime());
+                        update.getUid(), mPostNotificationTrackerFactory.newTracker());
         runnable.run();
         waitForIdle();
 
@@ -4298,13 +4388,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addEnqueuedNotification(r);
         NotificationManagerService.PostNotificationRunnable runnable =
                 mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
-                        r.getUid(), SystemClock.elapsedRealtime());
+                        r.getUid(), mPostNotificationTrackerFactory.newTracker());
         runnable.run();
 
         r = generateNotificationRecord(mTestNotificationChannel, 1, null, false);
         r.setCriticality(CriticalNotificationExtractor.CRITICAL);
         runnable = mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
-                r.getUid(), SystemClock.elapsedRealtime());
+                r.getUid(), mPostNotificationTrackerFactory.newTracker());
         mService.addEnqueuedNotification(r);
 
         runnable.run();
@@ -4953,7 +5043,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mService.new PostNotificationRunnable(original.getKey(),
                         original.getSbn().getPackageName(),
                         original.getUid(),
-                        SystemClock.elapsedRealtime());
+                        mPostNotificationTrackerFactory.newTracker());
         runnable.run();
         waitForIdle();
 
@@ -4977,7 +5067,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mService.new PostNotificationRunnable(update.getKey(),
                         update.getSbn().getPackageName(),
                         update.getUid(),
-                        SystemClock.elapsedRealtime());
+                        mPostNotificationTrackerFactory.newTracker());
         runnable.run();
         waitForIdle();
 
@@ -7260,8 +7350,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         NotificationManagerService.PostNotificationRunnable runnable =
                 mService.new PostNotificationRunnable(update.getKey(), r.getSbn().getPackageName(),
-                        r.getUid(),
-                        SystemClock.elapsedRealtime());
+                        r.getUid(), mPostNotificationTrackerFactory.newTracker());
         runnable.run();
         waitForIdle();
 
@@ -7569,13 +7658,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void clearDefaultDnDPackageShouldEnableIt() throws RemoteException {
-        ComponentName deviceConfig = new ComponentName("device", "config");
         ArrayMap<Boolean, ArrayList<ComponentName>> changed = generateResetComponentValues();
         when(mAssistants.resetComponents(anyString(), anyInt())).thenReturn(changed);
         when(mListeners.resetComponents(anyString(), anyInt())).thenReturn(changed);
-        mService.getBinderService().clearData("device", 0, false);
+        mService.getBinderService().clearData("pkgName", 0, false);
         verify(mConditionProviders, times(1)).resetPackage(
-                        eq("device"), eq(0));
+                        eq("pkgName"), eq(0));
     }
 
     @Test
@@ -8419,7 +8507,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(0, notifsBefore.length);
 
         Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1);
-        int uid = 0; // sysui on primary user
 
         mService.mNotificationDelegate.grantInlineReplyUriPermission(
                 nr.getKey(), uri, nr.getSbn().getUser(), nr.getSbn().getPackageName(),
@@ -8552,7 +8639,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         reset(mPackageManager);
 
         Uri uri1 = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1);
-        Uri uri2 = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 2);
 
         // create an inline record a uri in it
         mService.mNotificationDelegate.grantInlineReplyUriPermission(
@@ -9956,7 +10042,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addEnqueuedNotification(r);
         NotificationManagerService.PostNotificationRunnable runnable =
                 mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
-                        r.getUid(), SystemClock.elapsedRealtime());
+                        r.getUid(), mPostNotificationTrackerFactory.newTracker());
         runnable.run();
         waitForIdle();
 
@@ -9973,7 +10059,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mService.addEnqueuedNotification(r);
         runnable = mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
-                r.getUid(), SystemClock.elapsedRealtime());
+                r.getUid(), mPostNotificationTrackerFactory.newTracker());
         runnable.run();
         waitForIdle();
 
@@ -9990,7 +10076,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mService.addEnqueuedNotification(r);
         runnable = mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
-                r.getUid(), SystemClock.elapsedRealtime());
+                r.getUid(), mPostNotificationTrackerFactory.newTracker());
         runnable.run();
         waitForIdle();
 
@@ -10082,10 +10168,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // normal blocked notifications - blocked
         mService.addEnqueuedNotification(r);
-        NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
-                        r.getUid(), SystemClock.elapsedRealtime());
-        runnable.run();
+        mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(), r.getUid(),
+                mPostNotificationTrackerFactory.newTracker()).run();
         waitForIdle();
 
         verify(mUsageStats).registerBlocked(any());
@@ -10102,9 +10186,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         mService.addEnqueuedNotification(r);
-        runnable = mService.new PostNotificationRunnable(
-                r.getKey(), r.getSbn().getPackageName(), r.getUid(), SystemClock.elapsedRealtime());
-        runnable.run();
+        mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(), r.getUid(),
+                mPostNotificationTrackerFactory.newTracker()).run();
         waitForIdle();
 
         verify(mUsageStats).registerBlocked(any());
@@ -10116,7 +10199,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mTelecomManager.isInManagedCall()).thenReturn(true);
 
         mService.addEnqueuedNotification(r);
-        runnable.run();
+        mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(), r.getUid(),
+                mPostNotificationTrackerFactory.newTracker()).run();
         waitForIdle();
 
         verify(mUsageStats, never()).registerBlocked(any());
@@ -10129,7 +10213,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(true);
 
         mService.addEnqueuedNotification(r);
-        runnable.run();
+        mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(), r.getUid(),
+                mPostNotificationTrackerFactory.newTracker()).run();
         waitForIdle();
 
         verify(mUsageStats, never()).registerBlocked(any());
@@ -10142,7 +10227,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setTelecomManager(null);
 
         mService.addEnqueuedNotification(r);
-        runnable.run();
+        mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(), r.getUid(),
+                mPostNotificationTrackerFactory.newTracker()).run();
         waitForIdle();
 
         verify(mUsageStats).registerBlocked(any());
@@ -10156,7 +10242,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setTelecomManager(null);
 
         mService.addEnqueuedNotification(r);
-        runnable.run();
+        mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(), r.getUid(),
+                mPostNotificationTrackerFactory.newTracker()).run();
         waitForIdle();
 
         verify(mUsageStats).registerBlocked(any());
@@ -10168,7 +10255,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         reset(mUsageStats);
 
         mService.addEnqueuedNotification(r);
-        runnable.run();
+        mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(), r.getUid(),
+                mPostNotificationTrackerFactory.newTracker()).run();
         waitForIdle();
 
         verify(mUsageStats).registerBlocked(any());
