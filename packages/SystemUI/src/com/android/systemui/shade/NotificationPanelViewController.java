@@ -389,7 +389,6 @@ public final class NotificationPanelViewController implements Dumpable {
     private KeyguardBottomAreaView mKeyguardBottomArea;
     private boolean mExpanding;
     private boolean mSplitShadeEnabled;
-    private final boolean mMultiShadeEnabled;
     /** The bottom padding reserved for elements of the keyguard measuring notifications. */
     private float mKeyguardNotificationBottomPadding;
     /**
@@ -854,7 +853,6 @@ public final class NotificationPanelViewController implements Dumpable {
         mFeatureFlags = featureFlags;
         mAnimateBack = mFeatureFlags.isEnabled(Flags.WM_SHADE_ANIMATE_BACK_GESTURE);
         mTrackpadGestureBack = mFeatureFlags.isEnabled(Flags.TRACKPAD_GESTURE_FEATURES);
-        mMultiShadeEnabled = mFeatureFlags.isEnabled(Flags.DUAL_SHADE);
         mFalsingCollector = falsingCollector;
         mPowerManager = powerManager;
         mWakeUpCoordinator = coordinator;
@@ -4024,10 +4022,8 @@ public final class NotificationPanelViewController implements Dumpable {
      *   {@link #updateVisibility()}? That would allow us to make this method private.
      */
     public void updatePanelExpansionAndVisibility() {
-        if (!mMultiShadeEnabled) {
-            mShadeExpansionStateManager.onPanelExpansionChanged(
-                    mExpandedFraction, isExpanded(), mTracking, mExpansionDragDownAmountPx);
-        }
+        mShadeExpansionStateManager.onPanelExpansionChanged(
+                mExpandedFraction, isExpanded(), mTracking, mExpansionDragDownAmountPx);
 
         updateVisibility();
     }
