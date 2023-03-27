@@ -39,8 +39,9 @@
 #include <SkColor.h>
 #include <SkEncodedImageFormat.h>
 #include <SkHighContrastFilter.h>
-#include <SkImageEncoder.h>
+#include <SkImage.h>
 #include <SkImageAndroid.h>
+#include <SkImageEncoder.h>
 #include <SkImagePriv.h>
 #include <SkJpegGainmapEncoder.h>
 #include <SkPixmap.h>
@@ -264,7 +265,8 @@ Bitmap::Bitmap(AHardwareBuffer* buffer, const SkImageInfo& info, size_t rowBytes
     mPixelStorage.hardware.buffer = buffer;
     AHardwareBuffer_acquire(buffer);
     setImmutable();  // HW bitmaps are always immutable
-    mImage = SkImage::MakeFromAHardwareBuffer(buffer, mInfo.alphaType(), mInfo.refColorSpace());
+    mImage = SkImages::DeferredFromAHardwareBuffer(buffer, mInfo.alphaType(),
+                                                   mInfo.refColorSpace());
 }
 #endif
 
@@ -373,7 +375,7 @@ sk_sp<SkImage> Bitmap::makeImage() {
         // TODO: refactor Bitmap to not derive from SkPixelRef, which would allow caching here.
 #ifdef __ANDROID__
         // pinnable images are only supported with the Ganesh GPU backend compiled in.
-        image = sk_image_factory::MakePinnableFromRasterBitmap(skiaBitmap);
+        image = SkImages::PinnableRasterFromBitmap(skiaBitmap);
 #else
         image = SkMakeImageFromRasterBitmap(skiaBitmap, kNever_SkCopyPixelsMode);
 #endif

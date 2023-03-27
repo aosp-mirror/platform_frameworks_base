@@ -21,6 +21,7 @@
 #include <SkCanvas.h>
 #include <SkColorSpace.h>
 #include <SkImage.h>
+#include <SkImageAndroid.h>
 #include <SkImageInfo.h>
 #include <SkMatrix.h>
 #include <SkPaint.h>
@@ -108,7 +109,8 @@ void Readback::copySurfaceInto(ANativeWindow* window, const std::shared_ptr<Copy
     sk_sp<SkColorSpace> colorSpace =
             DataSpaceToColorSpace(static_cast<android_dataspace>(dataspace));
     sk_sp<SkImage> image =
-            SkImage::MakeFromAHardwareBuffer(sourceBuffer.get(), kPremul_SkAlphaType, colorSpace);
+            SkImages::DeferredFromAHardwareBuffer(sourceBuffer.get(), kPremul_SkAlphaType, 
+                                                  colorSpace);
 
     if (!image.get()) {
         return request->onCopyFinished(CopyResult::UnknownError);

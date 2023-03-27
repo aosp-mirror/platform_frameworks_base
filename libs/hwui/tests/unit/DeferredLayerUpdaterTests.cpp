@@ -40,7 +40,7 @@ RENDERTHREAD_TEST(DeferredLayerUpdater, updateLayer) {
     // push the deferred updates to the layer
     SkBitmap bitmap;
     bitmap.allocN32Pixels(16, 16);
-    sk_sp<SkImage> layerImage = SkImage::MakeFromBitmap(bitmap);
+    sk_sp<SkImage> layerImage = SkImages::RasterFromBitmap(bitmap);
     layerUpdater->updateLayer(true, layerImage, 0, SkRect::MakeEmpty());
 
     // the backing layer should now have all the properties applied.
