@@ -266,11 +266,11 @@ public class SystemActionPerformer {
             // actions.
             switch (actionId) {
                 case AccessibilityService.GLOBAL_ACTION_BACK: {
-                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_BACK);
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_BACK, InputDevice.SOURCE_KEYBOARD);
                     return true;
                 }
                 case AccessibilityService.GLOBAL_ACTION_HOME: {
-                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HOME);
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HOME, InputDevice.SOURCE_KEYBOARD);
                     return true;
                 }
                 case AccessibilityService.GLOBAL_ACTION_RECENTS:
@@ -291,23 +291,29 @@ public class SystemActionPerformer {
                     return lockScreen();
                 case AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT:
                     return takeScreenshot();
-                case AccessibilityService.GLOBAL_ACTION_KEYCODE_HEADSETHOOK :
-                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HEADSETHOOK);
+                case AccessibilityService.GLOBAL_ACTION_KEYCODE_HEADSETHOOK:
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HEADSETHOOK,
+                            InputDevice.SOURCE_KEYBOARD);
                     return true;
                 case AccessibilityService.GLOBAL_ACTION_DPAD_UP:
-                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_UP);
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_UP,
+                            InputDevice.SOURCE_KEYBOARD | InputDevice.SOURCE_DPAD);
                     return true;
                 case AccessibilityService.GLOBAL_ACTION_DPAD_DOWN:
-                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_DOWN);
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_DOWN,
+                            InputDevice.SOURCE_KEYBOARD | InputDevice.SOURCE_DPAD);
                     return true;
                 case AccessibilityService.GLOBAL_ACTION_DPAD_LEFT:
-                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_LEFT);
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_LEFT,
+                            InputDevice.SOURCE_KEYBOARD | InputDevice.SOURCE_DPAD);
                     return true;
                 case AccessibilityService.GLOBAL_ACTION_DPAD_RIGHT:
-                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_RIGHT);
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_RIGHT,
+                            InputDevice.SOURCE_KEYBOARD | InputDevice.SOURCE_DPAD);
                     return true;
                 case AccessibilityService.GLOBAL_ACTION_DPAD_CENTER:
-                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_CENTER);
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_CENTER,
+                            InputDevice.SOURCE_KEYBOARD | InputDevice.SOURCE_DPAD);
                     return true;
                 default:
                     Slog.e(TAG, "Invalid action id: " + actionId);
@@ -318,23 +324,24 @@ public class SystemActionPerformer {
         }
     }
 
-    private void sendDownAndUpKeyEvents(int keyCode) {
+    private void sendDownAndUpKeyEvents(int keyCode, int source) {
         final long token = Binder.clearCallingIdentity();
         try {
             // Inject down.
             final long downTime = SystemClock.uptimeMillis();
-            sendKeyEventIdentityCleared(keyCode, KeyEvent.ACTION_DOWN, downTime, downTime);
+            sendKeyEventIdentityCleared(keyCode, KeyEvent.ACTION_DOWN, downTime, downTime, source);
             sendKeyEventIdentityCleared(
-                    keyCode, KeyEvent.ACTION_UP, downTime, SystemClock.uptimeMillis());
+                    keyCode, KeyEvent.ACTION_UP, downTime, SystemClock.uptimeMillis(), source);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
     }
 
-    private void sendKeyEventIdentityCleared(int keyCode, int action, long downTime, long time) {
+    private void sendKeyEventIdentityCleared(int keyCode, int action, long downTime, long time,
+            int source) {
         KeyEvent event = KeyEvent.obtain(downTime, time, action, keyCode, 0, 0,
                 KeyCharacterMap.VIRTUAL_KEYBOARD, 0, KeyEvent.FLAG_FROM_SYSTEM,
-                InputDevice.SOURCE_KEYBOARD, null);
+                source, null);
         mContext.getSystemService(InputManager.class)
                 .injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
         event.recycle();
