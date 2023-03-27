@@ -156,14 +156,6 @@ public abstract class CredentialProviderService extends Service {
 
     private static final String TAG = "CredProviderService";
 
-    /**
-     * The list of capabilities exposed by a credential provider.
-     *
-     * @deprecated Replaced with {@link android.service.credentials#SERVICE_META_DATA}
-     */
-    @Deprecated
-    public static final String CAPABILITY_META_DATA_KEY = "android.credentials.capabilities";
-
      /**
       * Name under which a Credential Provider service component publishes information
       * about itself.  This meta-data must reference an XML resource containing
