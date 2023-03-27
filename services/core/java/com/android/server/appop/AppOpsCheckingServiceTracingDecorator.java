@@ -17,11 +17,15 @@
 package com.android.server.appop;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.os.Trace;
+import android.util.ArraySet;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+
+import java.io.PrintWriter;
 
 /**
  * Surrounds all AppOpsCheckingServiceInterface method calls with Trace.traceBegin and
@@ -201,22 +205,128 @@ public class AppOpsCheckingServiceTracingDecorator implements AppOpsCheckingServ
     }
 
     @Override
-    public SparseBooleanArray getForegroundOps(int uid) {
+    public void startWatchingOpModeChanged(@NonNull OnOpModeChangedListener changedListener,
+            int op) {
         Trace.traceBegin(TRACE_TAG,
-                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#getForegroundOps");
+                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#startWatchingOpModeChanged");
         try {
-            return mService.getForegroundOps(uid);
+            mService.startWatchingOpModeChanged(changedListener, op);
         } finally {
             Trace.traceEnd(TRACE_TAG);
         }
     }
 
     @Override
-    public SparseBooleanArray getForegroundOps(String packageName, int userId) {
+    public void startWatchingPackageModeChanged(@NonNull OnOpModeChangedListener changedListener,
+            @NonNull String packageName) {
         Trace.traceBegin(TRACE_TAG,
-                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#getForegroundOps");
+                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#startWatchingPackageModeChanged");
         try {
-            return mService.getForegroundOps(packageName, userId);
+            mService.startWatchingPackageModeChanged(changedListener, packageName);
+        } finally {
+            Trace.traceEnd(TRACE_TAG);
+        }
+    }
+
+    @Override
+    public void removeListener(@NonNull OnOpModeChangedListener changedListener) {
+        Trace.traceBegin(TRACE_TAG,
+                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#removeListener");
+        try {
+            mService.removeListener(changedListener);
+        } finally {
+            Trace.traceEnd(TRACE_TAG);
+        }
+    }
+
+    @Override
+    public ArraySet<OnOpModeChangedListener> getOpModeChangedListeners(int op) {
+        Trace.traceBegin(TRACE_TAG,
+                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#getOpModeChangedListeners");
+        try {
+            return mService.getOpModeChangedListeners(op);
+        } finally {
+            Trace.traceEnd(TRACE_TAG);
+        }
+    }
+
+    @Override
+    public ArraySet<OnOpModeChangedListener> getPackageModeChangedListeners(
+            @NonNull String packageName) {
+        Trace.traceBegin(TRACE_TAG,
+                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#getPackageModeChangedListeners");
+        try {
+            return mService.getPackageModeChangedListeners(packageName);
+        } finally {
+            Trace.traceEnd(TRACE_TAG);
+        }
+    }
+
+    @Override
+    public void notifyWatchersOfChange(int op, int uid) {
+        Trace.traceBegin(TRACE_TAG,
+                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#notifyWatchersOfChange");
+        try {
+            mService.notifyWatchersOfChange(op, uid);
+        } finally {
+            Trace.traceEnd(TRACE_TAG);
+        }
+    }
+
+    @Override
+    public void notifyOpChanged(@NonNull OnOpModeChangedListener changedListener, int op, int uid,
+            @Nullable String packageName) {
+        Trace.traceBegin(TRACE_TAG,
+                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#notifyOpChanged");
+        try {
+            mService.notifyOpChanged(changedListener, op, uid, packageName);
+        } finally {
+            Trace.traceEnd(TRACE_TAG);
+        }
+    }
+
+    @Override
+    public void notifyOpChangedForAllPkgsInUid(int op, int uid, boolean onlyForeground,
+            @Nullable OnOpModeChangedListener callbackToIgnore) {
+        Trace.traceBegin(TRACE_TAG,
+                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#notifyOpChangedForAllPkgsInUid");
+        try {
+            mService.notifyOpChangedForAllPkgsInUid(op, uid, onlyForeground, callbackToIgnore);
+        } finally {
+            Trace.traceEnd(TRACE_TAG);
+        }
+    }
+
+    @Override
+    public SparseBooleanArray evalForegroundUidOps(int uid, SparseBooleanArray foregroundOps) {
+        Trace.traceBegin(TRACE_TAG,
+                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#evalForegroundUidOps");
+        try {
+            return mService.evalForegroundUidOps(uid, foregroundOps);
+        } finally {
+            Trace.traceEnd(TRACE_TAG);
+        }
+    }
+
+    @Override
+    public SparseBooleanArray evalForegroundPackageOps(String packageName,
+            SparseBooleanArray foregroundOps, @UserIdInt int userId) {
+        Trace.traceBegin(TRACE_TAG,
+                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#evalForegroundPackageOps");
+        try {
+            return mService.evalForegroundPackageOps(packageName, foregroundOps, userId);
+        } finally {
+            Trace.traceEnd(TRACE_TAG);
+        }
+    }
+
+    @Override
+    public boolean dumpListeners(int dumpOp, int dumpUid, String dumpPackage,
+            PrintWriter printWriter) {
+        Trace.traceBegin(TRACE_TAG,
+                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#dumpListeners");
+        try {
+            return mService.dumpListeners(dumpOp, dumpUid, dumpPackage, printWriter);
         } finally {
             Trace.traceEnd(TRACE_TAG);
         }

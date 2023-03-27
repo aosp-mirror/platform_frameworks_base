@@ -144,11 +144,4 @@ public interface AppOpsRestrictions {
      */
     void dumpRestrictions(PrintWriter printWriter, int dumpOp, String dumpPackage,
             boolean showUserRestrictions);
-
-    /**
-     * Listener for when an appop restriction is removed.
-     */
-    interface AppOpsRestrictionRemovedListener {
-        void onAppOpsRestrictionRemoved(int code);
-    }
 }
