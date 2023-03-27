@@ -189,7 +189,6 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                             KeyguardTransitionInteractor(
                                 repository = FakeKeyguardTransitionRepository(),
                             ),
-                        bouncerInteractor = mock(),
                         falsingManager = FalsingManagerFake(),
                     )
                 },
