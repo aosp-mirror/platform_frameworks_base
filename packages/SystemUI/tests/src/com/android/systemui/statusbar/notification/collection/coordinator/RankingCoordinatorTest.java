@@ -25,6 +25,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,6 +50,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
@@ -75,12 +78,15 @@ public class RankingCoordinatorTest extends SysuiTestCase {
     @Mock private NodeController mAlertingHeaderController;
     @Mock private NodeController mSilentNodeController;
     @Mock private SectionHeaderController mSilentHeaderController;
+    @Mock private Pluggable.PluggableListener<NotifFilter> mInvalidationListener;
 
     @Captor private ArgumentCaptor<NotifFilter> mNotifFilterCaptor;
+    @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerCaptor;
 
     private NotificationEntry mEntry;
     private NotifFilter mCapturedSuspendedFilter;
     private NotifFilter mCapturedDozingFilter;
+    private StatusBarStateController.StateListener mStatusBarStateCallback;
     private RankingCoordinator mRankingCoordinator;
 
     private NotifSectioner mAlertingSectioner;
@@ -106,6 +112,10 @@ public class RankingCoordinatorTest extends SysuiTestCase {
         verify(mNotifPipeline, times(2)).addPreGroupFilter(mNotifFilterCaptor.capture());
         mCapturedSuspendedFilter = mNotifFilterCaptor.getAllValues().get(0);
         mCapturedDozingFilter = mNotifFilterCaptor.getAllValues().get(1);
+        mCapturedDozingFilter.setInvalidationListener(mInvalidationListener);
+
+        verify(mStatusBarStateController, times(1)).addCallback(mStateListenerCaptor.capture());
+        mStatusBarStateCallback = mStateListenerCaptor.getAllValues().get(0);
 
         mAlertingSectioner = mRankingCoordinator.getAlertingSectioner();
         mSilentSectioner = mRankingCoordinator.getSilentSectioner();
@@ -170,6 +180,13 @@ public class RankingCoordinatorTest extends SysuiTestCase {
 
         // THEN don't filter out the notification
         assertFalse(mCapturedDozingFilter.shouldFilterOut(mEntry, 0));
+
+        // WHEN it's not dozing and doze amount is 1
+        when(mStatusBarStateController.isDozing()).thenReturn(false);
+        when(mStatusBarStateController.getDozeAmount()).thenReturn(1f);
+
+        // THEN filter out the notification
+        assertTrue(mCapturedDozingFilter.shouldFilterOut(mEntry, 0));
     }
 
     @Test
@@ -265,6 +282,27 @@ public class RankingCoordinatorTest extends SysuiTestCase {
         mMinimizedSectioner.onEntriesUpdated(Arrays.asList(mEntry));
         mAlertingSectioner.onEntriesUpdated(Arrays.asList(mEntry));
         verify(mSilentHeaderController, times(2)).setClearSectionEnabled(eq(false));
+    }
+
+    @Test
+    public void statusBarStateCallbackTest() {
+        mStatusBarStateCallback.onDozeAmountChanged(1f, 1f);
+        verify(mInvalidationListener, times(1))
+                .onPluggableInvalidated(mCapturedDozingFilter, "dozeAmount changed to one");
+        reset(mInvalidationListener);
+
+        mStatusBarStateCallback.onDozeAmountChanged(1f, 1f);
+        verify(mInvalidationListener, never()).onPluggableInvalidated(any(), any());
+        reset(mInvalidationListener);
+
+        mStatusBarStateCallback.onDozeAmountChanged(0.6f, 0.6f);
+        verify(mInvalidationListener, times(1))
+                .onPluggableInvalidated(mCapturedDozingFilter, "dozeAmount changed to not one");
+        reset(mInvalidationListener);
+
+        mStatusBarStateCallback.onDozeAmountChanged(0f, 0f);
+        verify(mInvalidationListener, never()).onPluggableInvalidated(any(), any());
+        reset(mInvalidationListener);
     }
 
     private void assertInSection(NotificationEntry entry, NotifSectioner section) {
