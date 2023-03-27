@@ -326,7 +326,7 @@ class EmbeddedWindowController {
 
         @Override
         public boolean shouldControlIme() {
-            return false;
+            return mHostWindowState != null;
         }
 
         @Override
@@ -336,6 +336,9 @@ class EmbeddedWindowController {
 
         @Override
         public InsetsControlTarget getImeControlTarget() {
+            if (mHostWindowState != null) {
+                return mHostWindowState.getImeControlTarget();
+            }
             return mWmService.getDefaultDisplayContentLocked().mRemoteInsetsControlTarget;
         }
 
@@ -346,7 +349,7 @@ class EmbeddedWindowController {
 
         @Override
         public ActivityRecord getActivityRecord() {
-            return null;
+            return mHostActivityRecord;
         }
 
         @Override
