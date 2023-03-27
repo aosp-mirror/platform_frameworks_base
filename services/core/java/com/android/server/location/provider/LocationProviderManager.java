@@ -2584,7 +2584,7 @@ public class LocationProviderManager extends
 
         // Attempt to add a missing MSL altitude on behalf of the provider.
         if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_LOCATION,
-                "enable_location_provider_manager_msl", false)) {
+                "enable_location_provider_manager_msl", true)) {
             return processed.map(location -> {
                 if (!location.hasMslAltitude() && location.hasAltitude()) {
                     try {
