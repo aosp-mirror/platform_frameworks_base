@@ -141,6 +141,22 @@ interface ISoundTriggerHal {
     void flushCallbacks();
 
     /**
+     * Used only for testing purposes. Called when a client attaches to the framework.
+     * Transmitting this event to the fake STHAL allows observation of this event, which is
+     * normally consumed by the framework, and is not communicated to the STHAL.
+     * @param token - A unique binder token associated with this session.
+     */
+    void clientAttached(IBinder token);
+
+    /**
+     * Used only for testing purposes. Called when a client detached from the framework.
+     * Transmitting this event to the fake STHAL allows observation of this event, which is
+     * normally consumed by the framework, and is not communicated to the STHAL.
+     * @param token - The same token passed to the corresponding {@link clientAttached(IBinder)}.
+     */
+    void clientDetached(IBinder token);
+
+    /**
      * Kill and restart the HAL instance. This is typically a last resort for error recovery and may
      * result in other related services being killed.
      */

@@ -143,6 +143,16 @@ public class SoundTriggerHalWatchdog implements ISoundTriggerHal {
     }
 
     @Override
+    public void clientAttached(IBinder binder) {
+        mUnderlying.clientAttached(binder);
+    }
+
+    @Override
+    public void clientDetached(IBinder binder) {
+        mUnderlying.clientDetached(binder);
+    }
+
+    @Override
     public void reboot() {
         mUnderlying.reboot();
     }
