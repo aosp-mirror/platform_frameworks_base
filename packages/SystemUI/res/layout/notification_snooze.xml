@@ -46,6 +46,7 @@
             android:layout_toEndOf="@+id/snooze_option_default"
             android:layout_centerVertical="true"
             android:paddingTop="1dp"
+            android:importantForAccessibility="yes"
             android:tint="#9E9E9E" />
 
         <TextView
