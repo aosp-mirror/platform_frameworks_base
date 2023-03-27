@@ -230,6 +230,15 @@ public class AppOpsService extends IAppOpsService.Stub {
     private static final int MAX_UNUSED_POOLED_OBJECTS = 3;
     private static final int RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS = 300000;
 
+    /* Temporary solution before Uidstate class is removed. These uids get their modes set. */
+    private static final int[] NON_PACKAGE_UIDS = new int[]{
+            Process.ROOT_UID,
+            Process.PHONE_UID,
+            Process.BLUETOOTH_UID,
+            Process.NFC_UID,
+            Process.NETWORK_STACK_UID,
+            Process.SHELL_UID};
+
     final Context mContext;
     final AtomicFile mStorageFile;
     final AtomicFile mRecentAccessesFile;
@@ -1057,7 +1066,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 UidState uidState = mUidStates.valueAt(uidNum);
 
                 String[] pkgsInUid = getPackagesForUid(uidState.uid);
-                if (ArrayUtils.isEmpty(pkgsInUid)) {
+                if (ArrayUtils.isEmpty(pkgsInUid) && uid >= Process.FIRST_APPLICATION_UID) {
                     uidState.clear();
                     mUidStates.removeAt(uidNum);
                     scheduleFastWriteLocked();
@@ -1086,51 +1095,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
-        getUserManagerInternal().addUserLifecycleListener(
-                new UserManagerInternal.UserLifecycleListener() {
-                    @Override
-                    public void onUserCreated(UserInfo user, Object token) {
-                        initializeUserUidStates(user.id);
-                    }
-
-                    // onUserRemoved handled by #removeUser
-                });
-
-        getPackageManagerInternal().getPackageList(
-                new PackageManagerInternal.PackageListObserver() {
-                    @Override
-                    public void onPackageAdded(String packageName, int appId) {
-                        PackageInfo pi = getPackageManagerInternal().getPackageInfo(packageName,
-                                PackageManager.GET_PERMISSIONS, Process.myUid(),
-                                mContext.getUserId());
-                        boolean isSamplingTarget = isSamplingTarget(pi);
-                        int[] userIds = getUserManagerInternal().getUserIds();
-                        synchronized (AppOpsService.this) {
-                            if (isSamplingTarget) {
-                                mRarelyUsedPackages.add(packageName);
-                            }
-                            for (int i = 0; i < userIds.length; i++) {
-                                int uid = UserHandle.getUid(userIds[i], appId);
-                                UidState uidState = getUidStateLocked(uid, true);
-                                if (!uidState.pkgOps.containsKey(packageName)) {
-                                    uidState.pkgOps.put(packageName,
-                                            new Ops(packageName, uidState));
-                                }
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onPackageRemoved(String packageName, int appId) {
-                        int[] userIds = getUserManagerInternal().getUserIds();
-                        synchronized (AppOpsService.this) {
-                            for (int i = 0; i < userIds.length; i++) {
-                                int uid = UserHandle.getUid(userIds[i], appId);
-                                packageRemovedLocked(uid, packageName);
-                            }
-                        }
-                    }
-                });
+        prepareInternalCallbacks();
 
         final IntentFilter packageSuspendFilter = new IntentFilter();
         packageSuspendFilter.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
@@ -1189,6 +1154,55 @@ public class AppOpsService extends IAppOpsService.Stub {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
     }
 
+    @VisibleForTesting
+    void prepareInternalCallbacks() {
+        getUserManagerInternal().addUserLifecycleListener(
+                new UserManagerInternal.UserLifecycleListener() {
+                    @Override
+                    public void onUserCreated(UserInfo user, Object token) {
+                        initializeUserUidStates(user.id);
+                    }
+
+                    // onUserRemoved handled by #removeUser
+                });
+
+        getPackageManagerInternal().getPackageList(
+                new PackageManagerInternal.PackageListObserver() {
+                    @Override
+                    public void onPackageAdded(String packageName, int appId) {
+                        PackageInfo pi = getPackageManagerInternal().getPackageInfo(packageName,
+                                PackageManager.GET_PERMISSIONS, Process.myUid(),
+                                mContext.getUserId());
+                        boolean isSamplingTarget = isSamplingTarget(pi);
+                        int[] userIds = getUserManagerInternal().getUserIds();
+                        synchronized (AppOpsService.this) {
+                            if (isSamplingTarget) {
+                                mRarelyUsedPackages.add(packageName);
+                            }
+                            for (int i = 0; i < userIds.length; i++) {
+                                int uid = UserHandle.getUid(userIds[i], appId);
+                                UidState uidState = getUidStateLocked(uid, true);
+                                if (!uidState.pkgOps.containsKey(packageName)) {
+                                    uidState.pkgOps.put(packageName,
+                                            new Ops(packageName, uidState));
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onPackageRemoved(String packageName, int appId) {
+                        int[] userIds = getUserManagerInternal().getUserIds();
+                        synchronized (AppOpsService.this) {
+                            for (int i = 0; i < userIds.length; i++) {
+                                int uid = UserHandle.getUid(userIds[i], appId);
+                                packageRemovedLocked(uid, packageName);
+                            }
+                        }
+                    }
+                });
+    }
+
     /**
      * Initialize uid state objects for state contained in the checking service.
      */
@@ -1204,6 +1218,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                     int userId = userIds[i];
                     initializeUserUidStatesLocked(userId, packageStates);
                 }
+            }
+
+            for (int uid : NON_PACKAGE_UIDS) {
+                mUidStates.put(uid, new UidState(uid));
             }
         }
     }
@@ -1323,7 +1341,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     // The callback method from AppOpsUidStateTracker
     private void onUidStateChanged(int uid, int state, boolean foregroundModeMayChange) {
         synchronized (this) {
-            UidState uidState = getUidStateLocked(uid, true);
+            UidState uidState = getUidStateLocked(uid, false);
 
             if (uidState != null && foregroundModeMayChange && uidState.hasForegroundWatchers) {
                 for (int fgi = uidState.foregroundOps.size() - 1; fgi >= 0; fgi--) {
@@ -1396,12 +1414,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             @ActivityManager.ProcessCapability int capability) {
         synchronized (this) {
             getUidStateTracker().updateUidProcState(uid, procState, capability);
-            if (!mUidStates.contains(uid)) {
-                UidState uidState = new UidState(uid);
-                mUidStates.put(uid, uidState);
-                onUidStateChanged(uid,
-                        AppOpsUidStateTracker.processStateToUidState(procState), false);
-            }
         }
     }
 
@@ -1536,7 +1548,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return null;
             }
             ArrayList<AppOpsManager.OpEntry> resOps = collectOps(pkgOps, ops);
-            if (resOps == null) {
+            if (resOps == null || resOps.size() == 0) {
                 return null;
             }
             ArrayList<AppOpsManager.PackageOps> res = new ArrayList<AppOpsManager.PackageOps>();
@@ -1792,6 +1804,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (mode == defaultMode) {
                     return;
                 }
+                if (uid >= Process.FIRST_APPLICATION_UID) {
+                    // TODO change to a throw; no crashing for now.
+                    Slog.e(TAG, "Trying to set mode for unknown uid " + uid + ".");
+                }
+                // I suppose we'll support setting these uids. Shouldn't matter later when UidState
+                // is removed.
                 uidState = new UidState(uid);
                 mUidStates.put(uid, uidState);
             }
@@ -3908,7 +3926,7 @@ public class AppOpsService extends IAppOpsService.Stub {
      */
     private Ops getOpsLocked(int uid, String packageName, @Nullable String attributionTag,
             boolean isAttributionTagValid, @Nullable RestrictionBypass bypass, boolean edit) {
-        UidState uidState = getUidStateLocked(uid, edit);
+        UidState uidState = getUidStateLocked(uid, false);
         if (uidState == null) {
             return null;
         }
