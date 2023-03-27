@@ -307,7 +307,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             }
 
             entriesToLocallyDismiss.add(entry);
-            if (!isCanceled(entry)) {
+            if (!entry.isCanceled()) {
                 // send message to system server if this notification hasn't already been cancelled
                 mBgExecutor.execute(() -> {
                     try {
@@ -387,7 +387,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             entry.setDismissState(DISMISSED);
             mLogger.logNotifDismissed(entry);
 
-            if (isCanceled(entry)) {
+            if (entry.isCanceled()) {
                 canceledEntries.add(entry);
             } else {
                 // Mark any children as dismissed as system server will auto-dismiss them as well
@@ -396,7 +396,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
                         if (shouldAutoDismissChildren(otherEntry, entry.getSbn().getGroupKey())) {
                             otherEntry.setDismissState(PARENT_DISMISSED);
                             mLogger.logChildDismissed(otherEntry);
-                            if (isCanceled(otherEntry)) {
+                            if (otherEntry.isCanceled()) {
                                 canceledEntries.add(otherEntry);
                             }
                         }
@@ -523,7 +523,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
                             + logKey(entry)));
         }
 
-        if (!isCanceled(entry)) {
+        if (!entry.isCanceled()) {
             throw mEulogizer.record(
                     new IllegalStateException("Cannot remove notification " + logKey(entry)
                             + ": has not been marked for removal"));
@@ -587,7 +587,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
     private void applyRanking(@NonNull RankingMap rankingMap) {
         ArrayMap<String, NotificationEntry> currentEntriesWithoutRankings = null;
         for (NotificationEntry entry : mNotificationSet.values()) {
-            if (!isCanceled(entry)) {
+            if (!entry.isCanceled()) {
 
                 // TODO: (b/148791039) We should crash if we are ever handed a ranking with
                 //  incomplete entries. Right now, there's a race condition in NotificationListener
@@ -813,15 +813,6 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             throw new IllegalArgumentException("Ranking map doesn't contain key: " + key);
         }
         return ranking;
-    }
-
-    /**
-     * True if the notification has been canceled by system server. Usually, such notifications are
-     * immediately removed from the collection, but can sometimes stick around due to lifetime
-     * extenders.
-     */
-    private boolean isCanceled(NotificationEntry entry) {
-        return entry.mCancellationReason != REASON_NOT_CANCELED;
     }
 
     private boolean cannotBeLifetimeExtended(NotificationEntry entry) {

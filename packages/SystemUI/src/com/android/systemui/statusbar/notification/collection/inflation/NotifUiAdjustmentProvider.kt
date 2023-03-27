@@ -46,7 +46,7 @@ class NotifUiAdjustmentProvider @Inject constructor(
     private val userTracker: UserTracker
 ) {
     private val dirtyListeners = ListenerSet<Runnable>()
-    private var isSnoozeEnabled = false
+    private var isSnoozeSettingsEnabled = false
 
     /**
      *  Update the snooze enabled value on user switch
@@ -95,7 +95,7 @@ class NotifUiAdjustmentProvider @Inject constructor(
     }
 
     private fun updateSnoozeEnabled() {
-        isSnoozeEnabled =
+        isSnoozeSettingsEnabled =
             secureSettings.getIntForUser(SHOW_NOTIFICATION_SNOOZE, 0, UserHandle.USER_CURRENT) == 1
     }
 
@@ -118,7 +118,7 @@ class NotifUiAdjustmentProvider @Inject constructor(
         smartActions = entry.ranking.smartActions,
         smartReplies = entry.ranking.smartReplies,
         isConversation = entry.ranking.isConversation,
-        isSnoozeEnabled = isSnoozeEnabled,
+        isSnoozeEnabled = isSnoozeSettingsEnabled && !entry.isCanceled,
         isMinimized = isEntryMinimized(entry),
         needsRedaction = lockscreenUserManager.needsRedaction(entry),
     )
