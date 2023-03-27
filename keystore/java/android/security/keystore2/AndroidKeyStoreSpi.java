@@ -79,13 +79,11 @@ import java.security.spec.NamedParameterSpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.NoSuchElementException;
 
 import javax.crypto.SecretKey;
 
@@ -1043,26 +1041,22 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
     }
 
-    private Set<String> getUniqueAliases() {
+    private KeyDescriptor[] getAliasesBatch(String startPastAlias) {
         try {
-            final KeyDescriptor[] keys = mKeyStore.list(
+            return mKeyStore.listBatch(
                     getTargetDomain(),
-                    mNamespace
+                    mNamespace,
+                    startPastAlias
             );
-            final Set<String> aliases = new HashSet<>(keys.length);
-            for (KeyDescriptor d : keys) {
-                aliases.add(d.alias);
-            }
-            return aliases;
         } catch (android.security.KeyStoreException e) {
             Log.e(TAG, "Failed to list keystore entries.", e);
-            return new HashSet<>();
+            return new KeyDescriptor[0];
         }
     }
 
     @Override
     public Enumeration<String> engineAliases() {
-        return Collections.enumeration(getUniqueAliases());
+        return new KeyEntriesEnumerator();
     }
 
     @Override
@@ -1073,12 +1067,18 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
         return getKeyMetadata(alias) != null;
     }
-
     @Override
     public int engineSize() {
-        return getUniqueAliases().size();
+        try {
+            return mKeyStore.getNumberOfEntries(
+                    getTargetDomain(),
+                    mNamespace
+            );
+        } catch (android.security.KeyStoreException e) {
+            Log.e(TAG, "Failed to get the number of keystore entries.", e);
+            return 0;
+        }
     }
-
     @Override
     public boolean engineIsKeyEntry(String alias) {
         return isKeyEntry(alias);
@@ -1249,6 +1249,40 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             throw new KeyStoreException(
                     "Entry must be a PrivateKeyEntry, SecretKeyEntry, WrappedKeyEntry "
                             + "or TrustedCertificateEntry; was " + entry);
+        }
+    }
+
+    private class KeyEntriesEnumerator implements Enumeration<String> {
+        private KeyDescriptor[] mCurrentBatch;
+        private int mCurrentEntry = 0;
+        private String mLastAlias = null;
+        private KeyEntriesEnumerator() {
+            getAndValidateNextBatch();
+        }
+
+        private void getAndValidateNextBatch() {
+            mCurrentBatch = getAliasesBatch(mLastAlias);
+            mCurrentEntry = 0;
+        }
+
+        public boolean hasMoreElements() {
+            return (mCurrentBatch != null) && (mCurrentBatch.length > 0);
+        }
+
+        public String nextElement() {
+            if ((mCurrentBatch == null) || (mCurrentBatch.length == 0)) {
+                throw new NoSuchElementException("Error while fetching entries.");
+            }
+            final KeyDescriptor currentEntry = mCurrentBatch[mCurrentEntry];
+            mLastAlias = currentEntry.alias;
+
+            mCurrentEntry++;
+            // This was the last entry in the batch.
+            if (mCurrentEntry >= mCurrentBatch.length) {
+                getAndValidateNextBatch();
+            }
+
+            return mLastAlias;
         }
     }
 }

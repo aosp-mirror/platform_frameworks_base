@@ -161,6 +161,15 @@ public class KeyStore2 {
     }
 
     /**
+     * List all entries in the keystore for in the given namespace.
+     */
+    public KeyDescriptor[] listBatch(int domain, long namespace, String startPastAlias)
+            throws KeyStoreException {
+        return handleRemoteExceptionWithRetry(
+                (service) -> service.listEntriesBatched(domain, namespace, startPastAlias));
+    }
+
+    /**
      * Grant string prefix as used by the keystore boringssl engine. Must be kept in sync
      * with system/security/keystore-engine. Note: The prefix here includes the 0x which
      * std::stringstream used in keystore-engine needs to identify the number as hex represented.
@@ -301,6 +310,13 @@ public class KeyStore2 {
         });
     }
 
+    /**
+     * Returns the number of Keystore entries for a given domain and namespace.
+     */
+    public int getNumberOfEntries(int domain, long namespace) throws KeyStoreException {
+        return handleRemoteExceptionWithRetry((service)
+                -> service.getNumberOfEntries(domain, namespace));
+    }
     protected static void interruptedPreservingSleep(long millis) {
         boolean wasInterrupted = false;
         Calendar calendar = Calendar.getInstance();
