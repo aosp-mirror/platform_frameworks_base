@@ -19164,7 +19164,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final IApplicationThread thread = app.getOnewayThread();
                     if (thread != null) {
                         mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(app,
-                                OomAdjuster.OOM_ADJ_REASON_NONE);
+                                CachedAppOptimizer.UNFREEZE_REASON_PING);
                         pingCount.incrementAndGet();
                         try {
                             thread.schedulePing(pongCallback);
