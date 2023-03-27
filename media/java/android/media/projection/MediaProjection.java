@@ -16,8 +16,6 @@
 
 package android.media.projection;
 
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.compat.CompatChanges;
@@ -29,13 +27,10 @@ import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
 import android.os.Build;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
-import android.view.ContentRecordingSession;
 import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -72,21 +67,17 @@ public final class MediaProjection {
     private final IMediaProjection mImpl;
     private final Context mContext;
     private final DisplayManager mDisplayManager;
-    private final IMediaProjectionManager mProjectionService;
     @NonNull
     private final Map<Callback, CallbackRecord> mCallbacks = new ArrayMap<>();
 
     /** @hide */
     public MediaProjection(Context context, IMediaProjection impl) {
-        this(context, impl, IMediaProjectionManager.Stub.asInterface(
-                        ServiceManager.getService(Context.MEDIA_PROJECTION_SERVICE)),
-                context.getSystemService(DisplayManager.class));
+        this(context, impl, context.getSystemService(DisplayManager.class));
     }
 
     /** @hide */
     @VisibleForTesting
-    public MediaProjection(Context context, IMediaProjection impl, IMediaProjectionManager service,
-            DisplayManager displayManager) {
+    public MediaProjection(Context context, IMediaProjection impl, DisplayManager displayManager) {
         mContext = context;
         mImpl = impl;
         try {
@@ -94,7 +85,6 @@ public final class MediaProjection {
         } catch (RemoteException e) {
             throw new RuntimeException("Failed to start media projection", e);
         }
-        mProjectionService = service;
         mDisplayManager = displayManager;
     }
 
@@ -223,38 +213,22 @@ public final class MediaProjection {
     public VirtualDisplay createVirtualDisplay(
             @NonNull VirtualDisplayConfig.Builder virtualDisplayConfig,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
-        try {
-            final IBinder launchCookie = mImpl.getLaunchCookie();
-            Context windowContext = null;
-            ContentRecordingSession session;
-            if (launchCookie == null) {
-                windowContext = mContext.createWindowContext(mContext.getDisplayNoVerify(),
-                        TYPE_APPLICATION, null /* options */);
-                session = ContentRecordingSession.createDisplaySession(
-                        windowContext.getWindowContextToken());
-            } else {
-                session = ContentRecordingSession.createTaskSession(launchCookie);
-            }
-            // Pass in the current session details, so they are guaranteed to only be set in
-            // WindowManagerService AFTER a VirtualDisplay is constructed (assuming there are no
-            // errors during set-up).
-            virtualDisplayConfig.setContentRecordingSession(session);
-            virtualDisplayConfig.setWindowManagerMirroringEnabled(true);
-            final VirtualDisplay virtualDisplay = mDisplayManager.createVirtualDisplay(this,
-                    virtualDisplayConfig.build(), callback, handler, windowContext);
-            if (virtualDisplay == null) {
-                // Since WindowManager handling a new display and DisplayManager creating a new
-                // VirtualDisplay is async, WindowManager may have tried to start task recording
-                // and encountered an error that required stopping recording entirely. The
-                // VirtualDisplay would then be null and the MediaProjection is no longer active.
-                Slog.w(TAG, "Failed to create virtual display.");
-                return null;
-            }
-            return virtualDisplay;
-        } catch (RemoteException e) {
-            // Can not capture if WMS is not accessible, so bail out.
-            throw e.rethrowFromSystemServer();
+        // Pass in the current session details, so they are guaranteed to only be set in
+        // WindowManagerService AFTER a VirtualDisplay is constructed (assuming there are no
+        // errors during set-up).
+        virtualDisplayConfig.setWindowManagerMirroringEnabled(true);
+        // Do not declare a display id to mirror; default to the default display.
+        final VirtualDisplay virtualDisplay = mDisplayManager.createVirtualDisplay(this,
+                virtualDisplayConfig.build(), callback, handler);
+        if (virtualDisplay == null) {
+            // Since WindowManager handling a new display and DisplayManager creating a new
+            // VirtualDisplay is async, WindowManager may have tried to start task recording
+            // and encountered an error that required stopping recording entirely. The
+            // VirtualDisplay would then be null and the MediaProjection is no longer active.
+            Slog.w(TAG, "Failed to create virtual display.");
+            return null;
         }
+        return virtualDisplay;
     }
 
     /**

@@ -50,7 +50,7 @@ public class ContentRecordingSessionTest {
     @Test
     public void testParcelable() {
         ContentRecordingSession session = ContentRecordingSession.createTaskSession(WINDOW_TOKEN);
-        session.setDisplayId(DISPLAY_ID);
+        session.setVirtualDisplayId(DISPLAY_ID);
 
         Parcel parcel = Parcel.obtain();
         session.writeToParcel(parcel, 0 /* flags */);
@@ -70,39 +70,84 @@ public class ContentRecordingSessionTest {
     @Test
     public void testDisplayConstructor() {
         ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
-                WINDOW_TOKEN);
+                DEFAULT_DISPLAY);
         assertThat(session.getContentToRecord()).isEqualTo(RECORD_CONTENT_DISPLAY);
-        assertThat(session.getTokenToRecord()).isEqualTo(WINDOW_TOKEN);
+        assertThat(session.getTokenToRecord()).isNull();
     }
 
     @Test
-    public void testIsValid() {
-        ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
+    public void testIsValid_displaySession() {
+        // Canonical display session.
+        ContentRecordingSession displaySession = ContentRecordingSession.createDisplaySession(
+                DEFAULT_DISPLAY);
+        displaySession.setVirtualDisplayId(DEFAULT_DISPLAY);
+        assertThat(ContentRecordingSession.isValid(displaySession)).isTrue();
+
+        // Virtual display id values.
+        ContentRecordingSession displaySession0 = ContentRecordingSession.createDisplaySession(
+                DEFAULT_DISPLAY);
+        assertThat(ContentRecordingSession.isValid(displaySession0)).isFalse();
+
+        ContentRecordingSession displaySession1 = ContentRecordingSession.createDisplaySession(
+                DEFAULT_DISPLAY);
+        displaySession1.setVirtualDisplayId(INVALID_DISPLAY);
+        assertThat(ContentRecordingSession.isValid(displaySession1)).isFalse();
+
+        // Display id values.
+        ContentRecordingSession displaySession2 = ContentRecordingSession.createDisplaySession(
+                INVALID_DISPLAY);
+        displaySession2.setVirtualDisplayId(DEFAULT_DISPLAY);
+        assertThat(ContentRecordingSession.isValid(displaySession2)).isFalse();
+
+        displaySession2.setDisplayToRecord(DEFAULT_DISPLAY);
+        assertThat(ContentRecordingSession.isValid(displaySession2)).isTrue();
+    }
+
+    @Test
+    public void testIsValid_taskSession() {
+        // Canonical task session.
+        ContentRecordingSession taskSession = ContentRecordingSession.createTaskSession(
                 WINDOW_TOKEN);
-        assertThat(ContentRecordingSession.isValid(session)).isFalse();
+        taskSession.setVirtualDisplayId(DEFAULT_DISPLAY);
+        assertThat(ContentRecordingSession.isValid(taskSession)).isTrue();
 
-        session.setDisplayId(DEFAULT_DISPLAY);
-        assertThat(ContentRecordingSession.isValid(session)).isTrue();
+        // Virtual display id values.
+        ContentRecordingSession taskSession0 = ContentRecordingSession.createTaskSession(
+                WINDOW_TOKEN);
+        assertThat(ContentRecordingSession.isValid(taskSession0)).isFalse();
 
-        session.setDisplayId(INVALID_DISPLAY);
-        assertThat(ContentRecordingSession.isValid(session)).isFalse();
+        ContentRecordingSession taskSession1 = ContentRecordingSession.createTaskSession(
+                WINDOW_TOKEN);
+        taskSession1.setVirtualDisplayId(INVALID_DISPLAY);
+        assertThat(ContentRecordingSession.isValid(taskSession1)).isFalse();
+
+        // Window container values.
+        ContentRecordingSession taskSession3 = ContentRecordingSession.createTaskSession(null);
+        taskSession3.setVirtualDisplayId(DEFAULT_DISPLAY);
+        assertThat(ContentRecordingSession.isValid(taskSession3)).isFalse();
+
+        ContentRecordingSession taskSession4 = ContentRecordingSession.createTaskSession(
+                WINDOW_TOKEN);
+        taskSession4.setVirtualDisplayId(DEFAULT_DISPLAY);
+        taskSession4.setTokenToRecord(null);
+        assertThat(ContentRecordingSession.isValid(taskSession4)).isFalse();
     }
 
     @Test
     public void testIsProjectionOnSameDisplay() {
         assertThat(ContentRecordingSession.isProjectionOnSameDisplay(null, null)).isFalse();
         ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
-                WINDOW_TOKEN);
-        session.setDisplayId(DEFAULT_DISPLAY);
+                DEFAULT_DISPLAY);
+        session.setVirtualDisplayId(DEFAULT_DISPLAY);
         assertThat(ContentRecordingSession.isProjectionOnSameDisplay(session, null)).isFalse();
 
         ContentRecordingSession incomingSession = ContentRecordingSession.createDisplaySession(
-                WINDOW_TOKEN);
-        incomingSession.setDisplayId(DEFAULT_DISPLAY);
+                DEFAULT_DISPLAY);
+        incomingSession.setVirtualDisplayId(DEFAULT_DISPLAY);
         assertThat(ContentRecordingSession.isProjectionOnSameDisplay(session,
                 incomingSession)).isTrue();
 
-        incomingSession.setDisplayId(DEFAULT_DISPLAY + 1);
+        incomingSession.setVirtualDisplayId(DEFAULT_DISPLAY + 1);
         assertThat(ContentRecordingSession.isProjectionOnSameDisplay(session,
                 incomingSession)).isFalse();
     }
@@ -110,10 +155,10 @@ public class ContentRecordingSessionTest {
     @Test
     public void testEquals() {
         ContentRecordingSession session = ContentRecordingSession.createTaskSession(WINDOW_TOKEN);
-        session.setDisplayId(DISPLAY_ID);
+        session.setVirtualDisplayId(DISPLAY_ID);
 
         ContentRecordingSession session2 = ContentRecordingSession.createTaskSession(WINDOW_TOKEN);
-        session2.setDisplayId(DISPLAY_ID);
+        session2.setVirtualDisplayId(DISPLAY_ID);
         assertThat(session).isEqualTo(session2);
     }
 }
