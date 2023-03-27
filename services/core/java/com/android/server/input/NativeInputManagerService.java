@@ -234,6 +234,9 @@ interface NativeInputManagerService {
      */
     float[] getMouseCursorPosition();
 
+    /** Set whether showing a pointer icon for styluses is enabled. */
+    void setStylusPointerIconEnabled(boolean enabled);
+
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
         /** Pointer to native input manager service object, used by native code. */
@@ -478,5 +481,8 @@ interface NativeInputManagerService {
 
         @Override
         public native float[] getMouseCursorPosition();
+
+        @Override
+        public native void setStylusPointerIconEnabled(boolean enabled);
     }
 }
