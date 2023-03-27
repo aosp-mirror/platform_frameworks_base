@@ -23,6 +23,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.media.RoutingSessionInfo;
 import android.os.Build;
@@ -566,9 +567,11 @@ public class LocalMediaManager implements BluetoothCallback {
         }
 
         private boolean isMutingExpectedDevice(CachedBluetoothDevice cachedDevice) {
-            return mAudioManager.getMutingExpectedDevice() != null
-                    && cachedDevice.getAddress().equals(
-                    mAudioManager.getMutingExpectedDevice().getAddress());
+            AudioDeviceAttributes mutingExpectedDevice = mAudioManager.getMutingExpectedDevice();
+            if (mutingExpectedDevice == null || cachedDevice == null) {
+                return false;
+            }
+            return cachedDevice.getAddress().equals(mutingExpectedDevice.getAddress());
         }
 
         private List<MediaDevice> buildDisconnectedBluetoothDevice() {
