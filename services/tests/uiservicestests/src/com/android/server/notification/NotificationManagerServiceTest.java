@@ -73,6 +73,7 @@ import static android.service.notification.NotificationListenerService.FLAG_FILT
 import static android.service.notification.NotificationListenerService.REASON_LOCKDOWN;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.ALLOW_DISMISS_ONGOING;
@@ -278,7 +279,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
     private static final String PKG_NO_CHANNELS = "com.example.no.channels";
     private static final int TEST_TASK_ID = 1;
-    private static final int UID_HEADLESS = 1000000;
+    private static final int UID_HEADLESS = 1_000_000;
+    private static final int TOAST_DURATION = 2_000;
 
     private final int mUid = Binder.getCallingUid();
     private TestableNotificationManagerService mService;
@@ -6539,8 +6541,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         setAppInForegroundForToasts(mUid, true);
 
         // enqueue toast -> toast should still enqueue
-        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
-                new TestableToastCallback(), 2000, 0);
+        enqueueToast(testPackage, new TestableToastCallback());
         assertEquals(1, mService.mToastQueue.size());
     }
 
@@ -6559,8 +6560,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         setAppInForegroundForToasts(mUid, false);
 
         // enqueue toast -> no toasts enqueued
-        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
-                new TestableToastCallback(), 2000, 0);
+        enqueueToast(testPackage, new TestableToastCallback());
         assertEquals(0, mService.mToastQueue.size());
     }
 
@@ -6583,12 +6583,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         INotificationManager nmService = (INotificationManager) mService.mService;
 
         // first time trying to show the toast, showToast gets called
-        nmService.enqueueToast(testPackage, token, callback, 2000, 0);
+        enqueueToast(nmService, testPackage, token, callback);
         verify(callback, times(1)).show(any());
 
         // second time trying to show the same toast, showToast isn't called again (total number of
         // invocations stays at one)
-        nmService.enqueueToast(testPackage, token, callback, 2000, 0);
+        enqueueToast(nmService, testPackage, token, callback);
         verify(callback, times(1)).show(any());
     }
 
@@ -6611,7 +6611,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ITransientNotification callback = mock(ITransientNotification.class);
         INotificationManager nmService = (INotificationManager) mService.mService;
 
-        nmService.enqueueToast(testPackage, token, callback, 2000, 0);
+        enqueueToast(nmService, testPackage, token, callback);
         verify(callback, times(1)).show(any());
     }
 
@@ -6636,8 +6636,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ITransientNotification callback2 = mock(ITransientNotification.class);
         INotificationManager nmService = (INotificationManager) mService.mService;
 
-        nmService.enqueueToast(testPackage, token1, callback1, 2000, 0);
-        nmService.enqueueToast(testPackage, token2, callback2, 2000, 0);
+        enqueueToast(nmService, testPackage, token1, callback1);
+        enqueueToast(nmService, testPackage, token2, callback2);
 
         assertEquals(2, mService.mToastQueue.size()); // Both toasts enqueued.
         verify(callback1, times(1)).show(any()); // First toast shown.
@@ -6665,8 +6665,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         setAppInForegroundForToasts(mUid, true);
 
         // enqueue toast -> toast should still enqueue
-        ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(),
-                "Text", 2000, 0, null);
+        enqueueTextToast(testPackage, "Text");
         assertEquals(1, mService.mToastQueue.size());
     }
 
@@ -6685,8 +6684,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         setAppInForegroundForToasts(mUid, false);
 
         // enqueue toast -> toast should still enqueue
-        ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(),
-                "Text", 2000, 0, null);
+        enqueueTextToast(testPackage, "Text");
         assertEquals(1, mService.mToastQueue.size());
     }
 
@@ -6708,13 +6706,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         INotificationManager nmService = (INotificationManager) mService.mService;
 
         // first time trying to show the toast, showToast gets called
-        nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
+        enqueueTextToast(testPackage, "Text");
         verify(mStatusBar, times(1))
                 .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any(), anyInt());
 
         // second time trying to show the same toast, showToast isn't called again (total number of
         // invocations stays at one)
-        nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
+        enqueueTextToast(testPackage, "Text");
         verify(mStatusBar, times(1))
                 .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any(), anyInt());
     }
@@ -6736,7 +6734,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Binder token = new Binder();
         INotificationManager nmService = (INotificationManager) mService.mService;
 
-        nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
+        enqueueTextToast(testPackage, "Text");
         verify(mStatusBar, times(0))
                 .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any(), anyInt());
     }
@@ -6758,7 +6756,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Binder token = new Binder();
         INotificationManager nmService = (INotificationManager) mService.mService;
 
-        nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
+        enqueueTextToast(testPackage, "Text");
         verify(mStatusBar, times(1))
                 .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any(), anyInt());
     }
@@ -6779,7 +6777,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Binder token = new Binder();
         INotificationManager nmService = (INotificationManager) mService.mService;
 
-        nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
+        enqueueTextToast(testPackage, "Text");
         verify(mStatusBar).showToast(anyInt(), any(), any(), any(), any(), anyInt(), any(),
                 anyInt());
     }
@@ -6800,7 +6798,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Binder token = new Binder();
         INotificationManager nmService = (INotificationManager) mService.mService;
 
-        nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
+        enqueueTextToast(testPackage, "Text");
 
         // window token was added when enqueued
         ArgumentCaptor<Binder> binderCaptor =
@@ -6836,8 +6834,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         setAppInForegroundForToasts(mUid, false);
 
         // enqueue toast -> toast should still enqueue
-        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
-                new TestableToastCallback(), 2000, 0);
+        enqueueToast(testPackage, new TestableToastCallback());
         assertEquals(1, mService.mToastQueue.size());
         verify(mAm).setProcessImportant(any(), anyInt(), eq(true), any());
     }
@@ -6858,8 +6855,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         setAppInForegroundForToasts(mUid, true);
 
         // enqueue toast -> toast should still enqueue
-        ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(),
-                "Text", 2000, 0, null);
+        enqueueTextToast(testPackage, "Text");
         assertEquals(1, mService.mToastQueue.size());
         verify(mAm).setProcessImportant(any(), anyInt(), eq(false), any());
     }
@@ -6880,8 +6876,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         setAppInForegroundForToasts(mUid, false);
 
         // enqueue toast -> toast should still enqueue
-        ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(),
-                "Text", 2000, 0, null);
+        enqueueTextToast(testPackage, "Text");
         assertEquals(1, mService.mToastQueue.size());
         verify(mAm).setProcessImportant(any(), anyInt(), eq(false), any());
     }
@@ -6899,8 +6894,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(false);
 
         // enqueue toast -> no toasts enqueued
-        ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(),
-                "Text", 2000, 0, null);
+        enqueueTextToast(testPackage, "Text");
         verify(mStatusBar).showToast(anyInt(), any(), any(), any(), any(), anyInt(), any(),
                 anyInt());
     }
@@ -6921,8 +6915,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPermissionHelper.hasPermission(mUid)).thenReturn(true);
 
         // enqueue toast -> no toasts enqueued
-        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
-                new TestableToastCallback(), 2000, 0);
+        enqueueToast(testPackage, new TestableToastCallback());
         assertEquals(0, mService.mToastQueue.size());
     }
 
@@ -6944,8 +6937,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         setAppInForegroundForToasts(mUid, false);
 
         // enqueue toast -> no toasts enqueued
-        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
-                new TestableToastCallback(), 2000, 0);
+        enqueueToast(testPackage, new TestableToastCallback());
         assertEquals(0, mService.mToastQueue.size());
     }
 
@@ -6967,8 +6959,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         setAppInForegroundForToasts(mUid, false);
 
         // enqueue toast -> system toast can still be enqueued
-        ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
-                new TestableToastCallback(), 2000, 0);
+        enqueueToast(testPackage, new TestableToastCallback());
         assertEquals(1, mService.mToastQueue.size());
     }
 
@@ -6988,13 +6979,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Trying to quickly enqueue more toast than allowed.
         for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_TOASTS + 1; i++) {
-            nmService.enqueueTextToast(
-                    testPackage,
-                    new Binder(),
-                    "Text",
-                    /* duration */ 2000,
-                    /* displayId */ 0,
-                    /* callback */ null);
+            enqueueTextToast(testPackage, "Text");
         }
         // Only allowed number enqueued, rest ignored.
         assertEquals(NotificationManagerService.MAX_PACKAGE_TOASTS, mService.mToastQueue.size());
@@ -10717,5 +10702,21 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 /* name= */ "application_exemptions",
                 String.valueOf(isOn),
                 /* makeDefault= */ false);
+    }
+
+    private void enqueueToast(String testPackage, ITransientNotification callback)
+            throws RemoteException {
+        enqueueToast((INotificationManager) mService.mService, testPackage, new Binder(), callback);
+    }
+
+    private void enqueueToast(INotificationManager service, String testPackage,
+            IBinder token, ITransientNotification callback) throws RemoteException {
+        service.enqueueToast(testPackage, token, callback, TOAST_DURATION, /* isUiContext= */ true,
+                DEFAULT_DISPLAY);
+    }
+
+    private void enqueueTextToast(String testPackage, CharSequence text) throws RemoteException {
+        ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(), text,
+                TOAST_DURATION, /* isUiContext= */ true, DEFAULT_DISPLAY, /* textCallback= */ null);
     }
 }
