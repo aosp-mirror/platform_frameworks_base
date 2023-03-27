@@ -234,6 +234,14 @@ class NotificationInterruptLogger @Inject constructor(
         })
     }
 
+    fun logNoPulsingNotificationHidden(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+        }, {
+            "No pulsing: notification hidden on lock screen: $str1"
+        })
+    }
+
     fun logNoPulsingNotImportant(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
             str1 = entry.logKey
