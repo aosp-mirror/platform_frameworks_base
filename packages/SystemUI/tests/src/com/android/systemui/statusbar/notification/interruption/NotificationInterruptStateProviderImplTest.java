@@ -656,6 +656,39 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testShouldNotFullScreen_isSuppressedByBubbleMetadata_withStrictFlag() {
+        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
+        testShouldNotFullScreen_isSuppressedByBubbleMetadata();
+    }
+
+    @Test
+    public void testShouldNotFullScreen_isSuppressedByBubbleMetadata() {
+        NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
+        Notification.BubbleMetadata bubbleMetadata = new Notification.BubbleMetadata.Builder("foo")
+                .setSuppressNotification(true).build();
+        entry.getSbn().getNotification().setBubbleMetadata(bubbleMetadata);
+        when(mPowerManager.isInteractive()).thenReturn(false);
+        when(mStatusBarStateController.isDreaming()).thenReturn(true);
+        when(mStatusBarStateController.getState()).thenReturn(KEYGUARD);
+
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.NO_FSI_SUPPRESSIVE_BUBBLE_METADATA);
+        assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
+                .isFalse();
+        verify(mLogger, never()).logNoFullscreen(any(), any());
+        verify(mLogger).logNoFullscreenWarning(entry,
+                "NO_FSI_SUPPRESSIVE_BUBBLE_METADATA: BubbleMetadata may prevent HUN");
+        verify(mLogger, never()).logFullscreen(any(), any());
+
+        assertThat(mUiEventLoggerFake.numLogs()).isEqualTo(1);
+        UiEventLoggerFake.FakeUiEvent fakeUiEvent = mUiEventLoggerFake.get(0);
+        assertThat(fakeUiEvent.eventId).isEqualTo(
+                NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA.getId());
+        assertThat(fakeUiEvent.uid).isEqualTo(entry.getSbn().getUid());
+        assertThat(fakeUiEvent.packageName).isEqualTo(entry.getSbn().getPackageName());
+    }
+
+    @Test
     public void testShouldFullScreen_notInteractive_withStrictFlag() throws Exception {
         when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
         testShouldFullScreen_notInteractive();
@@ -664,6 +697,9 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     @Test
     public void testShouldFullScreen_notInteractive() throws RemoteException {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
+        Notification.BubbleMetadata bubbleMetadata = new Notification.BubbleMetadata.Builder("foo")
+                .setSuppressNotification(false).build();
+        entry.getSbn().getNotification().setBubbleMetadata(bubbleMetadata);
         when(mPowerManager.isInteractive()).thenReturn(false);
         when(mStatusBarStateController.isDreaming()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(SHADE);
@@ -897,6 +933,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         Set<FullScreenIntentDecision> warnings = new HashSet<>(Arrays.asList(
                 FullScreenIntentDecision.NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR,
+                FullScreenIntentDecision.NO_FSI_SUPPRESSIVE_BUBBLE_METADATA,
                 FullScreenIntentDecision.NO_FSI_NO_HUN_OR_KEYGUARD
         ));
         for (FullScreenIntentDecision decision : FullScreenIntentDecision.values()) {
