@@ -18727,8 +18727,8 @@ package android.hardware.usb {
     method public int bulkTransfer(android.hardware.usb.UsbEndpoint, byte[], int, int, int);
     method public boolean claimInterface(android.hardware.usb.UsbInterface, boolean);
     method public void close();
-    method public int controlTransfer(int, int, int, int, byte[], int, int);
-    method public int controlTransfer(int, int, int, int, byte[], int, int, int);
+    method public int controlTransfer(int, int, int, int, @Nullable byte[], int, int);
+    method public int controlTransfer(int, int, int, int, @Nullable byte[], int, int, int);
     method public int getFileDescriptor();
     method public byte[] getRawDescriptors();
     method public String getSerial();
