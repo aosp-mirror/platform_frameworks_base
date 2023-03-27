@@ -36,6 +36,7 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSW
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.CURRENT_LSKF_BASED_PROTECTOR_ID_KEY;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
+import static com.android.internal.widget.LockPatternUtils.PIN_LENGTH_UNAVAILABLE;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE;
 import static com.android.internal.widget.LockPatternUtils.USER_FRP;
@@ -1202,6 +1203,31 @@ public class LockSettingsService extends ILockSettings.Stub {
                 DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userId);
     }
 
+    /*
+     * Gets the PIN length for the given user if it is currently available.
+     * Can only be invoked by process/activity that have the right permission.
+     * Returns:
+     *      A. Actual PIN length if credential type PIN and auto confirm feature is enabled
+     *         for the user or user's PIN has been successfully verified since the device booted
+     *      B. PIN_LENGTH_UNAVAILABLE if pin length is not stored/available
+     */
+    @Override
+    public int getPinLength(int userId) {
+        checkPasswordHavePermission();
+        PasswordMetrics passwordMetrics = getUserPasswordMetrics(userId);
+        if (passwordMetrics != null && passwordMetrics.credType == CREDENTIAL_TYPE_PIN) {
+            return passwordMetrics.length;
+        }
+        synchronized (mSpManager) {
+            final long protectorId = getCurrentLskfBasedProtectorId(userId);
+            if (protectorId == SyntheticPasswordManager.NULL_PROTECTOR_ID) {
+                // Only possible for new users during early boot (before onThirdPartyAppsStarted())
+                return PIN_LENGTH_UNAVAILABLE;
+            }
+            return mSpManager.getPinLength(protectorId, userId);
+        }
+    }
+
     /**
      * This API is cached; whenever the result would change,
      * {@link com.android.internal.widget.LockPatternUtils#invalidateCredentialTypeCache}
@@ -1682,11 +1708,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     private void onPostPasswordChanged(LockscreenCredential newCredential, int userHandle) {
         if (newCredential.isPattern()) {
             setBoolean(LockPatternUtils.PATTERN_EVER_CHOSEN_KEY, true, userHandle);
-        }
-        if (LockPatternUtils.isAutoPinConfirmFeatureAvailable()) {
-            if (newCredential.isPin()) {
-                setLong(LockPatternUtils.PIN_LENGTH, newCredential.size(), userHandle);
-            }
         }
 
         updatePasswordHistory(newCredential, userHandle);
@@ -2229,6 +2250,11 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
+    /**
+     * Returns the PasswordMetrics for the current user
+     * @param userHandle The id of the user for which we return the password metrics object
+     * @return passwordmetrics for the user or null if not available
+     */
     @VisibleForTesting
     PasswordMetrics getUserPasswordMetrics(int userHandle) {
         if (!isUserSecure(userHandle)) {
