@@ -1604,7 +1604,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     boolean handlesOrientationChangeFromDescendant(@ScreenOrientation int orientation) {
-        return !getIgnoreOrientationRequest(orientation)
+        return !shouldIgnoreOrientationRequest(orientation)
                 && !getDisplayRotation().isFixedToUserRotation();
     }
 
@@ -1706,7 +1706,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         final int activityOrientation = r.getOverrideOrientation();
         if (!WindowManagerService.ENABLE_FIXED_ROTATION_TRANSFORM
-                || getIgnoreOrientationRequest(activityOrientation)) {
+                || shouldIgnoreOrientationRequest(activityOrientation)) {
             return ROTATION_UNDEFINED;
         }
         if (activityOrientation == ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
@@ -5120,7 +5120,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         @ScreenOrientation
         int getOrientation(@ScreenOrientation int candidate) {
             // IME does not participate in orientation.
-            return getIgnoreOrientationRequest(candidate) ? SCREEN_ORIENTATION_UNSET : candidate;
+            return shouldIgnoreOrientationRequest(candidate) ? SCREEN_ORIENTATION_UNSET : candidate;
         }
 
         @Override
