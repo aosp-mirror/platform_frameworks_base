@@ -39,6 +39,7 @@ import android.os.InputEventInjectionSync;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Vibrator;
+import android.sysprop.InputProperties;
 import android.util.Log;
 import android.view.Display;
 import android.view.InputDevice;
@@ -1123,7 +1124,8 @@ public final class InputManager {
     public boolean isStylusPointerIconEnabled() {
         if (mIsStylusPointerIconEnabled == null) {
             mIsStylusPointerIconEnabled = getContext().getResources()
-                    .getBoolean(com.android.internal.R.bool.config_enableStylusPointerIcon);
+                    .getBoolean(com.android.internal.R.bool.config_enableStylusPointerIcon)
+                    || InputProperties.force_enable_stylus_pointer_icon().orElse(false);
         }
         return mIsStylusPointerIconEnabled;
     }
