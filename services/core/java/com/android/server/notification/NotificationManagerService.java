@@ -3328,10 +3328,10 @@ public class NotificationManagerService extends SystemService {
             }
 
             if (!isUiContext && displayId == Display.DEFAULT_DISPLAY
-                    && UserManager.isVisibleBackgroundUsersEnabled()) {
-                // When the caller is a visible background user using a non-ui context (like the
+                    && mUm.isVisibleBackgroundUsersSupported()) {
+                // When the caller is a visible background user using a non-UI context (like the
                 // application context), the Toast must be displayed in the display the user was
-                // started visible on
+                // started visible on.
                 int userId = UserHandle.getUserId(callingUid);
                 int userDisplayId = mUmInternal.getMainDisplayAssignedToUser(userId);
                 if (displayId != userDisplayId) {
