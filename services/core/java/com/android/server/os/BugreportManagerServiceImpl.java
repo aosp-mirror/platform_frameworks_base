@@ -39,6 +39,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.LocalLog;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -60,6 +61,7 @@ import java.util.OptionalInt;
  */
 class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
+    private static final int LOCAL_LOG_SIZE = 20;
     private static final String TAG = "BugreportManagerService";
     private static final boolean DEBUG = false;
 
@@ -73,8 +75,18 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     private final ArraySet<String> mBugreportAllowlistedPackages;
     private final BugreportFileManager mBugreportFileManager;
 
+
     @GuardedBy("mLock")
     private OptionalInt mPreDumpedDataUid = OptionalInt.empty();
+
+    // Attributes below are just Used for dump() purposes
+    @Nullable
+    @GuardedBy("mLock")
+    private DumpstateListener mCurrentDumpstateListener;
+    @GuardedBy("mLock")
+    private int mNumberFinishedBugreports;
+    @GuardedBy("mLock")
+    private final LocalLog mFinishedBugreports = new LocalLog(LOCAL_LOG_SIZE);
 
     /** Helper class for associating previously generated bugreports with their callers. */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
@@ -264,8 +276,9 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             }
 
             // Wrap the listener so we can intercept binder events directly.
-            IDumpstateListener myListener = new DumpstateListener(listener, ds,
-                    new Pair<>(callingUid, callingPackage));
+            DumpstateListener myListener = new DumpstateListener(listener, ds,
+                    new Pair<>(callingUid, callingPackage), /* reportFinishedFile= */ true);
+            setCurrentDumpstateListenerLocked(myListener);
             try {
                 ds.retrieveBugreport(callingUid, callingPackage, bugreportFd,
                         bugreportFile, myListener);
@@ -273,6 +286,16 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
                 Slog.e(TAG, "RemoteException in retrieveBugreport", e);
             }
         }
+    }
+
+    @GuardedBy("mLock")
+    private void setCurrentDumpstateListenerLocked(DumpstateListener listener) {
+        if (mCurrentDumpstateListener != null) {
+            Slogf.w(TAG, "setCurrentDumpstateListenerLocked(%s): called when "
+                    + "mCurrentDumpstateListener is already set (%s)", listener,
+                    mCurrentDumpstateListener);
+        }
+        mCurrentDumpstateListener = listener;
     }
 
     private void validateBugreportMode(@BugreportParams.BugreportMode int mode) {
@@ -440,7 +463,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             }
         }
 
-        boolean isConsentDeferred =
+        boolean reportFinishedFile =
                 (bugreportFlags & BugreportParams.BUGREPORT_FLAG_DEFER_CONSENT) != 0;
 
         IDumpstate ds = startAndGetDumpstateBinderServiceLocked();
@@ -450,9 +473,9 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             return;
         }
 
-        // Wrap the listener so we can intercept binder events directly.
-        IDumpstateListener myListener = new DumpstateListener(listener, ds,
-                isConsentDeferred ? new Pair<>(callingUid, callingPackage) : null);
+        DumpstateListener myListener = new DumpstateListener(listener, ds,
+                new Pair<>(callingUid, callingPackage), reportFinishedFile);
+        setCurrentDumpstateListenerLocked(myListener);
         try {
             ds.startBugreport(callingUid, callingPackage, bugreportFd, screenshotFd, bugreportMode,
                     bugreportFlags, myListener, isScreenshotRequested);
@@ -540,21 +563,40 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             } else {
                 pw.println(mPreDumpedDataUid.getAsInt());
             }
+
+            if (mCurrentDumpstateListener == null) {
+                pw.println("Not taking a bug report");
+            } else {
+                mCurrentDumpstateListener.dump(pw);
+            }
+
+            if (mNumberFinishedBugreports == 0) {
+                pw.println("No finished bugreports");
+            } else {
+                pw.printf("%d finished bugreport%s. Last %d:\n", mNumberFinishedBugreports,
+                        (mNumberFinishedBugreports > 1 ? "s" : ""),
+                        Math.min(mNumberFinishedBugreports, LOCAL_LOG_SIZE));
+                mFinishedBugreports.dump("  ", pw);
+            }
         }
 
         synchronized (mBugreportFileManager.mLock) {
             int numberFiles = mBugreportFileManager.mBugreportFiles.size();
-            pw.printf("%d call%s", numberFiles, (numberFiles > 1 ? "s" : ""));
+            pw.printf("%d pending file%s", numberFiles, (numberFiles > 1 ? "s" : ""));
             if (numberFiles > 0) {
                 for (int i = 0; i < numberFiles; i++) {
                     Pair<Integer, String> caller = mBugreportFileManager.mBugreportFiles.keyAt(i);
                     ArraySet<String> files = mBugreportFileManager.mBugreportFiles.valueAt(i);
-                    pw.printf("  %s/%d: %s\n", caller.second, caller.first, files);
+                    pw.printf("  %s: %s\n", callerToString(caller), files);
                 }
             } else {
                 pw.println();
             }
         }
+    }
+
+    private static String callerToString(@Nullable Pair<Integer, String> caller) {
+        return (caller == null) ? "N/A" : caller.second + "/" + caller.first;
     }
 
     private int clearBugreportFlag(int flags, @BugreportParams.BugreportFlag int flag) {
@@ -576,19 +618,28 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         throw new IllegalArgumentException(message);
     }
 
-
     private final class DumpstateListener extends IDumpstateListener.Stub
             implements DeathRecipient {
+
+        private static int sNextId;
+
+        private final int mId = ++sNextId; // used for debugging purposes only
         private final IDumpstateListener mListener;
         private final IDumpstate mDs;
-        private boolean mDone = false;
         private final Pair<Integer, String> mCaller;
+        private final boolean mReportFinishedFile;
+        private int mProgress; // used for debugging purposes only
+        private boolean mDone;
 
         DumpstateListener(IDumpstateListener listener, IDumpstate ds,
-                @Nullable Pair<Integer, String> caller) {
+                Pair<Integer, String> caller, boolean reportFinishedFile) {
+            if (DEBUG) {
+                Slogf.d(TAG, "Starting DumpstateListener(id=%d) for caller %s", mId, caller);
+            }
             mListener = listener;
             mDs = ds;
             mCaller = caller;
+            mReportFinishedFile = reportFinishedFile;
             try {
                 mDs.asBinder().linkToDeath(this, 0);
             } catch (RemoteException e) {
@@ -601,6 +652,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             if (DEBUG) {
                 Slogf.d(TAG, "onProgress: %d", progress);
             }
+            mProgress = progress;
             mListener.onProgress(progress);
         }
 
@@ -608,19 +660,23 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         public void onError(int errorCode) throws RemoteException {
             Slogf.e(TAG, "onError(): %d", errorCode);
             synchronized (mLock) {
-                mDone = true;
+                releaseItselfLocked();
+                reportFinishedLocked("ErroCode: " + errorCode);
             }
             mListener.onError(errorCode);
         }
 
         @Override
         public void onFinished(String bugreportFile) throws RemoteException {
-            Slogf.e(TAG, "onFinished(): %s", bugreportFile);
+            Slogf.i(TAG, "onFinished(): %s", bugreportFile);
             synchronized (mLock) {
-                mDone = true;
+                releaseItselfLocked();
+                reportFinishedLocked("File: " + bugreportFile);
             }
-            if (mCaller != null) {
+            if (mReportFinishedFile) {
                 mBugreportFileManager.addBugreportFileForCaller(mCaller, bugreportFile);
+            } else if (DEBUG) {
+                Slog.d(TAG, "Not reporting finished file");
             }
             mListener.onFinished(bugreportFile);
         }
@@ -662,6 +718,40 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
                 }
             }
             mDs.asBinder().unlinkToDeath(this, 0);
+        }
+
+        @Override
+        public String toString() {
+            return "DumpstateListener[id=" + mId + ", progress=" + mProgress + "]";
+        }
+
+        @GuardedBy("mLock")
+        private void reportFinishedLocked(String message) {
+            mNumberFinishedBugreports++;
+            mFinishedBugreports.log("Caller: " + callerToString(mCaller) + " " + message);
+        }
+
+        private void dump(PrintWriter pw) {
+            pw.println("DumpstateListener:");
+            pw.printf("  id: %d\n", mId);
+            pw.printf("  caller: %s\n", callerToString(mCaller));
+            pw.printf("  reports finished file: %b\n", mReportFinishedFile);
+            pw.printf("  progress: %d\n", mProgress);
+            pw.printf("  done: %b\n", mDone);
+        }
+
+        @GuardedBy("mLock")
+        private void releaseItselfLocked() {
+            mDone = true;
+            if (mCurrentDumpstateListener == this) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "releaseItselfLocked(): releasing %s", this);
+                }
+                mCurrentDumpstateListener = null;
+            } else {
+                Slogf.w(TAG, "releaseItselfLocked(): " + this + " is finished, but current listener"
+                        + " is " + mCurrentDumpstateListener);
+            }
         }
     }
 }
