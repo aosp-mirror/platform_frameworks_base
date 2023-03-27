@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.notification.interruption
 
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.Decision
@@ -25,6 +26,7 @@ import com.android.systemui.statusbar.notification.interruption.VisualInterrupti
  * Wraps a [NotificationInterruptStateProvider] to convert it to the new
  * [VisualInterruptionDecisionProvider] interface.
  */
+@SysUISingleton
 class NotificationInterruptStateProviderWrapper(
     private val wrapped: NotificationInterruptStateProvider
 ) : VisualInterruptionDecisionProvider {
