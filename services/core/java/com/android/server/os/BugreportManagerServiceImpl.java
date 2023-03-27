@@ -44,9 +44,12 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.DumpUtils;
 import com.android.server.SystemConfig;
+import com.android.server.utils.Slogf;
 
 import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Objects;
 import java.util.OptionalInt;
 
@@ -56,7 +59,10 @@ import java.util.OptionalInt;
  * <p>Delegates the actualy generation to a native implementation of {@code IDumpstate}.
  */
 class BugreportManagerServiceImpl extends IDumpstate.Stub {
+
     private static final String TAG = "BugreportManagerService";
+    private static final boolean DEBUG = false;
+
     private static final String BUGREPORT_SERVICE = "bugreportd";
     private static final long DEFAULT_BUGREPORT_SERVICE_TIMEOUT_MILLIS = 30 * 1000;
 
@@ -64,7 +70,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     private final Context mContext;
     private final AppOpsManager mAppOps;
     private final TelephonyManager mTelephonyManager;
-    private final ArraySet<String> mBugreportWhitelistedPackages;
+    private final ArraySet<String> mBugreportAllowlistedPackages;
     private final BugreportFileManager mBugreportFileManager;
 
     @GuardedBy("mLock")
@@ -77,11 +83,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         private final Object mLock = new Object();
 
         @GuardedBy("mLock")
-        private final ArrayMap<Pair<Integer, String>, ArraySet<String>> mBugreportFiles;
-
-        BugreportFileManager() {
-            mBugreportFiles = new ArrayMap<>();
-        }
+        private final ArrayMap<Pair<Integer, String>, ArraySet<String>> mBugreportFiles =
+                new ArrayMap<>();
 
         /**
          * Checks that a given file was generated on behalf of the given caller. If the file was
@@ -159,10 +162,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         mAppOps = mContext.getSystemService(AppOpsManager.class);
         mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
         mBugreportFileManager = new BugreportFileManager();
-        mBugreportWhitelistedPackages =
-                injector.getAllowlistedPackages();
+        mBugreportAllowlistedPackages = injector.getAllowlistedPackages();
     }
-
 
     @Override
     @RequiresPermission(android.Manifest.permission.DUMP)
@@ -196,6 +197,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             Binder.restoreCallingIdentity(identity);
         }
 
+        Slogf.i(TAG, "Starting bugreport for %s / %d", callingPackage, callingUid);
         synchronized (mLock) {
             startBugreportLocked(callingUid, callingPackage, bugreportFd, screenshotFd,
                     bugreportMode, bugreportFlags, listener, isScreenshotRequested);
@@ -208,6 +210,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         int callingUid = Binder.getCallingUid();
         enforcePermission(callingPackage, callingUid, true /* checkCarrierPrivileges */);
 
+        Slogf.i(TAG, "Cancelling bugreport for %s / %d", callingPackage, callingUid);
         synchronized (mLock) {
             IDumpstate ds = getDumpstateBinderServiceLocked();
             if (ds == null) {
@@ -234,6 +237,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         int callingUid = Binder.getCallingUid();
         enforcePermission(callingPackage, callingUid, false);
 
+        Slogf.i(TAG, "Retrieving bugreport for %s / %d", callingPackage, callingUid);
         try {
             mBugreportFileManager.ensureCallerPreviouslyGeneratedFile(
                     new Pair<>(callingUid, callingPackage), bugreportFile);
@@ -299,7 +303,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
         // To gain access through the DUMP permission, the OEM has to allow this package explicitly
         // via sysconfig and privileged permissions.
-        if (mBugreportWhitelistedPackages.contains(callingPackage)
+        if (mBugreportAllowlistedPackages.contains(callingPackage)
                 && mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                         == PackageManager.PERMISSION_GRANTED) {
             return;
@@ -522,6 +526,37 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         SystemProperties.set("ctl.stop", BUGREPORT_SERVICE);
     }
 
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+
+        pw.printf("Allow-listed packages: %s\n", mBugreportAllowlistedPackages);
+
+        synchronized (mLock) {
+            pw.print("Pre-dumped data UID: ");
+            if (mPreDumpedDataUid.isEmpty()) {
+                pw.println("none");
+            } else {
+                pw.println(mPreDumpedDataUid.getAsInt());
+            }
+        }
+
+        synchronized (mBugreportFileManager.mLock) {
+            int numberFiles = mBugreportFileManager.mBugreportFiles.size();
+            pw.printf("%d call%s", numberFiles, (numberFiles > 1 ? "s" : ""));
+            if (numberFiles > 0) {
+                for (int i = 0; i < numberFiles; i++) {
+                    Pair<Integer, String> caller = mBugreportFileManager.mBugreportFiles.keyAt(i);
+                    ArraySet<String> files = mBugreportFileManager.mBugreportFiles.valueAt(i);
+                    pw.printf("  %s/%d: %s\n", caller.second, caller.first, files);
+                }
+            } else {
+                pw.println();
+            }
+        }
+    }
+
     private int clearBugreportFlag(int flags, @BugreportParams.BugreportFlag int flag) {
         flags &= ~flag;
         return flags;
@@ -563,11 +598,15 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
         @Override
         public void onProgress(int progress) throws RemoteException {
+            if (DEBUG) {
+                Slogf.d(TAG, "onProgress: %d", progress);
+            }
             mListener.onProgress(progress);
         }
 
         @Override
         public void onError(int errorCode) throws RemoteException {
+            Slogf.e(TAG, "onError(): %d", errorCode);
             synchronized (mLock) {
                 mDone = true;
             }
@@ -576,6 +615,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
         @Override
         public void onFinished(String bugreportFile) throws RemoteException {
+            Slogf.e(TAG, "onFinished(): %s", bugreportFile);
             synchronized (mLock) {
                 mDone = true;
             }
@@ -587,11 +627,17 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
         @Override
         public void onScreenshotTaken(boolean success) throws RemoteException {
+            if (DEBUG) {
+                Slogf.d(TAG, "onScreenshotTaken(): %b", success);
+            }
             mListener.onScreenshotTaken(success);
         }
 
         @Override
         public void onUiIntensiveBugreportDumpsFinished() throws RemoteException {
+            if (DEBUG) {
+                Slogf.d(TAG, "onUiIntensiveBugreportDumpsFinished()");
+            }
             mListener.onUiIntensiveBugreportDumpsFinished();
         }
 
