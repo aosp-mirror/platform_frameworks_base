@@ -19,12 +19,14 @@ package com.android.systemui.statusbar.notification.interruption;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.Notification.GROUP_ALERT_SUMMARY;
+import static android.app.Notification.VISIBILITY_PRIVATE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
+import static android.app.NotificationManager.VISIBILITY_NO_OVERRIDE;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
@@ -222,7 +224,23 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         ensureStateForHeadsUpWhenDozing();
 
         NotificationEntry entry = createNotification(IMPORTANCE_DEFAULT);
+        modifyRanking(entry)
+                .setVisibilityOverride(VISIBILITY_NO_OVERRIDE)
+                .build();
+
         assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isTrue();
+    }
+
+    @Test
+    public void testShouldHeadsUpWhenDozing_hiddenOnLockscreen() {
+        ensureStateForHeadsUpWhenDozing();
+
+        NotificationEntry entry = createNotification(IMPORTANCE_DEFAULT);
+        modifyRanking(entry)
+                .setVisibilityOverride(VISIBILITY_PRIVATE)
+                .build();
+
+        assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isFalse();
     }
 
     @Test
