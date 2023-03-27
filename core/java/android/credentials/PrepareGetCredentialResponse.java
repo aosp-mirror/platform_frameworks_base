@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.IntentSender;
 import android.os.CancellationSignal;
 import android.os.OutcomeReceiver;
@@ -67,7 +68,7 @@ public final class PrepareGetCredentialResponse {
         }
 
         /** @hide */
-        void show(@NonNull Activity activity, @Nullable CancellationSignal cancellationSignal,
+        void show(@NonNull Context context, @Nullable CancellationSignal cancellationSignal,
                 @CallbackExecutor @NonNull Executor executor,
                 @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
             if (mPendingIntent == null) {
@@ -80,7 +81,7 @@ public final class PrepareGetCredentialResponse {
                 @Override
                 public void onPendingIntent(PendingIntent pendingIntent) {
                     try {
-                        activity.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
+                        context.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
                     } catch (IntentSender.SendIntentException e) {
                         Log.e(TAG, "startIntentSender() failed for intent for show()", e);
                         executor.execute(() -> callback.onError(
@@ -101,7 +102,7 @@ public final class PrepareGetCredentialResponse {
             });
 
             try {
-                activity.startIntentSender(mPendingIntent.getIntentSender(), null, 0, 0, 0);
+                context.startIntentSender(mPendingIntent.getIntentSender(), null, 0, 0, 0);
             } catch (IntentSender.SendIntentException e) {
                 Log.e(TAG, "startIntentSender() failed for intent for show()", e);
                 executor.execute(() -> callback.onError(
