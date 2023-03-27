@@ -2349,12 +2349,23 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
 
             // Prepare transition before resume top activity, so it can be collected.
-            if (!displayShouldSleep && display.isDefaultDisplay
-                    && !display.getDisplayPolicy().isAwake()
-                    && display.mTransitionController.isShellTransitionsEnabled()
+            if (!displayShouldSleep && display.mTransitionController.isShellTransitionsEnabled()
                     && !display.mTransitionController.isCollecting()) {
-                display.mTransitionController.requestTransitionIfNeeded(TRANSIT_WAKE,
-                        0 /* flags */, null /* trigger */, display);
+                int transit = TRANSIT_NONE;
+                if (!display.getDisplayPolicy().isAwake()) {
+                    // Note that currently this only happens on default display because non-default
+                    // display is always awake.
+                    transit = TRANSIT_WAKE;
+                } else if (display.isKeyguardOccluded()) {
+                    // The display was awake so this is resuming activity for occluding keyguard.
+                    transit = WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
+                }
+                if (transit != TRANSIT_NONE) {
+                    display.mTransitionController.requestStartTransition(
+                            display.mTransitionController.createTransition(transit),
+                            null /* startTask */, null /* remoteTransition */,
+                            null /* displayChange */);
+                }
             }
             // Set the sleeping state of the root tasks on the display.
             display.forAllRootTasks(rootTask -> {
