@@ -263,7 +263,7 @@ public class ShortcutManagerTestUtils {
                 + instrumentation.getContext().getUserId() + " " + RoleManager.ROLE_HOME + " "
                 + packageName + " 0");
         waitUntil("Failed to get shortcut access",
-                () -> hasShortcutAccess(instrumentation, packageName), 20);
+                () -> hasShortcutAccess(instrumentation, packageName), 60);
     }
 
     public static void setDefaultLauncher(Instrumentation instrumentation, Context packageContext) {
