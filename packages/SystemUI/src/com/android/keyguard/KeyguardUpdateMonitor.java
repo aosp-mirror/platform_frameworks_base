@@ -98,11 +98,13 @@ import android.hardware.biometrics.SensorProperties;
 import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.usb.UsbManager;
 import android.nfc.NfcAdapter;
 import android.os.CancellationSignal;
@@ -171,6 +173,7 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1888,8 +1891,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     CancellationSignal mFingerprintCancelSignal;
     @VisibleForTesting
     CancellationSignal mFaceCancelSignal;
-    private List<FingerprintSensorPropertiesInternal> mFingerprintSensorProperties;
-    private List<FaceSensorPropertiesInternal> mFaceSensorProperties;
+    private List<FingerprintSensorPropertiesInternal> mFingerprintSensorProperties =
+            Collections.emptyList();
+    private List<FaceSensorPropertiesInternal> mFaceSensorProperties = Collections.emptyList();
     private boolean mFingerprintLockedOut;
     private boolean mFingerprintLockedOutPermanent;
     private boolean mFaceLockedOutPermanent;
@@ -2371,11 +2375,29 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         setStrongAuthTracker(mStrongAuthTracker);
 
         if (mFpm != null) {
-            mFingerprintSensorProperties = mFpm.getSensorPropertiesInternal();
+            mFpm.addAuthenticatorsRegisteredCallback(
+                    new IFingerprintAuthenticatorsRegisteredCallback.Stub() {
+                        @Override
+                        public void onAllAuthenticatorsRegistered(
+                                List<FingerprintSensorPropertiesInternal> sensors)
+                                throws RemoteException {
+                            mFingerprintSensorProperties = sensors;
+                            updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
+                            mLogger.d("FingerprintManager onAllAuthenticatorsRegistered");
+                        }
+                    });
             mFpm.addLockoutResetCallback(mFingerprintLockoutResetCallback);
         }
         if (mFaceManager != null) {
-            mFaceSensorProperties = mFaceManager.getSensorPropertiesInternal();
+            mFaceManager.addAuthenticatorsRegisteredCallback(
+                    new IFaceAuthenticatorsRegisteredCallback.Stub() {
+                        @Override
+                        public void onAllAuthenticatorsRegistered(
+                                List<FaceSensorPropertiesInternal> sensors) throws RemoteException {
+                            mFaceSensorProperties = sensors;
+                            mLogger.d("FaceManager onAllAuthenticatorsRegistered");
+                        }
+                    });
             mFaceManager.addLockoutResetCallback(mFaceLockoutResetCallback);
         }
 
