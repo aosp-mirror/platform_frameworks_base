@@ -378,24 +378,24 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
             // WHEN we set up some mobile connection info
             val serviceState = ServiceState()
             serviceState.setOperatorName("longName", "OpTypical", "1")
-            serviceState.isEmergencyOnly = false
+            serviceState.isEmergencyOnly = true
             getTelephonyCallbackForType<TelephonyCallback.ServiceStateListener>(telephonyManager)
                 .onServiceStateChanged(serviceState)
 
             // THEN it's logged to the buffer
             assertThat(dumpBuffer()).contains("$COL_OPERATOR${BUFFER_SEPARATOR}OpTypical")
-            assertThat(dumpBuffer()).contains("$COL_EMERGENCY${BUFFER_SEPARATOR}false")
+            assertThat(dumpBuffer()).contains("$COL_EMERGENCY${BUFFER_SEPARATOR}true")
 
             // WHEN we update mobile connection info
             val serviceState2 = ServiceState()
             serviceState2.setOperatorName("longName", "OpDiff", "1")
-            serviceState2.isEmergencyOnly = true
+            serviceState2.isEmergencyOnly = false
             getTelephonyCallbackForType<TelephonyCallback.ServiceStateListener>(telephonyManager)
                 .onServiceStateChanged(serviceState2)
 
             // THEN the updates are logged
             assertThat(dumpBuffer()).contains("$COL_OPERATOR${BUFFER_SEPARATOR}OpDiff")
-            assertThat(dumpBuffer()).contains("$COL_EMERGENCY${BUFFER_SEPARATOR}true")
+            assertThat(dumpBuffer()).contains("$COL_EMERGENCY${BUFFER_SEPARATOR}false")
 
             emergencyJob.cancel()
             operatorJob.cancel()
