@@ -67,10 +67,10 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.wm.shell.R;
-import com.android.wm.shell.TaskView;
-import com.android.wm.shell.TaskViewTaskController;
 import com.android.wm.shell.common.AlphaOptimizedButton;
 import com.android.wm.shell.common.TriangleShape;
+import com.android.wm.shell.taskview.TaskView;
+import com.android.wm.shell.taskview.TaskViewTaskController;
 
 import java.io.PrintWriter;
 

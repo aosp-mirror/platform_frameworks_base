@@ -59,8 +59,8 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
-import com.android.wm.shell.TaskView
-import com.android.wm.shell.TaskViewFactory
+import com.android.wm.shell.taskview.TaskView
+import com.android.wm.shell.taskview.TaskViewFactory
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import java.util.function.Consumer

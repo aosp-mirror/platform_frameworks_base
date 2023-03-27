@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell;
+package com.android.wm.shell.taskview;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
@@ -35,6 +35,7 @@ import android.view.SurfaceControl;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
 import java.io.PrintWriter;

@@ -36,7 +36,7 @@ import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
-import com.android.wm.shell.TaskView
+import com.android.wm.shell.taskview.TaskView
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test

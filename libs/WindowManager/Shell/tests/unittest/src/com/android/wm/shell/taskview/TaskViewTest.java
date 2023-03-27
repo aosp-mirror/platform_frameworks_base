@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell;
+package com.android.wm.shell.taskview;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
@@ -53,6 +53,8 @@ import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SyncTransactionQueue.TransactionRunnable;

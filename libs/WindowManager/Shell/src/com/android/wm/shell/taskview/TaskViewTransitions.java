@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell;
+package com.android.wm.shell.taskview;
 
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;

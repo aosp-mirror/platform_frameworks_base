@@ -929,7 +929,7 @@ public class AppTransitionController {
 
     /**
      * Returns {@code true} if a given {@link WindowContainer} is an embedded Task in
-     * {@link com.android.wm.shell.TaskView}.
+     * {@link TaskView}.
      *
      * Note that this is a short term workaround to support Android Auto until it migrate to
      * ShellTransition. This should only be used by {@link #getAnimationTargets}.
