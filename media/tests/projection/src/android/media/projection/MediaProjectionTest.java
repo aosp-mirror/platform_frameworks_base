@@ -35,7 +35,6 @@ import static org.mockito.Mockito.mock;
 
 import android.annotation.Nullable;
 import android.compat.testing.PlatformCompatChangeRule;
-import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
@@ -88,8 +87,6 @@ public class MediaProjectionTest {
     @Mock
     private MediaProjection.Callback mMediaProjectionCallback;
     @Mock
-    private IMediaProjectionManager mIMediaProjectionManager;
-    @Mock
     private Display mDisplay;
     @Mock
     private VirtualDisplay.Callback mVirtualDisplayCallback;
@@ -115,12 +112,10 @@ public class MediaProjectionTest {
                         .strictness(Strictness.LENIENT)
                         .startMocking();
 
-        doReturn(mock(IBinder.class)).when(mIMediaProjectionManager).asBinder();
-
         // Support the MediaProjection instance.
         mFakeIMediaProjection.setLaunchCookie(mock(IBinder.class));
         mMediaProjection = new MediaProjection(mTestableContext, mFakeIMediaProjection,
-                mIMediaProjectionManager, mDisplayManager);
+                mDisplayManager);
 
         // Support creation of the VirtualDisplay.
         mTestableContext.addMockSystemService(DisplayManager.class, mDisplayManager);
@@ -128,8 +123,7 @@ public class MediaProjectionTest {
         doReturn(DEFAULT_DISPLAY + 7).when(mDisplay).getDisplayId();
         doReturn(mVirtualDisplay).when(mDisplayManager).createVirtualDisplay(
                 any(MediaProjection.class), any(VirtualDisplayConfig.class),
-                nullable(VirtualDisplay.Callback.class), nullable(Handler.class),
-                nullable(Context.class));
+                nullable(VirtualDisplay.Callback.class), nullable(Handler.class));
     }
 
     @After
