@@ -1178,20 +1178,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
         final Rect newDestinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
         if (newDestinationBounds.equals(currentDestinationBounds)) return;
-        if (animator.getAnimationType() == ANIM_TYPE_BOUNDS) {
-            if (mWaitForFixedRotation) {
-                // The new destination bounds are in next rotation (DisplayLayout has been rotated
-                // in computeRotatedBounds). The animation runs in previous rotation so the end
-                // bounds need to be transformed.
-                final Rect displayBounds = mPipBoundsState.getDisplayBounds();
-                final Rect rotatedEndBounds = new Rect(newDestinationBounds);
-                rotateBounds(rotatedEndBounds, displayBounds, mNextRotation, mCurrentRotation);
-                animator.updateEndValue(rotatedEndBounds);
-            } else {
-                animator.updateEndValue(newDestinationBounds);
-            }
-        }
-        animator.setDestinationBounds(newDestinationBounds);
+        updateAnimatorBounds(newDestinationBounds);
         destinationBoundsOut.set(newDestinationBounds);
     }
 
@@ -1203,7 +1190,17 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mPipAnimationController.getCurrentAnimator();
         if (animator != null && animator.isRunning()) {
             if (animator.getAnimationType() == ANIM_TYPE_BOUNDS) {
-                animator.updateEndValue(bounds);
+                if (mWaitForFixedRotation) {
+                    // The new destination bounds are in next rotation (DisplayLayout has been
+                    // rotated in computeRotatedBounds). The animation runs in previous rotation so
+                    // the end bounds need to be transformed.
+                    final Rect displayBounds = mPipBoundsState.getDisplayBounds();
+                    final Rect rotatedEndBounds = new Rect(bounds);
+                    rotateBounds(rotatedEndBounds, displayBounds, mNextRotation, mCurrentRotation);
+                    animator.updateEndValue(rotatedEndBounds);
+                } else {
+                    animator.updateEndValue(bounds);
+                }
             }
             animator.setDestinationBounds(bounds);
         }
