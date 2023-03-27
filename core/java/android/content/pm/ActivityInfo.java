@@ -1083,6 +1083,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION =
             254631730L; // buganizer id
 
@@ -1142,6 +1143,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION =
             263959004L; // buganizer id
 
@@ -1154,6 +1156,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH = 264304459L; // buganizer id
 
     /**
@@ -1166,6 +1169,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE =
             264301586L; // buganizer id
 
@@ -1292,6 +1296,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS = 263259275L;
 
     // Compat framework that per-app overrides rely on only supports booleans. That's why we have
@@ -1307,6 +1312,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT = 265452344L;
 
     /**
@@ -1318,6 +1324,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR = 265451093L;
 
     /**
@@ -1331,6 +1338,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE = 266124927L;
 
     /**
@@ -1377,6 +1385,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION = 255940284L;
 
     /**
