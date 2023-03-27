@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.media.soundtrigger_middleware;
 
 import android.media.permission.Identity;
-import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
+import android.media.soundtrigger_middleware.ISoundTriggerInjection;
+import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 
 /**
@@ -86,4 +88,12 @@ interface ISoundTriggerMiddlewareService {
                                           in Identity middlemanIdentity,
                                           in Identity originatorIdentity,
                                           ISoundTriggerCallback callback);
+
+    /**
+     * Attach an injection interface interface to the ST mock HAL.
+     * See {@link ISoundTriggerInjection} for injection details.
+     * If another client attaches, this session will be pre-empted.
+     */
+    void attachFakeHalInjection(ISoundTriggerInjection injection);
+
 }
