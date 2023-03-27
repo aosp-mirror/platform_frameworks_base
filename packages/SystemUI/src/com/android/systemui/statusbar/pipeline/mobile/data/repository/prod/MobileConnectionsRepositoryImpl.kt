@@ -19,12 +19,6 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.IntentFilter
-import android.net.ConnectivityManager
-import android.net.ConnectivityManager.NetworkCallback
-import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
-import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
@@ -46,11 +40,11 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.dagger.MobileSummaryLog
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.util.kotlin.pairwise
@@ -80,7 +74,7 @@ import kotlinx.coroutines.withContext
 class MobileConnectionsRepositoryImpl
 @Inject
 constructor(
-    private val connectivityManager: ConnectivityManager,
+    connectivityRepository: ConnectivityRepository,
     private val subscriptionManager: SubscriptionManager,
     private val telephonyManager: TelephonyManager,
     private val logger: MobileInputLogger,
@@ -261,47 +255,31 @@ constructor(
         subIdRepositoryCache[subId]
             ?: createRepositoryForSubId(subId).also { subIdRepositoryCache[subId] = it }
 
-    @SuppressLint("MissingPermission")
-    override val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel> =
-        conflatedCallbackFlow {
-                val callback =
-                    object : NetworkCallback(FLAG_INCLUDE_LOCATION_INFO) {
-                        override fun onLost(network: Network) {
-                            logger.logOnLost(network, isDefaultNetworkCallback = true)
-                            // Send a disconnected model when lost. Maybe should create a sealed
-                            // type or null here?
-                            trySend(MobileConnectivityModel())
-                        }
-
-                        override fun onCapabilitiesChanged(
-                            network: Network,
-                            caps: NetworkCapabilities
-                        ) {
-                            logger.logOnCapabilitiesChanged(
-                                network,
-                                caps,
-                                isDefaultNetworkCallback = true,
-                            )
-                            trySend(
-                                MobileConnectivityModel(
-                                    isConnected = caps.hasTransport(TRANSPORT_CELLULAR),
-                                    isValidated = caps.hasCapability(NET_CAPABILITY_VALIDATED),
-                                )
-                            )
-                        }
-                    }
-
-                connectivityManager.registerDefaultNetworkCallback(callback)
-
-                awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
-            }
+    override val mobileIsDefault: StateFlow<Boolean> =
+        connectivityRepository.defaultConnections
+            // Because carrier merged networks are displayed as mobile networks, they're
+            // part of the `isDefault` calculation. See b/272586234.
+            .map { it.mobile.isDefault || it.carrierMerged.isDefault }
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogger,
-                columnPrefix = "$LOGGING_PREFIX.defaultConnection",
-                initialValue = MobileConnectivityModel(),
+                columnPrefix = "",
+                columnName = "mobileIsDefault",
+                initialValue = false,
             )
-            .stateIn(scope, SharingStarted.WhileSubscribed(), MobileConnectivityModel())
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val defaultConnectionIsValidated: StateFlow<Boolean> =
+        connectivityRepository.defaultConnections
+            .map { it.isValidated }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogger,
+                columnPrefix = "",
+                columnName = "defaultConnectionIsValidated",
+                initialValue = false,
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     /**
      * Flow that tracks the active mobile data subscriptions. Emits `true` whenever the active data
