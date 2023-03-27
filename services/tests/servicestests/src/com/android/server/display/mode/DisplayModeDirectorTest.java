@@ -27,7 +27,7 @@ import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_R
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HIGH_ZONE;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_LOW_ZONE;
 
-import static com.android.server.display.mode.DisplayModeDirector.Vote.INVALID_SIZE;
+import static com.android.server.display.mode.Vote.INVALID_SIZE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -94,7 +94,6 @@ import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.TestUtils;
 import com.android.server.display.mode.DisplayModeDirector.BrightnessObserver;
 import com.android.server.display.mode.DisplayModeDirector.DesiredDisplayModeSpecs;
-import com.android.server.display.mode.DisplayModeDirector.Vote;
 import com.android.server.sensors.SensorManagerInternal;
 import com.android.server.sensors.SensorManagerInternal.ProximityActiveListener;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -223,8 +222,7 @@ public class DisplayModeDirectorTest {
         assertThat(modeSpecs.appRequest.render.min).isEqualTo(0f);
         assertThat(modeSpecs.appRequest.render.max).isEqualTo(Float.POSITIVE_INFINITY);
 
-        int numPriorities =
-                DisplayModeDirector.Vote.MAX_PRIORITY - DisplayModeDirector.Vote.MIN_PRIORITY + 1;
+        int numPriorities =  Vote.MAX_PRIORITY - Vote.MIN_PRIORITY + 1;
 
         // Ensure vote priority works as expected. As we add new votes with higher priority, they
         // should take precedence over lower priority votes.
