@@ -418,6 +418,13 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             for (int i = 0; i < info.getChanges().size(); ++i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
                 final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+                if (taskInfo != null
+                        && taskInfo.configuration.windowConfiguration.isAlwaysOnTop()) {
+                    // Tasks that are always on top (e.g. bubbles), will handle their own transition
+                    // as they are on top of everything else. So cancel the merge here.
+                    cancel();
+                    return;
+                }
                 hasTaskChange = hasTaskChange || taskInfo != null;
                 final boolean isLeafTask = leafTaskFilter.test(change);
                 if (TransitionUtil.isOpeningType(change.getMode())) {
