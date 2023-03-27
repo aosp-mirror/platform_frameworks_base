@@ -182,6 +182,26 @@ constructor(
                 interactionState = null
                 true
             }
+            MotionEvent.ACTION_POINTER_UP -> {
+                val removedPointerId = event.getPointerId(event.actionIndex)
+                if (removedPointerId == interactionState?.pointerId && event.pointerCount > 1) {
+                    // We removed the original pointer but there must be another pointer because the
+                    // gesture is still ongoing. Let's switch to that pointer.
+                    interactionState =
+                        event.firstUnremovedPointerId(removedPointerId)?.let { replacementPointerId
+                            ->
+                            interactionState?.copy(
+                                pointerId = replacementPointerId,
+                                // We want to update the currentY of our state so that the
+                                // transition to the next pointer doesn't report a big jump between
+                                // the Y coordinate of the removed pointer and the Y coordinate of
+                                // the replacement pointer.
+                                currentY = event.getY(replacementPointerId),
+                            )
+                        }
+                }
+                true
+            }
             MotionEvent.ACTION_CANCEL -> {
                 if (isDraggingShade()) {
                     // Our drag gesture was canceled by the system. This happens primarily in one of
@@ -218,5 +238,18 @@ constructor(
 
     private fun isDraggingShade(): Boolean {
         return interactionState?.isDraggingShade ?: false
+    }
+
+    /**
+     * Returns the index of the first pointer that is not [removedPointerId] or `null`, if there is
+     * no other pointer.
+     */
+    private fun MotionEvent.firstUnremovedPointerId(removedPointerId: Int): Int? {
+        return (0 until pointerCount)
+            .firstOrNull { pointerIndex ->
+                val pointerId = getPointerId(pointerIndex)
+                pointerId != removedPointerId
+            }
+            ?.let { pointerIndex -> getPointerId(pointerIndex) }
     }
 }
