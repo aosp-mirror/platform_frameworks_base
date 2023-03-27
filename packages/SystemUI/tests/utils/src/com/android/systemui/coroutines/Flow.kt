@@ -69,10 +69,10 @@ fun <T> TestScope.collectValues(
     flow: Flow<T>,
     context: CoroutineContext = EmptyCoroutineContext,
     start: CoroutineStart = CoroutineStart.DEFAULT,
-): FlowValues<T> {
+): FlowValue<List<T>> {
     val values = mutableListOf<T>()
     backgroundScope.launch(context, start) { flow.collect(values::add) }
-    return FlowValuesImpl {
+    return FlowValueImpl {
         runCurrent()
         values.toList()
     }
@@ -83,17 +83,7 @@ interface FlowValue<T> : ReadOnlyProperty<Any?, T> {
     operator fun invoke(): T
 }
 
-/** @see collectValues */
-interface FlowValues<T> : ReadOnlyProperty<Any?, List<T>> {
-    operator fun invoke(): List<T>
-}
-
 private class FlowValueImpl<T>(private val block: () -> T) : FlowValue<T> {
     override operator fun invoke(): T = block()
     override fun getValue(thisRef: Any?, property: KProperty<*>): T = invoke()
-}
-
-private class FlowValuesImpl<T>(private val block: () -> List<T>) : FlowValues<T> {
-    override operator fun invoke(): List<T> = block()
-    override fun getValue(thisRef: Any?, property: KProperty<*>): List<T> = invoke()
 }
