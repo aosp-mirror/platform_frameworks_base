@@ -41,15 +41,6 @@ constructor(
 
     private val collectionStatuses = mutableMapOf<String, Boolean>()
 
-    fun logUiAdapterSubIdsUpdated(subs: List<Int>) {
-        buffer.log(
-            TAG,
-            LogLevel.INFO,
-            { str1 = subs.toString() },
-            { "Sub IDs in MobileUiAdapter updated internally: $str1" },
-        )
-    }
-
     fun logUiAdapterSubIdsSentToIconController(subs: List<Int>) {
         buffer.log(
             TAG,
