@@ -21,6 +21,8 @@ import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
+import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
+import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 
 import static com.android.server.display.VirtualDisplayAdapter.UNIQUE_ID_PREFIX;
 
@@ -69,7 +71,6 @@ import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionManager;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.MessageQueue;
@@ -111,6 +112,7 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -236,6 +238,8 @@ public class DisplayManagerServiceTest {
     @Mock LocalDisplayAdapter.SurfaceControlProxy mSurfaceControlProxy;
     @Mock IBinder mMockDisplayToken;
     @Mock SensorManagerInternal mMockSensorManagerInternal;
+
+    @Captor ArgumentCaptor<ContentRecordingSession> mContentRecordingSessionCaptor;
 
     @Before
     public void setUp() throws Exception {
@@ -1030,6 +1034,7 @@ public class DisplayManagerServiceTest {
     @Test
     public void testCreateVirtualDisplay_setContentRecordingSessionSuccess()
             throws RemoteException {
+        final int displayToRecord = 50;
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
         when(mMockWindowManagerInternal
                 .setContentRecordingSession(any(ContentRecordingSession.class)))
@@ -1040,8 +1045,7 @@ public class DisplayManagerServiceTest {
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
                 VIRTUAL_DISPLAY_NAME, 600, 800, 320);
         builder.setUniqueId("uniqueId --- setContentRecordingSession true");
-        builder.setContentRecordingSession(
-                ContentRecordingSession.createDisplaySession(new Binder("")));
+        builder.setDisplayIdToMirror(displayToRecord);
 
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -1052,6 +1056,12 @@ public class DisplayManagerServiceTest {
                 mMockAppToken /* callback */, projection, PACKAGE_NAME);
 
         assertThat(displayId).isNotEqualTo(Display.INVALID_DISPLAY);
+        verify(mMockWindowManagerInternal, atLeastOnce()).setContentRecordingSession(
+                mContentRecordingSessionCaptor.capture());
+        ContentRecordingSession session = mContentRecordingSessionCaptor.getValue();
+        assertThat(session.getContentToRecord()).isEqualTo(RECORD_CONTENT_DISPLAY);
+        assertThat(session.getVirtualDisplayId()).isEqualTo(displayId);
+        assertThat(session.getDisplayToRecord()).isEqualTo(displayToRecord);
     }
 
     @Test
@@ -1066,8 +1076,6 @@ public class DisplayManagerServiceTest {
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
                 VIRTUAL_DISPLAY_NAME, 600, 800, 320);
         builder.setUniqueId("uniqueId --- setContentRecordingSession false");
-        builder.setContentRecordingSession(
-                ContentRecordingSession.createDisplaySession(new Binder("")));
 
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -1081,6 +1089,41 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
+    public void testCreateVirtualDisplay_setContentRecordingSession_taskSession()
+            throws RemoteException {
+        final int displayToRecord = 50;
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        when(mMockWindowManagerInternal
+                .setContentRecordingSession(any(ContentRecordingSession.class)))
+                .thenReturn(true);
+        IMediaProjection projection = mock(IMediaProjection.class);
+        doReturn(mock(IBinder.class)).when(projection).getLaunchCookie();
+
+        doReturn(true).when(mMockProjectionService).isCurrentProjection(eq(projection));
+
+        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
+                VIRTUAL_DISPLAY_NAME, 600, 800, 320);
+        builder.setUniqueId("uniqueId --- setContentRecordingSession false");
+        builder.setDisplayIdToMirror(displayToRecord);
+
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        registerDefaultDisplays(displayManager);
+        displayManager.windowManagerAndInputReady();
+
+        DisplayManagerService.BinderService binderService = displayManager.new BinderService();
+        final int displayId = binderService.createVirtualDisplay(builder.build(),
+                mMockAppToken /* callback */, projection, PACKAGE_NAME);
+
+        assertThat(displayId).isNotEqualTo(Display.INVALID_DISPLAY);
+        verify(mMockWindowManagerInternal, atLeastOnce()).setContentRecordingSession(
+                mContentRecordingSessionCaptor.capture());
+        ContentRecordingSession session = mContentRecordingSessionCaptor.getValue();
+        assertThat(session.getContentToRecord()).isEqualTo(RECORD_CONTENT_TASK);
+        assertThat(session.getVirtualDisplayId()).isEqualTo(displayId);
+        assertThat(session.getTokenToRecord()).isNotNull();
+    }
+
+    @Test
     public void testCreateVirtualDisplay_setContentRecordingSession_noProjection_noFlags() {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
 
@@ -1088,8 +1131,6 @@ public class DisplayManagerServiceTest {
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
                 VIRTUAL_DISPLAY_NAME, 600, 800, 320);
         builder.setUniqueId("uniqueId --- setContentRecordingSession false");
-        builder.setContentRecordingSession(
-                ContentRecordingSession.createDisplaySession(new Binder("")));
 
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -1115,8 +1156,6 @@ public class DisplayManagerServiceTest {
                 VIRTUAL_DISPLAY_NAME, 600, 800, 320);
         builder.setUniqueId("uniqueId --- setContentRecordingSession false");
         builder.setFlags(VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY);
-        builder.setContentRecordingSession(
-                ContentRecordingSession.createDisplaySession(new Binder("")));
 
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -1147,8 +1186,6 @@ public class DisplayManagerServiceTest {
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
                 VIRTUAL_DISPLAY_NAME, 600, 800, 320);
         builder.setUniqueId("uniqueId --- setContentRecordingSession false");
-        builder.setContentRecordingSession(
-                ContentRecordingSession.createDisplaySession(new Binder("")));
 
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);

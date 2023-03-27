@@ -583,7 +583,7 @@ public final class VirtualDeviceManager {
                 throw ex.rethrowFromSystemServer();
             }
             DisplayManagerGlobal displayManager = DisplayManagerGlobal.getInstance();
-            return displayManager.createVirtualDisplayWrapper(config, mContext, callbackWrapper,
+            return displayManager.createVirtualDisplayWrapper(config, callbackWrapper,
                     displayId);
         }
 

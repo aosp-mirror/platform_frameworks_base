@@ -302,8 +302,7 @@ class Vr2dDisplay {
             builder.setUniqueId(UNIQUE_DISPLAY_ID);
             builder.setFlags(flags);
             mVirtualDisplay = mDisplayManager.createVirtualDisplay(null /* projection */,
-                    builder.build(), null /* callback */, null /* handler */,
-                    null /* windowContext */);
+                    builder.build(), null /* callback */, null /* handler */);
 
             if (mVirtualDisplay != null) {
                 updateDisplayId(mVirtualDisplay.getDisplay().getDisplayId());
