@@ -482,6 +482,12 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
+        if (entry.getRanking().getLockscreenVisibilityOverride()
+                == Notification.VISIBILITY_PRIVATE) {
+            if (log) mLogger.logNoPulsingNotificationHidden(entry);
+            return false;
+        }
+
         if (entry.getImportance() < NotificationManager.IMPORTANCE_DEFAULT) {
             if (log) mLogger.logNoPulsingNotImportant(entry);
             return false;
