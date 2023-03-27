@@ -40,6 +40,7 @@ import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutInfoAsUser
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.getDefaultRoleHolderAsUser
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
+import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
 import com.android.systemui.util.kotlin.getOrNull
@@ -95,6 +96,18 @@ constructor(
             logDebug { "onBubbleExpandChanged - collapsing: $info" }
             eventLogger.logNoteTaskClosed(info)
         }
+    }
+
+    /** Starts [LaunchNoteTaskProxyActivity] on the given [user]. */
+    fun startNoteTaskProxyActivityForUser(user: UserHandle) {
+        context.startActivityAsUser(
+            Intent().apply {
+                component =
+                    ComponentName(context, LaunchNoteTaskManagedProfileProxyActivity::class.java)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            },
+            user
+        )
     }
 
     /**
