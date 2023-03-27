@@ -1261,28 +1261,43 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
 
     private static boolean isLayoutCompatibleWithLanguageTag(KeyboardLayout layout,
             @NonNull String languageTag) {
-        final int[] scriptsFromLanguageTag = UScript.getCode(Locale.forLanguageTag(languageTag));
-        if (scriptsFromLanguageTag.length == 0) {
-            // If no scripts inferred from languageTag then allowing the layout
-            return true;
-        }
-        LocaleList locales = layout.getLocales();
-        if (locales.isEmpty()) {
+        LocaleList layoutLocales = layout.getLocales();
+        if (layoutLocales.isEmpty()) {
             // KCM file doesn't have an associated language tag. This can be from
             // a 3rd party app so need to include it as a potential layout.
             return true;
         }
-        for (int i = 0; i < locales.size(); i++) {
-            final Locale locale = locales.get(i);
-            if (locale == null) {
-                continue;
-            }
-            int[] scripts = UScript.getCode(locale);
-            if (scripts != null && haveCommonValue(scripts, scriptsFromLanguageTag)) {
+        // Match derived Script codes
+        final int[] scriptsFromLanguageTag = getScriptCodes(Locale.forLanguageTag(languageTag));
+        if (scriptsFromLanguageTag.length == 0) {
+            // If no scripts inferred from languageTag then allowing the layout
+            return true;
+        }
+        for (int i = 0; i < layoutLocales.size(); i++) {
+            final Locale locale = layoutLocales.get(i);
+            int[] scripts = getScriptCodes(locale);
+            if (haveCommonValue(scripts, scriptsFromLanguageTag)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private static int[] getScriptCodes(@Nullable Locale locale) {
+        if (locale == null) {
+            return new int[0];
+        }
+        if (!TextUtils.isEmpty(locale.getScript())) {
+            int scriptCode = UScript.getCodeFromName(locale.getScript());
+            if (scriptCode != UScript.INVALID_CODE) {
+                return new int[]{scriptCode};
+            }
+        }
+        int[] scripts = UScript.getCode(locale);
+        if (scripts != null) {
+            return scripts;
+        }
+        return new int[0];
     }
 
     private static boolean haveCommonValue(int[] arr1, int[] arr2) {
