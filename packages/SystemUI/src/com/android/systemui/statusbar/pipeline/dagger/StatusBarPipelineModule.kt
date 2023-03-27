@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupR
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractorImpl
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter
+import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxyImpl
 import com.android.systemui.statusbar.pipeline.mobile.util.SubscriptionManagerProxy
@@ -53,6 +54,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
+import kotlinx.coroutines.flow.Flow
+import java.util.function.Supplier
+import javax.inject.Named
 
 @Module
 abstract class StatusBarPipelineModule {
@@ -115,6 +119,17 @@ abstract class StatusBarPipelineModule {
 
         @Provides
         @SysUISingleton
+        @Named(FIRST_MOBILE_SUB_SHOWING_NETWORK_TYPE_ICON)
+        fun provideFirstMobileSubShowingNetworkTypeIconProvider(
+            mobileIconsViewModel: MobileIconsViewModel,
+        ): Supplier<Flow<Boolean>> {
+            return Supplier<Flow<Boolean>> {
+                mobileIconsViewModel.firstMobileSubShowingNetworkTypeIcon
+            }
+        }
+
+        @Provides
+        @SysUISingleton
         @WifiInputLog
         fun provideWifiInputLogBuffer(factory: LogBufferFactory): LogBuffer {
             return factory.create("WifiInputLog", 50)
@@ -168,5 +183,8 @@ abstract class StatusBarPipelineModule {
         fun provideVerboseMobileViewLogBuffer(factory: LogBufferFactory): LogBuffer {
             return factory.create("VerboseMobileViewLog", 100)
         }
+
+        const val FIRST_MOBILE_SUB_SHOWING_NETWORK_TYPE_ICON =
+            "FirstMobileSubShowingNetworkTypeIcon"
     }
 }
