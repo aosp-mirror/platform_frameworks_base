@@ -30,16 +30,19 @@ public class PermissionUtils {
 
     /** Checks whether the given package name hold the given permission **/
     public static boolean hasPermission(Context context, String packageName, String permission) {
+        return context.getPackageManager().checkPermission(permission, packageName)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /** Checks whether the given package name is a system app on the device **/
+    public static boolean isSystemApp(Context context, String packageName) {
         try {
             ApplicationInfo appInfo =
                     context.getPackageManager()
-                            .getApplicationInfo(
-                                    packageName,
+                            .getApplicationInfo(packageName,
                                     PackageManager.ApplicationInfoFlags.of(
                                             PackageManager.MATCH_SYSTEM_ONLY));
-            if (appInfo != null
-                    && context.checkPermission(permission, /* pid= */ -1, appInfo.uid)
-                    == PackageManager.PERMISSION_GRANTED) {
+            if (appInfo != null) {
                 return true;
             }
         } catch (PackageManager.NameNotFoundException e) {
