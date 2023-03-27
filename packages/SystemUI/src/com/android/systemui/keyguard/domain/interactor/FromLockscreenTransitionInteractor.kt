@@ -59,16 +59,23 @@ constructor(
     }
 
     private fun listenForLockscreenToDreaming() {
+        val invalidFromStates = setOf(KeyguardState.AOD, KeyguardState.DOZING)
         scope.launch {
             keyguardInteractor.isAbleToDream
-                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
-                .collect { pair ->
-                    val (isAbleToDream, lastStartedTransition) = pair
-                    if (
-                        isAbleToDream &&
-                            lastStartedTransition.to == KeyguardState.LOCKSCREEN &&
-                            lastStartedTransition.from != KeyguardState.AOD
-                    ) {
+                .sample(
+                    combine(
+                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                        keyguardTransitionInteractor.finishedKeyguardState,
+                        ::Pair
+                    ),
+                    ::toTriple
+                )
+                .collect { (isAbleToDream, lastStartedTransition, finishedKeyguardState) ->
+                    val isOnLockscreen = finishedKeyguardState == KeyguardState.LOCKSCREEN
+                    val isTransitionInterruptible =
+                        lastStartedTransition.to == KeyguardState.LOCKSCREEN &&
+                            !invalidFromStates.contains(lastStartedTransition.from)
+                    if (isAbleToDream && (isOnLockscreen || isTransitionInterruptible)) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
