@@ -38,7 +38,9 @@ import static com.android.wm.shell.bubbles.Bubbles.DISMISS_NO_LONGER_BUBBLE;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_PACKAGE_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_SHORTCUT_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_CHANGED;
+import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_BUBBLES;
 
+import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -59,6 +61,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -88,13 +91,17 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.FloatingContentCoordinator;
+import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
@@ -123,7 +130,8 @@ import java.util.function.IntConsumer;
  *
  * The controller manages addition, removal, and visible state of bubbles on screen.
  */
-public class BubbleController implements ConfigurationChangeListener {
+public class BubbleController implements ConfigurationChangeListener,
+        RemoteCallable<BubbleController> {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleController" : TAG_BUBBLES;
 
@@ -248,6 +256,8 @@ public class BubbleController implements ConfigurationChangeListener {
     private Optional<OneHandedController> mOneHandedOptional;
     /** Drag and drop controller to register listener for onDragStarted. */
     private DragAndDropController mDragAndDropController;
+    /** Used to send bubble events to launcher. */
+    private Bubbles.BubbleStateListener mBubbleStateListener;
 
     public BubbleController(Context context,
             ShellInit shellInit,
@@ -458,7 +468,13 @@ public class BubbleController implements ConfigurationChangeListener {
         mCurrentProfiles = userProfiles;
 
         mShellController.addConfigurationChangeListener(this);
+        mShellController.addExternalInterface(KEY_EXTRA_SHELL_BUBBLES,
+                this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
+    }
+
+    private ExternalInterfaceBinder createExternalInterface() {
+        return new BubbleController.IBubblesImpl(this);
     }
 
     @VisibleForTesting
@@ -473,6 +489,48 @@ public class BubbleController implements ConfigurationChangeListener {
 
     public ShellExecutor getMainExecutor() {
         return mMainExecutor;
+    }
+
+    @Override
+    public Context getContext() {
+        return mContext;
+    }
+
+    @Override
+    public ShellExecutor getRemoteCallExecutor() {
+        return mMainExecutor;
+    }
+
+    /**
+     * Sets a listener to be notified of bubble updates. This is used by launcher so that
+     * it may render bubbles in itself. Only one listener is supported.
+     */
+    public void registerBubbleStateListener(Bubbles.BubbleStateListener listener) {
+        if (isShowingAsBubbleBar()) {
+            // Only set the listener if bubble bar is showing.
+            mBubbleStateListener = listener;
+            sendInitialListenerUpdate();
+        } else {
+            mBubbleStateListener = null;
+        }
+    }
+
+    /**
+     * Unregisters the {@link Bubbles.BubbleStateListener}.
+     */
+    public void unregisterBubbleStateListener() {
+        mBubbleStateListener = null;
+    }
+
+    /**
+     * If a {@link Bubbles.BubbleStateListener} is present, this will send the current bubble
+     * state to it.
+     */
+    private void sendInitialListenerUpdate() {
+        if (mBubbleStateListener != null) {
+            BubbleBarUpdate update = mBubbleData.getInitialStateForBubbleBar();
+            mBubbleStateListener.onBubbleStateChange(update);
+        }
     }
 
     /**
@@ -1722,6 +1780,73 @@ public class BubbleController implements ConfigurationChangeListener {
         }
     }
 
+    /**
+     * The interface for calls from outside the host process.
+     */
+    @BinderThread
+    private class IBubblesImpl extends IBubbles.Stub implements ExternalInterfaceBinder {
+        private BubbleController mController;
+        private final SingleInstanceRemoteListener<BubbleController, IBubblesListener> mListener;
+        private final Bubbles.BubbleStateListener mBubbleListener =
+                new Bubbles.BubbleStateListener() {
+
+            @Override
+            public void onBubbleStateChange(BubbleBarUpdate update) {
+                Bundle b = new Bundle();
+                b.setClassLoader(BubbleBarUpdate.class.getClassLoader());
+                b.putParcelable(BubbleBarUpdate.BUNDLE_KEY, update);
+                mListener.call(l -> l.onBubbleStateChange(b));
+            }
+        };
+
+        IBubblesImpl(BubbleController controller) {
+            mController = controller;
+            mListener = new SingleInstanceRemoteListener<>(mController,
+                    c -> c.registerBubbleStateListener(mBubbleListener),
+                    c -> c.unregisterBubbleStateListener());
+        }
+
+        /**
+         * Invalidates this instance, preventing future calls from updating the controller.
+         */
+        @Override
+        public void invalidate() {
+            mController = null;
+        }
+
+        @Override
+        public void registerBubbleListener(IBubblesListener listener) {
+            mMainExecutor.execute(() -> {
+                mListener.register(listener);
+            });
+        }
+
+        @Override
+        public void unregisterBubbleListener(IBubblesListener listener) {
+            mMainExecutor.execute(() -> mListener.unregister());
+        }
+
+        @Override
+        public void showBubble(String key, boolean onLauncherHome) {
+            // TODO
+        }
+
+        @Override
+        public void removeBubble(String key, int reason) {
+            // TODO
+        }
+
+        @Override
+        public void collapseBubbles() {
+            // TODO
+        }
+
+        @Override
+        public void onTaskbarStateChanged(int newState) {
+            // TODO (b/269670598)
+        }
+    }
+
     private class BubblesImpl implements Bubbles {
         // Up-to-date cached state of bubbles data for SysUI to query from the calling thread
         @VisibleForTesting
@@ -1834,6 +1959,17 @@ public class BubbleController implements ConfigurationChangeListener {
         }
 
         private CachedState mCachedState = new CachedState();
+
+        private IBubblesImpl mIBubbles;
+
+        @Override
+        public IBubbles createExternalInterface() {
+            if (mIBubbles != null) {
+                mIBubbles.invalidate();
+            }
+            mIBubbles = new IBubblesImpl(BubbleController.this);
+            return mIBubbles;
+        }
 
         @Override
         public boolean isBubbleNotificationSuppressedFromShade(String key, String groupKey) {
