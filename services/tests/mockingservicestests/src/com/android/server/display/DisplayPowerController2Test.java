@@ -66,7 +66,6 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.display.RampAnimator.DualRampAnimator;
-import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.display.layout.Layout;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
@@ -565,8 +564,8 @@ public final class DisplayPowerController2Test {
                 .thenReturn(brightness);
         dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
         when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
-        when(mHolder.automaticBrightnessController.getAutomaticScreenBrightness(
-                any(BrightnessEvent.class))).thenReturn(PowerManager.BRIGHTNESS_INVALID_FLOAT);
+        when(mHolder.automaticBrightnessController.getAutomaticScreenBrightness())
+                .thenReturn(PowerManager.BRIGHTNESS_INVALID_FLOAT);
 
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
@@ -603,8 +602,8 @@ public final class DisplayPowerController2Test {
                 .thenReturn(brightness);
         dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
         when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
-        when(mHolder.automaticBrightnessController.getAutomaticScreenBrightness(
-                any(BrightnessEvent.class))).thenReturn(PowerManager.BRIGHTNESS_INVALID_FLOAT);
+        when(mHolder.automaticBrightnessController.getAutomaticScreenBrightness())
+                .thenReturn(PowerManager.BRIGHTNESS_INVALID_FLOAT);
 
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
