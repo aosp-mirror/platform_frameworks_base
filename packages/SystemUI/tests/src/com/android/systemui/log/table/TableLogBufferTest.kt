@@ -18,6 +18,7 @@ package com.android.systemui.log.table
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.table.TableChange.Companion.IS_INITIAL_PREFIX
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
@@ -353,10 +354,10 @@ class TableLogBufferTest : SysuiTestCase() {
     }
 
     @Test
-    fun logChange_rowInitializer_dumpsCorrectly() {
+    fun logChange_rowInitializer_notIsInitial_dumpsCorrectly() {
         systemClock.setCurrentTimeMillis(100L)
 
-        underTest.logChange("") { row ->
+        underTest.logChange(columnPrefix = "", isInitial = false) { row ->
             row.logChange("column1", "val1")
             row.logChange("column2", 2)
             row.logChange("column3", true)
@@ -371,6 +372,131 @@ class TableLogBufferTest : SysuiTestCase() {
         assertThat(dumpedString).contains(expected1)
         assertThat(dumpedString).contains(expected2)
         assertThat(dumpedString).contains(expected3)
+    }
+
+    @Test
+    fun logChange_rowInitializer_isInitial_dumpsCorrectly() {
+        systemClock.setCurrentTimeMillis(100L)
+
+        underTest.logChange(columnPrefix = "", isInitial = true) { row ->
+            row.logChange("column1", "val1")
+            row.logChange("column2", 2)
+            row.logChange("column3", true)
+        }
+
+        val dumpedString = dumpChanges()
+
+        val timestamp = TABLE_LOG_DATE_FORMAT.format(100L)
+        val expected1 = timestamp + SEPARATOR + "column1" + SEPARATOR + IS_INITIAL_PREFIX + "val1"
+        val expected2 = timestamp + SEPARATOR + "column2" + SEPARATOR + IS_INITIAL_PREFIX + "2"
+        val expected3 = timestamp + SEPARATOR + "column3" + SEPARATOR + IS_INITIAL_PREFIX + "true"
+        assertThat(dumpedString).contains(expected1)
+        assertThat(dumpedString).contains(expected2)
+        assertThat(dumpedString).contains(expected3)
+    }
+
+    @Test
+    fun logChange_rowInitializer_isInitialThenNotInitial_dumpsCorrectly() {
+        systemClock.setCurrentTimeMillis(100L)
+        underTest.logChange(columnPrefix = "", isInitial = true) { row ->
+            row.logChange("column1", "val1")
+            row.logChange("column2", 2)
+            row.logChange("column3", true)
+        }
+
+        systemClock.setCurrentTimeMillis(200L)
+        underTest.logChange(columnPrefix = "", isInitial = false) { row ->
+            row.logChange("column1", "val11")
+            row.logChange("column2", 22)
+            row.logChange("column3", false)
+        }
+
+        val dumpedString = dumpChanges()
+
+        val timestamp = TABLE_LOG_DATE_FORMAT.format(100L)
+        val expected1 = timestamp + SEPARATOR + "column1" + SEPARATOR + IS_INITIAL_PREFIX + "val1"
+        val expected2 = timestamp + SEPARATOR + "column2" + SEPARATOR + IS_INITIAL_PREFIX + "2"
+        val expected3 = timestamp + SEPARATOR + "column3" + SEPARATOR + IS_INITIAL_PREFIX + "true"
+        val timestamp2 = TABLE_LOG_DATE_FORMAT.format(200L)
+        val expected4 = timestamp2 + SEPARATOR + "column1" + SEPARATOR + "val11"
+        val expected5 = timestamp2 + SEPARATOR + "column2" + SEPARATOR + "22"
+        val expected6 = timestamp2 + SEPARATOR + "column3" + SEPARATOR + "false"
+        assertThat(dumpedString).contains(expected1)
+        assertThat(dumpedString).contains(expected2)
+        assertThat(dumpedString).contains(expected3)
+        assertThat(dumpedString).contains(expected4)
+        assertThat(dumpedString).contains(expected5)
+        assertThat(dumpedString).contains(expected6)
+    }
+
+    @Test
+    fun logDiffs_neverInitial() {
+        systemClock.setCurrentTimeMillis(100L)
+
+        val prevDiffable =
+            object : TestDiffable() {
+                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
+                    row.logChange("stringValChange", "prevStringVal")
+                }
+            }
+        val nextDiffable =
+            object : TestDiffable() {
+                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
+                    row.logChange("stringValChange", "newStringVal")
+                }
+            }
+
+        underTest.logDiffs("prefix", prevDiffable, nextDiffable)
+
+        val dumpedString = dumpChanges()
+
+        assertThat(dumpedString).doesNotContain(IS_INITIAL_PREFIX)
+    }
+
+    @Test
+    fun logChange_variousPrimitiveValues_isInitialAlwaysUpdated() {
+        systemClock.setCurrentTimeMillis(100L)
+        underTest.logChange(prefix = "", columnName = "first", value = "val1", isInitial = true)
+        systemClock.setCurrentTimeMillis(200L)
+        underTest.logChange(prefix = "", columnName = "second", value = "val2", isInitial = true)
+        systemClock.setCurrentTimeMillis(300L)
+        underTest.logChange(prefix = "", columnName = "first", value = 11, isInitial = false)
+        systemClock.setCurrentTimeMillis(400L)
+        underTest.logChange(prefix = "", columnName = "first", value = false, isInitial = false)
+        systemClock.setCurrentTimeMillis(500L)
+        underTest.logChange(prefix = "", columnName = "third", value = 33, isInitial = true)
+
+        val dumpedString = dumpChanges()
+
+        val expected1 =
+            TABLE_LOG_DATE_FORMAT.format(100L) +
+                SEPARATOR +
+                "first" +
+                SEPARATOR +
+                IS_INITIAL_PREFIX +
+                "val1"
+        val expected2 =
+            TABLE_LOG_DATE_FORMAT.format(200L) +
+                SEPARATOR +
+                "second" +
+                SEPARATOR +
+                IS_INITIAL_PREFIX +
+                "val2"
+        val expected3 = TABLE_LOG_DATE_FORMAT.format(300L) + SEPARATOR + "first" + SEPARATOR + "11"
+        val expected4 =
+            TABLE_LOG_DATE_FORMAT.format(400L) + SEPARATOR + "first" + SEPARATOR + "false"
+        val expected5 =
+            TABLE_LOG_DATE_FORMAT.format(500L) +
+                SEPARATOR +
+                "third" +
+                SEPARATOR +
+                IS_INITIAL_PREFIX +
+                "33"
+        assertThat(dumpedString).contains(expected1)
+        assertThat(dumpedString).contains(expected2)
+        assertThat(dumpedString).contains(expected3)
+        assertThat(dumpedString).contains(expected4)
+        assertThat(dumpedString).contains(expected5)
     }
 
     @Test
