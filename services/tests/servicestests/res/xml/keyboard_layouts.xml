@@ -73,9 +73,17 @@
         android:keyboardLocale="ru-Cyrl" />
 
     <keyboard-layout
+        android:name="keyboard_layout_english_without_script_code"
+        android:label="English(No script code)"
+        android:keyboardLayout="@raw/dummy_keyboard_layout"
+        android:keyboardLocale="en"
+        android:keyboardLayoutType="qwerty" />
+
+    <keyboard-layout
         android:name="keyboard_layout_vendorId:1,productId:1"
         android:label="vendorId:1,productId:1"
         android:keyboardLayout="@raw/dummy_keyboard_layout"
         androidprv:vendorId="1"
         androidprv:productId="1" />
+
 </keyboard-layouts>

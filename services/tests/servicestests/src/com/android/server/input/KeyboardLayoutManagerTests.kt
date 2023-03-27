@@ -26,7 +26,6 @@ import android.content.pm.ServiceInfo
 import android.hardware.input.IInputManager
 import android.hardware.input.InputManager
 import android.hardware.input.KeyboardLayout
-import android.icu.lang.UScript
 import android.icu.util.ULocale
 import android.os.Bundle
 import android.os.test.TestLooper
@@ -52,7 +51,6 @@ import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.util.Locale
 
 private fun createKeyboard(
     deviceId: Int,
@@ -553,24 +551,17 @@ class KeyboardLayoutManagerTests {
                 0,
                 keyboardLayouts.size
             )
-
-            val englishScripts = UScript.getCode(Locale.forLanguageTag("hi-Latn"))
-            for (kl in keyboardLayouts) {
-                var isCompatible = false
-                for (i in 0 until kl.locales.size()) {
-                    val locale: Locale = kl.locales.get(i) ?: continue
-                    val scripts = UScript.getCode(locale)
-                    if (scripts != null && areScriptsCompatible(scripts, englishScripts)) {
-                        isCompatible = true
-                        break
-                    }
-                }
-                assertTrue(
-                    "New UI: getKeyboardLayoutListForInputDevice API should only return " +
-                            "compatible layouts but found " + kl.descriptor,
-                    isCompatible
+            assertTrue("New UI: getKeyboardLayoutListForInputDevice API should return a list " +
+                    "containing English(US) layout for hi-Latn",
+                containsLayout(keyboardLayouts, ENGLISH_US_LAYOUT_DESCRIPTOR)
+            )
+            assertTrue("New UI: getKeyboardLayoutListForInputDevice API should return a list " +
+                    "containing English(No script code) layout for hi-Latn",
+                containsLayout(
+                    keyboardLayouts,
+                    createLayoutDescriptor("keyboard_layout_english_without_script_code")
                 )
-            }
+            )
 
             // Check Layouts for "hi" which by default uses 'Deva' script.
             keyboardLayouts =
@@ -598,6 +589,46 @@ class KeyboardLayoutManagerTests {
             assertEquals("New UI: getKeyboardLayoutListForInputDevice API should return user " +
                     "selected layout even if the script is incompatible with IME",
                     1,
+                keyboardLayouts.size
+            )
+
+            // Special case Japanese: UScript ignores provided script code for certain language tags
+            // Should manually match provided script codes and then rely on Uscript to derive
+            // script from language tags and match those.
+            keyboardLayouts =
+                keyboardLayoutManager.getKeyboardLayoutListForInputDevice(
+                        keyboardDevice.identifier, USER_ID, imeInfo,
+                        createImeSubtypeForLanguageTag("ja-Latn-JP")
+                )
+            assertNotEquals(
+                "New UI: getKeyboardLayoutListForInputDevice API should return the list of " +
+                        "supported layouts with matching script code for ja-Latn-JP",
+                0,
+                keyboardLayouts.size
+            )
+            assertTrue("New UI: getKeyboardLayoutListForInputDevice API should return a list " +
+                    "containing English(US) layout for ja-Latn-JP",
+                containsLayout(keyboardLayouts, ENGLISH_US_LAYOUT_DESCRIPTOR)
+            )
+            assertTrue("New UI: getKeyboardLayoutListForInputDevice API should return a list " +
+                    "containing English(No script code) layout for ja-Latn-JP",
+                containsLayout(
+                    keyboardLayouts,
+                    createLayoutDescriptor("keyboard_layout_english_without_script_code")
+                )
+            )
+
+            // If script code not explicitly provided for Japanese should rely on Uscript to find
+            // derived script code and hence no suitable layout will be found.
+            keyboardLayouts =
+                keyboardLayoutManager.getKeyboardLayoutListForInputDevice(
+                        keyboardDevice.identifier, USER_ID, imeInfo,
+                        createImeSubtypeForLanguageTag("ja-JP")
+                )
+            assertEquals(
+                "New UI: getKeyboardLayoutListForInputDevice API should return empty list of " +
+                        "supported layouts with matching script code for ja-JP",
+                0,
                 keyboardLayouts.size
             )
         }
@@ -779,10 +810,10 @@ class KeyboardLayoutManagerTests {
     private fun createLayoutDescriptor(keyboardName: String): String =
         "$PACKAGE_NAME/$RECEIVER_NAME/$keyboardName"
 
-    private fun areScriptsCompatible(scriptList1: IntArray, scriptList2: IntArray): Boolean {
-        for (s1 in scriptList1) {
-            for (s2 in scriptList2) {
-                if (s1 == s2) return true
+    private fun containsLayout(layoutList: Array<KeyboardLayout>, layoutDesc: String): Boolean {
+        for (kl in layoutList) {
+            if (kl.descriptor.equals(layoutDesc)) {
+                return true
             }
         }
         return false
