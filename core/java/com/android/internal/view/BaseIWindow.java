@@ -18,7 +18,7 @@ package com.android.internal.view;
 
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -127,7 +127,8 @@ public class BaseIWindow extends IWindow.Stub {
 
     @Override
     public void updatePointerIcon(float x, float y) {
-        InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_NOT_SPECIFIED);
+        InputManagerGlobal.getInstance()
+                .setPointerIconType(PointerIcon.TYPE_NOT_SPECIFIED);
     }
 
     @Override
