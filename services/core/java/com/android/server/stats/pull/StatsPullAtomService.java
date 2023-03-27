@@ -4716,7 +4716,7 @@ public class StatsPullAtomService extends SystemService {
         List<Integer> disabledSurroundEncodingsList = new ArrayList<>();
         List<Integer> enabledSurroundEncodingsList = new ArrayList<>();
         for (int surroundEncoding : surroundEncodingsMap.keySet()) {
-            if (!surroundEncodingsMap.get(surroundEncoding)) {
+            if (!audioManager.isSurroundFormatEnabled(surroundEncoding)) {
                 disabledSurroundEncodingsList.add(surroundEncoding);
             } else {
                 enabledSurroundEncodingsList.add(surroundEncoding);
