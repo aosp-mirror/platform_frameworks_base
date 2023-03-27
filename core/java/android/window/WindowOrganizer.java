@@ -61,9 +61,7 @@ public class WindowOrganizer {
      * Apply multiple WindowContainer operations at once.
      *
      * Note that using this API requires the caller to hold
-     * {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS}, unless the caller is using
-     * {@link TaskFragmentOrganizer}, in which case it is allowed to change TaskFragment that is
-     * created by itself.
+     * {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS}.
      *
      * @param t The transaction to apply.
      * @param callback This transaction will use the synchronization scheme described in
@@ -72,8 +70,7 @@ public class WindowOrganizer {
      * @return An ID for the sync operation which will later be passed to transactionReady callback.
      *         This lets the caller differentiate overlapping sync operations.
      */
-    @RequiresPermission(value = android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
-            conditional = true)
+    @RequiresPermission(value = android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public int applySyncTransaction(@NonNull WindowContainerTransaction t,
             @NonNull WindowContainerTransactionCallback callback) {
         try {

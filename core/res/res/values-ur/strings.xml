@@ -2039,7 +2039,7 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"اَن انسٹال کریں"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"بہر صورت کھولیں"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ضرر رساں ایپ کا پتہ چلا"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> کو آلے کے تمام لاگز تک رسائی کی اجازت دیں؟"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"‫<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> کو آلے کے تمام لاگز تک رسائی کی اجازت دیں؟"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"یک وقتی رسائی کی اجازت دیں"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"اجازت نہ دیں"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"آپ کے آلے پر جو ہوتا ہے آلے کے لاگز اسے ریکارڈ کر لیتے ہیں۔ ایپس ان لاگز کا استعمال مسائل کو تلاش کرنے اور ان کو حل کرنے کے لیے کر سکتی ہیں۔\n\nکچھ لاگز میں حساس معلومات شامل ہو سکتی ہیں، اس لیے صرف اپنی بھروسے مند ایپس کو ہی آلے کے تمام لاگز تک رسائی کی اجازت دیں۔ \n\nاگر آپ اس ایپ کو آلے کے تمام لاگز تک رسائی کی اجازت نہیں دیتے ہیں تب بھی یہ اپنے لاگز تک رسائی حاصل کر سکتی ہے۔ آپ کے آلے کا مینوفیکچرر اب بھی آپ کے آلے پر کچھ لاگز یا معلومات تک رسائی حاصل کر سکتا ہے۔ مزید جانیں"</string>

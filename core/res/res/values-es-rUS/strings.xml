@@ -51,7 +51,7 @@
     <string name="needPuk2" msgid="7032612093451537186">"Escribir PUK2 para desbloquear la tarjeta SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Error; habilita el bloqueo de SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Tienes <xliff:g id="NUMBER_1">%d</xliff:g> intentos más antes de que se bloquee la tarjeta SIM.</item>
       <item quantity="other">Tienes <xliff:g id="NUMBER_1">%d</xliff:g> intentos más antes de que se bloquee la tarjeta SIM.</item>
       <item quantity="one">Tienes <xliff:g id="NUMBER_0">%d</xliff:g> un intento más antes de que se bloquee la tarjeta SIM.</item>
     </plurals>
@@ -1358,7 +1358,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Cargando el dispositivo conectado. Presiona para ver más opciones."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Se detectó un accesorio de audio analógico"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"El dispositivo adjunto no es compatible con este teléfono. Presiona para obtener más información."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Depuración por USB conectada"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Depuración por USB activada"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Presiona para desactivar"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Seleccionar para desactivar la depuración por USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Se conectó la depuración inalámbrica"</string>
@@ -2043,7 +2043,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"¿Quieres permitir que <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> acceda a todos los registros del dispositivo?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Permitir acceso por única vez"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"No permitir"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Los registros del dispositivo permiten documentar lo que sucede en él. Las apps pueden usar estos registros para encontrar y solucionar problemas.\n\nEs posible que algunos registros del dispositivo contengan información sensible, por lo que solo debes permitir que accedan a todos los registros las apps que sean de tu confianza. \n\n Ten en cuenta que la app puede acceder a sus propios registros aun si no permites que acceda a todos los registros del dispositivo. También es posible que el fabricante del dispositivo acceda a algunos registros o información en tu dispositivo. Más información"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Los registros del dispositivo permiten documentar lo que sucede en él. Las apps pueden usar estos registros para encontrar y solucionar problemas.\n\nEs posible que algunos registros del dispositivo contengan información sensible, por lo que solo debes permitir que accedan a ellos las apps que sean de tu confianza. \n\n Ten en cuenta que la app puede acceder a sus propios registros aun si no permites que acceda a todos los registros del dispositivo. También es posible que el fabricante del dispositivo acceda a algunos registros o información en tu dispositivo. Más información"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"No volver a mostrar"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> quiere mostrar fragmentos de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editar"</string>

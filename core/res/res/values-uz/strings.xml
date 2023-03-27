@@ -2039,8 +2039,8 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"O‘CHIRIB TASHLASH"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"BARIBIR OCHILSIN"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Zararli ilova aniqlandi"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ilovasining qurilmadagi barcha jurnallarga kirishiga ruxsat berilsinmi?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Bir matalik foydalanishga ruxsat berish"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> uchun qurilmadagi barcha jurnallarga kirish ruxsati berilsinmi?"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Bir martalik ruxsat berish"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Rad etish"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"Qurilma jurnaliga qurilma bilan yuz bergan hodisalar qaydlari yoziladi. Ilovalar bu jurnal qaydlari yordamida muammolarni topishi va bartaraf qilishi mumkin.\n\nAyrim jurnal qaydlarida maxfiy axborotlar yozilishi mumkin, shu sababli qurilmadagi barcha jurnal qaydlariga ruxsatni faqat ishonchli ilovalarga bering. \n\nBu ilovaga qurilmadagi barcha jurnal qaydlariga ruxsat berilmasa ham, u oʻzining jurnalini ocha oladi. Qurilma ishlab chiqaruvchisi ham ayrim jurnallar yoki qurilma haqidagi axborotlarni ocha oladi. Batafsil"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Boshqa chiqmasin"</string>

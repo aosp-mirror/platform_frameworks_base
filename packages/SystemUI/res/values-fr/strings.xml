@@ -204,7 +204,7 @@
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"<xliff:g id="NUMBER">%s</xliff:g> autres"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> autre notification à l\'intérieur.</item>
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> more notifications inside.</item>
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> autres notifications à l\'intérieur.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> autres notifications à l\'intérieur.</item>
     </plurals>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"L\'écran est verrouillé en mode paysage."</string>
@@ -255,7 +255,7 @@
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Écon. données activé"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="one">%d appareil</item>
-      <item quantity="many">%d devices</item>
+      <item quantity="many">%d appareils</item>
       <item quantity="other">%d appareils</item>
     </plurals>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lampe de poche"</string>
@@ -350,7 +350,7 @@
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite nombre utilisateurs atteinte"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Vous pouvez ajouter <xliff:g id="COUNT">%d</xliff:g> profil utilisateur.</item>
-      <item quantity="many">You can add up to <xliff:g id="COUNT">%d</xliff:g> users.</item>
+      <item quantity="many">Vous pouvez ajouter jusqu\'à <xliff:g id="COUNT">%d</xliff:g> profils utilisateur.</item>
       <item quantity="other">Vous pouvez ajouter jusqu\'à <xliff:g id="COUNT">%d</xliff:g> profils utilisateur.</item>
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"Supprimer l\'utilisateur ?"</string>
@@ -540,12 +540,12 @@
     <string name="snoozed_for_time" msgid="7586689374860469469">"Répétée après <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="one">%d heure</item>
-      <item quantity="many">%d hours</item>
+      <item quantity="many">%d heures</item>
       <item quantity="other">%d heures</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
       <item quantity="one">%d minute</item>
-      <item quantity="many">%d minutes</item>
+      <item quantity="many">%d minutes</item>
       <item quantity="other">%d minutes</item>
     </plurals>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Économiseur de batterie"</string>
@@ -772,7 +772,7 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Sélectionnez l\'appli pour laquelle ajouter des commandes"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> commande ajoutée.</item>
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> controls added.</item>
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> commandes ajoutées.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> commandes ajoutées.</item>
     </plurals>
     <string name="controls_removed" msgid="3731789252222856959">"Supprimé"</string>
@@ -835,7 +835,7 @@
     <string name="controls_error_removed" msgid="6675638069846014366">"Introuvable"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Commande indisponible"</string>
     <string name="controls_error_removed_message" msgid="2885911717034750542">"Impossible d\'accéder à \"<xliff:g id="DEVICE">%1$s</xliff:g>\". Vérifiez l\'application <xliff:g id="APPLICATION">%2$s</xliff:g> pour vous assurer que la commande est toujours disponible et que les paramètres de l\'application n\'ont pas changé."</string>
-    <string name="controls_open_app" msgid="483650971094300141">"Ouvrir l\'application"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Ouvrir l\'appli"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Impossible de charger l\'état"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Erreur. Veuillez réessayer."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Ajouter des commandes"</string>

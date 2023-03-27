@@ -203,7 +203,7 @@
     <string name="accessibility_clear_all" msgid="970525598287244592">"Cancella tutte le notifiche."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> more notifications inside.</item>
+      <item quantity="many">Altre <xliff:g id="NUMBER_1">%s</xliff:g> notifiche nel gruppo.</item>
       <item quantity="other">Altre <xliff:g id="NUMBER_1">%s</xliff:g> notifiche nel gruppo.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> altra notifica nel gruppo.</item>
     </plurals>
@@ -254,7 +254,7 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Attivazione…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Risp. dati attivo"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
-      <item quantity="many">%d devices</item>
+      <item quantity="many">%d dispositivi</item>
       <item quantity="other">%d dispositivi</item>
       <item quantity="one">%d dispositivo</item>
     </plurals>
@@ -349,7 +349,7 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sì, continua"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite di utenti raggiunto"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
-      <item quantity="many">You can add up to <xliff:g id="COUNT">%d</xliff:g> users.</item>
+      <item quantity="many">Puoi aggiungere fino a <xliff:g id="COUNT">%d</xliff:g> utenti.</item>
       <item quantity="other">Puoi aggiungere fino a <xliff:g id="COUNT">%d</xliff:g> utenti.</item>
       <item quantity="one">È possibile creare un solo utente.</item>
     </plurals>
@@ -539,12 +539,12 @@
     <string name="snooze_undo" msgid="2738844148845992103">"Annulla"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Posticipato di <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
-      <item quantity="many">%d hours</item>
+      <item quantity="many">%d ore</item>
       <item quantity="other">%d ore</item>
       <item quantity="one">%d ora</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
-      <item quantity="many">%d minutes</item>
+      <item quantity="many">%d minuti</item>
       <item quantity="other">%d minuti</item>
       <item quantity="one">%d minuto</item>
     </plurals>
@@ -728,7 +728,7 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"Rifiuta"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Tocca per programmare il Risparmio energetico"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Attiva questa funzionalità se è probabile che la batteria si scarichi"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"No grazie"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"No, grazie"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump heap SysUI"</string>
     <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"In uso"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Le app stanno usando <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
@@ -771,7 +771,7 @@
     <string name="quick_controls_title" msgid="6839108006171302273">"Controllo dispositivi"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Scegli un\'app per aggiungere controlli"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> controls added.</item>
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> controlli aggiunti.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> controlli aggiunti.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> controllo aggiunto.</item>
     </plurals>
@@ -912,7 +912,7 @@
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Telefonata in corso"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Dati mobili"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
-    <string name="mobile_data_connection_active" msgid="944490013299018227">"Connessione attiva"</string>
+    <string name="mobile_data_connection_active" msgid="944490013299018227">"Connessa"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Nessuna connessione dati mobili automatica"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Nessuna connessione"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nessun\'altra rete disponibile"</string>

@@ -52,7 +52,7 @@
     <string name="enablePin" msgid="2543771964137091212">"Échec de l\'opération. Veuillez activer le verrouillage de la carte SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM ne soit verrouillée.</item>
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM ne soit verrouillée.</item>
       <item quantity="other">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM ne soit verrouillée.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"Code IMEI"</string>
