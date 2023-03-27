@@ -1563,7 +1563,7 @@ public final class SystemServer implements Dumpable {
             ServiceManager.addService("dynamic_system", dynamicSystem);
             t.traceEnd();
 
-            if (!isWatch) {
+            if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CONSUMER_IR)) {
                 t.traceBegin("StartConsumerIrService");
                 consumerIr = new ConsumerIrService(context);
                 ServiceManager.addService(Context.CONSUMER_IR_SERVICE, consumerIr);
