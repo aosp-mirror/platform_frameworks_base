@@ -34,7 +34,9 @@ import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
 import com.android.credentialmanager.common.BaseEntry
 import com.android.credentialmanager.common.ProviderActivityState
+import com.android.credentialmanager.common.ui.ConfirmButton
 import com.android.credentialmanager.common.ui.CredentialContainerCard
+import com.android.credentialmanager.common.ui.CtaButtonRow
 import com.android.credentialmanager.common.ui.HeadlineIcon
 import com.android.credentialmanager.common.ui.HeadlineText
 import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
@@ -62,6 +64,7 @@ fun GetGenericCredentialScreen(
                             providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
                             providerInfoList = getCredentialUiState.providerInfoList,
                             onEntrySelected = viewModel::getFlowOnEntrySelected,
+                            onConfirm = viewModel::getFlowOnConfirmEntrySelected,
                             onLog = { viewModel.logUiEvent(it) },
                     )
                     viewModel.uiMetrics.log(GetCredentialEvent
@@ -93,10 +96,13 @@ fun PrimarySelectionCardGeneric(
         providerDisplayInfo: ProviderDisplayInfo,
         providerInfoList: List<ProviderInfo>,
         onEntrySelected: (BaseEntry) -> Unit,
+        onConfirm: () -> Unit,
         onLog: @Composable (UiEventLogger.UiEventEnum) -> Unit,
 ) {
     val sortedUserNameToCredentialEntryList =
             providerDisplayInfo.sortedUserNameToCredentialEntryList
+    val totalEntriesCount = sortedUserNameToCredentialEntryList
+            .flatMap { it.sortedCredentialEntryList }.size
     SheetContainerCard {
         // When only one provider (not counting the remote-only provider) exists, display that
         // provider's icon + name up top.
@@ -125,7 +131,11 @@ fun PrimarySelectionCardGeneric(
         item {
             HeadlineText(
                     text = stringResource(
-                            R.string.get_dialog_title_choose_option_for,
+                            if (totalEntriesCount == 1) {
+                                R.string.get_dialog_title_use_info_on
+                            } else {
+                                R.string.get_dialog_title_choose_option_for
+                            },
                             requestDisplayInfo.appName
                     ),
             )
@@ -134,7 +144,6 @@ fun PrimarySelectionCardGeneric(
         item {
             CredentialContainerCard {
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    // Show max 4 entries in this primary page
                     sortedUserNameToCredentialEntryList.forEach {
                         // TODO(b/275375861): fallback UI merges entries by account names.
                         //  Need a strategy to be able to show all entries.
@@ -145,6 +154,19 @@ fun PrimarySelectionCardGeneric(
                         )
                     }
                 }
+            }
+        }
+        item { Divider(thickness = 24.dp, color = Color.Transparent) }
+        item {
+            if (totalEntriesCount == 1) {
+                CtaButtonRow(
+                    rightButton = {
+                        ConfirmButton(
+                            stringResource(R.string.get_dialog_button_label_continue),
+                            onClick = onConfirm
+                        )
+                    }
+                )
             }
         }
     }
