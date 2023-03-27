@@ -1053,23 +1053,6 @@ package android.app {
     method public void launchAssist(@Nullable android.os.Bundle);
   }
 
-  public final class StartLockscreenValidationRequest implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getLockscreenUiType();
-    method public int getRemainingAttempts();
-    method @NonNull public byte[] getSourcePublicKey();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.StartLockscreenValidationRequest> CREATOR;
-  }
-
-  public static final class StartLockscreenValidationRequest.Builder {
-    ctor public StartLockscreenValidationRequest.Builder();
-    method @NonNull public android.app.StartLockscreenValidationRequest build();
-    method @NonNull public android.app.StartLockscreenValidationRequest.Builder setLockscreenUiType(int);
-    method @NonNull public android.app.StartLockscreenValidationRequest.Builder setRemainingAttempts(int);
-    method @NonNull public android.app.StartLockscreenValidationRequest.Builder setSourcePublicKey(@NonNull byte[]);
-  }
-
   public class StatusBarManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.STATUS_BAR) public android.app.StatusBarManager.DisableInfo getDisableInfo();
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public int getNavBarMode();
