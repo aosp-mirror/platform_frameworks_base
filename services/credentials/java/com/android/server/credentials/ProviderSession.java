@@ -31,9 +31,7 @@ import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.server.credentials.metrics.CandidatePhaseMetric;
-import com.android.server.credentials.metrics.InitialPhaseMetric;
-import com.android.server.credentials.metrics.ProviderStatusForMetrics;
+import com.android.server.credentials.metrics.ProviderSessionMetric;
 
 import java.util.UUID;
 
@@ -72,10 +70,8 @@ public abstract class ProviderSession<T, R>
     protected R mProviderResponse;
     @NonNull
     protected Boolean mProviderResponseSet = false;
-    // Specific candidate provider metric for the provider this session handles
     @NonNull
-    protected final CandidatePhaseMetric mCandidatePhasePerProviderMetric =
-            new CandidatePhaseMetric();
+    protected final ProviderSessionMetric mProviderSessionMetric = new ProviderSessionMetric();
     @NonNull
     private int mProviderSessionUid;
 
@@ -209,50 +205,18 @@ public abstract class ProviderSession<T, R>
         return mRemoteCredentialService;
     }
 
-    protected void captureCandidateFailureInMetrics() {
-        mCandidatePhasePerProviderMetric.setHasException(true);
-    }
-
     /** Updates the status . */
     protected void updateStatusAndInvokeCallback(@NonNull Status status) {
         setStatus(status);
-        updateCandidateMetric(status);
+        mProviderSessionMetric.collectCandidateMetricUpdate(isTerminatingStatus(status),
+                isCompletionStatus(status), mProviderSessionUid);
         mCallbacks.onProviderStatusChanged(status, mComponentName);
     }
 
-    private void updateCandidateMetric(Status status) {
-        try {
-            mCandidatePhasePerProviderMetric.setCandidateUid(mProviderSessionUid);
-            mCandidatePhasePerProviderMetric
-                    .setQueryFinishTimeNanoseconds(System.nanoTime());
-            if (isTerminatingStatus(status)) {
-                mCandidatePhasePerProviderMetric.setQueryReturned(false);
-                mCandidatePhasePerProviderMetric.setProviderQueryStatus(
-                        ProviderStatusForMetrics.QUERY_FAILURE
-                                .getMetricCode());
-            } else if (isCompletionStatus(status)) {
-                mCandidatePhasePerProviderMetric.setQueryReturned(true);
-                mCandidatePhasePerProviderMetric.setProviderQueryStatus(
-                        ProviderStatusForMetrics.QUERY_SUCCESS
-                                .getMetricCode());
-            }
-        } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
-        }
-    }
-
-    // Common method to transfer metrics from the initial phase to the candidate phase per provider
+    /** Common method that transfers metrics from the init phase to candidates */
     protected void startCandidateMetrics() {
-        try {
-            InitialPhaseMetric initMetric = ((RequestSession) mCallbacks).mRequestSessionMetric
-                    .getInitialPhaseMetric();
-            mCandidatePhasePerProviderMetric.setSessionId(initMetric.getSessionId());
-            mCandidatePhasePerProviderMetric.setServiceBeganTimeNanoseconds(
-                    initMetric.getCredentialServiceStartedTimeNanoseconds());
-            mCandidatePhasePerProviderMetric.setStartQueryTimeNanoseconds(System.nanoTime());
-        } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
-        }
+        mProviderSessionMetric.collectCandidateMetricSetupViaInitialMetric(
+                ((RequestSession) mCallbacks).mRequestSessionMetric.getInitialPhaseMetric());
     }
 
     /** Get the request to be sent to the provider. */

@@ -148,7 +148,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         }
         Log.i(TAG, "Provider session found");
         mRequestSessionMetric.collectMetricPerBrowsingSelect(selection,
-                providerSession.mCandidatePhasePerProviderMetric);
+                providerSession.mProviderSessionMetric.getCandidatePhasePerProviderMetric());
         providerSession.onUiEntrySelected(selection.getEntryKey(),
                 selection.getEntrySubkey(), selection.getPendingIntentProviderResponse());
     }
