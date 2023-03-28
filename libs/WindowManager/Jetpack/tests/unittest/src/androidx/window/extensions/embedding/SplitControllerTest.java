@@ -565,7 +565,6 @@ public class SplitControllerTest {
         assertNotNull(mSplitController.getActiveSplitForContainers(primaryContainer, container));
         assertTrue(primaryContainer.areLastRequestedBoundsEqual(null));
         assertTrue(container.areLastRequestedBoundsEqual(null));
-        assertEquals(container, mSplitController.getContainerWithActivity(secondaryActivity));
     }
 
     @Test
@@ -1008,9 +1007,8 @@ public class SplitControllerTest {
 
         assertTrue(result);
         assertSplitPair(primaryActivity, mActivity, true /* matchParentBounds */);
-        assertEquals(mSplitController.getContainerWithActivity(secondaryActivity),
-                mSplitController.getContainerWithActivity(mActivity));
-        verify(mSplitPresenter, never()).createNewSplitContainer(any(), any(), any(), any());
+        assertTrue(mSplitController.getContainerWithActivity(mActivity)
+                .areLastRequestedBoundsEqual(new Rect()));
     }
 
     @Test
@@ -1215,7 +1213,7 @@ public class SplitControllerTest {
                 .build();
 
         assertTrue("Rules must have same presentation if tags are null and has same properties.",
-                SplitController.haveSamePresentation(splitRule1, splitRule2,
+                SplitController.areRulesSamePresentation(splitRule1, splitRule2,
                         new WindowMetrics(TASK_BOUNDS, WindowInsets.CONSUMED)));
 
         splitRule2 = createSplitPairRuleBuilder(
@@ -1230,7 +1228,7 @@ public class SplitControllerTest {
 
         assertFalse("Rules must have different presentations if tags are not equal regardless"
                         + "of other properties",
-                SplitController.haveSamePresentation(splitRule1, splitRule2,
+                SplitController.areRulesSamePresentation(splitRule1, splitRule2,
                         new WindowMetrics(TASK_BOUNDS, WindowInsets.CONSUMED)));
     }
 
