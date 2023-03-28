@@ -80,7 +80,7 @@ public class HdmiEarcLocalDeviceTx extends HdmiEarcLocalDevice {
     protected void handleEarcStateChange(@Constants.EarcStatus int status) {
         int oldEarcStatus;
         synchronized (mLock) {
-            HdmiLogger.debug(TAG, "eARC state change [old:%b new %b]", mEarcStatus,
+            HdmiLogger.debug("eARC state change [old:%b new %b]", mEarcStatus,
                     status);
             oldEarcStatus = mEarcStatus;
             mEarcStatus = status;
