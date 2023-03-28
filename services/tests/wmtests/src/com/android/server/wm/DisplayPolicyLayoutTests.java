@@ -202,7 +202,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         // Exclude comparing IME insets because currently the simulated layout only focuses on the
         // insets from status bar and navigation bar.
         realInsetsState.removeSource(InsetsSource.ID_IME);
-        realInsetsState.removeSource(InsetsState.ITYPE_CAPTION_BAR);
 
         assertEquals(new ToStringComparatorWrapper<>(realInsetsState),
                 new ToStringComparatorWrapper<>(simulatedInsetsState));
