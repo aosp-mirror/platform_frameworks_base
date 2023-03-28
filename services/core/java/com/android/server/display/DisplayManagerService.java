@@ -4600,7 +4600,8 @@ public final class DisplayManagerService extends SystemService {
         public void onDesiredDisplayModeSpecsChanged() {
             synchronized (mSyncRoot) {
                 mChanged = false;
-                mLogicalDisplayMapper.forEachLocked(mSpecsChangedConsumer);
+                mLogicalDisplayMapper.forEachLocked(mSpecsChangedConsumer,
+                        /* includeDisabled= */ false);
                 if (mChanged) {
                     scheduleTraversalLocked(false);
                     mChanged = false;
