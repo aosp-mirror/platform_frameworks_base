@@ -22,7 +22,6 @@ import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
@@ -41,6 +40,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.modifiers.height
+import com.android.compose.modifiers.padding
 import com.android.compose.swipeable.FixedThreshold
 import com.android.compose.swipeable.SwipeableState
 import com.android.compose.swipeable.ThresholdConfig
@@ -48,6 +48,7 @@ import com.android.compose.swipeable.rememberSwipeableState
 import com.android.compose.swipeable.swipeable
 import com.android.systemui.multishade.shared.model.ProxiedInputModel
 import com.android.systemui.multishade.ui.viewmodel.ShadeViewModel
+import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
@@ -145,13 +146,31 @@ private fun ShadeContent(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit = {},
 ) {
+    /**
+     * Returns a function that takes in [Density] and returns the current padding around the shade
+     * content.
+     */
+    fun padding(
+        shadeHeightPx: () -> Float,
+    ): Density.() -> Int {
+        return {
+            min(
+                12.dp.toPx().roundToInt(),
+                shadeHeightPx().roundToInt(),
+            )
+        }
+    }
+
     Surface(
         shape = RoundedCornerShape(32.dp),
         modifier =
             modifier
-                .padding(12.dp)
                 .fillMaxWidth()
                 .height { shadeHeightPx().roundToInt() }
+                .padding(
+                    horizontal = padding(shadeHeightPx),
+                    vertical = padding(shadeHeightPx),
+                )
                 .graphicsLayer {
                     // Applies the vertical over-stretching of the shade content that may happen if
                     // the user keep dragging down when the shade is already fully-expanded.
