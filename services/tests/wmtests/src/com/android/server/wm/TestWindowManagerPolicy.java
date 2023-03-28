@@ -222,7 +222,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void onKeyguardOccludedChangedLw(boolean occluded) {
+    public void onKeyguardOccludedChangedLw(boolean occluded, boolean waitAppTransition) {
     }
 
     public void setSafeMode(boolean safeMode) {
