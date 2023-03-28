@@ -245,27 +245,6 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `icon group - checks default data`() =
-        testScope.runTest {
-            mobileIconsInteractor.defaultDataSubId.value = SUB_1_ID
-            connectionRepository.resolvedNetworkType.value =
-                DefaultNetworkType(mobileMappingsProxy.toIconKey(THREE_G))
-
-            var latest: NetworkTypeIconModel? = null
-            val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest).isEqualTo(NetworkTypeIconModel.DefaultIcon(TelephonyIcons.THREE_G))
-
-            // Default data sub id changes to something else
-            mobileIconsInteractor.defaultDataSubId.value = 123
-
-            assertThat(latest)
-                .isEqualTo(NetworkTypeIconModel.DefaultIcon(TelephonyIcons.NOT_DEFAULT_DATA))
-
-            job.cancel()
-        }
-
-    @Test
     fun overrideIcon_usesCarrierIdOverride() =
         testScope.runTest {
             val overrides =
@@ -276,7 +255,6 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
             underTest = createInteractor(overrides)
 
-            mobileIconsInteractor.defaultDataSubId.value = SUB_1_ID
             connectionRepository.resolvedNetworkType.value =
                 DefaultNetworkType(mobileMappingsProxy.toIconKey(THREE_G))
 
@@ -506,7 +484,6 @@ class MobileIconInteractorTest : SysuiTestCase() {
             mobileIconsInteractor.mobileIsDefault,
             mobileIconsInteractor.defaultMobileIconMapping,
             mobileIconsInteractor.defaultMobileIconGroup,
-            mobileIconsInteractor.defaultDataSubId,
             mobileIconsInteractor.isDefaultConnectionFailed,
             mobileIconsInteractor.isForceHidden,
             connectionRepository,

@@ -76,9 +76,6 @@ interface MobileIconsInteractor {
     /** True if the CDMA level should be preferred over the primary level. */
     val alwaysUseCdmaLevel: StateFlow<Boolean>
 
-    /** Tracks the subscriptionId set as the default for data connections */
-    val defaultDataSubId: StateFlow<Int>
-
     /** The icon mapping from network type to [MobileIconGroup] for the default subscription */
     val defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>
 
@@ -186,8 +183,6 @@ constructor(
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), listOf())
 
-    override val defaultDataSubId = mobileConnectionsRepo.defaultDataSubId
-
     /**
      * Copied from the old pipeline. We maintain a 2s period of time where we will keep the
      * validated bit from the old active network (A) while data is changing to the new one (B).
@@ -284,7 +279,6 @@ constructor(
             mobileIsDefault,
             defaultMobileIconMapping,
             defaultMobileIconGroup,
-            defaultDataSubId,
             isDefaultConnectionFailed,
             isForceHidden,
             mobileConnectionsRepo.getRepoForSubId(subId),

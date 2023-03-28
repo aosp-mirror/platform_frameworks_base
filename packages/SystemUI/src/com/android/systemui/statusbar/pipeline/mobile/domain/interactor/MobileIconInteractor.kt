@@ -21,7 +21,6 @@ import android.telephony.CarrierConfigManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.MobileIconCarrierIdOverrides
 import com.android.settingslib.mobile.MobileIconCarrierIdOverridesImpl
-import com.android.settingslib.mobile.TelephonyIcons.NOT_DEFAULT_DATA
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
@@ -41,7 +40,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
 interface MobileIconInteractor {
@@ -125,7 +123,6 @@ class MobileIconInteractorImpl(
     override val mobileIsDefault: StateFlow<Boolean>,
     defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>,
     defaultMobileIconGroup: StateFlow<MobileIconGroup>,
-    defaultDataSubId: StateFlow<Int>,
     override val isDefaultConnectionFailed: StateFlow<Boolean>,
     override val isForceHidden: Flow<Boolean>,
     connectionRepository: MobileConnectionRepository,
@@ -137,15 +134,6 @@ class MobileIconInteractorImpl(
     override val activity = connectionRepository.dataActivityDirection
 
     override val isDataEnabled: StateFlow<Boolean> = connectionRepository.dataEnabled
-
-    private val isDefault =
-        defaultDataSubId
-            .mapLatest { connectionRepository.subId == it }
-            .stateIn(
-                scope,
-                SharingStarted.WhileSubscribed(),
-                connectionRepository.subId == defaultDataSubId.value
-            )
 
     // True if there exists _any_ icon override for this carrierId. Note that overrides can include
     // any or none of the icon groups defined in MobileMappings, so we still need to check on a
@@ -180,12 +168,7 @@ class MobileIconInteractorImpl(
                 connectionRepository.resolvedNetworkType,
                 defaultMobileIconMapping,
                 defaultMobileIconGroup,
-                isDefault,
-            ) { resolvedNetworkType, mapping, defaultGroup, isDefault ->
-                if (!isDefault) {
-                    return@combine NOT_DEFAULT_DATA
-                }
-
+            ) { resolvedNetworkType, mapping, defaultGroup ->
                 when (resolvedNetworkType) {
                     is ResolvedNetworkType.CarrierMergedNetworkType ->
                         resolvedNetworkType.iconGroupOverride
