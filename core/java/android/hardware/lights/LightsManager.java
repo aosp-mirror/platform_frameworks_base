@@ -25,8 +25,6 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
@@ -39,7 +37,6 @@ import java.util.List;
 public abstract class LightsManager {
     private static final String TAG = "LightsManager";
 
-    @NonNull private final Context mContext;
     // These enum values copy the values from {@link com.android.server.lights.LightsManager}
     // and the light HAL. Since 0-7 are lights reserved for system use, only the microphone light
     // and following types are available through this API.
@@ -62,9 +59,7 @@ public abstract class LightsManager {
     /**
      * @hide to prevent subclassing from outside of the framework
      */
-    public LightsManager(Context context) {
-        mContext = Preconditions.checkNotNull(context);
-    }
+    public LightsManager() {}
 
     /**
      * Returns the lights available on the device.
