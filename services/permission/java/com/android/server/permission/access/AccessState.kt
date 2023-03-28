@@ -97,23 +97,27 @@ class SystemState private constructor(
 }
 
 class UserState private constructor(
+    // packageName -> version, this version is used permissions/app-ops states upgrade.
+    val packageVersions: IndexedMap<String, Int>,
     // A map of (appId to a map of (permissionName to permissionFlags))
     val appIdPermissionFlags: IntMap<IndexedMap<String, Int>>,
     // appId -> opName -> opCode
     val appIdAppOpModes: IntMap<IndexedMap<String, Int>>,
     // packageName -> opName -> opCode
-    val packageAppOpModes: IndexedMap<String, IndexedMap<String, Int>>
+    val packageAppOpModes: IndexedMap<String, IndexedMap<String, Int>>,
 ) : WritableState() {
     constructor() : this(
+        IndexedMap(),
         IntMap(),
         IntMap(),
-        IndexedMap()
+        IndexedMap(),
     )
 
     fun copy(): UserState = UserState(
+        packageVersions.copy { it },
         appIdPermissionFlags.copy { it.copy { it } },
         appIdAppOpModes.copy { it.copy { it } },
-        packageAppOpModes.copy { it.copy { it } }
+        packageAppOpModes.copy { it.copy { it } },
     )
 }
 

@@ -115,6 +115,13 @@ public class PermissionMigrationHelperImpl implements PermissionMigrationHelper 
         return appIdPermissionStates;
     }
 
+    @Override
+    public int getLegacyPermissionsVersion(int userId) {
+        PackageManagerInternal packageManagerInternal =
+                LocalServices.getService(PackageManagerInternal.class);
+        return packageManagerInternal.getLegacyPermissionsVersion(userId);
+    }
+
     @NonNull
     private Map<String, LegacyPermissionState> toLegacyPermissionStates(
             List<RuntimePermissionsState.PermissionState> permissions) {

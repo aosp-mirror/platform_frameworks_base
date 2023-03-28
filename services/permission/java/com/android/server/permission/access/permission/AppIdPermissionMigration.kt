@@ -20,6 +20,7 @@ import android.util.Log
 import com.android.server.LocalServices
 import com.android.server.permission.access.AccessState
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.util.PackageVersionMigration
 import com.android.server.pm.permission.PermissionMigrationHelper
 
 /**
@@ -55,12 +56,16 @@ class AppIdPermissionMigration {
     }
 
     internal fun migrateUserState(state: AccessState, userId: Int) {
-        val legacyPermissionsManager =
+        val permissionMigrationHelper =
             LocalServices.getService(PermissionMigrationHelper::class.java)!!
-        val permissionStates = legacyPermissionsManager.getLegacyPermissionStates(userId)
+        val permissionStates = permissionMigrationHelper.getLegacyPermissionStates(userId)
+        val version = PackageVersionMigration.getVersion(userId)
 
         permissionStates.forEach { (appId, permissionStates) ->
             migratePermissionStates(appId, state, permissionStates, userId)
+            state.systemState.appIds[appId].forEachIndexed { _, packageName ->
+                state.userStates[userId].packageVersions[packageName] = version
+            }
         }
     }
 

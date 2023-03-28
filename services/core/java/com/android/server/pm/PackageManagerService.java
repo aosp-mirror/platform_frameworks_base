@@ -6779,6 +6779,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        public int getLegacyPermissionsVersion(@UserIdInt int userId) {
+            synchronized (mLock) {
+                return mSettings.getDefaultRuntimePermissionsVersion(userId);
+            }
+        }
+
+        @Override
         @SuppressWarnings("GuardedBy")
         public boolean isPermissionUpgradeNeeded(int userId) {
             return mSettings.isPermissionUpgradeNeeded(userId);

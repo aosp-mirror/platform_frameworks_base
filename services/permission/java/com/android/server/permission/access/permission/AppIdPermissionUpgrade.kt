@@ -1,0 +1,224 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.server.permission.access.permission
+
+import android.Manifest
+import android.os.Build
+import android.util.Log
+import com.android.server.permission.access.MutateStateScope
+import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.util.andInv
+import com.android.server.permission.access.util.hasAnyBit
+import com.android.server.permission.access.util.hasBits
+import com.android.server.pm.pkg.PackageState
+
+class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
+    /**
+     * Upgrade the package permissions, if needed.
+     *
+     * @param version package version
+     *
+     * @see [com.android.server.permission.access.util.PackageVersionMigration.getVersion]
+     */
+    fun MutateStateScope.upgradePermissions(
+        packageState: PackageState,
+        userId: Int,
+        version: Int
+    ) {
+        val packageName = packageState.packageName
+        if (version == 0 || version == 1) {
+            Log.v(LOG_TAG, "No version available for package: $packageName.")
+            return
+        }
+
+        // Upgrade from Pie
+        if (version == 2 || version == 3) {
+            Log.v(
+                LOG_TAG, "Allowlisting and upgrading background location permission for " +
+                    "package: $packageName, version: $version, user:$userId"
+            )
+            allowlistRestrictedPermissions(packageState, userId)
+            upgradeBackgroundLocationPermission(packageState, userId)
+        }
+        if (version <= 10) {
+            Log.v(
+                LOG_TAG, "Upgrading access media location permission for package: $packageName" +
+                    ", version: $version, user: $userId"
+            )
+            upgradeAccessMediaLocationPermission(packageState, userId)
+        }
+        // Enable isAtLeastT check, when moving subsystem to mainline.
+        if (version <= 12 /*&& SdkLevel.isAtLeastT()*/) {
+            Log.v(
+                LOG_TAG, "Upgrading scoped permissions for package: $packageName" +
+                    ", version: $version, user: $userId"
+            )
+            upgradeAuralVisualMediaPermissions(packageState, userId)
+        }
+        // Add a new upgrade step: if (packageVersion <= LATEST_VERSION) { .... }
+        // Also increase LATEST_VERSION
+    }
+
+    private fun MutateStateScope.allowlistRestrictedPermissions(
+        packageState: PackageState,
+        userId: Int
+    ) {
+        packageState.androidPackage!!.requestedPermissions.forEach { permissionName ->
+            if (permissionName in LEGACY_RESTRICTED_PERMISSIONS) {
+                with(policy) {
+                    updatePermissionFlags(
+                        packageState.appId, userId, permissionName,
+                        PermissionFlags.UPGRADE_EXEMPT, PermissionFlags.UPGRADE_EXEMPT
+                    )
+                }
+            }
+        }
+    }
+
+    private fun MutateStateScope.upgradeBackgroundLocationPermission(
+        packageState: PackageState,
+        userId: Int
+    ) {
+        val androidPackage = packageState.androidPackage!!
+        if (Manifest.permission.ACCESS_BACKGROUND_LOCATION in androidPackage.requestedPermissions) {
+            val permissionFlags =
+                state.userStates[userId].appIdPermissionFlags[packageState.appId]
+            val fineLocationFlags = permissionFlags[Manifest.permission.ACCESS_FINE_LOCATION] ?: 0
+            val coarseLocationFlags =
+                permissionFlags[Manifest.permission.ACCESS_COARSE_LOCATION] ?: 0
+            val isForegroundLocationGranted = PermissionFlags.isAppOpGranted(fineLocationFlags) ||
+                PermissionFlags.isAppOpGranted(coarseLocationFlags)
+            if (isForegroundLocationGranted) {
+                grantRuntimePermission(
+                    packageState, userId, Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                )
+            }
+        }
+    }
+
+    private fun MutateStateScope.upgradeAccessMediaLocationPermission(
+        packageState: PackageState,
+        userId: Int
+    ) {
+        val androidPackage = packageState.androidPackage!!
+        if (Manifest.permission.ACCESS_MEDIA_LOCATION in androidPackage.requestedPermissions) {
+            val permissionFlags = state.userStates[userId].appIdPermissionFlags[packageState.appId]
+            val flags = permissionFlags[Manifest.permission.READ_EXTERNAL_STORAGE] ?: 0
+            if (PermissionFlags.isAppOpGranted(flags)) {
+                grantRuntimePermission(
+                    packageState, userId, Manifest.permission.ACCESS_MEDIA_LOCATION
+                )
+            }
+        }
+    }
+
+    private fun MutateStateScope.upgradeAuralVisualMediaPermissions(
+        packageState: PackageState,
+        userId: Int
+    ) {
+        val androidPackage = packageState.androidPackage!!
+        if (androidPackage.targetSdkVersion < Build.VERSION_CODES.TIRAMISU) {
+            return
+        }
+
+        val requestedPermissionNames = androidPackage.requestedPermissions
+        val permissionFlags = state.userStates[userId].appIdPermissionFlags[packageState.appId]
+        val isStorageUserGranted = requestedPermissionNames.anyIndexed { _, permissionName ->
+            val flags = permissionFlags[permissionName] ?: 0
+            permissionName in STORAGE_PERMISSIONS && PermissionFlags.isAppOpGranted(flags) &&
+                flags.hasBits(PermissionFlags.USER_SET)
+        }
+        if (isStorageUserGranted) {
+            requestedPermissionNames.forEachIndexed { _, permissionName ->
+                if (permissionName in AURAL_VISUAL_MEDIA_PERMISSIONS) {
+                    grantRuntimePermission(packageState, userId, permissionName)
+                }
+            }
+        }
+    }
+
+    private fun MutateStateScope.grantRuntimePermission(
+        packageState: PackageState,
+        userId: Int,
+        permissionName: String
+    ) {
+        Log.v(
+            LOG_TAG, "Granting runtime permission for package: ${packageState.packageName}, " +
+                "permission: $permissionName, userId: $userId"
+        )
+        val permission = state.systemState.permissions[permissionName]!!
+        if (packageState.getUserStateOrDefault(userId).isInstantApp && !permission.isInstant) {
+            return
+        }
+
+        val appId = packageState.appId
+        val permissionFlags = state.userStates[userId].appIdPermissionFlags[appId]
+        var flags = permissionFlags[permission.name] ?: 0
+        if (flags.hasAnyBit(MASK_ANY_FIXED)) {
+            Log.v(
+                LOG_TAG,
+                "Not allowed to grant $permissionName to package ${packageState.packageName}"
+            )
+            return
+        }
+
+        flags = flags or PermissionFlags.RUNTIME_GRANTED
+        flags = flags andInv (
+            PermissionFlags.APP_OP_REVOKED or
+            PermissionFlags.IMPLICIT or
+            PermissionFlags.LEGACY_GRANTED or
+            PermissionFlags.HIBERNATION or
+            PermissionFlags.ONE_TIME
+        )
+        with(policy) {
+            setPermissionFlags(appId, userId, permissionName, flags)
+        }
+    }
+
+    companion object {
+        private val LOG_TAG = AppIdPermissionUpgrade::class.java.simpleName
+
+        private const val MASK_ANY_FIXED =
+            PermissionFlags.USER_SET or PermissionFlags.USER_FIXED or
+            PermissionFlags.POLICY_FIXED or PermissionFlags.SYSTEM_FIXED
+
+        private val LEGACY_RESTRICTED_PERMISSIONS = indexedSetOf(
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.SEND_SMS,
+            Manifest.permission.RECEIVE_SMS,
+            Manifest.permission.RECEIVE_WAP_PUSH,
+            Manifest.permission.RECEIVE_MMS,
+            Manifest.permission.READ_CELL_BROADCASTS,
+            Manifest.permission.READ_CALL_LOG,
+            Manifest.permission.WRITE_CALL_LOG,
+            Manifest.permission.PROCESS_OUTGOING_CALLS
+        )
+
+        private val STORAGE_PERMISSIONS = indexedSetOf(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+        private val AURAL_VISUAL_MEDIA_PERMISSIONS = indexedSetOf(
+            Manifest.permission.READ_MEDIA_AUDIO,
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.READ_MEDIA_VIDEO,
+            Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+        )
+    }
+}
