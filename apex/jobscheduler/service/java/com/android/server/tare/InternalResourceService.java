@@ -501,12 +501,16 @@ public class InternalResourceService extends SystemService {
         }
     }
 
-    boolean isHeadlessSystemApp(@NonNull String pkgName) {
+    boolean isHeadlessSystemApp(final int userId, @NonNull String pkgName) {
         if (pkgName == null) {
             Slog.wtfStack(TAG, "isHeadlessSystemApp called with null package");
             return false;
         }
         synchronized (mLock) {
+            final InstalledPackageInfo ipo = getInstalledPackageInfo(userId, pkgName);
+            if (ipo != null && ipo.isHeadlessSystemApp) {
+                return true;
+            }
             // The wellbeing app is pre-set on the device, not expected to be interacted with
             // much by the user, but can be expected to do work in the background on behalf of
             // the user. As such, it's a pseudo-headless system app, so treat it as a headless
@@ -1754,6 +1758,10 @@ public class InternalResourceService extends SystemService {
             pw.print("Exempted apps", mExemptedApps);
             pw.println();
 
+            pw.println();
+            pw.print("Wellbeing app=");
+            pw.println(mWellbeingPackage == null ? "None" : mWellbeingPackage);
+
             boolean printedVips = false;
             pw.println();
             pw.print("VIPs:");
@@ -1832,6 +1840,37 @@ public class InternalResourceService extends SystemService {
 
             pw.println();
             mAnalyst.dump(pw);
+
+            // Put this at the end since this may be a lot and we want to have the earlier
+            // information easily accessible.
+            boolean printedInterestingIpos = false;
+            pw.println();
+            pw.print("Interesting apps:");
+            pw.increaseIndent();
+            for (int u = 0; u < mPkgCache.numMaps(); ++u) {
+                for (int p = 0; p < mPkgCache.numElementsForKeyAt(u); ++p) {
+                    final InstalledPackageInfo ipo = mPkgCache.valueAt(u, p);
+
+                    // Printing out every single app will be too much. Only print apps that
+                    // have some interesting characteristic.
+                    final boolean isInteresting = ipo.hasCode
+                            && ipo.isHeadlessSystemApp
+                            && !UserHandle.isCore(ipo.uid);
+                    if (!isInteresting) {
+                        continue;
+                    }
+
+                    printedInterestingIpos = true;
+                    pw.println();
+                    pw.print(ipo);
+                }
+            }
+            if (printedInterestingIpos) {
+                pw.println();
+            } else {
+                pw.print(" None");
+            }
+            pw.decreaseIndent();
         }
     }
 }

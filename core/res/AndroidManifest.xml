@@ -7401,6 +7401,8 @@
          <p>Protection level: normal
     -->
     <permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION"
+                android:label="@string/permlab_updatePackagesWithoutUserAction"
+                android:description="@string/permdesc_updatePackagesWithoutUserAction"
                 android:protectionLevel="normal" />
     <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION"/>
 

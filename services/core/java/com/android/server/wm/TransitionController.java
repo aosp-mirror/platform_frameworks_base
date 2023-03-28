@@ -30,6 +30,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.WindowConfiguration;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -465,6 +466,28 @@ class TransitionController {
         return type == TRANSIT_OPEN || type == TRANSIT_CLOSE;
     }
 
+    /** Whether the display change should run with blast sync. */
+    private static boolean shouldSync(@NonNull TransitionRequestInfo.DisplayChange displayChange) {
+        if ((displayChange.getStartRotation() + displayChange.getEndRotation()) % 2 == 0) {
+            // 180 degrees rotation change may not change screen size. So the clients may draw
+            // some frames before and after the display projection transaction is applied by the
+            // remote player. That may cause some buffers to show in different rotation. So use
+            // sync method to pause clients drawing until the projection transaction is applied.
+            return true;
+        }
+        final Rect startBounds = displayChange.getStartAbsBounds();
+        final Rect endBounds = displayChange.getEndAbsBounds();
+        if (startBounds == null || endBounds == null) return false;
+        final int startWidth = startBounds.width();
+        final int startHeight = startBounds.height();
+        final int endWidth = endBounds.width();
+        final int endHeight = endBounds.height();
+        // This is changing screen resolution. Because the screen decor layers are excluded from
+        // screenshot, their draw transactions need to run with the start transaction.
+        return (endWidth > startWidth) == (endHeight > startHeight)
+                && (endWidth != startWidth || endHeight != startHeight);
+    }
+
     /**
      * If a transition isn't requested yet, creates one and asks the TransitionPlayer (Shell) to
      * start it. Collection can start immediately.
@@ -494,12 +517,7 @@ class TransitionController {
         } else {
             newTransition = requestStartTransition(createTransition(type, flags),
                     trigger != null ? trigger.asTask() : null, remoteTransition, displayChange);
-            if (newTransition != null && displayChange != null && (displayChange.getStartRotation()
-                    + displayChange.getEndRotation()) % 2 == 0) {
-                // 180 degrees rotation change may not change screen size. So the clients may draw
-                // some frames before and after the display projection transaction is applied by the
-                // remote player. That may cause some buffers to show in different rotation. So use
-                // sync method to pause clients drawing until the projection transaction is applied.
+            if (newTransition != null && displayChange != null && shouldSync(displayChange)) {
                 mAtm.mWindowManager.mSyncEngine.setSyncMethod(newTransition.getSyncId(),
                         BLASTSyncEngine.METHOD_BLAST);
             }

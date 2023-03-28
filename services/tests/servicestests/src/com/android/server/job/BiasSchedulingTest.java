@@ -21,6 +21,7 @@ import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.DeviceIdleManager;
 import android.test.AndroidTestCase;
 
 import com.android.server.job.MockBiasJobService.TestEnvironment;
@@ -48,6 +49,7 @@ public class BiasSchedulingTest extends AndroidTestCase {
         sJobServiceComponent = new ComponentName(getContext(), MockBiasJobService.class);
         mJobScheduler = (JobScheduler) getContext().getSystemService(Context.JOB_SCHEDULER_SERVICE);
         mJobScheduler.cancelAll();
+        getContext().getSystemService(DeviceIdleManager.class).endIdle("BiasSchedulingTest");
     }
 
     @Override

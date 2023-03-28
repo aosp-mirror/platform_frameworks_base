@@ -122,6 +122,8 @@ public class QuickStepContract {
     // Whether the screen is currently transitioning into the state indicated by
     // SYSUI_STATE_SCREEN_ON.
     public static final int SYSUI_STATE_SCREEN_TRANSITION = 1 << 29;
+    // The notification panel expansion fraction is > 0
+    public static final int SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE = 1 << 30;
 
     // Mask for SystemUiStateFlags to isolate SYSUI_STATE_SCREEN_ON and
     // SYSUI_STATE_SCREEN_TRANSITION, to match SCREEN_STATE_*

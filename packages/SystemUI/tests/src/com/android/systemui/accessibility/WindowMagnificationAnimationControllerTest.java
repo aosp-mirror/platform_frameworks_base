@@ -790,7 +790,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         //  should move with both offsetX and offsetY without regrading offsetY/offsetX
         mInstrumentation.runOnMainSync(
                 () -> {
-                    mController.getMagnificationSettings().setDiagonalScrolling(true);
+                    mController.setDiagonalScrolling(true);
                     mController.moveWindowMagnifier(offsetX, offsetY);
                 });
 

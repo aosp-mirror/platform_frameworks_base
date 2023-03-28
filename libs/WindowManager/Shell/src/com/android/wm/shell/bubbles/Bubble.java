@@ -47,6 +47,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
+import com.android.wm.shell.common.bubbles.BubbleInfo;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -242,6 +243,16 @@ public class Bubble implements BubbleViewProvider {
         mMainExecutor = mainExecutor;
         mTaskId = INVALID_TASK_ID;
         setEntry(entry);
+    }
+
+    /** Converts this bubble into a {@link BubbleInfo} object to be shared with external callers. */
+    public BubbleInfo asBubbleBarBubble() {
+        return new BubbleInfo(getKey(),
+                getFlags(),
+                getShortcutInfo().getId(),
+                getIcon(),
+                getUser().getIdentifier(),
+                getPackageName());
     }
 
     @Override
@@ -545,8 +556,13 @@ public class Bubble implements BubbleViewProvider {
         }
     }
 
+    /**
+     * @return the icon set on BubbleMetadata, if it exists. This is only non-null for bubbles
+     * created via a PendingIntent. This is null for bubbles created by a shortcut, as we use the
+     * icon from the shortcut.
+     */
     @Nullable
-    Icon getIcon() {
+    public Icon getIcon() {
         return mIcon;
     }
 

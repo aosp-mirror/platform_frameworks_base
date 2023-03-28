@@ -31,6 +31,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.never
@@ -118,5 +119,25 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
     `when`(mKeyguardMessageAreaController.message).thenReturn("Unlock to continue.")
     mKeyguardPatternViewController.startAppearAnimation()
     verify(mKeyguardMessageAreaController, never()).setMessage(anyString(), anyBoolean())
+  }
+
+  @Test
+  fun reset() {
+    mKeyguardPatternViewController.reset()
+    verify(mLockPatternView).setInStealthMode(anyBoolean())
+    verify(mLockPatternView).enableInput()
+    verify(mLockPatternView).setEnabled(true)
+    verify(mLockPatternView).clearPattern()
+    verify(mLockPatternUtils).getLockoutAttemptDeadline(anyInt())
+  }
+
+  @Test
+  fun resume() {
+    mKeyguardPatternViewController.onResume(KeyguardSecurityView.VIEW_REVEALED)
+    verify(mLockPatternView).setInStealthMode(anyBoolean())
+    verify(mLockPatternView).enableInput()
+    verify(mLockPatternView).setEnabled(true)
+    verify(mLockPatternView).clearPattern()
+    verify(mLockPatternUtils).getLockoutAttemptDeadline(anyInt())
   }
 }

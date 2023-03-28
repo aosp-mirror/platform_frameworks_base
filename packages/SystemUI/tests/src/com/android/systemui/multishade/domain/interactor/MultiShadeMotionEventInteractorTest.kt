@@ -20,7 +20,13 @@ import android.view.MotionEvent
 import android.view.ViewConfiguration
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.multishade.data.remoteproxy.MultiShadeInputProxy
 import com.android.systemui.multishade.data.repository.MultiShadeRepository
 import com.android.systemui.multishade.shared.model.ProxiedInputModel
@@ -49,6 +55,8 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
     private lateinit var repository: MultiShadeRepository
     private lateinit var interactor: MultiShadeInteractor
     private val touchSlop: Int = ViewConfiguration.get(context).scaledTouchSlop
+    private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
+    private lateinit var falsingManager: FalsingManagerFake
 
     @Before
     fun setUp() {
@@ -67,11 +75,18 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
                 repository = repository,
                 inputProxy = inputProxy,
             )
+        keyguardTransitionRepository = FakeKeyguardTransitionRepository()
+        falsingManager = FalsingManagerFake()
         underTest =
             MultiShadeMotionEventInteractor(
                 applicationContext = context,
                 applicationScope = testScope.backgroundScope,
-                interactor = interactor,
+                multiShadeInteractor = interactor,
+                keyguardTransitionInteractor =
+                    KeyguardTransitionInteractor(
+                        repository = keyguardTransitionRepository,
+                    ),
+                falsingManager = falsingManager,
             )
     }
 
@@ -202,6 +217,60 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun shouldIntercept_moveAboveTouchSlopAndUp_butBouncerShowing_returnsFalse() =
+        testScope.runTest {
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.PRIMARY_BOUNCER,
+                    value = 0.1f,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            runCurrent()
+
+            underTest.shouldIntercept(motionEvent(MotionEvent.ACTION_DOWN))
+
+            assertThat(
+                    underTest.shouldIntercept(
+                        motionEvent(
+                            MotionEvent.ACTION_MOVE,
+                            y = touchSlop + 1f,
+                        )
+                    )
+                )
+                .isFalse()
+            assertThat(underTest.shouldIntercept(motionEvent(MotionEvent.ACTION_UP))).isFalse()
+        }
+
+    @Test
+    fun shouldIntercept_moveAboveTouchSlopAndCancel_butBouncerShowing_returnsFalse() =
+        testScope.runTest {
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.PRIMARY_BOUNCER,
+                    value = 0.1f,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            runCurrent()
+
+            underTest.shouldIntercept(motionEvent(MotionEvent.ACTION_DOWN))
+
+            assertThat(
+                    underTest.shouldIntercept(
+                        motionEvent(
+                            MotionEvent.ACTION_MOVE,
+                            y = touchSlop + 1f,
+                        )
+                    )
+                )
+                .isFalse()
+            assertThat(underTest.shouldIntercept(motionEvent(MotionEvent.ACTION_CANCEL))).isFalse()
+        }
+
+    @Test
     fun tap_doesNotSendProxiedInput() =
         testScope.runTest {
             val leftShadeProxiedInput by collectLastValue(interactor.proxiedInput(ShadeId.LEFT))
@@ -233,7 +302,7 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun dragAboveTouchSlopAndUp() =
+    fun dragShadeAboveTouchSlopAndUp() =
         testScope.runTest {
             val leftShadeProxiedInput by collectLastValue(interactor.proxiedInput(ShadeId.LEFT))
             val rightShadeProxiedInput by collectLastValue(interactor.proxiedInput(ShadeId.RIGHT))
@@ -277,7 +346,7 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun dragAboveTouchSlopAndCancel() =
+    fun dragShadeAboveTouchSlopAndCancel() =
         testScope.runTest {
             val leftShadeProxiedInput by collectLastValue(interactor.proxiedInput(ShadeId.LEFT))
             val rightShadeProxiedInput by collectLastValue(interactor.proxiedInput(ShadeId.RIGHT))
@@ -314,6 +383,83 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
 
             val cancelEvent = motionEvent(MotionEvent.ACTION_CANCEL)
             assertThat(underTest.shouldIntercept(cancelEvent)).isTrue()
+            underTest.onTouchEvent(cancelEvent, viewWidthPx = 1000)
+            assertThat(leftShadeProxiedInput).isNull()
+            assertThat(rightShadeProxiedInput).isNull()
+            assertThat(singleShadeProxiedInput).isNull()
+        }
+
+    @Test
+    fun dragUp_withUp_doesNotShowShade() =
+        testScope.runTest {
+            val leftShadeProxiedInput by collectLastValue(interactor.proxiedInput(ShadeId.LEFT))
+            val rightShadeProxiedInput by collectLastValue(interactor.proxiedInput(ShadeId.RIGHT))
+            val singleShadeProxiedInput by collectLastValue(interactor.proxiedInput(ShadeId.SINGLE))
+
+            underTest.shouldIntercept(
+                motionEvent(
+                    MotionEvent.ACTION_DOWN,
+                    x = 100f, // left shade
+                )
+            )
+            assertThat(leftShadeProxiedInput).isNull()
+            assertThat(rightShadeProxiedInput).isNull()
+            assertThat(singleShadeProxiedInput).isNull()
+
+            val yDragAmountPx = -(touchSlop + 1f) // dragging up
+            val moveEvent =
+                motionEvent(
+                    MotionEvent.ACTION_MOVE,
+                    x = 100f, // left shade
+                    y = yDragAmountPx,
+                )
+            assertThat(underTest.shouldIntercept(moveEvent)).isFalse()
+            underTest.onTouchEvent(moveEvent, viewWidthPx = 1000)
+            assertThat(leftShadeProxiedInput).isNull()
+            assertThat(rightShadeProxiedInput).isNull()
+            assertThat(singleShadeProxiedInput).isNull()
+
+            val upEvent = motionEvent(MotionEvent.ACTION_UP)
+            assertThat(underTest.shouldIntercept(upEvent)).isFalse()
+            underTest.onTouchEvent(upEvent, viewWidthPx = 1000)
+            assertThat(leftShadeProxiedInput).isNull()
+            assertThat(rightShadeProxiedInput).isNull()
+            assertThat(singleShadeProxiedInput).isNull()
+        }
+
+    @Test
+    fun dragUp_withCancel_falseTouch_showsThenHidesBouncer() =
+        testScope.runTest {
+            val leftShadeProxiedInput by collectLastValue(interactor.proxiedInput(ShadeId.LEFT))
+            val rightShadeProxiedInput by collectLastValue(interactor.proxiedInput(ShadeId.RIGHT))
+            val singleShadeProxiedInput by collectLastValue(interactor.proxiedInput(ShadeId.SINGLE))
+
+            underTest.shouldIntercept(
+                motionEvent(
+                    MotionEvent.ACTION_DOWN,
+                    x = 900f, // right shade
+                )
+            )
+            assertThat(leftShadeProxiedInput).isNull()
+            assertThat(rightShadeProxiedInput).isNull()
+            assertThat(singleShadeProxiedInput).isNull()
+
+            val yDragAmountPx = -(touchSlop + 1f) // drag up
+            val moveEvent =
+                motionEvent(
+                    MotionEvent.ACTION_MOVE,
+                    x = 900f, // right shade
+                    y = yDragAmountPx,
+                )
+            assertThat(underTest.shouldIntercept(moveEvent)).isFalse()
+            underTest.onTouchEvent(moveEvent, viewWidthPx = 1000)
+            assertThat(leftShadeProxiedInput).isNull()
+            assertThat(rightShadeProxiedInput).isNull()
+            assertThat(singleShadeProxiedInput).isNull()
+
+            falsingManager.setIsFalseTouch(true)
+            val cancelEvent = motionEvent(MotionEvent.ACTION_CANCEL)
+            assertThat(underTest.shouldIntercept(cancelEvent)).isFalse()
             underTest.onTouchEvent(cancelEvent, viewWidthPx = 1000)
             assertThat(leftShadeProxiedInput).isNull()
             assertThat(rightShadeProxiedInput).isNull()

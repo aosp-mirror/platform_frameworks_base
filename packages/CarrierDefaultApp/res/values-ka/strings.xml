@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_name (2809080280462257271) -->
-    <skip />
+    <string name="app_name" msgid="2809080280462257271">"ოპერატორთან კომუნიკაცია"</string>
     <string name="android_system_label" msgid="2797790869522345065">"მობილური ოპერატორი"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"მობილური ინტერნეტის პაკეტი ამოიწურა"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"მობილური ინტერნეტი დეაქტივირებულია"</string>
@@ -16,10 +15,8 @@
     <string name="ssl_error_example" msgid="6188711843183058764">"მაგალითად, სისტემაში შესვლის გვერდი შეიძლება არ ეკუთვნოდეს ნაჩვენებ ორგანიზაციას."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"მაინც ბრაუზერში გაგრძელება"</string>
     <string name="performance_boost_notification_channel" msgid="3475440855635538592">"ეფექტურობის გაძლიერება"</string>
-    <!-- no translation found for performance_boost_notification_title (3126203390685781861) -->
-    <skip />
-    <!-- no translation found for performance_boost_notification_detail (216569851036236346) -->
-    <skip />
+    <string name="performance_boost_notification_title" msgid="3126203390685781861">"5G ვარიანტები თქვენი ოპერატორისგან"</string>
+    <string name="performance_boost_notification_detail" msgid="216569851036236346">"ეწვიეთ %s-ის ვებსაიტს თქვენი აპის გამოცდილების ვარიანტების სანახავად"</string>
     <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"ახლა არა"</string>
     <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"მართვა"</string>
     <string name="slice_purchase_app_label" msgid="7170191659233241166">"ეფექტურობის გაძლიერების შეძენა."</string>

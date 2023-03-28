@@ -25,6 +25,7 @@ import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.app.WindowConfiguration.WindowingMode
 import android.content.Context
+import android.graphics.Rect
 import android.os.IBinder
 import android.os.SystemProperties
 import android.view.SurfaceControl
@@ -67,6 +68,7 @@ class DesktopTasksController(
         private val syncQueue: SyncTransactionQueue,
         private val rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
         private val transitions: Transitions,
+        private val animationTransitionHandler: EnterDesktopTaskTransitionHandler,
         private val desktopModeTaskRepository: DesktopModeTaskRepository,
         @ShellMainThread private val mainExecutor: ShellExecutor
 ) : RemoteCallable<DesktopTasksController>, Transitions.TransitionHandler {
@@ -133,6 +135,44 @@ class DesktopTasksController(
         }
     }
 
+    /**
+     * Moves a single task to freeform and sets the taskBounds to the passed in bounds,
+     * startBounds
+     */
+    fun moveToFreeform(
+            taskInfo: RunningTaskInfo,
+            startBounds: Rect
+    ) {
+        val wct = WindowContainerTransaction()
+        moveHomeTaskToFront(wct)
+        addMoveToDesktopChanges(wct, taskInfo.getToken())
+        wct.setBounds(taskInfo.token, startBounds)
+
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            animationTransitionHandler.startTransition(
+                    Transitions.TRANSIT_ENTER_FREEFORM, wct)
+        } else {
+            shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
+    /** Brings apps to front and sets freeform task bounds */
+    fun moveToDesktopWithAnimation(
+            taskInfo: RunningTaskInfo,
+            freeformBounds: Rect
+    ) {
+        val wct = WindowContainerTransaction()
+        bringDesktopAppsToFront(wct)
+        addMoveToDesktopChanges(wct, taskInfo.getToken())
+        wct.setBounds(taskInfo.token, freeformBounds)
+
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            animationTransitionHandler.startTransition(Transitions.TRANSIT_ENTER_DESKTOP_MODE, wct)
+        } else {
+            shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
     /** Move a task with given `taskId` to fullscreen */
     fun moveToFullscreen(taskId: Int) {
         shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { task -> moveToFullscreen(task) }
@@ -146,6 +186,17 @@ class DesktopTasksController(
         addMoveToFullscreenChanges(wct, task.token)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
+        } else {
+            shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
+    /** Move a task to the front **/
+    fun moveTaskToFront(taskInfo: ActivityManager.RunningTaskInfo) {
+        val wct = WindowContainerTransaction()
+        wct.reorder(taskInfo.token, true)
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            transitions.startTransition(TRANSIT_TO_FRONT, wct, null /* handler */)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
         }

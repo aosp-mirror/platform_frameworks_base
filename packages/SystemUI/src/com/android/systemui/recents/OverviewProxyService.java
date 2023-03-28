@@ -21,6 +21,7 @@ import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
+
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
@@ -47,6 +48,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -104,6 +106,8 @@ import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
 import com.android.wm.shell.sysui.ShellInterface;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -112,8 +116,6 @@ import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Class to send information from overview to launcher with a binder.
@@ -140,7 +142,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final Handler mHandler;
     private final Lazy<NavigationBarController> mNavBarControllerLazy;
     private final NotificationShadeWindowController mStatusBarWinController;
-    private final Runnable mConnectionRunnable = this::internalConnectToCurrentUser;
+    private final Runnable mConnectionRunnable = () ->
+            internalConnectToCurrentUser("runnable: startConnectionToCurrentUser");
     private final ComponentName mRecentsComponentName;
     private final List<OverviewProxyListener> mConnectionCallbacks = new ArrayList<>();
     private final Intent mQuickStepIntent;
@@ -266,7 +269,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                     InputDevice.SOURCE_KEYBOARD);
 
             ev.setDisplayId(mContext.getDisplay().getDisplayId());
-            return InputManager.getInstance()
+            return InputManagerGlobal.getInstance()
                     .injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
         }
 
@@ -406,7 +409,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 // Failed to link to death (process may have died between binding and connecting),
                 // just unbind the service for now and retry again
                 Log.e(TAG_OPS, "Lost connection to launcher service", e);
-                disconnectFromLauncherService();
+                disconnectFromLauncherService("Lost connection to launcher service");
                 retryConnectionWithBackoff();
                 return;
             }
@@ -501,7 +504,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 @Override
                 public void onUserChanged(int newUser, @NonNull Context userContext) {
                     mConnectionBackoffAttempts = 0;
-                    internalConnectToCurrentUser();
+                    internalConnectToCurrentUser("User changed");
                 }
             };
 
@@ -716,12 +719,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         if (mHandler.getLooper() != Looper.myLooper()) {
             mHandler.post(mConnectionRunnable);
         } else {
-            internalConnectToCurrentUser();
+            internalConnectToCurrentUser("startConnectionToCurrentUser");
         }
     }
 
-    private void internalConnectToCurrentUser() {
-        disconnectFromLauncherService();
+    private void internalConnectToCurrentUser(String reason) {
+        disconnectFromLauncherService(reason);
 
         // If user has not setup yet or already connected, do not try to connect
         if (!isEnabled()) {
@@ -783,7 +786,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         return mOverviewProxy;
     }
 
-    private void disconnectFromLauncherService() {
+    private void disconnectFromLauncherService(String disconnectReason) {
+        Log.d(TAG_OPS, "disconnectFromLauncherService bound?: " + mBound +
+                " currentProxy: " + mOverviewProxy + " disconnectReason: " + disconnectReason);
         if (mBound) {
             // Always unbind the service (ie. if called through onNullBinding or onBindingDied)
             mContext.unbindService(mOverviewServiceConnection);
@@ -1047,6 +1052,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mContext.unregisterReceiver(mLauncherStateChangedReceiver);
         mIsEnabled = false;
         mHandler.removeCallbacks(mConnectionRunnable);
-        disconnectFromLauncherService();
+        disconnectFromLauncherService("Shutdown for test");
     }
 }

@@ -19,6 +19,7 @@ package com.android.wm.shell.transition;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_SLEEP;
@@ -132,6 +133,12 @@ public class Transitions implements RemoteCallable<Transitions> {
 
     /** Transition type for maximize to freeform transition. */
     public static final int TRANSIT_RESTORE_FROM_MAXIMIZE = WindowManager.TRANSIT_FIRST_CUSTOM + 9;
+
+    /** Transition type to freeform in desktop mode. */
+    public static final int TRANSIT_ENTER_FREEFORM = WindowManager.TRANSIT_FIRST_CUSTOM + 10;
+
+    /** Transition type to freeform in desktop mode. */
+    public static final int TRANSIT_ENTER_DESKTOP_MODE = WindowManager.TRANSIT_FIRST_CUSTOM + 11;
 
     private final WindowOrganizer mOrganizer;
     private final Context mContext;
@@ -541,9 +548,7 @@ public class Transitions implements RemoteCallable<Transitions> {
             }
         }
 
-        // Allow to notify keyguard un-occluding state to KeyguardService, which can happen while
-        // screen-off, so there might no visibility change involved.
-        if (info.getRootCount() == 0 && info.getType() != TRANSIT_KEYGUARD_UNOCCLUDE) {
+        if (info.getRootCount() == 0 && !alwaysReportToKeyguard(info)) {
             // No root-leashes implies that the transition is empty/no-op, so just do
             // housekeeping and return.
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "No transition roots (%s): %s",
@@ -587,6 +592,23 @@ public class Transitions implements RemoteCallable<Transitions> {
             return;
         }
         processReadyQueue();
+    }
+
+    /**
+     * Some transitions we always need to report to keyguard even if they are empty.
+     * TODO (b/274954192): Remove this once keyguard dispatching moves to Shell.
+     */
+    private static boolean alwaysReportToKeyguard(TransitionInfo info) {
+        // occlusion status of activities can change while screen is off so there will be no
+        // visibility change but we still need keyguardservice to be notified.
+        if (info.getType() == TRANSIT_KEYGUARD_UNOCCLUDE) return true;
+
+        // It's possible for some activities to stop with bad timing (esp. since we can't yet
+        // queue activity transitions initiated by apps) that results in an empty transition for
+        // keyguard going-away. In general, we should should always report Keyguard-going-away.
+        if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) return true;
+
+        return false;
     }
 
     void processReadyQueue() {

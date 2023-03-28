@@ -26,6 +26,8 @@
     <string name="install_done" msgid="5987363587661783896">"برنامه نصب شد."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"می‌خواهید این برنامه را نصب کنید؟"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"می‌خواهید این برنامه را به‌روزرسانی کنید؟"</string>
+    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
+    <skip />
     <string name="install_failed" msgid="5777824004474125469">"برنامه نصب نشد."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"از نصب شدن بسته جلوگیری شد."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"برنامه نصب نشد چون بسته با بسته موجود تداخل دارد."</string>
@@ -41,6 +43,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"این کاربر نمی‌تواند برنامه‌های ناشناس نصب کند"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"این کاربر مجاز به نصب برنامه‌ نیست"</string>
     <string name="ok" msgid="7871959885003339302">"بسیار خوب"</string>
+    <!-- no translation found for update_anyway (8792432341346261969) -->
+    <skip />
     <string name="manage_applications" msgid="5400164782453975580">"مدیریت برنامه‌ها"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"فضا کافی نیست"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> نصب نمی‌شود. مقداری از فضا را آزاد و دوباره امتحان کنید."</string>

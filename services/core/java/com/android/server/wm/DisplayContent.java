@@ -1567,7 +1567,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (configChanged) {
             mWaitingForConfig = true;
             if (mTransitionController.isShellTransitionsEnabled()) {
-                requestChangeTransitionIfNeeded(changes, null /* displayChange */);
+                final TransitionRequestInfo.DisplayChange change =
+                        mTransitionController.isCollecting()
+                                ? null : new TransitionRequestInfo.DisplayChange(mDisplayId);
+                if (change != null) {
+                    change.setStartAbsBounds(currentDisplayConfig.windowConfiguration.getBounds());
+                    change.setEndAbsBounds(mTmpConfiguration.windowConfiguration.getBounds());
+                }
+                requestChangeTransitionIfNeeded(changes, change);
             } else if (mLastHasContent) {
                 mWmService.startFreezingDisplay(0 /* exitAnim */, 0 /* enterAnim */, this);
             }
@@ -6545,7 +6552,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * mirror using MediaProjection. When done through MediaProjection API, the
      * ContentRecordingSession will be created automatically.
      *
-     * This should only be called when there's no ContentRecordingSession already set for this
+     * <p>This should only be called when there's no ContentRecordingSession already set for this
      * display. The code will ask DMS if this display should enable display mirroring and which
      * displayId to mirror from.
      *
@@ -6586,9 +6593,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mirrorDisplayId, mDisplayId);
         }
 
+        // Create a session for mirroring the display content to this virtual display.
         ContentRecordingSession session = ContentRecordingSession
-                .createDisplaySession(mirrorDc.getDisplayUiContext().getWindowContextToken())
-                .setDisplayId(mDisplayId);
+                .createDisplaySession(mirrorDc.getDisplayId())
+                .setVirtualDisplayId(mDisplayId);
         setContentRecordingSession(session);
         ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
                 "Content Recording: Successfully created a ContentRecordingSession for "

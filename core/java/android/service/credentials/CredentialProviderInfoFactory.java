@@ -163,28 +163,12 @@ public final class CredentialProviderInfoFactory {
 
     private static boolean isSystemProviderWithValidPermission(
             ServiceInfo serviceInfo, Context context) {
-        requireNonNull(context, "context must not be null");
-
-        final String permission = Manifest.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE;
-        try {
-            ApplicationInfo appInfo =
-                    context.getPackageManager()
-                            .getApplicationInfo(
-                                    serviceInfo.packageName,
-                                    PackageManager.ApplicationInfoFlags.of(
-                                            PackageManager.MATCH_SYSTEM_ONLY));
-            if (appInfo != null
-                    && context.checkPermission(permission, /* pid= */ -1, appInfo.uid)
-                            == PackageManager.PERMISSION_GRANTED) {
-                Slog.i(TAG, "SYS permission granted for: " + serviceInfo.packageName);
-                return true;
-            } else {
-                Slog.i(TAG, "SYS permission failed for: " + serviceInfo.packageName);
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, "Error getting info for " + serviceInfo + ": " + e);
+        if (context == null) {
+            Slog.w(TAG, "Context is null in isSystemProviderWithValidPermission");
+            return false;
         }
-        return false;
+        return PermissionUtils.hasPermission(context, serviceInfo.packageName,
+                Manifest.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE);
     }
 
     private static boolean isValidSystemProvider(
@@ -238,14 +222,6 @@ public final class CredentialProviderInfoFactory {
             builder = extractXmlMetadata(context, builder, serviceInfo, pm, resources);
         } catch (Exception e) {
             Log.e(TAG, "Failed to get XML metadata", e);
-        }
-
-        // 5. Extract the legacy metadata.
-        try {
-            builder.addCapabilities(
-                    populateLegacyProviderCapabilities(resources, metadata, serviceInfo));
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to get legacy metadata ", e);
         }
 
         return builder;
@@ -339,38 +315,6 @@ public final class CredentialProviderInfoFactory {
         }
 
         return capabilities;
-    }
-
-    private static Set<String> populateLegacyProviderCapabilities(
-            Resources resources, Bundle metadata, ServiceInfo serviceInfo) {
-        Set<String> output = new HashSet<>();
-        Set<String> capabilities = new HashSet<>();
-
-        try {
-            String[] discovered =
-                    resources.getStringArray(
-                            metadata.getInt(CredentialProviderService.CAPABILITY_META_DATA_KEY));
-            if (discovered != null) {
-                capabilities.addAll(Arrays.asList(discovered));
-            }
-        } catch (Resources.NotFoundException | NullPointerException e) {
-            Log.e(TAG, "Failed to get capabilities: ", e);
-        }
-
-        if (capabilities.size() == 0) {
-            Log.e(TAG, "No capabilities found for provider:" + serviceInfo);
-            return output;
-        }
-
-        for (String capability : capabilities) {
-            if (capability == null || capability.isEmpty()) {
-                Log.w(TAG, "Skipping empty/null capability");
-                continue;
-            }
-            Log.i(TAG, "Capabilities found for provider: " + capability);
-            output.add(capability);
-        }
-        return output;
     }
 
     private static ServiceInfo getServiceInfoOrThrow(
