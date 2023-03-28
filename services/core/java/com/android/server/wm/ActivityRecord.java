@@ -3543,8 +3543,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // the best capture timing (e.g. IME window capture),
                 // No need additional task capture while task is controlled by RecentsAnimation.
                 if (mAtmService.mWindowManager.mTaskSnapshotController != null
-                        && !(task.isAnimatingByRecents()
-                                || mTransitionController.inRecentsTransition(task))) {
+                        && !task.isAnimatingByRecents()) {
                     final ArraySet<Task> tasks = Sets.newArraySet(task);
                     mAtmService.mWindowManager.mTaskSnapshotController.snapshotTasks(tasks);
                     mAtmService.mWindowManager.mTaskSnapshotController

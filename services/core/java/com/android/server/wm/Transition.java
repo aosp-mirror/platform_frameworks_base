@@ -109,7 +109,7 @@ import java.util.function.Predicate;
  */
 class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private static final String TAG = "Transition";
-    private static final String TRACE_NAME_PLAY_TRANSITION = "PlayTransition";
+    private static final String TRACE_NAME_PLAY_TRANSITION = "playing";
 
     /** The default package for resources */
     private static final String DEFAULT_PACKAGE = "android";
@@ -870,8 +870,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      */
     void finishTransition() {
         if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER) && mIsPlayerEnabled) {
-            Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, TRACE_NAME_PLAY_TRANSITION,
-                    System.identityHashCode(this));
+            asyncTraceEnd(System.identityHashCode(this));
         }
         mLogger.mFinishTimeNs = SystemClock.elapsedRealtimeNanos();
         mController.mLoggerHandler.post(mLogger::logOnFinish);
@@ -1322,8 +1321,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 mController.getTransitionPlayer().onTransitionReady(
                         mToken, info, transaction, mFinishTransaction);
                 if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
-                    Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, TRACE_NAME_PLAY_TRANSITION,
-                            System.identityHashCode(this));
+                    asyncTraceBegin(TRACE_NAME_PLAY_TRANSITION, System.identityHashCode(this));
                 }
             } catch (RemoteException e) {
                 // If there's an exception when trying to send the mergedTransaction to the
@@ -2308,6 +2306,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
     boolean getLegacyIsReady() {
         return isCollecting() && mSyncId >= 0;
+    }
+
+    static void asyncTraceBegin(@NonNull String name, int cookie) {
+        Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_WINDOW_MANAGER, TAG, name, cookie);
+    }
+
+    static void asyncTraceEnd(int cookie) {
+        Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_WINDOW_MANAGER, TAG, cookie);
     }
 
     @VisibleForTesting
