@@ -1374,8 +1374,7 @@
         android:permissionFlags="hardRestricted"
         android:protectionLevel="dangerous" />
 
-    <!-- Allows an application to write (but not read) the user's
-         call log data.
+    <!-- Allows an application to write and read the user's call log data.
          <p class="note"><strong>Note:</strong> If your app uses the
          {@link #WRITE_CONTACTS} permission and <em>both</em> your <a
          href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
