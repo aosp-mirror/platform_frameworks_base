@@ -20,6 +20,7 @@ import android.hardware.biometrics.BiometricSourceType
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.Dumpable
+import com.android.systemui.biometrics.AuthController
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -29,6 +30,7 @@ import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -37,6 +39,17 @@ import kotlinx.coroutines.flow.stateIn
 interface DeviceEntryFingerprintAuthRepository {
     /** Whether the device entry fingerprint auth is locked out. */
     val isLockedOut: StateFlow<Boolean>
+
+    /**
+     * Whether the fingerprint sensor is currently listening, this doesn't mean that the user is
+     * actively authenticating.
+     */
+    val isRunning: Flow<Boolean>
+
+    /**
+     * Fingerprint sensor type present on the device, null if fingerprint sensor is not available.
+     */
+    val availableFpSensorType: BiometricType?
 }
 
 /**
@@ -50,6 +63,7 @@ interface DeviceEntryFingerprintAuthRepository {
 class DeviceEntryFingerprintAuthRepositoryImpl
 @Inject
 constructor(
+    val authController: AuthController,
     val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     @Application scope: CoroutineScope,
     dumpManager: DumpManager,
@@ -62,6 +76,12 @@ constructor(
     override fun dump(pw: PrintWriter, args: Array<String?>) {
         pw.println("isLockedOut=${isLockedOut.value}")
     }
+
+    override val availableFpSensorType: BiometricType?
+        get() =
+            if (authController.isUdfpsSupported) BiometricType.UNDER_DISPLAY_FINGERPRINT
+            else if (authController.isSfpsSupported) BiometricType.SIDE_FINGERPRINT
+            else if (authController.isRearFpsSupported) BiometricType.REAR_FINGERPRINT else null
 
     override val isLockedOut: StateFlow<Boolean> =
         conflatedCallbackFlow {
@@ -88,6 +108,32 @@ constructor(
                 awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
             }
             .stateIn(scope, started = SharingStarted.Eagerly, initialValue = false)
+
+    override val isRunning: Flow<Boolean>
+        get() = conflatedCallbackFlow {
+            val callback =
+                object : KeyguardUpdateMonitorCallback() {
+                    override fun onBiometricRunningStateChanged(
+                        running: Boolean,
+                        biometricSourceType: BiometricSourceType?
+                    ) {
+                        if (biometricSourceType == BiometricSourceType.FINGERPRINT) {
+                            trySendWithFailureLogging(
+                                running,
+                                TAG,
+                                "Fingerprint running state changed"
+                            )
+                        }
+                    }
+                }
+            keyguardUpdateMonitor.registerCallback(callback)
+            trySendWithFailureLogging(
+                keyguardUpdateMonitor.isFingerprintDetectionRunning,
+                TAG,
+                "Initial fingerprint running state"
+            )
+            awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
+        }
 
     companion object {
         const val TAG = "DeviceEntryFingerprintAuthRepositoryImpl"

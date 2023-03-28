@@ -2476,8 +2476,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * not enrolled udfps. This may be false if called before onAllAuthenticatorsRegistered.
      */
     public boolean isUdfpsSupported() {
-        return mAuthController.getUdfpsProps() != null
-                && !mAuthController.getUdfpsProps().isEmpty();
+        return mAuthController.isUdfpsSupported();
     }
 
     /**
@@ -2492,8 +2491,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * not enrolled sfps. This may be false if called before onAllAuthenticatorsRegistered.
      */
     public boolean isSfpsSupported() {
-        return mAuthController.getSfpsProps() != null
-                && !mAuthController.getSfpsProps().isEmpty();
+        return mAuthController.isSfpsSupported();
     }
 
     /**
