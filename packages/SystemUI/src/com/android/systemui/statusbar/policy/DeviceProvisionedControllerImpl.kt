@@ -36,6 +36,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.wrapper.BuildInfo
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
@@ -47,6 +48,7 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
     private val globalSettings: GlobalSettings,
     private val userTracker: UserTracker,
     private val dumpManager: DumpManager,
+    private val buildInfo: BuildInfo,
     @Background private val backgroundHandler: Handler,
     @Main private val mainExecutor: Executor
 ) : DeviceProvisionedController,
@@ -187,7 +189,7 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
     }
 
     override fun isFrpActive(): Boolean {
-        return frpActive.get()
+        return frpActive.get() && !buildInfo.isDebuggable
     }
 
     override fun isUserSetup(user: Int): Boolean {
