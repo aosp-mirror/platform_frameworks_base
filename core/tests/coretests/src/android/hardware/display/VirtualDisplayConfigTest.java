@@ -19,11 +19,8 @@ package android.hardware.display;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.graphics.SurfaceTexture;
-import android.os.Binder;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.util.DisplayMetrics;
-import android.view.ContentRecordingSession;
 import android.view.Surface;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -55,9 +52,6 @@ public class VirtualDisplayConfigTest {
 
     // Values for hidden APIs.
     private static final int DISPLAY_ID_TO_MIRROR = 10;
-    private static final IBinder WINDOW_TOKEN = new Binder("DisplayContentWindowToken");
-    private static final ContentRecordingSession CONTENT_RECORDING_SESSION =
-            ContentRecordingSession.createTaskSession(WINDOW_TOKEN);
 
     private final Surface mSurface = new Surface(new SurfaceTexture(/*texName=*/1));
 
@@ -99,7 +93,6 @@ public class VirtualDisplayConfigTest {
                 .setRequestedRefreshRate(REQUESTED_REFRESH_RATE)
                 .setDisplayIdToMirror(DISPLAY_ID_TO_MIRROR)
                 .setWindowManagerMirroringEnabled(true)
-                .setContentRecordingSession(CONTENT_RECORDING_SESSION)
                 .build();
     }
 
@@ -113,6 +106,5 @@ public class VirtualDisplayConfigTest {
         assertThat(config.getRequestedRefreshRate()).isEqualTo(REQUESTED_REFRESH_RATE);
         assertThat(config.getDisplayIdToMirror()).isEqualTo(DISPLAY_ID_TO_MIRROR);
         assertThat(config.isWindowManagerMirroringEnabled()).isTrue();
-        assertThat(config.getContentRecordingSession()).isEqualTo(CONTENT_RECORDING_SESSION);
     }
 }

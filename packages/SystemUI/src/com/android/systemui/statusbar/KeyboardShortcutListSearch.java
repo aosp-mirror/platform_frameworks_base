@@ -33,7 +33,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
-import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -388,7 +388,7 @@ public final class KeyboardShortcutListSearch {
      * Keyboard with its default map.
      */
     private void retrieveKeyCharacterMap(int deviceId) {
-        final InputManager inputManager = InputManager.getInstance();
+        final InputManagerGlobal inputManager = InputManagerGlobal.getInstance();
         mBackupKeyCharacterMap = inputManager.getInputDevice(-1).getKeyCharacterMap();
         if (deviceId != -1) {
             final InputDevice inputDevice = inputManager.getInputDevice(deviceId);

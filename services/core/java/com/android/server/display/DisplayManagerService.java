@@ -1514,20 +1514,37 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
 
-            // When calling WindowManagerService#setContentRecordingSession, WindowManagerService
-            // attempts to acquire a lock before executing its main body. Due to this, we need
-            // to be sure that it isn't called while the DisplayManagerService is also holding
-            // a lock, to avoid a deadlock scenario.
-            final ContentRecordingSession session =
-                    virtualDisplayConfig.getContentRecordingSession();
+            // Build a session describing the MediaProjection instance, if there is one. A session
+            // for a VirtualDisplay or physical display mirroring is handled in DisplayContent.
+            ContentRecordingSession session = null;
+            try {
+                if (projection != null) {
+                    IBinder launchCookie = projection.getLaunchCookie();
+                    if (launchCookie == null) {
+                        // Record a particular display.
+                        session = ContentRecordingSession.createDisplaySession(
+                                virtualDisplayConfig.getDisplayIdToMirror());
+                    } else {
+                        // Record a single task indicated by the launch cookie.
+                        session = ContentRecordingSession.createTaskSession(launchCookie);
+                    }
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Unable to retrieve the projection's launch cookie", e);
+            }
+
             // Ensure session details are only set when mirroring (through VirtualDisplay flags or
             // MediaProjection).
             final boolean shouldMirror =
                     projection != null || (flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0;
+            // When calling WindowManagerService#setContentRecordingSession, WindowManagerService
+            // attempts to acquire a lock before executing its main body. Due to this, we need
+            // to be sure that it isn't called while the DisplayManagerService is also holding
+            // a lock, to avoid a deadlock scenario.
             if (shouldMirror && displayId != Display.INVALID_DISPLAY && session != null) {
                 // Only attempt to set content recording session if there are details to set and a
                 // VirtualDisplay has been successfully constructed.
-                session.setDisplayId(displayId);
+                session.setVirtualDisplayId(displayId);
 
                 // We set the content recording session here on the server side instead of using
                 // a second AIDL call in MediaProjection. By ensuring that a virtual display has

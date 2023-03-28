@@ -1881,7 +1881,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void launchAccessibilitySubSettings(int displayId, ComponentName name) {
         final Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_DETAILS_SETTINGS);
         final Bundle bundle = ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle();
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra(Intent.EXTRA_COMPONENT_NAME, name.flattenToString());
         try {
             mContext.startActivityAsUser(intent, bundle, UserHandle.of(mCurrentUserId));

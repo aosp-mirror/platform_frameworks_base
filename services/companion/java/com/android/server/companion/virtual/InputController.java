@@ -244,7 +244,7 @@ class InputController {
         token.unlinkToDeath(inputDeviceDescriptor.getDeathRecipient(), /* flags= */ 0);
         mNativeWrapper.closeUinput(inputDeviceDescriptor.getNativePointer());
         String phys = inputDeviceDescriptor.getPhys();
-        InputManager.getInstance().removeUniqueIdAssociation(phys);
+        InputManagerGlobal.getInstance().removeUniqueIdAssociation(phys);
         // Type associations are added in the case of navigation touchpads. Those should be removed
         // once the input device gets closed.
         if (inputDeviceDescriptor.getType() == InputDeviceDescriptor.TYPE_NAVIGATION_TOUCHPAD) {
@@ -355,7 +355,7 @@ class InputController {
 
     private void setUniqueIdAssociation(int displayId, String phys) {
         final String displayUniqueId = mDisplayManagerInternal.getDisplayInfo(displayId).uniqueId;
-        InputManager.getInstance().addUniqueIdAssociation(phys, displayUniqueId);
+        InputManagerGlobal.getInstance().addUniqueIdAssociation(phys, displayUniqueId);
     }
 
     boolean sendDpadKeyEvent(@NonNull IBinder token, @NonNull VirtualKeyEvent event) {
@@ -711,7 +711,7 @@ class InputController {
 
                 }
             };
-            InputManager.getInstance().registerInputDeviceListener(mListener, mHandler);
+            InputManagerGlobal.getInstance().registerInputDeviceListener(mListener, mHandler);
         }
 
         /**
@@ -740,7 +740,7 @@ class InputController {
 
         @Override
         public void close() {
-            InputManager.getInstance().unregisterInputDeviceListener(mListener);
+            InputManagerGlobal.getInstance().unregisterInputDeviceListener(mListener);
         }
     }
 
@@ -809,7 +809,7 @@ class InputController {
                 throw e;
             }
         } catch (DeviceCreationException e) {
-            InputManager.getInstance().removeUniqueIdAssociation(phys);
+            InputManagerGlobal.getInstance().removeUniqueIdAssociation(phys);
             throw e;
         }
 
