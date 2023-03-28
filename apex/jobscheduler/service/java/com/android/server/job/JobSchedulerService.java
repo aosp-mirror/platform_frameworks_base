@@ -23,7 +23,6 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
-import android.Manifest;
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -191,14 +190,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     private static final long REQUIRE_NETWORK_CONSTRAINT_FOR_NETWORK_JOB_WORK_ITEMS = 241104082L;
 
-    /**
-     * Require the app to have the INTERNET and ACCESS_NETWORK_STATE permissions when scheduling
-     * a job with a connectivity constraint.
-     */
-    @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
-    static final long REQUIRE_NETWORK_PERMISSIONS_FOR_CONNECTIVITY_JOBS = 271850009L;
-
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static Clock sSystemClock = Clock.systemUTC();
 
@@ -307,14 +298,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     private final RemoteCallbackList<IUserVisibleJobObserver> mUserVisibleJobObservers =
             new RemoteCallbackList<>();
-
-    /**
-     * Cache of grant status of permissions, keyed by UID->PID->permission name. A missing value
-     * means the state has not been queried.
-     */
-    @GuardedBy("mPermissionCache")
-    private final SparseArray<SparseArrayMap<String, Boolean>> mPermissionCache =
-            new SparseArray<>();
 
     private final CountQuotaTracker mQuotaTracker;
     private static final String QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG = ".schedulePersisted()";
@@ -1059,10 +1042,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             final int pkgUid = intent.getIntExtra(Intent.EXTRA_UID, -1);
 
             if (Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
-                synchronized (mPermissionCache) {
-                    // Something changed. Better clear the cached permission set.
-                    mPermissionCache.remove(pkgUid);
-                }
                 // Purge the app's jobs if the whole package was just disabled.  When this is
                 // the case the component name will be a bare package name.
                 if (pkgName != null && pkgUid != -1) {
@@ -1127,19 +1106,17 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.w(TAG, "PACKAGE_CHANGED for " + pkgName + " / uid " + pkgUid);
                 }
             } else if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
-                synchronized (mPermissionCache) {
-                    // Something changed. Better clear the cached permission set.
-                    mPermissionCache.remove(pkgUid);
-                }
                 if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                    final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                     synchronized (mLock) {
-                        mUidToPackageCache.remove(pkgUid);
+                        mUidToPackageCache.remove(uid);
+                    }
+                } else {
+                    synchronized (mJobSchedulerStub.mPersistCache) {
+                        mJobSchedulerStub.mPersistCache.remove(pkgUid);
                     }
                 }
             } else if (Intent.ACTION_PACKAGE_FULLY_REMOVED.equals(action)) {
-                synchronized (mPermissionCache) {
-                    mPermissionCache.remove(pkgUid);
-                }
                 if (DEBUG) {
                     Slog.d(TAG, "Removing jobs for " + pkgName + " (uid=" + pkgUid + ")");
                 }
@@ -1178,14 +1155,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                 }
                 mConcurrencyManager.onUserRemoved(userId);
-                synchronized (mPermissionCache) {
-                    for (int u = mPermissionCache.size() - 1; u >= 0; --u) {
-                        final int uid = mPermissionCache.keyAt(u);
-                        if (userId == UserHandle.getUserId(uid)) {
-                            mPermissionCache.removeAt(u);
-                        }
-                    }
-                }
             } else if (Intent.ACTION_QUERY_PACKAGE_RESTART.equals(action)) {
                 // Has this package scheduled any jobs, such that we will take action
                 // if it were to be force-stopped?
@@ -3779,38 +3748,18 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     /**
-     * Returns whether the app has the permission granted.
-     * This currently only works for normal permissions and <b>DOES NOT</b> work for runtime
-     * permissions.
-     * TODO: handle runtime permissions
-     */
-    private boolean hasPermission(int uid, int pid, @NonNull String permission) {
-        synchronized (mPermissionCache) {
-            SparseArrayMap<String, Boolean> pidPermissions = mPermissionCache.get(uid);
-            if (pidPermissions == null) {
-                pidPermissions = new SparseArrayMap<>();
-                mPermissionCache.put(uid, pidPermissions);
-            }
-            final Boolean cached = pidPermissions.get(pid, permission);
-            if (cached != null) {
-                return cached;
-            }
-
-            final int result = getContext().checkPermission(permission, pid, uid);
-            final boolean permissionGranted = (result == PackageManager.PERMISSION_GRANTED);
-            pidPermissions.add(pid, permission, permissionGranted);
-            return permissionGranted;
-        }
-    }
-
-    /**
      * Binder stub trampoline implementation
      */
     final class JobSchedulerStub extends IJobScheduler.Stub {
+        /**
+         * Cache determination of whether a given app can persist jobs
+         * key is uid of the calling app; value is undetermined/true/false
+         */
+        private final SparseArray<Boolean> mPersistCache = new SparseArray<Boolean>();
+
         // Enforce that only the app itself (or shared uid participant) can schedule a
         // job that runs one of the app's services, as well as verifying that the
         // named service properly requires the BIND_JOB_SERVICE permission
-        // TODO(141645789): merge enforceValidJobRequest() with validateJob()
         private void enforceValidJobRequest(int uid, int pid, JobInfo job) {
             final PackageManager pm = getContext()
                     .createContextAsUser(UserHandle.getUserHandleForUid(uid), 0)
@@ -3835,33 +3784,31 @@ public class JobSchedulerService extends com.android.server.SystemService
                 throw new IllegalArgumentException(
                         "Tried to schedule job for non-existent component: " + service);
             }
-            // If we get this far we're good to go; all we need to do now is check
-            // whether the app is allowed to persist its scheduled work.
             if (job.isPersisted() && !canPersistJobs(pid, uid)) {
                 throw new IllegalArgumentException("Requested job cannot be persisted without"
                         + " holding android.permission.RECEIVE_BOOT_COMPLETED permission");
             }
-            if (job.getRequiredNetwork() != null
-                    && CompatChanges.isChangeEnabled(
-                            REQUIRE_NETWORK_PERMISSIONS_FOR_CONNECTIVITY_JOBS, uid)) {
-                // All networking, including with the local network and even local to the device,
-                // requires the INTERNET permission.
-                if (!hasPermission(uid, pid, Manifest.permission.INTERNET)) {
-                    throw new SecurityException(Manifest.permission.INTERNET
-                            + " required for jobs with a connectivity constraint");
-                }
-                if (!hasPermission(uid, pid, Manifest.permission.ACCESS_NETWORK_STATE)) {
-                    throw new SecurityException(Manifest.permission.ACCESS_NETWORK_STATE
-                            + " required for jobs with a connectivity constraint");
-                }
-            }
         }
 
         private boolean canPersistJobs(int pid, int uid) {
-            // Persisting jobs is tantamount to running at boot, so we permit
-            // it when the app has declared that it uses the RECEIVE_BOOT_COMPLETED
-            // permission
-            return hasPermission(uid, pid, Manifest.permission.RECEIVE_BOOT_COMPLETED);
+            // If we get this far we're good to go; all we need to do now is check
+            // whether the app is allowed to persist its scheduled work.
+            final boolean canPersist;
+            synchronized (mPersistCache) {
+                Boolean cached = mPersistCache.get(uid);
+                if (cached != null) {
+                    canPersist = cached.booleanValue();
+                } else {
+                    // Persisting jobs is tantamount to running at boot, so we permit
+                    // it when the app has declared that it uses the RECEIVE_BOOT_COMPLETED
+                    // permission
+                    int result = getContext().checkPermission(
+                            android.Manifest.permission.RECEIVE_BOOT_COMPLETED, pid, uid);
+                    canPersist = (result == PackageManager.PERMISSION_GRANTED);
+                    mPersistCache.put(uid, canPersist);
+                }
+            }
+            return canPersist;
         }
 
         private int validateJob(@NonNull JobInfo job, int callingUid, int callingPid,
@@ -4079,8 +4026,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 throw new SecurityException("Caller uid " + callerUid
                         + " not permitted to schedule jobs for other apps");
             }
-
-            enforceValidJobRequest(callerUid, callerPid, job);
 
             int result = validateJob(job, callerUid, callerPid, userId, packageName, null);
             if (result != JobScheduler.RESULT_SUCCESS) {

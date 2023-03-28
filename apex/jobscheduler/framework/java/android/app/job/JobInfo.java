@@ -1382,12 +1382,6 @@ public class JobInfo implements Parcelable {
          * Calling this method will override any requirements previously defined
          * by {@link #setRequiredNetwork(NetworkRequest)}; you typically only
          * want to call one of these methods.
-         *
-         * Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
-         * an app must hold the {@link android.Manifest.permission#INTERNET} and
-         * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} permissions to
-         * schedule a job that requires a network.
-         *
          * <p class="note">
          * When your job executes in
          * {@link JobService#onStartJob(JobParameters)}, be sure to use the
@@ -1443,11 +1437,6 @@ public class JobInfo implements Parcelable {
          * specific network returned by {@link JobParameters#getNetwork()},
          * otherwise you'll use the default network which may not meet this
          * constraint.
-         *
-         * Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
-         * an app must hold the {@link android.Manifest.permission#INTERNET} and
-         * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} permissions to
-         * schedule a job that requires a network.
          *
          * @param networkRequest The detailed description of the kind of network
          *            this job requires, or {@code null} if no specific kind of
