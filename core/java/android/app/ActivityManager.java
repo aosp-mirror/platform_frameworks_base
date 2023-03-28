@@ -256,6 +256,7 @@ public class ActivityManager {
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
     public interface UidFrozenStateChangedCallback {
         /**
          * Indicates that the UID was frozen.
@@ -263,6 +264,7 @@ public class ActivityManager {
          * @hide
          */
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @TestApi
         int UID_FROZEN_STATE_FROZEN = 1;
 
         /**
@@ -271,6 +273,7 @@ public class ActivityManager {
          * @hide
          */
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @TestApi
         int UID_FROZEN_STATE_UNFROZEN = 2;
 
         /**
@@ -296,6 +299,7 @@ public class ActivityManager {
          * @hide
          */
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @TestApi
         void onUidFrozenStateChanged(@NonNull int[] uids,
                 @NonNull @UidFrozenState int[] frozenStates);
     }
@@ -315,6 +319,7 @@ public class ActivityManager {
      */
     @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
     public void registerUidFrozenStateChangedCallback(
             @NonNull Executor executor,
             @NonNull UidFrozenStateChangedCallback callback) {
@@ -346,6 +351,7 @@ public class ActivityManager {
      */
     @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
     public void unregisterUidFrozenStateChangedCallback(
             @NonNull UidFrozenStateChangedCallback callback) {
         Preconditions.checkNotNull(callback, "callback cannot be null");
