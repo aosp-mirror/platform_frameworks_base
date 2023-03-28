@@ -37,7 +37,6 @@ import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -137,8 +136,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private PendingIntent mContentIntent;
     @Mock
-    private Intent mContentIntentInner;
-    @Mock
     private OnUserInteractionCallback mOnUserInteractionCallback;
     @Mock
     private Runnable mFutureDismissalRunnable;
@@ -163,7 +160,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         when(mContentIntent.isActivity()).thenReturn(true);
         when(mContentIntent.getCreatorUserHandle()).thenReturn(UserHandle.of(1));
-        when(mContentIntent.getIntent()).thenReturn(mContentIntentInner);
 
         mNotificationTestHelper = new NotificationTestHelper(
                 mContext,
@@ -387,7 +383,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 eq(entry.getKey()), any(NotificationVisibility.class));
 
         // The content intent should NOT be sent on click.
-        verify(mContentIntent).getIntent();
         verify(mContentIntent).isActivity();
         verifyNoMoreInteractions(mContentIntent);
 
