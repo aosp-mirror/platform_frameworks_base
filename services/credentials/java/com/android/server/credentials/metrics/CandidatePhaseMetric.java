@@ -16,12 +16,14 @@
 
 package com.android.server.credentials.metrics;
 
+import android.util.IntArray;
 import android.util.Log;
 
 import com.android.server.credentials.MetricUtilities;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The central candidate provider metric object that mimics our defined metric setup.
@@ -70,7 +72,7 @@ public class CandidatePhaseMetric {
     // The count of authentication entries from this provider, defaults to -1
     private int mAuthenticationEntryCount = -1;
     // Gathered to pass on to chosen provider when required
-    private final List<Integer> mAvailableEntries = new ArrayList<>();
+    private final IntArray mAvailableEntries = new IntArray();
 
     public CandidatePhaseMetric() {
     }
@@ -263,6 +265,6 @@ public class CandidatePhaseMetric {
      * this metric
      */
     public List<Integer> getAvailableEntries() {
-        return new ArrayList<>(this.mAvailableEntries); // no alias copy
+        return Arrays.stream(mAvailableEntries.toArray()).boxed().collect(Collectors.toList());
     }
 }
