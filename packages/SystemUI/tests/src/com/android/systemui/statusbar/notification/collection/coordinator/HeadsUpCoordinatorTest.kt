@@ -273,7 +273,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     @Test
     fun testPromotesAddedHUN() {
         // GIVEN the current entry should heads up
-        whenever(notificationInterruptStateProvider.shouldHeadsUp(entry)).thenReturn(true)
+        setShouldHeadsUp(entry, true)
 
         // WHEN the notification is added but not yet binding
         collectionListener.onEntryAdded(entry)
@@ -286,7 +286,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     @Test
     fun testPromotesBindingHUN() {
         // GIVEN the current entry should heads up
-        whenever(notificationInterruptStateProvider.shouldHeadsUp(entry)).thenReturn(true)
+        setShouldHeadsUp(entry, true)
 
         // WHEN the notification started binding on the previous run
         collectionListener.onEntryAdded(entry)
@@ -338,7 +338,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     @Test
     fun testShowHUNOnInflationFinished() {
         // WHEN a notification should HUN and its inflation is finished
-        whenever(notificationInterruptStateProvider.shouldHeadsUp(entry)).thenReturn(true)
+        setShouldHeadsUp(entry, true)
 
         collectionListener.onEntryAdded(entry)
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(entry))
@@ -355,7 +355,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     @Test
     fun testNoHUNOnInflationFinished() {
         // WHEN a notification shouldn't HUN and its inflation is finished
-        whenever(notificationInterruptStateProvider.shouldHeadsUp(entry)).thenReturn(false)
+        setShouldHeadsUp(entry, false)
         collectionListener.onEntryAdded(entry)
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(entry))
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
@@ -824,8 +824,10 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryAdded(entry)
 
         verify(launchFullScreenIntentProvider).launchFullScreenIntent(entry)
-        verify(notificationInterruptStateProvider).logFullScreenIntentDecision(
-                entry, FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
+        verifyLoggedFullScreenIntentDecision(
+            entry,
+            FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE
+        )
     }
 
     @Test
@@ -835,8 +837,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryAdded(entry)
 
         verify(launchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
-        verify(notificationInterruptStateProvider).logFullScreenIntentDecision(
-                entry, FullScreenIntentDecision.NO_FULL_SCREEN_INTENT)
+        verifyLoggedFullScreenIntentDecision(entry, FullScreenIntentDecision.NO_FULL_SCREEN_INTENT)
     }
 
     @Test
@@ -846,8 +847,10 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryAdded(entry)
 
         verify(launchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
-        verify(notificationInterruptStateProvider).logFullScreenIntentDecision(
-                entry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
+        verifyLoggedFullScreenIntentDecision(
+            entry,
+            FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND
+        )
     }
 
     @Test
@@ -860,9 +863,11 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryAdded(entry)
 
         // Verify that this causes a log
-        verify(notificationInterruptStateProvider).logFullScreenIntentDecision(
-                entry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
-        clearInvocations(notificationInterruptStateProvider)
+        verifyLoggedFullScreenIntentDecision(
+            entry,
+            FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND
+        )
+        clearInterruptionProviderInvocations()
 
         // and it is then updated to allow full screen
         setShouldFullScreen(entry, FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
@@ -873,8 +878,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(launchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
 
         // VERIFY that no additional logging happens either
-        verify(notificationInterruptStateProvider, never())
-                .logFullScreenIntentDecision(any(), any())
+        verifyNoFullScreenIntentDecisionLogged()
     }
 
     @Test
@@ -888,9 +892,11 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         // at this point, it should not have full screened, but should have logged
         verify(launchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
-        verify(notificationInterruptStateProvider).logFullScreenIntentDecision(entry,
-                FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
-        clearInvocations(notificationInterruptStateProvider)
+        verifyLoggedFullScreenIntentDecision(
+            entry,
+            FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND
+        )
+        clearInterruptionProviderInvocations()
 
         // and it is then updated to allow full screen AND HUN
         setShouldFullScreen(entry, FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
@@ -904,9 +910,11 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(launchFullScreenIntentProvider).launchFullScreenIntent(entry)
         verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
         verify(headsUpManager, never()).showNotification(any())
-        verify(notificationInterruptStateProvider).logFullScreenIntentDecision(entry,
-                FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
-        clearInvocations(notificationInterruptStateProvider)
+        verifyLoggedFullScreenIntentDecision(
+            entry,
+            FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE
+        )
+        clearInterruptionProviderInvocations()
 
         // WHEN ranking updates again and the pipeline reruns
         clearInvocations(launchFullScreenIntentProvider)
@@ -916,8 +924,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         // VERIFY that the FSI does not launch again or log
         verify(launchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
-        verify(notificationInterruptStateProvider, never())
-                .logFullScreenIntentDecision(any(), any())
+        verifyNoFullScreenIntentDecisionLogged()
     }
 
     @Test
@@ -931,9 +938,11 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         // at this point, it should not have full screened, but should have logged
         verify(launchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
-        verify(notificationInterruptStateProvider).logFullScreenIntentDecision(entry,
-                FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
-        clearInvocations(notificationInterruptStateProvider)
+        verifyLoggedFullScreenIntentDecision(
+            entry,
+            FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND
+        )
+        clearInterruptionProviderInvocations()
 
         // ranking is applied with only DND blocking FSI
         setShouldFullScreen(entry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
@@ -947,9 +956,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(headsUpManager, never()).showNotification(any())
 
         // Same decision as before; is not logged
-        verify(notificationInterruptStateProvider, never())
-                .logFullScreenIntentDecision(any(), any())
-        clearInvocations(notificationInterruptStateProvider)
+        verifyNoFullScreenIntentDecisionLogged()
+        clearInterruptionProviderInvocations()
 
         // and it is then updated to allow full screen AND HUN
         setShouldFullScreen(entry, FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
@@ -963,9 +971,11 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(launchFullScreenIntentProvider).launchFullScreenIntent(entry)
         verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
         verify(headsUpManager, never()).showNotification(any())
-        verify(notificationInterruptStateProvider).logFullScreenIntentDecision(entry,
-                FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
-        clearInvocations(notificationInterruptStateProvider)
+        verifyLoggedFullScreenIntentDecision(
+            entry,
+            FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE
+        )
+        clearInterruptionProviderInvocations()
     }
 
     @Test
@@ -1052,6 +1062,22 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     private fun setShouldFullScreen(entry: NotificationEntry, decision: FullScreenIntentDecision) {
         whenever(notificationInterruptStateProvider.getFullScreenIntentDecision(entry))
             .thenReturn(decision)
+    }
+
+    private fun verifyLoggedFullScreenIntentDecision(
+        entry: NotificationEntry,
+        decision: FullScreenIntentDecision
+    ) {
+        verify(notificationInterruptStateProvider).logFullScreenIntentDecision(entry, decision)
+    }
+
+    private fun verifyNoFullScreenIntentDecisionLogged() {
+        verify(notificationInterruptStateProvider, never())
+            .logFullScreenIntentDecision(any(), any())
+    }
+
+    private fun clearInterruptionProviderInvocations() {
+        clearInvocations(notificationInterruptStateProvider)
     }
 
     private fun finishBind(entry: NotificationEntry) {
