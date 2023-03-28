@@ -5646,7 +5646,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean isSyncFinished() {
-        if (!isVisibleRequested()) {
+        if (!isVisibleRequested() || isFullyTransparent()) {
             // Don't wait for invisible windows. However, we don't alter the state in case the
             // window becomes visible while the sync group is still active.
             return true;
