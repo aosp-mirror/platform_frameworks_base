@@ -46,6 +46,10 @@ class FakeBiometricSettingsRepository : BiometricSettingsRepository {
     override val isFaceAuthSupportedInCurrentPosture: Flow<Boolean>
         get() = flowOf(true)
 
+    private val _isCurrentUserInLockdown = MutableStateFlow(false)
+    override val isCurrentUserInLockdown: Flow<Boolean>
+        get() = _isCurrentUserInLockdown
+
     fun setFingerprintEnrolled(isFingerprintEnrolled: Boolean) {
         _isFingerprintEnrolled.value = isFingerprintEnrolled
     }
