@@ -70,6 +70,7 @@ import androidx.test.filters.LargeTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
 
+import com.android.compatibility.common.util.CddTest;
 import com.android.internal.content.InstallLocationUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
@@ -2911,6 +2912,7 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     @LargeTest
+    @CddTest(requirements = {"3.1/C-0-8"})
     public void testMinInstallableTargetSdkFail() throws Exception {
         // Test installing a package that doesn't meet the minimum installable sdk requirement
         setMinInstallableTargetSdkFeatureFlags();
