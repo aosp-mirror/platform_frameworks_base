@@ -185,4 +185,29 @@ class FontScalingDialogTest : SysuiTestCase() {
 
         fontScalingDialog.dismiss()
     }
+
+    @Test
+    fun dragSeekBar_createTextPreview() {
+        val slider: SeekBarWithIconButtonsView = spy(SeekBarWithIconButtonsView(mContext))
+        whenever(
+                fontScalingDialog.findViewById<SeekBarWithIconButtonsView>(R.id.font_scaling_slider)
+            )
+            .thenReturn(slider)
+        fontScalingDialog.show()
+        verify(slider).setOnSeekBarChangeListener(capture(seekBarChangeCaptor))
+        val seekBar: SeekBar = slider.findViewById(R.id.seekbar)!!
+
+        // Default seekbar progress for font size is 1, simulate dragging to 0 without
+        // releasing the finger
+        seekBarChangeCaptor.value.onStartTrackingTouch(seekBar)
+        seekBarChangeCaptor.value.onProgressChanged(
+            seekBar,
+            /* progress= */ 0,
+            /* fromUser= */ false
+        )
+        backgroundExecutor.runAllReady()
+
+        verify(fontScalingDialog).createTextPreview(/* index= */ 0)
+        fontScalingDialog.dismiss()
+    }
 }
