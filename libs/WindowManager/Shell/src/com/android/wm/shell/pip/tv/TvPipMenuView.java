@@ -26,6 +26,9 @@ import static android.view.KeyEvent.KEYCODE_DPAD_UP;
 import static android.view.KeyEvent.KEYCODE_ENTER;
 
 import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_MOVE;
+import static com.android.wm.shell.pip.tv.TvPipMenuController.MODE_ALL_ACTIONS_MENU;
+import static com.android.wm.shell.pip.tv.TvPipMenuController.MODE_MOVE_MENU;
+import static com.android.wm.shell.pip.tv.TvPipMenuController.MODE_NO_MENU;
 
 import android.content.Context;
 import android.graphics.Rect;
@@ -86,9 +89,9 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
     private final ImageView mArrowLeft;
     private final TvWindowMenuActionButton mA11yDoneButton;
 
-    private Rect mCurrentPipBounds;
-    private boolean mMoveMenuIsVisible;
-    private boolean mButtonMenuIsVisible;
+    private @TvPipMenuController.TvPipMenuMode int mCurrentMenuMode = MODE_NO_MENU;
+    private final Rect mCurrentPipBounds = new Rect();
+    private int mCurrentPipGravity;
     private boolean mSwitchingOrientation;
 
     private final AccessibilityManager mA11yManager;
@@ -172,7 +175,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
             return;
         }
 
-        if (mButtonMenuIsVisible) {
+        if (mCurrentMenuMode == MODE_ALL_ACTIONS_MENU) {
             mSwitchingOrientation = true;
             mActionButtonsRecyclerView.animate()
                     .alpha(0)
@@ -217,19 +220,14 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
     /**
      * Also updates the button gravity.
      */
-    void updateBounds(Rect updatedBounds) {
+    void setPipBounds(Rect updatedPipBounds) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: updateLayout, width: %s, height: %s", TAG, updatedBounds.width(),
-                updatedBounds.height());
-        mCurrentPipBounds = updatedBounds;
-        updatePipFrameBounds();
-    }
+                "%s: updateLayout, width: %s, height: %s", TAG, updatedPipBounds.width(),
+                updatedPipBounds.height());
+        if (updatedPipBounds.equals(mCurrentPipBounds)) return;
 
-    Rect getPipMenuContainerBounds(Rect pipBounds) {
-        final Rect menuUiBounds = new Rect(pipBounds);
-        menuUiBounds.inset(-mPipMenuOuterSpace, -mPipMenuOuterSpace);
-        menuUiBounds.bottom += mEduTextDrawer.getHeight();
-        return menuUiBounds;
+        mCurrentPipBounds.set(updatedPipBounds);
+        updatePipFrameBounds();
     }
 
     /**
@@ -264,12 +262,39 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         }
     }
 
-    /**
-     * @param gravity for the arrow hints
-     */
-    void showMoveMenu(int gravity) {
+    Rect getPipMenuContainerBounds(Rect pipBounds) {
+        final Rect menuUiBounds = new Rect(pipBounds);
+        menuUiBounds.inset(-mPipMenuOuterSpace, -mPipMenuOuterSpace);
+        menuUiBounds.bottom += mEduTextDrawer.getHeight();
+        return menuUiBounds;
+    }
+
+    void transitionToMenuMode(int menuMode, boolean resetMenu) {
+        switch (menuMode) {
+            case MODE_NO_MENU:
+                hideAllUserControls();
+                break;
+            case MODE_MOVE_MENU:
+                showMoveMenu();
+                break;
+            case MODE_ALL_ACTIONS_MENU:
+                showAllActionsMenu(resetMenu);
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Unknown TV PiP menu mode: "
+                        + TvPipMenuController.getMenuModeString(mCurrentMenuMode));
+        }
+
+        mCurrentMenuMode = menuMode;
+    }
+
+    private void showMoveMenu() {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: showMoveMenu()", TAG);
-        showMovementHints(gravity);
+
+        if (mCurrentMenuMode == MODE_MOVE_MENU) return;
+
+        showMovementHints();
         setMenuButtonsVisible(false);
         setFrameHighlighted(true);
 
@@ -278,32 +303,38 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         mEduTextDrawer.closeIfNeeded();
     }
 
-
-    void showButtonsMenu(boolean exitingMoveMode) {
+    private void showAllActionsMenu(boolean resetMenu) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: showButtonsMenu(), exitingMoveMode %b", TAG, exitingMoveMode);
+                "%s: showAllActionsMenu(), resetMenu %b", TAG, resetMenu);
+
+        if (resetMenu) {
+            scrollToFirstAction();
+        }
+
+        if (mCurrentMenuMode == MODE_ALL_ACTIONS_MENU) return;
+
         setMenuButtonsVisible(true);
         hideMovementHints();
         setFrameHighlighted(true);
         animateAlphaTo(1f, mDimLayer);
         mEduTextDrawer.closeIfNeeded();
 
-        if (exitingMoveMode) {
-            scrollAndRefocusButton(mTvPipActionsProvider.getFirstIndexOfAction(ACTION_MOVE),
-                    /* alwaysScroll= */ false);
-        } else {
-            scrollAndRefocusButton(0, /* alwaysScroll= */ true);
+        if (mCurrentMenuMode == MODE_MOVE_MENU) {
+            refocusButton(mTvPipActionsProvider.getFirstIndexOfAction(ACTION_MOVE));
         }
+
     }
 
-    private void scrollAndRefocusButton(int position, boolean alwaysScroll) {
-        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: scrollAndRefocusButton, target: %d", TAG, position);
-
-        if (alwaysScroll || !refocusButton(position)) {
-            mButtonLayoutManager.scrollToPositionWithOffset(position, 0);
-            mActionButtonsRecyclerView.post(() -> refocusButton(position));
+    private void scrollToFirstAction() {
+        // Clearing the focus here is necessary to allow a smooth scroll even if the first action
+        // is currently not visible.
+        final View focusedChild = mActionButtonsRecyclerView.getFocusedChild();
+        if (focusedChild != null) {
+            focusedChild.clearFocus();
         }
+
+        mButtonLayoutManager.scrollToPosition(0);
+        mActionButtonsRecyclerView.post(() -> refocusButton(0));
     }
 
     /**
@@ -311,6 +342,9 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
      * the view for the position not being available (scrolling beforehand will be necessary).
      */
     private boolean refocusButton(int position) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: refocusButton, position: %d", TAG, position);
+
         View itemToFocus = mButtonLayoutManager.findViewByPosition(position);
         if (itemToFocus != null) {
             itemToFocus.requestFocus();
@@ -319,21 +353,29 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         return itemToFocus != null;
     }
 
-    void hideAllUserControls() {
+    private void hideAllUserControls() {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: hideAllUserControls()", TAG);
+
+        if (mCurrentMenuMode == MODE_NO_MENU) return;
+
         setMenuButtonsVisible(false);
         hideMovementHints();
         setFrameHighlighted(false);
         animateAlphaTo(0f, mDimLayer);
     }
 
+    void setPipGravity(int gravity) {
+        mCurrentPipGravity = gravity;
+        if (mCurrentMenuMode == MODE_MOVE_MENU) {
+            showMovementHints();
+        }
+    }
+
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
-        if (!hasWindowFocus) {
-            hideAllUserControls();
-        }
+        mListener.onPipWindowFocusChanged(hasWindowFocus);
     }
 
     private void animateAlphaTo(float alpha, View view) {
@@ -399,15 +441,13 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
     /**
      * Shows user hints for moving the PiP, e.g. arrows.
      */
-    public void showMovementHints(int gravity) {
+    public void showMovementHints() {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: showMovementHints(), position: %s", TAG, Gravity.toString(gravity));
-        mMoveMenuIsVisible = true;
-
-        animateAlphaTo(checkGravity(gravity, Gravity.BOTTOM) ? 1f : 0f, mArrowUp);
-        animateAlphaTo(checkGravity(gravity, Gravity.TOP) ? 1f : 0f, mArrowDown);
-        animateAlphaTo(checkGravity(gravity, Gravity.RIGHT) ? 1f : 0f, mArrowLeft);
-        animateAlphaTo(checkGravity(gravity, Gravity.LEFT) ? 1f : 0f, mArrowRight);
+                "%s: showMovementHints(), position: %s", TAG, Gravity.toString(mCurrentPipGravity));
+        animateAlphaTo(checkGravity(mCurrentPipGravity, Gravity.BOTTOM) ? 1f : 0f, mArrowUp);
+        animateAlphaTo(checkGravity(mCurrentPipGravity, Gravity.TOP) ? 1f : 0f, mArrowDown);
+        animateAlphaTo(checkGravity(mCurrentPipGravity, Gravity.RIGHT) ? 1f : 0f, mArrowLeft);
+        animateAlphaTo(checkGravity(mCurrentPipGravity, Gravity.LEFT) ? 1f : 0f, mArrowRight);
 
         boolean a11yEnabled = mA11yManager.isEnabled();
         setArrowA11yEnabled(mArrowUp, a11yEnabled, KEYCODE_DPAD_UP);
@@ -446,10 +486,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: hideMovementHints()", TAG);
 
-        if (!mMoveMenuIsVisible) {
-            return;
-        }
-        mMoveMenuIsVisible = false;
+        if (mCurrentMenuMode != MODE_MOVE_MENU) return;
 
         animateAlphaTo(0, mArrowUp);
         animateAlphaTo(0, mArrowRight);
@@ -464,7 +501,6 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
     private void setMenuButtonsVisible(boolean visible) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: showUserActions: %b", TAG, visible);
-        mButtonMenuIsVisible = visible;
         animateAlphaTo(visible ? 1 : 0, mActionButtonsRecyclerView);
     }
 
@@ -534,5 +570,11 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
          * @return whether pip movement was handled.
          */
         boolean onPipMovement(int keycode);
+
+        /**
+         * Called when the TvPipMenuView loses focus. This also means that the TV PiP menu window
+         * has lost focus.
+         */
+        void onPipWindowFocusChanged(boolean focused);
     }
 }
