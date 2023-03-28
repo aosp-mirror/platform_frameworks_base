@@ -975,6 +975,42 @@ public final class BroadcastQueueModernImplTest {
                 dropboxEntryBroadcast2.first, expectedMergedBroadcast.first));
     }
 
+    @Test
+    public void testDeliveryGroupPolicy_sameAction_differentMatchingCriteria() {
+        final Intent closeSystemDialogs1 = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        final BroadcastOptions optionsCloseSystemDialog1 = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
+
+        final Intent closeSystemDialogs2 = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+                .putExtra("reason", "testing");
+        final BroadcastOptions optionsCloseSystemDialog2 = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeliveryGroupMatchingKey(Intent.ACTION_CLOSE_SYSTEM_DIALOGS, "testing");
+
+        // Halt all processing so that we get a consistent view
+        mHandlerThread.getLooper().getQueue().postSyncBarrier();
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(
+                closeSystemDialogs1, optionsCloseSystemDialog1));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(
+                closeSystemDialogs2, optionsCloseSystemDialog2));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(
+                closeSystemDialogs1, optionsCloseSystemDialog1));
+        // Verify that only the older broadcast with no extras was removed.
+        final BroadcastProcessQueue queue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        verifyPendingRecords(queue, List.of(closeSystemDialogs2, closeSystemDialogs1));
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(
+                closeSystemDialogs2, optionsCloseSystemDialog2));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(
+                closeSystemDialogs1, optionsCloseSystemDialog1));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(
+                closeSystemDialogs2, optionsCloseSystemDialog2));
+        // Verify that only the older broadcast with no extras was removed.
+        verifyPendingRecords(queue, List.of(closeSystemDialogs1, closeSystemDialogs2));
+    }
+
     private Pair<Intent, BroadcastOptions> createDropboxBroadcast(String tag, long timestampMs,
             int droppedCount) {
         final Intent dropboxEntryAdded = new Intent(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED);
