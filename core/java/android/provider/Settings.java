@@ -18154,12 +18154,6 @@ public final class Settings {
             public static final String WEAR_OS_VERSION_STRING = "wear_os_version_string";
 
             /**
-             * Whether the physical button has been set.
-             * @hide
-             */
-            public static final String BUTTON_SET = "button_set";
-
-            /**
              * Whether there is a side button.
              * @hide
              */
@@ -18331,6 +18325,12 @@ public final class Settings {
             public static final int COMPANION_OS_VERSION_UNDEFINED = -1;
 
             /**
+             * The companion App name.
+             * @hide
+             */
+            public static final String COMPANION_APP_NAME = "wear_companion_app_name";
+
+            /**
              * A boolean value to indicate if we want to support all languages in LE edition on
              * wear. 1 for supporting, 0 for not supporting.
              * @hide
@@ -18442,11 +18442,14 @@ public final class Settings {
             public static final String BURN_IN_PROTECTION_ENABLED = "burn_in_protection";
 
             /**
-
              * Whether the device has combined location setting enabled.
+             *
+             * @deprecated Use LocationManager as the source of truth for all location states.
+             *
              * @hide
              */
-            public static final String COMBINED_LOCATION_ENABLED = "combined_location_enable";
+            @Deprecated
+            public static final String COMBINED_LOCATION_ENABLE = "combined_location_enable";
 
             /**
              * The wrist orientation mode of the device
@@ -18511,66 +18514,35 @@ public final class Settings {
             public static final String CLOCKWORK_LONG_PRESS_TO_ASSISTANT_ENABLED =
                     "clockwork_long_press_to_assistant_enabled";
 
-            /*
+            /**
              * Whether the device has Cooldown Mode enabled.
              * @hide
              */
             public static final String COOLDOWN_MODE_ON = "cooldown_mode_on";
 
-            /*
+            /**
              * Whether the device has Wet Mode/ Touch Lock Mode enabled.
              * @hide
              */
             public static final String WET_MODE_ON = "wet_mode_on";
 
-            /*
+            /**
              * Whether the RSB wake feature is enabled.
              * @hide
              */
             public static final String RSB_WAKE_ENABLED = "rsb_wake_enabled";
 
-            /*
+            /**
              * Whether the screen-unlock (keyguard) sound is enabled.
              * @hide
              */
             public static final String SCREEN_UNLOCK_SOUND_ENABLED = "screen_unlock_sound_enabled";
 
-            /*
+            /**
              * Whether charging sounds are enabled.
              * @hide
              */
             public static final String CHARGING_SOUNDS_ENABLED = "wear_charging_sounds_enabled";
-
-            /** The status of the early updates process.
-             * @hide
-             */
-            public static final String EARLY_UPDATES_STATUS = "early_updates_status";
-
-            /**
-             * Early updates not started
-             * @hide
-             */
-            public static final int EARLY_UPDATES_STATUS_NOT_STARTED = 0;
-            /**
-             * Early updates started and in progress
-             * @hide
-             */
-            public static final int EARLY_UPDATES_STATUS_STARTED = 1;
-            /**
-             * Early updates completed and was successful
-             * @hide
-             */
-            public static final int EARLY_UPDATES_STATUS_SUCCESS = 2;
-            /**
-             * Early updates skipped
-             * @hide
-             */
-            public static final int EARLY_UPDATES_STATUS_SKIPPED = 3;
-            /**
-             * Early updates aborted due to timeout
-             * @hide
-             */
-            public static final int EARLY_UPDATES_STATUS_ABORTED = 4;
 
             /**
              * Whether dynamic color theming (e.g. Material You) is enabled for apps which support
@@ -18705,6 +18677,167 @@ public final class Settings {
              * @hide
              */
             public static final String DISABLE_AOD_WHILE_PLUGGED = "disable_aod_while_plugged";
+
+            /**
+             * Whether the user has consented for network location provider (NLP).
+             * This setting key will only be used once during OOBE to set NLP initial value through
+             * the companion app ToS. This setting key will be synced over from Companion and
+             * corresponding toggle in GMS will be enabled.
+             * @hide
+             */
+            public static final String NETWORK_LOCATION_OPT_IN = "network_location_opt_in";
+
+            /**
+             * The custom foreground color.
+             * @hide
+             */
+            public static final String CUSTOM_COLOR_FOREGROUND = "custom_foreground_color";
+
+            /**
+             * The custom background color.
+             * @hide
+             */
+            public static final String CUSTOM_COLOR_BACKGROUND = "custom_background_color";
+
+            /** The status of the phone switching process.
+             * @hide
+             */
+            public static final String PHONE_SWITCHING_STATUS = "phone_switching_status";
+
+            /**
+             * Phone switching not started
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_STATUS_NOT_STARTED = 0;
+
+            /**
+             * Phone switching started
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_STATUS_STARTED = 1;
+
+            /**
+             * Phone switching completed and was successful
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_STATUS_SUCCESS = 2;
+
+            /**
+             * Phone switching was cancelled
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_STATUS_CANCELLED = 3;
+
+            /**
+             * Phone switching failed
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_STATUS_FAILED = 4;
+
+            /**
+             * Phone switching is in progress of advertising to new companion device.
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_STATUS_IN_PROGRESS_ADVERTISING = 5;
+
+            /**
+             * Phone switching successfully bonded with new companion device.
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_STATUS_IN_PROGRESS_BONDED = 6;
+
+            /**
+             * Phone switching successfully completed on phone side.
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_STATUS_IN_PROGRESS_PHONE_COMPLETE = 7;
+
+            /**
+             * Connection config migration in progress.
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_STATUS_IN_PROGRESS_MIGRATION = 8;
+
+            /**
+             * Connection config migration failed.
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_STATUS_IN_PROGRESS_MIGRATION_FAILED = 9;
+
+            /**
+             * Connection config migration cancellation in progress.
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_STATUS_IN_PROGRESS_MIGRATION_CANCELLED = 10;
+
+            /**
+             * Connection config migration success.
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_STATUS_IN_PROGRESS_MIGRATION_SUCCESS = 11;
+
+
+            /**
+             * Whether the device has enabled the feature to reduce motion and animation
+             * (0 = false, 1 = true)
+             * @hide
+             */
+            public static final String REDUCE_MOTION = "reduce_motion";
+
+            /**
+             * Whether RTL swipe-to-dismiss is enabled by developer options.
+             * (0 = false, 1 = true)
+             * @hide
+             */
+            public static final String RTL_SWIPE_TO_DISMISS_ENABLED_DEV =
+                    "rtl_swipe_to_dismiss_enabled_dev";
+
+            /**
+             * Tethered Configuration state.
+             * @hide
+             */
+            public static final String TETHER_CONFIG_STATE = "tethered_config_state";
+
+            /**
+             * Tethered configuration state is unknown.
+             * @hide
+             */
+            public static final int TETHERED_CONFIG_UNKNOWN = 0;
+
+            /**
+             * Device is set into standalone mode.
+             * @hide
+             */
+            public static final int TETHERED_CONFIG_STANDALONE = 1;
+
+            /**
+             * Device is set in tethered mode.
+             * @hide
+             */
+            public static final int TETHERED_CONFIG_TETHERED = 2;
+
+
+            /**
+             * Whether phone switching is supported.
+             *
+             * (0 = false, 1 = true)
+             * @hide
+             */
+            public static final String PHONE_SWITCHING_SUPPORTED = "phone_switching_supported";
+
+            /**
+             * Setting indicating the name of the Wear OS package that hosts the Media Controls UI.
+             *
+             * @hide
+             */
+            public static final String WEAR_MEDIA_CONTROLS_PACKAGE = "wear_media_controls_package";
+
+            /**
+             * Setting indicating the name of the Wear OS package responsible for bridging media.
+             *
+             * @hide
+             */
+            public static final String WEAR_MEDIA_SESSIONS_PACKAGE = "wear_media_sessions_package";
         }
     }
 

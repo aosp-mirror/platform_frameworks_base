@@ -103,5 +103,7 @@ public class GlobalSettings {
         Settings.Global.Wearable.UPGRADE_DATA_MIGRATION_STATUS,
         Settings.Global.HDR_CONVERSION_MODE,
         Settings.Global.HDR_FORCE_CONVERSION_TYPE,
+        Settings.Global.Wearable.RTL_SWIPE_TO_DISMISS_ENABLED_DEV,
+        Settings.Global.Wearable.REDUCE_MOTION,
     };
 }
