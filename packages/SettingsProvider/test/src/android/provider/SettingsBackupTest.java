@@ -627,7 +627,6 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.STEM_3_DATA,
                     Settings.Global.Wearable.STEM_3_DEFAULT_DATA,
                     Settings.Global.Wearable.WEAR_OS_VERSION_STRING,
-                    Settings.Global.Wearable.BUTTON_SET,
                     Settings.Global.Wearable.SIDE_BUTTON,
                     Settings.Global.Wearable.ANDROID_WEAR_VERSION,
                     Settings.Global.Wearable.SYSTEM_CAPABILITIES,
@@ -643,6 +642,7 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE,
                     Settings.Global.Wearable.COMPANION_BLE_ROLE,
                     Settings.Global.Wearable.COMPANION_NAME,
+                    Settings.Global.Wearable.COMPANION_APP_NAME,
                     Settings.Global.Wearable.USER_HFP_CLIENT_SETTING,
                     Settings.Global.Wearable.COMPANION_OS_VERSION,
                     Settings.Global.Wearable.ENABLE_ALL_LANGUAGES,
@@ -662,13 +662,21 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.SCREEN_UNLOCK_SOUND_ENABLED,
                     Settings.Global.Wearable.BEDTIME_MODE,
                     Settings.Global.Wearable.BEDTIME_HARD_MODE,
-                    Settings.Global.Wearable.EARLY_UPDATES_STATUS,
                     Settings.Global.Wearable.RSB_WAKE_ENABLED,
                     Settings.Global.Wearable.LOCK_SCREEN_STATE,
                     Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_ENABLED,
                     Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE,
                     Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED,
-                    Settings.Global.Wearable.SCREENSHOT_ENABLED);
+                    Settings.Global.Wearable.SCREENSHOT_ENABLED,
+                    Settings.Global.Wearable.DISABLE_AOD_WHILE_PLUGGED,
+                    Settings.Global.Wearable.NETWORK_LOCATION_OPT_IN,
+                    Settings.Global.Wearable.CUSTOM_COLOR_FOREGROUND,
+                    Settings.Global.Wearable.CUSTOM_COLOR_BACKGROUND,
+                    Settings.Global.Wearable.PHONE_SWITCHING_STATUS,
+                    Settings.Global.Wearable.TETHER_CONFIG_STATE,
+                    Settings.Global.Wearable.PHONE_SWITCHING_SUPPORTED,
+                    Settings.Global.Wearable.WEAR_MEDIA_CONTROLS_PACKAGE,
+                    Settings.Global.Wearable.WEAR_MEDIA_SESSIONS_PACKAGE);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(
