@@ -26,7 +26,6 @@ import android.text.method.TextKeyListener;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
-import android.view.WindowInsets;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -157,15 +156,6 @@ public class KeyguardPasswordViewController
         // TODO: Remove this workaround by ensuring such a race condition never happens.
         mMainExecutor.executeDelayed(
                 this::updateSwitchImeButton, DELAY_MILLIS_TO_REEVALUATE_IME_SWITCH_ICON);
-        mView.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-            @Override
-            public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-                if (!mKeyguardViewController.isBouncerShowing()) {
-                    mView.hideKeyboard();
-                }
-                return insets;
-            }
-        });
     }
 
     @Override
