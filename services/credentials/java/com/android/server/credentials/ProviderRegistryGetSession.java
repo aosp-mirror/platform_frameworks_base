@@ -38,6 +38,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -103,7 +104,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
     @NonNull
     private final String mCredentialProviderPackageName;
     @NonNull
-    private final String mFlattenedRequestOptionString;
+    private final Set<String> mElementKeys;
     @VisibleForTesting
     List<CredentialEntry> mCredentialEntries;
 
@@ -119,9 +120,9 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
         mCredentialDescriptionRegistry = CredentialDescriptionRegistry.forUser(userId);
         mCallingAppInfo = callingAppInfo;
         mCredentialProviderPackageName = servicePackageName;
-        mFlattenedRequestOptionString = requestOption
+        mElementKeys = new HashSet<>(requestOption
                 .getCredentialRetrievalData()
-                .getString(CredentialOption.FLATTENED_REQUEST);
+                .getStringArrayList(CredentialOption.SUPPORTED_ELEMENT_KEYS));
     }
 
     protected ProviderRegistryGetSession(@NonNull Context context,
@@ -136,9 +137,9 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
         mCredentialDescriptionRegistry = CredentialDescriptionRegistry.forUser(userId);
         mCallingAppInfo = callingAppInfo;
         mCredentialProviderPackageName = servicePackageName;
-        mFlattenedRequestOptionString = requestOption
+        mElementKeys = new HashSet<>(requestOption
                 .getCredentialRetrievalData()
-                .getString(CredentialOption.FLATTENED_REQUEST);
+                .getStringArrayList(CredentialOption.SUPPORTED_ELEMENT_KEYS));
     }
 
     private List<Entry> prepareUiCredentialEntries(
@@ -257,7 +258,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
     protected void invokeSession() {
         mProviderResponse = mCredentialDescriptionRegistry
                 .getFilteredResultForProvider(mCredentialProviderPackageName,
-                        mFlattenedRequestOptionString);
+                        mElementKeys);
         mCredentialEntries = mProviderResponse.stream().flatMap(
                         (Function<CredentialDescriptionRegistry.FilterResult,
                                 Stream<CredentialEntry>>) filterResult
