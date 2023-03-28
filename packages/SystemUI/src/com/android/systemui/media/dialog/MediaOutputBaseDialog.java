@@ -78,7 +78,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private static final boolean DEBUG = true;
     private static final int HANDLE_BROADCAST_FAILED_DELAY = 3000;
 
-    private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
+    protected final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private final RecyclerView.LayoutManager mLayoutManager;
 
     final Context mContext;
@@ -102,10 +102,12 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private int mListMaxHeight;
     private int mItemHeight;
     private WallpaperColors mWallpaperColors;
-    private Executor mExecutor;
     private boolean mShouldLaunchLeBroadcastDialog;
+    private boolean mIsLeBroadcastCallbackRegistered;
 
     MediaOutputBaseAdapter mAdapter;
+
+    protected Executor mExecutor;
 
     private final ViewTreeObserver.OnGlobalLayoutListener mDeviceListLayoutListener = () -> {
         ViewGroup.LayoutParams params = mDeviceListLayout.getLayoutParams();
@@ -274,17 +276,19 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     public void onStart() {
         super.onStart();
         mMediaOutputController.start(this);
-        if(isBroadcastSupported()) {
-            mMediaOutputController.registerLeBroadcastServiceCallBack(mExecutor,
+        if (isBroadcastSupported() && !mIsLeBroadcastCallbackRegistered) {
+            mMediaOutputController.registerLeBroadcastServiceCallback(mExecutor,
                     mBroadcastCallback);
+            mIsLeBroadcastCallbackRegistered = true;
         }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if(isBroadcastSupported()) {
-            mMediaOutputController.unregisterLeBroadcastServiceCallBack(mBroadcastCallback);
+        if (isBroadcastSupported() && mIsLeBroadcastCallbackRegistered) {
+            mMediaOutputController.unregisterLeBroadcastServiceCallback(mBroadcastCallback);
+            mIsLeBroadcastCallbackRegistered = false;
         }
         mMediaOutputController.stop();
     }
