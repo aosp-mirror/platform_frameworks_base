@@ -499,8 +499,7 @@ void SkiaPipeline::renderFrameImpl(const SkRect& clip,
     }
     canvas->concat(preTransform);
 
-    // STOPSHIP: Revert, temporary workaround to clear always F16 frame buffer for b/74976293
-    if (!opaque || getSurfaceColorType() == kRGBA_F16_SkColorType) {
+    if (!opaque) {
         canvas->clear(SK_ColorTRANSPARENT);
     }
 
