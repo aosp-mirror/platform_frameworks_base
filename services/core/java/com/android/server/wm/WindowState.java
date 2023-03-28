@@ -2343,6 +2343,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // to be removed before the parent (so that the sync-engine tracking works). Since
         // WindowStateAnimator is a "virtual" child, we have to do it manually here.
         mWinAnimator.destroySurfaceLocked(getSyncTransaction());
+        if (!mDrawHandlers.isEmpty()) {
+            mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
+        }
         super.removeImmediately();
 
         final DisplayContent dc = getDisplayContent();
