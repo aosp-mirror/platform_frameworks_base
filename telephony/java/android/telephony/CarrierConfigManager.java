@@ -4478,6 +4478,57 @@ public class CarrierConfigManager {
             "data_stall_recovery_should_skip_bool_array";
 
     /**
+     * String array containing the list of names for service numbers provided by carriers. This key
+     * should be used with {@link #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY}. The names provided in
+     * this array will be mapped 1:1 with the numbers provided in the {@link
+     * #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY} array.
+     *
+     * <p>The data would be considered valid if and only if:
+     *
+     * <ul>
+     *   <li>The number of items in both the arrays are equal
+     *   <li>The data added to the {@link #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY} array is valid.
+     *       See {@link #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY} for more information.
+     * </ul>
+     *
+     * <p>Example:
+     *
+     * <pre><code>
+     * <string-array name="carrier_service_name_array" num="2">
+     *   <item value="Police"/>
+     *   <item value="Ambulance"/>
+     * </string-array>
+     * </code></pre>
+     */
+    public static final String KEY_CARRIER_SERVICE_NAME_STRING_ARRAY = "carrier_service_name_array";
+
+    /**
+     * String array containing the list of service numbers provided by carriers. This key should be
+     * used with {@link #KEY_CARRIER_SERVICE_NAME_STRING_ARRAY}. The numbers provided in this array
+     * will be mapped 1:1 with the names provided in the {@link
+     * #KEY_CARRIER_SERVICE_NAME_STRING_ARRAY} array.
+     *
+     * <p>The data would be considered valid if and only if:
+     *
+     * <ul>
+     *   <li>The number of items in both the arrays are equal
+     *   <li>The item added in this key follows a specific format. Either it should be all numbers,
+     *       or "+" followed by all numbers.
+     * </ul>
+     *
+     * <p>Example:
+     *
+     * <pre><code>
+     * <string-array name="carrier_service_number_array" num="2">
+     *   <item value="123"/>
+     *   <item value="+343"/>
+     * </string-array>
+     * </code></pre>
+     */
+    public static final String KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY =
+        "carrier_service_number_array";
+
+    /**
      * Configs used by ImsServiceEntitlement.
      */
     public static final class ImsServiceEntitlement {
@@ -9350,6 +9401,8 @@ public class CarrierConfigManager {
                 new long[] {180000, 180000, 180000, 180000});
         sDefaults.putBooleanArray(KEY_DATA_STALL_RECOVERY_SHOULD_SKIP_BOOL_ARRAY,
                 new boolean[] {false, false, true, false, false});
+        sDefaults.putStringArray(KEY_CARRIER_SERVICE_NAME_STRING_ARRAY, new String[0]);
+        sDefaults.putStringArray(KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY, new String[0]);
     }
 
     /**
