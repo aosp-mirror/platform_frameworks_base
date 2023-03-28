@@ -188,6 +188,9 @@ public class Toast {
 
     /**
      * Show the view for the specified duration.
+     *
+     * <p>Note that toasts being sent from the background are rate limited, so avoid sending such
+     * toasts in quick succession.
      */
     public void show() {
         if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
