@@ -223,7 +223,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Авт. ориентация"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Автоматично завъртане на екрана"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Местоположение"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Камера: достъп"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Достъп до камерата"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Достъп до микрофона"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Налице"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Блокирано"</string>
