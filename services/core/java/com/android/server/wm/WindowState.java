@@ -4495,20 +4495,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void updateAboveInsetsState(InsetsState aboveInsetsState,
-            SparseArray<InsetsSourceProvider> localInsetsSourceProvidersFromParent,
+            SparseArray<InsetsSource> localInsetsSourcesFromParent,
             ArraySet<WindowState> insetsChangedWindows) {
-        SparseArray<InsetsSourceProvider> mergedLocalInsetsSourceProviders =
-                localInsetsSourceProvidersFromParent;
-        if (mLocalInsetsSourceProviders != null && mLocalInsetsSourceProviders.size() != 0) {
-            mergedLocalInsetsSourceProviders = createShallowCopy(mergedLocalInsetsSourceProviders);
-            for (int i = 0; i < mLocalInsetsSourceProviders.size(); i++) {
-                mergedLocalInsetsSourceProviders.put(
-                        mLocalInsetsSourceProviders.keyAt(i),
-                        mLocalInsetsSourceProviders.valueAt(i));
-            }
-        }
-        final SparseArray<InsetsSource> mergedLocalInsetsSourcesFromParent =
-                toInsetsSources(mergedLocalInsetsSourceProviders);
+        final SparseArray<InsetsSource> mergedLocalInsetsSources =
+                createMergedSparseArray(localInsetsSourcesFromParent, mLocalInsetsSources);
 
         // Insets provided by the IME window can effect all the windows below it and hence it needs
         // to be visited in the correct order. Because of which updateAboveInsetsState() can't be
@@ -4519,9 +4509,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 insetsChangedWindows.add(w);
             }
 
-            if (!mergedLocalInsetsSourcesFromParent.contentEquals(w.mMergedLocalInsetsSources)) {
-                w.mMergedLocalInsetsSources = createShallowCopy(
-                        mergedLocalInsetsSourcesFromParent);
+            if (!mergedLocalInsetsSources.contentEquals(w.mMergedLocalInsetsSources)) {
+                w.mMergedLocalInsetsSources = mergedLocalInsetsSources;
                 insetsChangedWindows.add(w);
             }
 
@@ -4532,17 +4521,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
         }, true /* traverseTopToBottom */);
-    }
-
-    private static SparseArray<InsetsSource> toInsetsSources(
-            SparseArray<InsetsSourceProvider> insetsSourceProviders) {
-        final SparseArray<InsetsSource> insetsSources = new SparseArray<>(
-                insetsSourceProviders.size());
-        for (int i = 0; i < insetsSourceProviders.size(); i++) {
-            insetsSources.append(insetsSourceProviders.keyAt(i),
-                    insetsSourceProviders.valueAt(i).getSource());
-        }
-        return insetsSources;
     }
 
     private boolean forAllWindowTopToBottom(ToBooleanFunction<WindowState> callback) {

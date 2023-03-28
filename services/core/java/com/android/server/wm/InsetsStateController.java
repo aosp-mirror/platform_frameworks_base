@@ -161,14 +161,15 @@ class InsetsStateController {
         final InsetsState aboveInsetsState = new InsetsState();
         aboveInsetsState.set(mState,
                 displayCutout() | systemGestures() | mandatorySystemGestures());
+        final SparseArray<InsetsSource> localInsetsSourcesFromParent = new SparseArray<>();
         final ArraySet<WindowState> insetsChangedWindows = new ArraySet<>();
-        final SparseArray<InsetsSourceProvider>
-                localInsetsSourceProvidersFromParent = new SparseArray<>();
+
         // This method will iterate on the entire hierarchy in top to bottom z-order manner. The
         // aboveInsetsState will be modified as per the insets provided by the WindowState being
         // visited.
-        mDisplayContent.updateAboveInsetsState(aboveInsetsState,
-                localInsetsSourceProvidersFromParent, insetsChangedWindows);
+        mDisplayContent.updateAboveInsetsState(aboveInsetsState, localInsetsSourcesFromParent,
+                insetsChangedWindows);
+
         if (notifyInsetsChange) {
             for (int i = insetsChangedWindows.size() - 1; i >= 0; i--) {
                 mDispatchInsetsChanged.accept(insetsChangedWindows.valueAt(i));
