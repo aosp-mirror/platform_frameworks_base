@@ -302,9 +302,16 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     }
 
     public void forEachLocked(Consumer<LogicalDisplay> consumer) {
+        forEachLocked(consumer, /* includeDisabled= */ true);
+    }
+
+    public void forEachLocked(Consumer<LogicalDisplay> consumer, boolean includeDisabled) {
         final int count = mLogicalDisplays.size();
         for (int i = 0; i < count; i++) {
-            consumer.accept(mLogicalDisplays.valueAt(i));
+            LogicalDisplay display = mLogicalDisplays.valueAt(i);
+            if (display.isEnabledLocked() || includeDisabled) {
+                consumer.accept(display);
+            }
         }
     }
 
