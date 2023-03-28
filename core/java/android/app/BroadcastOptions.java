@@ -37,8 +37,6 @@ import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.PowerExemptionManager.TempAllowListType;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
@@ -61,7 +59,8 @@ public class BroadcastOptions extends ComponentOptions {
     private long mRequireCompatChangeId = CHANGE_INVALID;
     private long mIdForResponseEvent;
     private @DeliveryGroupPolicy int mDeliveryGroupPolicy;
-    private @Nullable String mDeliveryGroupMatchingKey;
+    private @Nullable String mDeliveryGroupMatchingNamespaceFragment;
+    private @Nullable String mDeliveryGroupMatchingKeyFragment;
     private @Nullable BundleMerger mDeliveryGroupExtrasMerger;
     private @Nullable IntentFilter mDeliveryGroupMatchingFilter;
     private @DeferralPolicy int mDeferralPolicy;
@@ -196,7 +195,13 @@ public class BroadcastOptions extends ComponentOptions {
             "android:broadcast.deliveryGroupPolicy";
 
     /**
-     * Corresponds to {@link #setDeliveryGroupMatchingKey(String, String)}.
+     * Corresponds to namespace fragment of {@link #setDeliveryGroupMatchingKey(String, String)}.
+     */
+    private static final String KEY_DELIVERY_GROUP_NAMESPACE =
+            "android:broadcast.deliveryGroupMatchingNamespace";
+
+    /**
+     * Corresponds to key fragment of {@link #setDeliveryGroupMatchingKey(String, String)}.
      */
     private static final String KEY_DELIVERY_GROUP_KEY =
             "android:broadcast.deliveryGroupMatchingKey";
@@ -337,7 +342,8 @@ public class BroadcastOptions extends ComponentOptions {
         mIdForResponseEvent = opts.getLong(KEY_ID_FOR_RESPONSE_EVENT);
         mDeliveryGroupPolicy = opts.getInt(KEY_DELIVERY_GROUP_POLICY,
                 DELIVERY_GROUP_POLICY_ALL);
-        mDeliveryGroupMatchingKey = opts.getString(KEY_DELIVERY_GROUP_KEY);
+        mDeliveryGroupMatchingNamespaceFragment = opts.getString(KEY_DELIVERY_GROUP_NAMESPACE);
+        mDeliveryGroupMatchingKeyFragment = opts.getString(KEY_DELIVERY_GROUP_KEY);
         mDeliveryGroupExtrasMerger = opts.getParcelable(KEY_DELIVERY_GROUP_EXTRAS_MERGER,
                 BundleMerger.class);
         mDeliveryGroupMatchingFilter = opts.getParcelable(KEY_DELIVERY_GROUP_MATCHING_FILTER,
@@ -851,11 +857,8 @@ public class BroadcastOptions extends ComponentOptions {
     @NonNull
     public BroadcastOptions setDeliveryGroupMatchingKey(@NonNull String namespace,
             @NonNull String key) {
-        Preconditions.checkArgument(!namespace.contains(":"),
-                "namespace should not contain ':'");
-        Preconditions.checkArgument(!key.contains(":"),
-                "key should not contain ':'");
-        mDeliveryGroupMatchingKey = namespace + ":" + key;
+        mDeliveryGroupMatchingNamespaceFragment = Objects.requireNonNull(namespace);
+        mDeliveryGroupMatchingKeyFragment = Objects.requireNonNull(key);
         return this;
     }
 
@@ -868,7 +871,38 @@ public class BroadcastOptions extends ComponentOptions {
      */
     @Nullable
     public String getDeliveryGroupMatchingKey() {
-        return mDeliveryGroupMatchingKey;
+        if (mDeliveryGroupMatchingNamespaceFragment == null
+                || mDeliveryGroupMatchingKeyFragment == null) {
+            return null;
+        }
+        return String.join(":", mDeliveryGroupMatchingNamespaceFragment,
+                mDeliveryGroupMatchingKeyFragment);
+    }
+
+    /**
+     * Return the namespace fragment that is used to identify the delivery group that this
+     * broadcast belongs to.
+     *
+     * @return the delivery group namespace fragment that was previously set using
+     *         {@link #setDeliveryGroupMatchingKey(String, String)}.
+     * @hide
+     */
+    @Nullable
+    public String getDeliveryGroupMatchingNamespaceFragment() {
+        return mDeliveryGroupMatchingNamespaceFragment;
+    }
+
+    /**
+     * Return the key fragment that is used to identify the delivery group that this
+     * broadcast belongs to.
+     *
+     * @return the delivery group key fragment that was previously set using
+     *         {@link #setDeliveryGroupMatchingKey(String, String)}.
+     * @hide
+     */
+    @Nullable
+    public String getDeliveryGroupMatchingKeyFragment() {
+        return mDeliveryGroupMatchingKeyFragment;
     }
 
     /**
@@ -876,7 +910,8 @@ public class BroadcastOptions extends ComponentOptions {
      * {@link #setDeliveryGroupMatchingKey(String, String)}.
      */
     public void clearDeliveryGroupMatchingKey() {
-        mDeliveryGroupMatchingKey = null;
+        mDeliveryGroupMatchingNamespaceFragment = null;
+        mDeliveryGroupMatchingKeyFragment = null;
     }
 
     /**
@@ -1094,8 +1129,11 @@ public class BroadcastOptions extends ComponentOptions {
         if (mDeliveryGroupPolicy != DELIVERY_GROUP_POLICY_ALL) {
             b.putInt(KEY_DELIVERY_GROUP_POLICY, mDeliveryGroupPolicy);
         }
-        if (mDeliveryGroupMatchingKey != null) {
-            b.putString(KEY_DELIVERY_GROUP_KEY, mDeliveryGroupMatchingKey);
+        if (mDeliveryGroupMatchingNamespaceFragment != null) {
+            b.putString(KEY_DELIVERY_GROUP_NAMESPACE, mDeliveryGroupMatchingNamespaceFragment);
+        }
+        if (mDeliveryGroupMatchingKeyFragment != null) {
+            b.putString(KEY_DELIVERY_GROUP_KEY, mDeliveryGroupMatchingKeyFragment);
         }
         if (mDeliveryGroupPolicy == DELIVERY_GROUP_POLICY_MERGED) {
             if (mDeliveryGroupExtrasMerger != null) {
