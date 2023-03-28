@@ -38,8 +38,10 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.provider.LaunchFullScreenIntentProvider
 import com.android.systemui.statusbar.notification.collection.render.NodeController
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper.DecisionImpl
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper.FullScreenIntentDecisionImpl
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback
 import com.android.systemui.statusbar.phone.NotificationGroupTestHelper
 import com.android.systemui.statusbar.policy.HeadsUpManager
@@ -52,6 +54,7 @@ import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import java.util.ArrayList
 import java.util.function.Consumer
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -86,7 +89,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     private val logger = HeadsUpCoordinatorLogger(logcatLogBuffer(), verbose = true)
     private val headsUpManager: HeadsUpManager = mock()
     private val headsUpViewBinder: HeadsUpViewBinder = mock()
-    private val notificationInterruptStateProvider: NotificationInterruptStateProvider = mock()
+    private val visualInterruptionDecisionProvider: VisualInterruptionDecisionProvider = mock()
     private val remoteInputManager: NotificationRemoteInputManager = mock()
     private val endLifetimeExtension: OnEndLifetimeExtensionCallback = mock()
     private val headerController: NodeController = mock()
@@ -114,7 +117,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
             systemClock,
             headsUpManager,
             headsUpViewBinder,
-            notificationInterruptStateProvider,
+            visualInterruptionDecisionProvider,
             remoteInputManager,
             launchFullScreenIntentProvider,
             flags,
@@ -168,8 +171,11 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         groupChild2 = helper.createChildNotification(GROUP_ALERT_ALL, 2, "child", 250)
         groupChild3 = helper.createChildNotification(GROUP_ALERT_ALL, 3, "child", 150)
 
+        // Set the default HUN decision
+        setDefaultShouldHeadsUp(false)
+
         // Set the default FSI decision
-        setShouldFullScreen(any(), FullScreenIntentDecision.NO_FULL_SCREEN_INTENT)
+        setDefaultShouldFullScreen(FullScreenIntentDecision.NO_FULL_SCREEN_INTENT)
     }
 
     @Test
@@ -1006,31 +1012,59 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         verify(launchFullScreenIntentProvider, never()).launchFullScreenIntent(entry)
     }
 
-    private fun setShouldHeadsUp(entry: NotificationEntry, should: Boolean = true) {
-        whenever(notificationInterruptStateProvider.shouldHeadsUp(entry)).thenReturn(should)
-        whenever(notificationInterruptStateProvider.checkHeadsUp(eq(entry), any()))
-                .thenReturn(should)
+    private fun setDefaultShouldHeadsUp(should: Boolean) {
+        whenever(visualInterruptionDecisionProvider.makeAndLogHeadsUpDecision(any()))
+            .thenReturn(DecisionImpl.of(should))
+        whenever(visualInterruptionDecisionProvider.makeUnloggedHeadsUpDecision(any()))
+            .thenReturn(DecisionImpl.of(should))
     }
 
-    private fun setShouldFullScreen(entry: NotificationEntry, decision: FullScreenIntentDecision) {
-        whenever(notificationInterruptStateProvider.getFullScreenIntentDecision(entry))
-            .thenReturn(decision)
+    private fun setShouldHeadsUp(entry: NotificationEntry, should: Boolean = true) {
+        whenever(visualInterruptionDecisionProvider.makeAndLogHeadsUpDecision(entry))
+            .thenReturn(DecisionImpl.of(should))
+        whenever(visualInterruptionDecisionProvider.makeUnloggedHeadsUpDecision(entry))
+            .thenReturn(DecisionImpl.of(should))
+    }
+
+    private fun setDefaultShouldFullScreen(
+        originalDecision: FullScreenIntentDecision
+    ) {
+        val provider = visualInterruptionDecisionProvider
+        whenever(provider.makeUnloggedFullScreenIntentDecision(any())).thenAnswer {
+            val entry: NotificationEntry = it.getArgument(0)
+            FullScreenIntentDecisionImpl(entry, originalDecision)
+        }
+    }
+
+    private fun setShouldFullScreen(
+        entry: NotificationEntry,
+        originalDecision: FullScreenIntentDecision
+    ) {
+        whenever(
+            visualInterruptionDecisionProvider.makeUnloggedFullScreenIntentDecision(entry)
+        ).thenAnswer {
+            FullScreenIntentDecisionImpl(entry, originalDecision)
+        }
     }
 
     private fun verifyLoggedFullScreenIntentDecision(
         entry: NotificationEntry,
-        decision: FullScreenIntentDecision
+        originalDecision: FullScreenIntentDecision
     ) {
-        verify(notificationInterruptStateProvider).logFullScreenIntentDecision(entry, decision)
+        val decision = withArgCaptor {
+            verify(visualInterruptionDecisionProvider).logFullScreenIntentDecision(capture())
+        }
+        check(decision is FullScreenIntentDecisionImpl)
+        assertEquals(entry, decision.originalEntry)
+        assertEquals(originalDecision, decision.originalDecision)
     }
 
     private fun verifyNoFullScreenIntentDecisionLogged() {
-        verify(notificationInterruptStateProvider, never())
-            .logFullScreenIntentDecision(any(), any())
+        verify(visualInterruptionDecisionProvider, never()).logFullScreenIntentDecision(any())
     }
 
     private fun clearInterruptionProviderInvocations() {
-        clearInvocations(notificationInterruptStateProvider)
+        clearInvocations(visualInterruptionDecisionProvider)
     }
 
     private fun finishBind(entry: NotificationEntry) {
