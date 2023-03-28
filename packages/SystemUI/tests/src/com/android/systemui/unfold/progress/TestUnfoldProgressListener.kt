@@ -126,7 +126,7 @@ class TestUnfoldProgressListener : UnfoldTransitionProgressProvider.TransitionPr
         }
 
         fun assertLastProgress(progress: Float) {
-            assertThat(progressHistory.last()).isWithin(1.0E-4F).of(progress)
+            waitForCondition { progress == progressHistory.last() }
         }
     }
 
