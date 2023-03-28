@@ -49,6 +49,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -126,11 +127,11 @@ public class CredentialManagerTest {
                 null, List.of(Slice.HINT_TITLE)).build();
         mRegisterRequest = new RegisterCredentialDescriptionRequest(
                 new CredentialDescription(Credential.TYPE_PASSWORD_CREDENTIAL,
-                        "{ \"foo\": \"bar\" }",
+                        new HashSet<>(List.of("{ \"foo\": \"bar\" }")),
                         List.of(new CredentialEntry(Credential.TYPE_PASSWORD_CREDENTIAL, slice))));
         mUnregisterRequest = new UnregisterCredentialDescriptionRequest(
                 new CredentialDescription(Credential.TYPE_PASSWORD_CREDENTIAL,
-                        "{ \"foo\": \"bar\" }",
+                        new HashSet<>(List.of("{ \"foo\": \"bar\" }")),
                         List.of(new CredentialEntry(Credential.TYPE_PASSWORD_CREDENTIAL, slice))));
 
         final Context context = InstrumentationRegistry.getInstrumentation().getContext();
