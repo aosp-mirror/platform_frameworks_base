@@ -179,7 +179,8 @@ public class MetricUtilities {
             int[] candidateRemoteEntryCountList = new int[providerSize];
             int index = 0;
             for (var session : providerSessions) {
-                CandidatePhaseMetric metric = session.mCandidatePhasePerProviderMetric;
+                CandidatePhaseMetric metric = session.mProviderSessionMetric
+                        .getCandidatePhasePerProviderMetric();
                 if (sessionId == -1) {
                     sessionId = metric.getSessionId();
                 }

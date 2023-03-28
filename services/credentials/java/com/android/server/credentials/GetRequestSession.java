@@ -112,7 +112,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
         mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
         mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(
                 mProviders.get(componentName.flattenToString())
-                .mCandidatePhasePerProviderMetric);
+                        .mProviderSessionMetric.getCandidatePhasePerProviderMetric());
         if (response != null) {
             mRequestSessionMetric.collectChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_SUCCESS.getMetricCode());
