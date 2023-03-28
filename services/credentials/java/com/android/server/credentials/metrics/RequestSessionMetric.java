@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Provides contextual metric collection for the
+ * Provides contextual metric collection for objects generated from classes such as
  * {@link com.android.server.credentials.GetRequestSession},
  * {@link com.android.server.credentials.CreateRequestSession},
  * and {@link com.android.server.credentials.ClearRequestSession} flows to isolate metric

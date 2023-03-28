@@ -43,8 +43,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 
-import com.android.server.credentials.metrics.EntryEnum;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Central provider session that listens for provider callbacks, and maintains provider state.
@@ -256,7 +253,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         if (exception instanceof GetCredentialException) {
             mProviderException = (GetCredentialException) exception;
         }
-        captureCandidateFailureInMetrics();
+        mProviderSessionMetric.collectCandidateExceptionStatus(/*hasException=*/true);
         updateStatusAndInvokeCallback(toStatus(errorCode));
     }
 
@@ -502,42 +499,12 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         addToInitialRemoteResponse(response, /*isInitialResponse=*/true);
         // Log the data.
         if (mProviderResponseDataHandler.isEmptyResponse(response)) {
+            mProviderSessionMetric.collectCandidateEntryMetrics(response);
             updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE);
             return;
         }
-        gatherCandidateEntryMetrics(response);
+        mProviderSessionMetric.collectCandidateEntryMetrics(response);
         updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED);
-    }
-
-    private void gatherCandidateEntryMetrics(BeginGetCredentialResponse response) {
-        try {
-            int numCredEntries = response.getCredentialEntries().size();
-            int numActionEntries = response.getActions().size();
-            int numAuthEntries = response.getAuthenticationActions().size();
-            int numRemoteEntry = MetricUtilities.ZERO;
-            if (response.getRemoteCredentialEntry() != null) {
-                numRemoteEntry = MetricUtilities.UNIT;
-                mCandidatePhasePerProviderMetric.addEntry(EntryEnum.REMOTE_ENTRY);
-            }
-            response.getCredentialEntries().forEach(c ->
-                    mCandidatePhasePerProviderMetric.addEntry(EntryEnum.CREDENTIAL_ENTRY));
-            response.getActions().forEach(c ->
-                    mCandidatePhasePerProviderMetric.addEntry(EntryEnum.ACTION_ENTRY));
-            response.getAuthenticationActions().forEach(c ->
-                    mCandidatePhasePerProviderMetric.addEntry(EntryEnum.AUTHENTICATION_ENTRY));
-            mCandidatePhasePerProviderMetric.setNumEntriesTotal(numCredEntries + numAuthEntries
-                    + numActionEntries + numRemoteEntry);
-            mCandidatePhasePerProviderMetric.setCredentialEntryCount(numCredEntries);
-            int numTypes = (response.getCredentialEntries().stream()
-                    .map(CredentialEntry::getType).collect(
-                            Collectors.toSet())).size(); // Dedupe type strings
-            mCandidatePhasePerProviderMetric.setCredentialEntryTypeCount(numTypes);
-            mCandidatePhasePerProviderMetric.setActionEntryCount(numActionEntries);
-            mCandidatePhasePerProviderMetric.setAuthenticationEntryCount(numAuthEntries);
-            mCandidatePhasePerProviderMetric.setRemoteEntryCount(numRemoteEntry);
-        } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
-        }
     }
 
     /**
