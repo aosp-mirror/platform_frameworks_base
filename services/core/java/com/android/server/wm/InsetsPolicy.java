@@ -334,7 +334,11 @@ class InsetsPolicy {
             // remove caption insets from floating windows.
             // TODO(b/254128050): Remove this workaround after we find a way to update window frames
             //  and caption insets frames simultaneously.
-            state.removeSource(InsetsState.ITYPE_CAPTION_BAR);
+            for (int i = state.sourceSize() - 1; i >= 0; i--) {
+                if (state.sourceAt(i).getType() == Type.captionBar()) {
+                    state.removeSourceAt(i);
+                }
+            }
         }
 
         final SparseArray<WindowContainerInsetsSourceProvider> providers =
