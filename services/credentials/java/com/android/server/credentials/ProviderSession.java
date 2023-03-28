@@ -244,7 +244,8 @@ public abstract class ProviderSession<T, R>
     // Common method to transfer metrics from the initial phase to the candidate phase per provider
     protected void startCandidateMetrics() {
         try {
-            InitialPhaseMetric initMetric = ((RequestSession) mCallbacks).mInitialPhaseMetric;
+            InitialPhaseMetric initMetric = ((RequestSession) mCallbacks).mRequestSessionMetric
+                    .getInitialPhaseMetric();
             mCandidatePhasePerProviderMetric.setSessionId(initMetric.getSessionId());
             mCandidatePhasePerProviderMetric.setServiceBeganTimeNanoseconds(
                     initMetric.getCredentialServiceStartedTimeNanoseconds());

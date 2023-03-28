@@ -37,8 +37,10 @@ import java.util.Map;
  * from {@link com.android.internal.util.FrameworkStatsLog}.
  */
 public class MetricUtilities {
+    private static final boolean LOG_FLAG = true;
 
     private static final String TAG = "MetricUtilities";
+    public static final String USER_CANCELED_SUBSTRING = "TYPE_USER_CANCELED";
 
     public static final int DEFAULT_INT_32 = -1;
     public static final int[] DEFAULT_REPEATED_INT_32 = new int[0];
@@ -90,10 +92,13 @@ public class MetricUtilities {
      * @param apiStatus            the final status of this particular api call
      * @param emitSequenceId       an emitted sequence id for the current session
      */
-    protected static void logApiCalled(ChosenProviderFinalPhaseMetric finalPhaseMetric,
+    public static void logApiCalledFinalPhase(ChosenProviderFinalPhaseMetric finalPhaseMetric,
             List<CandidateBrowsingPhaseMetric> browsingPhaseMetrics, int apiStatus,
             int emitSequenceId) {
         try {
+            if (!LOG_FLAG) {
+                return;
+            }
             int browsedSize = browsingPhaseMetrics.size();
             int[] browsedClickedEntries = new int[browsedSize];
             int[] browsedProviderUid = new int[browsedSize];
@@ -151,9 +156,12 @@ public class MetricUtilities {
      * @param providers      a map with known providers and their held metric objects
      * @param emitSequenceId an emitted sequence id for the current session
      */
-    protected static void logApiCalled(Map<String, ProviderSession> providers,
+    public static void logApiCalledCandidatePhase(Map<String, ProviderSession> providers,
             int emitSequenceId) {
         try {
+            if (!LOG_FLAG) {
+                return;
+            }
             var providerSessions = providers.values();
             int providerSize = providerSessions.size();
             int sessionId = -1;
@@ -225,14 +233,18 @@ public class MetricUtilities {
      * contain default values for all other optional parameters.
      *
      * TODO(b/271135048) - given space requirements, this may be a good candidate for another atom
+     * TODO immediately remove and carry over TODO to new log for this setup
      *
      * @param apiName    the api name to log
      * @param apiStatus  the status to log
      * @param callingUid the calling uid
      */
-    protected static void logApiCalled(ApiName apiName, ApiStatus apiStatus,
+    public static void logApiCalledSimpleV1(ApiName apiName, ApiStatus apiStatus,
             int callingUid) {
         try {
+            if (!LOG_FLAG) {
+                return;
+            }
             FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED,
                     /* api_name */apiName.getMetricCode(),
                     /* caller_uid */ callingUid,
@@ -258,8 +270,12 @@ public class MetricUtilities {
      * @param initialPhaseMetric contains all the data for this emit
      * @param sequenceNum        the sequence number for this api call session emit
      */
-    protected static void logApiCalled(InitialPhaseMetric initialPhaseMetric, int sequenceNum) {
+    public static void logApiCalledInitialPhase(InitialPhaseMetric initialPhaseMetric,
+            int sequenceNum) {
         try {
+            if (!LOG_FLAG) {
+                return;
+            }
             FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_INIT_PHASE,
                     /* api_name */ initialPhaseMetric.getApiName(),
                     /* caller_uid */ initialPhaseMetric.getCallerUid(),
@@ -275,5 +291,4 @@ public class MetricUtilities {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
-
 }

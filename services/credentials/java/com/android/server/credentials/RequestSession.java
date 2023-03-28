@@ -16,8 +16,6 @@
 
 package com.android.server.credentials;
 
-import static com.android.server.credentials.MetricUtilities.logApiCalled;
-
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
@@ -30,27 +28,25 @@ import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
 import android.util.Log;
 
 import com.android.internal.R;
-import com.android.server.credentials.metrics.CandidateBrowsingPhaseMetric;
-import com.android.server.credentials.metrics.CandidatePhaseMetric;
-import com.android.server.credentials.metrics.ChosenProviderFinalPhaseMetric;
-import com.android.server.credentials.metrics.EntryEnum;
-import com.android.server.credentials.metrics.InitialPhaseMetric;
+import com.android.server.credentials.metrics.ApiName;
+import com.android.server.credentials.metrics.ApiStatus;
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
+import com.android.server.credentials.metrics.RequestSessionMetric;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Base class of a request session, that listens to UI events. This class must be extended
  * every time a new response type is expected from the providers.
  */
-abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialManagerUiCallback {
+abstract class RequestSession<T, U, V> implements CredentialManagerUi.CredentialManagerUiCallback {
     private static final String TAG = "RequestSession";
 
     // TODO: Revise access levels of attributes
@@ -77,16 +73,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
     protected final CancellationSignal mCancellationSignal;
 
     protected final Map<String, ProviderSession> mProviders = new HashMap<>();
-    protected final InitialPhaseMetric mInitialPhaseMetric = new InitialPhaseMetric();
-    protected final ChosenProviderFinalPhaseMetric
-            mChosenProviderFinalPhaseMetric = new ChosenProviderFinalPhaseMetric();
-
-    // TODO(b/271135048) - Group metrics used in a scope together, such as here in RequestSession
-    // TODO(b/271135048) - Replace this with a new atom per each browsing emit (V4)
-    @NonNull
-    protected List<CandidateBrowsingPhaseMetric> mCandidateBrowsingPhaseMetric = new ArrayList<>();
-    // As emits occur in sequential order, increment this counter and utilize
-    protected int mSequenceCounter = 0;
+    protected final RequestSessionMetric mRequestSessionMetric = new RequestSessionMetric();
     protected final String mHybridService;
 
     @NonNull
@@ -122,17 +109,8 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
                 mUserId, this);
         mHybridService = context.getResources().getString(
                 R.string.config_defaultCredentialManagerHybridService);
-        initialPhaseMetricSetup(timestampStarted);
-    }
-
-    private void initialPhaseMetricSetup(long timestampStarted) {
-        try {
-            mInitialPhaseMetric.setCredentialServiceStartedTimeNanoseconds(timestampStarted);
-            mInitialPhaseMetric.setSessionId(mRequestId.hashCode());
-            mInitialPhaseMetric.setCallerUid(mCallingUid);
-        } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
-        }
+        mRequestSessionMetric.collectInitialPhaseMetricInfo(timestampStarted, mRequestId,
+                mCallingUid, ApiName.getMetricCodeFromRequestInfo(mRequestType));
     }
 
     public abstract ProviderSession initiateProviderSession(CredentialProviderInfo providerInfo,
@@ -140,11 +118,10 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
 
     protected abstract void launchUiWithProviderData(ArrayList<ProviderData> providerDataList);
 
-    // Sets up the initial metric collector for use across all request session impls
-    protected void setupInitialPhaseMetric(int metricCode, int requestClassType) {
-        this.mInitialPhaseMetric.setApiName(metricCode);
-        this.mInitialPhaseMetric.setCountRequestClassType(requestClassType);
-    }
+    protected abstract void invokeClientCallbackSuccess(V response) throws RemoteException;
+
+    protected abstract void invokeClientCallbackError(String errorType, String errorMsg) throws
+            RemoteException;
 
     public void addProviderSession(ComponentName componentName, ProviderSession providerSession) {
         mProviders.put(componentName.flattenToString(), providerSession);
@@ -170,24 +147,10 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
             return;
         }
         Log.i(TAG, "Provider session found");
-        logBrowsingPhasePerSelect(selection, providerSession);
+        mRequestSessionMetric.collectMetricPerBrowsingSelect(selection,
+                providerSession.mCandidatePhasePerProviderMetric);
         providerSession.onUiEntrySelected(selection.getEntryKey(),
                 selection.getEntrySubkey(), selection.getPendingIntentProviderResponse());
-    }
-
-    private void logBrowsingPhasePerSelect(UserSelectionDialogResult selection,
-            ProviderSession providerSession) {
-        try {
-            CandidateBrowsingPhaseMetric browsingPhaseMetric = new CandidateBrowsingPhaseMetric();
-            browsingPhaseMetric.setSessionId(this.mInitialPhaseMetric.getSessionId());
-            browsingPhaseMetric.setEntryEnum(
-                    EntryEnum.getMetricCodeFromString(selection.getEntryKey()));
-            browsingPhaseMetric.setProviderUid(providerSession.mCandidatePhasePerProviderMetric
-                    .getCandidateUid());
-            this.mCandidateBrowsingPhaseMetric.add(browsingPhaseMetric);
-        } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
-        }
     }
 
     protected void finishSession(boolean propagateCancellation) {
@@ -206,14 +169,6 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
             }
         }
         return false;
-    }
-
-    protected void logApiCall(ChosenProviderFinalPhaseMetric finalPhaseMetric,
-            List<CandidateBrowsingPhaseMetric> browsingPhaseMetrics, int apiStatus) {
-        // TODO (b/270403549) - this browsing phase object is fine but also have a new emit
-        // For the returned types by authentication entries - i.e. a CandidatePhase During Browse
-        // Possibly think of adding in more atoms for other APIs as well.
-        logApiCalled(finalPhaseMetric, browsingPhaseMetrics, apiStatus, ++mSequenceCounter);
     }
 
     protected boolean isSessionCancelled() {
@@ -239,7 +194,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         ArrayList<ProviderData> providerDataList = getProviderDataForUi();
         if (!providerDataList.isEmpty()) {
             Log.i(TAG, "provider list not empty about to initiate ui");
-            MetricUtilities.logApiCalled(mProviders, ++mSequenceCounter);
+            mRequestSessionMetric.logCandidatePhaseMetrics(mProviders);
             launchUiWithProviderData(providerDataList);
         }
     }
@@ -251,7 +206,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         ArrayList<ProviderData> providerDataList = new ArrayList<>();
 
         if (isSessionCancelled()) {
-            MetricUtilities.logApiCalled(mProviders, ++mSequenceCounter);
+            mRequestSessionMetric.logCandidatePhaseMetrics(mProviders);
             finishSession(/*propagateCancellation=*/true);
             return providerDataList;
         }
@@ -267,54 +222,65 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         return providerDataList;
     }
 
-    protected void collectFinalPhaseMetricStatus(boolean hasException,
-            ProviderStatusForMetrics finalSuccess) {
-        mChosenProviderFinalPhaseMetric.setHasException(hasException);
-        mChosenProviderFinalPhaseMetric.setChosenProviderStatus(
-                finalSuccess.getMetricCode());
+    /**
+     * Allows subclasses to directly finalize the call and set closing metrics on response.
+     *
+     * @param response the response associated with the API call that just completed
+     */
+    protected void respondToClientWithResponseAndFinish(V response) {
+        mRequestSessionMetric.collectFinalPhaseProviderMetricStatus(/*has_exception=*/ false,
+                ProviderStatusForMetrics.FINAL_SUCCESS);
+        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
+            Log.i(TAG, "Request has already been completed. This is strange.");
+            return;
+        }
+        if (isSessionCancelled()) {
+            mRequestSessionMetric.logApiCalledAtFinish(
+                    /*apiStatus=*/ ApiStatus.CLIENT_CANCELED.getMetricCode());
+            finishSession(/*propagateCancellation=*/true);
+            return;
+        }
+        try {
+            invokeClientCallbackSuccess(response);
+            mRequestSessionMetric.logApiCalledAtFinish(
+                    /*apiStatus=*/ ApiStatus.SUCCESS.getMetricCode());
+        } catch (RemoteException e) {
+            mRequestSessionMetric.collectFinalPhaseProviderMetricStatus(
+                    /*has_exception=*/ true, ProviderStatusForMetrics.FINAL_FAILURE);
+            Log.i(TAG, "Issue while responding to client with a response : " + e.getMessage());
+            mRequestSessionMetric.logApiCalledAtFinish(
+                    /*apiStatus=*/ ApiStatus.FAILURE.getMetricCode());
+        }
+        finishSession(/*propagateCancellation=*/false);
     }
 
     /**
-     * Called by RequestSession's upon chosen metric determination. It's expected that most bits
-     * are transferred here. However, certain new information, such as the selected provider's final
-     * exception bit, the framework to ui and back latency, or the ui response bit are set at other
-     * locations. Other information, such browsing metrics, api_status, and the sequence id count
-     * are combined together during the final emit moment with the actual and official
-     * {@link com.android.internal.util.FrameworkStatsLog} metric generation.
+     * Allows subclasses to directly finalize the call and set closing metrics on error completion.
      *
-     * @param componentName the componentName to associate with a provider
+     * @param errorType the type of error given back in the flow
+     * @param errorMsg the error message given back in the flow
      */
-    protected void setChosenMetric(ComponentName componentName) {
-        try {
-            CandidatePhaseMetric metric = this.mProviders.get(componentName.flattenToString())
-                    .mCandidatePhasePerProviderMetric;
-
-            mChosenProviderFinalPhaseMetric.setSessionId(metric.getSessionId());
-            mChosenProviderFinalPhaseMetric.setChosenUid(metric.getCandidateUid());
-
-            mChosenProviderFinalPhaseMetric.setQueryPhaseLatencyMicroseconds(
-                    metric.getQueryLatencyMicroseconds());
-
-            mChosenProviderFinalPhaseMetric.setServiceBeganTimeNanoseconds(
-                    metric.getServiceBeganTimeNanoseconds());
-            mChosenProviderFinalPhaseMetric.setQueryStartTimeNanoseconds(
-                    metric.getStartQueryTimeNanoseconds());
-            mChosenProviderFinalPhaseMetric.setQueryEndTimeNanoseconds(metric
-                    .getQueryFinishTimeNanoseconds());
-
-            mChosenProviderFinalPhaseMetric.setNumEntriesTotal(metric.getNumEntriesTotal());
-            mChosenProviderFinalPhaseMetric.setCredentialEntryCount(metric
-                    .getCredentialEntryCount());
-            mChosenProviderFinalPhaseMetric.setCredentialEntryTypeCount(
-                    metric.getCredentialEntryTypeCount());
-            mChosenProviderFinalPhaseMetric.setActionEntryCount(metric.getActionEntryCount());
-            mChosenProviderFinalPhaseMetric.setRemoteEntryCount(metric.getRemoteEntryCount());
-            mChosenProviderFinalPhaseMetric.setAuthenticationEntryCount(
-                    metric.getAuthenticationEntryCount());
-            mChosenProviderFinalPhaseMetric.setAvailableEntries(metric.getAvailableEntries());
-            mChosenProviderFinalPhaseMetric.setFinalFinishTimeNanoseconds(System.nanoTime());
-        } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+    protected void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
+        mRequestSessionMetric.collectFinalPhaseProviderMetricStatus(
+                /*has_exception=*/ true, ProviderStatusForMetrics.FINAL_FAILURE);
+        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
+            Log.i(TAG, "Request has already been completed. This is strange.");
+            return;
         }
+        if (isSessionCancelled()) {
+            mRequestSessionMetric.logApiCalledAtFinish(
+                    /*apiStatus=*/ ApiStatus.CLIENT_CANCELED.getMetricCode());
+            finishSession(/*propagateCancellation=*/true);
+            return;
+        }
+
+        try {
+            invokeClientCallbackError(errorType, errorMsg);
+        } catch (RemoteException e) {
+            Log.i(TAG, "Issue while responding to client with error : " + e.getMessage());
+        }
+        boolean isUserCanceled = errorType.contains(MetricUtilities.USER_CANCELED_SUBSTRING);
+        mRequestSessionMetric.logFailureOrUserCancel(isUserCanceled);
+        finishSession(/*propagateCancellation=*/false);
     }
 }
