@@ -89,7 +89,7 @@ interface FooterActionsInteractor {
     fun showSettings(expandable: Expandable)
 
     /** Show the user switcher. */
-    fun showUserSwitcher(context: Context, expandable: Expandable)
+    fun showUserSwitcher(expandable: Expandable)
 }
 
 @SysUISingleton
@@ -177,7 +177,7 @@ constructor(
         )
     }
 
-    override fun showUserSwitcher(context: Context, expandable: Expandable) {
-        userInteractor.showUserSwitcher(context, expandable)
+    override fun showUserSwitcher(expandable: Expandable) {
+        userInteractor.showUserSwitcher(expandable)
     }
 }
