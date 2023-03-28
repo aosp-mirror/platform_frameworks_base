@@ -49,7 +49,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
-import com.android.systemui.user.UserSwitcherActivity
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.user.data.source.UserRecord
@@ -513,24 +512,12 @@ constructor(
         }
     }
 
-    fun showUserSwitcher(context: Context, expandable: Expandable) {
-        if (!featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)) {
+    fun showUserSwitcher(expandable: Expandable) {
+        if (featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)) {
+            showDialog(ShowDialogRequestModel.ShowUserSwitcherFullscreenDialog(expandable))
+        } else {
             showDialog(ShowDialogRequestModel.ShowUserSwitcherDialog(expandable))
-            return
         }
-
-        val intent =
-            Intent(context, UserSwitcherActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-
-        activityStarter.startActivity(
-            intent,
-            true /* dismissShade */,
-            expandable.activityLaunchController(),
-            true /* showOverlockscreenwhenlocked */,
-            UserHandle.SYSTEM,
-        )
     }
 
     private fun showDialog(request: ShowDialogRequestModel) {
