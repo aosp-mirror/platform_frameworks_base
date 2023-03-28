@@ -2992,9 +2992,19 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         activateEscrowTokens(authToken, userId);
 
-        if (isProfileWithSeparatedLock(userId)) {
-            setDeviceUnlockedForUser(userId);
+        if (isCredentialSharableWithParent(userId)) {
+            if (getSeparateProfileChallengeEnabledInternal(userId)) {
+                setDeviceUnlockedForUser(userId);
+            } else {
+                // Here only clear StrongAuthFlags for a profile that has a unified challenge.
+                // StrongAuth for a profile with a separate challenge is handled differently and
+                // is cleared after the user successfully confirms the separate challenge to enter
+                // the profile. StrongAuth for the full user (e.g. userId 0) is also handled
+                // separately by Keyguard.
+                mStrongAuth.reportUnlock(userId);
+            }
         }
+
         mStrongAuth.reportSuccessfulStrongAuthUnlock(userId);
 
         onAuthTokenKnownForUser(userId, authToken);
