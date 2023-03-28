@@ -17,7 +17,7 @@
 package android.telephony.satellite.stub;
 
 import android.telephony.satellite.stub.NTRadioTechnology;
-
+import android.telephony.satellite.AntennaPosition;
 /**
  * {@hide}
  */
@@ -36,4 +36,14 @@ parcelable SatelliteCapabilities {
      * The maximum number of bytes per datagram that can be sent over satellite.
      */
     int maxBytesPerOutgoingDatagram;
+
+    /**
+     * Keys which are used to fill mAntennaPositionMap.
+     */
+    int[] antennaPositionKeys;
+
+    /**
+     * Antenna Position for different display modes received from satellite modem.
+     */
+    AntennaPosition[] antennaPositionValues;
 }

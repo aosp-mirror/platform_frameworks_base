@@ -21,7 +21,10 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -44,15 +47,25 @@ public final class SatelliteCapabilities implements Parcelable {
     private int mMaxBytesPerOutgoingDatagram;
 
     /**
+     * Antenna Position received from satellite modem which gives information about antenna
+     * direction to be used with satellite communication and suggested device hold positions.
+     * Map key: {@link SatelliteManager.DeviceHoldPosition} value: AntennaPosition
+     */
+    @NonNull
+    private Map<Integer, AntennaPosition> mAntennaPositionMap;
+
+    /**
      * @hide
      */
     @UnsupportedAppUsage
     public SatelliteCapabilities(Set<Integer> supportedRadioTechnologies,
-            boolean isPointingRequired, int maxBytesPerOutgoingDatagram) {
+            boolean isPointingRequired, int maxBytesPerOutgoingDatagram,
+            @NonNull Map<Integer, AntennaPosition> antennaPositionMap) {
         mSupportedRadioTechnologies = supportedRadioTechnologies == null
                 ? new HashSet<>() : supportedRadioTechnologies;
         mIsPointingRequired = isPointingRequired;
         mMaxBytesPerOutgoingDatagram = maxBytesPerOutgoingDatagram;
+        mAntennaPositionMap = antennaPositionMap;
     }
 
     private SatelliteCapabilities(Parcel in) {
@@ -77,6 +90,17 @@ public final class SatelliteCapabilities implements Parcelable {
 
         out.writeBoolean(mIsPointingRequired);
         out.writeInt(mMaxBytesPerOutgoingDatagram);
+
+        if (mAntennaPositionMap != null && !mAntennaPositionMap.isEmpty()) {
+            int size = mAntennaPositionMap.size();
+            out.writeInt(size);
+            for (Map.Entry<Integer, AntennaPosition> entry : mAntennaPositionMap.entrySet()) {
+                out.writeInt(entry.getKey());
+                out.writeParcelable(entry.getValue(), flags);
+            }
+        } else {
+            out.writeInt(0);
+        }
     }
 
     @NonNull public static final Creator<SatelliteCapabilities> CREATOR = new Creator<>() {
@@ -109,9 +133,30 @@ public final class SatelliteCapabilities implements Parcelable {
         sb.append(mIsPointingRequired);
         sb.append(",");
 
-        sb.append("maxBytesPerOutgoingDatagram");
+        sb.append("maxBytesPerOutgoingDatagram:");
         sb.append(mMaxBytesPerOutgoingDatagram);
+        sb.append(",");
+
+        sb.append("antennaPositionMap:");
+        sb.append(mAntennaPositionMap);
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SatelliteCapabilities that = (SatelliteCapabilities) o;
+        return Objects.equals(mSupportedRadioTechnologies, that.mSupportedRadioTechnologies)
+                && mIsPointingRequired == that.mIsPointingRequired
+                && mMaxBytesPerOutgoingDatagram == that.mMaxBytesPerOutgoingDatagram
+                && Objects.equals(mAntennaPositionMap, that.mAntennaPositionMap);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mSupportedRadioTechnologies, mIsPointingRequired,
+                mMaxBytesPerOutgoingDatagram, mAntennaPositionMap);
     }
 
     /**
@@ -141,6 +186,16 @@ public final class SatelliteCapabilities implements Parcelable {
         return mMaxBytesPerOutgoingDatagram;
     }
 
+    /**
+     * Antenna Position received from satellite modem which gives information about antenna
+     * direction to be used with satellite communication and suggested device hold positions.
+     * @return Map key: {@link SatelliteManager.DeviceHoldPosition} value: AntennaPosition
+     */
+    @NonNull
+    public Map<Integer, AntennaPosition> getAntennaPositionMap() {
+        return mAntennaPositionMap;
+    }
+
     private void readFromParcel(Parcel in) {
         mSupportedRadioTechnologies = new HashSet<>();
         int numSupportedRadioTechnologies = in.readInt();
@@ -152,5 +207,14 @@ public final class SatelliteCapabilities implements Parcelable {
 
         mIsPointingRequired = in.readBoolean();
         mMaxBytesPerOutgoingDatagram = in.readInt();
+
+        mAntennaPositionMap = new HashMap<>();
+        int antennaPositionMapSize = in.readInt();
+        for (int i = 0; i < antennaPositionMapSize; i++) {
+            int key = in.readInt();
+            AntennaPosition antennaPosition = in.readParcelable(
+                    AntennaPosition.class.getClassLoader(), AntennaPosition.class);
+            mAntennaPositionMap.put(key, antennaPosition);
+        }
     }
 }
