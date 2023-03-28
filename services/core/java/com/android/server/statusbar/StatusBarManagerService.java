@@ -33,6 +33,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
@@ -178,6 +179,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     private final SessionMonitor mSessionMonitor;
     private int mCurrentUserId;
     private boolean mTracingEnabled;
+    private int mLastSystemKey = -1;
 
     private final TileRequestTracker mTileRequestTracker;
 
@@ -905,12 +907,22 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             return;
         }
 
+        mLastSystemKey = key;
+
         if (mBar != null) {
             try {
                 mBar.handleSystemKey(key);
             } catch (RemoteException ex) {
             }
         }
+    }
+
+    @Override
+    @TestApi
+    public int getLastSystemKey() {
+        enforceStatusBar();
+
+        return mLastSystemKey;
     }
 
     @Override
