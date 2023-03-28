@@ -28,7 +28,6 @@ import android.hardware.BatteryState;
 import android.hardware.SensorManager;
 import android.hardware.input.HostUsiVersion;
 import android.hardware.input.InputDeviceIdentifier;
-import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerGlobal;
 import android.hardware.lights.LightsManager;
 import android.icu.util.ULocale;
@@ -1191,7 +1190,8 @@ public final class InputDevice implements Parcelable {
     public LightsManager getLightsManager() {
         synchronized (mMotionRanges) {
             if (mLightsManager == null) {
-                mLightsManager = InputManager.getInstance().getInputDeviceLightsManager(mId);
+                mLightsManager = InputManagerGlobal.getInstance()
+                        .getInputDeviceLightsManager(mId);
             }
         }
         return mLightsManager;
