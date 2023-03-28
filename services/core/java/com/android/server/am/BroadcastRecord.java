@@ -999,23 +999,50 @@ final class BroadcastRecord extends Binder {
 
     private static boolean matchesDeliveryGroup(@NonNull BroadcastRecord newRecord,
             @NonNull BroadcastRecord oldRecord) {
-        final String newMatchingKey = getDeliveryGroupMatchingKey(newRecord);
-        final String oldMatchingKey = getDeliveryGroupMatchingKey(oldRecord);
         final IntentFilter newMatchingFilter = getDeliveryGroupMatchingFilter(newRecord);
         // If neither delivery group key nor matching filter is specified, then use
         // Intent.filterEquals() to identify the delivery group.
-        if (newMatchingKey == null && oldMatchingKey == null && newMatchingFilter == null) {
+        if (isMatchingKeyNull(newRecord) && isMatchingKeyNull(oldRecord)
+                && newMatchingFilter == null) {
             return newRecord.intent.filterEquals(oldRecord.intent);
         }
         if (newMatchingFilter != null && !newMatchingFilter.asPredicate().test(oldRecord.intent)) {
             return false;
         }
-        return Objects.equals(newMatchingKey, oldMatchingKey);
+        return areMatchingKeysEqual(newRecord, oldRecord);
+    }
+
+    private static boolean isMatchingKeyNull(@NonNull BroadcastRecord record) {
+        final String namespace = getDeliveryGroupMatchingNamespaceFragment(record);
+        final String key = getDeliveryGroupMatchingKeyFragment(record);
+        // If either namespace or key part is null, then treat the entire matching key as null.
+        return namespace == null || key == null;
+    }
+
+    private static boolean areMatchingKeysEqual(@NonNull BroadcastRecord newRecord,
+            @NonNull BroadcastRecord oldRecord) {
+        final String newNamespaceFragment = getDeliveryGroupMatchingNamespaceFragment(newRecord);
+        final String oldNamespaceFragment = getDeliveryGroupMatchingNamespaceFragment(oldRecord);
+        if (!Objects.equals(newNamespaceFragment, oldNamespaceFragment)) {
+            return false;
+        }
+
+        final String newKeyFragment = getDeliveryGroupMatchingKeyFragment(newRecord);
+        final String oldKeyFragment = getDeliveryGroupMatchingKeyFragment(oldRecord);
+        return Objects.equals(newKeyFragment, oldKeyFragment);
     }
 
     @Nullable
-    private static String getDeliveryGroupMatchingKey(@NonNull BroadcastRecord record) {
-        return record.options == null ? null : record.options.getDeliveryGroupMatchingKey();
+    private static String getDeliveryGroupMatchingNamespaceFragment(
+            @NonNull BroadcastRecord record) {
+        return record.options == null
+                ? null : record.options.getDeliveryGroupMatchingNamespaceFragment();
+    }
+
+    @Nullable
+    private static String getDeliveryGroupMatchingKeyFragment(@NonNull BroadcastRecord record) {
+        return record.options == null
+                ? null : record.options.getDeliveryGroupMatchingKeyFragment();
     }
 
     @Nullable
