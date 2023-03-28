@@ -7088,6 +7088,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId) {
+        mContext.enforceCallingOrSelfPermission(REGISTER_WINDOW_MANAGER_LISTENERS,
+                "requestAppKeyboardShortcuts");
+
         try {
             WindowState focusedWindow = getFocusedWindow();
             if (focusedWindow != null && focusedWindow.mClient != null) {

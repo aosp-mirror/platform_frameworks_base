@@ -24,7 +24,6 @@ import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -43,17 +42,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.mockito.Mock
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
-
-    @Mock private lateinit var bouncerInteractor: PrimaryBouncerInteractor
 
     private lateinit var underTest: MultiShadeMotionEventInteractor
 
@@ -67,8 +60,6 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
         testScope = TestScope()
         motionEvents = mutableSetOf()
 
@@ -95,7 +86,6 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
                     KeyguardTransitionInteractor(
                         repository = keyguardTransitionRepository,
                     ),
-                bouncerInteractor = bouncerInteractor,
                 falsingManager = falsingManager,
             )
     }
@@ -400,7 +390,7 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun dragBouncerAboveTouchSlopAndUp_showsBouncer() =
+    fun dragUp_withUp_doesNotShowShade() =
         testScope.runTest {
             val leftShadeProxiedInput by collectLastValue(interactor.proxiedInput(ShadeId.LEFT))
             val rightShadeProxiedInput by collectLastValue(interactor.proxiedInput(ShadeId.RIGHT))
@@ -423,24 +413,22 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
                     x = 100f, // left shade
                     y = yDragAmountPx,
                 )
-            assertThat(underTest.shouldIntercept(moveEvent)).isTrue()
+            assertThat(underTest.shouldIntercept(moveEvent)).isFalse()
             underTest.onTouchEvent(moveEvent, viewWidthPx = 1000)
-            verify(bouncerInteractor).show(isScrimmed = true)
             assertThat(leftShadeProxiedInput).isNull()
             assertThat(rightShadeProxiedInput).isNull()
             assertThat(singleShadeProxiedInput).isNull()
 
             val upEvent = motionEvent(MotionEvent.ACTION_UP)
-            assertThat(underTest.shouldIntercept(upEvent)).isTrue()
+            assertThat(underTest.shouldIntercept(upEvent)).isFalse()
             underTest.onTouchEvent(upEvent, viewWidthPx = 1000)
-            verify(bouncerInteractor, never()).hide()
             assertThat(leftShadeProxiedInput).isNull()
             assertThat(rightShadeProxiedInput).isNull()
             assertThat(singleShadeProxiedInput).isNull()
         }
 
     @Test
-    fun dragBouncerAboveTouchSlopAndCancel_falseTouch_showsThenHidesBouncer() =
+    fun dragUp_withCancel_falseTouch_showsThenHidesBouncer() =
         testScope.runTest {
             val leftShadeProxiedInput by collectLastValue(interactor.proxiedInput(ShadeId.LEFT))
             val rightShadeProxiedInput by collectLastValue(interactor.proxiedInput(ShadeId.RIGHT))
@@ -463,18 +451,16 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
                     x = 900f, // right shade
                     y = yDragAmountPx,
                 )
-            assertThat(underTest.shouldIntercept(moveEvent)).isTrue()
+            assertThat(underTest.shouldIntercept(moveEvent)).isFalse()
             underTest.onTouchEvent(moveEvent, viewWidthPx = 1000)
-            verify(bouncerInteractor).show(isScrimmed = true)
             assertThat(leftShadeProxiedInput).isNull()
             assertThat(rightShadeProxiedInput).isNull()
             assertThat(singleShadeProxiedInput).isNull()
 
             falsingManager.setIsFalseTouch(true)
             val cancelEvent = motionEvent(MotionEvent.ACTION_CANCEL)
-            assertThat(underTest.shouldIntercept(cancelEvent)).isTrue()
+            assertThat(underTest.shouldIntercept(cancelEvent)).isFalse()
             underTest.onTouchEvent(cancelEvent, viewWidthPx = 1000)
-            verify(bouncerInteractor).hide()
             assertThat(leftShadeProxiedInput).isNull()
             assertThat(rightShadeProxiedInput).isNull()
             assertThat(singleShadeProxiedInput).isNull()

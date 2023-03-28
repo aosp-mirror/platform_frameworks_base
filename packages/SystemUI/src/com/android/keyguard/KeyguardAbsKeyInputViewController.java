@@ -277,6 +277,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     @Override
     public void onResume(int reason) {
         mResumed = true;
+        reset();
     }
 
     @Override

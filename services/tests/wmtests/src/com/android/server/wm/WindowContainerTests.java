@@ -22,8 +22,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.view.InsetsState.ITYPE_BOTTOM_GENERIC_OVERLAY;
-import static android.view.InsetsState.ITYPE_TOP_GENERIC_OVERLAY;
 import static android.view.WindowInsets.Type.systemOverlays;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -73,11 +71,13 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
+import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -1437,40 +1437,46 @@ public class WindowContainerTests extends WindowTestsBase {
         activity2.addWindow(createWindowState(attrs2, activity2));
         Rect genericOverlayInsetsRect1 = new Rect(0, 200, 1080, 700);
         Rect genericOverlayInsetsRect2 = new Rect(0, 0, 1080, 200);
+        final InsetsFrameProvider provider1 =
+                new InsetsFrameProvider(null, 1, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(genericOverlayInsetsRect1);
+        final InsetsFrameProvider provider2 =
+                new InsetsFrameProvider(null, 2, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(genericOverlayInsetsRect2);
+        final int sourceId1 = InsetsSource.createId(
+                provider1.getOwner(), provider1.getIndex(), provider1.getType());
+        final int sourceId2 = InsetsSource.createId(
+                provider2.getOwner(), provider2.getIndex(), provider2.getType());
 
-        rootTask.addLocalRectInsetsSourceProvider(genericOverlayInsetsRect1,
-                new int[]{ITYPE_TOP_GENERIC_OVERLAY});
-        container.addLocalRectInsetsSourceProvider(genericOverlayInsetsRect2,
-                new int[]{ITYPE_BOTTOM_GENERIC_OVERLAY});
+        rootTask.addLocalInsetsFrameProvider(provider1);
+        container.addLocalInsetsFrameProvider(provider2);
 
         InsetsSource genericOverlayInsetsProvider1Source = new InsetsSource(
-                ITYPE_TOP_GENERIC_OVERLAY, systemOverlays());
+                sourceId1, systemOverlays());
         genericOverlayInsetsProvider1Source.setFrame(genericOverlayInsetsRect1);
         genericOverlayInsetsProvider1Source.setVisible(true);
         InsetsSource genericOverlayInsetsProvider2Source = new InsetsSource(
-                ITYPE_BOTTOM_GENERIC_OVERLAY, systemOverlays());
+                sourceId2, systemOverlays());
         genericOverlayInsetsProvider2Source.setFrame(genericOverlayInsetsRect2);
         genericOverlayInsetsProvider2Source.setVisible(true);
 
         activity0.forAllWindows(window -> {
             assertEquals(genericOverlayInsetsRect1,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY).getFrame());
+                    window.getInsetsState().peekSource(sourceId1).getFrame());
             assertEquals(null,
-                    window.getInsetsState().peekSource(ITYPE_BOTTOM_GENERIC_OVERLAY));
+                    window.getInsetsState().peekSource(sourceId2));
         }, true);
         activity1.forAllWindows(window -> {
             assertEquals(genericOverlayInsetsRect1,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY).getFrame());
+                    window.getInsetsState().peekSource(sourceId1).getFrame());
             assertEquals(genericOverlayInsetsRect2,
-                    window.getInsetsState().peekSource(ITYPE_BOTTOM_GENERIC_OVERLAY)
-                            .getFrame());
+                    window.getInsetsState().peekSource(sourceId2).getFrame());
         }, true);
         activity2.forAllWindows(window -> {
             assertEquals(genericOverlayInsetsRect1,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY).getFrame());
+                    window.getInsetsState().peekSource(sourceId1).getFrame());
             assertEquals(genericOverlayInsetsRect2,
-                    window.getInsetsState().peekSource(ITYPE_BOTTOM_GENERIC_OVERLAY)
-                            .getFrame());
+                    window.getInsetsState().peekSource(sourceId2).getFrame());
         }, true);
     }
 
@@ -1490,22 +1496,30 @@ public class WindowContainerTests extends WindowTestsBase {
         attrs.setTitle("AppWindow0");
         activity0.addWindow(createWindowState(attrs, activity0));
 
-        Rect genericOverlayInsetsRect1 = new Rect(0, 200, 1080, 700);
-        Rect genericOverlayInsetsRect2 = new Rect(0, 0, 1080, 200);
+        final Rect genericOverlayInsetsRect1 = new Rect(0, 200, 1080, 700);
+        final Rect genericOverlayInsetsRect2 = new Rect(0, 0, 1080, 200);
+        final InsetsFrameProvider provider1 =
+                new InsetsFrameProvider(null, 1, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(genericOverlayInsetsRect1);
+        final InsetsFrameProvider provider2 =
+                new InsetsFrameProvider(null, 1, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(genericOverlayInsetsRect2);
+        final int sourceId1 = InsetsSource.createId(
+                provider1.getOwner(), provider1.getIndex(), provider1.getType());
+        final int sourceId2 = InsetsSource.createId(
+                provider2.getOwner(), provider2.getIndex(), provider2.getType());
 
-        rootTask.addLocalRectInsetsSourceProvider(genericOverlayInsetsRect1,
-                new int[]{ITYPE_TOP_GENERIC_OVERLAY});
+        rootTask.addLocalInsetsFrameProvider(provider1);
         activity0.forAllWindows(window -> {
             assertEquals(genericOverlayInsetsRect1,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY).getFrame());
+                    window.getInsetsState().peekSource(sourceId1).getFrame());
         }, true);
 
-        rootTask.addLocalRectInsetsSourceProvider(genericOverlayInsetsRect2,
-                new int[]{ITYPE_TOP_GENERIC_OVERLAY});
+        rootTask.addLocalInsetsFrameProvider(provider2);
 
         activity0.forAllWindows(window -> {
             assertEquals(genericOverlayInsetsRect2,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY).getFrame());
+                    window.getInsetsState().peekSource(sourceId2).getFrame());
         }, true);
     }
 
@@ -1543,35 +1557,44 @@ public class WindowContainerTests extends WindowTestsBase {
         activity2.addWindow(createWindowState(attrs2, activity2));
 
         activity2.addWindow(createWindowState(attrs2, activity2));
-        Rect navigationBarInsetsRect1 = new Rect(0, 200, 1080, 700);
-        Rect navigationBarInsetsRect2 = new Rect(0, 0, 1080, 200);
 
-        rootTask.addLocalRectInsetsSourceProvider(navigationBarInsetsRect1,
-                new int[]{ITYPE_TOP_GENERIC_OVERLAY});
-        container.addLocalRectInsetsSourceProvider(navigationBarInsetsRect2,
-                new int[]{ITYPE_BOTTOM_GENERIC_OVERLAY});
+        final Rect navigationBarInsetsRect1 = new Rect(0, 200, 1080, 700);
+        final Rect navigationBarInsetsRect2 = new Rect(0, 0, 1080, 200);
+        final InsetsFrameProvider provider1 =
+                new InsetsFrameProvider(null, 1, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(navigationBarInsetsRect1);
+        final InsetsFrameProvider provider2 =
+                new InsetsFrameProvider(null, 2, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(navigationBarInsetsRect2);
+        final int sourceId1 = InsetsSource.createId(
+                provider1.getOwner(), provider1.getIndex(), provider1.getType());
+        final int sourceId2 = InsetsSource.createId(
+                provider2.getOwner(), provider2.getIndex(), provider2.getType());
+
+        rootTask.addLocalInsetsFrameProvider(provider1);
+        container.addLocalInsetsFrameProvider(provider2);
         mDisplayContent.getInsetsStateController().onPostLayout();
-        rootTask.removeLocalInsetsSourceProvider(new int[]{ITYPE_TOP_GENERIC_OVERLAY});
+        rootTask.removeLocalInsetsFrameProvider(provider1);
         mDisplayContent.getInsetsStateController().onPostLayout();
 
         activity0.forAllWindows(window -> {
             assertEquals(null,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY));
+                    window.getInsetsState().peekSource(sourceId1));
             assertEquals(null,
-                    window.getInsetsState().peekSource(ITYPE_BOTTOM_GENERIC_OVERLAY));
+                    window.getInsetsState().peekSource(sourceId2));
         }, true);
         activity1.forAllWindows(window -> {
             assertEquals(null,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY));
+                    window.getInsetsState().peekSource(sourceId1));
             assertEquals(navigationBarInsetsRect2,
-                    window.getInsetsState().peekSource(ITYPE_BOTTOM_GENERIC_OVERLAY)
+                    window.getInsetsState().peekSource(sourceId2)
                                     .getFrame());
         }, true);
         activity2.forAllWindows(window -> {
             assertEquals(null,
-                    window.getInsetsState().peekSource(ITYPE_TOP_GENERIC_OVERLAY));
+                    window.getInsetsState().peekSource(sourceId1));
             assertEquals(navigationBarInsetsRect2,
-                    window.getInsetsState().peekSource(ITYPE_BOTTOM_GENERIC_OVERLAY)
+                    window.getInsetsState().peekSource(sourceId2)
                             .getFrame());
         }, true);
     }

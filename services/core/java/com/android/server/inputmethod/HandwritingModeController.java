@@ -24,8 +24,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UiThread;
-import android.hardware.input.InputManager;
 import android.os.Handler;
+import android.hardware.input.InputManagerGlobal;
 import android.os.IBinder;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -255,7 +255,8 @@ final class HandwritingModeController {
         }
         if (DEBUG) Slog.d(TAG, "Starting handwriting session in display: " + mCurrentDisplayId);
 
-        InputManager.getInstance().pilferPointers(mHandwritingSurface.getInputChannel().getToken());
+        InputManagerGlobal.getInstance()
+                .pilferPointers(mHandwritingSurface.getInputChannel().getToken());
 
         // Stop processing more events.
         mHandwritingEventReceiver.dispose();
