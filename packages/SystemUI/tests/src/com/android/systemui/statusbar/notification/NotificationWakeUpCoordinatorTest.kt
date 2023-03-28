@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import androidx.core.animation.AnimatorTestRule
+import androidx.core.animation.AnimatorTestRule2
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -51,7 +51,7 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
 
-    @get:Rule val animatorTestRule = AnimatorTestRule()
+    @get:Rule val animatorTestRule = AnimatorTestRule2()
 
     private val dumpManager: DumpManager = mock()
     private val headsUpManager: HeadsUpManager = mock()
