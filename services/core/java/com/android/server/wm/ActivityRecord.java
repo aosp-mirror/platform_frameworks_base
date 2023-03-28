@@ -173,6 +173,7 @@ import static com.android.server.wm.ActivityRecordProto.MIN_ASPECT_RATIO;
 import static com.android.server.wm.ActivityRecordProto.NAME;
 import static com.android.server.wm.ActivityRecordProto.NUM_DRAWN_WINDOWS;
 import static com.android.server.wm.ActivityRecordProto.NUM_INTERESTING_WINDOWS;
+import static com.android.server.wm.ActivityRecordProto.OVERRIDE_ORIENTATION;
 import static com.android.server.wm.ActivityRecordProto.PIP_AUTO_ENTER_ENABLED;
 import static com.android.server.wm.ActivityRecordProto.PROC_ID;
 import static com.android.server.wm.ActivityRecordProto.PROVIDES_MAX_BOUNDS;
@@ -10212,6 +10213,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(PROVIDES_MAX_BOUNDS, providesMaxBounds());
         proto.write(ENABLE_RECENTS_SCREENSHOT, mEnableRecentsScreenshot);
         proto.write(LAST_DROP_INPUT_MODE, mLastDropInputMode);
+        proto.write(OVERRIDE_ORIENTATION, getOverrideOrientation());
     }
 
     @Override
