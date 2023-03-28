@@ -34,7 +34,7 @@ import android.util.SparseArray;
 import android.view.InputApplicationHandle;
 
 import com.android.internal.os.TimeoutRecord;
-import com.android.server.am.ActivityManagerService;
+import com.android.server.am.StackTracesDumpHelper;
 import com.android.server.criticalevents.CriticalEventLog;
 
 import java.io.File;
@@ -336,7 +336,7 @@ class AnrController {
 
             String criticalEvents =
                     CriticalEventLog.getInstance().logLinesForSystemServerTraceFile();
-            final File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
+            final File tracesFile = StackTracesDumpHelper.dumpStackTraces(firstPids,
                     null /* processCpuTracker */, null /* lastPids */,
                     CompletableFuture.completedFuture(nativePids),
                     null /* logExceptionCreatingFile */, "Pre-dump", criticalEvents,
