@@ -123,11 +123,9 @@ class FlashNotificationsController {
     private static final int SCREEN_DEFAULT_COLOR_WITH_ALPHA =
             SCREEN_DEFAULT_COLOR | SCREEN_DEFAULT_ALPHA;
 
-    // TODO(b/266775677): Make protected-broadcast intent
     @VisibleForTesting
     static final String ACTION_FLASH_NOTIFICATION_START_PREVIEW =
             "com.android.internal.intent.action.FLASH_NOTIFICATION_START_PREVIEW";
-    // TODO(b/266775677): Make protected-broadcast intent
     @VisibleForTesting
     static final String ACTION_FLASH_NOTIFICATION_STOP_PREVIEW =
             "com.android.internal.intent.action.FLASH_NOTIFICATION_STOP_PREVIEW";
@@ -143,13 +141,10 @@ class FlashNotificationsController {
     @VisibleForTesting
     static final int PREVIEW_TYPE_LONG = 1;
 
-    // TODO(b/266775683): Move to settings provider
     @VisibleForTesting
     static final String SETTING_KEY_CAMERA_FLASH_NOTIFICATION = "camera_flash_notification";
-    // TODO(b/266775683): Move to settings provider
     @VisibleForTesting
     static final String SETTING_KEY_SCREEN_FLASH_NOTIFICATION = "screen_flash_notification";
-    // TODO(b/266775683): Move to settings provider
     @VisibleForTesting
     static final String SETTING_KEY_SCREEN_FLASH_NOTIFICATION_COLOR =
             "screen_flash_notification_color_global";
