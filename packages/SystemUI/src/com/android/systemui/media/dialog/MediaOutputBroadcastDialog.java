@@ -17,6 +17,10 @@
 package com.android.systemui.media.dialog;
 
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothLeBroadcastAssistant;
+import android.bluetooth.BluetoothLeBroadcastMetadata;
+import android.bluetooth.BluetoothLeBroadcastReceiveState;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -34,8 +38,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.graphics.drawable.IconCompat;
 
+import com.android.settingslib.media.BluetoothMediaDevice;
+import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.qrcode.QrCodeGenerator;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastSender;
@@ -49,7 +56,7 @@ import com.google.zxing.WriterException;
  */
 @SysUISingleton
 public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
-    private static final String TAG = "BroadcastDialog";
+    private static final String TAG = "MediaOutputBroadcastDialog";
 
     private ViewStub mBroadcastInfoArea;
     private ImageView mBroadcastQrCodeView;
@@ -66,6 +73,7 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
     private String mCurrentBroadcastName;
     private String mCurrentBroadcastCode;
     private boolean mIsStopbyUpdateBroadcastCode = false;
+
     private TextWatcher mTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -105,6 +113,79 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         }
     };
 
+    private boolean mIsLeBroadcastAssistantCallbackRegistered;
+
+    private BluetoothLeBroadcastAssistant.Callback mBroadcastAssistantCallback =
+            new BluetoothLeBroadcastAssistant.Callback() {
+                @Override
+                public void onSearchStarted(int reason) {
+                    Log.d(TAG, "Assistant-onSearchStarted: " + reason);
+                }
+
+                @Override
+                public void onSearchStartFailed(int reason) {
+                    Log.d(TAG, "Assistant-onSearchStartFailed: " + reason);
+                }
+
+                @Override
+                public void onSearchStopped(int reason) {
+                    Log.d(TAG, "Assistant-onSearchStopped: " + reason);
+                }
+
+                @Override
+                public void onSearchStopFailed(int reason) {
+                    Log.d(TAG, "Assistant-onSearchStopFailed: " + reason);
+                }
+
+                @Override
+                public void onSourceFound(@NonNull BluetoothLeBroadcastMetadata source) {
+                    Log.d(TAG, "Assistant-onSourceFound:");
+                }
+
+                @Override
+                public void onSourceAdded(@NonNull BluetoothDevice sink, int sourceId, int reason) {
+                    Log.d(TAG, "Assistant-onSourceAdded: Device: " + sink
+                            + ", sourceId: " + sourceId);
+                    mMainThreadHandler.post(() -> refreshUi());
+                }
+
+                @Override
+                public void onSourceAddFailed(@NonNull BluetoothDevice sink,
+                        @NonNull BluetoothLeBroadcastMetadata source, int reason) {
+                    Log.d(TAG, "Assistant-onSourceAddFailed: Device: " + sink);
+                }
+
+                @Override
+                public void onSourceModified(@NonNull BluetoothDevice sink, int sourceId,
+                        int reason) {
+                    Log.d(TAG, "Assistant-onSourceModified:");
+                }
+
+                @Override
+                public void onSourceModifyFailed(@NonNull BluetoothDevice sink, int sourceId,
+                        int reason) {
+                    Log.d(TAG, "Assistant-onSourceModifyFailed:");
+                }
+
+                @Override
+                public void onSourceRemoved(@NonNull BluetoothDevice sink, int sourceId,
+                        int reason) {
+                    Log.d(TAG, "Assistant-onSourceRemoved:");
+                }
+
+                @Override
+                public void onSourceRemoveFailed(@NonNull BluetoothDevice sink, int sourceId,
+                        int reason) {
+                    Log.d(TAG, "Assistant-onSourceRemoveFailed:");
+                }
+
+                @Override
+                public void onReceiveStateChanged(@NonNull BluetoothDevice sink, int sourceId,
+                        @NonNull BluetoothLeBroadcastReceiveState state) {
+                    Log.d(TAG, "Assistant-onReceiveStateChanged:");
+                }
+            };
+
     static final int METADATA_BROADCAST_NAME = 0;
     static final int METADATA_BROADCAST_CODE = 1;
 
@@ -128,6 +209,27 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         super.onCreate(savedInstanceState);
 
         initBtQrCodeUI();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (!mIsLeBroadcastAssistantCallbackRegistered) {
+            mIsLeBroadcastAssistantCallbackRegistered = true;
+            mMediaOutputController.registerLeBroadcastAssistantServiceCallback(mExecutor,
+                    mBroadcastAssistantCallback);
+        }
+        connectBroadcastWithActiveDevice();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mIsLeBroadcastAssistantCallbackRegistered) {
+            mIsLeBroadcastAssistantCallbackRegistered = false;
+            mMediaOutputController.unregisterLeBroadcastAssistantServiceCallback(
+                    mBroadcastAssistantCallback);
+        }
     }
 
     @Override
@@ -224,6 +326,7 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         mCurrentBroadcastCode = getBroadcastMetadataInfo(METADATA_BROADCAST_CODE);
         mBroadcastName.setText(mCurrentBroadcastName);
         mBroadcastCode.setText(mCurrentBroadcastCode);
+        refresh(false);
     }
 
     private void inflateBroadcastInfoArea() {
@@ -233,7 +336,7 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
 
     private void setQrCodeView() {
         //get the Metadata, and convert to BT QR code format.
-        String broadcastMetadata = getBroadcastMetadata();
+        String broadcastMetadata = getLocalBroadcastMetadataQrCodeString();
         if (broadcastMetadata.isEmpty()) {
             //TDOD(b/226708424) Error handling for unable to generate the QR code bitmap
             return;
@@ -246,6 +349,33 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         } catch (WriterException e) {
             //TDOD(b/226708424) Error handling for unable to generate the QR code bitmap
             Log.e(TAG, "Error generatirng QR code bitmap " + e);
+        }
+    }
+
+    void connectBroadcastWithActiveDevice() {
+        //get the Metadata, and convert to BT QR code format.
+        BluetoothLeBroadcastMetadata broadcastMetadata = getBroadcastMetadata();
+        if (broadcastMetadata == null) {
+            Log.e(TAG, "Error: There is no broadcastMetadata.");
+            return;
+        }
+        MediaDevice mediaDevice = mMediaOutputController.getCurrentConnectedMediaDevice();
+        if (mediaDevice == null || !(mediaDevice instanceof BluetoothMediaDevice)
+                || !mediaDevice.isBLEDevice()) {
+            Log.e(TAG, "Error: There is no active BT LE device.");
+            return;
+        }
+        BluetoothDevice sink = ((BluetoothMediaDevice) mediaDevice).getCachedDevice().getDevice();
+        Log.d(TAG, "The broadcastMetadata broadcastId: " + broadcastMetadata.getBroadcastId()
+                + ", the device: " + sink.getAnonymizedAddress());
+
+        if (mMediaOutputController.isThereAnyBroadcastSourceIntoSinkDevice(sink)) {
+            Log.d(TAG, "The sink device has the broadcast source now.");
+            return;
+        }
+        if (!mMediaOutputController.addSourceIntoSinkDeviceWithBluetoothLeAssistant(sink,
+                broadcastMetadata, /*isGroupOp=*/ true)) {
+            Log.e(TAG, "Error: Source add failed");
         }
     }
 
@@ -282,7 +412,11 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         mAlertDialog.show();
     }
 
-    private String getBroadcastMetadata() {
+    private String getLocalBroadcastMetadataQrCodeString() {
+        return mMediaOutputController.getLocalBroadcastMetadataQrCodeString();
+    }
+
+    private BluetoothLeBroadcastMetadata getBroadcastMetadata() {
         return mMediaOutputController.getBroadcastMetadata();
     }
 
@@ -314,6 +448,17 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
     }
 
     @Override
+    public boolean isBroadcastSupported() {
+        boolean isBluetoothLeDevice = false;
+        if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
+            isBluetoothLeDevice = mMediaOutputController.isBluetoothLeDevice(
+                    mMediaOutputController.getCurrentConnectedMediaDevice());
+        }
+
+        return mMediaOutputController.isBroadcastSupported() && isBluetoothLeDevice;
+    }
+
+    @Override
     public void handleLeBroadcastStarted() {
         mRetryCount = 0;
         if (mAlertDialog != null) {
@@ -332,6 +477,7 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
 
     @Override
     public void handleLeBroadcastMetadataChanged() {
+        Log.d(TAG, "handleLeBroadcastMetadataChanged:");
         refreshUi();
     }
 
