@@ -662,12 +662,26 @@ public final class AttributionSource implements Parcelable {
 
         /**
          * The next app to receive the permission protected data.
+         *
+         * @deprecated Use {@link setNextAttributionSource} instead.
          */
+        @Deprecated
         public @NonNull Builder setNext(@Nullable AttributionSource value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x20;
             mAttributionSourceState.next = (value != null) ? new AttributionSourceState[]
                     {value.mAttributionSourceState} : mAttributionSourceState.next;
+            return this;
+        }
+
+        /**
+         * The next app to receive the permission protected data.
+         */
+        public @NonNull Builder setNextAttributionSource(@NonNull AttributionSource value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x20;
+            mAttributionSourceState.next =
+                    new AttributionSourceState[]{value.mAttributionSourceState};
             return this;
         }
 
