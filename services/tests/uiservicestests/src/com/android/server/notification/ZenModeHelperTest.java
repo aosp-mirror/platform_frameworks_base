@@ -153,7 +153,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     private Resources mResources;
     private TestableLooper mTestableLooper;
     private ZenModeHelper mZenModeHelperSpy;
-    private Context mContext;
     private ContentResolver mContentResolver;
     @Mock AppOpsManager mAppOps;
     private WrappedSysUiStatsEvent.WrappedBuilderFactory mStatsEventBuilderFactory;
@@ -163,9 +162,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         MockitoAnnotations.initMocks(this);
 
         mTestableLooper = TestableLooper.get(this);
-        mContext = spy(getContext());
         mContentResolver = mContext.getContentResolver();
         mResources = spy(mContext.getResources());
+        String pkg = mContext.getPackageName();
         try {
             when(mResources.getXml(R.xml.default_zen_mode_config)).thenReturn(
                     getDefaultConfigParser());
@@ -190,7 +189,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         when(mPackageManager.getPackageUidAsUser(eq(CUSTOM_PKG_NAME), anyInt()))
                 .thenReturn(CUSTOM_PKG_UID);
         when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(
-                new String[] {getContext().getPackageName()});
+                new String[] {pkg});
         mZenModeHelperSpy.mPm = mPackageManager;
     }
 

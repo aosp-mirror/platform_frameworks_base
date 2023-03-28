@@ -307,7 +307,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Mock
     private PermissionHelper mPermissionHelper;
     private NotificationChannelLoggerFake mLogger = new NotificationChannelLoggerFake();
-    private TestableContext mContext = spy(getContext());
     private final String PKG = mContext.getPackageName();
     private TestableLooper mTestableLooper;
     @Mock
@@ -578,9 +577,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ArgumentCaptor<IntentFilter> intentFilterCaptor =
                 ArgumentCaptor.forClass(IntentFilter.class);
 
-        Mockito.doReturn(new Intent()).when(mContext).registerReceiverAsUser(
-                any(), any(), any(), any(), any());
-        Mockito.doReturn(new Intent()).when(mContext).registerReceiver(any(), any());
         verify(mContext, atLeastOnce()).registerReceiverAsUser(broadcastReceiverCaptor.capture(),
                 any(), intentFilterCaptor.capture(), any(), any());
         verify(mContext, atLeastOnce()).registerReceiver(broadcastReceiverCaptor.capture(),
