@@ -138,7 +138,8 @@ constructor(
 
                             wifiNetworkChangeEvents.tryEmit(Unit)
 
-                            val wifiInfo = networkCapabilities.getMainOrUnderlyingWifiInfo()
+                            val wifiInfo =
+                                networkCapabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
                             if (wifiInfo?.isPrimary == true) {
                                 val wifiNetworkModel =
                                     createWifiNetworkModel(
