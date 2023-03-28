@@ -16,6 +16,7 @@
 package android.hardware;
 
 import android.annotation.IntDef;
+import android.view.SurfaceControl;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -376,12 +377,19 @@ public final class DataSpace {
      */
     public static final int RANGE_LIMITED = 2 << 27;
     /**
-     * Extended range is used for scRGB only.
+     * Extended range can be used in combination with FP16 to communicate scRGB or with
+     * {@link android.view.SurfaceControl.Transaction#setExtendedRangeBrightness(SurfaceControl, float, float)}
+     * to indicate an HDR range.
      *
-     * <p>Intended for use with floating point pixel formats. [0.0 - 1.0] is the standard
-     * sRGB space. Values outside the range [0.0 - 1.0] can encode
-     * color outside the sRGB gamut. [-0.5, 7.5] is the scRGB range.
+     * <p>When used with floating point pixel formats and #STANDARD_BT709 then [0.0 - 1.0] is the
+     * standard sRGB space and values outside the range [0.0 - 1.0] can encode
+     * color outside the sRGB gamut. [-0.5, 7.5] is the standard scRGB range.
      * Used to blend/merge multiple dataspaces on a single display.</p>
+     *
+     * <p>As of {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} this may be combined with
+     * {@link android.view.SurfaceControl.Transaction#setExtendedRangeBrightness(SurfaceControl, float, float)}
+     * and other formats such as {@link HardwareBuffer#RGBA_8888} or
+     * {@link HardwareBuffer#RGBA_1010102} to communicate a variable HDR brightness range</p>
      */
     public static final int RANGE_EXTENDED = 3 << 27;
 
