@@ -1166,7 +1166,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // structure is taken. This causes only one fill request per burst of focus changes.
         cancelCurrentRequestLocked();
 
-        if (mClassificationState.mHintsToAutofillIdMap == null) {
+        if (mService.getMaster().isPccClassificationEnabled()
+                && mClassificationState.mHintsToAutofillIdMap == null) {
             if (sVerbose) {
                 Slog.v(TAG, "triggering field classification");
             }
