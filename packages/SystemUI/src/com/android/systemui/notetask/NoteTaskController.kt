@@ -40,6 +40,7 @@ import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutInfoAsUser
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.getDefaultRoleHolderAsUser
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
+import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
 import com.android.systemui.util.kotlin.getOrNull
@@ -97,6 +98,18 @@ constructor(
         }
     }
 
+    /** Starts [LaunchNoteTaskProxyActivity] on the given [user]. */
+    fun startNoteTaskProxyActivityForUser(user: UserHandle) {
+        context.startActivityAsUser(
+            Intent().apply {
+                component =
+                    ComponentName(context, LaunchNoteTaskManagedProfileProxyActivity::class.java)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            },
+            user
+        )
+    }
+
     /**
      * Shows a note task. How the task is shown will depend on when the method is invoked.
      *
@@ -107,11 +120,30 @@ constructor(
      * bubble is already opened.
      *
      * That will let users open other apps in full screen, and take contextual notes.
+     *
+     * On company owned personally enabled (COPE) devices, if the given [entryPoint] is in the
+     * [FORCE_WORK_NOTE_APPS_ENTRY_POINTS_ON_COPE_DEVICES] list, the default notes app in the work
+     * profile user will always be launched.
      */
     fun showNoteTask(
         entryPoint: NoteTaskEntryPoint,
     ) {
-        showNoteTaskAsUser(entryPoint, userTracker.userHandle)
+        if (!isEnabled) return
+
+        val user: UserHandle =
+            if (
+                entryPoint in FORCE_WORK_NOTE_APPS_ENTRY_POINTS_ON_COPE_DEVICES &&
+                    devicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile
+            ) {
+                userTracker.userProfiles
+                    .firstOrNull { userManager.isManagedProfile(it.id) }
+                    ?.userHandle
+                    ?: userTracker.userHandle
+            } else {
+                userTracker.userHandle
+            }
+
+        showNoteTaskAsUser(entryPoint, user)
     }
 
     /** A variant of [showNoteTask] which launches note task in the given [user]. */
@@ -149,7 +181,7 @@ constructor(
             when (info.launchMode) {
                 is NoteTaskLaunchMode.AppBubble -> {
                     // TODO: provide app bubble icon
-                    bubbles.showOrHideAppBubble(intent, userTracker.userHandle, null /* icon */)
+                    bubbles.showOrHideAppBubble(intent, user, null /* icon */)
                     // App bubble logging happens on `onBubbleExpandChanged`.
                     logDebug { "onShowNoteTask - opened as app bubble: $info" }
                 }
@@ -239,6 +271,16 @@ constructor(
          * @see com.android.launcher3.icons.IconCache.EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE
          */
         const val EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE = "extra_shortcut_badge_override_package"
+
+        /**
+         * A list of entry points which should be redirected to the work profile default notes app
+         * on company owned personally enabled (COPE) devices.
+         *
+         * Entry points in this list don't let users / admin to select the work or personal default
+         * notes app to be launched.
+         */
+        val FORCE_WORK_NOTE_APPS_ENTRY_POINTS_ON_COPE_DEVICES =
+            listOf(NoteTaskEntryPoint.TAIL_BUTTON, NoteTaskEntryPoint.QUICK_AFFORDANCE)
     }
 }
 

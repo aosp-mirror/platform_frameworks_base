@@ -34,7 +34,10 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlots
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
+import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
+import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl.Companion.WIFI_NETWORK_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiInputLogger
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
@@ -78,6 +81,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var wifiManager: WifiManager
     private lateinit var executor: Executor
     private lateinit var scope: CoroutineScope
+    private lateinit var connectivityRepository: ConnectivityRepository
 
     @Before
     fun setUp() {
@@ -93,6 +97,18 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             .thenReturn(flowOf(Unit))
         executor = FakeExecutor(FakeSystemClock())
         scope = CoroutineScope(IMMEDIATE)
+
+        connectivityRepository =
+            ConnectivityRepositoryImpl(
+                connectivityManager,
+                ConnectivitySlots(context),
+                context,
+                mock(),
+                mock(),
+                scope,
+                mock(),
+            )
+
         underTest = createRepo()
     }
 
@@ -302,13 +318,77 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isWifiDefault_cellularVcnNetwork_isTrue() =
+    fun isWifiDefault_carrierMergedViaCellular_isTrue() =
+        runBlocking(IMMEDIATE) {
+            val job = underTest.isWifiDefault.launchIn(this)
+
+            val carrierMergedInfo =
+                mock<WifiInfo>().apply { whenever(this.isCarrierMerged).thenReturn(true) }
+
+            val capabilities =
+                mock<NetworkCapabilities>().apply {
+                    whenever(this.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                    whenever(this.hasTransport(TRANSPORT_WIFI)).thenReturn(false)
+                    whenever(this.transportInfo).thenReturn(carrierMergedInfo)
+                }
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
+
+            assertThat(underTest.isWifiDefault.value).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isWifiDefault_carrierMergedViaCellular_withVcnTransport_isTrue() =
         runBlocking(IMMEDIATE) {
             val job = underTest.isWifiDefault.launchIn(this)
 
             val capabilities =
                 mock<NetworkCapabilities>().apply {
                     whenever(this.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                    whenever(this.hasTransport(TRANSPORT_WIFI)).thenReturn(false)
+                    whenever(this.transportInfo).thenReturn(VcnTransportInfo(PRIMARY_WIFI_INFO))
+                }
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
+
+            assertThat(underTest.isWifiDefault.value).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isWifiDefault_carrierMergedViaWifi_isTrue() =
+        runBlocking(IMMEDIATE) {
+            val job = underTest.isWifiDefault.launchIn(this)
+
+            val carrierMergedInfo =
+                mock<WifiInfo>().apply { whenever(this.isCarrierMerged).thenReturn(true) }
+
+            val capabilities =
+                mock<NetworkCapabilities>().apply {
+                    whenever(this.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                    whenever(this.hasTransport(TRANSPORT_CELLULAR)).thenReturn(false)
+                    whenever(this.transportInfo).thenReturn(carrierMergedInfo)
+                }
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
+
+            assertThat(underTest.isWifiDefault.value).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isWifiDefault_carrierMergedViaWifi_withVcnTransport_isTrue() =
+        runBlocking(IMMEDIATE) {
+            val job = underTest.isWifiDefault.launchIn(this)
+
+            val capabilities =
+                mock<NetworkCapabilities>().apply {
+                    whenever(this.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                    whenever(this.hasTransport(TRANSPORT_CELLULAR)).thenReturn(false)
                     whenever(this.transportInfo).thenReturn(VcnTransportInfo(PRIMARY_WIFI_INFO))
                 }
 
@@ -931,6 +1011,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         return WifiRepositoryImpl(
             broadcastDispatcher,
             connectivityManager,
+            connectivityRepository,
             logger,
             tableLogger,
             executor,

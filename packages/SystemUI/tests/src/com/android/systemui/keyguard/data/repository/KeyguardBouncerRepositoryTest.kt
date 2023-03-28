@@ -21,6 +21,8 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.SystemClock
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -58,6 +60,6 @@ class KeyguardBouncerRepositoryTest : SysuiTestCase() {
     @Test
     fun changingFlowValueTriggersLogging() = runBlocking {
         underTest.setPrimaryShow(true)
-        verify(bouncerLogger).logChange("", "PrimaryBouncerShow", false)
+        verify(bouncerLogger).logChange(eq(""), eq("PrimaryBouncerShow"), value = eq(false), any())
     }
 }

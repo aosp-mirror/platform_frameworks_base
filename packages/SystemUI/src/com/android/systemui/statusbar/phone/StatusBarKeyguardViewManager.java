@@ -281,7 +281,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mLastScreenOffAnimationPlaying;
     private float mQsExpansion;
     final Set<KeyguardViewManagerCallback> mCallbacks = new HashSet<>();
-    private boolean mIsModernAlternateBouncerEnabled;
     private boolean mIsBackAnimationEnabled;
     private final boolean mUdfpsNewTouchDetectionEnabled;
     private final UdfpsOverlayInteractor mUdfpsOverlayInteractor;
@@ -363,7 +362,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mPrimaryBouncerView = primaryBouncerView;
         mFoldAodAnimationController = sysUIUnfoldComponent
                 .map(SysUIUnfoldComponent::getFoldAodAnimationController).orElse(null);
-        mIsModernAlternateBouncerEnabled = featureFlags.isEnabled(Flags.MODERN_ALTERNATE_BOUNCER);
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mIsBackAnimationEnabled =
                 featureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM);
@@ -393,35 +391,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mCentralSurfacesRegistered = true;
 
         registerListeners();
-    }
-
-    /**
-     * Sets the given legacy alternate bouncer to null if it's the current alternate bouncer. Else,
-     * does nothing. Only used if modern alternate bouncer is NOT enabled.
-     */
-    public void removeLegacyAlternateBouncer(
-            @NonNull LegacyAlternateBouncer alternateBouncerLegacy) {
-        if (!mIsModernAlternateBouncerEnabled) {
-            if (Objects.equals(mAlternateBouncerInteractor.getLegacyAlternateBouncer(),
-                    alternateBouncerLegacy)) {
-                mAlternateBouncerInteractor.setLegacyAlternateBouncer(null);
-                hideAlternateBouncer(true);
-            }
-        }
-    }
-
-    /**
-     * Sets a new legacy alternate bouncer. Only used if modern alternate bouncer is NOT enabled.
-     */
-    public void setLegacyAlternateBouncer(@NonNull LegacyAlternateBouncer alternateBouncerLegacy) {
-        if (!mIsModernAlternateBouncerEnabled) {
-            if (!Objects.equals(mAlternateBouncerInteractor.getLegacyAlternateBouncer(),
-                    alternateBouncerLegacy)) {
-                mAlternateBouncerInteractor.setLegacyAlternateBouncer(alternateBouncerLegacy);
-                hideAlternateBouncer(true);
-            }
-        }
-
     }
 
 
@@ -1386,7 +1355,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public void dump(PrintWriter pw) {
         pw.println("StatusBarKeyguardViewManager:");
-        pw.println("  mIsModernAlternateBouncerEnabled: " + mIsModernAlternateBouncerEnabled);
         pw.println("  mRemoteInputActive: " + mRemoteInputActive);
         pw.println("  mDozing: " + mDozing);
         pw.println("  mAfterKeyguardGoneAction: " + mAfterKeyguardGoneAction);
@@ -1582,28 +1550,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 KeyguardUpdateMonitor.getCurrentUser());
         return mode == KeyguardSecurityModel.SecurityMode.SimPin
                 || mode == KeyguardSecurityModel.SecurityMode.SimPuk;
-    }
-
-    /**
-     * @deprecated Delegate used to send show and hide events to an alternate bouncer.
-     */
-    public interface LegacyAlternateBouncer {
-        /**
-         * Show alternate authentication bouncer.
-         * @return whether alternate auth method was newly shown
-         */
-        boolean showAlternateBouncer();
-
-        /**
-         * Hide alternate authentication bouncer
-         * @return whether the alternate auth method was newly hidden
-         */
-        boolean hideAlternateBouncer();
-
-        /**
-         * @return true if the alternate auth bouncer is showing
-         */
-        boolean isShowingAlternateBouncer();
     }
 
     /**

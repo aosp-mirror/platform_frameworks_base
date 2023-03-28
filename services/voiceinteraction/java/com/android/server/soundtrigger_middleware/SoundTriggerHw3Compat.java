@@ -186,6 +186,16 @@ public class SoundTriggerHw3Compat implements ISoundTriggerHal {
     }
 
     @Override
+    public void clientAttached(IBinder binder) {
+        // No-op. This method is for test purposes, and is intercepted above.
+    }
+
+    @Override
+    public void clientDetached(IBinder binder) {
+        // No-op. This method is for test purposes, and is intercepted above.
+    }
+
+    @Override
     public void reboot() {
         mRebootRunnable.run();
     }

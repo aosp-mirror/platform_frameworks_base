@@ -23,6 +23,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doReturn;
@@ -42,11 +43,11 @@ import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
 import android.view.Display;
-import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.ViewRootImpl;
+import android.view.WindowInsets;
 import android.view.WindowManager.LayoutParams;
 import android.window.TaskConstants;
 import android.window.WindowContainerTransaction;
@@ -256,10 +257,12 @@ public class WindowDecorationTests extends ShellTestCase {
                                 && (lp.flags & LayoutParams.FLAG_NOT_FOCUSABLE) != 0));
         if (ViewRootImpl.CAPTION_ON_SHELL) {
             verify(mMockView).setTaskFocusState(true);
-            verify(mMockWindowContainerTransaction)
-                    .addRectInsetsProvider(taskInfo.token,
-                            new Rect(100, 300, 400, 364),
-                            new int[] { InsetsState.ITYPE_CAPTION_BAR });
+            verify(mMockWindowContainerTransaction).addInsetsSource(
+                    eq(taskInfo.token),
+                    any(),
+                    eq(0 /* index */),
+                    eq(WindowInsets.Type.captionBar()),
+                    eq(new Rect(100, 300, 400, 364)));
         }
 
         verify(mMockSurfaceControlFinishT)
@@ -323,7 +326,7 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(mMockSurfaceControlViewHost, never()).release();
         verify(t, never()).apply();
         verify(mMockWindowContainerTransaction, never())
-                .removeInsetsProvider(eq(taskInfo.token), any());
+                .removeInsetsSource(eq(taskInfo.token), any(), anyInt(), anyInt());
 
         taskInfo.isVisible = false;
         windowDecor.relayout(taskInfo);
@@ -334,7 +337,8 @@ public class WindowDecorationTests extends ShellTestCase {
         releaseOrder.verify(t).remove(decorContainerSurface);
         releaseOrder.verify(t).remove(taskBackgroundSurface);
         releaseOrder.verify(t).apply();
-        verify(mMockWindowContainerTransaction).removeInsetsProvider(eq(taskInfo.token), any());
+        verify(mMockWindowContainerTransaction)
+                .removeInsetsSource(eq(taskInfo.token), any(), anyInt(), anyInt());
     }
 
     @Test
