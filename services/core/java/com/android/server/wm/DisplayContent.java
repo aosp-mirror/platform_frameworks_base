@@ -3293,7 +3293,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // Unlink death from remote to clear the reference from binder -> mRemoteInsetsDeath
             // -> this DisplayContent.
             setRemoteInsetsController(null);
-            mWmService.mAnimator.removeDisplayLocked(mDisplayId);
             mOverlayLayer.release();
             mA11yOverlayLayer.release();
             mWindowingLayer.release();
@@ -5304,8 +5303,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // TODO(b/62541591): evaluate whether this is the best spot to declare the
             // {@link DisplayContent} ready for use.
             mDisplayReady = true;
-
-            mWmService.mAnimator.addDisplayLocked(mDisplayId);
 
             if (mWmService.mDisplayManagerInternal != null) {
                 mWmService.mDisplayManagerInternal
