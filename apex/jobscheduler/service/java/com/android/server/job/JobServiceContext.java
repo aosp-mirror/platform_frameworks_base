@@ -21,6 +21,7 @@ import static android.app.job.JobInfo.getPriorityString;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
+import android.Manifest;
 import android.annotation.BytesLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -39,6 +40,7 @@ import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.PermissionChecker;
 import android.content.ServiceConnection;
 import android.net.Network;
 import android.net.Uri;
@@ -339,12 +341,13 @@ public final class JobServiceContext implements ServiceConnection {
                 job.changedAuthorities.toArray(triggeredAuthorities);
             }
             final JobInfo ji = job.getJob();
+            final Network passedNetwork = canGetNetworkInformation(job) ? job.network : null;
             mParams = new JobParameters(mRunningCallback, job.getNamespace(), job.getJobId(),
                     ji.getExtras(),
                     ji.getTransientExtras(), ji.getClipData(), ji.getClipGrantFlags(),
                     isDeadlineExpired, job.shouldTreatAsExpeditedJob(),
                     job.shouldTreatAsUserInitiatedJob(), triggeredUris, triggeredAuthorities,
-                    job.network);
+                    passedNetwork);
             mExecutionStartTimeElapsed = sElapsedRealtimeClock.millis();
             mMinExecutionGuaranteeMillis = mService.getMinJobExecutionGuaranteeMs(job);
             mMaxExecutionTimeMillis =
@@ -504,6 +507,37 @@ public final class JobServiceContext implements ServiceConnection {
         }
     }
 
+    private boolean canGetNetworkInformation(@NonNull JobStatus job) {
+        if (job.getJob().getRequiredNetwork() == null) {
+            // The job never had a network constraint, so we're not going to give it a network
+            // object. Add this check as an early return to avoid wasting cycles doing permission
+            // checks for this job.
+            return false;
+        }
+        // The calling app is doing the work, so use its UID, not the source UID.
+        final int uid = job.getUid();
+        if (CompatChanges.isChangeEnabled(
+                JobSchedulerService.REQUIRE_NETWORK_PERMISSIONS_FOR_CONNECTIVITY_JOBS, uid)) {
+            final String pkgName = job.getServiceComponent().getPackageName();
+            if (!hasPermissionForDelivery(uid, pkgName, Manifest.permission.INTERNET)) {
+                return false;
+            }
+            if (!hasPermissionForDelivery(uid, pkgName, Manifest.permission.ACCESS_NETWORK_STATE)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean hasPermissionForDelivery(int uid, @NonNull String pkgName,
+            @NonNull String permission) {
+        final int result = PermissionChecker.checkPermissionForDataDelivery(mContext, permission,
+                PermissionChecker.PID_UNKNOWN, uid, pkgName, /* attributionTag */ null,
+                "network info via JS");
+        return result == PermissionChecker.PERMISSION_GRANTED;
+    }
+
     @EconomicPolicy.AppAction
     private static int getStartActionId(@NonNull JobStatus job) {
         switch (job.getEffectivePriority()) {
@@ -603,6 +637,15 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     void informOfNetworkChangeLocked(Network newNetwork) {
+        if (newNetwork != null && mRunningJob != null && !canGetNetworkInformation(mRunningJob)) {
+            // The app can't get network information, so there's no point informing it of network
+            // changes. This case may happen if an app had scheduled network job and then
+            // started targeting U+ without requesting the required network permissions.
+            if (DEBUG) {
+                Slog.d(TAG, "Skipping network change call because of missing permissions");
+            }
+            return;
+        }
         if (mVerb != VERB_EXECUTING) {
             Slog.w(TAG, "Sending onNetworkChanged for a job that isn't started. " + mRunningJob);
             if (mVerb == VERB_BINDING || mVerb == VERB_STARTING) {
