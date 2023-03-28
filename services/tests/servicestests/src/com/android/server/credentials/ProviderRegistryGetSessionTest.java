@@ -18,6 +18,7 @@ package com.android.server.credentials;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -59,6 +60,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -74,7 +76,8 @@ public class ProviderRegistryGetSessionTest {
 
     private static final String CALLING_PACKAGE_NAME = "com.credman.app";
     private static final int USER_ID_1 = 1;
-    private static final String FLATTENED_REQUEST = "FLATTENED_REQ";
+    private static final ArrayList<String> FLATTENED_REQUEST =
+            new ArrayList<>(List.of("FLATTENED_REQ"));
     private static final String CP_SERVICE_NAME = "CredentialProvider";
     private static final ComponentName CREDENTIAL_PROVIDER_COMPONENT =
             new ComponentName(CALLING_PACKAGE_NAME, CP_SERVICE_NAME);
@@ -102,7 +105,8 @@ public class ProviderRegistryGetSessionTest {
         MockitoAnnotations.initMocks(this);
         final Context context = ApplicationProvider.getApplicationContext();
         mRetrievalData = new Bundle();
-        mRetrievalData.putString(CredentialOption.FLATTENED_REQUEST, FLATTENED_REQUEST);
+        mRetrievalData.putStringArrayList(CredentialOption.SUPPORTED_ELEMENT_KEYS,
+                FLATTENED_REQUEST);
         mCallingAppInfo = createCallingAppInfo();
         mGetCredentialOption = new CredentialOption(CREDENTIAL_TYPE, mRetrievalData,
                 new Bundle(), false);
@@ -114,10 +118,10 @@ public class ProviderRegistryGetSessionTest {
         when(mEntry.getSlice()).thenReturn(mSlice);
         when(mEntry2.getSlice()).thenReturn(mSlice2);
         mResult = new CredentialDescriptionRegistry.FilterResult(CALLING_PACKAGE_NAME,
-                FLATTENED_REQUEST,
+                new HashSet<>(FLATTENED_REQUEST),
                 List.of(mEntry, mEntry2));
         mResponse.add(mResult);
-        when(mCredentialDescriptionRegistry.getFilteredResultForProvider(anyString(), anyString()))
+        when(mCredentialDescriptionRegistry.getFilteredResultForProvider(anyString(), anySet()))
                 .thenReturn(mResponse);
         mProviderRegistryGetSession = ProviderRegistryGetSession
                 .createNewSession(context, USER_ID_1, mGetRequestSession,
@@ -129,7 +133,8 @@ public class ProviderRegistryGetSessionTest {
     @Test
     public void testInvokeSession_existingProvider_setsResults() {
         final ArgumentCaptor<String> packageNameCaptor = ArgumentCaptor.forClass(String.class);
-        final ArgumentCaptor<String> flattenedRequestCaptor = ArgumentCaptor.forClass(String.class);
+        final ArgumentCaptor<Set<String>> flattenedRequestCaptor =
+                ArgumentCaptor.forClass(Set.class);
         final ArgumentCaptor<ProviderSession.Status> statusCaptor =
                 ArgumentCaptor.forClass(ProviderSession.Status.class);
         final ArgumentCaptor<ComponentName> cpComponentNameCaptor =
@@ -141,7 +146,7 @@ public class ProviderRegistryGetSessionTest {
                 packageNameCaptor.capture(),
                 flattenedRequestCaptor.capture());
         assertThat(packageNameCaptor.getValue()).isEqualTo(CALLING_PACKAGE_NAME);
-        assertThat(flattenedRequestCaptor.getValue()).isEqualTo(FLATTENED_REQUEST);
+        assertThat(flattenedRequestCaptor.getValue()).containsExactly(FLATTENED_REQUEST);
         verify(mGetRequestSession).onProviderStatusChanged(statusCaptor.capture(),
                 cpComponentNameCaptor.capture());
         assertThat(statusCaptor.getValue()).isEqualTo(ProviderSession.Status.CREDENTIALS_RECEIVED);
