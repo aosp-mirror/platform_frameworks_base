@@ -32,6 +32,7 @@ import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList
 import static com.android.server.am.BroadcastProcessQueue.reasonToString;
 import static com.android.server.am.BroadcastProcessQueue.removeFromRunnableList;
 import static com.android.server.am.BroadcastRecord.deliveryStateToString;
+import static com.android.server.am.BroadcastRecord.getReceiverClassName;
 import static com.android.server.am.BroadcastRecord.getReceiverPackageName;
 import static com.android.server.am.BroadcastRecord.getReceiverProcessName;
 import static com.android.server.am.BroadcastRecord.getReceiverUid;
@@ -1040,7 +1041,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (deliveryState == BroadcastRecord.DELIVERY_TIMEOUT) {
             r.anrCount++;
             if (app != null && !app.isDebugging()) {
-                mService.appNotResponding(queue.app, TimeoutRecord.forBroadcastReceiver(r.intent));
+                final String packageName = getReceiverPackageName(receiver);
+                final String className = getReceiverClassName(receiver);
+                mService.appNotResponding(queue.app,
+                        TimeoutRecord.forBroadcastReceiver(r.intent, packageName, className));
             }
         } else {
             mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_SOFT, queue);

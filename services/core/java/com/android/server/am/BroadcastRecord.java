@@ -832,6 +832,14 @@ final class BroadcastRecord extends Binder {
         }
     }
 
+    static @Nullable String getReceiverClassName(@NonNull Object receiver) {
+        if (receiver instanceof BroadcastFilter) {
+            return ((BroadcastFilter) receiver).getReceiverClassName();
+        } else /* if (receiver instanceof ResolveInfo) */ {
+            return ((ResolveInfo) receiver).activityInfo.name;
+        }
+    }
+
     static int getReceiverPriority(@NonNull Object receiver) {
         if (receiver instanceof BroadcastFilter) {
             return ((BroadcastFilter) receiver).getPriority();

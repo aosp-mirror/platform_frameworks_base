@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.annotation.Nullable;
 import android.content.IntentFilter;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -53,6 +54,16 @@ final class BroadcastFilter extends IntentFilter {
         instantApp = _instantApp;
         visibleToInstantApp = _visibleToInstantApp;
         exported = _exported;
+    }
+
+    public @Nullable String getReceiverClassName() {
+        if (receiverId != null) {
+            final int index = receiverId.lastIndexOf('@');
+            if (index > 0) {
+                return receiverId.substring(0, index);
+            }
+        }
+        return null;
     }
 
     @NeverCompile
