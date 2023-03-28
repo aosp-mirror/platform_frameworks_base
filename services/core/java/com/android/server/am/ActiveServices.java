@@ -807,9 +807,9 @@ public final class ActiveServices {
         ServiceRecord r = res.record;
         // Note, when startService() or startForegroundService() is called on an already
         // running SHORT_SERVICE FGS, the call will succeed (i.e. we won't throw
-        // ForegroundServiceStartNotAllowedException), even when the service is alerady timed
-        // out. This is because these APIs will essnetially only change the "started" state
-        // of the service, and it won't afect "the foreground-ness" of the service, or the type
+        // ForegroundServiceStartNotAllowedException), even when the service is already timed
+        // out. This is because these APIs will essentially only change the "started" state
+        // of the service, and it won't affect "the foreground-ness" of the service, or the type
         // of the FGS.
         // However, this call will still _not_ extend the SHORT_SERVICE timeout either.
         // Also, if the app tries to change the type of the FGS later (using
