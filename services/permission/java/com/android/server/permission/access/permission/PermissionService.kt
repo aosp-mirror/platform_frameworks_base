@@ -89,7 +89,6 @@ import com.android.server.policy.SoftRestrictedPermissionPolicy
 import libcore.util.EmptyArray
 import java.io.FileDescriptor
 import java.io.PrintWriter
-import java.util.Collections
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
@@ -1917,10 +1916,14 @@ class PermissionService(
                 packageManagerInternal.getPackageStateInternal(androidPackage.packageName)!!
             addAllowlistedRestrictedPermissionsUnchecked(androidPackage, packageState.appId,
                 params.allowlistedRestrictedPermissions, userId)
-            // Drop UPGRADE_EXEMPT for all permissions requested by this package since there's an
-            // installer and the installer has made a decision.
-            setAllowlistedRestrictedPermissionsUnchecked(androidPackage, packageState.appId,
-                Collections.emptyList(), PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE, userId)
+            if (!packageState.isSystem()) {
+                // Drop UPGRADE_EXEMPT for all permissions requested by this package since there's
+                // an installer and the installer has made a decision.
+                setAllowlistedRestrictedPermissionsUnchecked(
+                    androidPackage, packageState.appId, emptyList(),
+                    PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE, userId
+                )
+            }
             setRequestedPermissionStates(packageState, userId, params.permissionStates)
         }
     }
