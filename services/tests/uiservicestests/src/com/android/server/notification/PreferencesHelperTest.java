@@ -4967,11 +4967,17 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testPullPackagePreferencesStats_postPermissionMigration() {
+        // make sure there's at least one channel for each package we want to test
+        NotificationChannel channelA = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channelA, true, false);
+        NotificationChannel channelB = new NotificationChannel("b", "b", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channelB, true, false);
+        NotificationChannel channelC = new NotificationChannel("c", "c", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_P, UID_P, channelC, true, false);
 
-        // build a collection of app permissions that should be passed in but ignored
+        // build a collection of app permissions that should be passed in and used
         ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
-        appPermissions.put(new Pair<>(1, "first"), new Pair<>(true, false)); // not in local prefs
-        appPermissions.put(new Pair<>(3, "third"), new Pair<>(false, true)); // not in local prefs
+        appPermissions.put(new Pair<>(UID_N_MR1, PKG_N_MR1), new Pair<>(true, false));
         appPermissions.put(new Pair<>(UID_O, PKG_O), new Pair<>(false, true)); // in local prefs
 
         // local preferences
@@ -4981,16 +4987,17 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // expected output. format: uid -> importance, as only uid (and not package name)
         // is in PackageNotificationPreferences
         ArrayMap<Integer, Pair<Integer, Boolean>> expected = new ArrayMap<>();
-        expected.put(1, new Pair<>(IMPORTANCE_DEFAULT, false));
-        expected.put(3, new Pair<>(IMPORTANCE_NONE, true));
-        expected.put(UID_O, new Pair<>(IMPORTANCE_NONE, true));     // banned by permissions
-        expected.put(UID_P, new Pair<>(IMPORTANCE_NONE, false));    // defaults to none, false
+        expected.put(UID_N_MR1, new Pair<>(IMPORTANCE_DEFAULT, false));
+        expected.put(UID_O, new Pair<>(IMPORTANCE_NONE, true));         // banned by permissions
+        expected.put(UID_P, new Pair<>(IMPORTANCE_UNSPECIFIED, false)); // default: unspecified
 
         ArrayList<StatsEvent> events = new ArrayList<>();
         mHelper.pullPackagePreferencesStats(events, appPermissions);
 
+        int found = 0;
         for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
             if (builder.getAtomId() == PACKAGE_NOTIFICATION_PREFERENCES) {
+                ++found;
                 int uid = builder.getInt(PackageNotificationPreferences.UID_FIELD_NUMBER);
                 boolean userSet = builder.getBoolean(
                         PackageNotificationPreferences.USER_SET_IMPORTANCE_FIELD_NUMBER);
@@ -5002,6 +5009,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 assertThat(expected.get(uid).second).isEqualTo(userSet);
             }
         }
+        // should have at least one entry for each of the packages we expected to see
+        assertThat(found).isAtLeast(3);
     }
 
     @Test
