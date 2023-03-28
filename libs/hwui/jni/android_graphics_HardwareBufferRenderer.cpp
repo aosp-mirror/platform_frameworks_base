@@ -74,7 +74,7 @@ static long android_graphics_HardwareBufferRenderer_create(JNIEnv* env, jobject,
     auto* hardwareBuffer = HardwareBufferHelpers::AHardwareBuffer_fromHardwareBuffer(env, buffer);
     auto* rootRenderNode = reinterpret_cast<RootRenderNode*>(renderNodePtr);
     ContextFactoryImpl factory(rootRenderNode);
-    auto* proxy = new RenderProxy(true, rootRenderNode, &factory);
+    auto* proxy = new RenderProxy(false, rootRenderNode, &factory);
     proxy->setHardwareBuffer(hardwareBuffer);
     return (jlong)proxy;
 }
