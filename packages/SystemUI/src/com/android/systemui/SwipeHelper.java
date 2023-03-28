@@ -17,7 +17,6 @@
 package com.android.systemui;
 
 import static androidx.dynamicanimation.animation.DynamicAnimation.TRANSLATION_X;
-import static androidx.dynamicanimation.animation.DynamicAnimation.TRANSLATION_Y;
 import static androidx.dynamicanimation.animation.FloatPropertyCompat.createFloatPropertyCompat;
 
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS;
@@ -92,7 +91,6 @@ public class SwipeHelper implements Gefingerpoken {
     private float mTouchSlopMultiplier;
 
     private final Callback mCallback;
-    private final int mSwipeDirection;
     private final VelocityTracker mVelocityTracker;
     private final FalsingManager mFalsingManager;
     private final FeatureFlags mFeatureFlags;
@@ -141,12 +139,10 @@ public class SwipeHelper implements Gefingerpoken {
     private final ArrayMap<View, Animator> mDismissPendingMap = new ArrayMap<>();
 
     public SwipeHelper(
-            int swipeDirection, Callback callback, Resources resources,
-            ViewConfiguration viewConfiguration, FalsingManager falsingManager,
-            FeatureFlags featureFlags) {
+            Callback callback, Resources resources, ViewConfiguration viewConfiguration,
+            FalsingManager falsingManager, FeatureFlags featureFlags) {
         mCallback = callback;
         mHandler = new Handler();
-        mSwipeDirection = swipeDirection;
         mVelocityTracker = VelocityTracker.obtain();
         mPagingTouchSlop = viewConfiguration.getScaledPagingTouchSlop();
         mSlopMultiplier = viewConfiguration.getScaledAmbiguousGestureMultiplier();
@@ -179,21 +175,21 @@ public class SwipeHelper implements Gefingerpoken {
     }
 
     private float getPos(MotionEvent ev) {
-        return mSwipeDirection == X ? ev.getX() : ev.getY();
+        return ev.getX();
     }
 
     private float getPerpendicularPos(MotionEvent ev) {
-        return mSwipeDirection == X ? ev.getY() : ev.getX();
+        return ev.getY();
     }
 
     protected float getTranslation(View v) {
-        return mSwipeDirection == X ? v.getTranslationX() : v.getTranslationY();
+        return v.getTranslationX();
     }
 
     private float getVelocity(VelocityTracker vt) {
-        return mSwipeDirection == X ? vt.getXVelocity() :
-                vt.getYVelocity();
+        return vt.getXVelocity();
     }
+
 
     protected Animator getViewTranslationAnimator(View view, float target,
             AnimatorUpdateListener listener) {
@@ -209,8 +205,7 @@ public class SwipeHelper implements Gefingerpoken {
 
     protected Animator createTranslationAnimation(View view, float newPos,
             AnimatorUpdateListener listener) {
-        ObjectAnimator anim = ObjectAnimator.ofFloat(view,
-                mSwipeDirection == X ? View.TRANSLATION_X : View.TRANSLATION_Y, newPos);
+        ObjectAnimator anim = ObjectAnimator.ofFloat(view, View.TRANSLATION_X, newPos);
 
         if (listener != null) {
             anim.addUpdateListener(listener);
@@ -220,18 +215,13 @@ public class SwipeHelper implements Gefingerpoken {
     }
 
     protected void setTranslation(View v, float translate) {
-        if (v == null) {
-            return;
-        }
-        if (mSwipeDirection == X) {
+        if (v != null) {
             v.setTranslationX(translate);
-        } else {
-            v.setTranslationY(translate);
         }
     }
 
     protected float getSize(View v) {
-        return mSwipeDirection == X ? v.getMeasuredWidth() : v.getMeasuredHeight();
+        return v.getMeasuredWidth();
     }
 
     public void setMinSwipeProgress(float minSwipeProgress) {
@@ -426,15 +416,12 @@ public class SwipeHelper implements Gefingerpoken {
         float newPos;
         boolean isLayoutRtl = animView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
 
-        // if we use the Menu to dismiss an item in landscape, animate up
-        boolean animateUpForMenu = velocity == 0 && (getTranslation(animView) == 0 || isDismissAll)
-                && mSwipeDirection == Y;
         // if the language is rtl we prefer swiping to the left
         boolean animateLeftForRtl = velocity == 0 && (getTranslation(animView) == 0 || isDismissAll)
                 && isLayoutRtl;
         boolean animateLeft = (Math.abs(velocity) > getEscapeVelocity() && velocity < 0) ||
                 (getTranslation(animView) < 0 && !isDismissAll);
-        if (animateLeft || animateLeftForRtl || animateUpForMenu) {
+        if (animateLeft || animateLeftForRtl) {
             newPos = -getTotalTranslationLength(animView);
         } else {
             newPos = getTotalTranslationLength(animView);
@@ -576,8 +563,7 @@ public class SwipeHelper implements Gefingerpoken {
                     startVelocity,
                     mSnapBackSpringConfig);
         }
-        return PhysicsAnimator.getInstance(target).spring(
-                mSwipeDirection == X ? TRANSLATION_X : TRANSLATION_Y, toPosition, startVelocity,
+        return PhysicsAnimator.getInstance(target).spring(TRANSLATION_X, toPosition, startVelocity,
                 mSnapBackSpringConfig);
     }
 
