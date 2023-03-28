@@ -37,12 +37,10 @@ public class SubscriptionInfoEntity {
             String countryIso, boolean isEmbedded, int cardId, int portIndex,
             boolean isOpportunistic, @Nullable String groupUUID, int subscriptionType,
             String uniqueName, boolean isSubscriptionVisible, String formattedPhoneNumber,
-            boolean isFirstRemovableSubscription, String defaultSimConfig,
-            boolean isDefaultSubscriptionSelection, boolean isValidSubscription,
-            boolean isUsableSubscription, boolean isActiveSubscriptionId,
-            boolean isAvailableSubscription, boolean isDefaultVoiceSubscription,
-            boolean isDefaultSmsSubscription, boolean isDefaultDataSubscription,
-            boolean isDefaultSubscription, boolean isActiveDataSubscriptionId) {
+            boolean isFirstRemovableSubscription, boolean isDefaultSubscriptionSelection,
+            boolean isValidSubscription, boolean isUsableSubscription,
+            boolean isActiveSubscriptionId, boolean isAvailableSubscription,
+            boolean isActiveDataSubscriptionId) {
         this.subId = subId;
         this.simSlotIndex = simSlotIndex;
         this.carrierId = carrierId;
@@ -62,16 +60,11 @@ public class SubscriptionInfoEntity {
         this.isSubscriptionVisible = isSubscriptionVisible;
         this.formattedPhoneNumber = formattedPhoneNumber;
         this.isFirstRemovableSubscription = isFirstRemovableSubscription;
-        this.defaultSimConfig = defaultSimConfig;
         this.isDefaultSubscriptionSelection = isDefaultSubscriptionSelection;
         this.isValidSubscription = isValidSubscription;
         this.isUsableSubscription = isUsableSubscription;
         this.isActiveSubscriptionId = isActiveSubscriptionId;
         this.isAvailableSubscription = isAvailableSubscription;
-        this.isDefaultVoiceSubscription = isDefaultVoiceSubscription;
-        this.isDefaultSmsSubscription = isDefaultSmsSubscription;
-        this.isDefaultDataSubscription = isDefaultDataSubscription;
-        this.isDefaultSubscription = isDefaultSubscription;
         this.isActiveDataSubscriptionId = isActiveDataSubscriptionId;
     }
 
@@ -135,9 +128,6 @@ public class SubscriptionInfoEntity {
     @ColumnInfo(name = DataServiceUtils.SubscriptionInfoData.COLUMN_IS_FIRST_REMOVABLE_SUBSCRIPTION)
     public boolean isFirstRemovableSubscription;
 
-    @ColumnInfo(name = DataServiceUtils.SubscriptionInfoData.COLUMN_DEFAULT_SIM_CONFIG)
-    public String defaultSimConfig;
-
     @ColumnInfo(name =
             DataServiceUtils.SubscriptionInfoData.COLUMN_IS_DEFAULT_SUBSCRIPTION_SELECTION)
     public boolean isDefaultSubscriptionSelection;
@@ -153,18 +143,6 @@ public class SubscriptionInfoEntity {
 
     @ColumnInfo(name = DataServiceUtils.SubscriptionInfoData.COLUMN_IS_AVAILABLE_SUBSCRIPTION)
     public boolean isAvailableSubscription;
-
-    @ColumnInfo(name = DataServiceUtils.SubscriptionInfoData.COLUMN_IS_DEFAULT_VOICE_SUBSCRIPTION)
-    public boolean isDefaultVoiceSubscription;
-
-    @ColumnInfo(name = DataServiceUtils.SubscriptionInfoData.COLUMN_IS_DEFAULT_SMS_SUBSCRIPTION)
-    public boolean isDefaultSmsSubscription;
-
-    @ColumnInfo(name = DataServiceUtils.SubscriptionInfoData.COLUMN_IS_DEFAULT_DATA_SUBSCRIPTION)
-    public boolean isDefaultDataSubscription;
-
-    @ColumnInfo(name = DataServiceUtils.SubscriptionInfoData.COLUMN_IS_DEFAULT_SUBSCRIPTION)
-    public boolean isDefaultSubscription;
 
     @ColumnInfo(name = DataServiceUtils.SubscriptionInfoData.COLUMN_IS_ACTIVE_DATA_SUBSCRIPTION)
     public boolean isActiveDataSubscriptionId;
@@ -207,16 +185,11 @@ public class SubscriptionInfoEntity {
         result = 31 * result + Boolean.hashCode(isSubscriptionVisible);
         result = 31 * result + formattedPhoneNumber.hashCode();
         result = 31 * result + Boolean.hashCode(isFirstRemovableSubscription);
-        result = 31 * result + defaultSimConfig.hashCode();
         result = 31 * result + Boolean.hashCode(isDefaultSubscriptionSelection);
         result = 31 * result + Boolean.hashCode(isValidSubscription);
         result = 31 * result + Boolean.hashCode(isUsableSubscription);
         result = 31 * result + Boolean.hashCode(isActiveSubscriptionId);
         result = 31 * result + Boolean.hashCode(isAvailableSubscription);
-        result = 31 * result + Boolean.hashCode(isDefaultVoiceSubscription);
-        result = 31 * result + Boolean.hashCode(isDefaultSmsSubscription);
-        result = 31 * result + Boolean.hashCode(isDefaultDataSubscription);
-        result = 31 * result + Boolean.hashCode(isDefaultSubscription);
         result = 31 * result + Boolean.hashCode(isActiveDataSubscriptionId);
         return result;
     }
@@ -250,16 +223,11 @@ public class SubscriptionInfoEntity {
                 && isSubscriptionVisible == info.isSubscriptionVisible
                 && TextUtils.equals(formattedPhoneNumber, info.formattedPhoneNumber)
                 && isFirstRemovableSubscription == info.isFirstRemovableSubscription
-                && TextUtils.equals(defaultSimConfig, info.defaultSimConfig)
                 && isDefaultSubscriptionSelection == info.isDefaultSubscriptionSelection
                 && isValidSubscription == info.isValidSubscription
                 && isUsableSubscription == info.isUsableSubscription
                 && isActiveSubscriptionId == info.isActiveSubscriptionId
                 && isAvailableSubscription == info.isAvailableSubscription
-                && isDefaultVoiceSubscription == info.isDefaultVoiceSubscription
-                && isDefaultSmsSubscription == info.isDefaultSmsSubscription
-                && isDefaultDataSubscription == info.isDefaultDataSubscription
-                && isDefaultSubscription == info.isDefaultSubscription
                 && isActiveDataSubscriptionId == info.isActiveDataSubscriptionId;
     }
 
@@ -303,8 +271,6 @@ public class SubscriptionInfoEntity {
                 .append(formattedPhoneNumber)
                 .append(", isFirstRemovableSubscription = ")
                 .append(isFirstRemovableSubscription)
-                .append(", defaultSimConfig = ")
-                .append(defaultSimConfig)
                 .append(", isDefaultSubscriptionSelection = ")
                 .append(isDefaultSubscriptionSelection)
                 .append(", isValidSubscription = ")
@@ -315,14 +281,6 @@ public class SubscriptionInfoEntity {
                 .append(isActiveSubscriptionId)
                 .append(", isAvailableSubscription = ")
                 .append(isAvailableSubscription)
-                .append(", isDefaultVoiceSubscription = ")
-                .append(isDefaultVoiceSubscription)
-                .append(", isDefaultSmsSubscription = ")
-                .append(isDefaultSmsSubscription)
-                .append(", isDefaultDataSubscription = ")
-                .append(isDefaultDataSubscription)
-                .append(", isDefaultSubscription = ")
-                .append(isDefaultSubscription)
                 .append(", isActiveDataSubscriptionId = ")
                 .append(isActiveDataSubscriptionId)
                 .append(")}");

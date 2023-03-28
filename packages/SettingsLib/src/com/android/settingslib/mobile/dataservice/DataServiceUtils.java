@@ -312,12 +312,6 @@ public class DataServiceUtils {
                 "isFirstRemovableSubscription";
 
         /**
-         * The name of the default SIM config column,
-         * {@see SubscriptionUtil#getDefaultSimConfig(Context, int)}.
-         */
-        public static final String COLUMN_DEFAULT_SIM_CONFIG = "defaultSimConfig";
-
-        /**
          * The name of the default subscription selection column,
          * {@see SubscriptionUtil#getSubscriptionOrDefault(Context, int)}.
          */
@@ -347,32 +341,6 @@ public class DataServiceUtils {
          * {@see SubscriptionUtil#getAvailableSubscription(Context, ProxySubscriptionManager, int)}.
          */
         public static final String COLUMN_IS_AVAILABLE_SUBSCRIPTION = "isAvailableSubscription";
-
-        /**
-         * The name of the default voice subscription state column, see
-         * {@link SubscriptionManager#getDefaultVoiceSubscriptionId()}.
-         */
-        public static final String COLUMN_IS_DEFAULT_VOICE_SUBSCRIPTION =
-                "isDefaultVoiceSubscription";
-
-        /**
-         * The name of the default sms subscription state column, see
-         * {@link SubscriptionManager#getDefaultSmsSubscriptionId()}.
-         */
-        public static final String COLUMN_IS_DEFAULT_SMS_SUBSCRIPTION = "isDefaultSmsSubscription";
-
-        /**
-         * The name of the default data subscription state column, see
-         * {@link SubscriptionManager#getDefaultDataSubscriptionId()}.
-         */
-        public static final String COLUMN_IS_DEFAULT_DATA_SUBSCRIPTION =
-                "isDefaultDataSubscription";
-
-        /**
-         * The name of the default subscription state column, see
-         * {@link SubscriptionManager#getDefaultSubscriptionId()}.
-         */
-        public static final String COLUMN_IS_DEFAULT_SUBSCRIPTION = "isDefaultSubscription";
 
         /**
          * The name of the active data subscription state column, see
