@@ -66,6 +66,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.IApplicationThread;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -83,7 +84,6 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
-import android.window.RemoteTransition;
 import android.window.ScreenCapture;
 import android.window.TransitionInfo;
 
@@ -160,7 +160,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private final TransitionController mController;
     private final BLASTSyncEngine mSyncEngine;
     private final Token mToken;
-    private RemoteTransition mRemoteTransition = null;
+    private IApplicationThread mRemoteAnimApp;
 
     /** Only use for clean-up after binder death! */
     private SurfaceControl.Transaction mStartTransaction = null;
@@ -1075,12 +1075,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return mForcePlaying;
     }
 
-    void setRemoteTransition(RemoteTransition remoteTransition) {
-        mRemoteTransition = remoteTransition;
+    void setRemoteAnimationApp(IApplicationThread app) {
+        mRemoteAnimApp = app;
     }
 
-    RemoteTransition getRemoteTransition() {
-        return mRemoteTransition;
+    /** Returns the app which will run the transition animation. */
+    IApplicationThread getRemoteAnimationApp() {
+        return mRemoteAnimApp;
     }
 
     void setNoAnimation(WindowContainer wc) {
