@@ -55,7 +55,6 @@ public class WorkSourceParcelTest {
         unparcelWorkSourceFromNativeAndVerify(/* uids= */ null , /* names= */ null);
         unparcelWorkSourceFromNativeAndVerify(uids1, /* names= */ null);
         unparcelWorkSourceFromNativeAndVerify(uids2, /* names= */ null);
-        //TODO(b/273752423)
         unparcelWorkSourceFromNativeAndVerify(/* uids= */ null , names1);
         unparcelWorkSourceFromNativeAndVerify(uids1, names1);
         unparcelWorkSourceFromNativeAndVerify(uids2, names2);
@@ -70,8 +69,8 @@ public class WorkSourceParcelTest {
         final int[] uids2 = {1000, 2000};
         final String[] names1 = {"testGetWorkSource1"};
         final String[] names2 = {"testGetWorkSource1", "testGetWorkSource2"};
-        //TODO(b/273752423)
-        //parcelWorkSourceToNativeAndVerify(/* uids= */ null , /* names= */ null );
+
+        parcelWorkSourceToNativeAndVerify(/* uids= */ null , /* names= */ null);
         parcelWorkSourceToNativeAndVerify(uids1, /* names= */ null);
         parcelWorkSourceToNativeAndVerify(uids2, /* names= */ null);
         parcelWorkSourceToNativeAndVerify(uids1, names1);
