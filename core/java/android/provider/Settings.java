@@ -7443,6 +7443,8 @@ public final class Settings {
          *
          * @hide
          */
+        @TestApi
+        @Readable
         @SuppressLint("NoSettingsProvider")
         public static final String STYLUS_BUTTONS_ENABLED = "stylus_buttons_enabled";
 
