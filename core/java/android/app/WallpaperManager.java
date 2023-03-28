@@ -858,6 +858,8 @@ public class WallpaperManager {
      *     (some versions of T may throw a {@code SecurityException}).</li>
      *     <li>From version U, this method should not be used
      *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
      * </ul>
      * <br>
      *
@@ -893,6 +895,8 @@ public class WallpaperManager {
      *     (some versions of T may throw a {@code SecurityException}).</li>
      *     <li>From version U, this method should not be used
      *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
      * </ul>
      * <br>
      *
@@ -1147,6 +1151,8 @@ public class WallpaperManager {
      *     (some versions of T may throw a {@code SecurityException}).</li>
      *     <li>From version U, this method should not be used
      *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
      * </ul>
      * <br>
      *
@@ -1176,6 +1182,8 @@ public class WallpaperManager {
      *     (some versions of T may throw a {@code SecurityException}).</li>
      *     <li>From version U, this method should not be used
      *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
      * </ul>
      * <br>
      *
@@ -1214,6 +1222,8 @@ public class WallpaperManager {
      *     (some versions of T may throw a {@code SecurityException}).</li>
      *     <li>From version U, this method should not be used
      *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
      * </ul>
      * <br>
      *
@@ -1247,6 +1257,8 @@ public class WallpaperManager {
      *     (some versions of T may throw a {@code SecurityException}).</li>
      *     <li>From version U, this method should not be used
      *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
      * </ul>
      * <br>
      *
@@ -1287,6 +1299,8 @@ public class WallpaperManager {
      *     (some versions of T may throw a {@code SecurityException}).</li>
      *     <li>From version U, this method should not be used
      *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
      * </ul>
      * <br>
      *
@@ -1314,6 +1328,8 @@ public class WallpaperManager {
      *     (some versions of T may throw a {@code SecurityException}).</li>
      *     <li>From version U, this method should not be used
      *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
      * </ul>
      * <br>
      *
@@ -1458,6 +1474,8 @@ public class WallpaperManager {
      *     (some versions of T may throw a {@code SecurityException}).</li>
      *     <li>From version U, this method should not be used
      *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
      * </ul>
      * <br>
      *
