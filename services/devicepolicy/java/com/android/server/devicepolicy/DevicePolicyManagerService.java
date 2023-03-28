@@ -22293,7 +22293,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_PACKAGE_STATE,
             MANAGE_DEVICE_POLICY_RESET_PASSWORD,
             MANAGE_DEVICE_POLICY_STATUS_BAR,
-            MANAGE_DEVICE_POLICY_APP_RESTRICTIONS);
+            MANAGE_DEVICE_POLICY_APP_RESTRICTIONS,
+            MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS);
     private static final List<String> PROFILE_OWNER_PERMISSIONS  = List.of(
             MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL,
             MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
@@ -22627,7 +22628,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         // Check the permission for the role-holder
         if (isCallerDevicePolicyManagementRoleHolder(caller)) {
-            return anyDpcHasPermission(permission, mContext.getUserId());
+            return anyDpcHasPermission(permission, caller.getUserId());
         }
         if (DELEGATE_SCOPES.containsKey(permission)) {
             return isCallerDelegate(caller, DELEGATE_SCOPES.get(permission));
