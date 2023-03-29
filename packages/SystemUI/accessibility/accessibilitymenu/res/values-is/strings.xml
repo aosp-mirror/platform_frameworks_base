@@ -4,11 +4,8 @@
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Aðgengisvalmynd"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"Aðgengisvalmyndin er stór valmynd sem birtist á skjánum sem má nota til að stjórna tækinu. Þú getur læst tækinu, stjórnað hljóðstyrk og birtustigi, tekið skjámyndir og fleira."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Hjálpari"</string>
-    <!-- no translation found for assistant_utterance (65509599221141377) -->
-    <skip />
+    <string name="assistant_utterance" msgid="65509599221141377">"Hjálpari"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Aðgengisstillingar"</string>
-    <string name="volume_label" msgid="3682221827627150574">"Hljóðstyrkur"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"Stýringar hljóðstyrks"</string>
     <string name="power_label" msgid="7699720321491287839">"Orka"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Orkuvalkostir"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Nýleg forrit"</string>

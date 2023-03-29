@@ -4,11 +4,8 @@
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Tillgänglighetsmenyn"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"Tillgänglighetsmenyn är en stor meny på skärmen som du kan styra enheten med. Du kan låsa enheten, ställa in volym och ljusstyrka, ta skärmbilder och annat."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Assistent"</string>
-    <!-- no translation found for assistant_utterance (65509599221141377) -->
-    <skip />
+    <string name="assistant_utterance" msgid="65509599221141377">"Assistent"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Tillgänglighetsinställningar"</string>
-    <string name="volume_label" msgid="3682221827627150574">"Volym"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"Volymkontroller"</string>
     <string name="power_label" msgid="7699720321491287839">"Styrka"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Strömalternativ"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Senaste apparna"</string>

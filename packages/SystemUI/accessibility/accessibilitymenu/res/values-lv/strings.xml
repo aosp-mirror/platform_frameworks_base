@@ -4,11 +4,8 @@
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Pieejamības izvēlne"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"Pieejamības izvēlne ir liela ekrāna izvēlne, ar ko varat kontrolēt ierīci. Varat bloķēt ierīci, kontrolēt skaļumu un spilgtumu, veidot ekrānuzņēmumus un paveikt daudz ko citu."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Asistents"</string>
-    <!-- no translation found for assistant_utterance (65509599221141377) -->
-    <skip />
+    <string name="assistant_utterance" msgid="65509599221141377">"Asistents"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Pieejamības iestatījumi"</string>
-    <string name="volume_label" msgid="3682221827627150574">"Skaļums"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"Skaļuma vadīklas"</string>
     <string name="power_label" msgid="7699720321491287839">"Barošana"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Barošanas opcijas"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Pēdējās izmantotās lietotnes"</string>

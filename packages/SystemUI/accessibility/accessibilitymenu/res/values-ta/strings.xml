@@ -4,11 +4,8 @@
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"அணுகல்தன்மை மெனு"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"அணுகல்தன்மை மெனுவானது உங்கள் சாதனத்தைக் கட்டுப்படுத்துவதற்கு, திரையில் தோன்றும் பெரிய மெனுவை வழங்குகிறது. சாதனத்தைப் பூட்டுதல், ஒலியளவையும் ஒளிர்வையும் மாற்றுதல், ஸ்கிரீன்ஷாட்களை எடுத்தல் போன்ற பலவற்றைச் செய்யலாம்."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Assistant"</string>
-    <!-- no translation found for assistant_utterance (65509599221141377) -->
-    <skip />
+    <string name="assistant_utterance" msgid="65509599221141377">"அசிஸ்டண்ட்"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"அணுகல்தன்மை அமைப்புகள்"</string>
-    <string name="volume_label" msgid="3682221827627150574">"ஒலியளவு"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"ஒலியளவுக் கட்டுப்பாடுகள்"</string>
     <string name="power_label" msgid="7699720321491287839">"பவர் பட்டன்"</string>
     <string name="power_utterance" msgid="7444296686402104807">"பவர் பட்டன் விருப்பங்கள்"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"சமீபத்திய ஆப்ஸ்"</string>
