@@ -33,9 +33,11 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.UserHandle;
@@ -63,7 +65,7 @@ import java.util.List;
 @SmallTest
 @RunWith(Parameterized.class)
 public class NotificationComparatorTest extends UiServiceTestCase {
-    @Mock Context mContext;
+    @Mock Context mMockContext;
     @Mock TelecomManager mTm;
     @Mock RankingHandler handler;
     @Mock PackageManager mPm;
@@ -115,32 +117,35 @@ public class NotificationComparatorTest extends UiServiceTestCase {
 
         int userId = UserHandle.myUserId();
 
-        when(mContext.getResources()).thenReturn(getContext().getResources());
-        when(mContext.getTheme()).thenReturn(getContext().getTheme());
-        when(mContext.getContentResolver()).thenReturn(getContext().getContentResolver());
-        when(mContext.getPackageManager()).thenReturn(mPm);
-        when(mContext.getSystemService(eq(Context.TELECOM_SERVICE))).thenReturn(mTm);
-        when(mContext.getSystemService(Vibrator.class)).thenReturn(mVibrator);
-        when(mContext.getString(anyInt())).thenCallRealMethod();
-        when(mContext.getColor(anyInt())).thenCallRealMethod();
+        final Resources res = mContext.getResources();
+        when(mMockContext.getResources()).thenReturn(res);
+        final Resources.Theme theme = mContext.getTheme();
+        when(mMockContext.getTheme()).thenReturn(theme);
+        final ContentResolver cr = mContext.getContentResolver();
+        when(mMockContext.getContentResolver()).thenReturn(cr);
+        when(mMockContext.getPackageManager()).thenReturn(mPm);
+        when(mMockContext.getSystemService(eq(mMockContext.TELECOM_SERVICE))).thenReturn(mTm);
+        when(mMockContext.getSystemService(Vibrator.class)).thenReturn(mVibrator);
+        when(mMockContext.getString(anyInt())).thenCallRealMethod();
+        when(mMockContext.getColor(anyInt())).thenCallRealMethod();
         when(mTm.getDefaultDialerPackage()).thenReturn(callPkg);
         final ApplicationInfo legacy = new ApplicationInfo();
         legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
         try {
             when(mPm.getApplicationInfoAsUser(anyString(), anyInt(), anyInt())).thenReturn(legacy);
-            when(mContext.getApplicationInfo()).thenReturn(legacy);
+            when(mMockContext.getApplicationInfo()).thenReturn(legacy);
         } catch (PackageManager.NameNotFoundException e) {
             // let's hope not
         }
 
-        smsPkg = Settings.Secure.getString(mContext.getContentResolver(),
+        smsPkg = Settings.Secure.getString(mMockContext.getContentResolver(),
                 Settings.Secure.SMS_DEFAULT_APPLICATION);
 
-        Notification nonInterruptiveNotif = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+        Notification nonInterruptiveNotif = new Notification.Builder(mMockContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_CALL)
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build();
-        mRecordMinCallNonInterruptive = new NotificationRecord(mContext,
+        mRecordMinCallNonInterruptive = new NotificationRecord(mMockContext,
                 new StatusBarNotification(callPkg,
                         callPkg, 1, "mRecordMinCallNonInterruptive", callUid, callUid,
                         nonInterruptiveNotif,
@@ -148,134 +153,134 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         mRecordMinCallNonInterruptive.setSystemImportance(NotificationManager.IMPORTANCE_MIN);
         mRecordMinCallNonInterruptive.setInterruptive(false);
 
-        Notification n1 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+        Notification n1 = new Notification.Builder(mMockContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_CALL)
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build();
-        mRecordMinCall = new NotificationRecord(mContext, new StatusBarNotification(callPkg,
+        mRecordMinCall = new NotificationRecord(mMockContext, new StatusBarNotification(callPkg,
                 callPkg, 1, "minCall", callUid, callUid, n1,
                 new UserHandle(userId), "", 2000), getDefaultChannel());
         mRecordMinCall.setSystemImportance(NotificationManager.IMPORTANCE_MIN);
         mRecordMinCall.setInterruptive(true);
 
-        Notification n2 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+        Notification n2 = new Notification.Builder(mMockContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_CALL)
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build();
-        mRecordHighCall = new NotificationRecord(mContext, new StatusBarNotification(callPkg,
+        mRecordHighCall = new NotificationRecord(mMockContext, new StatusBarNotification(callPkg,
                 callPkg, 1, "highcall", callUid, callUid, n2,
                 new UserHandle(userId), "", 1999), getDefaultChannel());
         mRecordHighCall.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
 
-        Notification nHighCallStyle = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+        Notification nHighCallStyle = new Notification.Builder(mMockContext, TEST_CHANNEL_ID)
                 .setStyle(Notification.CallStyle.forOngoingCall(
                         new Person.Builder().setName("caller").build(),
                         mock(PendingIntent.class)
                 ))
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build();
-        mRecordHighCallStyle = new NotificationRecord(mContext, new StatusBarNotification(callPkg,
-                callPkg, 1, "highCallStyle", callUid, callUid, nHighCallStyle,
+        mRecordHighCallStyle = new NotificationRecord(mMockContext, new StatusBarNotification(
+                callPkg, callPkg, 1, "highCallStyle", callUid, callUid, nHighCallStyle,
                 new UserHandle(userId), "", 2000), getDefaultChannel());
         mRecordHighCallStyle.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
         mRecordHighCallStyle.setInterruptive(true);
 
-        Notification n4 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+        Notification n4 = new Notification.Builder(mMockContext, TEST_CHANNEL_ID)
                 .setStyle(new Notification.MessagingStyle("sender!")).build();
-        mRecordInlineReply = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
+        mRecordInlineReply = new NotificationRecord(mMockContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "inlinereply", uid2, uid2, n4, new UserHandle(userId),
                 "", 1599), getDefaultChannel());
         mRecordInlineReply.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
         mRecordInlineReply.setPackagePriority(Notification.PRIORITY_MAX);
 
         if (smsPkg != null) {
-            Notification n5 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+            Notification n5 = new Notification.Builder(mMockContext, TEST_CHANNEL_ID)
                     .setCategory(Notification.CATEGORY_MESSAGE).build();
-            mRecordSms = new NotificationRecord(mContext, new StatusBarNotification(smsPkg,
+            mRecordSms = new NotificationRecord(mMockContext, new StatusBarNotification(smsPkg,
                     smsPkg, 1, "sms", smsUid, smsUid, n5, new UserHandle(userId),
                     "", 1299), getDefaultChannel());
             mRecordSms.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
         }
 
-        Notification n6 = new Notification.Builder(mContext, TEST_CHANNEL_ID).build();
-        mRecordStarredContact = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
+        Notification n6 = new Notification.Builder(mMockContext, TEST_CHANNEL_ID).build();
+        mRecordStarredContact = new NotificationRecord(mMockContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "starred", uid2, uid2, n6, new UserHandle(userId),
                 "", 1259), getDefaultChannel());
         mRecordStarredContact.setContactAffinity(ValidateNotificationPeople.STARRED_CONTACT);
         mRecordStarredContact.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
-        Notification n7 = new Notification.Builder(mContext, TEST_CHANNEL_ID).build();
-        mRecordContact = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
+        Notification n7 = new Notification.Builder(mMockContext, TEST_CHANNEL_ID).build();
+        mRecordContact = new NotificationRecord(mMockContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "contact", uid2, uid2, n7, new UserHandle(userId),
                 "", 1259), getDefaultChannel());
         mRecordContact.setContactAffinity(ValidateNotificationPeople.VALID_CONTACT);
         mRecordContact.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
-        Notification nSystemMax = new Notification.Builder(mContext, TEST_CHANNEL_ID).build();
-        mRecordSystemMax = new NotificationRecord(mContext, new StatusBarNotification(sysPkg,
+        Notification nSystemMax = new Notification.Builder(mMockContext, TEST_CHANNEL_ID).build();
+        mRecordSystemMax = new NotificationRecord(mMockContext, new StatusBarNotification(sysPkg,
                 sysPkg, 1, "systemmax", uid2, uid2, nSystemMax, new UserHandle(userId),
                 "", 1244), getDefaultChannel());
         mRecordSystemMax.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
 
-        Notification n8 = new Notification.Builder(mContext, TEST_CHANNEL_ID).build();
-        mRecordUrgent = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
+        Notification n8 = new Notification.Builder(mMockContext, TEST_CHANNEL_ID).build();
+        mRecordUrgent = new NotificationRecord(mMockContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "urgent", uid2, uid2, n8, new UserHandle(userId),
                 "", 1258), getDefaultChannel());
         mRecordUrgent.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
 
-        Notification n9 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+        Notification n9 = new Notification.Builder(mMockContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_MESSAGE)
                 .setFlag(Notification.FLAG_ONGOING_EVENT
                         |Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build();
-        mRecordCheater = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
+        mRecordCheater = new NotificationRecord(mMockContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "cheater", uid2, uid2, n9, new UserHandle(userId),
                 "", 9258), getDefaultChannel());
         mRecordCheater.setSystemImportance(NotificationManager.IMPORTANCE_LOW);
         mRecordCheater.setPackagePriority(Notification.PRIORITY_MAX);
 
-        Notification n10 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+        Notification n10 = new Notification.Builder(mMockContext, TEST_CHANNEL_ID)
                 .setStyle(new Notification.InboxStyle().setSummaryText("message!")).build();
-        mRecordEmail = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
+        mRecordEmail = new NotificationRecord(mMockContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "email", uid2, uid2, n10, new UserHandle(userId),
                 "", 1599), getDefaultChannel());
         mRecordEmail.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
 
-        Notification n11 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+        Notification n11 = new Notification.Builder(mMockContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_MESSAGE)
                 .setColorized(true).setColor(Color.WHITE)
                 .build();
-        mRecordCheaterColorized = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
-                pkg2, 1, "cheaterColorized", uid2, uid2, n11, new UserHandle(userId),
-                "", 9258), getDefaultChannel());
+        mRecordCheaterColorized = new NotificationRecord(mMockContext,
+                new StatusBarNotification(pkg2,pkg2, 1, "cheaterColorized", uid2, uid2, n11,
+                new UserHandle(userId), "", 9258), getDefaultChannel());
         mRecordCheaterColorized.setSystemImportance(NotificationManager.IMPORTANCE_LOW);
 
-        Notification n12 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+        Notification n12 = new Notification.Builder(mMockContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_MESSAGE)
                 .setColorized(true).setColor(Color.WHITE)
                 .setStyle(new Notification.MediaStyle())
                 .build();
-        mNoMediaSessionMedia = new NotificationRecord(mContext, new StatusBarNotification(
+        mNoMediaSessionMedia = new NotificationRecord(mMockContext, new StatusBarNotification(
                 pkg2, pkg2, 1, "media", uid2, uid2, n12, new UserHandle(userId),
                 "", 9258), getDefaultChannel());
         mNoMediaSessionMedia.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
-        Notification n13 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+        Notification n13 = new Notification.Builder(mMockContext, TEST_CHANNEL_ID)
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
                 .setColorized(true).setColor(Color.WHITE)
                 .build();
-        mRecordColorized = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
+        mRecordColorized = new NotificationRecord(mMockContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "colorized", uid2, uid2, n13,
                 new UserHandle(userId), "", 1999), getDefaultChannel());
         mRecordColorized.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
 
-        Notification n14 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+        Notification n14 = new Notification.Builder(mMockContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_CALL)
                 .setColorized(true).setColor(Color.WHITE)
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
                 .build();
-        mRecordColorizedCall = new NotificationRecord(mContext, new StatusBarNotification(callPkg,
-                callPkg, 1, "colorizedCall", callUid, callUid, n14,
+        mRecordColorizedCall = new NotificationRecord(mMockContext, new StatusBarNotification(
+                callPkg, callPkg, 1, "colorizedCall", callUid, callUid, n14,
                 new UserHandle(userId), "", 1999), getDefaultChannel());
         mRecordColorizedCall.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
     }
@@ -316,14 +321,14 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         actual.addAll(expected);
         Collections.shuffle(actual);
 
-        Collections.sort(actual, new NotificationComparator(mContext));
+        Collections.sort(actual, new NotificationComparator(mMockContext));
 
         assertThat(actual).containsExactlyElementsIn(expected).inOrder();
     }
 
     @Test
     public void testRankingScoreOverrides() {
-        NotificationComparator comp = new NotificationComparator(mContext);
+        NotificationComparator comp = new NotificationComparator(mMockContext);
         NotificationRecord recordMinCallNonInterruptive = spy(mRecordMinCallNonInterruptive);
         if (mSortByInterruptiveness) {
             assertTrue(comp.compare(mRecordMinCall, recordMinCallNonInterruptive) < 0);
@@ -339,7 +344,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
 
     @Test
     public void testMessaging() {
-        NotificationComparator comp = new NotificationComparator(mContext);
+        NotificationComparator comp = new NotificationComparator(mMockContext);
         assertTrue(comp.isImportantMessaging(mRecordInlineReply));
         if (mRecordSms != null) {
             assertTrue(comp.isImportantMessaging(mRecordSms));
@@ -350,7 +355,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
 
     @Test
     public void testPeople() {
-        NotificationComparator comp = new NotificationComparator(mContext);
+        NotificationComparator comp = new NotificationComparator(mMockContext);
         assertTrue(comp.isImportantPeople(mRecordStarredContact));
         assertTrue(comp.isImportantPeople(mRecordContact));
     }
