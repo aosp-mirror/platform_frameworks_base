@@ -5,9 +5,7 @@
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"‘အများသုံးနိုင်မှု မီနူး’ တွင် သင့်စက်ပစ္စည်းကို စီမံရန် ကြီးမားသည့်ဖန်သားပြင်မီနူး ပါဝင်သည်။ စက်ပစ္စည်းလော့ခ်ချခြင်း၊ အသံအတိုးအကျယ်နှင့် အလင်းအမှောင် ထိန်းချုပ်ခြင်း၊ ဖန်သားပြင်ဓာတ်ပုံရိုက်ခြင်း စသည်တို့ ပြုလုပ်နိုင်သည်။"</string>
     <string name="assistant_label" msgid="6796392082252272356">"Assistant"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Assistant"</string>
-    <string name="a11y_settings_label" msgid="3977714687248445050">"အများသုံးစွဲနိုင်မှု ဆက်တင်များ"</string>
-    <string name="volume_label" msgid="3682221827627150574">"အသံအတိုးအကျယ်"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"အသံအတိုးအကျယ် ခလုတ်များ"</string>
+    <string name="a11y_settings_label" msgid="3977714687248445050">"အများသုံးနိုင်မှု ဆက်တင်များ"</string>
     <string name="power_label" msgid="7699720321491287839">"ပါဝါခလုတ်"</string>
     <string name="power_utterance" msgid="7444296686402104807">"ပါဝါ ရွေးစရာများ"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"လတ်တလောသုံး အက်ပ်များ"</string>

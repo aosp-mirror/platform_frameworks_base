@@ -4,11 +4,8 @@
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Menu ułatwień dostępu"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"Menu ułatwień dostępu to duże menu ekranowe, które umożliwia obsługę urządzenia. Możesz zablokować urządzenie, zwiększyć lub zmniejszyć głośność oraz jasność, zrobić zrzut ekranu i wykonać inne działania."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Asystent"</string>
-    <!-- no translation found for assistant_utterance (65509599221141377) -->
-    <skip />
+    <string name="assistant_utterance" msgid="65509599221141377">"Asystent"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Ustawienia ułatwień dostępu"</string>
-    <string name="volume_label" msgid="3682221827627150574">"Głośność"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"Przyciski sterowania głośnością"</string>
     <string name="power_label" msgid="7699720321491287839">"Zasilanie"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Opcje przycisku zasilania"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Ostatnie aplikacje"</string>

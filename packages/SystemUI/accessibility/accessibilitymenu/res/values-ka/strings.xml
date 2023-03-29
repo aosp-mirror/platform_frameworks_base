@@ -6,8 +6,6 @@
     <string name="assistant_label" msgid="6796392082252272356">"ასისტენტი"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"ასისტენტი"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"მარტივი წვდომის პარამეტრები"</string>
-    <string name="volume_label" msgid="3682221827627150574">"ხმა"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"ხმის მართვის საშუალებები"</string>
     <string name="power_label" msgid="7699720321491287839">"ელკვება"</string>
     <string name="power_utterance" msgid="7444296686402104807">"ელკვების ვარიანტები"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"ბოლოდროინდელი აპები"</string>
