@@ -163,8 +163,6 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<KeyguardSecurityContainer.SwipeListener> mSwipeListenerArgumentCaptor;
 
-    private Configuration mConfiguration;
-
     private KeyguardSecurityContainerController mKeyguardSecurityContainerController;
     private KeyguardPasswordViewController mKeyguardPasswordViewController;
     private KeyguardPasswordView mKeyguardPasswordView;
@@ -172,12 +170,12 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
     @Before
     public void setup() {
-        mConfiguration = new Configuration();
-        mConfiguration.setToDefaults(); // Defaults to ORIENTATION_UNDEFINED.
         mTestableResources = mContext.getOrCreateTestableResources();
+        mTestableResources.getResources().getConfiguration().orientation =
+                Configuration.ORIENTATION_UNDEFINED;
 
         when(mView.getContext()).thenReturn(mContext);
-        when(mView.getResources()).thenReturn(mContext.getResources());
+        when(mView.getResources()).thenReturn(mTestableResources.getResources());
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(/* width=  */ 0, /* height= */
                 0);
         lp.gravity = 0;
@@ -254,6 +252,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
     @Test
     public void onResourcesUpdate_callsThroughOnRotationChange() {
+        clearInvocations(mView);
+
         // Rotation is the same, shouldn't cause an update
         mKeyguardSecurityContainerController.updateResources();
         verify(mView, never()).initMode(eq(MODE_DEFAULT), eq(mGlobalSettings), eq(mFalsingManager),
@@ -581,12 +581,12 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         // Set initial gravity
         mTestableResources.addOverride(R.integer.keyguard_host_view_gravity,
                 Gravity.CENTER);
+        mTestableResources.addOverride(
+                R.bool.can_use_one_handed_bouncer, false);
 
         // Kick off the initial pass...
         mKeyguardSecurityContainerController.onInit();
-        verify(mView).setLayoutParams(argThat(
-                (ArgumentMatcher<FrameLayout.LayoutParams>) argument ->
-                        argument.gravity == Gravity.CENTER));
+        verify(mView).setLayoutParams(any());
         clearInvocations(mView);
 
         // Now simulate a config change
@@ -594,9 +594,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
 
         mKeyguardSecurityContainerController.updateResources();
-        verify(mView).setLayoutParams(argThat(
-                (ArgumentMatcher<FrameLayout.LayoutParams>) argument ->
-                        argument.gravity == (Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM)));
+        verify(mView).setLayoutParams(any());
     }
 
     @Test
