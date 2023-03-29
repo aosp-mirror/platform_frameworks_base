@@ -131,6 +131,7 @@ package android.app {
     method public void alwaysShowUnsupportedCompileSdkWarning(android.content.ComponentName);
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public int[] getDisplayIdsForStartingVisibleBackgroundUsers();
     method public long getTotalRam();
+    method @NonNull @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int[] getUidFrozenState(@NonNull int[]);
     method @RequiresPermission(allOf={android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public int getUidProcessCapabilities(int);
     method @RequiresPermission(allOf={android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public int getUidProcessState(int);
     method public void holdLock(android.os.IBinder, int);
