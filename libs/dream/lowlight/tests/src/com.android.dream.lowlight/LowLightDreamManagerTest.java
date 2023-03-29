@@ -21,10 +21,7 @@ import static com.android.dream.lowlight.LowLightDreamManager.AMBIENT_LIGHT_MODE
 import static com.android.dream.lowlight.LowLightDreamManager.AMBIENT_LIGHT_MODE_UNKNOWN;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -47,9 +44,6 @@ public class LowLightDreamManagerTest {
     private DreamManager mDreamManager;
 
     @Mock
-    private LowLightTransitionCoordinator mTransitionCoordinator;
-
-    @Mock
     private ComponentName mDreamComponent;
 
     LowLightDreamManager mLowLightDreamManager;
@@ -58,14 +52,7 @@ public class LowLightDreamManagerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        // Automatically run any provided Runnable to mTransitionCoordinator to simplify testing.
-        doAnswer(invocation -> {
-            ((Runnable) invocation.getArgument(1)).run();
-            return null;
-        }).when(mTransitionCoordinator).notifyBeforeLowLightTransition(anyBoolean(),
-                any(Runnable.class));
-
-        mLowLightDreamManager = new LowLightDreamManager(mDreamManager, mTransitionCoordinator,
+        mLowLightDreamManager = new LowLightDreamManager(mDreamManager,
                 mDreamComponent);
     }
 
@@ -73,7 +60,6 @@ public class LowLightDreamManagerTest {
     public void setAmbientLightMode_lowLight_setSystemDream() {
         mLowLightDreamManager.setAmbientLightMode(AMBIENT_LIGHT_MODE_LOW_LIGHT);
 
-        verify(mTransitionCoordinator).notifyBeforeLowLightTransition(eq(true), any());
         verify(mDreamManager).setSystemDreamComponent(mDreamComponent);
     }
 
@@ -81,7 +67,6 @@ public class LowLightDreamManagerTest {
     public void setAmbientLightMode_regularLight_clearSystemDream() {
         mLowLightDreamManager.setAmbientLightMode(AMBIENT_LIGHT_MODE_REGULAR);
 
-        verify(mTransitionCoordinator).notifyBeforeLowLightTransition(eq(false), any());
         verify(mDreamManager).setSystemDreamComponent(null);
     }
 
@@ -100,7 +85,7 @@ public class LowLightDreamManagerTest {
     @Test
     public void setAmbientLightMode_dreamComponentNotSet_doNothing() {
         final LowLightDreamManager lowLightDreamManager = new LowLightDreamManager(mDreamManager,
-                mTransitionCoordinator, null /*dream component*/);
+                null /*dream component*/);
 
         lowLightDreamManager.setAmbientLightMode(AMBIENT_LIGHT_MODE_LOW_LIGHT);
 

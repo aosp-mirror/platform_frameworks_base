@@ -34,8 +34,6 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerReposito
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.power.data.repository.FakePowerRepository
-import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
@@ -88,7 +86,6 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
 
     private lateinit var userRepository: FakeUserRepository
     private lateinit var keyguardRepository: FakeKeyguardRepository
-    private lateinit var powerRepository: FakePowerRepository
 
     private lateinit var testDispatcher: TestDispatcher
     private lateinit var testScope: TestScope
@@ -116,7 +113,6 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
         }
 
         keyguardRepository = FakeKeyguardRepository()
-        powerRepository = FakePowerRepository()
         val refreshUsersScheduler =
             RefreshUsersScheduler(
                 applicationScope = testScope.backgroundScope,
@@ -145,7 +141,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                 set(Flags.FACE_AUTH_REFACTOR, true)
             }
         underTest =
-            UserSwitcherViewModel.Factory(
+            UserSwitcherViewModel(
                     userInteractor =
                         UserInteractor(
                             applicationContext = context,
@@ -173,13 +169,8 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                             refreshUsersScheduler = refreshUsersScheduler,
                             guestUserInteractor = guestUserInteractor,
                         ),
-                    powerInteractor =
-                        PowerInteractor(
-                            repository = powerRepository,
-                        ),
                     guestUserInteractor = guestUserInteractor,
                 )
-                .create(UserSwitcherViewModel::class.java)
     }
 
     @Test
@@ -326,46 +317,12 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isFinishRequested - finishes when user is switched`() =
-        testScope.runTest {
-            val userInfos = setUsers(count = 2)
-            val isFinishRequested = mutableListOf<Boolean>()
-            val job =
-                launch(testDispatcher) { underTest.isFinishRequested.toList(isFinishRequested) }
-            assertThat(isFinishRequested.last()).isFalse()
-
-            userRepository.setSelectedUserInfo(userInfos[1])
-
-            assertThat(isFinishRequested.last()).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
-    fun `isFinishRequested - finishes when the screen turns off`() =
-        testScope.runTest {
-            setUsers(count = 2)
-            powerRepository.setInteractive(true)
-            val isFinishRequested = mutableListOf<Boolean>()
-            val job =
-                launch(testDispatcher) { underTest.isFinishRequested.toList(isFinishRequested) }
-            assertThat(isFinishRequested.last()).isFalse()
-
-            powerRepository.setInteractive(false)
-
-            assertThat(isFinishRequested.last()).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
     fun `isFinishRequested - finishes when cancel button is clicked`() =
         testScope.runTest {
             setUsers(count = 2)
-            powerRepository.setInteractive(true)
             val isFinishRequested = mutableListOf<Boolean>()
             val job =
-                launch(testDispatcher) { underTest.isFinishRequested.toList(isFinishRequested) }
+                    launch(testDispatcher) { underTest.isFinishRequested.toList(isFinishRequested) }
             assertThat(isFinishRequested.last()).isFalse()
 
             underTest.onCancelButtonClicked()

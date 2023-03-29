@@ -267,9 +267,6 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 return;
             }
             sendStatusChanged();
-        } else {
-            throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
-                    + "\n mRootTaskInfo: " + mRootTaskInfo);
         }
     }
 

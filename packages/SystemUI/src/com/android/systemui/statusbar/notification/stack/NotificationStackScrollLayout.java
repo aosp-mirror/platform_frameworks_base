@@ -5565,6 +5565,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void setDozeAmount(float dozeAmount) {
         mAmbientState.setDozeAmount(dozeAmount);
         updateContinuousBackgroundDrawing();
+        updateStackPosition();
         requestChildrenUpdate();
     }
 

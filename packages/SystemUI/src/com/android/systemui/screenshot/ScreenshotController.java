@@ -491,10 +491,6 @@ public class ScreenshotController {
                     });
         }
 
-        if (DEBUG_WINDOW) {
-            Log.d(TAG, "setContentView: " + mScreenshotView);
-        }
-        setContentView(mScreenshotView);
         // ignore system bar insets for the purpose of window layout
         mWindow.getDecorView().setOnApplyWindowInsetsListener(
                 (v, insets) -> WindowInsets.CONSUMED);
@@ -799,10 +795,6 @@ public class ScreenshotController {
                     mContext.getDrawable(R.drawable.overlay_badge_background), owner));
         }
         mScreenshotView.setScreenshot(mScreenBitmap, screenInsets);
-        if (DEBUG_WINDOW) {
-            Log.d(TAG, "setContentView: " + mScreenshotView);
-        }
-        setContentView(mScreenshotView);
         // ignore system bar insets for the purpose of window layout
         mWindow.getDecorView().setOnApplyWindowInsetsListener(
                 (v, insets) -> WindowInsets.CONSUMED);
