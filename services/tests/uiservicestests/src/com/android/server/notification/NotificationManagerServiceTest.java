@@ -424,7 +424,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Shell permisssions will override permissions of our app, so add all necessary permissions
         // for this test here:
         InstrumentationRegistry.getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
-                "android.permission.ALLOWLISTED_WRITE_DEVICE_CONFIG",
+                "android.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG",
                 "android.permission.READ_DEVICE_CONFIG",
                 "android.permission.READ_CONTACTS");
 
