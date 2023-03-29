@@ -2141,6 +2141,17 @@ class UserController implements Handler.Callback {
 
         final int observerCount = mUserSwitchObservers.beginBroadcast();
         if (observerCount > 0) {
+            for (int i = 0; i < observerCount; i++) {
+                final String name = "#" + i + " " + mUserSwitchObservers.getBroadcastCookie(i);
+                t.traceBegin("onBeforeUserSwitching-" + name);
+                try {
+                    mUserSwitchObservers.getBroadcastItem(i).onBeforeUserSwitching(newUserId);
+                } catch (RemoteException e) {
+                    // Ignore
+                } finally {
+                    t.traceEnd();
+                }
+            }
             final ArraySet<String> curWaitingUserSwitchCallbacks = new ArraySet<>();
             synchronized (mLock) {
                 uss.switching = true;
