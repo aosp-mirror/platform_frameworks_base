@@ -802,6 +802,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Дазваляе трымальніку запусціць прагляд інфармацыі пра функцыі для праграмы."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"атрымліваць даныя датчыка з высокай частатой дыскрэтызацыі"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Праграма зможа распазнаваць даныя датчыка з частатой звыш 200 Гц"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Устанавіць правілы паролю"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Кіраваць даўжынёй і сімваламі, дазволенымі пры ўводзе пароляў і PIN-кодаў блакіроўкі экрана."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Сачыць за спробамі разблакіроўкі экрана"</string>

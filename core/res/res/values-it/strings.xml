@@ -801,6 +801,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Consente all\'app che ha questa autorizzazione di iniziare a visualizzare le informazioni relative alle funzionalità di un\'app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"Accesso ai dati dei sensori a una frequenza di campionamento elevata"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Consente all\'app di campionare i dati dei sensori a una frequenza maggiore di 200 Hz"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Impostare regole per le password"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Controlla la lunghezza e i caratteri ammessi nelle password e nei PIN del blocco schermo."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitorare tentativi di sblocco dello schermo"</string>
@@ -1634,7 +1638,7 @@
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Impostazioni"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Disconnetti"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Ricerca in corso..."</string>
-    <string name="media_route_status_connecting" msgid="5845597961412010540">"Connessione..."</string>
+    <string name="media_route_status_connecting" msgid="5845597961412010540">"Connessione in corso..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Disponibile"</string>
     <string name="media_route_status_not_available" msgid="480912417977515261">"Non disponibili"</string>
     <string name="media_route_status_in_use" msgid="6684112905244944724">"In uso"</string>
