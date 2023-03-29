@@ -591,7 +591,7 @@ interface IDevicePolicyManager {
 
     List<UserHandle> getPolicyManagedProfiles(in UserHandle userHandle);
 
-    void setApplicationExemptions(String packageName, in int[]exemptions);
+    void setApplicationExemptions(String callerPackage, String packageName, in int[]exemptions);
     int[] getApplicationExemptions(String packageName);
 
     void setMtePolicy(int flag, String callerPackageName);
