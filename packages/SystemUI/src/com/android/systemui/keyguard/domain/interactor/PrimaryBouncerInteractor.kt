@@ -21,8 +21,6 @@ import android.content.res.ColorStateList
 import android.hardware.biometrics.BiometricSourceType
 import android.os.Handler
 import android.os.Trace
-import android.os.UserHandle
-import android.os.UserManager
 import android.util.Log
 import android.view.View
 import com.android.keyguard.KeyguardConstants
@@ -106,10 +104,9 @@ constructor(
     val panelExpansionAmount: Flow<Float> = repository.panelExpansionAmount
     /** 0f = bouncer fully hidden. 1f = bouncer fully visible. */
     val bouncerExpansion: Flow<Float> =
-        combine(
-            repository.panelExpansionAmount,
-            repository.primaryBouncerShow
-        ) { panelExpansion, primaryBouncerIsShowing ->
+        combine(repository.panelExpansionAmount, repository.primaryBouncerShow) {
+            panelExpansion,
+            primaryBouncerIsShowing ->
             if (primaryBouncerIsShowing) {
                 1f - panelExpansion
             } else {
@@ -152,22 +149,18 @@ constructor(
             (isBouncerShowing() || repository.primaryBouncerShowingSoon.value) &&
                 needsFullscreenBouncer()
 
-        if (!resumeBouncer && isBouncerShowing()) {
-            // If bouncer is visible, the bouncer is already showing.
-            return
-        }
-
         Trace.beginSection("KeyguardBouncer#show")
         repository.setPrimaryScrimmed(isScrimmed)
         if (isScrimmed) {
             setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
         }
 
+        // In this special case, we want to hide the bouncer and show it again. We want to emit
+        // show(true) again so that we can reinflate the new view.
         if (resumeBouncer) {
-            primaryBouncerView.delegate?.resume()
-            // Bouncer is showing the next security screen and we just need to prompt a resume.
-            return
+            repository.setPrimaryShow(false)
         }
+
         if (primaryBouncerView.delegate?.showNextSecurityScreenOrFinish() == true) {
             // Keyguard is done.
             return

@@ -48,6 +48,7 @@ import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -121,6 +122,17 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         whenever(bouncerView.delegate?.showNextSecurityScreenOrFinish()).thenReturn(true)
         verify(keyguardStateController, never()).notifyPrimaryBouncerShowing(true)
         verify(mPrimaryBouncerCallbackInteractor, never()).dispatchStartingToShow()
+    }
+
+    @Test
+    fun testShow_isResumed() {
+        whenever(repository.primaryBouncerShow.value).thenReturn(true)
+        whenever(keyguardSecurityModel.getSecurityMode(anyInt()))
+            .thenReturn(KeyguardSecurityModel.SecurityMode.SimPuk)
+
+        underTest.show(true)
+        verify(repository).setPrimaryShow(false)
+        verify(repository).setPrimaryShow(true)
     }
 
     @Test
