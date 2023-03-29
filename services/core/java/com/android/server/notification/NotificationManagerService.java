@@ -3323,7 +3323,8 @@ public class NotificationManagerService extends SystemService {
             final boolean isSystemToast = isCallerSystemOrPhone()
                     || PackageManagerService.PLATFORM_PACKAGE_NAME.equals(pkg);
             boolean isAppRenderedToast = (callback != null);
-            if (!checkCanEnqueueToast(pkg, callingUid, isAppRenderedToast, isSystemToast)) {
+            if (!checkCanEnqueueToast(pkg, callingUid, displayId, isAppRenderedToast,
+                    isSystemToast)) {
                 return;
             }
 
@@ -3393,7 +3394,7 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        private boolean checkCanEnqueueToast(String pkg, int callingUid,
+        private boolean checkCanEnqueueToast(String pkg, int callingUid, int displayId,
                 boolean isAppRenderedToast, boolean isSystemToast) {
             final boolean isPackageSuspended = isPackagePaused(pkg);
             final boolean notificationsDisabledForPackage = !areNotificationsEnabledForPackage(pkg,
@@ -3420,6 +3421,13 @@ public class NotificationManagerService extends SystemService {
                     isPackageInForegroundForToast(callingUid))) {
                 Slog.w(TAG, "Blocking custom toast from package " + pkg
                         + " due to package not in the foreground at time the toast was posted");
+                return false;
+            }
+
+            int userId = UserHandle.getUserId(callingUid);
+            if (!isSystemToast && !mUmInternal.isUserVisible(userId, displayId)) {
+                Slog.e(TAG, "Suppressing toast from package " + pkg + "/" + callingUid + " as user "
+                        + userId + " is not visible on display " + displayId);
                 return false;
             }
 
