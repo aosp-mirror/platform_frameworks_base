@@ -778,13 +778,12 @@ class ActivityClientController extends IActivityClientController.Stub {
                         && r.mTransitionController.inPlayingTransition(r)
                         && !r.mTransitionController.isCollecting()
                         ? r.mTransitionController.createTransition(TRANSIT_TO_BACK) : null;
-                if (transition != null) {
-                    r.mTransitionController.requestStartTransition(transition, null /*startTask */,
-                            null /* remoteTransition */, null /* displayChange */);
-                }
                 final boolean changed = r != null && r.setOccludesParent(true);
                 if (transition != null) {
                     if (changed) {
+                        r.mTransitionController.requestStartTransition(transition,
+                                null /*startTask */, null /* remoteTransition */,
+                                null /* displayChange */);
                         r.mTransitionController.setReady(r.getDisplayContent());
                     } else {
                         transition.abort();
@@ -818,13 +817,12 @@ class ActivityClientController extends IActivityClientController.Stub {
                 final Transition transition = r.mTransitionController.inPlayingTransition(r)
                         && !r.mTransitionController.isCollecting()
                         ? r.mTransitionController.createTransition(TRANSIT_TO_FRONT) : null;
-                if (transition != null) {
-                    r.mTransitionController.requestStartTransition(transition, null /*startTask */,
-                            null /* remoteTransition */, null /* displayChange */);
-                }
                 final boolean changed = r.setOccludesParent(false);
                 if (transition != null) {
                     if (changed) {
+                        r.mTransitionController.requestStartTransition(transition,
+                                null /*startTask */, null /* remoteTransition */,
+                                null /* displayChange */);
                         r.mTransitionController.setReady(r.getDisplayContent());
                     } else {
                         transition.abort();
