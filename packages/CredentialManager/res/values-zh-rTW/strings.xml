@@ -18,7 +18,7 @@
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"公開金鑰密碼編譯"</string>
     <string name="public_key_cryptography_detail" msgid="6937631710280562213">"密碼金鑰根據 FIDO 聯盟 (包括 Google、Apple、Microsoft 等) 及 W3C 標準，使用加密編譯金鑰組。有別於傳統密碼，系統會針對應用程式或網站建立專屬的私密 - 公開金鑰組，因此你不再需要輸入使用者名稱和一串密碼字元。私密金鑰會安全地儲存在裝置或密碼管理工具中，並用來確認你的身分。公開金鑰會提供給應用程式或網站伺服器。只要有相對應的金鑰，就能立即註冊和登入。"</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"提升帳戶安全性"</string>
-    <string name="improved_account_security_detail" msgid="9123750251551844860">"系統會為應用程式或網站建立專屬的對應金鑰，因此你不會意外登入詐欺性的應用程式或網站。此外，伺服器上只存放公開金鑰，因此可大幅降低駭客入侵的風險。"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"系統會為應用程式或網站建立專屬的對應金鑰，因此你不會意外登入詐騙應用程式或網站。此外，伺服器上只存放公開金鑰，可大幅降低駭客入侵的風險。"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"流暢轉換"</string>
     <string name="seamless_transition_detail" msgid="3440478759491650823">"即使現在已邁入無密碼時代，密碼仍可與密碼金鑰並用"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"選擇要將<xliff:g id="CREATETYPES">%1$s</xliff:g>存在哪裡"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"要使用已儲存的「<xliff:g id="APP_NAME">%1$s</xliff:g>」密碼金鑰嗎？"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"要使用已儲存的「<xliff:g id="APP_NAME">%1$s</xliff:g>」登入資訊嗎？"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"選擇已儲存的「<xliff:g id="APP_NAME">%1$s</xliff:g>」登入資訊"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"使用其他方式登入"</string>
     <string name="snackbar_action" msgid="37373514216505085">"查看選項"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"繼續"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"管理登入資訊"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"透過其他裝置"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"使用其他裝置"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>

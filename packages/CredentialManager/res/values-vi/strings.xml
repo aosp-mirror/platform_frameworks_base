@@ -15,7 +15,7 @@
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Xem thêm thông tin về mã xác thực"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Công nghệ không dùng mật khẩu"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Mã xác thực cho phép bạn đăng nhập mà không cần dựa vào mật khẩu. Bạn chỉ cần dùng vân tay, tính năng nhận dạng khuôn mặt, mã PIN hoặc hình mở khoá để xác minh danh tính và tạo mã xác thực."</string>
-    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Mật mã của khoá công khai"</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Mã hoá khoá công khai"</string>
     <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Dựa trên Liên minh FIDO (bao gồm Google, Apple, Microsoft, v.v.) và tiêu chuẩn W3C, mã xác thực sử dụng cặp khoá mã hoá. Khác với tên người dùng và chuỗi ký tự chúng tôi dùng cho mật khẩu, một cặp khoá riêng tư – công khai được tạo cho một ứng dụng hoặc trang web. Khoá riêng tư được lưu trữ an toàn trên thiết bị hoặc trình quản lý mật khẩu và xác nhận danh tính của bạn. Khoá công khai được chia sẻ với máy chủ ứng dụng hoặc trang web. Với khoá tương ứng, bạn có thể đăng ký và đăng nhập tức thì."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Cải thiện tính bảo mật của tài khoản"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Mỗi khoá được liên kết riêng với ứng dụng hoặc trang web mà khoá đó được tạo. Vì vậy, bạn sẽ không bao giờ đăng nhập nhầm vào một ứng dụng hoặc trang web lừa đảo. Ngoài ra, với các máy chủ chỉ lưu giữ khoá công khai, việc xâm nhập càng khó hơn nhiều."</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Dùng mã xác thực bạn đã lưu cho <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Dùng thông tin đăng nhập bạn đã lưu cho <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Chọn thông tin đăng nhập đã lưu cho <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Đăng nhập bằng cách khác"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Xem các lựa chọn"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Tiếp tục"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Quản lý thông tin đăng nhập"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Từ một thiết bị khác"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Dùng thiết bị khác"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>

@@ -49,9 +49,11 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Voltar à página anterior"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Fechar"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Dispensar"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Usar sua chave de acesso salva para <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Usar sua chave de acesso salva para o app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Usar suas informações de login salvas para <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Escolher um login salvo para <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Fazer login de outra forma"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Conferir opções"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Continuar"</string>
@@ -64,4 +66,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Gerenciar logins"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"De outro dispositivo"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Usar um dispositivo diferente"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Solicitação cancelada por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
 </resources>

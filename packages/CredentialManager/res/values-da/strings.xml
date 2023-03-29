@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Forbedret kontosikkerhed"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Hver nøgle er udelukkende tilknyttet den app eller det website, som nøglen blev oprettet til. På denne måde kan du aldrig logge ind i en svigagtig app eller på et svigagtigt website ved en fejl. Og da serverne kun opbevarer offentlige nøgler, er kontoer meget sværere at hacke."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Problemfri overgang"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Selvom vi nærmer os en fremtid, hvor adgangskoder er mindre fremtrædende, kan de stadig bruges i samspil med adgangsnøgler"</string>
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Selvom vi nærmer os en fremtid, hvor adgangskoder er mindre fremtrædende, kan de stadig bruges i samspil med adgangsnøgler."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Vælg, hvor du vil gemme dine <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Vælg en adgangskodeadministrator for at gemme dine oplysninger, så du kan logge ind hurtigere næste gang"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vil du oprette en adgangsnøgle til <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Vil du bruge din gemte adgangsnøgle til <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Vil du bruge din gemte loginmetode til <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Vælg en gemt loginmetode til <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Log ind på en anden måde"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Se valgmuligheder"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Fortsæt"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Administrer loginmetoder"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Fra en anden enhed"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Brug en anden enhed"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>
