@@ -102,7 +102,7 @@ private fun getServiceLabelAndIcon(
                 ).toString()
             providerIcon = pkgInfo.applicationInfo.loadIcon(pm)
         } catch (e: PackageManager.NameNotFoundException) {
-            Log.e(Constants.LOG_TAG, "Provider info not found", e)
+            Log.e(Constants.LOG_TAG, "Provider package info not found", e)
         }
     } else {
         try {
@@ -113,7 +113,23 @@ private fun getServiceLabelAndIcon(
             ).toString()
             providerIcon = si.loadIcon(pm)
         } catch (e: PackageManager.NameNotFoundException) {
-            Log.e(Constants.LOG_TAG, "Provider info not found", e)
+            Log.e(Constants.LOG_TAG, "Provider service info not found", e)
+            // Added for mdoc use case where the provider may not need to register a service and
+            // instead only relies on the registration api.
+            try {
+                val pkgInfo = pm.getPackageInfo(
+                    component.packageName,
+                    PackageManager.PackageInfoFlags.of(0)
+                )
+                providerLabel =
+                    pkgInfo.applicationInfo.loadSafeLabel(
+                        pm, 0f,
+                        TextUtils.SAFE_STRING_FLAG_FIRST_LINE or TextUtils.SAFE_STRING_FLAG_TRIM
+                    ).toString()
+                providerIcon = pkgInfo.applicationInfo.loadIcon(pm)
+            } catch (e: PackageManager.NameNotFoundException) {
+                Log.e(Constants.LOG_TAG, "Provider package info not found", e)
+            }
         }
     }
     return if (providerLabel == null || providerIcon == null) {
