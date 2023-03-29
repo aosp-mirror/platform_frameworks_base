@@ -391,6 +391,9 @@ message ActivityRecordProto {
     optional int32 last_drop_input_mode = 36;
     optional int32 override_orientation = 37 [(.android.typedef) = "android.content.pm.ActivityInfo.ScreenOrientation"];
     optional bool should_send_compat_fake_focus = 38;
+    optional bool should_force_rotate_for_camera_compat = 39;
+    optional bool should_refresh_activity_for_camera_compat = 40;
+    optional bool should_refresh_activity_via_pause_for_camera_compat = 41;
 }
 
 /* represents WindowToken */
