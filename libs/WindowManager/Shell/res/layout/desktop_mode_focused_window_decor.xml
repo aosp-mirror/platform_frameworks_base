@@ -25,8 +25,9 @@
 
     <ImageButton
         android:id="@+id/caption_handle"
-        android:layout_width="128dp"
+        android:layout_width="176dp"
         android:layout_height="42dp"
+        android:paddingHorizontal="24dp"
         android:contentDescription="@string/handle_text"
         android:src="@drawable/decor_handle_dark"
         tools:tint="@color/desktop_mode_caption_handle_bar_dark"
