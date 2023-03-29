@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"ஆப்ஸ் நிறுவப்பட்டது."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"இந்த ஆப்ஸை நிறுவ வேண்டுமா?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"இந்த ஆப்ஸைப் புதுப்பிக்க வேண்டுமா?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> இலிருந்து இந்த ஆப்ஸைப் புதுப்பிக்க வேண்டுமா?\n\nபொதுவாக இந்த ஆப்ஸ்<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> இலிருந்து புதுப்பிப்புகளைப் பெறும். வேறொன்றின் மூலம் புதுப்பித்தால் எதிர்காலத்தில் மொபைலில் வேறு இடத்திலிருந்து புதுப்பிப்புகளை நீங்கள் பெறக்கூடும். ஆப்ஸ் செயல்பாடுகள் மாறுபடக்கூடும்."</string>
     <string name="install_failed" msgid="5777824004474125469">"ஆப்ஸ் நிறுவப்படவில்லை."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"இந்தத் தொகுப்பு நிறுவப்படுவதிலிருந்து தடுக்கப்பட்டது."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"இந்தத் தொகுப்பு ஏற்கனவே உள்ள தொகுப்புடன் முரண்படுவதால் ஆப்ஸ் நிறுவப்படவில்லை."</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"அறியப்படாத ஆப்ஸை இந்தப் பயனரால் நிறுவ இயலாது"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ஆப்ஸை நிறுவ இந்தப் பயனருக்கு அனுமதியில்லை"</string>
     <string name="ok" msgid="7871959885003339302">"சரி"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"பரவாயில்லை, புதுப்பிக்கவும்"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ஆப்ஸை நிர்வகி"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"போதுமான சேமிப்பிடம் இல்லை"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸை நிறுவ இயலவில்லை. சிறிது சேமிப்பிடத்தைக் காலிசெய்து மீண்டும் முயலவும்."</string>

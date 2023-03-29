@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"መተግበሪያ ተጭኗል።"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ይህን መተግበሪያ መጫን ይፈልጋሉ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ይህን መተግበሪያ ማዘመን ይፈልጋሉ?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"ይህ መተግበሪያ ከ<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> ይዘምን?\n\nይህ መተግበሪያ በመደበኛነት ዝማኔዎችን ከ<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> ይቀበላል። ከተለየ ምንጭ በማዘመን በስልክዎ ላይ ካለ ማንኛውም ምንጭ የወደፊት ዝማኔዎችን ሊቀበሉ ይችላሉ። የመተግበሪያ ተግባራዊነት ሊለወጥ ይችላል።"</string>
     <string name="install_failed" msgid="5777824004474125469">"መተግበሪያ አልተጫነም።"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ጥቅሉ እንዳይጫን ታግዷል።"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"እንደ ጥቅል ያልተጫነ መተግበሪያ ከነባር ጥቅል ጋር ይጋጫል።"</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ያልታወቁ መተግበሪያዎች በዚህ ተጠቃሚ ሊጫኑ አይችሉም"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ይህ ተጠቃሚ መተግበሪያዎችን እንዲጭን አልተፈቀደለትም"</string>
     <string name="ok" msgid="7871959885003339302">"እሺ"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"የሆነው ሆኖ አዘምን"</string>
     <string name="manage_applications" msgid="5400164782453975580">"መተግበሪያዎችን ያቀናብሩ"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ቦታ ሞልቷል"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g>ን መጫን አልቻለም። የተወሰነ ቦታ ያስለቅቁና እንደገና ይሞክሩ።"</string>

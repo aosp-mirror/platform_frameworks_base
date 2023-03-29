@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"已安装应用。"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"要安装此应用吗？"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"要更新此应用吗？"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"要通过<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>更新此应用？\n\n此应用通常通过<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>接收更新。如果通过其他来源更新，手机未来可能会收到任何来源的更新。应用功能可能会变化。"</string>
     <string name="install_failed" msgid="5777824004474125469">"未安装应用。"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"系统已禁止安装该软件包。"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"应用未安装：软件包与现有软件包存在冲突。"</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"该用户无法安装未知应用"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"此用户无权安装应用"</string>
     <string name="ok" msgid="7871959885003339302">"确定"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"仍然更新"</string>
     <string name="manage_applications" msgid="5400164782453975580">"管理应用"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"空间不足"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"无法安装<xliff:g id="APP_NAME">%1$s</xliff:g>。请释放一些存储空间并重试。"</string>

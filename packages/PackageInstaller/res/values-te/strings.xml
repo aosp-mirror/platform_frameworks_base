@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"యాప్ ఇన్‌స్టాల్ చేయబడింది."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"మీరు ఈ యాప్‌ను ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"మీరు ఈ యాప్‌ను అప్‌డేట్ చేయాలనుకుంటున్నారా?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> నుండి ఈ యాప్‌ను అప్‌డేట్ చేయాలా?\n\nఈ యాప్ సాధారణంగా <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> నుండి అప్‌డేట్‌లను అందుకుంటుంది. విభిన్న సోర్స్ నుండి అప్‌డేట్ చేయడం ద్వారా, మీరు మీ ఫోన్‌లోని ఏదైనా సోర్స్ నుండి భవిష్యత్తు అప్‌డేట్‌లను పొందవచ్చు. యాప్ ఫంక్షనాలిటీ మారవచ్చు."</string>
     <string name="install_failed" msgid="5777824004474125469">"యాప్ ఇన్‌స్టాల్ చేయబడలేదు."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ప్యాకేజీ ఇన్‌స్టాల్ కాకుండా బ్లాక్ చేయబడింది."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ప్యాకేజీ, అలాగే ఇప్పటికే ఉన్న ప్యాకేజీ మధ్య వైరుధ్యం ఉన్నందున యాప్ ఇన్‌స్టాల్ చేయబడలేదు."</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ఈ వినియోగదారు తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయలేరు"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"యాప్‌లను ఇన్‌స్టాల్ చేయడానికి ఈ వినియోగదారుకు అనుమతి లేదు"</string>
     <string name="ok" msgid="7871959885003339302">"సరే"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"ఏదేమైనా అప్‌డేట్ చేయండి"</string>
     <string name="manage_applications" msgid="5400164782453975580">"యాప్‌లను నిర్వహించండి"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ఖాళీ లేదు"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g>ని ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు. కొంత స్థలాన్ని ఖాళీ చేసి మళ్లీ ప్రయత్నించండి."</string>

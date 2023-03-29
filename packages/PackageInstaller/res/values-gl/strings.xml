@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Instalouse a aplicación."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Queres instalar esta aplicación?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Queres actualizar esta aplicación?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Queres actualizar esta aplicación desde <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nAs actualizacións desta aplicación adoitan provir de <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Se actualizas a aplicación desde unha fonte diferente, pode que, a partir de agora, recibas actualizacións de calquera fonte no teléfono. Poderían cambiar as funcións da aplicación."</string>
     <string name="install_failed" msgid="5777824004474125469">"Non se instalou a aplicación"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Bloqueouse a instalación do paquete."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"A aplicación non se instalou porque o paquete presenta un conflito cun paquete que xa hai."</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Este usuario non pode instalar aplicacións descoñecidas"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Este usuario non ten permiso para instalar aplicacións"</string>
     <string name="ok" msgid="7871959885003339302">"Aceptar"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"Actualizar de todas formas"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Xestionar apps"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Esgotouse o espazo"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Non se puido instalar a aplicación <xliff:g id="APP_NAME">%1$s</xliff:g>. Libera espazo e téntao de novo."</string>

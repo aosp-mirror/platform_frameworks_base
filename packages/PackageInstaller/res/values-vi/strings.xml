@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Ứng dụng đã được cài đặt."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Bạn có muốn cài đặt ứng dụng này không?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Bạn có muốn cập nhật ứng dụng này không?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Cập nhật ứng dụng này của <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nỨng dụng này thường nhận thông tin cập nhật từ <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Khi cập nhật từ một nguồn khác, trong tương lai, bạn có thể nhận thông tin cập nhật từ nguồn bất kỳ trên điện thoại của bạn. Chức năng ứng dụng có thể thay đổi."</string>
     <string name="install_failed" msgid="5777824004474125469">"Ứng dụng chưa được cài đặt."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Đã chặn cài đặt gói."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Chưa cài đặt được ứng dụng do gói xung đột với một gói hiện có."</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Người dùng này không thể cài đặt ứng dụng không xác định"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Người dùng này không được phép cài đặt ứng dụng"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"Vẫn cập nhật"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Quản lý ứng dụng"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Hết dung lượng"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Không thể cài đặt <xliff:g id="APP_NAME">%1$s</xliff:g>. Hãy giải phóng dung lượng và thử lại."</string>

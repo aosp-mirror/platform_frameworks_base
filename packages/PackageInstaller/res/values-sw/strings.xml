@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Imesakinisha programu."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Ungependa kusakinisha programu hii?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Ungependa kusasisha programu hii?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Ungependa kusasisha hii programu kutoka kwa<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nProgramu hii kwa kawaida hupokea masasisho kutoka kwa <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Kwa kusasisha kutoka chanzo tofauti, huenda ukapokea masasisho ya siku zijazo kutoka chanzo chochote kwenye simu yako. Utendaji wa programu unaweza kubadilika."</string>
     <string name="install_failed" msgid="5777824004474125469">"Imeshindwa kusakinisha programu."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Kifurushi kimezuiwa kisisakinishwe."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Programu haikusakinishwa kwa sababu kifurushi kinakinzana na kifurushi kingine kilichopo."</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Mtumiaji huyu hana idhini ya kusakinisha programu ambazo hazijulikani"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Mtumiaji huyu haruhusiwi kusakinisha programu"</string>
     <string name="ok" msgid="7871959885003339302">"Sawa"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"Sasisha tu"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Dhibiti programu"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Nafasi imejaa"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Imeshindwa kusakinisha <xliff:g id="APP_NAME">%1$s</xliff:g>. Futa baadhi ya maudhui ili upate nafasi kisha ujaribu tena."</string>
