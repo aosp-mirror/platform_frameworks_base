@@ -260,13 +260,17 @@ public class KeyguardPatternViewController
         mLockPatternView.setEnabled(true);
         mLockPatternView.clearPattern();
 
+        displayDefaultSecurityMessage();
+    }
+
+    @Override
+    public void onResume(int reason) {
+        super.onResume(reason);
         // if the user is currently locked out, enforce it.
         long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
                 KeyguardUpdateMonitor.getCurrentUser());
         if (deadline != 0) {
             handleAttemptLockout(deadline);
-        } else {
-            displayDefaultSecurityMessage();
         }
     }
 
