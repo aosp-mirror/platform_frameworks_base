@@ -107,7 +107,7 @@ public class UserManagerServiceShellCommandTest {
                 new String[]{"get-main-user"}, mShellCallback, mResultReceiver));
 
         mWriter.flush();
-        assertEquals("Main user id: 12", mOutStream.toString().trim());
+        assertEquals("12", mOutStream.toString().trim());
     }
 
     @Test
@@ -118,7 +118,7 @@ public class UserManagerServiceShellCommandTest {
         assertEquals(1, mCommand.exec(mBinder, in, out, err,
                 new String[]{"get-main-user"}, mShellCallback, mResultReceiver));
         mWriter.flush();
-        assertEquals("Couldn't get main user.", mOutStream.toString().trim());
+        assertEquals("None", mOutStream.toString().trim());
     }
 
     @Test
