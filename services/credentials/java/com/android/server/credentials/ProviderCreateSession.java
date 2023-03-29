@@ -40,8 +40,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 
-import com.android.server.credentials.metrics.EntryEnum;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -158,7 +156,7 @@ public final class ProviderCreateSession extends ProviderSession<
             // Store query phase exception for aggregation with final response
             mProviderException = (CreateCredentialException) exception;
         }
-        captureCandidateFailureInMetrics();
+        mProviderSessionMetric.collectCandidateExceptionStatus(/*hasException=*/true);
         updateStatusAndInvokeCallback(toStatus(errorCode));
     }
 
@@ -179,34 +177,11 @@ public final class ProviderCreateSession extends ProviderSession<
         mProviderResponseDataHandler.addResponseContent(response.getCreateEntries(),
                 response.getRemoteCreateEntry());
         if (mProviderResponseDataHandler.isEmptyResponse(response)) {
-            gatherCandidateEntryMetrics(response);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response);
             updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE);
         } else {
-            gatherCandidateEntryMetrics(response);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response);
             updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED);
-        }
-    }
-
-    private void gatherCandidateEntryMetrics(BeginCreateCredentialResponse response) {
-        try {
-            var createEntries = response.getCreateEntries();
-            int numRemoteEntry = MetricUtilities.ZERO;
-            if (response.getRemoteCreateEntry() != null) {
-                numRemoteEntry = MetricUtilities.UNIT;
-                mCandidatePhasePerProviderMetric.addEntry(EntryEnum.REMOTE_ENTRY);
-            }
-            int numCreateEntries =
-                    createEntries == null ? MetricUtilities.ZERO : createEntries.size();
-            if (numCreateEntries > MetricUtilities.ZERO) {
-                createEntries.forEach(c ->
-                        mCandidatePhasePerProviderMetric.addEntry(EntryEnum.CREDENTIAL_ENTRY));
-            }
-            mCandidatePhasePerProviderMetric.setNumEntriesTotal(numCreateEntries + numRemoteEntry);
-            mCandidatePhasePerProviderMetric.setRemoteEntryCount(numRemoteEntry);
-            mCandidatePhasePerProviderMetric.setCredentialEntryCount(numCreateEntries);
-            mCandidatePhasePerProviderMetric.setCredentialEntryTypeCount(MetricUtilities.UNIT);
-        } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
 

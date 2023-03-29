@@ -29,6 +29,7 @@ import android.hardware.input.InputManager.KeyboardBacklightListener;
 import android.hardware.input.InputManager.OnTabletModeChangedListener;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
+import android.hardware.lights.LightsManager;
 import android.hardware.lights.LightsRequest;
 import android.os.Binder;
 import android.os.CombinedVibration;
@@ -876,7 +877,7 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#getInputDeviceSensorManager(int)
+     * @see InputDevice#getSensorManager()
      */
     @NonNull
     public SensorManager getInputDeviceSensorManager(int deviceId) {
@@ -952,6 +953,14 @@ public final class InputManagerGlobal {
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @see InputDevice#getLightsManager()
+     */
+    @NonNull
+    public LightsManager getInputDeviceLightsManager(int deviceId) {
+        return new InputDeviceLightsManager(deviceId);
     }
 
     /**
@@ -1032,7 +1041,7 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#getInputDeviceVibratorManager(int)
+     * @see InputDevice#getVibratorManager()
      */
     @NonNull
     public VibratorManager getInputDeviceVibratorManager(int deviceId) {
@@ -1138,7 +1147,7 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#getKeyCodeforKeyLocation(int, int)
+     * @see InputManager#getKeyCodeForKeyLocation(int, int)
      */
     public int getKeyCodeForKeyLocation(int deviceId, int locationKeyCode) {
         try {

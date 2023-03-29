@@ -339,13 +339,14 @@ public final class CredentialManagerService
                 CredentialDescriptionRegistry.forUser(UserHandle.getCallingUserId());
 
         // All requested credential descriptions based on the given request.
-        Set<String> requestedCredentialDescriptions =
+        Set<Set<String>> requestedCredentialDescriptions =
                 options.stream()
                         .map(
                                 getCredentialOption ->
-                                        getCredentialOption
+                                        new HashSet<>(getCredentialOption
                                                 .getCredentialRetrievalData()
-                                                .getString(CredentialOption.FLATTENED_REQUEST))
+                                                .getStringArrayList(
+                                                        CredentialOption.SUPPORTED_ELEMENT_KEYS)))
                         .collect(Collectors.toSet());
 
         // All requested credential descriptions based on the given request.
@@ -356,15 +357,13 @@ public final class CredentialManagerService
                 new HashSet<>();
 
         for (CredentialDescriptionRegistry.FilterResult filterResult : filterResults) {
-            Set<String> registeredUnflattenedStrings = CredentialDescriptionRegistry
-                    .flatStringToSet(filterResult.mFlattenedRequest);
             for (CredentialOption credentialOption : options) {
-                Set<String> requestedUnflattenedStrings = CredentialDescriptionRegistry
-                        .flatStringToSet(credentialOption
+                Set<String> requestedElementKeys = new HashSet<>(
+                        credentialOption
                                 .getCredentialRetrievalData()
-                                .getString(CredentialOption.FLATTENED_REQUEST));
-                if (CredentialDescriptionRegistry.checkForMatch(registeredUnflattenedStrings,
-                        requestedUnflattenedStrings)) {
+                                .getStringArrayList(CredentialOption.SUPPORTED_ELEMENT_KEYS));
+                if (CredentialDescriptionRegistry.checkForMatch(filterResult.mElementKeys,
+                        requestedElementKeys)) {
                     result.add(new Pair<>(credentialOption, filterResult));
                 }
             }
@@ -511,28 +510,20 @@ public final class CredentialManagerService
             if (isCredentialDescriptionApiEnabled()) {
                 List<CredentialOption> optionsThatRequireActiveCredentials =
                         request.getCredentialOptions().stream()
-                                .filter(
-                                        getCredentialOption ->
-                                                !TextUtils.isEmpty(
-                                                        getCredentialOption
-                                                                .getCredentialRetrievalData()
-                                                                .getString(
-                                                                        CredentialOption
-                                                                                .FLATTENED_REQUEST,
-                                                                        null)))
+                                .filter(credentialOption -> credentialOption
+                                        .getCredentialRetrievalData()
+                                        .getStringArrayList(
+                                                CredentialOption
+                                                        .SUPPORTED_ELEMENT_KEYS) != null)
                                 .toList();
 
                 List<CredentialOption> optionsThatDoNotRequireActiveCredentials =
                         request.getCredentialOptions().stream()
-                                .filter(
-                                        getCredentialOption ->
-                                                TextUtils.isEmpty(
-                                                        getCredentialOption
-                                                                .getCredentialRetrievalData()
-                                                                .getString(
-                                                                        CredentialOption
-                                                                                .FLATTENED_REQUEST,
-                                                                        null)))
+                                .filter(credentialOption -> credentialOption
+                                        .getCredentialRetrievalData()
+                                        .getStringArrayList(
+                                                CredentialOption
+                                                        .SUPPORTED_ELEMENT_KEYS) == null)
                                 .toList();
 
                 List<ProviderSession> sessionsWithoutRemoteService =
@@ -590,28 +581,20 @@ public final class CredentialManagerService
             if (isCredentialDescriptionApiEnabled()) {
                 List<CredentialOption> optionsThatRequireActiveCredentials =
                         request.getCredentialOptions().stream()
-                                .filter(
-                                        getCredentialOption ->
-                                                !TextUtils.isEmpty(
-                                                        getCredentialOption
-                                                                .getCredentialRetrievalData()
-                                                                .getString(
-                                                                        CredentialOption
-                                                                                .FLATTENED_REQUEST,
-                                                                        null)))
+                                .filter(credentialOption -> credentialOption
+                                                .getCredentialRetrievalData()
+                                                .getStringArrayList(
+                                                        CredentialOption
+                                                                .SUPPORTED_ELEMENT_KEYS) != null)
                                 .toList();
 
                 List<CredentialOption> optionsThatDoNotRequireActiveCredentials =
                         request.getCredentialOptions().stream()
-                                .filter(
-                                        getCredentialOption ->
-                                                TextUtils.isEmpty(
-                                                        getCredentialOption
-                                                                .getCredentialRetrievalData()
-                                                                .getString(
-                                                                        CredentialOption
-                                                                                .FLATTENED_REQUEST,
-                                                                        null)))
+                                .filter(credentialOption -> credentialOption
+                                        .getCredentialRetrievalData()
+                                        .getStringArrayList(
+                                                CredentialOption
+                                                        .SUPPORTED_ELEMENT_KEYS) == null)
                                 .toList();
 
                 List<ProviderSession> sessionsWithoutRemoteService =
@@ -724,9 +707,10 @@ public final class CredentialManagerService
 
         private void finalizeAndEmitInitialPhaseMetric(RequestSession session) {
             try {
-                var initMetric = session.mInitialPhaseMetric;
+                var initMetric = session.mRequestSessionMetric.getInitialPhaseMetric();
                 initMetric.setCredentialServiceBeginQueryTimeNanoseconds(System.nanoTime());
-                MetricUtilities.logApiCalled(initMetric, ++session.mSequenceCounter);
+                MetricUtilities.logApiCalledInitialPhase(initMetric,
+                        session.mRequestSessionMetric.returnIncrementSequence());
             } catch (Exception e) {
                 Log.w(TAG, "Unexpected error during metric logging: " + e);
             }
@@ -805,7 +789,7 @@ public final class CredentialManagerService
                     if (serviceComponentName.equals(componentName)) {
                         if (!s.getServicePackageName().equals(callingPackage)) {
                             // The component name and the package name do not match.
-                            MetricUtilities.logApiCalled(
+                            MetricUtilities.logApiCalledSimpleV1(
                                     ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
                                     ApiStatus.FAILURE, callingUid);
                             Log.w(
@@ -814,7 +798,8 @@ public final class CredentialManagerService
                                             + " match package name.");
                             return false;
                         }
-                        MetricUtilities.logApiCalled(ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
+                        MetricUtilities.logApiCalledSimpleV1(
+                                ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
                                 ApiStatus.SUCCESS, callingUid);
                         // TODO(b/271135048) - Update asap to use the new logging types
                         return true;

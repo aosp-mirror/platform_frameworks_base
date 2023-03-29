@@ -27,14 +27,11 @@ import android.credentials.GetCredentialResponse;
 import android.credentials.IGetCredentialCallback;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.RequestInfo;
-import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
 import android.util.Log;
 
-import com.android.server.credentials.metrics.ApiName;
-import com.android.server.credentials.metrics.ApiStatus;
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 
 import java.util.ArrayList;
@@ -45,7 +42,7 @@ import java.util.stream.Collectors;
  * responses from providers, and the UX app, and updates the provider(S) state.
  */
 public class GetRequestSession extends RequestSession<GetCredentialRequest,
-        IGetCredentialCallback>
+        IGetCredentialCallback, GetCredentialResponse>
         implements ProviderSession.ProviderInternalCallback<GetCredentialResponse> {
     private static final String TAG = "GetRequestSession";
     public GetRequestSession(Context context, int userId, int callingUid,
@@ -57,7 +54,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
         int numTypes = (request.getCredentialOptions().stream()
                 .map(CredentialOption::getType).collect(
                 Collectors.toSet())).size(); // Dedupe type strings
-        setupInitialPhaseMetric(ApiName.GET_CREDENTIAL.getMetricCode(), numTypes);
+        mRequestSessionMetric.collectGetFlowInitialMetricInfo(numTypes);
     }
 
     /**
@@ -83,110 +80,56 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
 
     @Override
     protected void launchUiWithProviderData(ArrayList<ProviderData> providerDataList) {
-        mChosenProviderFinalPhaseMetric.setUiCallStartTimeNanoseconds(System.nanoTime());
+        mRequestSessionMetric.collectUiCallStartTime(System.nanoTime());
         try {
-            Binder.withCleanCallingIdentity(() ->
-                    mClientCallback.onPendingIntent(mCredentialManagerUi.createPendingIntent(
+            mClientCallback.onPendingIntent(mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newGetRequestInfo(
                             mRequestId, mClientRequest, mClientAppInfo.getPackageName()),
-                    providerDataList)));
-        } catch (RuntimeException e) {
-            mChosenProviderFinalPhaseMetric.setUiReturned(false);
+                    providerDataList));
+        } catch (RemoteException e) {
+            mRequestSessionMetric.collectUiReturnedFinalPhase(/*uiReturned=*/ false);
             respondToClientWithErrorAndFinish(
                     GetCredentialException.TYPE_UNKNOWN, "Unable to instantiate selector");
         }
     }
 
     @Override
+    protected void invokeClientCallbackSuccess(GetCredentialResponse response)
+            throws RemoteException {
+        mClientCallback.onResponse(response);
+    }
+
+    @Override
+    protected void invokeClientCallbackError(String errorType, String errorMsg)
+            throws RemoteException {
+        mClientCallback.onError(errorType, errorMsg);
+    }
+
+    @Override
     public void onFinalResponseReceived(ComponentName componentName,
             @Nullable GetCredentialResponse response) {
-        mChosenProviderFinalPhaseMetric.setUiReturned(true);
-        mChosenProviderFinalPhaseMetric.setUiCallEndTimeNanoseconds(System.nanoTime());
         Log.i(TAG, "onFinalCredentialReceived from: " + componentName.flattenToString());
-        setChosenMetric(componentName);
+        mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
+        mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(
+                mProviders.get(componentName.flattenToString())
+                        .mProviderSessionMetric.getCandidatePhasePerProviderMetric());
         if (response != null) {
-            mChosenProviderFinalPhaseMetric.setChosenProviderStatus(
+            mRequestSessionMetric.collectChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_SUCCESS.getMetricCode());
             respondToClientWithResponseAndFinish(response);
         } else {
-            mChosenProviderFinalPhaseMetric.setChosenProviderStatus(
+            mRequestSessionMetric.collectChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_FAILURE.getMetricCode());
             respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
                     "Invalid response from provider");
         }
     }
 
-    //TODO: Try moving the three error & response methods below to RequestSession to be shared
-    // between get & create.
+    //TODO(b/274954697): Further shorten the three below to completely migrate to superclass
     @Override
     public void onFinalErrorReceived(ComponentName componentName, String errorType,
             String message) {
         respondToClientWithErrorAndFinish(errorType, message);
-    }
-
-    private void respondToClientWithResponseAndFinish(GetCredentialResponse response) {
-        collectFinalPhaseMetricStatus(false, ProviderStatusForMetrics.FINAL_SUCCESS);
-        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
-            Log.i(TAG, "Request has already been completed. This is strange.");
-            return;
-        }
-        if (isSessionCancelled()) {
-            logApiCall(mChosenProviderFinalPhaseMetric,
-                    mCandidateBrowsingPhaseMetric,
-                    /* apiStatus */ ApiStatus.CLIENT_CANCELED.getMetricCode());
-            finishSession(/*propagateCancellation=*/true);
-            return;
-        }
-        try {
-            mClientCallback.onResponse(response);
-            logApiCall(mChosenProviderFinalPhaseMetric,
-                    mCandidateBrowsingPhaseMetric,
-                    /* apiStatus */ ApiStatus.SUCCESS.getMetricCode());
-        } catch (RemoteException e) {
-            collectFinalPhaseMetricStatus(true, ProviderStatusForMetrics.FINAL_FAILURE);
-            Log.i(TAG, "Issue while responding to client with a response : " + e.getMessage());
-            logApiCall(mChosenProviderFinalPhaseMetric,
-                    mCandidateBrowsingPhaseMetric,
-                    /* apiStatus */ ApiStatus.FAILURE.getMetricCode());
-        }
-        finishSession(/*propagateCancellation=*/false);
-    }
-
-    private void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
-        collectFinalPhaseMetricStatus(true, ProviderStatusForMetrics.FINAL_FAILURE);
-        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
-            Log.i(TAG, "Request has already been completed. This is strange.");
-            return;
-        }
-        if (isSessionCancelled()) {
-            logApiCall(mChosenProviderFinalPhaseMetric,
-                    mCandidateBrowsingPhaseMetric,
-                    /* apiStatus */ ApiStatus.CLIENT_CANCELED.getMetricCode());
-            finishSession(/*propagateCancellation=*/true);
-            return;
-        }
-
-        try {
-            mClientCallback.onError(errorType, errorMsg);
-        } catch (RemoteException e) {
-            Log.i(TAG, "Issue while responding to client with error : " + e.getMessage());
-        }
-        logFailureOrUserCancel(errorType);
-        finishSession(/*propagateCancellation=*/false);
-    }
-
-    private void logFailureOrUserCancel(String errorType) {
-        collectFinalPhaseMetricStatus(true, ProviderStatusForMetrics.FINAL_FAILURE);
-        if (GetCredentialException.TYPE_USER_CANCELED.equals(errorType)) {
-            mChosenProviderFinalPhaseMetric.setHasException(false);
-            logApiCall(mChosenProviderFinalPhaseMetric,
-                    mCandidateBrowsingPhaseMetric,
-                    /* apiStatus */ ApiStatus.USER_CANCELED.getMetricCode());
-        } else {
-            logApiCall(mChosenProviderFinalPhaseMetric,
-                    mCandidateBrowsingPhaseMetric,
-                    /* apiStatus */ ApiStatus.FAILURE.getMetricCode());
-        }
     }
 
     @Override

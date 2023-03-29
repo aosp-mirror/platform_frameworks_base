@@ -384,8 +384,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     private void onMove() {
-        if (!mBackGestureStarted || mBackNavigationInfo == null || !mEnableAnimations.get()
-                || mActiveCallback == null) {
+        if (!mBackGestureStarted || mBackNavigationInfo == null || mActiveCallback == null) {
             return;
         }
 
@@ -424,9 +423,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             return;
         }
         try {
-            if (mEnableAnimations.get()) {
-                callback.onBackStarted(backEvent);
-            }
+            callback.onBackStarted(backEvent);
         } catch (RemoteException e) {
             Log.e(TAG, "dispatchOnBackStarted error: ", e);
         }
@@ -448,9 +445,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             return;
         }
         try {
-            if (mEnableAnimations.get()) {
-                callback.onBackCancelled();
-            }
+            callback.onBackCancelled();
         } catch (RemoteException e) {
             Log.e(TAG, "dispatchOnBackCancelled error: ", e);
         }
@@ -462,17 +457,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             return;
         }
         try {
-            if (mEnableAnimations.get()) {
-                callback.onBackProgressed(backEvent);
-            }
+            callback.onBackProgressed(backEvent);
         } catch (RemoteException e) {
             Log.e(TAG, "dispatchOnBackProgressed error: ", e);
         }
-    }
-
-    private boolean shouldDispatchAnimation(IOnBackInvokedCallback callback) {
-        // TODO(b/258698745): Only dispatch to animation callbacks.
-        return mEnableAnimations.get();
     }
 
     /**

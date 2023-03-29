@@ -25,11 +25,11 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
+import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
@@ -126,20 +126,21 @@ public final class CredentialManager {
      * need additional permission {@link CREDENTIAL_MANAGER_SET_ORIGIN}
      * to use this functionality
      *
+     * @param context the context used to launch any UI needed; use an activity context to make sure
+     *                the UI will be launched within the same task stack
      * @param request the request specifying type(s) of credentials to get from the user
-     * @param activity the activity used to launch any UI needed
      * @param cancellationSignal an optional signal that allows for cancelling this call
      * @param executor the callback will take place on this {@link Executor}
      * @param callback the callback invoked when the request succeeds or fails
      */
     public void getCredential(
+            @NonNull Context context,
             @NonNull GetCredentialRequest request,
-            @NonNull Activity activity,
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
         requireNonNull(request, "request must not be null");
-        requireNonNull(activity, "activity must not be null");
+        requireNonNull(context, "context must not be null");
         requireNonNull(executor, "executor must not be null");
         requireNonNull(callback, "callback must not be null");
 
@@ -153,7 +154,7 @@ public final class CredentialManager {
             cancelRemote =
                     mService.executeGetCredential(
                             request,
-                            new GetCredentialTransport(activity, executor, callback),
+                            new GetCredentialTransport(context, executor, callback),
                             mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -175,21 +176,22 @@ public final class CredentialManager {
      * request through the {@link #prepareGetCredential(
      * GetCredentialRequest, CancellationSignal, Executor, OutcomeReceiver)} API.
      *
+     * @param context the context used to launch any UI needed; use an activity context to make sure
+     *                the UI will be launched within the same task stack
      * @param pendingGetCredentialHandle the handle representing the pending operation to resume
-     * @param activity the activity used to launch any UI needed
      * @param cancellationSignal an optional signal that allows for cancelling this call
      * @param executor the callback will take place on this {@link Executor}
      * @param callback the callback invoked when the request succeeds or fails
      */
     public void getCredential(
+            @NonNull Context context,
             @NonNull PrepareGetCredentialResponse.PendingGetCredentialHandle
-                    pendingGetCredentialHandle,
-            @NonNull Activity activity,
+            pendingGetCredentialHandle,
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
         requireNonNull(pendingGetCredentialHandle, "pendingGetCredentialHandle must not be null");
-        requireNonNull(activity, "activity must not be null");
+        requireNonNull(context, "context must not be null");
         requireNonNull(executor, "executor must not be null");
         requireNonNull(callback, "callback must not be null");
 
@@ -198,7 +200,7 @@ public final class CredentialManager {
             return;
         }
 
-        pendingGetCredentialHandle.show(activity, cancellationSignal, executor, callback);
+        pendingGetCredentialHandle.show(context, cancellationSignal, executor, callback);
     }
 
     /**
@@ -207,9 +209,9 @@ public final class CredentialManager {
      *
      * <p>This API doesn't invoke any UI. It only performs the preparation work so that you can
      * later launch the remaining get-credential operation (involves UIs) through the {@link
-     * #getCredential(PrepareGetCredentialResponse.PendingGetCredentialHandle, Activity,
+     * #getCredential(PrepareGetCredentialResponse.PendingGetCredentialHandle, Context,
      * CancellationSignal, Executor, OutcomeReceiver)} API which incurs less latency compared to
-     * the {@link #getCredential(GetCredentialRequest, Activity, CancellationSignal, Executor,
+     * the {@link #getCredential(GetCredentialRequest, Context, CancellationSignal, Executor,
      * OutcomeReceiver)} API that executes the whole operation in one call.
      *
      * @param request            the request specifying type(s) of credentials to get from the user
@@ -262,21 +264,22 @@ public final class CredentialManager {
      * need additional permission {@link CREDENTIAL_MANAGER_SET_ORIGIN}
      * to use this functionality
      *
+     * @param context the context used to launch any UI needed; use an activity context to make sure
+     *                the UI will be launched within the same task stack
      * @param request the request specifying type(s) of credentials to get from the user
-     * @param activity the activity used to launch any UI needed
      * @param cancellationSignal an optional signal that allows for cancelling this call
      * @param executor the callback will take place on this {@link Executor}
      * @param callback the callback invoked when the request succeeds or fails
      */
     public void createCredential(
+            @NonNull Context context,
             @NonNull CreateCredentialRequest request,
-            @NonNull Activity activity,
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull
                     OutcomeReceiver<CreateCredentialResponse, CreateCredentialException> callback) {
         requireNonNull(request, "request must not be null");
-        requireNonNull(activity, "activity must not be null");
+        requireNonNull(context, "context must not be null");
         requireNonNull(executor, "executor must not be null");
         requireNonNull(callback, "callback must not be null");
 
@@ -290,7 +293,7 @@ public final class CredentialManager {
             cancelRemote =
                     mService.executeCreateCredential(
                             request,
-                            new CreateCredentialTransport(activity, executor, callback),
+                            new CreateCredentialTransport(context, executor, callback),
                             mContext.getOpPackageName());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -547,14 +550,24 @@ public final class CredentialManager {
 
         @Override
         public void onResponse(PrepareGetCredentialResponseInternal response) {
-            mExecutor.execute(() -> mCallback.onResult(
-                    new PrepareGetCredentialResponse(response, mGetCredentialTransport)));
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onResult(
+                        new PrepareGetCredentialResponse(response, mGetCredentialTransport)));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
         public void onError(String errorType, String message) {
-            mExecutor.execute(
-                    () -> mCallback.onError(new GetCredentialException(errorType, message)));
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(
+                        () -> mCallback.onError(new GetCredentialException(errorType, message)));
+            }  finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -587,7 +600,12 @@ public final class CredentialManager {
         @Override
         public void onResponse(GetCredentialResponse response) {
             if (mCallback != null) {
-                mCallback.onResponse(response);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    mCallback.onResponse(response);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             } else {
                 Log.d(TAG, "Unexpected onResponse call before the show invocation");
             }
@@ -596,7 +614,12 @@ public final class CredentialManager {
         @Override
         public void onError(String errorType, String message) {
             if (mCallback != null) {
-                mCallback.onError(errorType, message);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    mCallback.onError(errorType, message);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             } else {
                 Log.d(TAG, "Unexpected onError call before the show invocation");
             }
@@ -606,15 +629,15 @@ public final class CredentialManager {
     private static class GetCredentialTransport extends IGetCredentialCallback.Stub {
         // TODO: listen for cancellation to release callback.
 
-        private final Activity mActivity;
+        private final Context mContext;
         private final Executor mExecutor;
         private final OutcomeReceiver<GetCredentialResponse, GetCredentialException> mCallback;
 
         private GetCredentialTransport(
-                Activity activity,
+                Context context,
                 Executor executor,
                 OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
-            mActivity = activity;
+            mContext = context;
             mExecutor = executor;
             mCallback = callback;
         }
@@ -622,42 +645,57 @@ public final class CredentialManager {
         @Override
         public void onPendingIntent(PendingIntent pendingIntent) {
             try {
-                mActivity.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
+                mContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
             } catch (IntentSender.SendIntentException e) {
                 Log.e(
                         TAG,
                         "startIntentSender() failed for intent:" + pendingIntent.getIntentSender(),
                         e);
-                mExecutor.execute(() -> mCallback.onError(
-                        new GetCredentialException(GetCredentialException.TYPE_UNKNOWN)));
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mCallback.onError(
+                            new GetCredentialException(GetCredentialException.TYPE_UNKNOWN)));
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         }
 
         @Override
         public void onResponse(GetCredentialResponse response) {
-            mExecutor.execute(() -> mCallback.onResult(response));
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onResult(response));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
         public void onError(String errorType, String message) {
-            mExecutor.execute(
-                    () -> mCallback.onError(new GetCredentialException(errorType, message)));
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(
+                        () -> mCallback.onError(new GetCredentialException(errorType, message)));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
     private static class CreateCredentialTransport extends ICreateCredentialCallback.Stub {
         // TODO: listen for cancellation to release callback.
 
-        private final Activity mActivity;
+        private final Context mContext;
         private final Executor mExecutor;
         private final OutcomeReceiver<CreateCredentialResponse, CreateCredentialException>
                 mCallback;
 
         private CreateCredentialTransport(
-                Activity activity,
+                Context context,
                 Executor executor,
                 OutcomeReceiver<CreateCredentialResponse, CreateCredentialException> callback) {
-            mActivity = activity;
+            mContext = context;
             mExecutor = executor;
             mCallback = callback;
         }
@@ -665,26 +703,41 @@ public final class CredentialManager {
         @Override
         public void onPendingIntent(PendingIntent pendingIntent) {
             try {
-                mActivity.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
+                mContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
             } catch (IntentSender.SendIntentException e) {
                 Log.e(
                         TAG,
                         "startIntentSender() failed for intent:" + pendingIntent.getIntentSender(),
                         e);
-                mExecutor.execute(() -> mCallback.onError(
-                        new CreateCredentialException(CreateCredentialException.TYPE_UNKNOWN)));
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mCallback.onError(
+                            new CreateCredentialException(CreateCredentialException.TYPE_UNKNOWN)));
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         }
 
         @Override
         public void onResponse(CreateCredentialResponse response) {
-            mExecutor.execute(() -> mCallback.onResult(response));
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onResult(response));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
         public void onError(String errorType, String message) {
-            mExecutor.execute(
-                    () -> mCallback.onError(new CreateCredentialException(errorType, message)));
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(
+                        () -> mCallback.onError(new CreateCredentialException(errorType, message)));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -702,13 +755,24 @@ public final class CredentialManager {
 
         @Override
         public void onSuccess() {
-            mCallback.onResult(null);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mCallback.onResult(null);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
         public void onError(String errorType, String message) {
-            mExecutor.execute(
-                    () -> mCallback.onError(new ClearCredentialStateException(errorType, message)));
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(
+                        () -> mCallback.onError(
+                                new ClearCredentialStateException(errorType, message)));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -725,18 +789,34 @@ public final class CredentialManager {
         }
 
         public void onResponse(Void result) {
-            mExecutor.execute(() -> mCallback.onResult(result));
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onResult(result));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
         public void onResponse() {
-            mExecutor.execute(() -> mCallback.onResult(null));
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onResult(null));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
         public void onError(String errorType, String message) {
-            mExecutor.execute(
-                    () -> mCallback.onError(new SetEnabledProvidersException(errorType, message)));
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(
+                        () -> mCallback.onError(
+                                new SetEnabledProvidersException(errorType, message)));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 }
