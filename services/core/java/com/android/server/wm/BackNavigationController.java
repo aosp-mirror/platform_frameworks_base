@@ -675,14 +675,29 @@ class BackNavigationController {
         private static final int TASK_SWITCH = 1;
         private static final int ACTIVITY_SWITCH = 2;
 
+        private static boolean isActivitySwitch(WindowContainer close, WindowContainer open) {
+            if (close.asActivityRecord() == null || open.asActivityRecord() == null
+                    || (close.asActivityRecord().getTask()
+                    != open.asActivityRecord().getTask())) {
+                return false;
+            }
+            return true;
+        }
+
+        private static boolean isTaskSwitch(WindowContainer close, WindowContainer open) {
+            if (close.asTask() == null || open.asTask() == null
+                    || (close.asTask() == open.asTask())) {
+                return false;
+            }
+            return true;
+        }
+
         private void initiate(WindowContainer close, WindowContainer open)  {
             WindowContainer closeTarget;
-            if (close.asActivityRecord() != null && open.asActivityRecord() != null
-                    && (close.asActivityRecord().getTask() == open.asActivityRecord().getTask())) {
+            if (isActivitySwitch(close, open)) {
                 mSwitchType = ACTIVITY_SWITCH;
                 closeTarget = close.asActivityRecord();
-            } else if (close.asTask() != null && open.asTask() != null
-                    && close.asTask() != open.asTask()) {
+            } else if (isTaskSwitch(close, open)) {
                 mSwitchType = TASK_SWITCH;
                 closeTarget = close.asTask().getTopNonFinishingActivity();
             } else {
@@ -757,15 +772,15 @@ class BackNavigationController {
         }
 
         boolean isTarget(WindowContainer wc, boolean open) {
-            if (open) {
-                return wc == mOpenAdaptor.mTarget || mOpenAdaptor.mTarget.hasChild(wc);
+            if (!mComposed) {
+                return false;
             }
-
+            final WindowContainer target = open ? mOpenAdaptor.mTarget : mCloseAdaptor.mTarget;
             if (mSwitchType == TASK_SWITCH) {
-                return  wc == mCloseAdaptor.mTarget
-                        || (wc.asTask() != null && wc.hasChild(mCloseAdaptor.mTarget));
+                return  wc == target
+                        || (wc.asTask() != null && wc.hasChild(target));
             } else if (mSwitchType == ACTIVITY_SWITCH) {
-                return wc == mCloseAdaptor.mTarget;
+                return wc == target || (wc.asTaskFragment() != null && wc.hasChild(target));
             }
             return false;
         }
