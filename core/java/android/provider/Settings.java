@@ -7142,6 +7142,28 @@ public final class Settings {
                 "input_method_selector_visibility";
 
         /**
+         * Toggle for enabling stylus handwriting. When enabled, current Input method receives
+         * stylus {@link MotionEvent}s if an {@link Editor} is focused.
+         *
+         * @see #STYLUS_HANDWRITING_DEFAULT_VALUE
+         * @hide
+         */
+        @TestApi
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String STYLUS_HANDWRITING_ENABLED = "stylus_handwriting_enabled";
+
+        /**
+         * Default value for {@link #STYLUS_HANDWRITING_ENABLED}.
+         *
+         * @hide
+         */
+        @TestApi
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final int STYLUS_HANDWRITING_DEFAULT_VALUE = 1;
+
+        /**
          * The currently selected voice interaction service flattened ComponentName.
          * @hide
          */
@@ -16509,17 +16531,6 @@ public final class Settings {
          */
         @Readable
         public static final String AUTOFILL_MAX_VISIBLE_DATASETS = "autofill_max_visible_datasets";
-
-        /**
-         * Toggle for enabling stylus handwriting. When enabled, current Input method receives
-         * stylus {@link MotionEvent}s if an {@link Editor} is focused.
-         *
-         * @hide
-         */
-        @TestApi
-        @Readable
-        @SuppressLint("NoSettingsProvider")
-        public static final String STYLUS_HANDWRITING_ENABLED = "stylus_handwriting_enabled";
 
         /**
          * Indicates whether a stylus has ever been used on the device.

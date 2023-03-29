@@ -274,7 +274,6 @@ public class SettingsBackupTest {
                     Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                     Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
                     Settings.Global.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS,
-                    Settings.Global.STYLUS_HANDWRITING_ENABLED,
                     Settings.Global.STYLUS_EVER_USED,
                     Settings.Global.ENABLE_ADB_INCREMENTAL_INSTALL_DEFAULT,
                     Settings.Global.ENABLE_MULTI_SLOT_TIMEOUT_MILLIS,
@@ -787,6 +786,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SMS_DEFAULT_APPLICATION,
                  Settings.Secure.SPELL_CHECKER_ENABLED,  // Intentionally removed in Q
                  Settings.Secure.STYLUS_BUTTONS_ENABLED,
+                 Settings.Secure.STYLUS_HANDWRITING_ENABLED,
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.KNOWN_TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.TV_APP_USES_NON_SYSTEM_INPUTS,
