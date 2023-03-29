@@ -22,6 +22,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -31,6 +33,8 @@ import com.android.systemui.multishade.data.remoteproxy.MultiShadeInputProxy
 import com.android.systemui.multishade.data.repository.MultiShadeRepository
 import com.android.systemui.multishade.shared.model.ProxiedInputModel
 import com.android.systemui.multishade.shared.model.ShadeId
+import com.android.systemui.shade.ShadeController
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -42,6 +46,10 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.Mock
+import org.mockito.Mockito.anyBoolean
+import org.mockito.Mockito.verify
+import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -57,9 +65,11 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
     private val touchSlop: Int = ViewConfiguration.get(context).scaledTouchSlop
     private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
     private lateinit var falsingManager: FalsingManagerFake
+    @Mock private lateinit var shadeController: ShadeController
 
     @Before
     fun setUp() {
+        MockitoAnnotations.initMocks(this)
         testScope = TestScope()
         motionEvents = mutableSetOf()
 
@@ -75,18 +85,23 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
                 repository = repository,
                 inputProxy = inputProxy,
             )
+        val featureFlags = FakeFeatureFlags()
+        featureFlags.set(Flags.DUAL_SHADE, true)
         keyguardTransitionRepository = FakeKeyguardTransitionRepository()
         falsingManager = FalsingManagerFake()
+
         underTest =
             MultiShadeMotionEventInteractor(
                 applicationContext = context,
                 applicationScope = testScope.backgroundScope,
                 multiShadeInteractor = interactor,
+                featureFlags = featureFlags,
                 keyguardTransitionInteractor =
                     KeyguardTransitionInteractor(
                         repository = keyguardTransitionRepository,
                     ),
                 falsingManager = falsingManager,
+                shadeController = shadeController,
             )
     }
 
@@ -94,6 +109,39 @@ class MultiShadeMotionEventInteractorTest : SysuiTestCase() {
     fun tearDown() {
         motionEvents.forEach { motionEvent -> motionEvent.recycle() }
     }
+
+    @Test
+    fun listenForIsAnyShadeExpanded_expanded_makesWindowViewVisible() =
+        testScope.runTest {
+            whenever(shadeController.isKeyguard).thenReturn(false)
+            repository.setExpansion(ShadeId.LEFT, 0.1f)
+            val expanded by collectLastValue(interactor.isAnyShadeExpanded)
+            assertThat(expanded).isTrue()
+
+            verify(shadeController).makeExpandedVisible(anyBoolean())
+        }
+
+    @Test
+    fun listenForIsAnyShadeExpanded_collapsed_makesWindowViewInvisible() =
+        testScope.runTest {
+            whenever(shadeController.isKeyguard).thenReturn(false)
+            repository.setForceCollapseAll(true)
+            val expanded by collectLastValue(interactor.isAnyShadeExpanded)
+            assertThat(expanded).isFalse()
+
+            verify(shadeController).makeExpandedInvisible()
+        }
+
+    @Test
+    fun listenForIsAnyShadeExpanded_collapsedOnKeyguard_makesWindowViewVisible() =
+        testScope.runTest {
+            whenever(shadeController.isKeyguard).thenReturn(true)
+            repository.setForceCollapseAll(true)
+            val expanded by collectLastValue(interactor.isAnyShadeExpanded)
+            assertThat(expanded).isFalse()
+
+            verify(shadeController).makeExpandedVisible(anyBoolean())
+        }
 
     @Test
     fun shouldIntercept_initialDown_returnsFalse() =
