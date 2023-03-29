@@ -4604,7 +4604,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private void setTextSizeInternal(int unit, float size, boolean shouldRequestLayout) {
+    @NonNull
+    private DisplayMetrics getDisplayMetricsOrSystem() {
         Context c = getContext();
         Resources r;
 
@@ -4614,8 +4615,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             r = c.getResources();
         }
 
+        return r.getDisplayMetrics();
+    }
+
+    private void setTextSizeInternal(int unit, float size, boolean shouldRequestLayout) {
         mTextSizeUnit = unit;
-        setRawTextSize(TypedValue.applyDimension(unit, size, r.getDisplayMetrics()),
+        setRawTextSize(TypedValue.applyDimension(unit, size, getDisplayMetricsOrSystem()),
                 shouldRequestLayout);
     }
 
@@ -6197,14 +6202,39 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public void setLineHeight(@Px @IntRange(from = 0) int lineHeight) {
-        Preconditions.checkArgumentNonnegative(lineHeight);
+        setLineHeightPx(lineHeight);
+    }
+
+    private void setLineHeightPx(@Px @FloatRange(from = 0) float lineHeight) {
+        Preconditions.checkArgumentNonnegative((int) lineHeight);
 
         final int fontHeight = getPaint().getFontMetricsInt(null);
         // Make sure we don't setLineSpacing if it's not needed to avoid unnecessary redraw.
+        // TODO(b/274974975): should this also check if lineSpacing needs to change?
         if (lineHeight != fontHeight) {
             // Set lineSpacingExtra by the difference of lineSpacing with lineHeight
             setLineSpacing(lineHeight - fontHeight, 1f);
         }
+    }
+
+    /**
+     * Sets an explicit line height to a given unit and value for this TextView. This is equivalent
+     * to the vertical distance between subsequent baselines in the TextView. See {@link
+     * TypedValue} for the possible dimension units.
+     *
+     * @param unit The desired dimension unit. SP units are strongly recommended so that line height
+     *             stays proportional to the text size when fonts are scaled up for accessibility.
+     * @param lineHeight The desired line height in the given units.
+     *
+     * @see #setLineSpacing(float, float)
+     * @see #getLineSpacingExtra()
+     *
+     * @attr ref android.R.styleable#TextView_lineHeight
+     */
+    @android.view.RemotableViewMethod
+    public void setLineHeight(int unit, @FloatRange(from = 0) float lineHeight) {
+        setLineHeightPx(
+                TypedValue.applyDimension(unit, lineHeight, getDisplayMetricsOrSystem()));
     }
 
     /**
