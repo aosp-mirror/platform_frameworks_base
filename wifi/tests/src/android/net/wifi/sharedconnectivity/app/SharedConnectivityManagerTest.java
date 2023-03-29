@@ -28,15 +28,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.net.wifi.sharedconnectivity.service.ISharedConnectivityService;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.os.RemoteException;
 
 import androidx.test.filters.SmallTest;
@@ -80,7 +82,7 @@ public class SharedConnectivityManagerTest {
     @Mock
     Executor mExecutor;
     @Mock
-    SharedConnectivityClientCallback mClientCallback;
+    SharedConnectivityClientCallback mClientCallback, mClientCallback2;
     @Mock
     Resources mResources;
     @Mock
@@ -95,47 +97,52 @@ public class SharedConnectivityManagerTest {
         setResources(mContext);
     }
 
-    /**
-     * Verifies constructor is binding to service.
-     */
     @Test
-    public void bindingToService() {
-        SharedConnectivityManager.create(mContext);
-
-        verify(mContext).bindService(any(), any(), anyInt());
-    }
-
-    /**
-     * Verifies create method returns null when resources are not specified
-     */
-    @Test
-    public void resourcesNotDefined() {
+    public void resourcesNotDefined_createShouldReturnNull() {
         when(mResources.getString(anyInt())).thenThrow(new Resources.NotFoundException());
 
         assertThat(SharedConnectivityManager.create(mContext)).isNull();
     }
 
-    /**
-     * Verifies registerCallback behavior.
-     */
     @Test
-    public void registerCallback_serviceNotConnected_registrationCachedThenConnected()
-            throws Exception {
+    public void bindingToServiceOnFirstCallbackRegistration() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
-        manager.setService(null);
+        manager.registerCallback(mExecutor, mClientCallback);
+
+        verify(mContext).bindService(any(Intent.class), any(ServiceConnection.class), anyInt());
+    }
+
+    @Test
+    public void bindIsCalledOnceOnMultipleCallbackRegistrations() throws Exception {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
 
         manager.registerCallback(mExecutor, mClientCallback);
-        manager.getServiceConnection().onServiceConnected(COMPONENT_NAME, mIBinder);
+        verify(mContext, times(1)).bindService(any(Intent.class), any(ServiceConnection.class),
+                anyInt());
 
-        // Since the binder is embedded in a proxy class, the call to registerCallback is done on
-        // the proxy. So instead verifying that the proxy is calling the binder.
-        verify(mIBinder).transact(anyInt(), any(Parcel.class), any(Parcel.class), anyInt());
+        manager.registerCallback(mExecutor, mClientCallback2);
+        verify(mContext, times(1)).bindService(any(Intent.class), any(ServiceConnection.class),
+                anyInt());
+    }
+
+    @Test
+    public void unbindIsCalledOnLastCallbackUnregistrations() throws Exception {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+
+        manager.registerCallback(mExecutor, mClientCallback);
+        manager.registerCallback(mExecutor, mClientCallback2);
+        manager.unregisterCallback(mClientCallback);
+        verify(mContext, never()).unbindService(
+                any(ServiceConnection.class));
+
+        manager.unregisterCallback(mClientCallback2);
+        verify(mContext, times(1)).unbindService(
+                any(ServiceConnection.class));
     }
 
     @Test
     public void registerCallback_serviceNotConnected_canUnregisterAndReregister() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
-        manager.setService(null);
 
         manager.registerCallback(mExecutor, mClientCallback);
         manager.unregisterCallback(mClientCallback);
@@ -177,9 +184,6 @@ public class SharedConnectivityManagerTest {
         verify(mClientCallback).onRegisterCallbackFailed(any(RemoteException.class));
     }
 
-    /**
-     * Verifies unregisterCallback behavior.
-     */
     @Test
     public void unregisterCallback_withoutRegisteringFirst_serviceNotConnected_shouldFail() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
@@ -239,11 +243,8 @@ public class SharedConnectivityManagerTest {
         assertThat(manager.unregisterCallback(mClientCallback)).isFalse();
     }
 
-    /**
-     * Verifies callback is called when service is connected
-     */
     @Test
-    public void onServiceConnected_registerCallbackBeforeConnection() {
+    public void onServiceConnected() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
 
         manager.registerCallback(mExecutor, mClientCallback);
@@ -253,20 +254,7 @@ public class SharedConnectivityManagerTest {
     }
 
     @Test
-    public void onServiceConnected_registerCallbackAfterConnection() {
-        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
-
-        manager.getServiceConnection().onServiceConnected(COMPONENT_NAME, mIBinder);
-        manager.registerCallback(mExecutor, mClientCallback);
-
-        verify(mClientCallback).onServiceConnected();
-    }
-
-    /**
-     * Verifies callback is called when service is disconnected
-     */
-    @Test
-    public void onServiceDisconnected_registerCallbackBeforeConnection() {
+    public void onServiceDisconnected() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
 
         manager.registerCallback(mExecutor, mClientCallback);
@@ -276,20 +264,7 @@ public class SharedConnectivityManagerTest {
         verify(mClientCallback).onServiceDisconnected();
     }
 
-    @Test
-    public void onServiceDisconnected_registerCallbackAfterConnection() {
-        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
 
-        manager.getServiceConnection().onServiceConnected(COMPONENT_NAME, mIBinder);
-        manager.registerCallback(mExecutor, mClientCallback);
-        manager.getServiceConnection().onServiceDisconnected(COMPONENT_NAME);
-
-        verify(mClientCallback).onServiceDisconnected();
-    }
-
-    /**
-     * Verifies connectHotspotNetwork behavior.
-     */
     @Test
     public void connectHotspotNetwork_serviceNotConnected_shouldFail() {
         HotspotNetwork network = buildHotspotNetwork();
@@ -320,9 +295,6 @@ public class SharedConnectivityManagerTest {
         assertThat(manager.connectHotspotNetwork(network)).isFalse();
     }
 
-    /**
-     * Verifies disconnectHotspotNetwork behavior.
-     */
     @Test
     public void disconnectHotspotNetwork_serviceNotConnected_shouldFail() {
         HotspotNetwork network = buildHotspotNetwork();
@@ -353,9 +325,6 @@ public class SharedConnectivityManagerTest {
         assertThat(manager.disconnectHotspotNetwork(network)).isFalse();
     }
 
-    /**
-     * Verifies connectKnownNetwork behavior.
-     */
     @Test
     public void connectKnownNetwork_serviceNotConnected_shouldFail() throws RemoteException {
         KnownNetwork network = buildKnownNetwork();
@@ -386,9 +355,6 @@ public class SharedConnectivityManagerTest {
         assertThat(manager.connectKnownNetwork(network)).isFalse();
     }
 
-    /**
-     * Verifies forgetKnownNetwork behavior.
-     */
     @Test
     public void forgetKnownNetwork_serviceNotConnected_shouldFail() {
         KnownNetwork network = buildKnownNetwork();
@@ -419,9 +385,6 @@ public class SharedConnectivityManagerTest {
         assertThat(manager.forgetKnownNetwork(network)).isFalse();
     }
 
-    /**
-     * Verify getters.
-     */
     @Test
     public void getHotspotNetworks_serviceNotConnected_shouldReturnNull() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
