@@ -801,6 +801,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"בעלי ההרשאה יוכלו להתחיל לצפות בפרטי התכונות של אפליקציות."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"גישה לנתוני חיישנים בתדירות דגימה גבוהה"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"האפליקציה תוכל לדגום נתוני חיישנים בתדירות של מעל 200 הרץ"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"הגדרת כללי סיסמה"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"קביעת האורך הנדרש והתווים המותרים בסיסמאות ובקודי האימות של מסך הנעילה."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"מעקב אחר ניסיונות לביטול של נעילת המסך"</string>

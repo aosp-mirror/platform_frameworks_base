@@ -800,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"მფლობელს საშუალებას აძლევს, დაიწყოს აპის ფუნქციების ინფორმაციის ნახვა."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"სენსორის მონაცემებზე წვდომა სემპლინგის მაღალი სიხშირით"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"საშუალებას აძლევს აპს, მიიღოს სენსორის მონაცემების ნიმუშები 200 ჰც-ზე მეტი სიხშირით"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"პაროლის წესების დაყენება"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"აკონტროლეთ ეკრანის ბლოკირების პაროლებისა და PIN-ების სიმბოლოების სიგრძე."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ეკრანის განბლოკვის მცდელობების მონიტორინგი"</string>
