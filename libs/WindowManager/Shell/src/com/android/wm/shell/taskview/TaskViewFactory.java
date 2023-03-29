@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell;
+package com.android.wm.shell.taskview;
 
 import android.annotation.UiContext;
 import android.content.Context;
