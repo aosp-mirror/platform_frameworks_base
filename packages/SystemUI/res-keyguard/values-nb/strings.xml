@@ -47,8 +47,8 @@
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"PIN-området for SIM-kortet"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="5537294043180237374">"PUK-området for SIM-kortet"</string>
     <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"Slett"</string>
-    <string name="disable_carrier_button_text" msgid="7153361131709275746">"Deaktiver e-SIM-kortet"</string>
-    <string name="error_disable_esim_title" msgid="3802652622784813119">"Kan ikke deaktivere e-SIM-kortet"</string>
+    <string name="disable_carrier_button_text" msgid="7153361131709275746">"Deaktiver eSIM-kortet"</string>
+    <string name="error_disable_esim_title" msgid="3802652622784813119">"Kan ikke deaktivere eSIM-kortet"</string>
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"E-SIM-kortet kan ikke deaktiveres på grunn av en feil."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Enter"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Feil mønster"</string>
@@ -57,7 +57,7 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Prøv på nytt om # sekund.}other{Prøv på nytt om # sekunder.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Skriv inn PIN-koden for SIM-kortet."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Skriv inn PIN-koden for SIM-kortet «<xliff:g id="CARRIER">%1$s</xliff:g>»."</string>
-    <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Deaktiver e-SIM-kortet for å bruke enheten uten mobiltjeneste."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Deaktiver eSIM-kortet for å bruke enheten uten mobiltjeneste."</string>
     <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"SIM-kortet er nå deaktivert. Skriv inn PUK-koden for å fortsette. Ta kontakt med operatøren for mer informasjon."</string>
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"SIM-kortet «<xliff:g id="CARRIER">%1$s</xliff:g>» er nå deaktivert. Skriv inn PUK-koden for å fortsette. Ta kontakt med operatøren for mer informasjon."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Tast inn ønsket PIN-kode"</string>
