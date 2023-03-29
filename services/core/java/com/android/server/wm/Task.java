@@ -49,6 +49,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
@@ -2858,7 +2859,7 @@ class Task extends TaskFragment {
                     getDisplayContent().getInsetsStateController().getRawInsetsState();
             for (int i = state.sourceSize() - 1; i >= 0; i--) {
                 final InsetsSource source = state.sourceAt(i);
-                if (source.insetsRoundedCornerFrame()) {
+                if (source.hasFlags(FLAG_INSETS_ROUNDED_CORNER)) {
                     animationBounds.inset(source.calculateVisibleInsets(animationBounds));
                 }
             }

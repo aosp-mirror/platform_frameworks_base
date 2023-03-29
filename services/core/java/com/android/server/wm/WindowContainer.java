@@ -4141,7 +4141,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     getDisplayContent().getInsetsStateController().getSourceProviders();
             for (int i = providers.size(); i >= 0; i--) {
                 final InsetsSourceProvider insetProvider = providers.valueAt(i);
-                if (!insetProvider.getSource().insetsRoundedCornerFrame()) {
+                if (!insetProvider.getSource().hasFlags(InsetsSource.FLAG_INSETS_ROUNDED_CORNER)) {
                     return;
                 }
 
