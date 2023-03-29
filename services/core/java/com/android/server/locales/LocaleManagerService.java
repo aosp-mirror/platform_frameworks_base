@@ -182,8 +182,11 @@ public class LocaleManagerService extends SystemService {
         @Override
         public void setApplicationLocales(@NonNull String appPackageName, @UserIdInt int userId,
                 @NonNull LocaleList locales, boolean fromDelegate) throws RemoteException {
+            int caller = fromDelegate
+                    ? FrameworkStatsLog.APPLICATION_LOCALES_CHANGED__CALLER__CALLER_DELEGATE
+                    : FrameworkStatsLog.APPLICATION_LOCALES_CHANGED__CALLER__CALLER_APPS;
             LocaleManagerService.this.setApplicationLocales(appPackageName, userId, locales,
-                    fromDelegate);
+                    fromDelegate, caller);
         }
 
         @Override
@@ -226,13 +229,14 @@ public class LocaleManagerService extends SystemService {
      * Sets the current UI locales for a specified app.
      */
     public void setApplicationLocales(@NonNull String appPackageName, @UserIdInt int userId,
-            @NonNull LocaleList locales, boolean fromDelegate)
+            @NonNull LocaleList locales, boolean fromDelegate, int caller)
             throws RemoteException, IllegalArgumentException {
         AppLocaleChangedAtomRecord atomRecordForMetrics = new
                 AppLocaleChangedAtomRecord(Binder.getCallingUid());
         try {
             requireNonNull(appPackageName);
             requireNonNull(locales);
+            atomRecordForMetrics.setCaller(caller);
             atomRecordForMetrics.setNewLocales(locales.toLanguageTags());
             //Allow apps with INTERACT_ACROSS_USERS permission to set locales for different user.
             userId = mActivityManagerInternal.handleIncomingUser(
@@ -273,8 +277,8 @@ public class LocaleManagerService extends SystemService {
                     + " and user " + userId);
         }
 
-        atomRecordForMetrics.setPrevLocales(getApplicationLocalesUnchecked(appPackageName, userId)
-                .toLanguageTags());
+        atomRecordForMetrics.setPrevLocales(
+                getApplicationLocalesUnchecked(appPackageName, userId).toLanguageTags());
         final ActivityTaskManagerInternal.PackageConfigurationUpdater updater =
                 mActivityTaskManagerInternal.createPackageConfigurationUpdater(appPackageName,
                         userId);
@@ -619,7 +623,10 @@ public class LocaleManagerService extends SystemService {
                     Slog.d(TAG, "remove the override LocaleConfig");
                     file.delete();
                 }
-                removeUnsupportedAppLocales(appPackageName, userId, resLocaleConfig);
+                removeUnsupportedAppLocales(appPackageName, userId, resLocaleConfig,
+                        FrameworkStatsLog
+                                .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_DYNAMIC_LOCALES_CHANGE
+                );
                 atomRecord.setOverrideRemoved(true);
                 atomRecord.setStatus(FrameworkStatsLog
                         .APP_SUPPORTED_LOCALES_CHANGED__STATUS__SUCCESS);
@@ -661,7 +668,10 @@ public class LocaleManagerService extends SystemService {
                 }
                 atomicFile.finishWrite(stream);
                 // Clear per-app locales if they are not in the override LocaleConfig.
-                removeUnsupportedAppLocales(appPackageName, userId, overrideLocaleConfig);
+                removeUnsupportedAppLocales(appPackageName, userId, overrideLocaleConfig,
+                        FrameworkStatsLog
+                                .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_DYNAMIC_LOCALES_CHANGE
+                );
                 if (overrideLocaleConfig.isSameLocaleConfig(resLocaleConfig)) {
                     Slog.d(TAG, "setOverrideLocaleConfig, same as the app's LocaleConfig");
                     atomRecord.setSameAsResConfig(true);
@@ -678,9 +688,12 @@ public class LocaleManagerService extends SystemService {
     /**
      * Checks if the per-app locales are in the LocaleConfig. Per-app locales missing from the
      * LocaleConfig will be removed.
+     *
+     * <p><b>Note:</b> Check whether to remove the per-app locales when the app is upgraded or
+     * the LocaleConfig is overridden.
      */
     void removeUnsupportedAppLocales(String appPackageName, int userId,
-            LocaleConfig localeConfig) {
+            LocaleConfig localeConfig, int caller) {
         LocaleList appLocales = getApplicationLocalesUnchecked(appPackageName, userId);
         // Remove the per-app locales from the locale list if they don't exist in the LocaleConfig.
         boolean resetAppLocales = false;
@@ -707,7 +720,7 @@ public class LocaleManagerService extends SystemService {
             try {
                 setApplicationLocales(appPackageName, userId,
                         new LocaleList(newAppLocales.toArray(locales)),
-                        mBackupHelper.areLocalesSetFromDelegate(userId, appPackageName));
+                        mBackupHelper.areLocalesSetFromDelegate(userId, appPackageName), caller);
             } catch (RemoteException | IllegalArgumentException e) {
                 Slog.e(TAG, "Could not set locales for " + appPackageName, e);
             }
