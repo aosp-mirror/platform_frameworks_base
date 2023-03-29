@@ -338,9 +338,7 @@ class InputController {
         }
 
         synchronized (mLock) {
-            InputDeviceDescriptor[] values = mInputDeviceDescriptors.values().toArray(
-                    new InputDeviceDescriptor[0]);
-            for (InputDeviceDescriptor value : values) {
+            for (InputDeviceDescriptor value : mInputDeviceDescriptors.values()) {
                 if (value.mName.equals(deviceName)) {
                     throw new DeviceCreationException(
                             "Input device name already in use: " + deviceName);
