@@ -160,12 +160,10 @@ public final class CredentialManagerService
             int resolvedUserId, boolean disabled, String[] serviceNames) {
         getOrConstructSystemServiceListLock(resolvedUserId);
         if (serviceNames == null || serviceNames.length == 0) {
-            Slog.i(TAG, "serviceNames sent in newServiceListLocked is null, or empty");
             return new ArrayList<>();
         }
         List<CredentialManagerServiceImpl> serviceList = new ArrayList<>(serviceNames.length);
         for (String serviceName : serviceNames) {
-            Log.i(TAG, "in newServiceListLocked, service: " + serviceName);
             if (TextUtils.isEmpty(serviceName)) {
                 continue;
             }
@@ -173,7 +171,7 @@ public final class CredentialManagerService
                 serviceList.add(
                         new CredentialManagerServiceImpl(this, mLock, resolvedUserId, serviceName));
             } catch (PackageManager.NameNotFoundException | SecurityException e) {
-                Log.i(TAG, "Unable to add serviceInfo : " + e.getMessage());
+                Slog.e(TAG, "Unable to add serviceInfo : ", e);
             }
         }
         return serviceList;
@@ -423,7 +421,7 @@ public final class CredentialManagerService
                                     userId);
             callingAppInfo = new CallingAppInfo(realPackageName, packageInfo.signingInfo, origin);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.i(TAG, "Issue while retrieving signatureInfo : " + e.getMessage());
+            Slog.e(TAG, "Issue while retrieving signatureInfo : ", e);
             callingAppInfo = new CallingAppInfo(realPackageName, null, origin);
         }
         return callingAppInfo;
@@ -436,7 +434,8 @@ public final class CredentialManagerService
                 IGetCredentialCallback callback,
                 final String callingPackage) {
             final long timestampBegan = System.nanoTime();
-            Log.i(TAG, "starting executeGetCredential with callingPackage: " + callingPackage);
+            Slog.d(TAG, "starting executeGetCredential with callingPackage: "
+                    + callingPackage);
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
             if (request.getOrigin() != null) {
@@ -630,11 +629,10 @@ public final class CredentialManagerService
                             GetCredentialException.TYPE_NO_CREDENTIAL,
                             "No credentials available on this device.");
                 } catch (RemoteException e) {
-                    Log.i(
+                    Slog.e(
                             TAG,
                             "Issue invoking onError on IGetCredentialCallback "
-                                    + "callback: "
-                                    + e.getMessage());
+                                    + "callback: ", e);
                 }
             }
 
@@ -649,7 +647,7 @@ public final class CredentialManagerService
                 ICreateCredentialCallback callback,
                 String callingPackage) {
             final long timestampBegan = System.nanoTime();
-            Log.i(TAG, "starting executeCreateCredential with callingPackage: "
+            Slog.d(TAG, "starting executeCreateCredential with callingPackage: "
                     + callingPackage);
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
@@ -692,11 +690,10 @@ public final class CredentialManagerService
                             CreateCredentialException.TYPE_NO_CREATE_OPTIONS,
                             "No create options available.");
                 } catch (RemoteException e) {
-                    Log.i(
+                    Slog.e(
                             TAG,
                             "Issue invoking onError on ICreateCredentialCallback "
-                                    + "callback: "
-                                    + e.getMessage());
+                                    + "callback: ", e);
                 }
             }
 
@@ -712,21 +709,19 @@ public final class CredentialManagerService
                 MetricUtilities.logApiCalledInitialPhase(initMetric,
                         session.mRequestSessionMetric.returnIncrementSequence());
             } catch (Exception e) {
-                Log.w(TAG, "Unexpected error during metric logging: " + e);
+                Log.w(TAG, "Unexpected error during metric logging: ", e);
             }
         }
 
         @Override
         public void setEnabledProviders(
                 List<String> providers, int userId, ISetEnabledProvidersCallback callback) {
-            Log.i(TAG, "setEnabledProviders");
-
             if (!hasWriteSecureSettingsPermission()) {
                 try {
                     callback.onError(
                             PERMISSION_DENIED_ERROR, PERMISSION_DENIED_WRITE_SECURE_SETTINGS_ERROR);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Issue with invoking response: " + e.getMessage());
+                    Slog.e(TAG, "Issue with invoking response: ", e);
                 }
                 return;
             }
@@ -753,7 +748,7 @@ public final class CredentialManagerService
                             "failed_setting_store",
                             "Failed to store setting containing enabled providers");
                 } catch (RemoteException e) {
-                    Log.i(TAG, "Issue with invoking error response: " + e.getMessage());
+                    Slog.e(TAG, "Issue with invoking error response: ", e);
                     return;
                 }
             }
@@ -762,7 +757,7 @@ public final class CredentialManagerService
             try {
                 callback.onResponse();
             } catch (RemoteException e) {
-                Log.i(TAG, "Issue with invoking response: " + e.getMessage());
+                Slog.e(TAG, "Issue with invoking response: ", e);
                 // TODO: Propagate failure
             }
 
@@ -774,7 +769,8 @@ public final class CredentialManagerService
         @Override
         public boolean isEnabledCredentialProviderService(
                 ComponentName componentName, String callingPackage) {
-            Log.i(TAG, "isEnabledCredentialProviderService");
+            Slog.d(TAG, "isEnabledCredentialProviderService with componentName: "
+                    + componentName.flattenToString());
 
             // TODO(253157366): Check additional set of services.
             final int userId = UserHandle.getCallingUserId();
@@ -792,10 +788,10 @@ public final class CredentialManagerService
                             MetricUtilities.logApiCalledSimpleV1(
                                     ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
                                     ApiStatus.FAILURE, callingUid);
-                            Log.w(
+                            Slog.w(
                                     TAG,
-                                    "isEnabledCredentialProviderService: Component name does not"
-                                            + " match package name.");
+                                    "isEnabledCredentialProviderService: Component name does "
+                                            + "not match package name.");
                             return false;
                         }
                         MetricUtilities.logApiCalledSimpleV1(
@@ -813,7 +809,6 @@ public final class CredentialManagerService
         @Override
         public List<CredentialProviderInfo> getCredentialProviderServices(
                 int userId, int providerFilter) {
-            Log.i(TAG, "getCredentialProviderServices");
             verifyGetProvidersPermission();
 
             return CredentialProviderInfoFactory.getCredentialProviderServices(
@@ -823,7 +818,6 @@ public final class CredentialManagerService
         @Override
         public List<CredentialProviderInfo> getCredentialProviderServicesForTesting(
                 int providerFilter) {
-            Log.i(TAG, "getCredentialProviderServicesForTesting");
             verifyGetProvidersPermission();
 
             final int userId = UserHandle.getCallingUserId();
@@ -844,8 +838,8 @@ public final class CredentialManagerService
                                                 .getServiceInfo().getComponentName());
                             } catch (NullPointerException e) {
                                 // Safe check
-                                Log.i(TAG, "Skipping provider as either the providerInfo"
-                                        + "or serviceInfo is null - weird");
+                                Slog.e(TAG, "Skipping provider as either the providerInfo"
+                                        + " or serviceInfo is null - weird");
                             }
                         });
             }
@@ -858,7 +852,8 @@ public final class CredentialManagerService
                 IClearCredentialStateCallback callback,
                 String callingPackage) {
             final long timestampBegan = System.nanoTime();
-            Log.i(TAG, "starting clearCredentialState with callingPackage: " + callingPackage);
+            Slog.d(TAG, "starting clearCredentialState with callingPackage: "
+                    + callingPackage);
             final int userId = UserHandle.getCallingUserId();
             int callingUid = Binder.getCallingUid();
             enforceCallingPackage(callingPackage, callingUid);
@@ -885,13 +880,13 @@ public final class CredentialManagerService
             if (providerSessions.isEmpty()) {
                 try {
                     // TODO("Replace with properly defined error type")
-                    callback.onError("UNKNOWN", "No crdentials available on this " + "device");
+                    callback.onError("UNKNOWN", "No credentials available on "
+                            + "this device");
                 } catch (RemoteException e) {
-                    Log.i(
+                    Slog.e(
                             TAG,
                             "Issue invoking onError on IClearCredentialStateCallback "
-                                    + "callback: "
-                                    + e.getMessage());
+                                    + "callback: ", e);
                 }
             }
 
@@ -906,7 +901,7 @@ public final class CredentialManagerService
         public void registerCredentialDescription(
                 RegisterCredentialDescriptionRequest request, String callingPackage)
                 throws IllegalArgumentException, NonCredentialProviderCallerException {
-            Log.i(TAG, "registerCredentialDescription");
+            Slog.d(TAG, "registerCredentialDescription with callingPackage: " + callingPackage);
 
             if (!isCredentialDescriptionApiEnabled()) {
                 throw new UnsupportedOperationException();
@@ -924,7 +919,9 @@ public final class CredentialManagerService
         public void unregisterCredentialDescription(
                 UnregisterCredentialDescriptionRequest request, String callingPackage)
                 throws IllegalArgumentException {
-            Log.i(TAG, "registerCredentialDescription");
+            Slog.d(TAG, "unregisterCredentialDescription with callingPackage: "
+                    + callingPackage);
+
 
             if (!isCredentialDescriptionApiEnabled()) {
                 throw new UnsupportedOperationException();
