@@ -800,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"권한을 보유한 앱에서 앱의 기능 정보를 보도록 허용합니다."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"더 높은 샘플링 레이트로 센서 데이터 액세스"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"앱에서 200Hz보다 빠른 속도로 센서 데이터를 샘플링하도록 허용합니다."</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"화면 잠금 비밀번호와 PIN에 허용되는 길이와 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"화면 잠금 해제 시도 모니터링"</string>

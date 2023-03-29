@@ -140,8 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"የWi-Fi ጥሪ"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
-    <!-- no translation found for wfcSpnFormat_wifi_call (434016592539090004) -->
-    <skip />
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"የWi-Fi ጥሪ"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ጠፍቷል"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"በ Wi-Fi በኩል ደውል"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"ከተንቀሳቃሽ ስልክ አውታረ መረብ በኩል ደውል"</string>
@@ -801,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ያዢው የአንድ መተግበሪያ የባህሪያት መረጃን ማየት እንዲጀምር ያስችለዋል።"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"የዳሳሽ ውሂቡን በከፍተኛ የናሙና ብዛት ላይ ይድረሱበት"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"መተግበሪያው የዳሳሽ ውሂቡን ከ200 ኸ በሚበልጥ ፍጥነት ናሙና እንዲያደርግ ይፈቅድለታል"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"የይለፍ ቃል ደንቦች አዘጋጅ"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"በማያ ገጽ መቆለፊያ የይለፍ ቃሎች እና ፒኖች ውስጥ የሚፈቀዱ ቁምፊዎችን እና ርዝመታቸውን ተቆጣጠር።"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"የማሳያ-ክፈት ሙከራዎችን ክትትል ያድርጉባቸው"</string>
