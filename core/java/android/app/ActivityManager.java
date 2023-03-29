@@ -885,14 +885,6 @@ public class ActivityManager {
     /** @hide Process can access network despite any power saving restrictions */
     @TestApi
     public static final int PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK = 1 << 3;
-    /**
-     * @hide
-     * @deprecated Use {@link #PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK} instead.
-     */
-    @TestApi
-    @Deprecated
-    public static final int PROCESS_CAPABILITY_NETWORK =
-            PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
 
     /**
      * Flag used to indicate whether an app is allowed to start a foreground service from the
