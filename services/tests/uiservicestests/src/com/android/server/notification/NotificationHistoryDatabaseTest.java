@@ -30,6 +30,7 @@ import android.app.NotificationHistory.HistoricalNotification;
 import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.util.AtomicFile;
 
 import androidx.test.InstrumentationRegistry;
@@ -56,8 +57,6 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     File mRootDir;
     @Mock
     Handler mFileWriteHandler;
-    @Mock
-    Context mContext;
 
     NotificationHistoryDatabase mDataBase;
 
@@ -92,10 +91,8 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mContext.getUser()).thenReturn(getContext().getUser());
-        when(mContext.getPackageName()).thenReturn(getContext().getPackageName());
-
-        mRootDir = new File(mContext.getFilesDir(), "NotificationHistoryDatabaseTest");
+        final File fileDir = mContext.getFilesDir();
+        mRootDir = new File(fileDir, "NotificationHistoryDatabaseTest");
 
         mDataBase = new NotificationHistoryDatabase(mFileWriteHandler, mRootDir);
         mDataBase.init();
