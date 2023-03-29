@@ -20,8 +20,6 @@ import static com.android.internal.util.LatencyTracker.ActionProperties.ENABLE_S
 import static com.android.internal.util.LatencyTracker.ActionProperties.SAMPLE_INTERVAL_SUFFIX;
 import static com.android.internal.util.LatencyTracker.ActionProperties.TRACE_THRESHOLD_SUFFIX;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import android.os.ConditionVariable;
 import android.provider.DeviceConfig;
 import android.util.Log;
@@ -33,7 +31,6 @@ import com.android.internal.annotations.GuardedBy;
 
 import com.google.common.collect.ImmutableMap;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,7 +43,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class FakeLatencyTracker extends LatencyTracker {
 
     private static final String TAG = "FakeLatencyTracker";
-    private static final Duration FORCE_UPDATE_TIMEOUT = Duration.ofSeconds(1);
 
     private final Object mLock = new Object();
     @GuardedBy("mLock")
@@ -203,7 +199,7 @@ public final class FakeLatencyTracker extends LatencyTracker {
             }
         }
         Log.i(TAG, "waiting for condition");
-        assertThat(mDeviceConfigPropertiesUpdated.block(FORCE_UPDATE_TIMEOUT.toMillis())).isTrue();
+        mDeviceConfigPropertiesUpdated.block();
     }
 
     public void waitForMatchingActionProperties(ActionProperties actionProperties)
@@ -232,7 +228,7 @@ public final class FakeLatencyTracker extends LatencyTracker {
             }
         }
         Log.i(TAG, "waiting for condition");
-        assertThat(mDeviceConfigPropertiesUpdated.block(FORCE_UPDATE_TIMEOUT.toMillis())).isTrue();
+        mDeviceConfigPropertiesUpdated.block();
     }
 
     public void waitForActionEnabledState(int action, boolean enabledState) throws Exception {
@@ -260,7 +256,7 @@ public final class FakeLatencyTracker extends LatencyTracker {
             }
         }
         Log.i(TAG, "waiting for condition");
-        assertThat(mDeviceConfigPropertiesUpdated.block(FORCE_UPDATE_TIMEOUT.toMillis())).isTrue();
+        mDeviceConfigPropertiesUpdated.block();
     }
 
     public void waitForGlobalEnabledState(boolean enabledState) throws Exception {
@@ -280,6 +276,6 @@ public final class FakeLatencyTracker extends LatencyTracker {
             }
         }
         Log.i(TAG, "waiting for condition");
-        assertThat(mDeviceConfigPropertiesUpdated.block(FORCE_UPDATE_TIMEOUT.toMillis())).isTrue();
+        mDeviceConfigPropertiesUpdated.block();
     }
 }
