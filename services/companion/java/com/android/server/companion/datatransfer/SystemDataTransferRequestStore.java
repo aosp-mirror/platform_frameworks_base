@@ -120,12 +120,14 @@ public class SystemDataTransferRequestStore {
         return requestsByAssociationId;
     }
 
-    void writeRequest(@UserIdInt int userId, SystemDataTransferRequest request) {
+    public void writeRequest(@UserIdInt int userId, SystemDataTransferRequest request) {
         Slog.i(LOG_TAG, "Writing request=" + request + " to store.");
         ArrayList<SystemDataTransferRequest> cachedRequests;
         synchronized (mLock) {
             // Write to cache
             cachedRequests = readRequestsFromCache(userId);
+            cachedRequests.removeIf(
+                    request1 -> request1.getAssociationId() == request.getAssociationId());
             cachedRequests.add(request);
             mCachedPerUser.set(userId, cachedRequests);
         }
