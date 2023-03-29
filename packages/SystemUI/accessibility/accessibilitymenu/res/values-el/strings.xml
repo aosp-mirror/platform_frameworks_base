@@ -4,11 +4,8 @@
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Μενού προσβασιμότητας"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"Το μενού προσβασιμότητας παρέχει ένα μεγάλο μενού στην οθόνη για να ελέγχετε τη συσκευή σας. Μπορείτε να κλειδώνετε τη συσκευή, να ελέγχετε την ένταση ήχου και τη φωτεινότητα, να λαμβάνετε στιγμιότυπα οθόνης και άλλα."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Βοηθός"</string>
-    <!-- no translation found for assistant_utterance (65509599221141377) -->
-    <skip />
+    <string name="assistant_utterance" msgid="65509599221141377">"Βοηθός"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Ρυθμίσεις προσβασιμότητας"</string>
-    <string name="volume_label" msgid="3682221827627150574">"Ένταση"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"Πλήκτρα έντασης ήχου"</string>
     <string name="power_label" msgid="7699720321491287839">"Κουμπί λειτουργίας"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Επιλογές λειτουργίας"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Πρόσφατες εφαρμογές"</string>

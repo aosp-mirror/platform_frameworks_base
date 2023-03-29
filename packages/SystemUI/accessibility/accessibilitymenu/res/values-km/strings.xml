@@ -4,11 +4,8 @@
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"ម៉ឺនុយ​ភាពងាយស្រួល"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"ម៉ឺនុយភាពងាយស្រួលផ្ដល់ម៉ឺនុយធំនៅលើអេក្រង់ ដើម្បីគ្រប់គ្រងឧបករណ៍របស់អ្នក។ អ្នកអាច​ចាក់សោឧបករណ៍​របស់អ្នក គ្រប់គ្រងកម្រិតសំឡេងនិងពន្លឺ ថតរូបអេក្រង់ និង​អ្វីៗច្រើនទៀត។"</string>
     <string name="assistant_label" msgid="6796392082252272356">"ជំនួយការ"</string>
-    <!-- no translation found for assistant_utterance (65509599221141377) -->
-    <skip />
+    <string name="assistant_utterance" msgid="65509599221141377">"Google Assistant"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"ការកំណត់​ភាព​ងាយស្រួល"</string>
-    <string name="volume_label" msgid="3682221827627150574">"កម្រិតសំឡេង"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"ការគ្រប់គ្រង​កម្រិត​សំឡេង"</string>
     <string name="power_label" msgid="7699720321491287839">"ថាមពល"</string>
     <string name="power_utterance" msgid="7444296686402104807">"ជម្រើស​ថាមពល"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"កម្មវិធី​ថ្មីៗ"</string>

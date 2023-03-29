@@ -6,8 +6,6 @@
     <string name="assistant_label" msgid="6796392082252272356">"Assistant"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Assistant"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Accessibility Settings"</string>
-    <string name="volume_label" msgid="3682221827627150574">"Volume"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"Volume controls"</string>
     <string name="power_label" msgid="7699720321491287839">"Power"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Power options"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Recent apps"</string>

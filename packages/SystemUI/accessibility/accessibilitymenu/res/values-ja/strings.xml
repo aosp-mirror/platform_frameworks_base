@@ -6,8 +6,6 @@
     <string name="assistant_label" msgid="6796392082252272356">"アシスタント"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"アシスタント"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"ユーザー補助機能の設定"</string>
-    <string name="volume_label" msgid="3682221827627150574">"音量"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"音量を調節"</string>
     <string name="power_label" msgid="7699720321491287839">"電源"</string>
     <string name="power_utterance" msgid="7444296686402104807">"電源オプション"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"最近使ったアプリ"</string>

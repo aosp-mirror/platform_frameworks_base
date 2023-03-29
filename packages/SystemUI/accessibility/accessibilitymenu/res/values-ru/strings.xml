@@ -4,11 +4,8 @@
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Меню спец. возможностей"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"С помощью большого экранного меню специальных возможностей можно блокировать устройство, регулировать громкость звука и яркость экрана, делать скриншоты и выполнять другие действия."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Ассистент"</string>
-    <!-- no translation found for assistant_utterance (65509599221141377) -->
-    <skip />
+    <string name="assistant_utterance" msgid="65509599221141377">"Ассистент"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Настройки специальных возможностей"</string>
-    <string name="volume_label" msgid="3682221827627150574">"Громкость"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"Кнопки регулировки громкости"</string>
     <string name="power_label" msgid="7699720321491287839">"Кнопка питания"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Настройки кнопки питания"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Недавние приложения"</string>

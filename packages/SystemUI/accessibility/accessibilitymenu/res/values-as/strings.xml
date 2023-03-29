@@ -4,11 +4,8 @@
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"সাধ্য সুবিধাসমূহৰ মেনু"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"সাধ্য সুবিধাৰ মেনুখনে আপোনাৰ ডিভাইচটো নিয়ন্ত্ৰণ কৰিবলৈ স্ক্ৰীনত এখন ডাঙৰ মেনু দেখুৱায়। আপুনি নিজৰ ডিভাইচটো লক কৰিব পাৰে, ভলিউম আৰু উজ্জ্বলতা নিয়ন্ত্ৰণ কৰিব পাৰে, স্ক্ৰীনশ্বট ল’ব পাৰে আৰু বহুতো কাম কৰিব পাৰে।"</string>
     <string name="assistant_label" msgid="6796392082252272356">"Assistant"</string>
-    <!-- no translation found for assistant_utterance (65509599221141377) -->
-    <skip />
+    <string name="assistant_utterance" msgid="65509599221141377">"Assistant"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"সাধ্য সুবিধাৰ ছেটিং"</string>
-    <string name="volume_label" msgid="3682221827627150574">"ভলিউম"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"ভলিউমৰ নিয়ন্ত্ৰণসমূহ"</string>
     <string name="power_label" msgid="7699720321491287839">"অন/অফ"</string>
     <string name="power_utterance" msgid="7444296686402104807">"অন/অফ বুটামৰ বিকল্পসমূহ"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"শেহতীয়া এপসমূহ"</string>
