@@ -25,7 +25,10 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.FloatProperty;
@@ -34,6 +37,7 @@ import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
+import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
@@ -43,6 +47,7 @@ import android.window.BackNavigationInfo;
 import android.window.BackProgressAnimator;
 import android.window.IOnBackInvokedCallback;
 
+import com.android.internal.R;
 import com.android.internal.dynamicanimation.animation.SpringAnimation;
 import com.android.internal.dynamicanimation.animation.SpringForce;
 import com.android.internal.policy.ScreenDecorationsUtils;
@@ -78,6 +83,7 @@ class CustomizeActivityAnimation {
     final CustomAnimationLoader mCustomAnimationLoader;
     private Animation mEnterAnimation;
     private Animation mCloseAnimation;
+    private int mNextBackgroundColor;
     final Transformation mTransformation = new Transformation();
 
     private final Choreographer mChoreographer;
@@ -144,8 +150,9 @@ class CustomizeActivityAnimation {
 
         // Draw background with task background color.
         if (mEnteringTarget.taskInfo != null && mEnteringTarget.taskInfo.taskDescription != null) {
-            mBackground.ensureBackground(
-                    mEnteringTarget.taskInfo.taskDescription.getBackgroundColor(), mTransaction);
+            mBackground.ensureBackground(mNextBackgroundColor == Color.TRANSPARENT
+                    ? mEnteringTarget.taskInfo.taskDescription.getBackgroundColor()
+                    : mNextBackgroundColor, mTransaction);
         }
     }
 
@@ -191,6 +198,7 @@ class CustomizeActivityAnimation {
         mTransaction.apply();
         mTransformation.clear();
         mLatestProgress = 0;
+        mNextBackgroundColor = Color.TRANSPARENT;
         if (mFinishCallback != null) {
             try {
                 mFinishCallback.onAnimationFinished();
@@ -252,11 +260,11 @@ class CustomizeActivityAnimation {
      * Load customize animation before animation start.
      */
     boolean prepareNextAnimation(BackNavigationInfo.CustomAnimationInfo animationInfo) {
-        mCloseAnimation = mCustomAnimationLoader.load(
-                animationInfo, false /* enterAnimation */);
-        if (mCloseAnimation != null) {
-            mEnterAnimation = mCustomAnimationLoader.load(
-                    animationInfo, true /* enterAnimation */);
+        final AnimationLoadResult result = mCustomAnimationLoader.loadAll(animationInfo);
+        if (result != null) {
+            mCloseAnimation = result.mCloseAnimation;
+            mEnterAnimation = result.mEnterAnimation;
+            mNextBackgroundColor = result.mBackgroundColor;
             return true;
         }
         return false;
@@ -318,35 +326,79 @@ class CustomizeActivityAnimation {
         }
     }
 
+
+    static final class AnimationLoadResult {
+        Animation mCloseAnimation;
+        Animation mEnterAnimation;
+        int mBackgroundColor;
+    }
+
     /**
      * Helper class to load custom animation.
      */
     static class CustomAnimationLoader {
-        private final TransitionAnimation mTransitionAnimation;
+        final TransitionAnimation mTransitionAnimation;
 
         CustomAnimationLoader(Context context) {
             mTransitionAnimation = new TransitionAnimation(
                     context, false /* debug */, "CustomizeBackAnimation");
         }
 
-        Animation load(BackNavigationInfo.CustomAnimationInfo animationInfo,
+        /**
+         * Load both enter and exit animation for the close activity transition.
+         * Note that the result is only valid if the exit animation has set and loaded success.
+         * If the entering animation has not set(i.e. 0), here will load the default entering
+         * animation for it.
+         *
+         * @param animationInfo The information of customize animation, which can be set from
+         * {@link Activity#overrideActivityTransition} and/or
+         * {@link LayoutParams#windowAnimations}
+         */
+        AnimationLoadResult loadAll(BackNavigationInfo.CustomAnimationInfo animationInfo) {
+            if (animationInfo.getPackageName().isEmpty()) {
+                return null;
+            }
+            final Animation close = loadAnimation(animationInfo, false);
+            if (close == null) {
+                return null;
+            }
+            final Animation open = loadAnimation(animationInfo, true);
+            AnimationLoadResult result = new AnimationLoadResult();
+            result.mCloseAnimation = close;
+            result.mEnterAnimation = open;
+            result.mBackgroundColor = animationInfo.getCustomBackground();
+            return result;
+        }
+
+        /**
+         * Load enter or exit animation from CustomAnimationInfo
+         * @param animationInfo The information for customize animation.
+         * @param enterAnimation true when load for enter animation, false for exit animation.
+         * @return Loaded animation.
+         */
+        @Nullable
+        Animation loadAnimation(BackNavigationInfo.CustomAnimationInfo animationInfo,
                 boolean enterAnimation) {
-            final String packageName = animationInfo.getPackageName();
-            if (packageName.isEmpty()) {
-                return null;
+            Animation a = null;
+            // Activity#overrideActivityTransition has higher priority than windowAnimations
+            // Try to get animation from Activity#overrideActivityTransition
+            if ((enterAnimation && animationInfo.getCustomEnterAnim() != 0)
+                    || (!enterAnimation && animationInfo.getCustomExitAnim() != 0)) {
+                a = mTransitionAnimation.loadAppTransitionAnimation(
+                        animationInfo.getPackageName(),
+                        enterAnimation ? animationInfo.getCustomEnterAnim()
+                                : animationInfo.getCustomExitAnim());
+            } else if (animationInfo.getWindowAnimations() != 0) {
+                // try to get animation from LayoutParams#windowAnimations
+                a = mTransitionAnimation.loadAnimationAttr(animationInfo.getPackageName(),
+                        animationInfo.getWindowAnimations(), enterAnimation
+                                ? R.styleable.WindowAnimation_activityCloseEnterAnimation
+                                : R.styleable.WindowAnimation_activityCloseExitAnimation,
+                        false /* translucent */);
             }
-            final int windowAnimations = animationInfo.getWindowAnimations();
-            if (windowAnimations == 0) {
-                return null;
-            }
-            final int attrs = enterAnimation
-                    ? com.android.internal.R.styleable.WindowAnimation_activityCloseEnterAnimation
-                    : com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
-            Animation a = mTransitionAnimation.loadAnimationAttr(packageName, windowAnimations,
-                    attrs, false /* translucent */);
             // Only allow to load default animation for opening target.
             if (a == null && enterAnimation) {
-                a = mTransitionAnimation.loadDefaultAnimationAttr(attrs, false /* translucent */);
+                a = loadDefaultOpenAnimation();
             }
             if (a != null) {
                 ProtoLog.d(WM_SHELL_BACK_PREVIEW, "custom animation loaded %s", a);
@@ -354,6 +406,12 @@ class CustomizeActivityAnimation {
                 ProtoLog.e(WM_SHELL_BACK_PREVIEW, "No custom animation loaded");
             }
             return a;
+        }
+
+        private Animation loadDefaultOpenAnimation() {
+            return mTransitionAnimation.loadDefaultAnimationAttr(
+                    R.styleable.WindowAnimation_activityCloseEnterAnimation,
+                    false /* translucent */);
         }
     }
 }

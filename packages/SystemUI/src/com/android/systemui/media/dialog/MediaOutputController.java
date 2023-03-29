@@ -25,7 +25,11 @@ import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.WallpaperColors;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeBroadcast;
+import android.bluetooth.BluetoothLeBroadcastAssistant;
+import android.bluetooth.BluetoothLeBroadcastMetadata;
+import android.bluetooth.BluetoothLeBroadcastReceiveState;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -66,6 +70,7 @@ import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
+import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcastAssistant;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcastMetadata;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.InfoMediaManager;
@@ -1049,7 +1054,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 ALLOWLIST_DURATION_MS);
     }
 
-    String getBroadcastMetadata() {
+    String getLocalBroadcastMetadataQrCodeString() {
         LocalBluetoothLeBroadcast broadcast =
                 mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
         if (broadcast == null) {
@@ -1059,6 +1064,17 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         final LocalBluetoothLeBroadcastMetadata metadata =
                 broadcast.getLocalBluetoothLeBroadcastMetaData();
         return metadata != null ? metadata.convertToQrCodeString() : "";
+    }
+
+    BluetoothLeBroadcastMetadata getBroadcastMetadata() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "getBroadcastMetadata: LE Audio Broadcast is null");
+            return null;
+        }
+
+        return broadcast.getLatestBluetoothLeBroadcastMetadata();
     }
 
     boolean isActiveRemoteDevice(@NonNull MediaDevice device) {
@@ -1121,7 +1137,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return true;
     }
 
-    void registerLeBroadcastServiceCallBack(
+    void registerLeBroadcastServiceCallback(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull BluetoothLeBroadcast.Callback callback) {
         LocalBluetoothLeBroadcast broadcast =
@@ -1130,10 +1146,11 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             Log.d(TAG, "The broadcast profile is null");
             return;
         }
+        Log.d(TAG, "Register LE broadcast callback");
         broadcast.registerServiceCallBack(executor, callback);
     }
 
-    void unregisterLeBroadcastServiceCallBack(
+    void unregisterLeBroadcastServiceCallback(
             @NonNull BluetoothLeBroadcast.Callback callback) {
         LocalBluetoothLeBroadcast broadcast =
                 mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
@@ -1141,7 +1158,57 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             Log.d(TAG, "The broadcast profile is null");
             return;
         }
+        Log.d(TAG, "Unregister LE broadcast callback");
         broadcast.unregisterServiceCallBack(callback);
+    }
+
+    boolean isThereAnyBroadcastSourceIntoSinkDevice(BluetoothDevice sink) {
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        if (assistant == null) {
+            Log.d(TAG, "The broadcast assistant profile is null");
+            return false;
+        }
+        List<BluetoothLeBroadcastReceiveState> sourceList = assistant.getAllSources(sink);
+        Log.d(TAG, "isThereAnyBroadcastSourceIntoSinkDevice: List size: " + sourceList.size());
+        return !sourceList.isEmpty();
+    }
+
+    boolean addSourceIntoSinkDeviceWithBluetoothLeAssistant(BluetoothDevice sink,
+            BluetoothLeBroadcastMetadata metadata, boolean isGroupOp) {
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        if (assistant == null) {
+            Log.d(TAG, "The broadcast assistant profile is null");
+            return false;
+        }
+        assistant.addSource(sink, metadata, isGroupOp);
+        return true;
+    }
+
+    void registerLeBroadcastAssistantServiceCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull BluetoothLeBroadcastAssistant.Callback callback) {
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        if (assistant == null) {
+            Log.d(TAG, "The broadcast assistant profile is null");
+            return;
+        }
+        Log.d(TAG, "Register LE broadcast assistant callback");
+        assistant.registerServiceCallBack(executor, callback);
+    }
+
+    void unregisterLeBroadcastAssistantServiceCallback(
+            @NonNull BluetoothLeBroadcastAssistant.Callback callback) {
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        if (assistant == null) {
+            Log.d(TAG, "The broadcast assistant profile is null");
+            return;
+        }
+        Log.d(TAG, "Unregister LE broadcast assistant callback");
+        assistant.unregisterServiceCallBack(callback);
     }
 
     private boolean isPlayBackInfoLocal() {

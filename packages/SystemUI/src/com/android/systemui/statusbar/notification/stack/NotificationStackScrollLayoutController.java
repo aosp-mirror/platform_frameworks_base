@@ -56,7 +56,6 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.SwipeHelper;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -748,7 +747,6 @@ public class NotificationStackScrollLayoutController {
                 !mKeyguardBypassController.getBypassEnabled());
 
         mSwipeHelper = mNotificationSwipeHelperBuilder
-                .setSwipeDirection(SwipeHelper.X)
                 .setNotificationCallback(mNotificationCallback)
                 .setOnMenuEventListener(mMenuEventListener)
                 .build();
