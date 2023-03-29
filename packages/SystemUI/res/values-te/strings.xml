@@ -682,8 +682,8 @@
   <string-array name="nav_bar_layouts">
     <item msgid="9156773083127904112">"సాధారణం"</item>
     <item msgid="2019571224156857610">"సంక్షిప్తమైనది"</item>
-    <item msgid="7453955063378349599">"ఎడమవైపుకు వాలుగా"</item>
-    <item msgid="5874146774389433072">"కుడివైపుకు వాలుగా"</item>
+    <item msgid="7453955063378349599">"ఎడమ వైపునకు వాలుగా"</item>
+    <item msgid="5874146774389433072">"కుడి వైపునకు వాలుగా"</item>
   </string-array>
     <string name="save" msgid="3392754183673848006">"సేవ్ చేయండి"</string>
     <string name="reset" msgid="8715144064608810383">"రీసెట్ చేయండి"</string>
@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"మ్యాగ్నిఫికేషన్ స్విచ్"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ఫుల్ స్క్రీన్‌ను మ్యాగ్నిఫై చేయండి"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"స్క్రీన్‌లో భాగాన్ని మ్యాగ్నిఫై చేయండి"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"స్విచ్ చేయి"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"మ్యాగ్నిఫికేషన్ సెట్టింగ్‌లను తెరవండి"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"సైజ్ మార్చడానికి మూలను లాగండి"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"వికర్ణ స్క్రోలింగ్‌ను అనుమతించండి"</string>
@@ -849,6 +848,8 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"మధ్యస్థం"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"చిన్నది"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"పెద్దది"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"పూర్తయింది"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"ఎడిట్ చేయండి"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"మాగ్నిఫయర్ విండో సెట్టింగ్‌లు"</string>

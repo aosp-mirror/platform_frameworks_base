@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"ಝೂಮ್ ಮಾಡುವ ಸ್ವಿಚ್"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ಹಿಗ್ಗಿಸಿ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ಸ್ಕ್ರೀನ್‌ನ ಅರ್ಧಭಾಗವನ್ನು ಝೂಮ್ ಮಾಡಿ"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ಸ್ವಿಚ್"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"ಹಿಗ್ಗಿಸುವಿಕೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"ಮರುಗಾತ್ರಗೊಳಿಸಲು ಮೂಲೆಯನ್ನು ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"ಡಯಾಗನಲ್ ಸ್ಕ್ರೋಲಿಂಗ್ ಅನ್ನು ಅನುಮತಿಸಿ"</string>
@@ -849,6 +848,8 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"ಮಧ್ಯಮ"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"ಚಿಕ್ಕದು"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"ದೊಡ್ಡದು"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"ಮುಗಿದಿದೆ"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"ಮ್ಯಾಗ್ನಿಫೈರ್ ವಿಂಡೋ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>

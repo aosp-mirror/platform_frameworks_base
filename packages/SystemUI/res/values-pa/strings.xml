@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"ਵੱਡਦਰਸ਼ੀਕਰਨ ਸਵਿੱਚ"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ਪੂਰੀ ਸਕ੍ਰੀਨ ਨੂੰ ਵੱਡਦਰਸ਼ੀ ਕਰੋ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ਸਕ੍ਰੀਨ ਦੇ ਹਿੱਸੇ ਨੂੰ ਵੱਡਾ ਕਰੋ"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ਸਵਿੱਚ"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"ਵੱਡਦਰਸ਼ੀਕਰਨ ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹੋ"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"ਆਕਾਰ ਬਦਲਣ ਲਈ ਕੋਨਾ ਘਸੀਟੋ"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"ਟੇਡੀ ਦਿਸ਼ਾ ਵਿੱਚ ਸਕ੍ਰੋਲ ਕਰਨ ਦਿਓ"</string>
@@ -849,6 +848,8 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"ਦਰਮਿਆਨਾ"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"ਛੋਟਾ"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"ਵੱਡਾ"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"ਹੋ ਗਿਆ"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"ਵੱਡਦਰਸ਼ੀ ਵਿੰਡੋ ਸੈਟਿੰਗਾਂ"</string>
@@ -870,8 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ।}one{# ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ।}other{# ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕੀਤੇ ਗਏ।}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"ਹਟਾਇਆ ਗਿਆ"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"ਕੀ <xliff:g id="APPNAME">%s</xliff:g> ਸ਼ਾਮਲ ਕਰਨਾ ਹੈ?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> ਚੁਣ ਸਕਦੀ ਹੈ ਕਿ ਇੱਥੇ ਕਿਹੜੇ ਕੰਟਰੋਲ ਅਤੇ ਕਿਹੜੀ ਸਮੱਗਰੀ ਦਿਸੇਗੀ।"</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"ਕੀ <xliff:g id="APPNAME">%s</xliff:g> ਲਈ ਕੰਟਰੋਲਾਂ ਨੂੰ ਹਟਾਉਣਾ ਹੈ?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"ਮਨਪਸੰਦ ਵਿੱਚ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"ਮਨਪਸੰਦ ਵਿੱਚ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ, ਸਥਾਨ <xliff:g id="NUMBER">%d</xliff:g>"</string>

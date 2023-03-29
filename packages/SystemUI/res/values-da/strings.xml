@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Skift forstørrelsestilstand"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Forstør hele skærmen"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Forstør en del af skærmen"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Skift"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Åbn indstillinger for forstørrelse"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Træk i hjørnet for at justere størrelsen"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Tillad diagonal rulning"</string>
@@ -849,6 +848,8 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Mellem"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Lille"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Stor"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"Udfør"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Rediger"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Indstillinger for lupvindue"</string>
@@ -870,8 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# styringselement er tilføjet.}one{# styringselement er tilføjet.}other{# styringselementer er tilføjet.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Fjernet"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Vil du tilføje <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> kan vælge, hvilke styringselementer og hvilket indhold der skal vises her."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vil du fjerne styringselementerne for <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Angivet som favorit"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Angivet som favorit. Position <xliff:g id="NUMBER">%d</xliff:g>"</string>

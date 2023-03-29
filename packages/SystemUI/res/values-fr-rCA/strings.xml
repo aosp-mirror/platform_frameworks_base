@@ -258,7 +258,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Luminosité"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversion des couleurs"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Correction des couleurs"</string>
-    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Taille de la police"</string>
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Taille de police"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Gérer les utilisateurs"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Terminé"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Fermer"</string>
@@ -574,7 +574,7 @@
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"paramètres des notifications"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"options de répétition des notifications"</string>
-    <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Me rappeler"</string>
+    <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Me le rappeler"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"Annuler"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Reporté pour <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# heure}=2{# heures}one{# heure}many{# d\'heures}other{# heures}}"</string>
@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Commutateur d\'agrandissement"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Agrandir la totalité de l\'écran"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Agrandir une partie de l\'écran"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Commutateur"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Ouvrir les paramètres d\'agrandissement"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Faire glisser le coin pour redimensionner"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Autoriser le défilement en diagonale"</string>
@@ -849,6 +848,8 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Moyenne"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Petite"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Grande"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"OK"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Modifier"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Paramètres de la fenêtre de loupe"</string>
@@ -870,8 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# commande ajoutée.}one{# commande ajoutée.}many{# de commandes ajoutées.}other{# commandes ajoutées.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Supprimé"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Ajouter <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> peut définir les commandes et le contenu qui s\'affiche ici."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Retirer les commandes pour <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Ajouté aux favoris"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Ajouté aux favoris, en position <xliff:g id="NUMBER">%d</xliff:g>"</string>
