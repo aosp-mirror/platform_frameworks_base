@@ -55,6 +55,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
@@ -126,7 +127,8 @@ public class NotificationRecordTest extends UiServiceTestCase {
         MockitoAnnotations.initMocks(this);
 
         when(mMockContext.getSystemService(eq(Vibrator.class))).thenReturn(mVibrator);
-        when(mMockContext.getResources()).thenReturn(getContext().getResources());
+        final Resources res = mContext.getResources();
+        when(mMockContext.getResources()).thenReturn(res);
         when(mMockContext.getPackageManager()).thenReturn(mPm);
         when(mMockContext.getContentResolver()).thenReturn(mContentResolver);
         ApplicationInfo appInfo = new ApplicationInfo();
