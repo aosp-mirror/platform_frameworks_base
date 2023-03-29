@@ -25,6 +25,8 @@ import android.app.role.RoleManager.ROLE_NOTES
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.ACTION_MAIN
+import android.content.Intent.CATEGORY_HOME
 import android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK
 import android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
@@ -278,7 +280,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun showNoteTask_keyguardIsLocked_noteIsOpen_shouldStartActivityAndLogUiEvent() {
+    fun showNoteTask_keyguardIsLocked_noteIsOpen_shouldCloseActivityAndLogUiEvent() {
         val expectedInfo =
             NOTE_TASK_INFO.copy(
                 entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
@@ -291,8 +293,17 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
         createNoteTaskController().showNoteTask(entryPoint = expectedInfo.entryPoint!!)
 
-        verify(context, never()).startActivityAsUser(any(), any())
-        verifyZeroInteractions(bubbles, eventLogger)
+        val intentCaptor = argumentCaptor<Intent>()
+        val userCaptor = argumentCaptor<UserHandle>()
+        verify(context).startActivityAsUser(capture(intentCaptor), capture(userCaptor))
+        intentCaptor.value.let { intent ->
+            assertThat(intent.action).isEqualTo(ACTION_MAIN)
+            assertThat(intent.categories).contains(CATEGORY_HOME)
+            assertThat(intent.flags and FLAG_ACTIVITY_NEW_TASK).isEqualTo(FLAG_ACTIVITY_NEW_TASK)
+        }
+        assertThat(userCaptor.value).isEqualTo(userTracker.userHandle)
+        verify(eventLogger).logNoteTaskClosed(expectedInfo)
+        verifyZeroInteractions(bubbles)
     }
 
     @Test
