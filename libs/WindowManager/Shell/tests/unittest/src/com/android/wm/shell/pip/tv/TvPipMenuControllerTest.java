@@ -57,6 +57,8 @@ public class TvPipMenuControllerTest extends ShellTestCase {
     private TvPipActionsProvider mMockActionsProvider;
     @Mock
     private TvPipMenuView mMockTvPipMenuView;
+    @Mock
+    private TvPipBackgroundView mMockTvPipBackgroundView;
 
     private TvPipMenuController mTvPipMenuController;
 
@@ -173,6 +175,7 @@ public class TvPipMenuControllerTest extends ShellTestCase {
         assertMenuIsInAllActionsMode();
         verify(mMockDelegate, times(2)).onInMoveModeChanged();
         verify(mMockTvPipMenuView).transitionToMenuMode(eq(MODE_ALL_ACTIONS_MENU), eq(false));
+        verify(mMockTvPipBackgroundView, times(2)).transitionToMenuMode(eq(MODE_ALL_ACTIONS_MENU));
     }
 
     @Test
@@ -215,6 +218,7 @@ public class TvPipMenuControllerTest extends ShellTestCase {
         assertMenuIsInAllActionsMode();
         verify(mMockDelegate, times(2)).onInMoveModeChanged();
         verify(mMockTvPipMenuView).transitionToMenuMode(eq(MODE_ALL_ACTIONS_MENU), eq(false));
+        verify(mMockTvPipBackgroundView, times(2)).transitionToMenuMode(eq(MODE_ALL_ACTIONS_MENU));
 
         pressBackAndAssertMenuClosed();
     }
@@ -262,12 +266,14 @@ public class TvPipMenuControllerTest extends ShellTestCase {
         assertMenuIsInMoveMode();
         verify(mMockDelegate).onInMoveModeChanged();
         verify(mMockTvPipMenuView).transitionToMenuMode(eq(MODE_MOVE_MENU), eq(false));
+        verify(mMockTvPipBackgroundView).transitionToMenuMode(eq(MODE_MOVE_MENU));
     }
 
     private void showAndAssertAllActionsMenu() {
         mTvPipMenuController.showMenu();
         assertMenuIsInAllActionsMode();
         verify(mMockTvPipMenuView).transitionToMenuMode(eq(MODE_ALL_ACTIONS_MENU), eq(true));
+        verify(mMockTvPipBackgroundView).transitionToMenuMode(eq(MODE_ALL_ACTIONS_MENU));
     }
 
     private void closeMenuAndAssertMenuClosed() {
@@ -284,6 +290,7 @@ public class TvPipMenuControllerTest extends ShellTestCase {
         assertMenuIsOpen(false);
         verify(mMockDelegate).onMenuClosed();
         verify(mMockTvPipMenuView).transitionToMenuMode(eq(MODE_NO_MENU), eq(false));
+        verify(mMockTvPipBackgroundView).transitionToMenuMode(eq(MODE_NO_MENU));
     }
 
     private void assertMenuIsOpen(boolean open) {
@@ -319,6 +326,11 @@ public class TvPipMenuControllerTest extends ShellTestCase {
         @Override
         TvPipMenuView createTvPipMenuView() {
             return mMockTvPipMenuView;
+        }
+
+        @Override
+        TvPipBackgroundView createTvPipBackgroundView() {
+            return mMockTvPipBackgroundView;
         }
     }
 }
