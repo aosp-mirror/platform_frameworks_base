@@ -825,6 +825,19 @@ public final class CredentialManagerService
                     mContext, userId, providerFilter, getEnabledProviders());
         }
 
+        @Override
+        public boolean isServiceEnabled() {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                return DeviceConfig.getBoolean(
+                        DeviceConfig.NAMESPACE_CREDENTIAL,
+                        CredentialManager.DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER,
+                        false);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+
         @SuppressWarnings("GuardedBy") // ErrorProne requires service.mLock which is the same
         // this.mLock
         private Set<ComponentName> getEnabledProviders() {
