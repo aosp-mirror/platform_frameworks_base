@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"App geïnstalleerd."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Wil je deze app installeren?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Wil je deze app updaten?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Deze app updaten via <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nDeze app krijgt gewoonlijk updates via <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Als je updatet via een andere bron, kun je toekomstige updates via elke bron op je telefoon krijgen. De app-functionaliteit kan veranderen."</string>
     <string name="install_failed" msgid="5777824004474125469">"App niet geïnstalleerd."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"De installatie van het pakket is geblokkeerd."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"App die niet is geïnstalleerd als pakket conflicteert met een bestaand pakket."</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Onbekende apps kunnen niet worden geïnstalleerd door deze gebruiker"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Deze gebruiker mag geen apps installeren"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"Toch updaten"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Apps beheren"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Geen ruimte beschikbaar"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> kan niet worden geïnstalleerd. Maak ruimte vrij en probeer het opnieuw."</string>

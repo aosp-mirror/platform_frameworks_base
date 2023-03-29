@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"ਐਪ ਸਥਾਪਤ ਕੀਤੀ ਗਈ।"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"ਕੀ ਇਸ ਐਪ ਨੂੰ <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> ਤੋਂ ਅੱਪਡੇਟ ਕਰਨਾ ਹੈ?\n\nਇਸ ਐਪ ਨੂੰ ਆਮ ਤੌਰ \'ਤੇ <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> ਤੋਂ ਅੱਪਡੇਟਾਂ ਪ੍ਰਾਪਤ ਹੁੰਦੀਆਂ ਹਨ। ਕਿਸੇ ਵੱਖਰੇ ਸਰੋਤ ਤੋਂ ਅੱਪਡੇਟ ਕਰ ਕੇ, ਤੁਸੀਂ ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਕਿਸੇ ਵੀ ਸਰੋਤ ਤੋਂ ਭਵਿੱਖੀ ਅੱਪਡੇਟਾਂ ਪ੍ਰਾਪਤ ਕਰ ਸਕਦੇ ਹੋ। ਐਪ ਪ੍ਰਕਾਰਜਾਤਮਕਤਾ ਬਦਲ ਸਕਦੀ ਹੈ।"</string>
     <string name="install_failed" msgid="5777824004474125469">"ਐਪ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤੀ ਗਈ।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ਪੈਕੇਜ ਨੂੰ ਸਥਾਪਤ ਹੋਣ ਤੋਂ ਬਲਾਕ ਕੀਤਾ ਗਿਆ ਸੀ।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ਪੈਕੇਜ ਦੇ ਇੱਕ ਮੌਜੂਦਾ ਪੈਕੇਜ ਨਾਲ ਵਿਵਾਦ ਹੋਣ ਕਰਕੇ ਐਪ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤੀ ਗਈ।"</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ਇਹ ਵਰਤੋਂਕਾਰ ਅਗਿਆਤ ਐਪਾਂ ਨੂੰ ਸਥਾਪਤ ਨਹੀਂ ਕਰ ਸਕਦਾ"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ਇਸ ਵਰਤੋਂਕਾਰ ਨੂੰ ਐਪਾਂ ਸਥਾਪਤ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ"</string>
     <string name="ok" msgid="7871959885003339302">"ਠੀਕ ਹੈ"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"ਫਿਰ ਵੀ ਅੱਪਡੇਟ ਕਰੋ"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ਐਪਾਂ ਪ੍ਰਬੰਧਿਤ ਕਰੋ"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ਜਗ੍ਹਾ ਖਾਲੀ ਨਹੀਂ"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਨੂੰ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ। ਕੁਝ ਜਗ੍ਹਾ ਖਾਲੀ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>

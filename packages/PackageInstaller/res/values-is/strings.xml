@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Forritið er uppsett."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Viltu setja upp þetta forrit?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Viltu uppfæra þetta forrit?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Uppfæra þetta forrit frá <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nÞetta forrit fær venjulega uppfærslur frá <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Með því að uppfæra frá öðrum uppruna gætirðu fengið framtíðaruppfærslur frá hvaða uppruna sem er í símanum. Forritseiginleikar kunna að breytast."</string>
     <string name="install_failed" msgid="5777824004474125469">"Forritið er ekki uppsett."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Lokað var á uppsetningu pakkans."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Forritið var ekki sett upp vegna árekstra á milli pakkans og annars pakka."</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Þessi notandi getur ekki sett upp óþekkt forrit"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Þessi notandi hefur ekki leyfi til að setja upp forrit"</string>
     <string name="ok" msgid="7871959885003339302">"Í lagi"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"Uppfæra samt"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Stj. forritum"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Ekkert pláss eftir"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Ekki tókst að setja <xliff:g id="APP_NAME">%1$s</xliff:g> upp. Losaðu um pláss og reyndu aftur."</string>

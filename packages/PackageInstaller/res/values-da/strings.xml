@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Appen er installeret."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vil du installere denne app?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vil du opdatere denne app?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Vil du opdatere denne app fra <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nDenne app plejer at modtage opdateringer fra <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Hvis du opdaterer fra en anden kilde, vil du kunne modtage opdateringer fra en hvilken som helst kilde på din telefon fremover. Appfunktionaliteten kan ændre sig."</string>
     <string name="install_failed" msgid="5777824004474125469">"Appen blev ikke installeret."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Pakken blev forhindret i at blive installeret."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Appen blev ikke installeret, da pakken er i strid med en eksisterende pakke."</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Denne bruger kan ikke installere ukendte apps"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Denne bruger har ikke tilladelse til at installere apps"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"Opdater alligevel"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Administrer apps"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Der er ikke mere plads"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> kunne ikke installeres. Frigør noget plads, og prøv igen."</string>
