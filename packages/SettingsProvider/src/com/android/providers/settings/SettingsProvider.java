@@ -2311,7 +2311,7 @@ public class SettingsProvider extends ContentProvider {
             @NonNull Set<String> flags) {
         boolean hasAllowlistPermission =
                 context.checkCallingOrSelfPermission(
-                Manifest.permission.ALLOWLISTED_WRITE_DEVICE_CONFIG)
+                Manifest.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG)
                 == PackageManager.PERMISSION_GRANTED;
         boolean hasWritePermission =
                 context.checkCallingOrSelfPermission(
@@ -2331,7 +2331,7 @@ public class SettingsProvider extends ContentProvider {
             }
         } else {
             throw new SecurityException("Permission denial to mutate flag, must have root, "
-                + "WRITE_DEVICE_CONFIG, or ALLOWLISTED_WRITE_DEVICE_CONFIG");
+                + "WRITE_DEVICE_CONFIG, or WRITE_ALLOWLISTED_DEVICE_CONFIG");
         }
     }
 
