@@ -24,6 +24,7 @@ import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
@@ -2271,6 +2272,15 @@ public class OomAdjuster {
                                 }
                             } else {
                                 capability |= PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
+                            }
+                        }
+                        if ((cstate.getCurCapability()
+                                & PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK) != 0) {
+                            if (clientProcState <= PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                                // This is used to grant network access to User Initiated Jobs.
+                                if (cr.hasFlag(Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS)) {
+                                    capability |= PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
+                                }
                             }
                         }
 
