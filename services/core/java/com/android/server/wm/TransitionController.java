@@ -567,7 +567,9 @@ class TransitionController {
             transition.mLogger.mRequestTimeNs = SystemClock.elapsedRealtimeNanos();
             transition.mLogger.mRequest = request;
             mTransitionPlayer.requestStartTransition(transition.getToken(), request);
-            transition.setRemoteTransition(remoteTransition);
+            if (remoteTransition != null) {
+                transition.setRemoteAnimationApp(remoteTransition.getAppThread());
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "Error requesting transition", e);
             transition.start();
@@ -779,9 +781,8 @@ class TransitionController {
             mRemotePlayer.clear();
             return;
         }
-        final RemoteTransition remote = transition.getRemoteTransition();
-        if (remote == null) return;
-        final IApplicationThread appThread = remote.getAppThread();
+        final IApplicationThread appThread = transition.getRemoteAnimationApp();
+        if (appThread == null || appThread == mTransitionPlayerProc.getThread()) return;
         final WindowProcessController delegate = mAtm.getProcessController(appThread);
         if (delegate == null) return;
         mRemotePlayer.update(delegate, isPlaying, true /* predict */);
