@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‏‎‏‏‏‎‎‏‎‏‎‎‎‎‏‎‎‎‎‎‎‏‏‎‏‏‏‏‎‏‎‏‏‏‎‎‏‎‎‎‎‏‏‏‏‎‎‏‎‏‎‎‎‏‏‎‏‎Magnification switch‎‏‎‎‏‎"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‎‎‏‎‎‏‏‎‏‏‏‎‏‏‎‎‎‏‎‏‎‎‏‏‏‏‏‏‎‏‎‏‎‏‏‏‎‏‎‎‏‎‏‎‏‏‏‎‏‎‎‎‎‎‏‎Magnify full screen‎‏‎‎‏‎"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‎‏‏‏‏‎‎‎‎‏‎‎‏‎‎‏‎‎‎‎‎‏‎‏‎‏‎‏‏‎‏‏‏‏‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‏‎‏‎Magnify part of screen‎‏‎‎‏‎"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‏‎‏‎‏‎‏‎‏‎‎‏‎‏‎‏‎‏‎‏‎‎‏‏‏‎‎‏‏‎‏‏‏‎‎‎‎‎‏‎‎‎‏‏‎‎‎‏‏‏‎‏‎‏‏‏‎Switch‎‏‎‎‏‎"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‏‎‏‏‏‏‏‏‏‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‎‎‏‎‎‏‎‏‏‏‎‎‎‏‏‏‎‎‎‏‎‎‎‏‏‎Open magnification settings‎‏‎‎‏‎"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‏‎‏‎‏‏‎‎‎‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‏‎‎‏‏‏‏‎‏‎‎‎‎‏‏‏‏‎‎‏‏‏‎‎‎‏‎‏‎‎‏‎‎Drag corner to resize‎‏‎‎‏‎"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‏‎‎‏‏‎‏‏‎‏‏‏‎‏‎‏‏‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‏‏‎‎‏‎‏‏‎‎‎‎‎‏‎‏‏‎‎‏‏‏‎‎Allow diagonal scrolling‎‏‎‎‏‎"</string>
@@ -849,6 +848,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‎‎‏‎‎‎‏‏‏‏‎‏‏‎‏‎‏‎‎‏‏‏‎‎‏‎‎‏‏‏‏‏‏‎‎‎‎‏‏‏‏‏‎‏‎‏‎‏‏‎‎‎‎‎‏‎Medium‎‏‎‎‏‎"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‎‎‏‏‏‎‎‎‏‎‏‎‏‏‎‎‎‎‎‎‎‎‎‎‎‎‎‎‏‏‎‏‎‏‏‏‏‎‏‏‎‎‎‏‏‎‏‎‎‎‎‏‎‎Small‎‏‎‎‏‎"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‎‏‎‎‎‏‎‎‏‎‏‏‏‏‎‏‏‏‎‎‎‏‎‎‏‎‏‏‏‏‎‏‎‎‏‏‎‎‏‏‎‎‎‏‎‎‏‎‏‏‎‎‏‏‎‎Large‎‏‎‎‏‎"</string>
+    <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‎‏‏‏‏‎‎‏‏‎‏‎‎‎‎‏‎‏‎‏‏‎‏‏‎‎‎‎‎‎‏‏‎‎‏‎‏‎‏‏‎‎‎Full screen‎‏‎‎‏‎"</string>
     <string name="accessibility_magnification_done" msgid="263349129937348512">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‏‎‏‎‎‏‏‏‏‎‎‏‏‎‏‎‏‎‏‎‎‎‏‏‎‏‏‎‏‏‎‏‏‏‎‏‎‎‏‎‏‏‏‎‎‏‏‏‏‎‏‎‎‎‎‎‎Done‎‏‎‎‏‎"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‎‎‏‎‎‎‏‎‎‏‎‏‏‎‎‎‏‏‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‎‏‎‏‎‏‎‏‎‎‏‎‎‎‏‎‏‎‏‏‏‎‎‎Edit‎‏‎‎‏‎"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‎‏‎‏‎‏‏‎‏‏‎‏‎‎‏‏‎‎‎‎‏‏‎‏‏‏‏‎‏‎‏‏‏‏‎‏‏‏‎‎‏‏‏‏‎‏‏‏‎‎‎‏‎‎‏‎‎Magnifier window settings‎‏‎‎‏‎"</string>

@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"切换放大模式"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"放大整个屏幕"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"放大部分屏幕"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"切换"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"打开放大功能设置"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"拖动一角即可调整大小"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"允许沿对角线滚动"</string>
@@ -849,6 +848,8 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"中"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"小"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"大"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"完成"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"修改"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"放大镜窗口设置"</string>
@@ -894,7 +895,7 @@
     <string name="controls_tile_locked" msgid="731547768182831938">"设备已锁定"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"要从锁定屏幕上显示和控制设备吗？"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"您可以在锁定屏幕上添加用于控制外部设备的控件。\n\n您的设备应用可能会允许您在不解锁手机或平板电脑的情况下控制某些设备。\n\n您可以随时在“设置”中进行更改。"</string>
-    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"要从锁定屏幕上控制设备吗？"</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"要在锁屏状态下控制设备吗？"</string>
     <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"您可以在不解锁手机或平板电脑的情况下控制某些设备。您的设备配套应用将决定哪些设备可以通过这种方式进行控制。"</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"不用了"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"是"</string>
@@ -1065,8 +1066,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"修改"</string>
     <string name="add" msgid="81036585205287996">"添加"</string>
     <string name="manage_users" msgid="1823875311934643849">"管理用户"</string>
-    <!-- no translation found for drag_split_not_supported (7173481676120546121) -->
-    <skip />
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"此通知不支持拖动到分屏中"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"WLAN 已关闭"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"优先模式"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"闹钟已设置"</string>

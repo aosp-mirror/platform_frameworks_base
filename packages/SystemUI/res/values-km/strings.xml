@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"ប៊ូតុងបិទបើកការ​ពង្រីក"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ពង្រីក​ពេញអេក្រង់"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ពង្រីក​ផ្នែកនៃ​អេក្រង់"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ប៊ូតុងបិទបើក"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"បើកការកំណត់​ការពង្រីក"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"អូសជ្រុងដើម្បីប្ដូរទំហំ"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"អនុញ្ញាត​ការរំកិលបញ្ឆិត"</string>
@@ -849,6 +848,8 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"មធ្យម"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"តូច"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"ធំ"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"រួចរាល់"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"កែ"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"ការកំណត់វិនដូ​កម្មវិធីពង្រីក"</string>
