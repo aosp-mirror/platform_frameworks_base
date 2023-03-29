@@ -14,9 +14,9 @@
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Se guardan en un administrador de contraseñas para que puedas acceder en otros dispositivos"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Más información sobre las llaves de acceso"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Tecnología sin contraseñas"</string>
-    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Las llaves de acceso permiten acceder sin depender de contraseñas. Solo tienes que usar tu huella dactilar, reconocimiento facial, PIN o patrón de deslizamiento para verificar tu identidad y crear una clave de acceso."</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Las llaves de acceso permiten acceder sin depender de contraseñas. Solo tienes que usar tu huella dactilar, reconocimiento facial, PIN o patrón de deslizamiento para verificar tu identidad y crear una llave de acceso."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Criptografía de claves públicas"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Basadas en la Alianza FIDO (Google, Apple, Microsoft, etc.) y en estándares del W3C, las llaves de acceso usan pares de claves criptográficas. A diferencia de la cadena de caracteres de las contraseñas, para una app o sitio web se crean claves privadas y públicas. La clave privada se guarda en tu dispositivo/administrador de contraseñas, y confirma tu identidad. La clave pública se comparte con el servidor de la app o sitio web. Las claves adecuadas te permiten registrarte y acceder al instante."</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Basadas en la Alianza FIDO (que incluye a Google, Apple, Microsoft, etc.) y en estándares del W3C, las llaves de acceso usan pares de claves criptográficas. A diferencia del nombre de usuario y la cadena de caracteres de las contraseñas, para una app o sitio web se crean claves privadas y públicas. La clave privada se guarda en tu dispositivo/administrador de contraseñas, y confirma tu identidad. La clave pública se comparte con el servidor de la app o sitio web. Las claves adecuadas te permiten registrarte y acceder al instante."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Mayor seguridad para las cuentas"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Cada llave está vinculada exclusivamente con el sitio web o la app para la que fue creada, por lo que nunca podrás acceder por error a una app o sitio web fraudulentos. Además, como los servidores solo guardan claves públicas, hackearlas es mucho más difícil."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Transición fluida"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"¿Quieres usar tu llave de acceso guardada para <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"¿Quieres usar tu acceso guardado para <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Elige un acceso guardado para <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Acceder de otra forma"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Ver opciones"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Continuar"</string>
@@ -64,4 +66,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Administrar accesos"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Desde otro dispositivo"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Usar otra voz"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> canceló la solicitud"</string>
 </resources>

@@ -16,7 +16,7 @@
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Құпия сөзсіз технология"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Кіру кілттері сізге құпия сөзге сүйенбей-ақ кіруге мүмкіндік береді. Жеке басыңызды растап, кіру кілтін жасау үшін тек саусақ ізі, бет тану функциясы, PIN коды немесе сырғыту өрнегі қажет."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Ашық кілт криптографиясы"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO Alliance (оған Google, Apple, Microsoft, т.б. кіреді) және W3C стандарттары бойынша кіру кілттерінде криптографиялық кілт жұптары қолданылады. Құпия сөз үшін пайдаланушы аты мен таңбалар қолданылады, ал қолданба немесе веб-сайт үшін жеке-ашық кілт жұбы жасалады. Жеке кілт құрылғыңызда немесе құпия сөз менеджерінде қорғалып, сақталады. Ол жеке басыңызды растау үшін қажет. Ашық кілт қолданба немесе веб-сайт серверіне жіберіледі. Кілттер сәйкес келсе, бірден тіркеліп, аккаунтқа кіре аласыз."</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO Alliance (оған Google, Apple, Microsoft, т.б. кіреді) және W3C стандарттары бойынша кіру кілттерінде криптографиялық кілт жұптары қолданылады. Құпия сөз үшін пайдаланушы аты мен таңбалар қолданылады, ал қолданба немесе веб-сайт үшін жеке-ашық кілт жұбы жасалады. Жеке кілт құрылғыңызда немесе құпия сөз менеджерінде қауіпсіз сақталады. Ол жеке басыңызды растау үшін қажет. Ашық кілт қолданба немесе веб-сайт серверіне жіберіледі. Кілттер сәйкес келсе, бірден тіркеліп, аккаунтқа кіре аласыз."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Аккаунттың қосымша қауіпсіздігі"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Әрбір кілт өзі арнайы жасалған қолданбамен немесе веб-сайтпен ғана байланысты болады, сондықтан алаяқтар қолданбасына немесе веб-сайтына байқаусызда кіру мүмкін емес. Онымен қоса тек ашық кілттер сақталатын серверлер арқасында хакерлердің бұзып кіруі айтарлықтай қиындады."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Оңай ауысу"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> үшін сақталған кіру кілті пайдаланылсын ба?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> үшін сақталған тіркелу деректері пайдаланылсын ба?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> үшін сақталған тіркелу деректерін таңдаңыз"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Басқаша кіру"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Опцияларды көру"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Жалғастыру"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Кіру әрекеттерін басқару"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Басқа құрылғыдан жасау"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Басқа құрылғыны пайдалану"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>

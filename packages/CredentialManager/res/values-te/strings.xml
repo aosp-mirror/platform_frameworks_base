@@ -11,7 +11,7 @@
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"పాస్-కీలతో సురక్షితంగా పేమెంట్ చేయవచ్చు"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"పాస్-కీలతో, మీరు క్లిష్టమైన పాస్‌వర్డ్‌లను క్రియేట్ చేయనవసరం లేదు లేదా గుర్తుంచుకోనవసరం లేదు"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"పాస్-కీలు అనేవి మీ వేలిముద్రను, ముఖాన్ని లేదా స్క్రీన్ లాక్‌ను ఉపయోగించి మీరు క్రియేట్ చేసే ఎన్‌క్రిప్ట్ చేసిన డిజిటల్ కీలు"</string>
-    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"అవి Password Managerకు సేవ్ చేయబడతాయి, తద్వారా మీరు ఇతర పరికరాలలో సైన్ ఇన్ చేయవచ్చు"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"ఏదైనా ఒక పాస్‌వర్డ్ మేనేజర్‌లో అవి సేవ్ అవుతాయి, తద్వారా మీరు ఇతర పరికరాలలో సైన్ ఇన్ చేయవచ్చు"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"పాస్-కీల గురించి మరిన్ని వివరాలు"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"పాస్‌వర్డ్ రహిత టెక్నాలజీ"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"పాస్‌వర్డ్‌లపై ఆధారపడకుండా సైన్ ఇన్ చేయడానికి పాస్-కీలు మిమ్మల్ని అనుమతిస్తాయి. మీ గుర్తింపును వెరిఫై చేసి, పాస్-కీని క్రియేట్ చేయడానికి మీరు మీ వేలిముద్ర, ముఖ గుర్తింపు, PIN, లేదా స్వైప్ ఆకృతిని ఉపయోగించాలి."</string>
@@ -22,7 +22,7 @@
     <string name="seamless_transition_title" msgid="5335622196351371961">"అవాంతరాలు లేని పరివర్తన"</string>
     <string name="seamless_transition_detail" msgid="3440478759491650823">"మనం భవిష్యత్తులో పాస్‌వర్డ్ రహిత టెక్నాలజీని ఉపయోగించినా, పాస్-కీలతో పాటు పాస్‌వర్డ్‌లు కూడా అందుబాటులో ఉంటాయి"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"మీ <xliff:g id="CREATETYPES">%1$s</xliff:g> ఎక్కడ సేవ్ చేయాలో ఎంచుకోండి"</string>
-    <string name="choose_provider_body" msgid="4967074531845147434">"మీ సమాచారాన్ని సేవ్ చేయడం కోసం ఒక Password Managerను ఎంచుకొని, తర్వాతిసారి వేగంగా సైన్ ఇన్ చేయండి"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"తర్వాతిసారి మరింత వేగంగా సైన్ ఇన్ చేసేందుకు వీలుగా మీ సమాచారాన్ని సేవ్ చేయడం కోసం ఒక పాస్‌వర్డ్ మేనేజర్‌ను ఎంచుకోండి"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> కోసం పాస్‌-కీని క్రియేట్ చేయాలా?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> కోసం పాస్‌వర్డ్‌ను సేవ్ చేయాలా?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> కోసం సైన్ ఇన్ సమాచారాన్ని సేవ్ చేయాలా?"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం మీ సేవ్ చేసిన పాస్-కీని ఉపయోగించాలా?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం మీరు సేవ్ చేసిన సైన్ ఇన్ వివరాలను ఉపయోగించాలా?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం సేవ్ చేసిన సైన్ ఇన్ వివరాలను ఎంచుకోండి"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"మరొక పద్ధతిలో సైన్ ఇన్ చేయండి"</string>
     <string name="snackbar_action" msgid="37373514216505085">"ఆప్షన్‌లను చూడండి"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"కొనసాగించండి"</string>
@@ -64,4 +66,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"సైన్‌ ఇన్‌లను మేనేజ్ చేయండి"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"మరొక పరికరం నుండి"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"వేరే పరికరాన్ని ఉపయోగించండి"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g>, రిక్వెస్ట్‌ను రద్దు చేసింది"</string>
 </resources>

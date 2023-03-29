@@ -10,13 +10,13 @@
     <string name="content_description_hide_password" msgid="6841375971631767996">"Скрыть пароль"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Ключи доступа безопаснее"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Благодаря ключам доступа вам не придется создавать или запоминать сложные пароли."</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Ключ доступа – это зашифрованное цифровое удостоверение, которое создается с использованием отпечатка пальца, функции фейсконтроля или блокировки экрана."</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Ключ доступа – это зашифрованное цифровое удостоверение, которое создается на основе отпечатка пальца, снимка для фейсконтроля, PIN-кода или графического ключа."</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Данные хранятся в менеджере паролей, чтобы вы могли входить в аккаунт на других устройствах."</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Подробнее о ключах доступа"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Технология аутентификации без пароля"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Ключи доступа позволяют входить в аккаунт без ввода пароля. Чтобы подтвердить личность и создать ключ доступа, достаточно использовать отпечаток пальца, распознавание по лицу, PIN-код или графический ключ."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Шифрование с помощью открытого ключа"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Согласно стандартам W3C и ассоциации FIDO Alliance (Google, Apple, Microsoft и др.) для создания ключей доступа используются пары криптографических ключей. В приложении или на сайте создается не имя пользователя и пароль, а пара открытого и закрытого ключей. Закрытый ключ хранится на вашем устройстве или в менеджере паролей и нужен для подтверждения личности. Открытый ключ передается приложению или серверу сайта. Подходящие ключи помогают быстро войти в аккаунт или зарегистрироваться."</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Согласно стандартам W3C и ассоциации FIDO Alliance (Google, Apple, Microsoft и др.) для создания ключей доступа используются пары ключей шифрования. В приложении или на сайте создается не имя пользователя и пароль, а пара ключей – открытый и закрытый. Закрытый хранится на вашем устройстве или в менеджере паролей и нужен для подтверждения личности, а открытый передается приложению или серверу сайта. Когда ключи соответствуют друг другу, вы можете быстро зарегистрироваться или войти в аккаунт."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Повышенная безопасность аккаунта"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Каждый ключ связан только с тем приложением или сайтом, для которого был создан, поэтому вы не сможете по ошибке войти в приложение или на сайт мошенников. Кроме того, на серверах хранятся только открытые ключи, что служит дополнительной защитой от взлома."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Плавный переход"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Использовать сохраненный ключ доступа для приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Использовать сохраненные учетные данные для приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Выберите сохраненные данные для приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Войти другим способом"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Показать варианты"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Продолжить"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Управление входом"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"С другого устройства"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Использовать другое устройство"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>
