@@ -91,6 +91,7 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"రద్దు చేయండి"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"రీస్టార్ట్ చేయండి"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"మళ్లీ చూపవద్దు"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="4507890186297500893">"ఈ యాప్‌ను తరలించడానికి డబుల్-ట్యాప్ చేయండి"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"గరిష్టీకరించండి"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"కుదించండి"</string>
     <string name="close_button_text" msgid="2913281996024033299">"మూసివేయండి"</string>
