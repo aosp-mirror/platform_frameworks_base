@@ -27,6 +27,8 @@ import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 
+import androidx.annotation.Nullable;
+
 /**
  * Injects gestures given an {@link Instrumentation} object.
  */
@@ -36,6 +38,13 @@ public class GestureHelper {
     private static final int MOTION_EVENT_INJECTION_DELAY_MILLIS = 5;
 
     private final UiAutomation mUiAutomation;
+
+    /**
+     * Primary pointer should be cached here for separate release
+     */
+    @Nullable private PointerProperties mPrimaryPtrProp;
+    @Nullable private PointerCoords mPrimaryPtrCoord;
+    private long mPrimaryPtrDownTime;
 
     /**
      * A pair of floating point values.
@@ -52,6 +61,52 @@ public class GestureHelper {
 
     public GestureHelper(Instrumentation instrumentation) {
         mUiAutomation = instrumentation.getUiAutomation();
+    }
+
+    /**
+     * Injects a series of {@link MotionEvent}s to simulate a drag gesture without pointer release.
+     *
+     * Simulates a drag gesture without releasing the primary pointer. The primary pointer info
+     * will be cached for potential release later on by {@code releasePrimaryPointer()}
+     *
+     * @param startPoint initial coordinates of the primary pointer
+     * @param endPoint final coordinates of the primary pointer
+     * @param steps number of steps to take to animate dragging
+     * @return true if gesture is injected successfully
+     */
+    public boolean dragWithoutRelease(@NonNull Tuple startPoint,
+            @NonNull Tuple endPoint, int steps) {
+        PointerProperties ptrProp = getPointerProp(0, MotionEvent.TOOL_TYPE_FINGER);
+        PointerCoords ptrCoord = getPointerCoord(startPoint.x, startPoint.y, 1, 1);
+
+        PointerProperties[] ptrProps = new PointerProperties[] { ptrProp };
+        PointerCoords[] ptrCoords = new PointerCoords[] { ptrCoord };
+
+        long downTime = SystemClock.uptimeMillis();
+
+        if (!primaryPointerDown(ptrProp, ptrCoord, downTime)) {
+            return false;
+        }
+
+        // cache the primary pointer info for later potential release
+        mPrimaryPtrProp = ptrProp;
+        mPrimaryPtrCoord = ptrCoord;
+        mPrimaryPtrDownTime = downTime;
+
+        return movePointers(ptrProps, ptrCoords, new Tuple[] { endPoint }, downTime, steps);
+    }
+
+    /**
+     * Release primary pointer if previous gesture has cached the primary pointer info.
+     *
+     * @return true if the release was injected successfully
+     */
+    public boolean releasePrimaryPointer() {
+        if (mPrimaryPtrProp != null && mPrimaryPtrCoord != null) {
+            return primaryPointerUp(mPrimaryPtrProp, mPrimaryPtrCoord, mPrimaryPtrDownTime);
+        }
+
+        return false;
     }
 
     /**
