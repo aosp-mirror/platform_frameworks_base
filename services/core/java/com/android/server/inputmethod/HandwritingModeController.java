@@ -24,8 +24,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UiThread;
-import android.os.Handler;
 import android.hardware.input.InputManagerGlobal;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -165,7 +165,11 @@ final class HandwritingModeController {
             @NonNull String delegatePackageName, @NonNull String delegatorPackageName) {
         mDelegatePackageName = delegatePackageName;
         mDelegatorPackageName = delegatorPackageName;
-        mHandwritingBuffer.ensureCapacity(getHandwritingBufferSize());
+        if (mHandwritingBuffer == null) {
+            mHandwritingBuffer = new ArrayList<>(getHandwritingBufferSize());
+        } else {
+            mHandwritingBuffer.ensureCapacity(getHandwritingBufferSize());
+        }
         scheduleHandwritingDelegationTimeout();
     }
 
