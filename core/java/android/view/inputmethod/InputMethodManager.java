@@ -1553,9 +1553,7 @@ public final class InputMethodManager {
         if (fallbackContext == null) {
             return false;
         }
-        if (!isStylusHandwritingEnabled(fallbackContext)) {
-            return false;
-        }
+
         return IInputMethodManagerGlobalInvoker.isStylusHandwritingAvailableAsUser(userId);
     }
 
@@ -2244,11 +2242,6 @@ public final class InputMethodManager {
         }
 
         boolean useDelegation = !TextUtils.isEmpty(delegatorPackageName);
-        if (!isStylusHandwritingEnabled(view.getContext())) {
-            Log.w(TAG, "Stylus handwriting pref is disabled. "
-                    + "Ignoring calls to start stylus handwriting.");
-            return false;
-        }
 
         checkFocus();
         synchronized (mH) {
@@ -2264,21 +2257,13 @@ public final class InputMethodManager {
             }
             if (useDelegation) {
                 return IInputMethodManagerGlobalInvoker.acceptStylusHandwritingDelegation(
-                        mClient, view.getContext().getOpPackageName(), delegatorPackageName);
+                        mClient, UserHandle.myUserId(), view.getContext().getOpPackageName(),
+                        delegatorPackageName);
             } else {
                 IInputMethodManagerGlobalInvoker.startStylusHandwriting(mClient);
             }
             return false;
         }
-    }
-
-    private boolean isStylusHandwritingEnabled(@NonNull Context context) {
-        if (Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.STYLUS_HANDWRITING_ENABLED, 0) == 0) {
-            Log.d(TAG, "Stylus handwriting pref is disabled.");
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -2344,13 +2329,9 @@ public final class InputMethodManager {
             fallbackImm.prepareStylusHandwritingDelegation(delegatorView, delegatePackageName);
         }
 
-        if (!isStylusHandwritingEnabled(delegatorView.getContext())) {
-            Log.w(TAG, "Stylus handwriting pref is disabled. "
-                    + "Ignoring prepareStylusHandwritingDelegation().");
-            return;
-        }
         IInputMethodManagerGlobalInvoker.prepareStylusHandwritingDelegation(
                 mClient,
+                UserHandle.myUserId(),
                 delegatePackageName,
                 delegatorView.getContext().getOpPackageName());
     }
