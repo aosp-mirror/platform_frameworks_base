@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Να χρησιμοποιηθεί το αποθηκευμένο κλειδί πρόσβασης για την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>;"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Να χρησιμοποιηθούν τα αποθηκευμένα στοιχεία σύνδεσης για την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>;"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Επιλογή αποθηκευμένων στοιχείων σύνδεσης για την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Σύνδεση με άλλον τρόπο"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Προβολή επιλογών"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Συνέχεια"</string>
@@ -64,4 +66,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Διαχείριση στοιχείων σύνδεσης"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Από άλλη συσκευή"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Χρήση διαφορετικής συσκευής"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Το αίτημα ακυρώθηκε από την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
 </resources>

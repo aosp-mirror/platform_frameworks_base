@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Gebruik jou gestoorde wagwoordsleutel vir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Gebruik jou gestoorde aanmelding vir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Kies ’n gestoorde aanmelding vir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Meld op ’n ander manier aan"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Bekyk opsies"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Gaan voort"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Bestuur aanmeldings"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Van ’n ander toestel af"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Gebruik ’n ander toestel"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>

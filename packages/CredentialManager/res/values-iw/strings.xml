@@ -16,7 +16,7 @@
     <string name="passwordless_technology_title" msgid="2497513482056606668">"טכנולוגיה ללא סיסמאות"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"מפתחות גישה מאפשרים לך להיכנס לחשבון בלי להסתמך על סיסמאות. עליך רק להשתמש בטביעת אצבע, בזיהוי הפנים, בקוד אימות או בקו ביטול נעילה כדי לאמת את זהותך וליצור מפתח גישה."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"קריפטוגרפיה של מפתח ציבורי"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"‏על סמך תקן FIDO‏ (ארגון שכולל חברות כמו Google,‏ Apple,‏ Microsoft ועוד) ותקני W3C, מפתחות הגישה מבוססים על זוגות של מפתחות קריפטוגרפיים. בניגוד למחרוזות תווים ולשם המשתמש שבהם אנחנו משתמשים בסיסמאות, זוג מפתחות – מפתח פרטי ומפתח ציבורי – נוצר עבור אפליקציה או אתר. המפתח הפרטי מאוחסן בבטחה במכשיר או במנהל הסיסמאות שלך, ומאמת את זהותך. המפתח הציבורי משותף עם השרת של האפליקציה או האתר. בעזרת המפתחות התואמים אפשר מיד להירשם ולהיכנס לחשבון."</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"‏על סמך תקן FIDO‏ (ארגון שכולל חברות כמו Google,‏ Apple,‏ Microsoft ועוד) ותקני W3C, מפתחות הגישה מבוססים על זוגות של מפתחות קריפטוגרפיים. בניגוד לשם המשתמש ולמחרוזת התווים ששמשמשת אצלנו בתור סיסמה, בתקן הזה נוצר זוג מפתחות – מפתח פרטי ומפתח ציבורי – עבור אפליקציה או אתר. המפתח הפרטי מאוחסן בבטחה במכשיר או במנהל הסיסמאות שלך, ומאמת את זהותך. המפתח הציבורי משותף עם השרת של האפליקציה או האתר. בעזרת המפתחות התואמים אפשר מיד להירשם ולהיכנס לחשבון."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"אבטחה טובה יותר של החשבון"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"כל מפתח מקושר אך ורק לאפליקציה או לאתר שעבורם הוא נוצר, ולכן אף פעם אי אפשר להיכנס בטעות לחשבון באפליקציה או באתר שמטרתם להונות. בנוסף, כיוון שהשרתים שומרים רק מפתחות ציבוריים, קשה יותר לפרוץ לחשבון."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"מעבר חלק"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"להשתמש במפתח גישה שנשמר עבור <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"להשתמש בפרטי הכניסה שנשמרו עבור <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"בחירת פרטי כניסה שמורים עבור <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"כניסה בדרך אחרת"</string>
     <string name="snackbar_action" msgid="37373514216505085">"הצגת האפשרויות"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"המשך"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"ניהול כניסות"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"ממכשיר אחר"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"צריך להשתמש במכשיר אחר"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>

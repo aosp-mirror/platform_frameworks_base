@@ -13,7 +13,7 @@
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"패스키는 지문, 얼굴 또는 화면 잠금으로 생성하는 암호화된 디지털 키입니다."</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"비밀번호 관리자에 저장되므로 다른 기기에서 로그인할 수 있습니다."</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"패스키 자세히 알아보기"</string>
-    <string name="passwordless_technology_title" msgid="2497513482056606668">"비밀번호 없는 기술"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"패스워드리스 기술"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"패스키를 이용하면 비밀번호에 의존하지 않고 로그인할 수 있습니다. 지문, 얼굴 인식, PIN 또는 스와이프 패턴만으로 본인 인증을 하고 패스키를 만들 수 있습니다."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"공개 키 암호화"</string>
     <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO 연합(Google, Apple, Microsoft 등 포함) 및 W3C 표준을 토대로 패스키는 암호화 키 쌍을 사용합니다. 사용자 이름과 비밀번호로 사용하는 문자열과는 달리 비공개-공개 키 쌍은 특정 앱 또는 웹사이트를 대상으로 생성됩니다. 비공개 키는 안전하게 기기 또는 비밀번호 관리자에 저장되며 사용자 본인 인증에 사용됩니다. 공개 키는 앱 또는 웹사이트 서버와 공유됩니다. 해당하는 키를 사용하면 즉시 등록하고 로그인할 수 있습니다."</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱용으로 저장된 패스키를 사용하시겠습니까?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱용 저장된 로그인 정보를 사용하시겠습니까?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱용 저장된 로그인 정보 선택"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"다른 방법으로 로그인"</string>
     <string name="snackbar_action" msgid="37373514216505085">"옵션 보기"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"계속"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"로그인 관리"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"다른 기기에서"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"다른 기기 사용"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>

@@ -16,11 +16,11 @@
     <string name="passwordless_technology_title" msgid="2497513482056606668">"უპაროლო ტექნოლოგია"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"წვდომის გასაღებები საშუალებას გაძლევთ, სისტემაში შეხვიდეთ პაროლის გარეშე. უბრალოდ, ვინაობის დასადასტურებლად და წვდომის გასაღების შესაქმნელად უნდა გამოიყენოთ თითის ანაბეჭდი, სახით ამოცნობა, PIN-კოდი, ან განბლოკვის გრაფიკული გასაღები."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"საჯარო გასაღების კრიპტოგრაფია"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO-ს ალიანსისა (Google, Apple, Microsoft და ა.შ.) და W3C-ის სტანდარტების შესაბამისად, წვდომის გასაღებები იყენებს კრიპტოგრაფიულ გასაღებების წყვილს. მომხ. სახ. და სიმბ. სტრიქ. განსხვავებით, რომელთაც პაროლ. ვიყენებთ, რამდენიმე პირადი/საჯარო გას. იქმნება აპის ან ვებსაიტისთვის. პირადი გასაღები უსაფრთხოდ ინახება მოწყობილობაზე ან პაროლ. მმართველში და ის ადასტურებს თქვენს ვინაობას. საჯარო გას. ზიარდება აპისა და ვებ. სერვერის მეშვეობით. შესაბ. გასაღებებით შეგიძლიათ მაშინვე დარეგისტ. და სისტ. შეხვიდეთ."</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO ალიანსის (Google, Apple, Microsoft და სხვა) და W3C სტანდარტების შესაბამისად, წვდომის გასაღებები კრიპტოგრაფიულ გასაღებთა წყვილია. პაროლზე გამოყენებული მომხმარებლის სახელის/სიმბოლოთა სტრიქონების განსხვავებით, პირადი/საჯარო გასაღები იქმნება აპისა და ვებსაიტისთვის. პირადი გასაღები უსაფრთხოდ ინახება მოწყობილობაზე/პაროლთა მმართველში და ადასტურებს ვინაობას. საჯარო გასაღები კი ზიარდება აპთან/ვებსერვერთან. შესაბაბისი გასაღებებით შეგიძლიათ დაუყოვნებლივ დარეგისტრირდეთ და სისტემაში შეხვიდეთ."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"ანგარიშის გაუმჯობესებული უსაფრთხოება"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"თითოეული გასაღები დაკავშირებულია მხოლოდ აპთან ან ვებსაიტთან, რომელთათვისაც ის შეიქმნა, ამიტომაც შემთხვევით ვერასდროს შეხვალთ თაღლითურ აპში თუ ვებსაიტზე. ამასთანავე, სერვერები ინახავს მხოლოდ საჯარო გასაღებებს, რაც ართულებს გატეხვის ალბათობას."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"დაუბრკოლებელი გადასვლა"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"უპაროლო მომავალში პაროლები კვლავ ხელმისაწვდომი იქნება, წვდომის გასაღებებთან ერთად"</string>
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"უპაროლო მომავალში გადასვლის პროცესის პარალელურად პაროლები კვლავ ხელმისაწვდომი იქნება, წვდომის გასაღებებთან ერთად"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"აირჩიეთ სად შეინახოთ თქვენი <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"აირჩიეთ პაროლების მმართველი თქვენი ინფორმაციის შესანახად, რომ მომავალში უფრო სწრაფად შეხვიდეთ."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"შექმნით წვდომის გასაღებს <xliff:g id="APPNAME">%1$s</xliff:g> აპისთვის?"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"გსურთ თქვენი დამახსოვრებული წვდომის გასაღების გამოყენება აპისთვის: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"გსურთ თქვენი დამახსოვრებული სისტემაში შესვლის მონაცემების გამოყენება აპისთვის: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"აირჩიეთ სისტემაში შესვლის ინფორმაცია აპისთვის: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"სხვა ხერხით შესვლა"</string>
     <string name="snackbar_action" msgid="37373514216505085">"პარამეტრების ნახვა"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"გაგრძელება"</string>
@@ -64,4 +66,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"სისტემაში შესვლის მონაცემების მართვა"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"სხვა მოწყობილობიდან"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"გამოიყენეთ სხვა მოწყობილობა"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"თხოვნა გაუქმებულია <xliff:g id="APP_NAME">%1$s</xliff:g>-ის მიერ"</string>
 </resources>

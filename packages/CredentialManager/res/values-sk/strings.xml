@@ -10,17 +10,17 @@
     <string name="content_description_hide_password" msgid="6841375971631767996">"Skryť heslo"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Bezpečnejšie s prístupovými kľúčmi"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Ak máte prístupové kľúče, nemusíte vytvárať ani si pamätať zložité heslá"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Prístupové kľúče sú šifrované digitálne kľúče, ktoré môžete vytvoriť odtlačkom prsta, tvárou alebo zámkou obrazovky."</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Prístupové kľúče sú šifrované digitálne kľúče, ktoré môžete vytvoriť odtlačkom prsta, tvárou alebo zámkou obrazovky"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Ukladajú sa do správcu hesiel, aby ste sa mohli prihlasovať v iných zariadeniach"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Viac o prístupových kľúčoch"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Technológia bez hesiel"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Prístupové kľúče vám umožňujú prihlásiť sa bez použitia hesiel. Stačí overiť totožnosť odtlačkom prsta, rozpoznávaním tváre, kódom PIN alebo vzorom potiahnutia a vytvoriť prístupový kľúč."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kryptografia verejných kľúčov"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Prístup. kľúče firiem patriacich do združenia FIDO (zahŕňajúceho Google, Apple, Microsoft a ďalšie) využívajú páry kryptograf. kľúčov a štandardy W3C. Na rozdiel od použív. mena a reťazca znakov využívaných v prípade hesiel sa pár súkr. a verej. kľúča vytvára pre aplikáciu alebo web. Súkr. kľúč sa bezpečne ukladá v zar. či správcovi hesiel a slúži na overenie totožnosti. Verej. kľúč sa zdieľa so serverom danej aplik. alebo webu. Príslušnými kľúčami sa môžete okamžite registrovať a prihlasovať."</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Prístupové kľúče založené na štandardoch W3C a aliancie FIDO (do ktorej patria Google, Apple, Microsoft a ďalší) používajú páry kryptografických kľúčov. Na rozdiel od používateľského mena a hesla sa pre každú aplikáciu alebo web vytvára jeden pár kľúčov (súkromný a verejný). Súkromný kľúč, bezpečne uložený v zariadení alebo v správcovi hesiel, potvrdzuje vašu identitu. Verejný kľúč sa zdieľa so serverom aplikácie alebo stránky. Vďaka zhodným kľúčom je registrácia a prihlásenie okamžité."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Lepšie zabezpečenie účtu"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Každý kľúč je výhradne prepojený s aplikáciou alebo webom, pre ktorý bol vytvorený, takže sa nikdy nemôžete omylom prihlásiť do podvodnej aplikácie alebo na podvodnom webe. Servery navyše uchovávajú iba verejné kľúče, čím podstatne sťažujú hackovanie."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Plynulý prechod"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Blížime sa k budúcnosti bez hesiel, ale heslá budú popri prístupových kľúčoch stále k dispozícii"</string>
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Hoci smerujeme k budúcnosti bez hesiel, popri prístupových kľúčoch budú naďalej k dispozícii i heslá."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Vyberte, kam sa majú ukladať <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Vyberte správcu hesiel, do ktorého sa budú ukladať vaše údaje, aby ste sa nabudúce mohli rýchlejšie prihlásiť"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Chcete vytvoriť prístupový kľúč pre aplikáciu <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Chcete pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g> použiť uložený prístupový kľúč?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Chcete pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g> použiť uložené prihlasovacie údaje?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Vyberte uložené prihlasovacie údaje pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Prihlásiť sa inak"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Zobraziť možnosti"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Pokračovať"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Spravovať prihlasovacie údaje"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Z iného zariadenia"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Použiť iné zariadenie"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>
