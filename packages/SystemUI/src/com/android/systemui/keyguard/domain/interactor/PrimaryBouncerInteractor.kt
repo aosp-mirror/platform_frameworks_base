@@ -106,10 +106,9 @@ constructor(
     val panelExpansionAmount: Flow<Float> = repository.panelExpansionAmount
     /** 0f = bouncer fully hidden. 1f = bouncer fully visible. */
     val bouncerExpansion: Flow<Float> =
-        combine(
-            repository.panelExpansionAmount,
-            repository.primaryBouncerShow
-        ) { panelExpansion, primaryBouncerIsShowing ->
+        combine(repository.panelExpansionAmount, repository.primaryBouncerShow) {
+            panelExpansion,
+            primaryBouncerIsShowing ->
             if (primaryBouncerIsShowing) {
                 1f - panelExpansion
             } else {
@@ -201,6 +200,7 @@ constructor(
             dismissCallbackRegistry.notifyDismissCancelled()
         }
 
+        repository.setPrimaryStartDisappearAnimation(null)
         falsingCollector.onBouncerHidden()
         keyguardStateController.notifyPrimaryBouncerShowing(false /* showing */)
         cancelShowRunnable()
@@ -312,11 +312,8 @@ constructor(
             runnable.run()
             return
         }
-        val finishRunnable = Runnable {
-            runnable.run()
-            repository.setPrimaryStartDisappearAnimation(null)
-        }
-        repository.setPrimaryStartDisappearAnimation(finishRunnable)
+
+        repository.setPrimaryStartDisappearAnimation(runnable)
     }
 
     /** Determine whether to show the side fps animation. */
