@@ -927,7 +927,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final ProcessRecord app = r.resultToApp;
         final IApplicationThread thread = (app != null) ? app.getOnewayThread() : null;
         if (thread != null) {
-            mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(
+            mService.mOomAdjuster.unfreezeTemporarily(
                     app, CachedAppOptimizer.UNFREEZE_REASON_FINISH_RECEIVER);
             if (r.shareIdentity && app.uid != r.callingUid) {
                 mService.mPackageManagerInt.grantImplicitAccess(r.userId, r.intent,
@@ -1513,7 +1513,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 mService.updateLruProcessLocked(queue.app, false, null);
             }
 
-            mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(queue.app,
+            mService.mOomAdjuster.unfreezeTemporarily(queue.app,
                     CachedAppOptimizer.UNFREEZE_REASON_START_RECEIVER);
 
             if (queue.runningOomAdjusted) {
