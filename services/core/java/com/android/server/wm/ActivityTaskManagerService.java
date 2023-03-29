@@ -2011,6 +2011,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return;
         }
 
+        if (r == mRootWindowContainer.getTopResumedActivity()) {
+            setLastResumedActivityUncheckLocked(r, "setFocusedTask-alreadyTop");
+            return;
+        }
         final Transition transition = (getTransitionController().isCollecting()
                 || !getTransitionController().isShellTransitionsEnabled()) ? null
                 : getTransitionController().createTransition(TRANSIT_TO_FRONT);
@@ -4788,11 +4792,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // until we've committed to the gesture. The focus will be transferred at the end of
         // the transition (if the transient launch is committed) or early if explicitly requested
         // via `setFocused*`.
+        boolean focusedAppChanged = false;
         if (!getTransitionController().isTransientCollect(r)) {
-            final Task prevFocusTask = r.mDisplayContent.mFocusedApp != null
-                    ? r.mDisplayContent.mFocusedApp.getTask() : null;
-            final boolean changed = r.mDisplayContent.setFocusedApp(r);
-            if (changed) {
+            focusedAppChanged = r.mDisplayContent.setFocusedApp(r);
+            if (focusedAppChanged) {
                 mWindowManager.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
                         true /*updateInputWindows*/);
             }
@@ -4801,13 +4804,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mTaskSupervisor.mRecentTasks.add(task);
         }
 
-        applyUpdateLockStateLocked(r);
-        applyUpdateVrModeLocked(r);
+        if (focusedAppChanged) {
+            applyUpdateLockStateLocked(r);
+        }
+        if (mVrController.mVrService != null) {
+            applyUpdateVrModeLocked(r);
+        }
 
-        EventLogTags.writeWmSetResumedActivity(
-                r == null ? -1 : r.mUserId,
-                r == null ? "NULL" : r.shortComponentName,
-                reason);
+        EventLogTags.writeWmSetResumedActivity(r.mUserId, r.shortComponentName, reason);
     }
 
     final class SleepTokenAcquirerImpl implements ActivityTaskManagerInternal.SleepTokenAcquirer {

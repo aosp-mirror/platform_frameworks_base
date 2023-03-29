@@ -126,6 +126,9 @@ final class VrController {
         }
     };
 
+    /** If it is null after system ready, then VR mode is not supported. */
+    VrManagerInternal mVrService;
+
     /**
      * Create new VrController instance.
      *
@@ -141,6 +144,7 @@ final class VrController {
     public void onSystemReady() {
         VrManagerInternal vrManagerInternal = LocalServices.getService(VrManagerInternal.class);
         if (vrManagerInternal != null) {
+            mVrService = vrManagerInternal;
             vrManagerInternal.addPersistentVrModeStateListener(mPersistentVrModeListener);
         }
     }
@@ -181,7 +185,7 @@ final class VrController {
     public boolean onVrModeChanged(ActivityRecord record) {
         // This message means that the top focused activity enabled VR mode (or an activity
         // that previously set this has become focused).
-        VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
+        final VrManagerInternal vrService = mVrService;
         if (vrService == null) {
             // VR mode isn't supported on this device.
             return false;
