@@ -11,7 +11,7 @@
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Më e sigurt me çelësat e kalimit"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Me çelësat e kalimit, nuk ka nevojë të krijosh ose të mbash mend fjalëkalime të ndërlikuara"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Çelësat e kalimit kanë çelësa dixhitalë të enkriptuar që ti i krijon duke përdorur gjurmën e gishtit, fytyrën ose kyçjen e ekranit"</string>
-    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Ata ruhen te një menaxher fjalëkalimesh, në mënyrë që mund të identifikohesh në pajisje të tjera"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Ata ruhen te një menaxher fjalëkalimesh, në mënyrë që të mund të identifikohesh në pajisje të tjera"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Më shumë rreth çelësave të kalimit"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Teknologji pa fjalëkalime"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Çelësat e kalimit të lejojnë të identifikohesh pa u mbështetur te fjalëkalimet. Të duhet vetëm të përdorësh gjurmën e gishtit, njohjen e fytyrës, PIN-in ose të rrëshqasësh motivin për të verifikuar identitetin dhe për të krijuar një çelës kalimi."</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Të përdoret fjalëkalimi yt i ruajtur për <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Të përdoret identifikimi yt i ruajtur për <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Zgjidh një identifikim të ruajtur për <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Identifikohu me një mënyrë tjetër"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Shiko opsionet"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Vazhdo"</string>
@@ -64,4 +66,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Identifikimet e menaxhimit"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Nga një pajisje tjetër"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Përdor një pajisje tjetër"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Kërkesa u anulua nga <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
 </resources>

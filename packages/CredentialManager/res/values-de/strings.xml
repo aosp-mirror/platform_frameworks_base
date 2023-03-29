@@ -9,8 +9,8 @@
     <string name="content_description_show_password" msgid="3283502010388521607">"Passwort einblenden"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"Passwort ausblenden"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Mehr Sicherheit mit Passkeys"</string>
-    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Mit Passkeys musst du keine komplizierten Passwörter erstellen oder dir merken"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Passkeys sind verschlüsselte digitale Schlüssel, die du mithilfe deines Fingerabdrucks, Gesichts oder deiner Displaysperre erstellst"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Mit Passkeys musst du keine komplizierten Passwörter erstellen oder sie dir merken"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Passkeys sind verschlüsselte digitale Schlüssel, die du mithilfe deines Fingerabdrucks, der Gesichtserkennung oder deiner Displaysperre erstellst"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Sie werden in einem Passwortmanager gespeichert, damit du dich auf anderen Geräten anmelden kannst"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Weitere Informationen zu Passkeys"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Passwortlose Technologie"</string>
@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Verbesserte Kontosicherheit"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Jeder Schlüssel ist ausschließlich mit der App oder Website verknüpft, für die er erstellt wurde. Du kannst dich also nicht aus Versehen bei einer betrügerischen App oder Website anmelden. Da auf Servern nur öffentliche Schlüssel verwaltet werden, wird das Hacking außerdem erheblich erschwert."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Nahtlose Umstellung"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Auch wenn wir uns auf eine passwortlose Zukunft zubewegen, werden neben Passkeys weiter Passwörter verfügbar sein"</string>
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Auch wenn wir uns auf eine passwortlose Zukunft zubewegen, werden neben Passkeys weiter Passwörter verfügbar sein."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Wähle aus, wo deine <xliff:g id="CREATETYPES">%1$s</xliff:g> gespeichert werden sollen"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Du kannst einen Passwortmanager auswählen, um deine Anmeldedaten zu speichern, damit du dich nächstes Mal schneller anmelden kannst"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Passkey für <xliff:g id="APPNAME">%1$s</xliff:g> erstellen?"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Gespeicherten Passkey für <xliff:g id="APP_NAME">%1$s</xliff:g> verwenden?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Gespeicherte Anmeldedaten für <xliff:g id="APP_NAME">%1$s</xliff:g> verwenden?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Gespeicherte Anmeldedaten für <xliff:g id="APP_NAME">%1$s</xliff:g> auswählen"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Andere Anmeldeoption auswählen"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Optionen ansehen"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Weiter"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Anmeldedaten verwalten"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Von einem anderen Gerät"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Anderes Gerät verwenden"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>

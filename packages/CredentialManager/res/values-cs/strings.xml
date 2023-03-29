@@ -16,7 +16,7 @@
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Technologie bez hesel"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Přístupové klíče umožňují přihlašovat se bez hesel. Stačí pomocí otisku prstu, rozpoznání obličeje, kódu PIN nebo gesta ověřit svou totožnost a vytvořit přístupový klíč."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kryptografie s veřejným klíčem"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Podle pokynů FIDO Alliance (která zahrnuje společnosti Google, Apple, Microsoft a další) a standardů W3C používají přístupové klíče páry kryptografických klíčů. Na rozdíl od uživatelského jména a řetězce znaků, které používáme pro hesla, se pro aplikaci nebo web vytváří pár klíčů (soukromého a veřejného ). Soukromý klíč je bezpečně uložen ve vašem zařízení nebo správci hesel a potvrzuje vaši identitu. Veřejný klíč je sdílen s aplikací nebo webovým serverem. Pomocí odpovídajících klíčů se můžete okamžitě zaregistrovat a přihlásit."</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Podle pokynů FIDO Alliance (která zahrnuje společnosti Google, Apple, Microsoft a další) a standardů W3C používají přístupové klíče páry kryptografických klíčů. Na rozdíl od uživatelského jména a řetězce znaků, které používáme pro hesla, se pro aplikaci nebo web vytváří pár klíčů (soukromého a veřejného). Soukromý klíč je bezpečně uložen ve vašem zařízení nebo správci hesel a potvrzuje vaši identitu. Veřejný klíč je sdílen s aplikací nebo webovým serverem. Pomocí odpovídajících klíčů se můžete okamžitě zaregistrovat a přihlásit."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Vylepšené zabezpečení účtu"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Každý klíč je propojen výhradně s aplikací nebo webem, pro které byl vytvořen, takže se nikdy nemůžete omylem přihlásit k podvodné aplikaci nebo webu. Protože na serverech jsou uloženy pouze veřejné klíče, je hackování navíc mnohem obtížnější."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Bezproblémový přechod"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Použít uložený přístupový klíč pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Použít uložené přihlášení pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Vyberte uložené přihlášení pro <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Přihlásit se jinak"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Zobrazit možnosti"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Pokračovat"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Spravovat přihlášení"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Z jiného zařízení"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Použít jiné zařízení"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>
