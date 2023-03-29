@@ -740,7 +740,7 @@
     <string name="privacy_type_location" msgid="7991481648444066703">"जगह"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"माइक्रोफ़ोन"</string>
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"स्क्रीन रिकॉर्डिंग"</string>
-    <string name="music_controls_no_title" msgid="4166497066552290938">"कोई शीर्षक नहीं"</string>
+    <string name="music_controls_no_title" msgid="4166497066552290938">"कोई टाइटल नहीं"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टैंडबाई"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"स्क्रीन को बड़ा करके दिखाने वाली विंडो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"स्क्रीन को बड़ा करके दिखाने वाली विंडो के नियंत्रण"</string>
