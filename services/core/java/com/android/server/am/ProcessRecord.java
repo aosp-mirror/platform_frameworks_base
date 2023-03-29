@@ -16,9 +16,12 @@
 
 package com.android.server.am;
 
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
+
+import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -63,7 +66,6 @@ import com.android.server.wm.WindowProcessListener;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Full information about a particular process that
@@ -1345,16 +1347,19 @@ class ProcessRecord implements WindowProcessListener {
      * {@param originatingToken} if you have one such originating token, this is useful for tracing
      * back the grant in the case of the notification token.
      */
-    void addOrUpdateBackgroundStartPrivileges(Binder entity,
-            BackgroundStartPrivileges backgroundStartPrivileges) {
-        Objects.requireNonNull(entity);
+    void addOrUpdateBackgroundStartPrivileges(@NonNull Binder entity,
+            @NonNull BackgroundStartPrivileges backgroundStartPrivileges) {
+        requireNonNull(entity, "entity");
+        requireNonNull(backgroundStartPrivileges, "backgroundStartPrivileges");
+        checkArgument(backgroundStartPrivileges.allowsAny(),
+                "backgroundStartPrivileges does not allow anything");
         mWindowProcessController.addOrUpdateBackgroundStartPrivileges(entity,
                 backgroundStartPrivileges);
         setBackgroundStartPrivileges(entity, backgroundStartPrivileges);
     }
 
-    void removeBackgroundStartPrivileges(Binder entity) {
-        Objects.requireNonNull(entity);
+    void removeBackgroundStartPrivileges(@NonNull Binder entity) {
+        requireNonNull(entity, "entity");
         mWindowProcessController.removeBackgroundStartPrivileges(entity);
         setBackgroundStartPrivileges(entity, null);
     }
