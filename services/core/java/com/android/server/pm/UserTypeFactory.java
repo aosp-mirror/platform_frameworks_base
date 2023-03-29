@@ -33,6 +33,7 @@ import static android.os.UserManager.USER_TYPE_FULL_RESTRICTED;
 import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 import static android.os.UserManager.USER_TYPE_FULL_SYSTEM;
 import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
+import static android.os.UserManager.USER_TYPE_PROFILE_COMMUNAL;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
 import static android.os.UserManager.USER_TYPE_PROFILE_TEST;
 import static android.os.UserManager.USER_TYPE_SYSTEM_HEADLESS;
@@ -106,6 +107,7 @@ public final class UserTypeFactory {
         builders.put(USER_TYPE_FULL_RESTRICTED, getDefaultTypeFullRestricted());
         builders.put(USER_TYPE_SYSTEM_HEADLESS, getDefaultTypeSystemHeadless());
         builders.put(USER_TYPE_PROFILE_CLONE, getDefaultTypeProfileClone());
+        builders.put(USER_TYPE_PROFILE_COMMUNAL, getDefaultTypeProfileCommunal());
         if (Build.IS_DEBUGGABLE) {
             builders.put(USER_TYPE_PROFILE_TEST, getDefaultTypeProfileTest());
         }
@@ -181,7 +183,7 @@ public final class UserTypeFactory {
                         com.android.internal.R.color.profile_badge_1_dark,
                         com.android.internal.R.color.profile_badge_2_dark,
                         com.android.internal.R.color.profile_badge_3_dark)
-                .setDefaultRestrictions(getDefaultManagedProfileRestrictions())
+                .setDefaultRestrictions(getDefaultProfileRestrictions())
                 .setDefaultSecureSettings(getDefaultManagedProfileSecureSettings())
                 .setDefaultCrossProfileIntentFilters(getDefaultManagedCrossProfileIntentFilter())
                 .setDefaultUserProperties(new UserProperties.Builder()
@@ -196,7 +198,7 @@ public final class UserTypeFactory {
      * configuration (for userdebug builds). For now it just uses managed profile badges.
      */
     private static UserTypeDetails.Builder getDefaultTypeProfileTest() {
-        final Bundle restrictions = new Bundle();
+        final Bundle restrictions = getDefaultProfileRestrictions();
         restrictions.putBoolean(UserManager.DISALLOW_FUN, true);
 
         return new UserTypeDetails.Builder()
@@ -222,6 +224,43 @@ public final class UserTypeFactory {
                         com.android.internal.R.color.profile_badge_3_dark)
                 .setDefaultRestrictions(restrictions)
                 .setDefaultSecureSettings(getDefaultNonManagedProfileSecureSettings());
+    }
+
+    /**
+     * Returns the Builder for the default {@link UserManager#USER_TYPE_PROFILE_COMMUNAL}
+     * configuration. For now it just uses managed profile badges.
+     */
+    private static UserTypeDetails.Builder getDefaultTypeProfileCommunal() {
+        return new UserTypeDetails.Builder()
+                .setName(USER_TYPE_PROFILE_COMMUNAL)
+                .setBaseType(FLAG_PROFILE)
+                .setMaxAllowed(1)
+                .setEnabled(UserManager.isCommunalProfileEnabled() ? 1 : 0)
+                .setLabel(0)
+                .setIconBadge(com.android.internal.R.drawable.ic_test_icon_badge_experiment)
+                .setBadgePlain(com.android.internal.R.drawable.ic_test_badge_experiment)
+                .setBadgeNoBackground(com.android.internal.R.drawable.ic_test_badge_no_background)
+                .setStatusBarIcon(com.android.internal.R.drawable.ic_test_badge_experiment)
+                .setBadgeLabels(
+                        com.android.internal.R.string.managed_profile_label_badge,
+                        com.android.internal.R.string.managed_profile_label_badge_2,
+                        com.android.internal.R.string.managed_profile_label_badge_3)
+                .setBadgeColors(
+                        com.android.internal.R.color.profile_badge_1,
+                        com.android.internal.R.color.profile_badge_2,
+                        com.android.internal.R.color.profile_badge_3)
+                .setDarkThemeBadgeColors(
+                        com.android.internal.R.color.profile_badge_1_dark,
+                        com.android.internal.R.color.profile_badge_2_dark,
+                        com.android.internal.R.color.profile_badge_3_dark)
+                .setDefaultRestrictions(getDefaultProfileRestrictions())
+                .setDefaultSecureSettings(getDefaultNonManagedProfileSecureSettings())
+                .setDefaultUserProperties(new UserProperties.Builder()
+                        .setStartWithParent(false)
+                        .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
+                        .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE)
+                        .setCredentialShareableWithParent(false)
+                        .setAlwaysVisible(true));
     }
 
     /**
@@ -317,7 +356,7 @@ public final class UserTypeFactory {
         return restrictions;
     }
 
-    private static Bundle getDefaultManagedProfileRestrictions() {
+    private static Bundle getDefaultProfileRestrictions() {
         final Bundle restrictions = new Bundle();
         restrictions.putBoolean(UserManager.DISALLOW_WALLPAPER, true);
         return restrictions;

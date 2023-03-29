@@ -208,20 +208,29 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     }
 
     /**
-     * Discard the current audio focus owner.
+     * Discard the current audio focus owner (unless the user is considered {@link
+     * FocusRequester#isAlwaysVisibleUser() always visible)}.
      * Notify top of audio focus stack that it lost focus (regardless of possibility to reassign
      * focus), remove it from the stack, and clear the remote control display.
+     * @return whether the current audio focus owner was discarded (including if there was none);
+     *         returns false if it was purposefully kept
      */
-    protected void discardAudioFocusOwner() {
+    protected boolean maybeDiscardAudioFocusOwner() {
         synchronized(mAudioFocusLock) {
             if (!mFocusStack.empty()) {
-                // notify the current focus owner it lost focus after removing it from stack
-                final FocusRequester exFocusOwner = mFocusStack.pop();
-                exFocusOwner.handleFocusLoss(AudioManager.AUDIOFOCUS_LOSS, null,
-                        false /*forceDuck*/);
-                exFocusOwner.release();
+                final FocusRequester exFocusOwner = mFocusStack.peek();
+                if (!exFocusOwner.isAlwaysVisibleUser()) {
+                    mFocusStack.pop();
+                    exFocusOwner.handleFocusLoss(AudioManager.AUDIOFOCUS_LOSS, null,
+                            false /*forceDuck*/);
+                    exFocusOwner.release();
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }
+        return true;
     }
 
     /**

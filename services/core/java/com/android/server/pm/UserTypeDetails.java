@@ -625,4 +625,12 @@ public final class UserTypeDetails {
     public boolean isManagedProfile() {
         return UserManager.isUserTypeManagedProfile(mName);
     }
+
+    /**
+     * Returns whether the user type is a communal profile
+     * (i.e. {@link UserManager#USER_TYPE_PROFILE_COMMUNAL}).
+     */
+    public boolean isCommunalProfile() {
+        return UserManager.isUserTypeCommunalProfile(mName);
+    }
 }

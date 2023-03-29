@@ -76,6 +76,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.storage.IStorageManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -2746,7 +2747,8 @@ public final class SystemServer implements Dumpable {
         final HsumBootUserInitializer hsumBootUserInitializer =
                 HsumBootUserInitializer.createInstance(
                         mActivityManagerService, mPackageManagerService, mContentResolver,
-                        context.getResources().getBoolean(R.bool.config_isMainUserPermanentAdmin));
+                        context.getResources().getBoolean(R.bool.config_isMainUserPermanentAdmin),
+                        UserManager.isCommunalProfileEnabled());
         if (hsumBootUserInitializer != null) {
             t.traceBegin("HsumBootUserInitializer.init");
             hsumBootUserInitializer.init(t);
@@ -3163,6 +3165,12 @@ public final class SystemServer implements Dumpable {
             }
             t.traceEnd();
         }, t);
+
+        if (hsumBootUserInitializer != null) {
+            t.traceBegin("HsumBootUserInitializer.postSystemReady");
+            hsumBootUserInitializer.postSystemReady(t);
+            t.traceEnd();
+        }
 
         t.traceBegin("LockSettingsThirdPartyAppsStarted");
         LockSettingsInternal lockSettingsInternal =

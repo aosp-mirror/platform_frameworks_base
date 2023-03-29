@@ -118,10 +118,17 @@ public final class UserManagerTest {
 
     private void removeExistingUsers() {
         int currentUser = ActivityManager.getCurrentUser();
+
+        UserHandle communalProfile = mUserManager.getCommunalProfile();
+        int communalProfileId = communalProfile != null
+                ? communalProfile.getIdentifier() : UserHandle.USER_NULL;
+
         List<UserInfo> list = mUserManager.getUsers();
         for (UserInfo user : list) {
             // Keep system and current user
-            if (user.id != UserHandle.USER_SYSTEM && user.id != currentUser) {
+            if (user.id != UserHandle.USER_SYSTEM &&
+                    user.id != currentUser &&
+                    user.id != communalProfileId) {
                 removeUser(user.id);
             }
         }
@@ -206,6 +213,7 @@ public final class UserManagerTest {
         assertThat(typeProps.isCredentialShareableWithParent())
                 .isEqualTo(cloneUserProperties.isCredentialShareableWithParent());
         assertThrows(SecurityException.class, cloneUserProperties::getDeleteAppWithParent);
+        assertThrows(SecurityException.class, cloneUserProperties::getAlwaysVisible);
 
         // Verify clone user parent
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
@@ -214,6 +222,45 @@ public final class UserManagerTest {
         assertThat(mainUserId).isEqualTo(parentProfileInfo.id);
         removeUser(userInfo.id);
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
+    }
+
+    @Test
+    public void testCommunalProfile() throws Exception {
+        assumeTrue("Device doesn't support communal profiles ",
+                mUserManager.isUserTypeEnabled(UserManager.USER_TYPE_PROFILE_COMMUNAL));
+
+        // Create communal profile if needed
+        if (mUserManager.getCommunalProfile() == null) {
+            Slog.i(TAG, "Attempting to create a communal profile for a test");
+            createUser("Communal", UserManager.USER_TYPE_PROFILE_COMMUNAL, /*flags*/ 0);
+        }
+        final UserHandle communal = mUserManager.getCommunalProfile();
+        assertWithMessage("Couldn't create communal profile").that(communal).isNotNull();
+
+        final UserTypeDetails userTypeDetails =
+                UserTypeFactory.getUserTypes().get(UserManager.USER_TYPE_PROFILE_COMMUNAL);
+        assertWithMessage("No communal user type on device").that(userTypeDetails).isNotNull();
+
+        // Test that only one communal profile can be created
+        final UserInfo secondCommunalProfile =
+                createUser("Communal", UserManager.USER_TYPE_PROFILE_COMMUNAL, /*flags*/ 0);
+        assertThat(secondCommunalProfile).isNull();
+
+        // Verify that communal profile doesn't have a parent
+        assertThat(mUserManager.getProfileParent(communal.getIdentifier())).isNull();
+
+        // Make sure that, when switching users, the communal profile remains visible.
+        final boolean isStarted = mActivityManager.startProfile(communal);
+        assertWithMessage("Unable to start communal profile").that(isStarted).isTrue();
+        final UserManager umCommunal = (UserManager) mContext.createPackageContextAsUser(
+                        "android", 0, communal).getSystemService(Context.USER_SERVICE);
+        final int originalCurrent = ActivityManager.getCurrentUser();
+        final UserInfo testUser = createUser("TestUser", /* flags= */ 0);
+        assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
+        switchUser(testUser.id);
+        assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
+        switchUser(originalCurrent);
+        assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
     }
 
     @MediumTest
@@ -856,6 +903,7 @@ public final class UserManagerTest {
         assertThat(userProps.isMediaSharedWithParent()).isFalse();
         assertThat(userProps.isCredentialShareableWithParent()).isTrue();
         assertThrows(SecurityException.class, userProps::getDeleteAppWithParent);
+        assertThrows(SecurityException.class, userProps::getAlwaysVisible);
     }
 
 

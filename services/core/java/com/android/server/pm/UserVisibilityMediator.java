@@ -121,6 +121,13 @@ public final class UserVisibilityMediator implements Dumpable {
     })
     public @interface SecondaryDisplayMappingStatus {}
 
+    /**
+     * ProfileGroupId representing always-visible users (e.g. a communal profile).
+     * This is an implementation detail of this class only; it may have nothing to do with the
+     * actual user's profile group id in UserManagerService.
+     */
+    public static final int ALWAYS_VISIBLE_PROFILE_GROUP_ID = UserHandle.USER_ALL;
+
     // TODO(b/266158156): might need to change this if boot logic is refactored for HSUM devices
     @VisibleForTesting
     static final int INITIAL_CURRENT_USER_ID = USER_SYSTEM;
@@ -159,6 +166,10 @@ public final class UserVisibilityMediator implements Dumpable {
      *
      * <p>It's used to determine not just if the user is visible, but also
      * {@link #isProfile(int, int) if it's a profile}.
+     *
+     * <p>Note that these profile group ids might not be identical to those used in
+     * UserManagerService, as different conventions are used (such as how to treat users with no
+     * profiles, or how to treat the communal profile).
      */
     @GuardedBy("mLock")
     private final SparseIntArray mStartedVisibleProfileGroupIds = new SparseIntArray();
@@ -221,7 +232,7 @@ public final class UserVisibilityMediator implements Dumpable {
      */
     public @UserAssignmentResult int assignUserToDisplayOnStart(@UserIdInt int userId,
             @UserIdInt int unResolvedProfileGroupId, @UserStartMode int userStartMode,
-            int displayId) {
+            int displayId, boolean isAlwaysVisible) {
         Preconditions.checkArgument(!isSpecialUserId(userId), "user id cannot be generic: %d",
                 userId);
         validateUserStartMode(userStartMode);
@@ -238,9 +249,8 @@ public final class UserVisibilityMediator implements Dumpable {
         // getUserVisibilityOnStartLocked() respectively).
 
 
-        int profileGroupId = unResolvedProfileGroupId == NO_PROFILE_GROUP_ID
-                ? userId
-                : unResolvedProfileGroupId;
+        int profileGroupId
+                = resolveProfileGroupId(userId, unResolvedProfileGroupId, isAlwaysVisible);
         if (DBG) {
             Slogf.d(TAG, "assignUserToDisplayOnStart(%d, %d, %s, %d): actualProfileGroupId=%d",
                     userId, unResolvedProfileGroupId, userStartModeToString(userStartMode),
@@ -330,6 +340,18 @@ public final class UserVisibilityMediator implements Dumpable {
         return result;
     }
 
+    private int resolveProfileGroupId(
+            @UserIdInt int userId, @UserIdInt int unResolvedProfileGroupId,
+            boolean isAlwaysVisible) {
+
+        if (isAlwaysVisible) {
+            return ALWAYS_VISIBLE_PROFILE_GROUP_ID;
+        }
+        return unResolvedProfileGroupId == NO_PROFILE_GROUP_ID
+                ? userId
+                : unResolvedProfileGroupId;
+    }
+
     @GuardedBy("mLock")
     @UserAssignmentResult
     private int getUserVisibilityOnStartLocked(@UserIdInt int userId, @UserIdInt int profileGroupId,
@@ -388,8 +410,7 @@ public final class UserVisibilityMediator implements Dumpable {
                             userStartModeToString(userStartMode), displayId);
                     return USER_ASSIGNMENT_RESULT_FAILURE;
                 case USER_START_MODE_BACKGROUND_VISIBLE:
-                    boolean isParentVisibleOnDisplay = isUserVisible(profileGroupId, displayId);
-                    if (!isParentVisibleOnDisplay) {
+                    if (!isParentVisibleOnDisplay(profileGroupId, displayId)) {
                         Slogf.w(TAG, "getUserVisibilityOnStartLocked(%d, %d, %s, %d) failed: cannot"
                                 + " start profile user visible when its parent is not visible in "
                                 + "that display", userId, profileGroupId,
@@ -718,6 +739,19 @@ public final class UserVisibilityMediator implements Dumpable {
                     isIt);
         }
         return isIt;
+    }
+
+    /**
+     * Returns whether the given profileGroupId - i.e. the user (for a non-profile), or its parent
+     * (for a profile) - is visible on the given display.
+     */
+    private boolean isParentVisibleOnDisplay(@UserIdInt int profileGroupId, int displayId) {
+        if (profileGroupId == ALWAYS_VISIBLE_PROFILE_GROUP_ID) {
+            return true;
+        }
+        // The profileGroupId is the user (for a non-profile) or its parent (for a profile),
+        // so query whether it is visible.
+        return isUserVisible(profileGroupId, displayId);
     }
 
     /**
@@ -1133,8 +1167,9 @@ public final class UserVisibilityMediator implements Dumpable {
             if (mCurrentUserId == userId) {
                 return true;
             }
-            return mStartedVisibleProfileGroupIds.get(userId, NO_PROFILE_GROUP_ID)
-                    == mCurrentUserId;
+            int profileGroupId = mStartedVisibleProfileGroupIds.get(userId, NO_PROFILE_GROUP_ID);
+            return profileGroupId ==
+                    mCurrentUserId || profileGroupId == ALWAYS_VISIBLE_PROFILE_GROUP_ID;
         }
     }
 

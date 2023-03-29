@@ -55,7 +55,7 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
                 onVisible(USER_ID));
 
         int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, FG,
-                DEFAULT_DISPLAY);
+                DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
         expectUserCannotBeUnassignedFromDisplay(USER_ID, DEFAULT_DISPLAY);
 
@@ -87,7 +87,7 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
         startForegroundUser(previousCurrentUserId);
 
         int result = mMediator.assignUserToDisplayOnStart(currentUserId, currentUserId, FG,
-                DEFAULT_DISPLAY);
+                DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
         expectUserCannotBeUnassignedFromDisplay(currentUserId, DEFAULT_DISPLAY);
 
@@ -123,7 +123,7 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
         startForegroundUser(PARENT_USER_ID);
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+                BG_VISIBLE, DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
         expectUserCannotBeUnassignedFromDisplay(PROFILE_USER_ID, DEFAULT_DISPLAY);
 
@@ -144,13 +144,36 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
         int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG_VISIBLE,
-                SECONDARY_DISPLAY_ID);
+                SECONDARY_DISPLAY_ID, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(USER_ID);
         expectNoDisplayAssignedToUser(USER_ID);
 
         expectInitialCurrentUserAssignedToDisplay(SECONDARY_DISPLAY_ID);
+
+        listener.verify();
+    }
+
+    @Test
+    public void testStartVisibleBgProfile_communalProfile() throws Exception {
+        AsyncUserVisibilityListener listener = addListenerForEvents(
+                onVisible(PROFILE_USER_ID));
+
+        int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID,
+                /* profileGroup= */ -12345,
+                BG_VISIBLE, DEFAULT_DISPLAY,
+                /* isCommunalProfile= */ true);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE);
+        expectUserCannotBeUnassignedFromDisplay(PROFILE_USER_ID, DEFAULT_DISPLAY);
+
+        expectUserIsVisible(PROFILE_USER_ID);
+        expectUserIsNotVisibleOnDisplay(PROFILE_USER_ID, INVALID_DISPLAY);
+        expectUserIsVisibleOnDisplay(PROFILE_USER_ID, DEFAULT_DISPLAY);
+        expectUserIsVisibleOnDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+        expectVisibleUsers(INITIAL_CURRENT_USER_ID, PROFILE_USER_ID);
+
+        expectDisplayAssignedToUser(PROFILE_USER_ID, DEFAULT_DISPLAY);
 
         listener.verify();
     }

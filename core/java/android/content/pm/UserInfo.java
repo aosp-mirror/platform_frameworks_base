@@ -386,6 +386,10 @@ public class UserInfo implements Parcelable {
         return UserManager.isUserTypeCloneProfile(userType);
     }
 
+    public boolean isCommunalProfile() {
+        return UserManager.isUserTypeCommunalProfile(userType);
+    }
+
     @UnsupportedAppUsage
     public boolean isEnabled() {
         return (flags & FLAG_DISABLED) != FLAG_DISABLED;
