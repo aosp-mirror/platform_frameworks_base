@@ -752,6 +752,29 @@ public class StatusBarManager {
     }
 
     /**
+     * Gets the last handled system key. A system key is a KeyEvent that the
+     * {@link com.android.server.policy.PhoneWindowManager} sends directly to the
+     * status bar, rather than forwarding to apps. If a key has never been sent to the
+     * status bar, will return -1.
+     *
+     * @return the keycode of the last KeyEvent that has been sent to the system.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR)
+    @TestApi
+    public int getLastSystemKey() {
+        try {
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                return svc.getLastSystemKey();
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+        return -1;
+    }
+
+    /**
      * Expand the settings panel.
      *
      * @hide

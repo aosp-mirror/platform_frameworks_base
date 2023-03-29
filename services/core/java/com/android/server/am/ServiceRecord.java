@@ -176,6 +176,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     boolean mAllowWhileInUsePermissionInFgs;
     // A copy of mAllowWhileInUsePermissionInFgs's value when the service is entering FGS state.
     boolean mAllowWhileInUsePermissionInFgsAtEntering;
+    /** Allow scheduling user-initiated jobs from the background. */
+    boolean mAllowUiJobScheduling;
 
     // the most recent package that start/bind this service.
     String mRecentCallingPackage;
@@ -607,6 +609,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
         pw.print(prefix); pw.print("allowWhileInUsePermissionInFgs=");
                 pw.println(mAllowWhileInUsePermissionInFgs);
+        pw.print(prefix); pw.print("allowUiJobScheduling="); pw.println(mAllowUiJobScheduling);
         pw.print(prefix); pw.print("recentCallingPackage=");
                 pw.println(mRecentCallingPackage);
         pw.print(prefix); pw.print("recentCallingUid=");
@@ -1024,7 +1027,17 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 ams.mConstants.SERVICE_BG_ACTIVITY_START_TIMEOUT);
     }
 
+    void updateAllowUiJobScheduling(boolean allowUiJobScheduling) {
+        if (mAllowUiJobScheduling == allowUiJobScheduling) {
+            return;
+        }
+        mAllowUiJobScheduling = allowUiJobScheduling;
+    }
+
     private void setAllowedBgActivityStartsByStart(BackgroundStartPrivileges newValue) {
+        if (mBackgroundStartPrivilegesByStartMerged == newValue) {
+            return;
+        }
         mBackgroundStartPrivilegesByStartMerged = newValue;
         updateParentProcessBgActivityStartsToken();
     }

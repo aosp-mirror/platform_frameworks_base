@@ -111,6 +111,7 @@ interface IStatusBarService
     void clickTile(in ComponentName tile);
     @UnsupportedAppUsage
     void handleSystemKey(in int key);
+    int getLastSystemKey();
 
     /**
      * Methods to show toast messages for screen pinning

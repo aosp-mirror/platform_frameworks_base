@@ -18,7 +18,6 @@ package android.hardware.input;
 
 import android.annotation.NonNull;
 import android.app.ActivityThread;
-import android.content.Context;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
 import android.hardware.lights.LightsManager;
@@ -44,8 +43,7 @@ class InputDeviceLightsManager extends LightsManager {
     // Package name
     private final String mPackageName;
 
-    InputDeviceLightsManager(Context context, int deviceId) {
-        super(context);
+    InputDeviceLightsManager(int deviceId) {
         mGlobal = InputManagerGlobal.getInstance();
         mDeviceId = deviceId;
         mPackageName = ActivityThread.currentPackageName();

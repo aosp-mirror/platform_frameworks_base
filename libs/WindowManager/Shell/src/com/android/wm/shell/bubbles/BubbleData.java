@@ -40,6 +40,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubbles.DismissReason;
+import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
+import com.android.wm.shell.common.bubbles.RemovedBubble;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -112,6 +114,61 @@ public class BubbleData {
 
         void bubbleRemoved(Bubble bubbleToRemove, @DismissReason int reason) {
             removedBubbles.add(new Pair<>(bubbleToRemove, reason));
+        }
+
+        /**
+         * Converts the update to a {@link BubbleBarUpdate} which contains updates relevant
+         * to the bubble bar. Only used when {@link BubbleController#isShowingAsBubbleBar()} is
+         * true.
+         */
+        BubbleBarUpdate toBubbleBarUpdate() {
+            BubbleBarUpdate bubbleBarUpdate = new BubbleBarUpdate();
+
+            bubbleBarUpdate.expandedChanged = expandedChanged;
+            bubbleBarUpdate.expanded = expanded;
+            if (selectionChanged) {
+                bubbleBarUpdate.selectedBubbleKey = selectedBubble != null
+                        ? selectedBubble.getKey()
+                        : null;
+            }
+            bubbleBarUpdate.addedBubble = addedBubble != null
+                    ? addedBubble.asBubbleBarBubble()
+                    : null;
+            // TODO(b/269670235): We need to handle updates better, I think for the bubble bar only
+            //  certain updates need to be sent instead of any updatedBubble.
+            bubbleBarUpdate.updatedBubble = updatedBubble != null
+                    ? updatedBubble.asBubbleBarBubble()
+                    : null;
+            bubbleBarUpdate.suppressedBubbleKey = suppressedBubble != null
+                    ? suppressedBubble.getKey()
+                    : null;
+            bubbleBarUpdate.unsupressedBubbleKey = unsuppressedBubble != null
+                    ? unsuppressedBubble.getKey()
+                    : null;
+            for (int i = 0; i < removedBubbles.size(); i++) {
+                Pair<Bubble, Integer> pair = removedBubbles.get(i);
+                bubbleBarUpdate.removedBubbles.add(
+                        new RemovedBubble(pair.first.getKey(), pair.second));
+            }
+            if (orderChanged) {
+                // Include the new order
+                for (int i = 0; i < bubbles.size(); i++) {
+                    bubbleBarUpdate.bubbleKeysInOrder.add(bubbles.get(i).getKey());
+                }
+            }
+            return bubbleBarUpdate;
+        }
+
+        /**
+         * Gets the current state of active bubbles and populates the update with that.  Only
+         * used when {@link BubbleController#isShowingAsBubbleBar()} is true.
+         */
+        BubbleBarUpdate getInitialState() {
+            BubbleBarUpdate bubbleBarUpdate = new BubbleBarUpdate();
+            for (int i = 0; i < bubbles.size(); i++) {
+                bubbleBarUpdate.currentBubbleList.add(bubbles.get(i).asBubbleBarBubble());
+            }
+            return bubbleBarUpdate;
         }
     }
 
@@ -188,6 +245,13 @@ public class BubbleData {
         mStateChange = new Update(mBubbles, mOverflowBubbles);
         mMaxBubbles = mPositioner.getMaxBubbles();
         mMaxOverflowBubbles = mContext.getResources().getInteger(R.integer.bubbles_max_overflow);
+    }
+
+    /**
+     * Returns a bubble bar update populated with the current list of active bubbles.
+     */
+    public BubbleBarUpdate getInitialStateForBubbleBar() {
+        return mStateChange.getInitialState();
     }
 
     public void setSuppressionChangedListener(Bubbles.BubbleMetadataFlagListener listener) {

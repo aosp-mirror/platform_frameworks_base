@@ -1360,9 +1360,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void startsListeningForSfps_whenKeyguardIsVisible_ifRequireInteractiveToAuthEnabled()
             throws RemoteException {
         // SFPS supported and enrolled
-        final ArrayList<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
-        props.add(newFingerprintSensorPropertiesInternal(TYPE_POWER_BUTTON));
-        when(mAuthController.getSfpsProps()).thenReturn(props);
+        when(mAuthController.isSfpsSupported()).thenReturn(true);
         when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
 
         // WHEN require interactive to auth is disabled, and keyguard is not awake
@@ -1401,9 +1399,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void notListeningForSfps_whenGoingToSleep_ifRequireInteractiveToAuthEnabled()
             throws RemoteException {
         // GIVEN SFPS supported and enrolled
-        final ArrayList<FingerprintSensorPropertiesInternal> props = new ArrayList<>();
-        props.add(newFingerprintSensorPropertiesInternal(TYPE_POWER_BUTTON));
-        when(mAuthController.getSfpsProps()).thenReturn(props);
+        when(mAuthController.isSfpsSupported()).thenReturn(true);
         when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
 
         // GIVEN Preconditions for sfps auth to run
@@ -2843,8 +2839,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void givenUdfpsSupported() {
-        Assert.assertFalse(mFingerprintSensorProperties.isEmpty());
-        when(mAuthController.getUdfpsProps()).thenReturn(mFingerprintSensorProperties);
+        when(mAuthController.isUdfpsSupported()).thenReturn(true);
         Assert.assertTrue(mKeyguardUpdateMonitor.isUdfpsSupported());
     }
 

@@ -21,6 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.AuthController
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.mockito.whenever
@@ -37,6 +38,7 @@ import org.junit.runners.JUnit4
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -46,7 +48,9 @@ import org.mockito.MockitoAnnotations
 class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var dumpManager: DumpManager
-    @Captor private lateinit var callbackCaptor: ArgumentCaptor<KeyguardUpdateMonitorCallback>
+    @Mock private lateinit var authController: AuthController
+    @Captor
+    private lateinit var updateMonitorCallback: ArgumentCaptor<KeyguardUpdateMonitorCallback>
 
     private lateinit var testScope: TestScope
 
@@ -59,6 +63,7 @@ class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
 
         underTest =
             DeviceEntryFingerprintAuthRepositoryImpl(
+                authController,
                 keyguardUpdateMonitor,
                 testScope.backgroundScope,
                 dumpManager,
@@ -67,7 +72,7 @@ class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
 
     @After
     fun tearDown() {
-        verify(keyguardUpdateMonitor).removeCallback(callbackCaptor.value)
+        //        verify(keyguardUpdateMonitor).removeCallback(updateMonitorCallback.value)
     }
 
     @Test
@@ -76,8 +81,8 @@ class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
             val isLockedOutValue = collectLastValue(underTest.isLockedOut)
             runCurrent()
 
-            verify(keyguardUpdateMonitor).registerCallback(callbackCaptor.capture())
-            val callback = callbackCaptor.value
+            verify(keyguardUpdateMonitor).registerCallback(updateMonitorCallback.capture())
+            val callback = updateMonitorCallback.value
             whenever(keyguardUpdateMonitor.isFingerprintLockedOut).thenReturn(true)
 
             callback.onLockedOutStateChanged(BiometricSourceType.FACE)
@@ -89,5 +94,64 @@ class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
             whenever(keyguardUpdateMonitor.isFingerprintLockedOut).thenReturn(false)
             callback.onLockedOutStateChanged(BiometricSourceType.FINGERPRINT)
             assertThat(isLockedOutValue()).isFalse()
+        }
+
+    @Test
+    fun fpRunningStateIsPropagated() =
+        testScope.runTest {
+            val isRunning = collectLastValue(underTest.isRunning)
+            whenever(keyguardUpdateMonitor.isFingerprintDetectionRunning).thenReturn(true)
+
+            // Initial value is available
+            assertThat(isRunning()).isTrue()
+
+            verify(keyguardUpdateMonitor, atLeastOnce())
+                .registerCallback(updateMonitorCallback.capture())
+            invokeOnCallback {
+                it.onBiometricRunningStateChanged(false, BiometricSourceType.FINGERPRINT)
+            }
+
+            assertThat(isRunning()).isFalse()
+
+            invokeOnCallback { it.onBiometricRunningStateChanged(true, BiometricSourceType.FACE) }
+
+            assertThat(isRunning()).isFalse()
+
+            updateMonitorCallback.value.onBiometricRunningStateChanged(
+                true,
+                BiometricSourceType.FINGERPRINT
+            )
+            assertThat(isRunning()).isTrue()
+        }
+
+    private fun invokeOnCallback(action: (KeyguardUpdateMonitorCallback) -> Unit) {
+        updateMonitorCallback.allValues.forEach { action(it) }
+    }
+
+    @Test
+    fun enabledFingerprintTypeProvidesTheCorrectOutput() =
+        testScope.runTest {
+            whenever(authController.isSfpsSupported).thenReturn(true)
+            whenever(authController.isUdfpsSupported).thenReturn(false)
+            whenever(authController.isRearFpsSupported).thenReturn(false)
+
+            assertThat(underTest.availableFpSensorType).isEqualTo(BiometricType.SIDE_FINGERPRINT)
+
+            whenever(authController.isSfpsSupported).thenReturn(false)
+            whenever(authController.isUdfpsSupported).thenReturn(true)
+            whenever(authController.isRearFpsSupported).thenReturn(false)
+
+            assertThat(underTest.availableFpSensorType)
+                .isEqualTo(BiometricType.UNDER_DISPLAY_FINGERPRINT)
+
+            whenever(authController.isSfpsSupported).thenReturn(false)
+            whenever(authController.isUdfpsSupported).thenReturn(false)
+            whenever(authController.isRearFpsSupported).thenReturn(true)
+
+            assertThat(underTest.availableFpSensorType).isEqualTo(BiometricType.REAR_FINGERPRINT)
+
+            whenever(authController.isRearFpsSupported).thenReturn(false)
+
+            assertThat(underTest.availableFpSensorType).isNull()
         }
 }

@@ -40,7 +40,9 @@ import static androidx.window.extensions.embedding.SplitContainer.isStickyPlaceh
 import static androidx.window.extensions.embedding.SplitContainer.shouldFinishAssociatedContainerWhenAdjacent;
 import static androidx.window.extensions.embedding.SplitContainer.shouldFinishAssociatedContainerWhenStacked;
 import static androidx.window.extensions.embedding.SplitPresenter.RESULT_EXPAND_FAILED_NO_TF_INFO;
+import static androidx.window.extensions.embedding.SplitPresenter.getActivitiesMinDimensionsPair;
 import static androidx.window.extensions.embedding.SplitPresenter.getActivityIntentMinDimensionsPair;
+import static androidx.window.extensions.embedding.SplitPresenter.getTaskWindowMetrics;
 import static androidx.window.extensions.embedding.SplitPresenter.shouldShowSplit;
 
 import android.app.Activity;
@@ -1037,9 +1039,15 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         final TaskFragmentContainer primaryContainer = getContainerWithActivity(
                 primaryActivity);
         final SplitContainer splitContainer = getActiveSplitForContainer(primaryContainer);
-        final WindowMetrics taskWindowMetrics = mPresenter.getTaskWindowMetrics(primaryActivity);
+        final TaskContainer.TaskProperties taskProperties = mPresenter
+                .getTaskProperties(primaryActivity);
+        final SplitAttributes calculatedSplitAttributes = mPresenter.computeSplitAttributes(
+                taskProperties, splitRule, splitRule.getDefaultSplitAttributes(),
+                getActivitiesMinDimensionsPair(primaryActivity, secondaryActivity));
         if (splitContainer != null && primaryContainer == splitContainer.getPrimaryContainer()
-                && canReuseContainer(splitRule, splitContainer.getSplitRule(), taskWindowMetrics)) {
+                && canReuseContainer(splitRule, splitContainer.getSplitRule(),
+                        getTaskWindowMetrics(taskProperties.getConfiguration()),
+                        calculatedSplitAttributes, splitContainer.getCurrentSplitAttributes())) {
             // Can launch in the existing secondary container if the rules share the same
             // presentation.
             final TaskFragmentContainer secondaryContainer = splitContainer.getSecondaryContainer();
@@ -1058,7 +1066,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             }
         }
         // Create new split pair.
-        mPresenter.createNewSplitContainer(wct, primaryActivity, secondaryActivity, splitRule);
+        mPresenter.createNewSplitContainer(wct, primaryActivity, secondaryActivity, splitRule,
+                calculatedSplitAttributes);
         return true;
     }
 
@@ -1283,9 +1292,16 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
         final TaskFragmentContainer existingContainer = getContainerWithActivity(primaryActivity);
         final SplitContainer splitContainer = getActiveSplitForContainer(existingContainer);
-        final WindowMetrics taskWindowMetrics = mPresenter.getTaskWindowMetrics(primaryActivity);
+        final TaskContainer.TaskProperties taskProperties = mPresenter
+                .getTaskProperties(primaryActivity);
+        final WindowMetrics taskWindowMetrics = getTaskWindowMetrics(
+                taskProperties.getConfiguration());
+        final SplitAttributes calculatedSplitAttributes = mPresenter.computeSplitAttributes(
+                taskProperties, splitRule, splitRule.getDefaultSplitAttributes(),
+                getActivityIntentMinDimensionsPair(primaryActivity, intent));
         if (splitContainer != null && existingContainer == splitContainer.getPrimaryContainer()
-                && (canReuseContainer(splitRule, splitContainer.getSplitRule(), taskWindowMetrics)
+                && (canReuseContainer(splitRule, splitContainer.getSplitRule(), taskWindowMetrics,
+                        calculatedSplitAttributes, splitContainer.getCurrentSplitAttributes())
                 // TODO(b/231845476) we should always respect clearTop.
                 || !respectClearTop)
                 && mPresenter.expandSplitContainerIfNeeded(wct, splitContainer, primaryActivity,
@@ -1296,7 +1312,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
         // Create a new TaskFragment to split with the primary activity for the new activity.
         return mPresenter.createNewSplitWithEmptySideContainer(wct, primaryActivity, intent,
-                splitRule);
+                splitRule, calculatedSplitAttributes);
     }
 
     /**
@@ -2273,21 +2289,29 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
-     * If the two rules have the same presentation, we can reuse the same {@link SplitContainer} if
-     * there is any.
+     * If the two rules have the same presentation, and the calculated {@link SplitAttributes}
+     * matches the {@link SplitAttributes} of {@link SplitContainer}, we can reuse the same
+     * {@link SplitContainer} if there is any.
      */
     private static boolean canReuseContainer(@NonNull SplitRule rule1, @NonNull SplitRule rule2,
-            @NonNull WindowMetrics parentWindowMetrics) {
+            @NonNull WindowMetrics parentWindowMetrics,
+            @NonNull SplitAttributes calculatedSplitAttributes,
+            @NonNull SplitAttributes containerSplitAttributes) {
         if (!isContainerReusableRule(rule1) || !isContainerReusableRule(rule2)) {
             return false;
         }
-        return haveSamePresentation((SplitPairRule) rule1, (SplitPairRule) rule2,
-                parentWindowMetrics);
+        return areRulesSamePresentation((SplitPairRule) rule1, (SplitPairRule) rule2,
+                parentWindowMetrics)
+                // Besides rules, we should also check whether the SplitContainer's splitAttributes
+                // matches the current splitAttributes or not. The splitAttributes may change
+                // if the app chooses different SplitAttributes calculator function before a new
+                // activity is started even they match the same splitRule.
+                && calculatedSplitAttributes.equals(containerSplitAttributes);
     }
 
     /** Whether the two rules have the same presentation. */
     @VisibleForTesting
-    static boolean haveSamePresentation(@NonNull SplitPairRule rule1,
+    static boolean areRulesSamePresentation(@NonNull SplitPairRule rule1,
             @NonNull SplitPairRule rule2, @NonNull WindowMetrics parentWindowMetrics) {
         if (rule1.getTag() != null || rule2.getTag() != null) {
             // Tag must be unique if it is set. We don't want to reuse the container if the rules

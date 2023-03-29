@@ -43,12 +43,12 @@ import java.util.Set;
 public final class CredentialOption implements Parcelable {
 
     /**
-     * Bundle key to the flattened version of the JSON request string. Framework will use this key
+     * Bundle key to the list of elements keys supported/requested. Framework will use this key
      * to determine which types of Credentials will utilize Credential Registry when filtering
      * Credential Providers to ping.
      */
-    public static final String FLATTENED_REQUEST = "android.credentials"
-            + ".GetCredentialOption.FLATTENED_REQUEST_STRING";
+    public static final String SUPPORTED_ELEMENT_KEYS = "android.credentials"
+            + ".GetCredentialOption.SUPPORTED_ELEMENT_KEYS";
 
     /**
      * The requested credential type.

@@ -219,7 +219,7 @@ data class EdgePanelParams(private var resources: Resources) {
                         height = getDimen(R.dimen.navigation_edge_active_background_height),
                         edgeCornerRadius = getDimen(R.dimen.navigation_edge_active_edge_corners),
                         farCornerRadius = getDimen(R.dimen.navigation_edge_active_far_corners),
-                        widthSpring = createSpring(650f, 0.75f),
+                        widthSpring = createSpring(850f, 0.75f),
                         heightSpring = createSpring(10000f, 1f),
                         edgeCornerRadiusSpring = createSpring(600f, 0.36f),
                         farCornerRadiusSpring = createSpring(2500f, 0.855f),
@@ -274,8 +274,8 @@ data class EdgePanelParams(private var resources: Resources) {
                         farCornerRadiusSpring = flungCommittedFarCornerSpring,
                         alphaSpring = createSpring(1400f, 1f),
                 ),
-                scale = 0.85f,
-                scaleSpring = createSpring(6000f, 1f),
+                scale = 0.86f,
+                scaleSpring = createSpring(5700f, 1f),
         )
 
         flungIndicator = committedIndicator.copy(

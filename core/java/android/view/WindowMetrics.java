@@ -162,7 +162,7 @@ public final class WindowMetrics {
         return WindowMetrics.class.getSimpleName() + ":{"
                 + "bounds=" + mBounds
                 + ", windowInsets=" + mWindowInsets
-                + ", density" + mDensity
+                + ", density=" + mDensity
                 + "}";
     }
 }

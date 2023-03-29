@@ -32,8 +32,6 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.BatteryState;
-import android.hardware.SensorManager;
-import android.hardware.lights.LightsManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -41,7 +39,6 @@ import android.os.InputEventInjectionSync;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Vibrator;
-import android.os.VibratorManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.InputDevice;
@@ -1308,47 +1305,6 @@ public final class InputManager {
      */
     public Vibrator getInputDeviceVibrator(int deviceId, int vibratorId) {
         return new InputDeviceVibrator(deviceId, vibratorId);
-    }
-
-    /**
-     * Gets a vibrator manager service associated with an input device, always creates a new
-     * instance.
-     * @return The vibrator manager, never null.
-     * @hide
-     */
-    @NonNull
-    public VibratorManager getInputDeviceVibratorManager(int deviceId) {
-        return new InputDeviceVibratorManager(deviceId);
-    }
-
-    /**
-     * Gets a sensor manager service associated with an input device, always creates a new instance.
-     * @return The sensor manager, never null.
-     * @hide
-     */
-    @NonNull
-    public SensorManager getInputDeviceSensorManager(int deviceId) {
-        return mGlobal.getInputDeviceSensorManager(deviceId);
-    }
-
-    /**
-     * Gets a battery state object associated with an input device, assuming it has one.
-     * @return The battery, never null.
-     * @hide
-     */
-    @NonNull
-    public BatteryState getInputDeviceBatteryState(int deviceId, boolean hasBattery) {
-        return mGlobal.getInputDeviceBatteryState(deviceId, hasBattery);
-    }
-
-    /**
-     * Gets a lights manager associated with an input device, always creates a new instance.
-     * @return The lights manager, never null.
-     * @hide
-     */
-    @NonNull
-    public LightsManager getInputDeviceLightsManager(int deviceId) {
-        return new InputDeviceLightsManager(getContext(), deviceId);
     }
 
     /**

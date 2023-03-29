@@ -678,7 +678,8 @@ public class SplitPresenterTest {
                 .setShouldClearTop(false)
                 .build();
 
-        mPresenter.createNewSplitContainer(mTransaction, mActivity, secondaryActivity, rule);
+        mPresenter.createNewSplitContainer(mTransaction, mActivity, secondaryActivity, rule,
+                SPLIT_ATTRIBUTES);
 
         assertEquals(primaryTf, mController.getContainerWithActivity(mActivity));
         final TaskFragmentContainer secondaryTf = mController.getContainerWithActivity(

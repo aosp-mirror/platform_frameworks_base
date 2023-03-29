@@ -1276,7 +1276,15 @@ public class UserManagerService extends IUserManager.Stub {
         getDevicePolicyManagerInternal().broadcastIntentToManifestReceivers(
                 intent, parentHandle, /* requiresPermission= */ true);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
-        mContext.sendBroadcastAsUser(intent, parentHandle);
+        final Bundle options = new BroadcastOptions()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                // Both actions use single namespace because only the final state matters.
+                .setDeliveryGroupMatchingKey(
+                        Intent.ACTION_MANAGED_PROFILE_AVAILABLE /* namespace */,
+                        String.valueOf(profileHandle.getIdentifier()) /* key */)
+                .toBundle();
+        mContext.sendBroadcastAsUser(intent, parentHandle, /* receiverPermission= */ null, options);
     }
 
     @Override

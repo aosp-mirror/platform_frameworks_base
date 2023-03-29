@@ -80,7 +80,7 @@ public class ImeVisibilityStateComputerTest extends InputMethodManagerServiceTes
 
         final ImeTargetWindowState state = mComputer.getWindowStateOrNull(mWindowToken);
         assertThat(state).isNotNull();
-        assertThat(state.hasEdiorFocused()).isTrue();
+        assertThat(state.hasEditorFocused()).isTrue();
         assertThat(state.getSoftInputModeState()).isEqualTo(SOFT_INPUT_STATE_UNCHANGED);
         assertThat(state.isRequestedImeVisible()).isTrue();
 
@@ -95,7 +95,7 @@ public class ImeVisibilityStateComputerTest extends InputMethodManagerServiceTes
 
         final ImeTargetWindowState state = mComputer.getWindowStateOrNull(mWindowToken);
         assertThat(state).isNotNull();
-        assertThat(state.hasEdiorFocused()).isTrue();
+        assertThat(state.hasEditorFocused()).isTrue();
         assertThat(state.getSoftInputModeState()).isEqualTo(SOFT_INPUT_STATE_UNCHANGED);
         assertThat(state.isRequestedImeVisible()).isTrue();
 
@@ -113,7 +113,7 @@ public class ImeVisibilityStateComputerTest extends InputMethodManagerServiceTes
 
         final ImeTargetWindowState state = mComputer.getWindowStateOrNull(mWindowToken);
         assertThat(state).isNotNull();
-        assertThat(state.hasEdiorFocused()).isTrue();
+        assertThat(state.hasEditorFocused()).isTrue();
         assertThat(state.getSoftInputModeState()).isEqualTo(SOFT_INPUT_STATE_UNCHANGED);
         assertThat(state.isRequestedImeVisible()).isFalse();
 
@@ -131,7 +131,7 @@ public class ImeVisibilityStateComputerTest extends InputMethodManagerServiceTes
 
         final ImeTargetWindowState state = mComputer.getWindowStateOrNull(mWindowToken);
         assertThat(state).isNotNull();
-        assertThat(state.hasEdiorFocused()).isTrue();
+        assertThat(state.hasEditorFocused()).isTrue();
         assertThat(state.getSoftInputModeState()).isEqualTo(SOFT_INPUT_STATE_UNCHANGED);
         assertThat(state.isRequestedImeVisible()).isFalse();
 
@@ -149,7 +149,7 @@ public class ImeVisibilityStateComputerTest extends InputMethodManagerServiceTes
 
         final ImeTargetWindowState state = mComputer.getWindowStateOrNull(mWindowToken);
         assertThat(state).isNotNull();
-        assertThat(state.hasEdiorFocused()).isTrue();
+        assertThat(state.hasEditorFocused()).isTrue();
         assertThat(state.getSoftInputModeState()).isEqualTo(SOFT_INPUT_STATE_UNCHANGED);
         assertThat(state.isRequestedImeVisible()).isFalse();
     }
