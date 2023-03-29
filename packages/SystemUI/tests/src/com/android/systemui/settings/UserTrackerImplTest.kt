@@ -167,6 +167,7 @@ class UserTrackerImplTest : SysuiTestCase() {
 
         val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
         verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
+        captor.value.onBeforeUserSwitching(newID)
         captor.value.onUserSwitching(newID, userSwitchingReply)
         verify(userSwitchingReply).sendResult(any())
 
@@ -290,6 +291,7 @@ class UserTrackerImplTest : SysuiTestCase() {
 
         val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
         verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
+        captor.value.onBeforeUserSwitching(newID)
         captor.value.onUserSwitching(newID, userSwitchingReply)
         verify(userSwitchingReply).sendResult(any())
 
@@ -308,6 +310,7 @@ class UserTrackerImplTest : SysuiTestCase() {
 
         val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
         verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
+        captor.value.onBeforeUserSwitching(newID)
         captor.value.onUserSwitchComplete(newID)
 
         assertThat(callback.calledOnUserChanged).isEqualTo(1)
