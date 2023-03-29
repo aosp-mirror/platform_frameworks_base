@@ -22264,7 +22264,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES,
             MANAGE_DEVICE_POLICY_USERS,
             MANAGE_DEVICE_POLICY_SAFE_BOOT,
-            MANAGE_DEVICE_POLICY_TIME);
+            MANAGE_DEVICE_POLICY_TIME,
+            MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS);
     private static final List<String> PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE_PERMISSIONS =
             List.of(
                 MANAGE_DEVICE_POLICY_ACROSS_USERS,
@@ -22370,7 +22371,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_PACKAGE_STATE,
             MANAGE_DEVICE_POLICY_RESET_PASSWORD,
             MANAGE_DEVICE_POLICY_STATUS_BAR,
-            MANAGE_DEVICE_POLICY_APP_RESTRICTIONS);
+            MANAGE_DEVICE_POLICY_APP_RESTRICTIONS,
+            MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS);
     private static final List<String> PROFILE_OWNER_PERMISSIONS  = List.of(
             MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL,
             MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
@@ -22508,8 +22510,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_LOCALE,
                 MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL);
         CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_LOCATION,
-                MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL);
-        CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,
                 MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL);
         CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_MICROPHONE,
                 MANAGE_DEVICE_POLICY_ACROSS_USERS);
@@ -22665,6 +22665,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             hasPermissionOnTargetUser = hasPermission(CROSS_USER_PERMISSIONS.get(permission),
                     callerPackageName);
         }
+
         return hasPermissionOnOwnUser && hasPermissionOnTargetUser;
     }
 
@@ -22705,7 +22706,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         // Check the permission for the role-holder
         if (isCallerDevicePolicyManagementRoleHolder(caller)) {
-            return anyDpcHasPermission(permission, mContext.getUserId());
+            return anyDpcHasPermission(permission, caller.getUserId());
         }
         if (DELEGATE_SCOPES.containsKey(permission)) {
             return isCallerDelegate(caller, DELEGATE_SCOPES.get(permission));
