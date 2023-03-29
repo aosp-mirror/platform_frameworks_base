@@ -271,12 +271,6 @@ public class KeyguardPatternViewController
     }
 
     @Override
-    public void onResume(int reason) {
-        super.onResume(reason);
-        reset();
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
 
