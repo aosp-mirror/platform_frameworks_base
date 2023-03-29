@@ -738,6 +738,13 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         } else {
             verifyDetectorForVisualQueryDetectionLocked(sharedMemory);
         }
+        if (!verifyProcessSharingLocked()) {
+            Slog.w(TAG, "Sandboxed detection service not in shared isolated process");
+            throw new IllegalStateException("VisualQueryDetectionService or HotworDetectionService "
+                    + "not in a shared isolated process. Please make sure to set "
+                    + "android:allowSharedIsolatedProcess and android:isolatedProcess to be true "
+                    + "and android:externalService to be false in the manifest file");
+        }
 
         if (mHotwordDetectionConnection == null) {
             mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
@@ -931,6 +938,19 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         return (serviceInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0
                 && (serviceInfo.flags & ServiceInfo.FLAG_EXTERNAL_SERVICE) == 0;
     }
+    @GuardedBy("this")
+    boolean verifyProcessSharingLocked() {
+        // only check this if both VQDS and HDS are declared in the app
+        ServiceInfo hotwordInfo = getServiceInfoLocked(mHotwordDetectionComponentName, mUser);
+        ServiceInfo visualQueryInfo =
+                getServiceInfoLocked(mVisualQueryDetectionComponentName, mUser);
+        if (hotwordInfo == null || visualQueryInfo == null) {
+            return true;
+        }
+        return (hotwordInfo.flags & ServiceInfo.FLAG_ALLOW_SHARED_ISOLATED_PROCESS) != 0
+                && (visualQueryInfo.flags & ServiceInfo.FLAG_ALLOW_SHARED_ISOLATED_PROCESS) != 0;
+    }
+
 
     void forceRestartHotwordDetector() {
         if (mHotwordDetectionConnection == null) {
