@@ -211,8 +211,7 @@ public class UserControllerTest {
     @Test
     public void testStartUser_foreground() {
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
-        verify(mInjector.getWindowManager()).startFreezingScreen(anyInt(), anyInt());
-        verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
+        verify(mInjector, never()).dismissUserSwitchingDialog(any());
         verify(mInjector.getWindowManager(), times(1)).setSwitchingUser(anyBoolean());
         verify(mInjector.getWindowManager()).setSwitchingUser(true);
         verify(mInjector).clearAllLockedTasks(anyString());
@@ -224,7 +223,8 @@ public class UserControllerTest {
     public void testStartUser_background() {
         boolean started = mUserController.startUser(TEST_USER_ID, USER_START_MODE_BACKGROUND);
         assertWithMessage("startUser(%s, foreground=false)", TEST_USER_ID).that(started).isTrue();
-        verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
+        verify(mInjector, never()).showUserSwitchingDialog(
+                any(), any(), anyString(), anyString(), any());
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
         verify(mInjector, never()).clearAllLockedTasks(anyString());
         startBackgroundUserAssertions();
@@ -276,7 +276,8 @@ public class UserControllerTest {
         assertWithMessage("startUserOnDisplay(%s, %s)", TEST_USER_ID, 42).that(started).isTrue();
         verifyUserAssignedToDisplay(TEST_USER_ID, 42);
 
-        verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
+        verify(mInjector, never()).showUserSwitchingDialog(
+                any(), any(), anyString(), anyString(), any());
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
         verify(mInjector, never()).clearAllLockedTasks(anyString());
         startBackgroundUserAssertions();
@@ -288,8 +289,9 @@ public class UserControllerTest {
                 /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
 
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
-        verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
-        verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
+        verify(mInjector, never()).showUserSwitchingDialog(
+                any(), any(), anyString(), anyString(), any());
+        verify(mInjector, never()).dismissUserSwitchingDialog(any());
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
         startForegroundUserAssertions();
     }
@@ -310,7 +312,8 @@ public class UserControllerTest {
         // Make sure no intents have been fired for pre-created users.
         assertTrue(mInjector.mSentIntents.isEmpty());
 
-        verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
+        verify(mInjector, never()).showUserSwitchingDialog(
+                any(), any(), anyString(), anyString(), any());
         verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
         verify(mInjector, never()).clearAllLockedTasks(anyString());
 
@@ -442,7 +445,7 @@ public class UserControllerTest {
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
         verify(mInjector, times(0)).dismissKeyguard(any());
-        verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
+        verify(mInjector, times(1)).dismissUserSwitchingDialog(any());
         continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false);
         verifySystemUserVisibilityChangesNeverNotified();
     }
@@ -463,7 +466,7 @@ public class UserControllerTest {
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
         verify(mInjector, times(1)).dismissKeyguard(any());
-        verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
+        verify(mInjector, times(1)).dismissUserSwitchingDialog(any());
         continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false);
         verifySystemUserVisibilityChangesNeverNotified();
     }
@@ -483,7 +486,7 @@ public class UserControllerTest {
         mInjector.mHandler.clearAllRecordedMessages();
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
-        verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
+        verify(mInjector, never()).dismissUserSwitchingDialog(any());
         continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false);
     }
 
@@ -985,8 +988,7 @@ public class UserControllerTest {
         mInjector.mHandler.clearAllRecordedMessages();
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
-        verify(mInjector.getWindowManager(), times(expectedNumberOfCalls))
-                .stopFreezingScreen();
+        verify(mInjector, times(expectedNumberOfCalls)).dismissUserSwitchingDialog(any());
         continueUserSwitchAssertions(oldUserId, newUserId, expectOldUserStopping);
     }
 
@@ -1186,6 +1188,22 @@ public class UserControllerTest {
         @Override
         protected void dismissKeyguard(Runnable runnable) {
             runnable.run();
+        }
+
+        @Override
+        void showUserSwitchingDialog(UserInfo fromUser, UserInfo toUser,
+                String switchingFromSystemUserMessage, String switchingToSystemUserMessage,
+                Runnable onShown) {
+            if (onShown != null) {
+                onShown.run();
+            }
+        }
+
+        @Override
+        void dismissUserSwitchingDialog(Runnable onDismissed) {
+            if (onDismissed != null) {
+                onDismissed.run();
+            }
         }
 
         @Override
