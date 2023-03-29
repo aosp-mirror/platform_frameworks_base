@@ -2413,6 +2413,12 @@ class DatabaseHelper extends SQLiteOpenHelper {
             loadStringSetting(stmt, Settings.Global.AIRPLANE_MODE_RADIOS,
                     R.string.def_airplane_mode_radios);
 
+            loadStringSetting(stmt, Global.SATELLITE_MODE_RADIOS,
+                    R.string.def_satellite_mode_radios);
+
+            loadIntegerSetting(stmt, Global.SATELLITE_MODE_ENABLED,
+                    R.integer.def_satellite_mode_enabled);
+
             loadStringSetting(stmt, Settings.Global.AIRPLANE_MODE_TOGGLEABLE_RADIOS,
                     R.string.airplane_mode_toggleable_radios);
 
