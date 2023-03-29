@@ -508,6 +508,7 @@ final class IInputMethodManagerGlobalInvoker {
     @AnyThread
     static void prepareStylusHandwritingDelegation(
             @NonNull IInputMethodClient client,
+            @UserIdInt int userId,
             @NonNull String delegatePackageName,
             @NonNull String delegatorPackageName) {
         final IInputMethodManager service = getService();
@@ -516,7 +517,7 @@ final class IInputMethodManagerGlobalInvoker {
         }
         try {
             service.prepareStylusHandwritingDelegation(
-                    client, delegatePackageName, delegatorPackageName);
+                    client, userId, delegatePackageName, delegatorPackageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -525,6 +526,7 @@ final class IInputMethodManagerGlobalInvoker {
     @AnyThread
     static boolean acceptStylusHandwritingDelegation(
             @NonNull IInputMethodClient client,
+            @UserIdInt int userId,
             @NonNull String delegatePackageName,
             @NonNull String delegatorPackageName) {
         final IInputMethodManager service = getService();
@@ -533,7 +535,7 @@ final class IInputMethodManagerGlobalInvoker {
         }
         try {
             return service.acceptStylusHandwritingDelegation(
-                    client, delegatePackageName, delegatorPackageName);
+                    client, userId, delegatePackageName, delegatorPackageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
