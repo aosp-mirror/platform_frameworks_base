@@ -800,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ஆப்ஸின் அம்சங்கள் குறித்த தகவல்களைப் பார்ப்பதற்கான அனுமதியை ஹோல்டருக்கு வழங்கும்."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"அதிகளவிலான சாம்பிளிங் ரேட்டில் சென்சார் தரவை அணுகுதல்"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 ஹெர்ட்ஸ்க்கும் அதிகமான வீதத்தில் சென்சார் தரவை மாதிரியாக்க ஆப்ஸை அனுமதிக்கும்"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"கடவுச்சொல் விதிகளை அமைக்கவும்"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"திரைப் பூட்டின் கடவுச்சொற்கள் மற்றும் பின்களில் அனுமதிக்கப்படும் நீளத்தையும் எழுத்துக்குறிகளையும் கட்டுப்படுத்தும்."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"திரையை அன்லாக் செய்வதற்கான முயற்சிகளைக் கண்காணி"</string>
@@ -2324,12 +2328,9 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"உள்ளடக்கத்தைக் காட்டுவதற்கு இரண்டு டிஸ்ப்ளேக்களையும் <xliff:g id="APP_NAME">%1$s</xliff:g> பயன்படுத்துகிறது"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"சாதனம் மிகவும் சூடாக உள்ளது"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"உங்கள் மொபைல் மிகவும் சூடாக இருப்பதால் இரட்டைத் திரை அம்சத்தைப் பயன்படுத்த முடியாது"</string>
-    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
-    <skip />
-    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
-    <skip />
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen அம்சத்தைப் பயன்படுத்த முடியாது"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"பேட்டரி சேமிப்பான் இயக்கத்தில் இருப்பதால் Dual Screen அம்சத்தைப் பயன்படுத்த முடியாது. இதை நீங்கள் அமைப்புகளில் முடக்கலாம்."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"அமைப்புகளைத் திற"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"முடக்கு"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> சாதனம் உள்ளமைக்கப்பட்டது"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"கீபோர்டு தளவமைப்பு <xliff:g id="LAYOUT_1">%s</xliff:g> மொழியில் அமைக்கப்பட்டது. மாற்ற தட்டவும்."</string>
