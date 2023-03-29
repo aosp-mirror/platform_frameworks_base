@@ -32,13 +32,17 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"크기 조절"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"숨기기"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"숨기기 취소"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"앱이 분할 화면에서 작동하지 않을 수 있습니다."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"앱이 화면 분할을 지원하지 않습니다."</string>
+    <!-- no translation found for dock_forced_resizable (7429086980048964687) -->
+    <skip />
+    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (2733543750291266047) -->
+    <skip />
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"이 앱은 창 1개에서만 열 수 있습니다."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"앱이 보조 디스플레이에서 작동하지 않을 수도 있습니다."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"앱이 보조 디스플레이에서의 실행을 지원하지 않습니다."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"화면 분할기"</string>
-    <string name="divider_title" msgid="5482989479865361192">"화면 분할기"</string>
+    <!-- no translation found for accessibility_divider (6407584574218956849) -->
+    <skip />
+    <!-- no translation found for divider_title (1963391955593749442) -->
+    <skip />
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"왼쪽 화면 전체화면"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"왼쪽 화면 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"왼쪽 화면 50%"</string>
@@ -85,7 +89,8 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"해결되지 않았나요?\n되돌리려면 탭하세요."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"카메라에 문제가 없나요? 닫으려면 탭하세요."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"더 많은 정보를 보고 더 많은 작업을 처리하세요"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"화면 분할을 사용하려면 다른 앱을 드래그해 가져옵니다."</string>
+    <!-- no translation found for letterbox_education_split_screen_text (449233070804658627) -->
+    <skip />
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"앱 위치를 조정하려면 앱 외부를 두 번 탭합니다."</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"확인"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"추가 정보는 펼쳐서 확인하세요."</string>
@@ -94,6 +99,8 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"취소"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"다시 시작"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"다시 표시 안함"</string>
+    <!-- no translation found for letterbox_reachability_reposition_text (4507890186297500893) -->
+    <skip />
     <string name="maximize_button_text" msgid="1650859196290301963">"최대화"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"최소화"</string>
     <string name="close_button_text" msgid="2913281996024033299">"닫기"</string>
