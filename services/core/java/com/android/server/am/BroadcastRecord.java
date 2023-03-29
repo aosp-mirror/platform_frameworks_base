@@ -1041,9 +1041,7 @@ final class BroadcastRecord extends Binder {
             if (label == null) {
                 label = intent.toString();
             }
-            mCachedToString = "BroadcastRecord{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " u" + userId + " " + label + "}";
+            mCachedToString = "BroadcastRecord{" + toShortString() + "}";
         }
         return mCachedToString;
     }
@@ -1055,7 +1053,7 @@ final class BroadcastRecord extends Binder {
                 label = intent.toString();
             }
             mCachedToShortString = Integer.toHexString(System.identityHashCode(this))
-                    + ":" + label + "/u" + userId;
+                    + " " + label + "/u" + userId;
         }
         return mCachedToShortString;
     }
