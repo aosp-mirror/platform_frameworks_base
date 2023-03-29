@@ -38,6 +38,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,9 +50,14 @@ import java.util.concurrent.Executor;
  * This class is the library used by consumers of Shared Connectivity data to bind to the service,
  * receive callbacks from, and send user actions to the service.
  *
+ * A client must register at least one callback so that the manager will bind to the service. Once
+ * all callbacks are unregistered, the manager will unbind from the service. When the client no
+ * longer needs Shared Connectivity data, the client must unregister.
+ *
  * The methods {@link #connectHotspotNetwork}, {@link #disconnectHotspotNetwork},
  * {@link #connectKnownNetwork} and {@link #forgetKnownNetwork} are not valid and will return false
- * if not called between {@link SharedConnectivityClientCallback#onServiceConnected()}
+ * and getter methods will fail and return null if not called between
+ * {@link SharedConnectivityClientCallback#onServiceConnected()}
  * and {@link SharedConnectivityClientCallback#onServiceDisconnected()} or if
  * {@link SharedConnectivityClientCallback#onRegisterCallbackFailed} was called.
  *
@@ -139,18 +145,21 @@ public class SharedConnectivityManager {
     }
 
     private ISharedConnectivityService mService;
+    @GuardedBy("mProxyDataLock")
     private final Map<SharedConnectivityClientCallback, SharedConnectivityCallbackProxy>
             mProxyMap = new HashMap<>();
+    @GuardedBy("mProxyDataLock")
     private final Map<SharedConnectivityClientCallback, SharedConnectivityCallbackProxy>
             mCallbackProxyCache = new HashMap<>();
-    // Used for testing
-    private final ServiceConnection mServiceConnection;
+    // Makes sure mProxyMap and mCallbackProxyCache are locked together when one of them is used.
+    private final Object mProxyDataLock = new Object();
+    private final Context mContext;
+    private final String mServicePackageName;
+    private final String mIntentAction;
+    private ServiceConnection mServiceConnection;
 
     /**
      * Creates a new instance of {@link SharedConnectivityManager}.
-     *
-     * Automatically binds to implementation of {@link SharedConnectivityService} specified in
-     * the device overlay.
      *
      * @return An instance of {@link SharedConnectivityManager} or null if the shared connectivity
      * service is not found.
@@ -185,12 +194,18 @@ public class SharedConnectivityManager {
 
     private SharedConnectivityManager(@NonNull Context context, String servicePackageName,
             String serviceIntentAction) {
+        mContext = context;
+        mServicePackageName = servicePackageName;
+        mIntentAction = serviceIntentAction;
+    }
+
+    private void bind() {
         mServiceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 mService = ISharedConnectivityService.Stub.asInterface(service);
-                if (!mCallbackProxyCache.isEmpty()) {
-                    synchronized (mCallbackProxyCache) {
+                synchronized (mProxyDataLock) {
+                    if (!mCallbackProxyCache.isEmpty()) {
                         mCallbackProxyCache.keySet().forEach(callback ->
                                 registerCallbackInternal(
                                         callback, mCallbackProxyCache.get(callback)));
@@ -203,15 +218,13 @@ public class SharedConnectivityManager {
             public void onServiceDisconnected(ComponentName name) {
                 if (DEBUG) Log.i(TAG, "onServiceDisconnected");
                 mService = null;
-                if (!mCallbackProxyCache.isEmpty()) {
-                    synchronized (mCallbackProxyCache) {
+                synchronized (mProxyDataLock) {
+                    if (!mCallbackProxyCache.isEmpty()) {
                         mCallbackProxyCache.keySet().forEach(
                                 SharedConnectivityClientCallback::onServiceDisconnected);
                         mCallbackProxyCache.clear();
                     }
-                }
-                if (!mProxyMap.isEmpty()) {
-                    synchronized (mProxyMap) {
+                    if (!mProxyMap.isEmpty()) {
                         mProxyMap.keySet().forEach(
                                 SharedConnectivityClientCallback::onServiceDisconnected);
                         mProxyMap.clear();
@@ -220,8 +233,8 @@ public class SharedConnectivityManager {
             }
         };
 
-        context.bindService(
-                new Intent().setPackage(servicePackageName).setAction(serviceIntentAction),
+        mContext.bindService(
+                new Intent().setPackage(mServicePackageName).setAction(mIntentAction),
                 mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -229,7 +242,7 @@ public class SharedConnectivityManager {
             SharedConnectivityCallbackProxy proxy) {
         try {
             mService.registerCallback(proxy);
-            synchronized (mProxyMap) {
+            synchronized (mProxyDataLock) {
                 mProxyMap.put(callback, proxy);
             }
             callback.onServiceConnected();
@@ -256,10 +269,19 @@ public class SharedConnectivityManager {
         return mServiceConnection;
     }
 
+    private void unbind() {
+        if (mServiceConnection != null) {
+            mContext.unbindService(mServiceConnection);
+            mServiceConnection = null;
+        }
+    }
+
     /**
      * Registers a callback for receiving updates to the list of Hotspot Networks, Known Networks,
      * shared connectivity settings state, hotspot network connection status and known network
      * connection status.
+     * Automatically binds to implementation of {@link SharedConnectivityService} specified in
+     * the device overlay when the first callback is registered.
      * The {@link SharedConnectivityClientCallback#onRegisterCallbackFailed} will be called if the
      * registration failed.
      *
@@ -284,8 +306,15 @@ public class SharedConnectivityManager {
         SharedConnectivityCallbackProxy proxy =
                 new SharedConnectivityCallbackProxy(executor, callback);
         if (mService == null) {
-            synchronized (mCallbackProxyCache) {
+            boolean shouldBind;
+            synchronized (mProxyDataLock) {
+                // Size can be 1 in different cases of register/unregister sequences. If size is 0
+                // Bind never happened or unbind was called.
+                shouldBind = mCallbackProxyCache.size() == 0;
                 mCallbackProxyCache.put(callback, proxy);
+            }
+            if (shouldBind) {
+                bind();
             }
             return;
         }
@@ -294,6 +323,7 @@ public class SharedConnectivityManager {
 
     /**
      * Unregisters a callback.
+     * Unbinds from {@link SharedConnectivityService} when no more callbacks are registered.
      *
      * @return Returns true if the callback was successfully unregistered, false otherwise.
      */
@@ -309,16 +339,27 @@ public class SharedConnectivityManager {
         }
 
         if (mService == null) {
-            synchronized (mCallbackProxyCache) {
+            boolean shouldUnbind;
+            synchronized (mProxyDataLock) {
                 mCallbackProxyCache.remove(callback);
+                // Connection was never established, so all registered callbacks are in the cache.
+                shouldUnbind = mCallbackProxyCache.isEmpty();
+            }
+            if (shouldUnbind) {
+                unbind();
             }
             return true;
         }
 
         try {
-            mService.unregisterCallback(mProxyMap.get(callback));
-            synchronized (mProxyMap) {
+            boolean shouldUnbind;
+            synchronized (mProxyDataLock) {
+                mService.unregisterCallback(mProxyMap.get(callback));
                 mProxyMap.remove(callback);
+                shouldUnbind = mProxyMap.isEmpty();
+            }
+            if (shouldUnbind) {
+                unbind();
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Exception in unregisterCallback", e);
