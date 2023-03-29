@@ -27,7 +27,6 @@ import android.content.IntentFilter;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewRootImpl;
@@ -61,7 +60,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     private Delegate mDelegate;
     private SurfaceControl mLeash;
     private TvPipMenuView mPipMenuView;
-    private View mPipBackgroundView;
+    private TvPipBackgroundView mPipBackgroundView;
     private boolean mMenuIsFocused;
 
     @TvPipMenuMode
@@ -178,10 +177,14 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     private void attachPipBackgroundView() {
-        mPipBackgroundView = LayoutInflater.from(mContext)
-                .inflate(R.layout.tv_pip_menu_background, null);
+        mPipBackgroundView = createTvPipBackgroundView();
         setUpViewSurfaceZOrder(mPipBackgroundView, -1);
         addPipMenuViewToSystemWindows(mPipBackgroundView, BACKGROUND_WINDOW_TITLE);
+    }
+
+    @VisibleForTesting
+    TvPipBackgroundView createTvPipBackgroundView() {
+        return new TvPipBackgroundView(mContext);
     }
 
     private void setUpViewSurfaceZOrder(View v, int zOrderRelativeToPip) {
@@ -415,10 +418,11 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     private void updateUiOnNewMenuModeRequest(boolean resetMenu) {
-        if (mPipMenuView == null) return;
+        if (mPipMenuView == null || mPipBackgroundView == null) return;
 
         mPipMenuView.setPipGravity(mTvPipBoundsState.getTvPipGravity());
         mPipMenuView.transitionToMenuMode(mCurrentMenuMode, resetMenu);
+        mPipBackgroundView.transitionToMenuMode(mCurrentMenuMode);
         grantPipMenuFocus(mCurrentMenuMode != MODE_NO_MENU);
     }
 
