@@ -168,7 +168,8 @@ public final class CredentialProviderInfoFactory {
             Slog.w(TAG, "Context is null in isSystemProviderWithValidPermission");
             return false;
         }
-        return PermissionUtils.hasPermission(context, serviceInfo.packageName,
+        return PermissionUtils.isSystemApp(context, serviceInfo.packageName)
+                && PermissionUtils.hasPermission(context, serviceInfo.packageName,
                 Manifest.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE);
     }
 
