@@ -69,8 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"ዩኤስቢ አንቃ"</string>
     <string name="learn_more" msgid="4690632085667273811">"የበለጠ ለመረዳት"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ቅጽበታዊ ገጽ እይታ"</string>
-    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
-    <skip />
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"መክፈትን አራዝም ተሰናክሏል"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ምስል ተልኳል"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ቅጽበታዊ ገጽ እይታ በማስቀመጥ ላይ..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ቅጽበታዊ ገጽ እይታን ወደ የስራ መገለጫ በማስቀመጥ ላይ…"</string>
@@ -833,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"የማጉላት ማብሪያ/ማጥፊያ"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ሙሉ ገጽ እይታን ያጉሉ"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"የማያ ገጹን ክፍል አጉላ"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ማብሪያ/ማጥፊያ"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"የማጉያ ቅንብሮችን ክፈት"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"መጠን ለመቀየር ጠርዙን ይዘው ይጎትቱ"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"ሰያፍ ሽብለላን ፍቀድ"</string>
@@ -850,6 +848,8 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"መካከለኛ"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"ትንሽ"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"ትልቅ"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"ተከናውኗል"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"አርትዕ"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"የማጉያ መስኮት ቅንብሮች"</string>

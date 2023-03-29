@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"മാഗ്നിഫിക്കേഷൻ മോഡ് മാറുക"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"സ്ക്രീൻ പൂർണ്ണമായും മാഗ്നിഫൈ ചെയ്യുക"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"സ്‌ക്രീനിന്റെ ഭാഗം മാഗ്നിഫൈ ചെയ്യുക"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"മാറുക"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"മാഗ്നിഫിക്കേഷൻ ക്രമീകരണം തുറക്കുക"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"വലുപ്പം മാറ്റാൻ മൂല വലിച്ചിടുക"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"ഡയഗണൽ സ്‌ക്രോളിംഗ് അനുവദിക്കുക"</string>
@@ -849,6 +848,8 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"ഇടത്തരം"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"ചെറുത്"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"വലുത്"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"പൂർത്തിയായി"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"മാഗ്നിഫയർ വിൻഡോ ക്രമീകരണം"</string>

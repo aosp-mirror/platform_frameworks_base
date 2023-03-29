@@ -816,7 +816,7 @@
     <string name="privacy_type_location" msgid="7991481648444066703">"जगह"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"माइक्रोफ़ोन"</string>
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"स्क्रीन रिकॉर्डिंग"</string>
-    <string name="music_controls_no_title" msgid="4166497066552290938">"कोई शीर्षक नहीं"</string>
+    <string name="music_controls_no_title" msgid="4166497066552290938">"कोई टाइटल नहीं"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टैंडबाई"</string>
     <string name="font_scaling_dialog_title" msgid="6273107303850248375">"फ़ॉन्ट का साइज़"</string>
     <string name="font_scaling_smaller" msgid="1012032217622008232">"छोटा करें"</string>
@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"ज़ूम करने की सुविधा वाला स्विच"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"फ़ुल स्क्रीन को ज़ूम करें"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रीन के किसी हिस्से को ज़ूम करें"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"स्विच"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"ज़ूम करने की सुविधा वाली सेटिंग खोलें"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"साइज़ बदलने के लिए, कोने को खींचें और छोड़ें"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"तिरछी दिशा में स्क्रोल करने की अनुमति दें"</string>
@@ -849,6 +848,8 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"मध्यम"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"छोटा"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"बड़ा"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"हो गया"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"बदलाव करें"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"ज़ूम करने की सुविधा वाली विंडो से जुड़ी सेटिंग"</string>
