@@ -463,10 +463,10 @@ class AssetManager2 {
       // Marks what kind of override this step was.
       Type type;
 
+      ApkAssetsCookie cookie = kInvalidCookie;
+
       // Built name of configuration for this step.
       String8 config_name;
-
-      ApkAssetsCookie cookie = kInvalidCookie;
     };
 
     // Last resolved resource ID.
