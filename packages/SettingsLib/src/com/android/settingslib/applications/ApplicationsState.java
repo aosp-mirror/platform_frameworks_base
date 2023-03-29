@@ -483,7 +483,10 @@ public class ApplicationsState {
     public AppEntry getEntry(String packageName, int userId) {
         if (DEBUG_LOCKING) Log.v(TAG, "getEntry about to acquire lock...");
         synchronized (mEntriesMap) {
-            AppEntry entry = mEntriesMap.get(userId).get(packageName);
+            AppEntry entry = null;
+            if (mEntriesMap.contains(userId)) {
+                entry = mEntriesMap.get(userId).get(packageName);
+            }
             if (entry == null) {
                 ApplicationInfo info = getAppInfoLocked(packageName, userId);
                 if (info == null) {
