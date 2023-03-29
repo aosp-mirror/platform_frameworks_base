@@ -18,19 +18,17 @@
 
 //#define LOG_NDEBUG 0
 
-#include <nativehelper/JNIHelp.h>
-
-#include <inttypes.h>
-
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/Log.h>
 #include <gui/DisplayEventDispatcher.h>
+#include <inttypes.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
 #include <utils/Log.h>
 #include <utils/Looper.h>
 #include <utils/threads.h>
+
 #include "android_os_MessageQueue.h"
-
-#include <nativehelper/ScopedLocalRef.h>
-
 #include "core_jni_helpers.h"
 
 namespace android {
@@ -133,6 +131,12 @@ static jobject createJavaVsyncEventData(JNIEnv* env, VsyncEventData vsyncEventDa
                                                   gDisplayEventReceiverClassInfo
                                                           .frameTimelineClassInfo.clazz,
                                                   /*initial element*/ NULL));
+    if (!frameTimelineObjs.get() || env->ExceptionCheck()) {
+        ALOGW("%s: Failed to create FrameTimeline array", __func__);
+        LOGW_EX(env);
+        env->ExceptionClear();
+        return NULL;
+    }
     for (int i = 0; i < VsyncEventData::kFrameTimelinesLength; i++) {
         VsyncEventData::FrameTimeline frameTimeline = vsyncEventData.frameTimelines[i];
         ScopedLocalRef<jobject>
@@ -144,6 +148,12 @@ static jobject createJavaVsyncEventData(JNIEnv* env, VsyncEventData vsyncEventDa
                                                 frameTimeline.vsyncId,
                                                 frameTimeline.expectedPresentationTime,
                                                 frameTimeline.deadlineTimestamp));
+        if (!frameTimelineObj.get() || env->ExceptionCheck()) {
+            ALOGW("%s: Failed to create FrameTimeline object", __func__);
+            LOGW_EX(env);
+            env->ExceptionClear();
+            return NULL;
+        }
         env->SetObjectArrayElement(frameTimelineObjs.get(), i, frameTimelineObj.get());
     }
     return env->NewObject(gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.clazz,
