@@ -27,7 +27,7 @@
     <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
     <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="untitled" msgid="3381766946944136678">"&lt;शीर्षक-रहित&gt;"</string>
+    <string name="untitled" msgid="3381766946944136678">"&lt;टाइटल-रहित&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(कोई फ़ोन नंबर नहीं)"</string>
     <string name="unknownName" msgid="7078697621109055330">"अज्ञात"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"वॉइसमेल"</string>
