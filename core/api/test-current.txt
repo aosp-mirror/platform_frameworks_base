@@ -3519,10 +3519,16 @@ package android.view.autofill {
   }
 
   public final class AutofillManager {
+    method public void clearAutofillRequestCallback();
+    method @RequiresPermission(android.Manifest.permission.PROVIDE_OWN_AUTOFILL_SUGGESTIONS) public void setAutofillRequestCallback(@NonNull java.util.concurrent.Executor, @NonNull android.view.autofill.AutofillRequestCallback);
     field public static final String ANY_HINT = "any";
     field public static final int FLAG_SMART_SUGGESTION_OFF = 0; // 0x0
     field public static final int FLAG_SMART_SUGGESTION_SYSTEM = 1; // 0x1
     field public static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 120000; // 0x1d4c0
+  }
+
+  public interface AutofillRequestCallback {
+    method public void onFillRequest(@Nullable android.view.inputmethod.InlineSuggestionsRequest, @NonNull android.os.CancellationSignal, @NonNull android.service.autofill.FillCallback);
   }
 
 }
@@ -3646,6 +3652,11 @@ package android.view.inputmethod {
 
   public final class InlineSuggestionInfo implements android.os.Parcelable {
     method @NonNull public static android.view.inputmethod.InlineSuggestionInfo newInlineSuggestionInfo(@NonNull android.widget.inline.InlinePresentationSpec, @NonNull String, @Nullable String[], @NonNull String, boolean);
+  }
+
+  public static final class InlineSuggestionsRequest.Builder {
+    method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setClientSupported(boolean);
+    method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setServiceSupported(boolean);
   }
 
   public final class InlineSuggestionsResponse implements android.os.Parcelable {
