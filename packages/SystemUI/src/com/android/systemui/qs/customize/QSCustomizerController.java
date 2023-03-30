@@ -175,7 +175,7 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
 
 
     private void reset() {
-        mTileAdapter.resetTileSpecs(QSHost.getDefaultSpecs(getContext()));
+        mTileAdapter.resetTileSpecs(QSHost.getDefaultSpecs(getContext().getResources()));
     }
 
     public boolean isCustomizing() {

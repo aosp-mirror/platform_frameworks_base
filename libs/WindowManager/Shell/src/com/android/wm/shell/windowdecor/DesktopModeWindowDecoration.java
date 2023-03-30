@@ -26,6 +26,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Choreographer;
@@ -38,6 +39,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.window.WindowContainerTransaction;
 
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -81,6 +83,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final int mHandleMenuCornerRadiusId = R.dimen.caption_menu_corner_radius;
     private PointF mHandleMenuPosition = new PointF();
 
+    private Drawable mAppIcon;
+    private CharSequence mAppName;
+
     DesktopModeWindowDecoration(
             Context context,
             DisplayController displayController,
@@ -95,6 +100,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mHandler = handler;
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
+
+        loadAppInfo();
     }
 
     @Override
@@ -185,7 +192,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 mWindowDecorViewHolder = new DesktopModeAppControlsWindowDecorationViewHolder(
                         mResult.mRootView,
                         mOnCaptionTouchListener,
-                        mOnCaptionButtonClickListener
+                        mOnCaptionButtonClickListener,
+                        mAppName,
+                        mAppIcon
                 );
             } else {
                 throw new IllegalArgumentException("Unexpected layout resource id");
@@ -243,22 +252,24 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
         final ImageView appIcon = menu.findViewById(R.id.application_icon);
         final TextView appName = menu.findViewById(R.id.application_name);
-        loadAppInfo(appName, appIcon);
+        appIcon.setImageDrawable(mAppIcon);
+        appName.setText(mAppName);
     }
 
     boolean isHandleMenuActive() {
         return mHandleMenu != null;
     }
 
-    private void loadAppInfo(TextView appNameTextView, ImageView appIconImageView) {
+    private void loadAppInfo() {
         String packageName = mTaskInfo.realActivity.getPackageName();
         PackageManager pm = mContext.getApplicationContext().getPackageManager();
         try {
-            // TODO(b/268363572): Use IconProvider or BaseIconCache to set drawable/name.
+            IconProvider provider = new IconProvider(mContext);
+            mAppIcon = provider.getIcon(pm.getActivityInfo(mTaskInfo.baseActivity,
+                    PackageManager.ComponentInfoFlags.of(0)));
             ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName,
                     PackageManager.ApplicationInfoFlags.of(0));
-            appNameTextView.setText(pm.getApplicationLabel(applicationInfo));
-            appIconImageView.setImageDrawable(pm.getApplicationIcon(applicationInfo));
+            mAppName = pm.getApplicationLabel(applicationInfo);
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Package not found: " + packageName, e);
         }

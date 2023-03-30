@@ -38,7 +38,6 @@ import android.service.credentials.CallingAppInfo;
 import android.service.credentials.PermissionUtils;
 import android.util.Log;
 
-import com.android.server.credentials.metrics.ApiName;
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 
 import java.util.ArrayList;
@@ -50,7 +49,7 @@ import java.util.stream.Collectors;
  * responses from providers, and the UX app, and updates the provider(S) state.
  */
 public class PrepareGetRequestSession extends RequestSession<GetCredentialRequest,
-        IGetCredentialCallback>
+        IGetCredentialCallback, GetCredentialResponse>
         implements ProviderSession.ProviderInternalCallback<GetCredentialResponse> {
     private static final String TAG = "GetRequestSession";
 
@@ -67,7 +66,7 @@ public class PrepareGetRequestSession extends RequestSession<GetCredentialReques
         int numTypes = (request.getCredentialOptions().stream()
                 .map(CredentialOption::getType).collect(
                         Collectors.toSet())).size(); // Dedupe type strings
-        setupInitialPhaseMetric(ApiName.GET_CREDENTIAL.getMetricCode(), numTypes);
+        mRequestSessionMetric.collectGetFlowInitialMetricInfo(numTypes);
         mPrepareGetCredentialCallback = prepareGetCredentialCallback;
     }
 
@@ -95,32 +94,45 @@ public class PrepareGetRequestSession extends RequestSession<GetCredentialReques
 
     @Override
     protected void launchUiWithProviderData(ArrayList<ProviderData> providerDataList) {
-        mChosenProviderFinalPhaseMetric.setUiCallStartTimeNanoseconds(System.nanoTime());
+        mRequestSessionMetric.collectUiCallStartTime(System.nanoTime());
         try {
             mClientCallback.onPendingIntent(mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newGetRequestInfo(
                             mRequestId, mClientRequest, mClientAppInfo.getPackageName()),
                     providerDataList));
         } catch (RemoteException e) {
-            mChosenProviderFinalPhaseMetric.setUiReturned(false);
+            mRequestSessionMetric.collectUiReturnedFinalPhase(/*uiReturned=*/ false);
             respondToClientWithErrorAndFinish(
                     GetCredentialException.TYPE_UNKNOWN, "Unable to instantiate selector");
         }
     }
 
     @Override
+    protected void invokeClientCallbackSuccess(GetCredentialResponse response)
+            throws RemoteException {
+        mClientCallback.onResponse(response);
+    }
+
+    @Override
+    protected void invokeClientCallbackError(String errorType, String errorMsg)
+            throws RemoteException {
+        mClientCallback.onError(errorType, errorMsg);
+    }
+
+    @Override
     public void onFinalResponseReceived(ComponentName componentName,
             @Nullable GetCredentialResponse response) {
-        mChosenProviderFinalPhaseMetric.setUiReturned(true);
-        mChosenProviderFinalPhaseMetric.setUiCallEndTimeNanoseconds(System.nanoTime());
         Log.i(TAG, "onFinalCredentialReceived from: " + componentName.flattenToString());
-        setChosenMetric(componentName);
+        mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
+        mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(mProviders.get(
+                componentName.flattenToString()).mProviderSessionMetric
+                .getCandidatePhasePerProviderMetric());
         if (response != null) {
-            mChosenProviderFinalPhaseMetric.setChosenProviderStatus(
+            mRequestSessionMetric.collectChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_SUCCESS.getMetricCode());
             respondToClientWithResponseAndFinish(response);
         } else {
-            mChosenProviderFinalPhaseMetric.setChosenProviderStatus(
+            mRequestSessionMetric.collectChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_FAILURE.getMetricCode());
             respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
                     "Invalid response from provider");
@@ -133,66 +145,6 @@ public class PrepareGetRequestSession extends RequestSession<GetCredentialReques
     public void onFinalErrorReceived(ComponentName componentName, String errorType,
             String message) {
         respondToClientWithErrorAndFinish(errorType, message);
-    }
-
-    private void respondToClientWithResponseAndFinish(GetCredentialResponse response) {
-        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
-            Log.i(TAG, "Request has already been completed. This is strange.");
-            return;
-        }
-        if (isSessionCancelled()) {
-//            TODO: properly log the new api
-//            logApiCall(ApiName.GET_CREDENTIAL, /* apiStatus */
-//                    ApiStatus.CLIENT_CANCELED);
-            finishSession(/*propagateCancellation=*/true);
-            return;
-        }
-        try {
-            mClientCallback.onResponse(response);
-//            TODO: properly log the new api
-//            logApiCall(ApiName.GET_CREDENTIAL, /* apiStatus */
-//                    ApiStatus.SUCCESS);
-        } catch (RemoteException e) {
-            Log.i(TAG, "Issue while responding to client with a response : " + e.getMessage());
-//            TODO: properly log the new api
-//            logApiCall(ApiName.GET_CREDENTIAL, /* apiStatus */
-//                    ApiStatus.FAILURE);
-        }
-        finishSession(/*propagateCancellation=*/false);
-    }
-
-    private void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
-        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
-            Log.i(TAG, "Request has already been completed. This is strange.");
-            return;
-        }
-        if (isSessionCancelled()) {
-//            TODO: properly log the new api
-//            logApiCall(ApiName.GET_CREDENTIAL, /* apiStatus */
-//                    ApiStatus.CLIENT_CANCELED);
-            finishSession(/*propagateCancellation=*/true);
-            return;
-        }
-
-        try {
-            mClientCallback.onError(errorType, errorMsg);
-        } catch (RemoteException e) {
-            Log.i(TAG, "Issue while responding to client with error : " + e.getMessage());
-        }
-        logFailureOrUserCancel(errorType);
-        finishSession(/*propagateCancellation=*/false);
-    }
-
-    private void logFailureOrUserCancel(String errorType) {
-        if (GetCredentialException.TYPE_USER_CANCELED.equals(errorType)) {
-//            TODO: properly log the new api
-//            logApiCall(ApiName.GET_CREDENTIAL,
-//                    /* apiStatus */ ApiStatus.USER_CANCELED);
-        } else {
-//            TODO: properly log the new api
-//            logApiCall(ApiName.GET_CREDENTIAL,
-//                    /* apiStatus */ ApiStatus.FAILURE);
-        }
     }
 
     @Override

@@ -18,15 +18,18 @@ package com.android.server.job.controllers;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED;
 
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.job.JobInfo;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
+import android.net.INetworkPolicyListener;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicyManager;
@@ -47,6 +50,7 @@ import android.util.Log;
 import android.util.Pools;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -98,13 +102,12 @@ public final class ConnectivityController extends RestrictingController implemen
             ~(ConnectivityManager.BLOCKED_REASON_APP_STANDBY
                     | ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER
                     | ConnectivityManager.BLOCKED_REASON_DOZE);
-    // TODO(261999509): allow bypassing data saver & user-restricted. However, when we allow a UI
-    //     job to run while data saver restricts the app, we must ensure that we don't run regular
-    //     jobs when we put a hole in the data saver wall for the UI job
     private static final int UNBYPASSABLE_UI_BLOCKED_REASONS =
             ~(ConnectivityManager.BLOCKED_REASON_APP_STANDBY
                     | ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER
-                    | ConnectivityManager.BLOCKED_REASON_DOZE);
+                    | ConnectivityManager.BLOCKED_REASON_DOZE
+                    | ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER
+                    | ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED);
     private static final int UNBYPASSABLE_FOREGROUND_BLOCKED_REASONS =
             ~(ConnectivityManager.BLOCKED_REASON_APP_STANDBY
                     | ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER
@@ -113,6 +116,7 @@ public final class ConnectivityController extends RestrictingController implemen
                     | ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED);
 
     private final ConnectivityManager mConnManager;
+    private final NetworkPolicyManager mNetPolicyManager;
     private final NetworkPolicyManagerInternal mNetPolicyManagerInternal;
     private final FlexibilityController mFlexibilityController;
 
@@ -241,6 +245,8 @@ public final class ConnectivityController extends RestrictingController implemen
      */
     private final List<UidStats> mSortedStats = new ArrayList<>();
     @GuardedBy("mLock")
+    private final SparseBooleanArray mBackgroundMeteredAllowed = new SparseBooleanArray();
+    @GuardedBy("mLock")
     private long mLastCallbackAdjustmentTimeElapsed;
     @GuardedBy("mLock")
     private final SparseArray<CellSignalStrengthCallback> mSignalStrengths = new SparseArray<>();
@@ -250,6 +256,8 @@ public final class ConnectivityController extends RestrictingController implemen
 
     private static final int MSG_ADJUST_CALLBACKS = 0;
     private static final int MSG_UPDATE_ALL_TRACKED_JOBS = 1;
+    private static final int MSG_DATA_SAVER_TOGGLED = 2;
+    private static final int MSG_UID_POLICIES_CHANGED = 3;
 
     private final Handler mHandler;
 
@@ -259,6 +267,7 @@ public final class ConnectivityController extends RestrictingController implemen
         mHandler = new CcHandler(AppSchedulingModuleThread.get().getLooper());
 
         mConnManager = mContext.getSystemService(ConnectivityManager.class);
+        mNetPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
         mNetPolicyManagerInternal = LocalServices.getService(NetworkPolicyManagerInternal.class);
         mFlexibilityController = flexibilityController;
 
@@ -266,6 +275,8 @@ public final class ConnectivityController extends RestrictingController implemen
         // network changes against the active network for each UID with jobs.
         final NetworkRequest request = new NetworkRequest.Builder().clearCapabilities().build();
         mConnManager.registerNetworkCallback(request, mNetworkCallback);
+
+        mNetPolicyManager.registerListener(mNetPolicyListener);
     }
 
     @GuardedBy("mLock")
@@ -530,6 +541,7 @@ public final class ConnectivityController extends RestrictingController implemen
             // All packages in the UID have been removed. It's safe to remove things based on
             // UID alone.
             mTrackedJobs.delete(uid);
+            mBackgroundMeteredAllowed.delete(uid);
             UidStats uidStats = mUidStats.removeReturnOld(uid);
             unregisterDefaultNetworkCallbackLocked(uid, sElapsedRealtimeClock.millis());
             mSortedStats.remove(uidStats);
@@ -547,6 +559,12 @@ public final class ConnectivityController extends RestrictingController implemen
                 unregisterDefaultNetworkCallbackLocked(uidStats.uid, nowElapsed);
                 mSortedStats.remove(uidStats);
                 mUidStats.removeAt(u);
+            }
+        }
+        for (int u = mBackgroundMeteredAllowed.size() - 1; u >= 0; --u) {
+            final int uid = mBackgroundMeteredAllowed.keyAt(u);
+            if (UserHandle.getUserId(uid) == userId) {
+                mBackgroundMeteredAllowed.removeAt(u);
             }
         }
         postAdjustCallbacks();
@@ -664,6 +682,88 @@ public final class ConnectivityController extends RestrictingController implemen
         }
 
         return false;
+    }
+
+    private boolean isMeteredAllowed(@NonNull JobStatus jobStatus,
+            @NonNull NetworkCapabilities networkCapabilities) {
+        // Network isn't metered. Usage is allowed. The rest of this method doesn't apply.
+        if (networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)
+                || networkCapabilities.hasCapability(NET_CAPABILITY_TEMPORARILY_NOT_METERED)) {
+            return true;
+        }
+
+        final int uid = jobStatus.getSourceUid();
+        final int procState = mService.getUidProcState(uid);
+        final int capabilities = mService.getUidCapabilities(uid);
+        // Jobs don't raise the proc state to anything better than IMPORTANT_FOREGROUND.
+        // If the app is in a better state, see if it has the capability to use the metered network.
+        final boolean currentStateAllows = procState != ActivityManager.PROCESS_STATE_UNKNOWN
+                && procState < ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+                && NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground(
+                        procState, capabilities);
+        if (DEBUG) {
+            Slog.d(TAG, "UID " + uid
+                    + " current state allows metered network=" + currentStateAllows
+                    + " procState=" + ActivityManager.procStateToString(procState)
+                    + " capabilities=" + ActivityManager.getCapabilitiesSummary(capabilities));
+        }
+        if (currentStateAllows) {
+            return true;
+        }
+
+        if ((jobStatus.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
+            final int expectedProcState = ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+            final int mergedCapabilities = capabilities
+                    | NetworkPolicyManager.getDefaultProcessNetworkCapabilities(expectedProcState);
+            final boolean wouldBeAllowed =
+                    NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground(
+                            expectedProcState, mergedCapabilities);
+            if (DEBUG) {
+                Slog.d(TAG, "UID " + uid
+                        + " willBeForeground flag allows metered network=" + wouldBeAllowed
+                        + " capabilities="
+                        + ActivityManager.getCapabilitiesSummary(mergedCapabilities));
+            }
+            if (wouldBeAllowed) {
+                return true;
+            }
+        }
+
+        if (jobStatus.shouldTreatAsUserInitiatedJob()) {
+            // Since the job is initiated by the user and will be visible to the user, it
+            // should be able to run on metered networks, similar to FGS.
+            // With user-initiated jobs, JobScheduler will request that the process
+            // run at IMPORTANT_FOREGROUND process state
+            // and get the USER_RESTRICTED_NETWORK process capability.
+            final int expectedProcState = ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            final int mergedCapabilities = capabilities
+                    | ActivityManager.PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK
+                    | NetworkPolicyManager.getDefaultProcessNetworkCapabilities(expectedProcState);
+            final boolean wouldBeAllowed =
+                    NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground(
+                            expectedProcState, mergedCapabilities);
+            if (DEBUG) {
+                Slog.d(TAG, "UID " + uid
+                        + " UI job state allows metered network=" + wouldBeAllowed
+                        + " capabilities=" + mergedCapabilities);
+            }
+            if (wouldBeAllowed) {
+                return true;
+            }
+        }
+
+        if (mBackgroundMeteredAllowed.indexOfKey(uid) >= 0) {
+            return mBackgroundMeteredAllowed.get(uid);
+        }
+
+        final boolean allowed =
+                mNetPolicyManager.getRestrictBackgroundStatus(uid)
+                        != ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED;
+        if (DEBUG) {
+            Slog.d(TAG, "UID " + uid + " allowed in data saver=" + allowed);
+        }
+        mBackgroundMeteredAllowed.put(uid, allowed);
+        return allowed;
     }
 
     /**
@@ -858,6 +958,12 @@ public final class ConnectivityController extends RestrictingController implemen
 
         // First, are we insane?
         if (isInsane(jobStatus, network, capabilities, constants)) return false;
+
+        // User-initiated jobs might make NetworkPolicyManager open up network access for
+        // the whole UID. If network access is opened up just because of UI jobs, we want
+        // to make sure that non-UI jobs don't run during that time,
+        // so make sure the job can make use of the metered network at this time.
+        if (!isMeteredAllowed(jobStatus, capabilities)) return false;
 
         // Second, is the network congested?
         if (isCongestionDelayed(jobStatus, network, capabilities, constants)) return false;
@@ -1138,9 +1244,10 @@ public final class ConnectivityController extends RestrictingController implemen
             // but it doesn't yet satisfy the requested constraints and the old network
             // is still available and satisfies the constraints. Don't change the network
             // given to the job for now and let it keep running. We will re-evaluate when
-            // the capabilities or connection state of the either network change.
+            // the capabilities or connection state of either network change.
             if (DEBUG) {
-                Slog.i(TAG, "Not reassigning network for running job " + jobStatus);
+                Slog.i(TAG, "Not reassigning network from " + jobStatus.network
+                        + " to " + network + " for running job " + jobStatus);
             }
             return false;
         }
@@ -1389,6 +1496,26 @@ public final class ConnectivityController extends RestrictingController implemen
         }
     };
 
+    private final INetworkPolicyListener mNetPolicyListener = new NetworkPolicyManager.Listener() {
+        @Override
+        public void onRestrictBackgroundChanged(boolean restrictBackground) {
+            if (DEBUG) {
+                Slog.v(TAG, "onRestrictBackgroundChanged: " + restrictBackground);
+            }
+            mHandler.obtainMessage(MSG_DATA_SAVER_TOGGLED).sendToTarget();
+        }
+
+        @Override
+        public void onUidPoliciesChanged(int uid, int uidPolicies) {
+            if (DEBUG) {
+                Slog.v(TAG, "onUidPoliciesChanged: " + uid);
+            }
+            mHandler.obtainMessage(MSG_UID_POLICIES_CHANGED,
+                    uid, mNetPolicyManager.getRestrictBackgroundStatus(uid))
+                    .sendToTarget();
+        }
+    };
+
     private class CcHandler extends Handler {
         CcHandler(Looper looper) {
             super(looper);
@@ -1408,6 +1535,27 @@ public final class ConnectivityController extends RestrictingController implemen
                         synchronized (mLock) {
                             final boolean allowThrottle = msg.arg1 == 1;
                             updateAllTrackedJobsLocked(allowThrottle);
+                        }
+                        break;
+
+                    case MSG_DATA_SAVER_TOGGLED:
+                        removeMessages(MSG_DATA_SAVER_TOGGLED);
+                        synchronized (mLock) {
+                            mBackgroundMeteredAllowed.clear();
+                            updateTrackedJobsLocked(-1, null);
+                        }
+                        break;
+
+                    case MSG_UID_POLICIES_CHANGED:
+                        final int uid = msg.arg1;
+                        final boolean newAllowed =
+                                msg.arg2 != ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED;
+                        synchronized (mLock) {
+                            final boolean oldAllowed = mBackgroundMeteredAllowed.get(uid);
+                            if (oldAllowed != newAllowed) {
+                                mBackgroundMeteredAllowed.put(uid, newAllowed);
+                                updateTrackedJobsLocked(uid, null);
+                            }
                         }
                         break;
                 }

@@ -5636,8 +5636,6 @@ class Task extends TaskFragment {
                 mWmService.mSyncEngine.queueSyncSet(
                         () -> mTransitionController.moveToCollecting(transition),
                         () -> {
-                            mTransitionController.requestStartTransition(transition, tr,
-                                    null /* remoteTransition */, null /* displayChange */);
                             // Need to check again since this happens later and the system might
                             // be in a different state.
                             if (!canMoveTaskToBack(tr)) {
@@ -5646,6 +5644,8 @@ class Task extends TaskFragment {
                                 transition.abort();
                                 return;
                             }
+                            mTransitionController.requestStartTransition(transition, tr,
+                                    null /* remoteTransition */, null /* displayChange */);
                             moveTaskToBackInner(tr);
                         });
             } else {

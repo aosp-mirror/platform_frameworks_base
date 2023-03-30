@@ -66,6 +66,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
 import android.view.autofill.Helper;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
@@ -3709,6 +3710,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return children;
     }
 
+    private AutofillManager getAutofillManager() {
+        return mContext.getSystemService(AutofillManager.class);
+    }
+
+    private boolean shouldIncludeAllChildrenViewWithAutofillTypeNotNone(AutofillManager afm) {
+        if (afm == null) return false;
+        return afm.shouldIncludeAllChildrenViewsWithAutofillTypeNotNoneInAssistStructure();
+    }
+
+    private boolean shouldIncludeAllChildrenViews(AutofillManager afm){
+        if (afm == null) return false;
+        return afm.shouldIncludeAllChildrenViewInAssistStructure();
+    }
+
     /** @hide */
     private void populateChildrenForAutofill(ArrayList<View> list, @AutofillFlags int flags) {
         final int childrenCount = mChildrenCount;
@@ -3718,6 +3733,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final ArrayList<View> preorderedList = buildOrderedChildList();
         final boolean customOrder = preorderedList == null
                 && isChildrenDrawingOrderEnabled();
+        final AutofillManager afm = getAutofillManager();
         for (int i = 0; i < childrenCount; i++) {
             final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
             final View child = (preorderedList == null)
@@ -3725,7 +3741,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if ((flags & AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0
                     || child.isImportantForAutofill()
                     || (child.isMatchingAutofillableHeuristics()
-                        && !child.isActivityDeniedForAutofillForUnimportantView())) {
+                        && !child.isActivityDeniedForAutofillForUnimportantView())
+                    || (shouldIncludeAllChildrenViewWithAutofillTypeNotNone(afm)
+                        && child.getAutofillType() != AUTOFILL_TYPE_NONE)
+                    || shouldIncludeAllChildrenViews(afm)){
                 list.add(child);
             } else if (child instanceof ViewGroup) {
                 ((ViewGroup) child).populateChildrenForAutofill(list, flags);

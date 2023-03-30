@@ -174,21 +174,26 @@ constructor(
 
         infoReference.set(info)
 
-        // TODO(b/266686199): We should handle when app not available. For now, we log.
-        val intent = createNoteTaskIntent(info)
         try {
+            // TODO(b/266686199): We should handle when app not available. For now, we log.
             logDebug { "onShowNoteTask - start: $info on user#${user.identifier}" }
             when (info.launchMode) {
                 is NoteTaskLaunchMode.AppBubble -> {
                     // TODO: provide app bubble icon
+                    val intent = createNoteTaskIntent(info)
                     bubbles.showOrHideAppBubble(intent, user, null /* icon */)
                     // App bubble logging happens on `onBubbleExpandChanged`.
                     logDebug { "onShowNoteTask - opened as app bubble: $info" }
                 }
                 is NoteTaskLaunchMode.Activity -> {
                     if (activityManager.isInForeground(info.packageName)) {
-                        logDebug { "onShowNoteTask - already opened as activity: $info" }
+                        // Force note task into background by calling home.
+                        val intent = createHomeIntent()
+                        context.startActivityAsUser(intent, user)
+                        eventLogger.logNoteTaskClosed(info)
+                        logDebug { "onShowNoteTask - closed as activity: $info" }
                     } else {
+                        val intent = createNoteTaskIntent(info)
                         context.startActivityAsUser(intent, user)
                         eventLogger.logNoteTaskOpened(info)
                         logDebug { "onShowNoteTask - opened as activity: $info" }
@@ -199,7 +204,7 @@ constructor(
         } catch (e: ActivityNotFoundException) {
             logDebug { "onShowNoteTask - failed: $info" }
         }
-        logDebug { "onShowNoteTask - compoleted: $info" }
+        logDebug { "onShowNoteTask - completed: $info" }
     }
 
     /**
@@ -306,3 +311,10 @@ private fun createNoteTaskIntent(info: NoteTaskInfo): Intent =
 private inline fun Any.logDebug(message: () -> String) {
     if (Build.IS_DEBUGGABLE) Log.d(this::class.java.simpleName.orEmpty(), message())
 }
+
+/** Creates an [Intent] which forces the current app to background by calling home. */
+private fun createHomeIntent(): Intent =
+    Intent(Intent.ACTION_MAIN).apply {
+        addCategory(Intent.CATEGORY_HOME)
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    }

@@ -40,13 +40,12 @@ public interface QSHost extends PanelInteractor {
 
     /**
      * Returns the default QS tiles for the context.
-     * @param context the context to obtain the resources from
+     * @param res the resources to use to determine the default tiles
      * @return a list of specs of the default tiles
      */
-    static List<String> getDefaultSpecs(Context context) {
+    static List<String> getDefaultSpecs(Resources res) {
         final ArrayList<String> tiles = new ArrayList();
 
-        final Resources res = context.getResources();
         final String defaultTileList = res.getString(R.string.quick_settings_tiles_default);
 
         tiles.addAll(Arrays.asList(defaultTileList.split(",")));

@@ -256,6 +256,7 @@ public class ActivityManager {
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
     public interface UidFrozenStateChangedCallback {
         /**
          * Indicates that the UID was frozen.
@@ -263,6 +264,7 @@ public class ActivityManager {
          * @hide
          */
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @TestApi
         int UID_FROZEN_STATE_FROZEN = 1;
 
         /**
@@ -271,6 +273,7 @@ public class ActivityManager {
          * @hide
          */
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @TestApi
         int UID_FROZEN_STATE_UNFROZEN = 2;
 
         /**
@@ -296,6 +299,7 @@ public class ActivityManager {
          * @hide
          */
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @TestApi
         void onUidFrozenStateChanged(@NonNull int[] uids,
                 @NonNull @UidFrozenState int[] frozenStates);
     }
@@ -315,6 +319,7 @@ public class ActivityManager {
      */
     @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
     public void registerUidFrozenStateChangedCallback(
             @NonNull Executor executor,
             @NonNull UidFrozenStateChangedCallback callback) {
@@ -346,6 +351,7 @@ public class ActivityManager {
      */
     @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
     public void unregisterUidFrozenStateChangedCallback(
             @NonNull UidFrozenStateChangedCallback callback) {
         Preconditions.checkNotNull(callback, "callback cannot be null");
@@ -359,6 +365,30 @@ public class ActivityManager {
                     throw e.rethrowFromSystemServer();
                 }
             }
+        }
+    }
+
+    /**
+     * Query the frozen state of a list of UIDs.
+     *
+     * @param uids the array of UIDs which the client would like to know the frozen state of.
+     * @return An array containing the frozen state for each requested UID, by index. Will be set
+     *               to {@link UidFrozenStateChangedCallback#UID_FROZEN_STATE_FROZEN}
+     *               if the UID is frozen. If the UID is not frozen or not found,
+     *               {@link UidFrozenStateChangedCallback#UID_FROZEN_STATE_UNFROZEN}
+     *               will be set.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
+    public @NonNull @UidFrozenStateChangedCallback.UidFrozenState
+            int[] getUidFrozenState(@NonNull int[] uids) {
+        try {
+            return getService().getUidFrozenState(uids);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -764,6 +794,7 @@ public class ActivityManager {
             PROCESS_CAPABILITY_FOREGROUND_MICROPHONE,
             PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK,
             PROCESS_CAPABILITY_BFSL,
+            PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProcessCapability {}
@@ -885,14 +916,6 @@ public class ActivityManager {
     /** @hide Process can access network despite any power saving restrictions */
     @TestApi
     public static final int PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK = 1 << 3;
-    /**
-     * @hide
-     * @deprecated Use {@link #PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK} instead.
-     */
-    @TestApi
-    @Deprecated
-    public static final int PROCESS_CAPABILITY_NETWORK =
-            PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
 
     /**
      * Flag used to indicate whether an app is allowed to start a foreground service from the
@@ -914,6 +937,13 @@ public class ActivityManager {
     public static final int PROCESS_CAPABILITY_BFSL = 1 << 4;
 
     /**
+     * @hide
+     * Process can access network at a high enough proc state despite any user restrictions.
+     */
+    @TestApi
+    public static final int PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK = 1 << 5;
+
+    /**
      * @hide all capabilities, the ORing of all flags in {@link ProcessCapability}.
      *
      * Don't expose it as TestApi -- we may add new capabilities any time, which could
@@ -923,7 +953,8 @@ public class ActivityManager {
             | PROCESS_CAPABILITY_FOREGROUND_CAMERA
             | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
             | PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK
-            | PROCESS_CAPABILITY_BFSL;
+            | PROCESS_CAPABILITY_BFSL
+            | PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
 
     /**
      * All implicit capabilities. There are capabilities that process automatically have.
@@ -943,6 +974,7 @@ public class ActivityManager {
         pw.print((caps & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0 ? 'M' : '-');
         pw.print((caps & PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK) != 0 ? 'N' : '-');
         pw.print((caps & PROCESS_CAPABILITY_BFSL) != 0 ? 'F' : '-');
+        pw.print((caps & PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK) != 0 ? 'U' : '-');
     }
 
     /** @hide */
@@ -952,6 +984,7 @@ public class ActivityManager {
         sb.append((caps & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0 ? 'M' : '-');
         sb.append((caps & PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK) != 0 ? 'N' : '-');
         sb.append((caps & PROCESS_CAPABILITY_BFSL) != 0 ? 'F' : '-');
+        sb.append((caps & PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK) != 0 ? 'U' : '-');
     }
 
     /**

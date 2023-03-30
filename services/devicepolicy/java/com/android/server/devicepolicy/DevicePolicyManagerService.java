@@ -10617,38 +10617,59 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * - SYSTEM_UID
      * - adb unless hasIncompatibleAccountsOrNonAdb is true.
      */
+    @GuardedBy("getLockObject()")
     private void enforceCanSetProfileOwnerLocked(
-            CallerIdentity caller, @Nullable ComponentName owner, int userHandle,
+            CallerIdentity caller, @Nullable ComponentName owner, @UserIdInt int userId,
             boolean hasIncompatibleAccountsOrNonAdb) {
-        UserInfo info = getUserInfo(userHandle);
+        UserInfo info = getUserInfo(userId);
         if (info == null) {
             // User doesn't exist.
             throw new IllegalArgumentException(
-                    "Attempted to set profile owner for invalid userId: " + userHandle);
+                    "Attempted to set profile owner for invalid userId: " + userId);
         }
         if (info.isGuest()) {
             throw new IllegalStateException("Cannot set a profile owner on a guest");
         }
-        if (mOwners.hasProfileOwner(userHandle)) {
-            throw new IllegalStateException("Trying to set the profile owner, but profile owner "
-                    + "is already set.");
+        if (mOwners.hasProfileOwner(userId)) {
+            StringBuilder errorMessage = new StringBuilder("Trying to set the profile owner");
+            if (!hasIncompatibleAccountsOrNonAdb) {
+                append(errorMessage, owner).append(" on user ").append(userId);
+            }
+            errorMessage.append(", but profile owner");
+            if (!hasIncompatibleAccountsOrNonAdb) {
+                appendProfileOwnerLocked(errorMessage, userId);
+            }
+
+            throw new IllegalStateException(errorMessage.append(" is already set.").toString());
         }
-        if (mOwners.hasDeviceOwner() && mOwners.getDeviceOwnerUserId() == userHandle) {
-            throw new IllegalStateException("Trying to set the profile owner, but the user "
-                    + "already has a device owner.");
+        if (mOwners.hasDeviceOwner() && mOwners.getDeviceOwnerUserId() == userId) {
+            StringBuilder errorMessage = new StringBuilder("Trying to set the profile owner");
+            if (!hasIncompatibleAccountsOrNonAdb) {
+                append(errorMessage, owner).append(" on user ").append(userId);
+            }
+            errorMessage.append(", but the user already has a device owner");
+            if (!hasIncompatibleAccountsOrNonAdb) {
+                appendDeviceOwnerLocked(errorMessage);
+            }
+            throw new IllegalStateException(errorMessage.append('.').toString());
         }
         if (isAdb(caller)) {
-            if ((mIsWatch || hasUserSetupCompleted(userHandle))
+            if ((mIsWatch || hasUserSetupCompleted(userId))
                     && hasIncompatibleAccountsOrNonAdb) {
-                throw new IllegalStateException("Not allowed to set the profile owner because "
-                        + "there are already some accounts on the profile");
+                StringBuilder errorMessage = new StringBuilder("Not allowed to set the profile "
+                        + "owner");
+                if (!hasIncompatibleAccountsOrNonAdb) {
+                    append(errorMessage, owner).append(" on user ").append(userId).append(' ');
+                }
+                throw new IllegalStateException(errorMessage.append(" because there are already "
+                        + "some accounts on the profile.").toString());
             }
             return;
         }
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS));
 
-        if ((mIsWatch || hasUserSetupCompleted(userHandle))) {
+        if ((mIsWatch || hasUserSetupCompleted(userId))) {
             Preconditions.checkState(isSystemUid(caller),
                     "Cannot set the profile owner on a user which is already set-up");
 
@@ -10665,31 +10686,62 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * The Device owner can only be set by adb or an app with the MANAGE_PROFILE_AND_DEVICE_OWNERS
      * permission.
      */
+    @GuardedBy("getLockObject()")
     private void enforceCanSetDeviceOwnerLocked(
             CallerIdentity caller, @Nullable ComponentName owner, @UserIdInt int deviceOwnerUserId,
             boolean hasIncompatibleAccountsOrNonAdb) {
+        boolean showComponentOnError = false;
         if (!isAdb(caller)) {
             Preconditions.checkCallAuthorization(
                     hasCallingOrSelfPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS));
+        } else {
+            showComponentOnError = true;
         }
 
         final int code = checkDeviceOwnerProvisioningPreConditionLocked(owner,
                 /* deviceOwnerUserId= */ deviceOwnerUserId, /* callingUserId*/ caller.getUserId(),
                 isAdb(caller), hasIncompatibleAccountsOrNonAdb);
         if (code != STATUS_OK) {
-            throw new IllegalStateException(
-                    computeProvisioningErrorString(code, deviceOwnerUserId));
+            throw new IllegalStateException(computeProvisioningErrorStringLocked(code,
+                    deviceOwnerUserId, owner, showComponentOnError));
         }
     }
 
-    private static String computeProvisioningErrorString(int code, @UserIdInt int userId) {
+    private String computeProvisioningErrorString(int code, @UserIdInt int userId) {
+        synchronized (getLockObject()) {
+            return computeProvisioningErrorStringLocked(code, userId, /* newOwner= */ null,
+                    /* showComponentOnError= */ false);
+        }
+    }
+
+    @GuardedBy("getLockObject()")
+    private String computeProvisioningErrorStringLocked(int code, @UserIdInt int userId,
+            @Nullable ComponentName newOwner, boolean showComponentOnError) {
         switch (code) {
             case STATUS_OK:
                 return "OK";
-            case STATUS_HAS_DEVICE_OWNER:
-                return "Trying to set the device owner, but device owner is already set.";
-            case STATUS_USER_HAS_PROFILE_OWNER:
-                return "Trying to set the device owner, but the user already has a profile owner.";
+            case STATUS_HAS_DEVICE_OWNER: {
+                StringBuilder error = new StringBuilder("Trying to set the device owner");
+                if (showComponentOnError && newOwner != null) {
+                    append(error, newOwner);
+                }
+                error.append(", but device owner");
+                if (showComponentOnError) {
+                    appendDeviceOwnerLocked(error);
+                }
+                return error.append(" is already set.").toString();
+            }
+            case STATUS_USER_HAS_PROFILE_OWNER: {
+                StringBuilder error = new StringBuilder("Trying to set the device owner");
+                if (showComponentOnError && newOwner != null) {
+                    append(error, newOwner);
+                }
+                error.append(", but the user already has a profile owner");
+                if (showComponentOnError) {
+                    appendProfileOwnerLocked(error, userId);
+                }
+                return error.append(".").toString();
+            }
             case STATUS_USER_NOT_RUNNING:
                 return "User " + userId + " not running.";
             case STATUS_NOT_SYSTEM_USER:
@@ -10708,7 +10760,32 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             default:
                 return "Unexpected @ProvisioningPreCondition: " + code;
         }
+    }
 
+    @GuardedBy("getLockObject()")
+    private void appendDeviceOwnerLocked(StringBuilder string) {
+        ComponentName deviceOwner = getDeviceOwnerComponent(/* callingUserOnly= */ false);
+        if (deviceOwner == null) {
+            // Shouldn't happen, but it doesn't hurt to check...
+            Slogf.wtf(LOG_TAG, "appendDeviceOwnerLocked(): device has no DO set");
+            return;
+        }
+        append(string, deviceOwner);
+    }
+
+    @GuardedBy("getLockObject()")
+    private void appendProfileOwnerLocked(StringBuilder string, @UserIdInt int userId) {
+        ComponentName profileOwner = mOwners.getProfileOwnerComponent(userId);
+        if (profileOwner == null) {
+            // Shouldn't happen, but it doesn't hurt to check...
+            Slogf.wtf(LOG_TAG, "profileOwner(%d): PO not set", userId);
+            return;
+        }
+        append(string, profileOwner);
+    }
+
+    private static StringBuilder append(StringBuilder string, ComponentName component) {
+        return string.append(" (").append(component.flattenToShortString()).append(')');
     }
 
     private void enforceUserUnlocked(int userId) {
@@ -19654,7 +19731,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setApplicationExemptions(String packageName, int[] exemptions) {
+    public void setApplicationExemptions(String callerPackage, String packageName,
+            int[] exemptions) {
         if (!mHasFeature) {
             return;
         }
@@ -19665,7 +19743,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_DEVICE_POLICY_APP_EXEMPTIONS));
 
-        final CallerIdentity caller = getCallerIdentity();
+        final CallerIdentity caller = getCallerIdentity(callerPackage);
         final ApplicationInfo packageInfo;
         packageInfo = getPackageInfoWithNullCheck(packageName, caller);
 
@@ -22186,7 +22264,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES,
             MANAGE_DEVICE_POLICY_USERS,
             MANAGE_DEVICE_POLICY_SAFE_BOOT,
-            MANAGE_DEVICE_POLICY_TIME);
+            MANAGE_DEVICE_POLICY_TIME,
+            MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS);
     private static final List<String> PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE_PERMISSIONS =
             List.of(
                 MANAGE_DEVICE_POLICY_ACROSS_USERS,
@@ -22292,7 +22371,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_PACKAGE_STATE,
             MANAGE_DEVICE_POLICY_RESET_PASSWORD,
             MANAGE_DEVICE_POLICY_STATUS_BAR,
-            MANAGE_DEVICE_POLICY_APP_RESTRICTIONS);
+            MANAGE_DEVICE_POLICY_APP_RESTRICTIONS,
+            MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS);
     private static final List<String> PROFILE_OWNER_PERMISSIONS  = List.of(
             MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL,
             MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
@@ -22430,8 +22510,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_LOCALE,
                 MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL);
         CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_LOCATION,
-                MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL);
-        CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,
                 MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL);
         CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_MICROPHONE,
                 MANAGE_DEVICE_POLICY_ACROSS_USERS);
@@ -22587,6 +22665,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             hasPermissionOnTargetUser = hasPermission(CROSS_USER_PERMISSIONS.get(permission),
                     callerPackageName);
         }
+
         return hasPermissionOnOwnUser && hasPermissionOnTargetUser;
     }
 
@@ -22627,7 +22706,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         // Check the permission for the role-holder
         if (isCallerDevicePolicyManagementRoleHolder(caller)) {
-            return anyDpcHasPermission(permission, mContext.getUserId());
+            return anyDpcHasPermission(permission, caller.getUserId());
         }
         if (DELEGATE_SCOPES.containsKey(permission)) {
             return isCallerDelegate(caller, DELEGATE_SCOPES.get(permission));
