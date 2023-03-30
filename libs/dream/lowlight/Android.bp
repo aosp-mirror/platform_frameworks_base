@@ -25,6 +25,7 @@ filegroup {
     name: "low_light_dream_lib-sources",
     srcs: [
         "src/**/*.java",
+        "src/**/*.kt",
     ],
     path: "src",
 }
@@ -37,10 +38,15 @@ android_library {
     resource_dirs: [
         "res",
     ],
+    libs: [
+        "kotlin-annotations",
+    ],
     static_libs: [
         "androidx.arch.core_core-runtime",
         "dagger2",
         "jsr330",
+        "kotlinx-coroutines-android",
+        "kotlinx-coroutines-core",
     ],
     manifest: "AndroidManifest.xml",
     plugins: ["dagger2-compiler"],
