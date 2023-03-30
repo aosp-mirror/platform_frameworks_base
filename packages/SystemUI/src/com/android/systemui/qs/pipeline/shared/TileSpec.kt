@@ -66,6 +66,10 @@ sealed class TileSpec private constructor(open val spec: String) {
             }
         }
 
+        fun create(component: ComponentName): CustomTileSpec {
+            return CustomTileSpec(CustomTile.toSpec(component), component)
+        }
+
         private val String.isCustomTileSpec: Boolean
             get() = startsWith(CustomTile.PREFIX)
 

@@ -93,7 +93,7 @@ constructor(
 
         private fun performRemove(args: List<String>, spec: TileSpec) {
             val user = args.getOrNull(2)?.toInt() ?: userRepository.getSelectedUserInfo().id
-            scope.launch { tileSpecRepository.removeTile(user, spec) }
+            scope.launch { tileSpecRepository.removeTiles(user, listOf(spec)) }
         }
 
         override fun help(pw: PrintWriter) {

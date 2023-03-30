@@ -26,8 +26,6 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
-import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
-import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.util.leak.GarbageMonitor;
 
 import java.util.ArrayList;
@@ -35,7 +33,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public interface QSHost extends PanelInteractor, CustomTileAddedRepository {
+public interface QSHost {
     String TILES_SETTING = Settings.Secure.QS_TILES;
     int POSITION_AT_END = -1;
 
@@ -75,7 +73,11 @@ public interface QSHost extends PanelInteractor, CustomTileAddedRepository {
      * @see QSFactory#createTileView
      */
     QSTileView createTileView(Context themedContext, QSTile tile, boolean collapsedView);
-    /** Create a {@link QSTile} of a {@code tileSpec} type. */
+    /** Create a {@link QSTile} of a {@code tileSpec} type.
+     *
+     * This should only be called by classes that need to create one-off instances of tiles.
+     * Do not use to create {@code custom} tiles without explicitly taking care of its lifecycle.
+     */
     QSTile createTile(String tileSpec);
 
     /**
