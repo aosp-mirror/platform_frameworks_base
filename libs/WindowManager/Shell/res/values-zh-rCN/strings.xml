@@ -32,13 +32,17 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"调整大小"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"隐藏"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"取消隐藏"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"应用可能无法在分屏模式下正常运行。"</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"应用不支持分屏。"</string>
+    <!-- no translation found for dock_forced_resizable (7429086980048964687) -->
+    <skip />
+    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (2733543750291266047) -->
+    <skip />
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"此应用只能在 1 个窗口中打开。"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"应用可能无法在辅显示屏上正常运行。"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"应用不支持在辅显示屏上启动。"</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"分屏分隔线"</string>
-    <string name="divider_title" msgid="5482989479865361192">"分屏分隔线"</string>
+    <!-- no translation found for accessibility_divider (6407584574218956849) -->
+    <skip />
+    <!-- no translation found for divider_title (1963391955593749442) -->
+    <skip />
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"左侧全屏"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"左侧 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"左侧 50%"</string>
@@ -85,7 +89,8 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"没有解决此问题？\n点按即可恢复"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"相机没有问题？点按即可忽略。"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"查看和处理更多任务"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"拖入另一个应用，即可使用分屏模式"</string>
+    <!-- no translation found for letterbox_education_split_screen_text (449233070804658627) -->
+    <skip />
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"在某个应用外连续点按两次，即可调整它的位置"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"知道了"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"展开即可了解详情。"</string>
@@ -94,6 +99,8 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"取消"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"重启"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"不再显示"</string>
+    <!-- no translation found for letterbox_reachability_reposition_text (4507890186297500893) -->
+    <skip />
     <string name="maximize_button_text" msgid="1650859196290301963">"最大化"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"最小化"</string>
     <string name="close_button_text" msgid="2913281996024033299">"关闭"</string>
