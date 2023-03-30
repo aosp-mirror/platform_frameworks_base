@@ -18,6 +18,7 @@ package android.view.autofill;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.CancellationSignal;
 import android.service.autofill.FillCallback;
 import android.view.inputmethod.InlineSuggestionsRequest;
@@ -55,7 +56,10 @@ import android.view.inputmethod.InlineSuggestionsRequest;
  *
  * <P>IMPORTANT: This should not be used for displaying anything other than input suggestions, or
  * the keyboard may choose to block your app from the inline strip.
+ *
+ * @hide
  */
+@TestApi
 public interface AutofillRequestCallback {
     /**
      * Called by the Android system to decide if a screen can be autofilled by the callback.
