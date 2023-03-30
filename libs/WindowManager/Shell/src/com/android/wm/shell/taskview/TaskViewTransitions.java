@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.taskview;
 
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -23,6 +24,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.Slog;
 import android.view.SurfaceControl;
@@ -40,7 +42,7 @@ import java.util.ArrayList;
  * Handles Shell Transitions that involve TaskView tasks.
  */
 public class TaskViewTransitions implements Transitions.TransitionHandler {
-    private static final String TAG = "TaskViewTransitions";
+    static final String TAG = "TaskViewTransitions";
 
     private final ArrayList<TaskViewTaskController> mTaskViews = new ArrayList<>();
     private final ArrayList<PendingTransition> mPending = new ArrayList<>();
@@ -195,6 +197,13 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         mPending.add(pending);
         startNextTransition();
         // visibility is reported in transition.
+    }
+
+    void setTaskBounds(TaskViewTaskController taskView, Rect boundsOnScreen) {
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setBounds(taskView.getTaskInfo().token, boundsOnScreen);
+        mPending.add(new PendingTransition(TRANSIT_CHANGE, wct, taskView, null /* cookie */));
+        startNextTransition();
     }
 
     private void startNextTransition() {
