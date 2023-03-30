@@ -263,4 +263,6 @@
     <string name="close_text">Close</string>
     <!-- Accessibility text for the handle menu close menu button [CHAR LIMIT=NONE] -->
     <string name="collapse_menu_text">Close Menu</string>
+    <!-- Accessibility text for the handle menu open menu button [CHAR LIMIT=NONE] -->
+    <string name="expand_menu_text">Open Menu</string>
 </resources>
