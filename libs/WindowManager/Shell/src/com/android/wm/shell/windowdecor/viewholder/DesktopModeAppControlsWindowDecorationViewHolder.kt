@@ -1,10 +1,9 @@
 package com.android.wm.shell.windowdecor.viewholder
 
 import android.app.ActivityManager.RunningTaskInfo
-import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
-import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -19,7 +18,9 @@ import com.android.wm.shell.R
 internal class DesktopModeAppControlsWindowDecorationViewHolder(
         rootView: View,
         onCaptionTouchListener: View.OnTouchListener,
-        onCaptionButtonClickListener: View.OnClickListener
+        onCaptionButtonClickListener: View.OnClickListener,
+        appName: CharSequence,
+        appIcon: Drawable
 ) : DesktopModeWindowDecorationViewHolder(rootView) {
 
     private val captionView: View = rootView.findViewById(R.id.desktop_mode_caption)
@@ -35,10 +36,11 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         captionHandle.setOnTouchListener(onCaptionTouchListener)
         openMenuButton.setOnClickListener(onCaptionButtonClickListener)
         closeWindowButton.setOnClickListener(onCaptionButtonClickListener)
+        appNameTextView.text = appName
+        appIconImageView.setImageDrawable(appIcon)
     }
 
     override fun bindData(taskInfo: RunningTaskInfo) {
-        bindAppInfo(taskInfo)
 
         val captionDrawable = captionView.background as GradientDrawable
         captionDrawable.setColor(taskInfo.taskDescription.statusBarColor)
@@ -48,20 +50,6 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         expandMenuButton.imageTintList = ColorStateList.valueOf(
                 getCaptionExpandButtonColor(taskInfo))
         appNameTextView.setTextColor(getCaptionAppNameTextColor(taskInfo))
-    }
-
-    private fun bindAppInfo(taskInfo: RunningTaskInfo) {
-        val packageName: String = taskInfo.realActivity.packageName
-        val pm: PackageManager = context.applicationContext.packageManager
-        try {
-            // TODO(b/268363572): Use IconProvider or BaseIconCache to set drawable/name.
-            val applicationInfo = pm.getApplicationInfo(packageName,
-                    PackageManager.ApplicationInfoFlags.of(0))
-            appNameTextView.text = pm.getApplicationLabel(applicationInfo)
-            appIconImageView.setImageDrawable(pm.getApplicationIcon(applicationInfo))
-        } catch (e: PackageManager.NameNotFoundException) {
-            Log.w(TAG, "Package not found: $packageName", e)
-        }
     }
 
     private fun getCaptionAppNameTextColor(taskInfo: RunningTaskInfo): Int {
