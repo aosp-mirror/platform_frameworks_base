@@ -19,7 +19,6 @@ package com.android.server.wm.flicker.ime
 import android.platform.test.annotations.Presubmit
 import android.tools.common.datatypes.component.ComponentNameMatcher
 import android.tools.common.traces.ConditionsFactory
-import android.tools.device.flicker.isShellTransitionsEnabled
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -101,16 +100,6 @@ open class ShowImeWhileEnteringOverviewTest(flicker: FlickerTest) : BaseTest(fli
         flicker.navBarLayerIsVisibleAtStartAndEnd()
     }
 
-    /** Bars are expected to be hidden while entering overview in landscape (b/227189877) */
-    @Presubmit
-    @Test
-    fun navBarLayerIsVisibleAtStartAndEndGestural() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
-        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        flicker.navBarLayerIsVisibleAtStartAndEnd()
-    }
-
     /**
      * In the legacy transitions, the nav bar is not marked as invisible. In the new transitions
      * this is fixed and the nav bar shows as invisible
@@ -121,7 +110,6 @@ open class ShowImeWhileEnteringOverviewTest(flicker: FlickerTest) : BaseTest(fli
         Assume.assumeFalse(flicker.scenario.isTablet)
         Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
         Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
-        Assume.assumeTrue(isShellTransitionsEnabled)
         flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.NAV_BAR) }
         flicker.assertLayersEnd { this.isInvisible(ComponentNameMatcher.NAV_BAR) }
     }
@@ -186,21 +174,11 @@ open class ShowImeWhileEnteringOverviewTest(flicker: FlickerTest) : BaseTest(fli
 
     @Presubmit
     @Test
-    fun statusBarLayerIsInvisibleInLandscapeShell() {
+    fun statusBarLayerIsInvisibleInLandscape() {
         Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
         Assume.assumeFalse(flicker.scenario.isTablet)
-        Assume.assumeTrue(isShellTransitionsEnabled)
         flicker.assertLayersStart { this.isVisible(ComponentNameMatcher.STATUS_BAR) }
         flicker.assertLayersEnd { this.isInvisible(ComponentNameMatcher.STATUS_BAR) }
-    }
-
-    @Presubmit
-    @Test
-    fun statusBarLayerIsVisibleInLandscapeLegacy() {
-        Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
-        Assume.assumeTrue(flicker.scenario.isTablet)
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        flicker.statusBarLayerIsVisibleAtStartAndEnd()
     }
 
     @Presubmit
