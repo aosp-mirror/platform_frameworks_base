@@ -322,6 +322,7 @@ public abstract class Context {
             BIND_EXTERNAL_SERVICE_LONG,
             // Make sure no flag uses the sign bit (most significant bit) of the long integer,
             // to avoid future confusion.
+            BIND_BYPASS_USER_NETWORK_RESTRICTIONS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BindServiceFlagsLongBits {}
@@ -686,6 +687,16 @@ public abstract class Context {
      * value that is compatible to {@link BindServiceFlags}.
      */
     public static final long BIND_EXTERNAL_SERVICE_LONG = 1L << 62;
+
+    /**
+     * Flag for {@link #bindService}: allow the process hosting the target service to gain
+     * {@link ActivityManager#PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK}, which allows it be able
+     * to access network regardless of any user restrictions.
+     *
+     * @hide
+     */
+    public static final long BIND_BYPASS_USER_NETWORK_RESTRICTIONS = 0x1_0000_0000L;
+
 
     /**
      * These bind flags reduce the strength of the binding such that we shouldn't
