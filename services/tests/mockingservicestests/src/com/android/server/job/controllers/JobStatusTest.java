@@ -397,6 +397,14 @@ public class JobStatusTest {
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
                 numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_MAX, job.getEffectivePriority());
+
+        // Less than 2 failures, but job is downgraded.
+        numFailures = 1;
+        numSystemStops = 0;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0, 0);
+        job.addInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+        assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
     }
 
     @Test
@@ -497,6 +505,80 @@ public class JobStatusTest {
         job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
                 numSystemStops, 0, 0, 0);
         assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
+    }
+
+    @Test
+    public void testGetEffectivePriority_UserInitiated() {
+        final JobInfo jobInfo =
+                new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                        .setUserInitiated(true)
+                        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                        .build();
+        JobStatus job = createJobStatus(jobInfo);
+
+        // Less than 2 failures, priority shouldn't be affected.
+        assertEquals(JobInfo.PRIORITY_MAX, job.getEffectivePriority());
+        int numFailures = 1;
+        int numSystemStops = 0;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0, 0);
+        assertEquals(JobInfo.PRIORITY_MAX, job.getEffectivePriority());
+
+        // 2+ failures, priority shouldn't be affected while job is still a UI job
+        numFailures = 2;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0, 0);
+        assertEquals(JobInfo.PRIORITY_MAX, job.getEffectivePriority());
+        numFailures = 5;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0, 0);
+        assertEquals(JobInfo.PRIORITY_MAX, job.getEffectivePriority());
+        numFailures = 8;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0, 0);
+        assertEquals(JobInfo.PRIORITY_MAX, job.getEffectivePriority());
+
+        // System stops shouldn't factor in the downgrade.
+        numSystemStops = 10;
+        numFailures = 0;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0, 0);
+        assertEquals(JobInfo.PRIORITY_MAX, job.getEffectivePriority());
+
+        // Job can no long run as user-initiated. Downgrades should be effective.
+        // Priority can't be max.
+        job = createJobStatus(jobInfo);
+        job.addInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+        assertFalse(job.shouldTreatAsUserInitiatedJob());
+
+        // Less than 2 failures.
+        assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
+        numFailures = 1;
+        numSystemStops = 0;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0, 0);
+        assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
+
+        // 2+ failures, priority should start getting lower
+        numFailures = 2;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0, 0);
+        assertEquals(JobInfo.PRIORITY_DEFAULT, job.getEffectivePriority());
+        numFailures = 5;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0, 0);
+        assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
+        numFailures = 8;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0, 0);
+        assertEquals(JobInfo.PRIORITY_MIN, job.getEffectivePriority());
+
+        // System stops shouldn't factor in the downgrade.
+        numSystemStops = 10;
+        numFailures = 0;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, numFailures,
+                numSystemStops, 0, 0, 0);
+        assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
     }
 
     @Test
