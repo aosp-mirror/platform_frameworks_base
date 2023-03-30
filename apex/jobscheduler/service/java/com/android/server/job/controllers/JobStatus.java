@@ -1131,8 +1131,23 @@ public final class JobStatus {
      */
     @JobInfo.Priority
     public int getEffectivePriority() {
-        final int rawPriority = job.getPriority();
+        final boolean isDemoted =
+                (getInternalFlags() & INTERNAL_FLAG_DEMOTED_BY_USER) != 0
+                        || (job.isUserInitiated()
+                        && (getInternalFlags() & INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ) != 0);
+        final int maxPriority;
+        if (isDemoted) {
+            // If the job was demoted for some reason, limit its priority to HIGH.
+            maxPriority = JobInfo.PRIORITY_HIGH;
+        } else {
+            maxPriority = JobInfo.PRIORITY_MAX;
+        }
+        final int rawPriority = Math.min(maxPriority, job.getPriority());
         if (numFailures < 2) {
+            return rawPriority;
+        }
+        if (shouldTreatAsUserInitiatedJob()) {
+            // Don't drop priority of UI jobs.
             return rawPriority;
         }
         // Slowly decay priority of jobs to prevent starvation of other jobs.
