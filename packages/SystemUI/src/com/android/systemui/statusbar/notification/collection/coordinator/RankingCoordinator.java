@@ -190,7 +190,9 @@ public class RankingCoordinator implements Coordinator {
             "DndSuppressingVisualEffects") {
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
-            if (mStatusBarStateController.isDozing() && entry.shouldSuppressAmbient()) {
+            if ((mStatusBarStateController.isDozing()
+                    || mStatusBarStateController.getDozeAmount() == 1f)
+                    && entry.shouldSuppressAmbient()) {
                 return true;
             }
 
@@ -200,6 +202,20 @@ public class RankingCoordinator implements Coordinator {
 
     private final StatusBarStateController.StateListener mStatusBarStateCallback =
             new StatusBarStateController.StateListener() {
+                private boolean mPrevDozeAmountIsOne = false;
+
+                @Override
+                public void onDozeAmountChanged(float linear, float eased) {
+                    StatusBarStateController.StateListener.super.onDozeAmountChanged(linear, eased);
+
+                    boolean dozeAmountIsOne = linear == 1f;
+                    if (mPrevDozeAmountIsOne != dozeAmountIsOne) {
+                        mDndVisualEffectsFilter.invalidateList("dozeAmount changed to "
+                                + (dozeAmountIsOne ? "one" : "not one"));
+                        mPrevDozeAmountIsOne = dozeAmountIsOne;
+                    }
+                }
+
                 @Override
                 public void onDozingChanged(boolean isDozing) {
                     mDndVisualEffectsFilter.invalidateList("onDozingChanged to " + isDozing);
