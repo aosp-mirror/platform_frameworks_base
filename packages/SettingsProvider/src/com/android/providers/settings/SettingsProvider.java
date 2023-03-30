@@ -2311,7 +2311,7 @@ public class SettingsProvider extends ContentProvider {
             @NonNull Set<String> flags) {
         boolean hasAllowlistPermission =
                 context.checkCallingOrSelfPermission(
-                Manifest.permission.ALLOWLISTED_WRITE_DEVICE_CONFIG)
+                Manifest.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG)
                 == PackageManager.PERMISSION_GRANTED;
         boolean hasWritePermission =
                 context.checkCallingOrSelfPermission(
@@ -2331,7 +2331,7 @@ public class SettingsProvider extends ContentProvider {
             }
         } else {
             throw new SecurityException("Permission denial to mutate flag, must have root, "
-                + "WRITE_DEVICE_CONFIG, or ALLOWLISTED_WRITE_DEVICE_CONFIG");
+                + "WRITE_DEVICE_CONFIG, or WRITE_ALLOWLISTED_DEVICE_CONFIG");
         }
     }
 
@@ -3739,7 +3739,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 215;
+            private static final int SETTINGS_VERSION = 216;
 
             private final int mUserId;
 
@@ -5735,6 +5735,31 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 215;
+                }
+
+                if (currentVersion == 215) {
+                    // Version 215: default |def_airplane_mode_radios| and
+                    // |airplane_mode_toggleable_radios| changed to remove NFC & add UWB.
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+                    final String oldApmRadiosValue = globalSettings.getSettingLocked(
+                            Settings.Global.AIRPLANE_MODE_RADIOS).getValue();
+                    if (TextUtils.equals("cell,bluetooth,wifi,nfc,wimax", oldApmRadiosValue)) {
+                        globalSettings.insertSettingOverrideableByRestoreLocked(
+                                Settings.Global.AIRPLANE_MODE_RADIOS,
+                                getContext().getResources().getString(
+                                        R.string.def_airplane_mode_radios),
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    final String oldApmToggleableRadiosValue = globalSettings.getSettingLocked(
+                            Settings.Global.AIRPLANE_MODE_TOGGLEABLE_RADIOS).getValue();
+                    if (TextUtils.equals("bluetooth,wifi,nfc", oldApmToggleableRadiosValue)) {
+                        globalSettings.insertSettingOverrideableByRestoreLocked(
+                                Settings.Global.AIRPLANE_MODE_TOGGLEABLE_RADIOS,
+                                getContext().getResources().getString(
+                                        R.string.airplane_mode_toggleable_radios),
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 216;
                 }
 
                 // vXXX: Add new settings above this point.

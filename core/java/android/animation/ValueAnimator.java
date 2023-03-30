@@ -1118,10 +1118,6 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         if (Looper.myLooper() == null) {
             throw new AndroidRuntimeException("Animators may only be run on Looper threads");
         }
-        if (playBackwards == mResumed && mSelfPulse == !mSuppressSelfPulseRequested && mStarted) {
-            // already started
-            return;
-        }
         mReversing = playBackwards;
         mSelfPulse = !mSuppressSelfPulseRequested;
         // Special case: reversing from seek-to-0 should act as if not seeked at all.

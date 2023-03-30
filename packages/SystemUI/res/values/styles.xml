@@ -844,12 +844,10 @@
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
     </style>
 
-    <style name="Theme.UserSwitcherActivity" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+    <style name="Theme.UserSwitcherFullscreenDialog" parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
         <item name="android:statusBarColor">@color/user_switcher_fullscreen_bg</item>
         <item name="android:windowBackground">@color/user_switcher_fullscreen_bg</item>
         <item name="android:navigationBarColor">@color/user_switcher_fullscreen_bg</item>
-        <!-- Setting a placeholder will avoid using the SystemUI icon on the splash screen -->
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_blank</item>
     </style>
 
     <style name="Theme.CreateUser" parent="@android:style/Theme.DeviceDefault.NoActionBar">

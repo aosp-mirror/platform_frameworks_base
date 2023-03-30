@@ -30,6 +30,8 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
+import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT
+import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
@@ -42,7 +44,6 @@ import com.android.systemui.keyguard.data.repository.BiometricType.UNDER_DISPLAY
 import com.android.systemui.keyguard.shared.model.DevicePosture
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -78,6 +79,8 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var biometricManager: BiometricManager
+    @Captor
+    private lateinit var strongAuthTracker: ArgumentCaptor<LockPatternUtils.StrongAuthTracker>
     @Captor private lateinit var authControllerCallback: ArgumentCaptor<AuthController.Callback>
     @Captor
     private lateinit var biometricManagerCallback:
@@ -112,12 +115,12 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
                 devicePolicyManager = devicePolicyManager,
                 scope = testScope.backgroundScope,
                 backgroundDispatcher = testDispatcher,
-                looper = testableLooper!!.looper,
-                dumpManager = dumpManager,
                 biometricManager = biometricManager,
                 devicePostureRepository = devicePostureRepository,
+                dumpManager = dumpManager,
             )
         testScope.runCurrent()
+        verify(lockPatternUtils).registerStrongAuthTracker(strongAuthTracker.capture())
     }
 
     @Test
@@ -147,20 +150,17 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
             val strongBiometricAllowed = collectLastValue(underTest.isStrongBiometricAllowed)
             runCurrent()
 
-            val captor = argumentCaptor<LockPatternUtils.StrongAuthTracker>()
-            verify(lockPatternUtils).registerStrongAuthTracker(captor.capture())
-
-            captor.value.stub.onStrongAuthRequiredChanged(STRONG_AUTH_NOT_REQUIRED, PRIMARY_USER_ID)
-            testableLooper?.processAllMessages() // StrongAuthTracker uses the TestableLooper
+            onStrongAuthChanged(STRONG_AUTH_NOT_REQUIRED, PRIMARY_USER_ID)
             assertThat(strongBiometricAllowed()).isTrue()
 
-            captor.value.stub.onStrongAuthRequiredChanged(
-                STRONG_AUTH_REQUIRED_AFTER_BOOT,
-                PRIMARY_USER_ID
-            )
-            testableLooper?.processAllMessages() // StrongAuthTracker uses the TestableLooper
+            onStrongAuthChanged(STRONG_AUTH_REQUIRED_AFTER_BOOT, PRIMARY_USER_ID)
             assertThat(strongBiometricAllowed()).isFalse()
         }
+
+    private fun onStrongAuthChanged(flags: Int, userId: Int) {
+        strongAuthTracker.value.stub.onStrongAuthRequiredChanged(flags, userId)
+        testableLooper?.processAllMessages() // StrongAuthTracker uses the TestableLooper
+    }
 
     @Test
     fun fingerprintDisabledByDpmChange() =
@@ -349,6 +349,30 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
 
             devicePostureRepository.setCurrentPosture(DevicePosture.FLIPPED)
             assertThat(isFaceAuthSupported()).isTrue()
+        }
+
+    @Test
+    fun userInLockdownUsesStrongAuthFlagsToDetermineValue() =
+        testScope.runTest {
+            createBiometricSettingsRepository()
+
+            val isUserInLockdown = collectLastValue(underTest.isCurrentUserInLockdown)
+            // has default value.
+            assertThat(isUserInLockdown()).isFalse()
+
+            // change strong auth flags for another user.
+            // Combine with one more flag to check if we do the bitwise and
+            val inLockdown =
+                STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN or STRONG_AUTH_REQUIRED_AFTER_TIMEOUT
+            onStrongAuthChanged(inLockdown, ANOTHER_USER_ID)
+
+            // Still false.
+            assertThat(isUserInLockdown()).isFalse()
+
+            // change strong auth flags for current user.
+            onStrongAuthChanged(inLockdown, PRIMARY_USER_ID)
+
+            assertThat(isUserInLockdown()).isTrue()
         }
 
     private fun enrollmentChange(biometricType: BiometricType, userId: Int, enabled: Boolean) {

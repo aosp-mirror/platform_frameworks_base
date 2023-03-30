@@ -190,9 +190,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         } catch (Exception e) {
             // IOException/UnsupportedOperationException may be thrown if external storage is
             // not mounted
-            if (DEBUG_STORAGE) {
-                Log.d(TAG, "Failed to store screenshot", e);
-            }
+            Log.d(TAG, "Failed to store screenshot", e);
             mParams.clearImage();
             mImageData.reset();
             mQuickShareData.reset();

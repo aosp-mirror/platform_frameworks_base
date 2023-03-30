@@ -32,6 +32,7 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_PREDICT_BACK;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.content.res.ResourceId;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -75,7 +76,7 @@ class BackNavigationController {
     private Runnable mPendingAnimation;
     private final NavigationMonitor mNavigationMonitor = new NavigationMonitor();
 
-    private AnimationHandler mAnimationHandler;
+    AnimationHandler mAnimationHandler;
     private final ArrayList<WindowContainer> mTmpOpenApps = new ArrayList<>();
     private final ArrayList<WindowContainer> mTmpCloseApps = new ArrayList<>();
 
@@ -651,7 +652,8 @@ class BackNavigationController {
     /**
      * Create and handling animations status for an open/close animation targets.
      */
-    private static class AnimationHandler {
+    static class AnimationHandler {
+        private final boolean mShowWindowlessSurface;
         private final WindowManagerService mWindowManagerService;
         private BackWindowAnimationAdaptor mCloseAdaptor;
         private BackWindowAnimationAdaptor mOpenAdaptor;
@@ -670,19 +672,37 @@ class BackNavigationController {
 
         AnimationHandler(WindowManagerService wms) {
             mWindowManagerService = wms;
+            final Context context = wms.mContext;
+            mShowWindowlessSurface = context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_predictShowStartingSurface);
         }
         private static final int UNKNOWN = 0;
         private static final int TASK_SWITCH = 1;
         private static final int ACTIVITY_SWITCH = 2;
 
+        private static boolean isActivitySwitch(WindowContainer close, WindowContainer open) {
+            if (close.asActivityRecord() == null || open.asActivityRecord() == null
+                    || (close.asActivityRecord().getTask()
+                    != open.asActivityRecord().getTask())) {
+                return false;
+            }
+            return true;
+        }
+
+        private static boolean isTaskSwitch(WindowContainer close, WindowContainer open) {
+            if (close.asTask() == null || open.asTask() == null
+                    || (close.asTask() == open.asTask())) {
+                return false;
+            }
+            return true;
+        }
+
         private void initiate(WindowContainer close, WindowContainer open)  {
             WindowContainer closeTarget;
-            if (close.asActivityRecord() != null && open.asActivityRecord() != null
-                    && (close.asActivityRecord().getTask() == open.asActivityRecord().getTask())) {
+            if (isActivitySwitch(close, open)) {
                 mSwitchType = ACTIVITY_SWITCH;
                 closeTarget = close.asActivityRecord();
-            } else if (close.asTask() != null && open.asTask() != null
-                    && close.asTask() != open.asTask()) {
+            } else if (isTaskSwitch(close, open)) {
                 mSwitchType = TASK_SWITCH;
                 closeTarget = close.asTask().getTopNonFinishingActivity();
             } else {
@@ -699,7 +719,8 @@ class BackNavigationController {
             }
         }
 
-        boolean composeAnimations(@NonNull WindowContainer close, @NonNull WindowContainer open) {
+        private boolean composeAnimations(@NonNull WindowContainer close,
+                @NonNull WindowContainer open) {
             clearBackAnimateTarget(null /* cleanupTransaction */);
             if (close == null || open == null) {
                 Slog.e(TAG, "reset animation with null target close: "
@@ -757,15 +778,15 @@ class BackNavigationController {
         }
 
         boolean isTarget(WindowContainer wc, boolean open) {
-            if (open) {
-                return wc == mOpenAdaptor.mTarget || mOpenAdaptor.mTarget.hasChild(wc);
+            if (!mComposed) {
+                return false;
             }
-
+            final WindowContainer target = open ? mOpenAdaptor.mTarget : mCloseAdaptor.mTarget;
             if (mSwitchType == TASK_SWITCH) {
-                return  wc == mCloseAdaptor.mTarget
-                        || (wc.asTask() != null && wc.hasChild(mCloseAdaptor.mTarget));
+                return  wc == target
+                        || (wc.asTask() != null && wc.hasChild(target));
             } else if (mSwitchType == ACTIVITY_SWITCH) {
-                return wc == mCloseAdaptor.mTarget;
+                return wc == target || (wc.asTaskFragment() != null && wc.hasChild(target));
             }
             return false;
         }
@@ -983,21 +1004,20 @@ class BackNavigationController {
                 case BackNavigationInfo.TYPE_CROSS_ACTIVITY:
                     return new ScheduleAnimationBuilder(backType, adapter)
                             .setComposeTarget(currentActivity, previousActivity)
-                            .setOpeningSnapshot(getActivitySnapshot(previousActivity));
+                            .setIsLaunchBehind(false);
                 case BackNavigationInfo.TYPE_CROSS_TASK:
                     return new ScheduleAnimationBuilder(backType, adapter)
                             .setComposeTarget(currentTask, previousTask)
-                            .setOpeningSnapshot(getTaskSnapshot(previousTask));
+                            .setIsLaunchBehind(false);
             }
             return null;
         }
 
-        private class ScheduleAnimationBuilder {
+        class ScheduleAnimationBuilder {
             final int mType;
             final BackAnimationAdapter mBackAnimationAdapter;
             WindowContainer mCloseTarget;
             WindowContainer mOpenTarget;
-            TaskSnapshot mOpenSnapshot;
             boolean mIsLaunchBehind;
 
             ScheduleAnimationBuilder(int type, BackAnimationAdapter backAnimationAdapter) {
@@ -1011,11 +1031,6 @@ class BackNavigationController {
                 return this;
             }
 
-            ScheduleAnimationBuilder setOpeningSnapshot(TaskSnapshot snapshot) {
-                mOpenSnapshot = snapshot;
-                return this;
-            }
-
             ScheduleAnimationBuilder setIsLaunchBehind(boolean launchBehind) {
                 mIsLaunchBehind = launchBehind;
                 return this;
@@ -1026,17 +1041,32 @@ class BackNavigationController {
                         || wc.hasChild(mOpenTarget) || wc.hasChild(mCloseTarget);
             }
 
+            /**
+             * Apply preview strategy on the opening target
+             * @param open The opening target.
+             * @param visibleOpenActivity  The visible activity in opening target.
+             * @return If the preview strategy is launch behind, returns the Activity that has
+             *         launchBehind set, or null otherwise.
+             */
+            private ActivityRecord applyPreviewStrategy(WindowContainer open,
+                    ActivityRecord visibleOpenActivity) {
+                if (isSupportWindowlessSurface() && mShowWindowlessSurface && !mIsLaunchBehind) {
+                    createStartingSurface(getSnapshot(open));
+                    return null;
+                }
+                setLaunchBehind(visibleOpenActivity);
+                return visibleOpenActivity;
+            }
+
             Runnable build() {
                 if (mOpenTarget == null || mCloseTarget == null) {
                     return null;
                 }
-                final boolean shouldLaunchBehind = mIsLaunchBehind || !isSupportWindowlessSurface();
-                final ActivityRecord launchBehindActivity = !shouldLaunchBehind ? null
-                        : mOpenTarget.asTask() != null
+                final ActivityRecord openActivity = mOpenTarget.asTask() != null
                                 ? mOpenTarget.asTask().getTopNonFinishingActivity()
                                 : mOpenTarget.asActivityRecord() != null
                                         ? mOpenTarget.asActivityRecord() : null;
-                if (shouldLaunchBehind && launchBehindActivity == null) {
+                if (openActivity == null) {
                     Slog.e(TAG, "No opening activity");
                     return null;
                 }
@@ -1044,11 +1074,8 @@ class BackNavigationController {
                 if (!composeAnimations(mCloseTarget, mOpenTarget)) {
                     return null;
                 }
-                if (launchBehindActivity != null) {
-                    setLaunchBehind(launchBehindActivity);
-                } else {
-                    createStartingSurface(mOpenSnapshot);
-                }
+                final ActivityRecord launchBehindActivity =
+                        applyPreviewStrategy(mOpenTarget, openActivity);
 
                 final IBackAnimationFinishedCallback callback = makeAnimationFinishedCallback(
                         launchBehindActivity != null ? triggerBack -> {
@@ -1171,25 +1198,22 @@ class BackNavigationController {
         mPendingAnimationBuilder = null;
     }
 
-    private static TaskSnapshot getActivitySnapshot(@NonNull ActivityRecord r) {
+    static TaskSnapshot getSnapshot(@NonNull WindowContainer w) {
         if (!isScreenshotEnabled()) {
             return null;
         }
-        // Check if we have a screenshot of the previous activity, indexed by its
-        // component name.
-        // TODO return TaskSnapshot when feature complete.
-//        final HardwareBuffer hw = r.getTask().getSnapshotForActivityRecord(r);
-        return null;
-    }
+        if (w.asTask() != null) {
+            final Task task = w.asTask();
+            return  task.mRootWindowContainer.mWindowManager.mTaskSnapshotController.getSnapshot(
+                    task.mTaskId, task.mUserId, false /* restoreFromDisk */,
+                    false /* isLowResolution */);
+        }
 
-    private static TaskSnapshot getTaskSnapshot(Task task) {
-        if (!isScreenshotEnabled()) {
+        if (w.asActivityRecord() != null) {
+            // TODO (b/259497289) return TaskSnapshot when feature complete.
             return null;
         }
-        // Don't read from disk!!
-        return  task.mRootWindowContainer.mWindowManager.mTaskSnapshotController.getSnapshot(
-                task.mTaskId, task.mUserId, false /* restoreFromDisk */,
-                false /* isLowResolution */);
+        return null;
     }
 
     void setWindowManager(WindowManagerService wm) {

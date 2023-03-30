@@ -1119,9 +1119,7 @@ public class ScreenshotController {
 
     /** Reset screenshot view and then call onCompleteRunnable */
     private void finishDismiss() {
-        if (DEBUG_DISMISS) {
-            Log.d(TAG, "finishDismiss");
-        }
+        Log.d(TAG, "finishDismiss");
         if (mLastScrollCaptureRequest != null) {
             mLastScrollCaptureRequest.cancel(true);
             mLastScrollCaptureRequest = null;

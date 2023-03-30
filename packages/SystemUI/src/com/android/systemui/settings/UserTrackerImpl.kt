@@ -161,6 +161,10 @@ open class UserTrackerImpl internal constructor(
 
     private fun registerUserSwitchObserver() {
         iActivityManager.registerUserSwitchObserver(object : UserSwitchObserver() {
+            override fun onBeforeUserSwitching(newUserId: Int) {
+                setUserIdInternal(newUserId)
+            }
+
             override fun onUserSwitching(newUserId: Int, reply: IRemoteCallback?) {
                 backgroundHandler.run {
                     handleUserSwitching(newUserId)
@@ -180,8 +184,6 @@ open class UserTrackerImpl internal constructor(
     protected open fun handleUserSwitching(newUserId: Int) {
         Assert.isNotMainThread()
         Log.i(TAG, "Switching to user $newUserId")
-
-        setUserIdInternal(newUserId)
 
         val list = synchronized(callbacks) {
             callbacks.toList()
@@ -205,7 +207,6 @@ open class UserTrackerImpl internal constructor(
         Assert.isNotMainThread()
         Log.i(TAG, "Switched to user $newUserId")
 
-        setUserIdInternal(newUserId)
         notifySubscribers {
             onUserChanged(newUserId, userContext)
             onProfilesChanged(userProfiles)

@@ -109,6 +109,9 @@ interface ClockEvents {
     /** Call whenever the locale changes */
     fun onLocaleChanged(locale: Locale) {}
 
+    val isReactiveToTone
+        get() = true
+
     /** Call whenever the color palette should update */
     fun onColorPaletteChanged(resources: Resources) {}
 
@@ -137,6 +140,12 @@ interface ClockAnimations {
     fun onPositionUpdated(fromRect: Rect, toRect: Rect, fraction: Float) {}
 
     /**
+     * Runs when swiping clock picker, swipingFraction: 1.0 -> clock is scaled up in the preview,
+     * 0.0 -> clock is scaled down in the shade; previewRatio is previewSize / screenSize
+     */
+    fun onPickerCarouselSwiping(swipingFraction: Float, previewRatio: Float) {}
+
+    /**
      * Whether this clock has a custom position update animation. If true, the keyguard will call
      * `onPositionUpdated` to notify the clock of a position update animation. If false, a default
      * animation will be used (e.g. a simple translation).
@@ -158,8 +167,12 @@ interface ClockFaceEvents {
     val hasCustomWeatherDataDisplay: Boolean
         get() = false
 
-    /** Region Darkness specific to the clock face */
-    fun onRegionDarknessChanged(isDark: Boolean) {}
+    /**
+     * Region Darkness specific to the clock face.
+     * - isRegionDark = dark theme -> clock should be light
+     * - !isRegionDark = light theme -> clock should be dark
+     */
+    fun onRegionDarknessChanged(isRegionDark: Boolean) {}
 
     /**
      * Call whenever font settings change. Pass in a target font size in pixels. The specific clock

@@ -79,7 +79,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.indentIfPossible
-import com.android.wm.shell.TaskViewFactory
+import com.android.wm.shell.taskview.TaskViewFactory
 import dagger.Lazy
 import java.io.PrintWriter
 import java.text.Collator

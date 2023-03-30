@@ -307,7 +307,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Mock
     private PermissionHelper mPermissionHelper;
     private NotificationChannelLoggerFake mLogger = new NotificationChannelLoggerFake();
-    private TestableContext mContext = spy(getContext());
     private final String PKG = mContext.getPackageName();
     private TestableLooper mTestableLooper;
     @Mock
@@ -425,7 +424,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Shell permisssions will override permissions of our app, so add all necessary permissions
         // for this test here:
         InstrumentationRegistry.getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
-                "android.permission.ALLOWLISTED_WRITE_DEVICE_CONFIG",
+                "android.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG",
                 "android.permission.READ_DEVICE_CONFIG",
                 "android.permission.READ_CONTACTS");
 
@@ -578,9 +577,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ArgumentCaptor<IntentFilter> intentFilterCaptor =
                 ArgumentCaptor.forClass(IntentFilter.class);
 
-        Mockito.doReturn(new Intent()).when(mContext).registerReceiverAsUser(
-                any(), any(), any(), any(), any());
-        Mockito.doReturn(new Intent()).when(mContext).registerReceiver(any(), any());
         verify(mContext, atLeastOnce()).registerReceiverAsUser(broadcastReceiverCaptor.capture(),
                 any(), intentFilterCaptor.capture(), any(), any());
         verify(mContext, atLeastOnce()).registerReceiver(broadcastReceiverCaptor.capture(),
@@ -611,6 +607,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mShortcutServiceInternal.isSharingShortcut(anyInt(), anyString(), anyString(),
                 anyString(), anyInt(), any())).thenReturn(true);
         when(mUserManager.isUserUnlocked(any(UserHandle.class))).thenReturn(true);
+        mockIsUserVisible(DEFAULT_DISPLAY, true);
         mockIsVisibleBackgroundUsersSupported(false);
 
         // Set the testable bubble extractor
@@ -6913,6 +6910,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testTextToastsCallStatusBar_nonUiContext_secondaryDisplay()
             throws Exception {
         allowTestPackageToToast();
+        mockIsUserVisible(SECONDARY_DISPLAY_ID, true);
 
         enqueueTextToast(TEST_PACKAGE, "Text", /* isUiContext= */ false, SECONDARY_DISPLAY_ID);
 
@@ -6936,6 +6934,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testTextToastsCallStatusBar_visibleBgUsers_uiContext_secondaryDisplay()
             throws Exception {
         mockIsVisibleBackgroundUsersSupported(true);
+        mockIsUserVisible(SECONDARY_DISPLAY_ID, true);
         mockDisplayAssignedToUser(INVALID_DISPLAY); // make sure it's not used
         allowTestPackageToToast();
 
@@ -6960,12 +6959,33 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testTextToastsCallStatusBar_visibleBgUsers_nonUiContext_secondaryDisplay()
             throws Exception {
         mockIsVisibleBackgroundUsersSupported(true);
+        mockIsUserVisible(SECONDARY_DISPLAY_ID, true);
         mockDisplayAssignedToUser(INVALID_DISPLAY); // make sure it's not used
         allowTestPackageToToast();
 
         enqueueTextToast(TEST_PACKAGE, "Text", /* isUiContext= */ false, SECONDARY_DISPLAY_ID);
 
         verifyToastShownForTestPackage("Text", SECONDARY_DISPLAY_ID);
+    }
+
+    @Test
+    public void testTextToastsCallStatusBar_userNotVisibleOnDisplay() throws Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+        setToastRateIsWithinQuota(true);
+        setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
+        mockIsUserVisible(DEFAULT_DISPLAY, false);
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        // enqueue toast -> no toasts enqueued
+        enqueueTextToast(testPackage, "Text");
+        verify(mStatusBar, never()).showToast(anyInt(), any(), any(), any(), any(), anyInt(), any(),
+                anyInt());
+        assertEquals(0, mService.mToastQueue.size());
     }
 
     @Test
@@ -6985,6 +7005,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // enqueue toast -> no toasts enqueued
         enqueueToast(testPackage, new TestableToastCallback());
+        verify(mStatusBar, never()).showToast(anyInt(), any(), any(), any(), any(), anyInt(), any(),
+                anyInt());
         assertEquals(0, mService.mToastQueue.size());
     }
 
@@ -10806,6 +10828,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     private void mockIsVisibleBackgroundUsersSupported(boolean supported) {
         when(mUm.isVisibleBackgroundUsersSupported()).thenReturn(supported);
+    }
+
+    private void mockIsUserVisible(int displayId, boolean visible) {
+        when(mUmInternal.isUserVisible(mUserId, displayId)).thenReturn(visible);
     }
 
     private void mockDisplayAssignedToUser(int displayId) {
