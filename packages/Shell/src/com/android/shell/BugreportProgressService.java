@@ -1697,7 +1697,7 @@ public class BugreportProgressService extends Service {
     }
 
     private void collapseNotificationBar() {
-        closeSystemDialogs();
+        sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
     }
 
     private static Looper newLooper(String name) {

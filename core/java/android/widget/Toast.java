@@ -206,23 +206,21 @@ public class Toast {
         String pkg = mContext.getOpPackageName();
         TN tn = mTN;
         tn.mNextView = mNextView;
-        final boolean isUiContext = mContext.isUiContext();
         final int displayId = mContext.getDisplayId();
 
         try {
             if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
                 if (mNextView != null) {
                     // It's a custom toast
-                    service.enqueueToast(pkg, mToken, tn, mDuration, isUiContext, displayId);
+                    service.enqueueToast(pkg, mToken, tn, mDuration, displayId);
                 } else {
                     // It's a text toast
                     ITransientNotificationCallback callback =
                             new CallbackBinder(mCallbacks, mHandler);
-                    service.enqueueTextToast(pkg, mToken, mText, mDuration, isUiContext, displayId,
-                            callback);
+                    service.enqueueTextToast(pkg, mToken, mText, mDuration, displayId, callback);
                 }
             } else {
-                service.enqueueToast(pkg, mToken, tn, mDuration, isUiContext, displayId);
+                service.enqueueToast(pkg, mToken, tn, mDuration, displayId);
             }
         } catch (RemoteException e) {
             // Empty

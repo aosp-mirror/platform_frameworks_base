@@ -129,31 +129,15 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun startAppearAnimation_withAutoPinConfirmationFailedPasswordAttemptsLessThan5() {
+    fun startAppearAnimation_withAutoPinConfirmation() {
         `when`(featureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)).thenReturn(true)
         `when`(lockPatternUtils.getPinLength(anyInt())).thenReturn(6)
         `when`(lockPatternUtils.isAutoPinConfirmEnabled(anyInt())).thenReturn(true)
-        `when`(lockPatternUtils.getCurrentFailedPasswordAttempts(anyInt())).thenReturn(3)
         `when`(passwordTextView.text).thenReturn("")
 
         pinViewController.startAppearAnimation()
         verify(deleteButton).visibility = View.INVISIBLE
         verify(enterButton).visibility = View.INVISIBLE
-        verify(passwordTextView).setUsePinShapes(true)
-        verify(passwordTextView).setIsPinHinting(true)
-    }
-
-    @Test
-    fun startAppearAnimation_withAutoPinConfirmationFailedPasswordAttemptsMoreThan5() {
-        `when`(featureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)).thenReturn(true)
-        `when`(lockPatternUtils.getPinLength(anyInt())).thenReturn(6)
-        `when`(lockPatternUtils.isAutoPinConfirmEnabled(anyInt())).thenReturn(true)
-        `when`(lockPatternUtils.getCurrentFailedPasswordAttempts(anyInt())).thenReturn(6)
-        `when`(passwordTextView.text).thenReturn("")
-
-        pinViewController.startAppearAnimation()
-        verify(deleteButton).visibility = View.INVISIBLE
-        verify(enterButton).visibility = View.VISIBLE
         verify(passwordTextView).setUsePinShapes(true)
         verify(passwordTextView).setIsPinHinting(true)
     }

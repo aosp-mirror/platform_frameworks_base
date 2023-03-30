@@ -414,16 +414,6 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
         // This is a no-op. Only implemented for decorators.
     }
 
-    @Override
-    public void clientAttached(IBinder binder) {
-        // This is a no-op. Only implemented for decorators.
-    }
-
-    @Override
-    public void clientDetached(IBinder binder) {
-        // This is a no-op. Only implemented for decorators.
-    }
-
     private Properties getProperties_2_0()
             throws RemoteException {
         AtomicInteger retval = new AtomicInteger(-1);

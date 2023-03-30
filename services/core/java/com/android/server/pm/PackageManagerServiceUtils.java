@@ -32,7 +32,6 @@ import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
 import static com.android.server.pm.PackageManagerService.DEBUG_PREFERRED;
 import static com.android.server.pm.PackageManagerService.RANDOM_CODEPATH_PREFIX;
 import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
-import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.STUB_SUFFIX;
 import static com.android.server.pm.PackageManagerService.TAG;
 
@@ -1516,12 +1515,5 @@ public class PackageManagerServiceUtils {
                 }
             }
         }
-    }
-
-    /**
-     * Check if package name is com.android.shell or is null.
-     */
-    public static boolean isInstalledByAdb(String initiatingPackageName) {
-        return initiatingPackageName == null || SHELL_PACKAGE_NAME.equals(initiatingPackageName);
     }
 }

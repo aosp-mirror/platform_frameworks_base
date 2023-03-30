@@ -43,18 +43,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.R
 import com.android.credentialmanager.ui.theme.EntryShape
@@ -340,7 +336,7 @@ fun MoreOptionTopAppBar(
                         contentDescription = stringResource(
                             R.string.accessibility_back_arrow_button
                         ),
-                        modifier = Modifier.size(24.dp).autoMirrored(),
+                        modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -349,11 +345,4 @@ fun MoreOptionTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
         modifier = Modifier.padding(top = 12.dp, bottom = bottomPadding)
     )
-}
-
-private fun Modifier.autoMirrored() = composed {
-    when (LocalLayoutDirection.current) {
-        LayoutDirection.Rtl -> graphicsLayer(scaleX = -1f)
-        else -> this
-    }
 }

@@ -3052,7 +3052,7 @@ public class ApplicationPackageManager extends PackageManager {
             mPM.setComponentEnabledSetting(componentName, enabled
                     ? COMPONENT_ENABLED_STATE_DEFAULT
                     : COMPONENT_ENABLED_STATE_DISABLED,
-                    DONT_KILL_APP, getUserId(), mContext.getOpPackageName());
+                    DONT_KILL_APP, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3075,8 +3075,7 @@ public class ApplicationPackageManager extends PackageManager {
     public void setComponentEnabledSetting(ComponentName componentName,
                                            int newState, int flags) {
         try {
-            mPM.setComponentEnabledSetting(componentName, newState, flags, getUserId(),
-                    mContext.getOpPackageName());
+            mPM.setComponentEnabledSetting(componentName, newState, flags, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3085,7 +3084,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void setComponentEnabledSettings(List<ComponentEnabledSetting> settings) {
         try {
-            mPM.setComponentEnabledSettings(settings, getUserId(), mContext.getOpPackageName());
+            mPM.setComponentEnabledSettings(settings, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

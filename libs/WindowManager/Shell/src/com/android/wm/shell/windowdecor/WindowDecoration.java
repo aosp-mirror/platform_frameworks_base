@@ -24,14 +24,13 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.Binder;
 import android.view.Display;
+import android.view.InsetsState;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.ViewRootImpl;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 import android.window.TaskConstants;
@@ -59,6 +58,7 @@ import java.util.function.Supplier;
  */
 public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         implements AutoCloseable {
+    private static final int[] CAPTION_INSETS_TYPES = { InsetsState.ITYPE_CAPTION_BAR };
 
     /**
      * System-wide context. Only used to create context with overridden configurations.
@@ -96,7 +96,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     private WindowlessWindowManager mCaptionWindowManager;
     private SurfaceControlViewHost mViewHost;
 
-    private final Binder mOwner = new Binder();
     private final Rect mCaptionInsetsRect = new Rect();
     private final Rect mTaskSurfaceCrop = new Rect();
     private final float[] mTmpColor = new float[3];
@@ -305,9 +304,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
             // Caption insets
             mCaptionInsetsRect.set(taskBounds);
-            mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + captionHeight + params.mCaptionY;
-            wct.addInsetsSource(mTaskInfo.token,
-                    mOwner, 0 /* index */, WindowInsets.Type.captionBar(), mCaptionInsetsRect);
+            mCaptionInsetsRect.bottom =
+                    mCaptionInsetsRect.top + captionHeight + params.mCaptionY;
+            wct.addRectInsetsProvider(mTaskInfo.token, mCaptionInsetsRect,
+                    CAPTION_INSETS_TYPES);
         } else {
             startT.hide(mCaptionContainerSurface);
         }
@@ -372,8 +372,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
 
         final WindowContainerTransaction wct = mWindowContainerTransactionSupplier.get();
-        wct.removeInsetsSource(mTaskInfo.token,
-                mOwner, 0 /* index */, WindowInsets.Type.captionBar());
+        wct.removeInsetsProvider(mTaskInfo.token, CAPTION_INSETS_TYPES);
         mTaskOrganizer.applyTransaction(wct);
     }
 

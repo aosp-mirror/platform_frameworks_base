@@ -54,18 +54,18 @@ public class FalsingDataProviderTest extends ClassifierTest {
     @Mock
     private FoldStateListener mFoldStateListener;
     private final DockManagerFake mDockManager = new DockManagerFake();
-    private DisplayMetrics mDisplayMetrics;
 
     @Before
     public void setup() {
         super.setup();
         MockitoAnnotations.initMocks(this);
-        mDisplayMetrics = new DisplayMetrics();
-        mDisplayMetrics.xdpi = 100;
-        mDisplayMetrics.ydpi = 100;
-        mDisplayMetrics.widthPixels = 1000;
-        mDisplayMetrics.heightPixels = 1000;
-        mDataProvider = createWithFoldCapability(false);
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        displayMetrics.xdpi = 100;
+        displayMetrics.ydpi = 100;
+        displayMetrics.widthPixels = 1000;
+        displayMetrics.heightPixels = 1000;
+        mDataProvider = new FalsingDataProvider(
+                displayMetrics, mBatteryController, mFoldStateListener, mDockManager);
     }
 
     @After
@@ -345,42 +345,20 @@ public class FalsingDataProviderTest extends ClassifierTest {
     }
 
     @Test
-    public void test_UnfoldedState_Folded() {
-        FalsingDataProvider falsingDataProvider = createWithFoldCapability(true);
+    public void test_FoldedState_Folded() {
         when(mFoldStateListener.getFolded()).thenReturn(true);
-        assertThat(falsingDataProvider.isUnfolded()).isFalse();
+        assertThat(mDataProvider.isUnfolded()).isFalse();
     }
 
     @Test
-    public void test_UnfoldedState_Unfolded() {
-        FalsingDataProvider falsingDataProvider = createWithFoldCapability(true);
+    public void test_FoldedState_Unfolded() {
         when(mFoldStateListener.getFolded()).thenReturn(false);
-        assertThat(falsingDataProvider.isUnfolded()).isTrue();
+        assertThat(mDataProvider.isUnfolded()).isTrue();
     }
 
     @Test
-    public void test_Nonfoldabled_TrueFoldState() {
-        FalsingDataProvider falsingDataProvider = createWithFoldCapability(false);
-        when(mFoldStateListener.getFolded()).thenReturn(true);
-        assertThat(falsingDataProvider.isUnfolded()).isFalse();
-    }
-
-    @Test
-    public void test_Nonfoldabled_FalseFoldState() {
-        FalsingDataProvider falsingDataProvider = createWithFoldCapability(false);
-        when(mFoldStateListener.getFolded()).thenReturn(false);
-        assertThat(falsingDataProvider.isUnfolded()).isFalse();
-    }
-
-    @Test
-    public void test_Nonfoldabled_NullFoldState() {
-        FalsingDataProvider falsingDataProvider = createWithFoldCapability(true);
+    public void test_FoldedState_NotFoldable() {
         when(mFoldStateListener.getFolded()).thenReturn(null);
-        assertThat(falsingDataProvider.isUnfolded()).isFalse();
-    }
-
-    private FalsingDataProvider createWithFoldCapability(boolean foldable) {
-        return new FalsingDataProvider(
-                mDisplayMetrics, mBatteryController, mFoldStateListener, mDockManager, foldable);
+        assertThat(mDataProvider.isUnfolded()).isFalse();
     }
 }

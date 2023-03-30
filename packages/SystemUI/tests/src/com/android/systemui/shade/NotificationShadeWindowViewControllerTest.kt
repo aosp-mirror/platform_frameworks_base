@@ -27,12 +27,10 @@ import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollectorFake
-import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.dock.DockManager
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
@@ -69,8 +67,8 @@ import org.mockito.Mockito.anyFloat
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -172,12 +170,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                     MultiShadeMotionEventInteractor(
                         applicationContext = context,
                         applicationScope = testScope.backgroundScope,
-                        multiShadeInteractor = multiShadeInteractor,
-                        keyguardTransitionInteractor =
-                            KeyguardTransitionInteractor(
-                                repository = FakeKeyguardTransitionRepository(),
-                            ),
-                        falsingManager = FalsingManagerFake(),
+                        interactor = multiShadeInteractor,
                     )
                 },
             )

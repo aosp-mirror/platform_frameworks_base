@@ -378,9 +378,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void handleAppCrash() {
-        ArrayList<ActivityRecord> activities = new ArrayList<>(mActivities);
-        for (int i = activities.size() - 1; i >= 0; --i) {
-            final ActivityRecord r = activities.get(i);
+        for (int i = mActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord r = mActivities.get(i);
             Slog.w(TAG, "  Force finishing activity "
                     + r.mActivityComponent.flattenToShortString());
             r.detachFromProcess();

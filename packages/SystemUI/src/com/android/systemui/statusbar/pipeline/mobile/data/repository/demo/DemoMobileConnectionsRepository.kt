@@ -24,6 +24,7 @@ import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBufferFactory
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
@@ -157,10 +158,8 @@ constructor(
     override val defaultDataSubId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
 
     // TODO(b/261029387): not yet supported
-    override val mobileIsDefault: StateFlow<Boolean> = MutableStateFlow(true)
-
-    // TODO(b/261029387): not yet supported
-    override val defaultConnectionIsValidated: StateFlow<Boolean> = MutableStateFlow(true)
+    override val defaultMobileNetworkConnectivity =
+        MutableStateFlow(MobileConnectivityModel(isConnected = true, isValidated = true))
 
     override fun getRepoForSubId(subId: Int): DemoMobileConnectionRepository {
         val current = connectionRepoCache[subId]?.repo

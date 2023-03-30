@@ -29,7 +29,6 @@ import android.media.soundtrigger.SoundModelType;
 import android.media.soundtrigger.Status;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -39,7 +38,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -94,14 +92,13 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
     /**
      * Ctor.
      *
-     * @param halFactory - A factory for the underlying HAL driver.
-     * @param audioSessionProvider - Creates a session token + device id/port pair used to
-     * associate recognition events with the audio stream used to access data.
+     * @param halFactory A factory for the underlying HAL driver.
      */
     SoundTriggerModule(@NonNull HalFactory halFactory,
             @NonNull SoundTriggerMiddlewareImpl.AudioSessionProvider audioSessionProvider) {
-        mHalFactory = Objects.requireNonNull(halFactory);
-        mAudioSessionProvider = Objects.requireNonNull(audioSessionProvider);
+        assert halFactory != null;
+        mHalFactory = halFactory;
+        mAudioSessionProvider = audioSessionProvider;
 
         attachToHal();
     }
@@ -221,7 +218,6 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
      */
     private class Session implements ISoundTriggerModule {
         private ISoundTriggerCallback mCallback;
-        private final IBinder mToken = new Binder();
         private final Map<Integer, Model> mLoadedModels = new HashMap<>();
 
         /**
@@ -231,7 +227,6 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
          */
         private Session(@NonNull ISoundTriggerCallback callback) {
             mCallback = callback;
-            mHalService.clientAttached(mToken);
         }
 
         @Override
@@ -242,7 +237,6 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                 }
                 removeSession(this);
                 mCallback = null;
-                mHalService.clientDetached(mToken);
             }
         }
 

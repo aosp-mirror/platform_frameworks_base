@@ -72,7 +72,7 @@ constructor(
     @Application private val scope: CoroutineScope,
     statusBarPipelineFlags: StatusBarPipelineFlags,
     wifiConstants: WifiConstants,
-) : WifiViewModelCommon {
+) {
     /** Returns the icon to use based on the given network. */
     private fun WifiNetworkModel.icon(): WifiIcon {
         return when (this) {
@@ -106,7 +106,8 @@ constructor(
         }
     }
 
-    override val wifiIcon: StateFlow<WifiIcon> =
+    /** The wifi icon that should be displayed. */
+    private val wifiIcon: StateFlow<WifiIcon> =
         combine(
                 interactor.isEnabled,
                 interactor.isDefault,
@@ -161,17 +162,17 @@ constructor(
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = default)
     }
 
-    override val isActivityInViewVisible: Flow<Boolean> =
+    private val isActivityInViewVisible: Flow<Boolean> =
         activity
             .map { it.hasActivityIn }
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = false)
 
-    override val isActivityOutViewVisible: Flow<Boolean> =
+    private val isActivityOutViewVisible: Flow<Boolean> =
         activity
             .map { it.hasActivityOut }
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = false)
 
-    override val isActivityContainerVisible: Flow<Boolean> =
+    private val isActivityContainerVisible: Flow<Boolean> =
         combine(isActivityInViewVisible, isActivityOutViewVisible) { activityIn, activityOut ->
                 activityIn || activityOut
             }
@@ -180,8 +181,41 @@ constructor(
     // TODO(b/238425913): It isn't ideal for the wifi icon to need to know about whether the
     //  airplane icon is visible. Instead, we should have a parent StatusBarSystemIconsViewModel
     //  that appropriately knows about both icons and sets the padding appropriately.
-    override val isAirplaneSpacerVisible: Flow<Boolean> =
+    private val isAirplaneSpacerVisible: Flow<Boolean> =
         airplaneModeViewModel.isAirplaneModeIconVisible
+
+    /** A view model for the status bar on the home screen. */
+    val home: HomeWifiViewModel =
+        HomeWifiViewModel(
+            statusBarPipelineFlags,
+            wifiIcon,
+            isActivityInViewVisible,
+            isActivityOutViewVisible,
+            isActivityContainerVisible,
+            isAirplaneSpacerVisible,
+        )
+
+    /** A view model for the status bar on keyguard. */
+    val keyguard: KeyguardWifiViewModel =
+        KeyguardWifiViewModel(
+            statusBarPipelineFlags,
+            wifiIcon,
+            isActivityInViewVisible,
+            isActivityOutViewVisible,
+            isActivityContainerVisible,
+            isAirplaneSpacerVisible,
+        )
+
+    /** A view model for the status bar in quick settings. */
+    val qs: QsWifiViewModel =
+        QsWifiViewModel(
+            statusBarPipelineFlags,
+            wifiIcon,
+            isActivityInViewVisible,
+            isActivityOutViewVisible,
+            isActivityContainerVisible,
+            isAirplaneSpacerVisible,
+        )
 
     companion object {
         @StringRes

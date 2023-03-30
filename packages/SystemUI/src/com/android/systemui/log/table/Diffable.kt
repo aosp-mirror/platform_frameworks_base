@@ -70,9 +70,7 @@ fun <T : Diffable<T>> Flow<T>.logDiffsForTable(
 ): Flow<T> {
     // Fully log the initial value to the table.
     val getInitialValue = {
-        tableLogBuffer.logChange(columnPrefix, isInitial = true) { row ->
-            initialValue.logFull(row)
-        }
+        tableLogBuffer.logChange(columnPrefix) { row -> initialValue.logFull(row) }
         initialValue
     }
     return this.pairwiseBy(getInitialValue) { prevVal: T, newVal: T ->
@@ -92,7 +90,7 @@ fun Flow<Boolean>.logDiffsForTable(
     initialValue: Boolean,
 ): Flow<Boolean> {
     val initialValueFun = {
-        tableLogBuffer.logChange(columnPrefix, columnName, initialValue, isInitial = true)
+        tableLogBuffer.logChange(columnPrefix, columnName, initialValue)
         initialValue
     }
     return this.pairwiseBy(initialValueFun) { prevVal, newVal: Boolean ->
@@ -111,7 +109,7 @@ fun Flow<Int>.logDiffsForTable(
     initialValue: Int,
 ): Flow<Int> {
     val initialValueFun = {
-        tableLogBuffer.logChange(columnPrefix, columnName, initialValue, isInitial = true)
+        tableLogBuffer.logChange(columnPrefix, columnName, initialValue)
         initialValue
     }
     return this.pairwiseBy(initialValueFun) { prevVal, newVal: Int ->
@@ -130,7 +128,7 @@ fun Flow<Int?>.logDiffsForTable(
     initialValue: Int?,
 ): Flow<Int?> {
     val initialValueFun = {
-        tableLogBuffer.logChange(columnPrefix, columnName, initialValue, isInitial = true)
+        tableLogBuffer.logChange(columnPrefix, columnName, initialValue)
         initialValue
     }
     return this.pairwiseBy(initialValueFun) { prevVal, newVal: Int? ->
@@ -149,7 +147,7 @@ fun Flow<String?>.logDiffsForTable(
     initialValue: String?,
 ): Flow<String?> {
     val initialValueFun = {
-        tableLogBuffer.logChange(columnPrefix, columnName, initialValue, isInitial = true)
+        tableLogBuffer.logChange(columnPrefix, columnName, initialValue)
         initialValue
     }
     return this.pairwiseBy(initialValueFun) { prevVal, newVal: String? ->
@@ -168,12 +166,7 @@ fun <T> Flow<List<T>>.logDiffsForTable(
     initialValue: List<T>,
 ): Flow<List<T>> {
     val initialValueFun = {
-        tableLogBuffer.logChange(
-            columnPrefix,
-            columnName,
-            initialValue.toString(),
-            isInitial = true,
-        )
+        tableLogBuffer.logChange(columnPrefix, columnName, initialValue.toString())
         initialValue
     }
     return this.pairwiseBy(initialValueFun) { prevVal, newVal: List<T> ->

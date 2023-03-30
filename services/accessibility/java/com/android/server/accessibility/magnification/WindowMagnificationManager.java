@@ -779,10 +779,8 @@ public class WindowMagnificationManager implements
      * @return {@code true} if the event was handled, {@code false} otherwise
      */
     public boolean showMagnificationButton(int displayId, int magnificationMode) {
-        synchronized (mLock) {
-            return mConnectionWrapper != null
-                    && mConnectionWrapper.showMagnificationButton(displayId, magnificationMode);
-        }
+        return mConnectionWrapper != null && mConnectionWrapper.showMagnificationButton(
+                displayId, magnificationMode);
     }
 
     /**
@@ -792,23 +790,8 @@ public class WindowMagnificationManager implements
      * @return {@code true} if the event was handled, {@code false} otherwise
      */
     public boolean removeMagnificationButton(int displayId) {
-        synchronized (mLock) {
-            return mConnectionWrapper != null
-                    && mConnectionWrapper.removeMagnificationButton(displayId);
-        }
-    }
-
-    /**
-     * Requests System UI remove magnification settings panel on the specified display.
-     *
-     * @param displayId The logical display id.
-     * @return {@code true} if the event was handled, {@code false} otherwise
-     */
-    public boolean removeMagnificationSettingsPanel(int displayId) {
-        synchronized (mLock) {
-            return mConnectionWrapper != null
-                    && mConnectionWrapper.removeMagnificationSettingsPanel(displayId);
-        }
+        return mConnectionWrapper != null && mConnectionWrapper.removeMagnificationButton(
+                displayId);
     }
 
     /**

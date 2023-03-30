@@ -271,13 +271,6 @@ public class Vpn {
     static final int DEFAULT_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT = 5 * 60;
 
     /**
-     * Default keepalive value to consider long-lived TCP connections are expensive on the
-     * VPN network from battery usage point of view.
-     * TODO: consider reading from setting.
-     */
-    @VisibleForTesting
-    static final int DEFAULT_LONG_LIVED_TCP_CONNS_EXPENSIVE_TIMEOUT_SEC = 60;
-    /**
      *  Prefer using {@link IkeSessionParams.ESP_IP_VERSION_AUTO} and
      *  {@link IkeSessionParams.ESP_ENCAP_TYPE_AUTO} for ESP packets.
      *
@@ -365,8 +358,9 @@ public class Vpn {
         return mVpnProfileStore;
     }
 
-    private static final int MAX_EVENTS_LOGS = 100;
-    private final LocalLog mEventChanges = new LocalLog(MAX_EVENTS_LOGS);
+    private static final int MAX_EVENTS_LOGS = 20;
+    private final LocalLog mUnderlyNetworkChanges = new LocalLog(MAX_EVENTS_LOGS);
+    private final LocalLog mVpnManagerEvents = new LocalLog(MAX_EVENTS_LOGS);
 
     /**
      * Cached Map of <subscription ID, CarrierConfigInfo> since retrieving the PersistableBundle
@@ -956,7 +950,7 @@ public class Vpn {
             int errorCode, @NonNull final String packageName, @Nullable final String sessionKey,
             @NonNull final VpnProfileState profileState, @Nullable final Network underlyingNetwork,
             @Nullable final NetworkCapabilities nc, @Nullable final LinkProperties lp) {
-        mEventChanges.log("[VMEvent] Event class=" + getVpnManagerEventClassName(errorClass)
+        mVpnManagerEvents.log("Event class=" + getVpnManagerEventClassName(errorClass)
                 + ", err=" + getVpnManagerEventErrorName(errorCode) + " for " + packageName
                 + " on session " + sessionKey);
         final Intent intent = buildVpnManagerEventIntent(category, errorClass, errorCode,
@@ -1106,8 +1100,6 @@ public class Vpn {
         mLockdownAllowlist = (mLockdown && lockdownAllowlist != null)
                 ? Collections.unmodifiableList(new ArrayList<>(lockdownAllowlist))
                 : Collections.emptyList();
-        mEventChanges.log("[LockdownAlwaysOn] Mode changed: lockdown=" + mLockdown + " alwaysOn="
-                + mAlwaysOn + " calling from " + Binder.getCallingUid());
 
         if (isCurrentPreparedPackage(packageName)) {
             updateAlwaysOnNotification(mNetworkInfo.getDetailedState());
@@ -1678,12 +1670,9 @@ public class Vpn {
         capsBuilder.setUids(createUserAndRestrictedProfilesRanges(mUserId,
                 mConfig.allowedApplications, mConfig.disallowedApplications));
 
-        final boolean expensive = areLongLivedTcpConnectionsExpensive(mVpnRunner);
-        capsBuilder.setTransportInfo(new VpnTransportInfo(
-                getActiveVpnType(),
-                mConfig.session,
-                mConfig.allowBypass,
-                expensive));
+        capsBuilder.setTransportInfo(
+                new VpnTransportInfo(getActiveVpnType(), mConfig.session, mConfig.allowBypass,
+                        false /* longLivedTcpConnectionsExpensive */));
 
         // Only apps targeting Q and above can explicitly declare themselves as metered.
         // These VPNs are assumed metered unless they state otherwise.
@@ -1715,17 +1704,6 @@ public class Vpn {
         updateState(DetailedState.CONNECTED, "agentConnect");
     }
 
-    private static boolean areLongLivedTcpConnectionsExpensive(@NonNull VpnRunner runner) {
-        if (!(runner instanceof IkeV2VpnRunner)) return false;
-
-        final int delay = ((IkeV2VpnRunner) runner).getOrGuessKeepaliveDelaySeconds();
-        return areLongLivedTcpConnectionsExpensive(delay);
-    }
-
-    private static boolean areLongLivedTcpConnectionsExpensive(int keepaliveDelaySec) {
-        return keepaliveDelaySec < DEFAULT_LONG_LIVED_TCP_CONNS_EXPENSIVE_TIMEOUT_SEC;
-    }
-
     private boolean canHaveRestrictedProfile(int userId) {
         final long token = Binder.clearCallingIdentity();
         try {
@@ -1737,7 +1715,7 @@ public class Vpn {
     }
 
     private void logUnderlyNetworkChanges(List<Network> networks) {
-        mEventChanges.log("[UnderlyingNW] Switch to "
+        mUnderlyNetworkChanges.log("Switch to "
                 + ((networks != null) ? TextUtils.join(", ", networks) : "null"));
     }
 
@@ -3004,17 +2982,16 @@ public class Vpn {
                     @Override
                     public void onCarrierConfigChanged(int slotIndex, int subId, int carrierId,
                             int specificCarrierId) {
-                        mEventChanges.log("[CarrierConfig] Changed on slot " + slotIndex + " subId="
-                                + subId + " carrerId=" + carrierId
-                                + " specificCarrierId=" + specificCarrierId);
                         synchronized (Vpn.this) {
                             mCachedCarrierConfigInfoPerSubId.remove(subId);
 
                             // Ignore stale runner.
                             if (mVpnRunner != Vpn.IkeV2VpnRunner.this) return;
 
-                            maybeMigrateIkeSessionAndUpdateVpnTransportInfo(mActiveNetwork);
+                            maybeMigrateIkeSession(mActiveNetwork);
                         }
+                        // TODO: update the longLivedTcpConnectionsExpensive value in the
+                        //  networkcapabilities of the VPN network.
                     }
         };
 
@@ -3097,8 +3074,6 @@ public class Vpn {
          */
         public void onIkeOpened(int token, @NonNull IkeSessionConfiguration ikeConfiguration) {
             if (!isActiveToken(token)) {
-                mEventChanges.log("[IKEEvent-" + mSessionKey + "] onIkeOpened obsolete token="
-                        + token);
                 Log.d(TAG, "onIkeOpened called for obsolete token " + token);
                 return;
             }
@@ -3106,12 +3081,7 @@ public class Vpn {
             mMobikeEnabled =
                     ikeConfiguration.isIkeExtensionEnabled(
                             IkeSessionConfiguration.EXTENSION_TYPE_MOBIKE);
-            final IkeSessionConnectionInfo info = ikeConfiguration.getIkeSessionConnectionInfo();
-            mEventChanges.log("[IKEEvent-" + mSessionKey + "] onIkeOpened token=" + token
-                    + ", localAddr=" + info.getLocalAddress()
-                    + ", network=" + info.getNetwork()
-                    + ", mobikeEnabled= " + mMobikeEnabled);
-            onIkeConnectionInfoChanged(token, info);
+            onIkeConnectionInfoChanged(token, ikeConfiguration.getIkeSessionConnectionInfo());
         }
 
         /**
@@ -3124,17 +3094,11 @@ public class Vpn {
          */
         public void onIkeConnectionInfoChanged(
                 int token, @NonNull IkeSessionConnectionInfo ikeConnectionInfo) {
-
             if (!isActiveToken(token)) {
-                mEventChanges.log("[IKEEvent-" + mSessionKey
-                        + "] onIkeConnectionInfoChanged obsolete token=" + token);
                 Log.d(TAG, "onIkeConnectionInfoChanged called for obsolete token " + token);
                 return;
             }
-            mEventChanges.log("[IKEEvent-" + mSessionKey
-                    + "] onIkeConnectionInfoChanged token=" + token
-                    + ", localAddr=" + ikeConnectionInfo.getLocalAddress()
-                    + ", network=" + ikeConnectionInfo.getNetwork());
+
             // The update on VPN and the IPsec tunnel will be done when migration is fully complete
             // in onChildMigrated
             mIkeConnectionInfo = ikeConnectionInfo;
@@ -3148,8 +3112,6 @@ public class Vpn {
          */
         public void onChildOpened(int token, @NonNull ChildSessionConfiguration childConfig) {
             if (!isActiveToken(token)) {
-                mEventChanges.log("[IKEEvent-" + mSessionKey
-                        + "] onChildOpened obsolete token=" + token);
                 Log.d(TAG, "onChildOpened called for obsolete token " + token);
 
                 // Do nothing; this signals that either: (1) a new/better Network was found,
@@ -3159,9 +3121,7 @@ public class Vpn {
                 // sessions are torn down via resetIkeState().
                 return;
             }
-            mEventChanges.log("[IKEEvent-" + mSessionKey + "] onChildOpened token=" + token
-                    + ", addr=" + TextUtils.join(", ", childConfig.getInternalAddresses())
-                    + " dns=" + TextUtils.join(", ", childConfig.getInternalDnsServers()));
+
             try {
                 final String interfaceName = mTunnelIface.getInterfaceName();
                 final List<LinkAddress> internalAddresses = childConfig.getInternalAddresses();
@@ -3258,8 +3218,6 @@ public class Vpn {
         public void onChildTransformCreated(
                 int token, @NonNull IpSecTransform transform, int direction) {
             if (!isActiveToken(token)) {
-                mEventChanges.log("[IKEEvent-" + mSessionKey
-                        + "] onChildTransformCreated obsolete token=" + token);
                 Log.d(TAG, "ChildTransformCreated for obsolete token " + token);
 
                 // Do nothing; this signals that either: (1) a new/better Network was found,
@@ -3269,9 +3227,7 @@ public class Vpn {
                 // sessions are torn down via resetIkeState().
                 return;
             }
-            mEventChanges.log("[IKEEvent-" + mSessionKey
-                    + "] onChildTransformCreated token=" + token + ", direction=" + direction
-                    + ", transform=" + transform);
+
             try {
                 mTunnelIface.setUnderlyingNetwork(mIkeConnectionInfo.getNetwork());
 
@@ -3296,14 +3252,10 @@ public class Vpn {
                 @NonNull IpSecTransform inTransform,
                 @NonNull IpSecTransform outTransform) {
             if (!isActiveToken(token)) {
-                mEventChanges.log("[IKEEvent-" + mSessionKey
-                        + "] onChildMigrated obsolete token=" + token);
                 Log.d(TAG, "onChildMigrated for obsolete token " + token);
                 return;
             }
-            mEventChanges.log("[IKEEvent-" + mSessionKey
-                    + "] onChildMigrated token=" + token
-                    + ", in=" + inTransform + ", out=" + outTransform);
+
             // The actual network of this IKE session has migrated to is
             // mIkeConnectionInfo.getNetwork() instead of mActiveNetwork because mActiveNetwork
             // might have been updated after the migration was triggered.
@@ -3490,7 +3442,7 @@ public class Vpn {
                 return;
             }
 
-            if (maybeMigrateIkeSessionAndUpdateVpnTransportInfo(underlyingNetwork)) return;
+            if (maybeMigrateIkeSession(underlyingNetwork)) return;
 
             startIkeSession(underlyingNetwork);
         }
@@ -3597,43 +3549,7 @@ public class Vpn {
             return new CarrierConfigInfo(mccMnc, natKeepalive, encapType, ipVersion);
         }
 
-        private int getOrGuessKeepaliveDelaySeconds() {
-            if (mProfile.isAutomaticNattKeepaliveTimerEnabled()) {
-                return guessNattKeepaliveTimerForNetwork();
-            } else if (mProfile.getIkeTunnelConnectionParams() != null) {
-                return mProfile.getIkeTunnelConnectionParams()
-                        .getIkeSessionParams().getNattKeepAliveDelaySeconds();
-            }
-            return DEFAULT_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT;
-        }
-
-        boolean maybeMigrateIkeSessionAndUpdateVpnTransportInfo(
-                @NonNull Network underlyingNetwork) {
-            final int keepaliveDelaySec = getOrGuessKeepaliveDelaySeconds();
-            final boolean migrated = maybeMigrateIkeSession(underlyingNetwork, keepaliveDelaySec);
-            if (migrated) {
-                updateVpnTransportInfoAndNetCap(keepaliveDelaySec);
-            }
-            return migrated;
-        }
-
-        public void updateVpnTransportInfoAndNetCap(int keepaliveDelaySec) {
-            final VpnTransportInfo info = new VpnTransportInfo(
-                    getActiveVpnType(),
-                    mConfig.session,
-                    mConfig.allowBypass,
-                    areLongLivedTcpConnectionsExpensive(keepaliveDelaySec));
-            final boolean ncUpdateRequired = !info.equals(mNetworkCapabilities.getTransportInfo());
-            if (ncUpdateRequired) {
-                mNetworkCapabilities = new NetworkCapabilities.Builder(mNetworkCapabilities)
-                        .setTransportInfo(info)
-                        .build();
-                doSendNetworkCapabilities(mNetworkAgent, mNetworkCapabilities);
-            }
-        }
-
-        private boolean maybeMigrateIkeSession(@NonNull Network underlyingNetwork,
-                int keepaliveDelaySeconds) {
+        boolean maybeMigrateIkeSession(@NonNull Network underlyingNetwork) {
             if (mSession == null || !mMobikeEnabled) return false;
 
             // IKE session can schedule a migration event only when IKE AUTH is finished
@@ -3658,6 +3574,15 @@ public class Vpn {
                 encapType = ESP_ENCAP_TYPE_AUTO;
             }
 
+            final int keepaliveDelaySeconds;
+            if (mProfile.isAutomaticNattKeepaliveTimerEnabled()) {
+                keepaliveDelaySeconds = guessNattKeepaliveTimerForNetwork();
+            } else if (mProfile.getIkeTunnelConnectionParams() != null) {
+                keepaliveDelaySeconds = mProfile.getIkeTunnelConnectionParams()
+                        .getIkeSessionParams().getNattKeepAliveDelaySeconds();
+            } else {
+                keepaliveDelaySeconds = DEFAULT_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT;
+            }
             mSession.setNetwork(underlyingNetwork, ipVersion, encapType, keepaliveDelaySeconds);
             return true;
         }
@@ -3731,8 +3656,6 @@ public class Vpn {
 
         /** Called when the NetworkCapabilities of underlying network is changed */
         public void onDefaultNetworkCapabilitiesChanged(@NonNull NetworkCapabilities nc) {
-            mEventChanges.log("[UnderlyingNW] Cap changed from "
-                    + mUnderlyingNetworkCapabilities + " to " + nc);
             final NetworkCapabilities oldNc = mUnderlyingNetworkCapabilities;
             mUnderlyingNetworkCapabilities = nc;
             if (oldNc == null) {
@@ -3740,14 +3663,12 @@ public class Vpn {
                 startOrMigrateIkeSession(mActiveNetwork);
             } else if (!nc.getSubscriptionIds().equals(oldNc.getSubscriptionIds())) {
                 // Renew carrierConfig values.
-                maybeMigrateIkeSessionAndUpdateVpnTransportInfo(mActiveNetwork);
+                maybeMigrateIkeSession(mActiveNetwork);
             }
         }
 
         /** Called when the LinkProperties of underlying network is changed */
         public void onDefaultNetworkLinkPropertiesChanged(@NonNull LinkProperties lp) {
-            mEventChanges.log("[UnderlyingNW] Lp changed from "
-                    + mUnderlyingLinkProperties + " to " + lp);
             mUnderlyingLinkProperties = lp;
         }
 
@@ -3770,7 +3691,7 @@ public class Vpn {
                         Log.d(TAG, "Data stall suspected");
 
                         // Trigger MOBIKE.
-                        maybeMigrateIkeSessionAndUpdateVpnTransportInfo(mActiveNetwork);
+                        maybeMigrateIkeSession(mActiveNetwork);
                         mDataStallSuspected = true;
                     }
                 }
@@ -4752,7 +4673,7 @@ public class Vpn {
         // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
         //  ConnectivityServiceTest.
         if (SdkLevel.isAtLeastT()) {
-            mEventChanges.log("[VMEvent] " + packageName + " stopped");
+            mVpnManagerEvents.log(packageName + " stopped");
             sendEventToVpnManagerApp(intent, packageName);
         }
     }
@@ -5086,21 +5007,23 @@ public class Vpn {
             pw.println("NetworkCapabilities: " + mNetworkCapabilities);
             if (isIkev2VpnRunner()) {
                 final IkeV2VpnRunner runner = ((IkeV2VpnRunner) mVpnRunner);
-                pw.println("SessionKey: " + runner.mSessionKey);
+                pw.println("Token: " + runner.mSessionKey);
                 pw.println("MOBIKE " + (runner.mMobikeEnabled ? "enabled" : "disabled"));
-                pw.println("Profile: " + runner.mProfile);
-                pw.println("Token: " + runner.mCurrentToken);
                 if (mDataStallSuspected) pw.println("Data stall suspected");
                 if (runner.mScheduledHandleDataStallFuture != null) {
                     pw.println("Reset session scheduled");
                 }
             }
-            pw.println();
             pw.println("mCachedCarrierConfigInfoPerSubId=" + mCachedCarrierConfigInfoPerSubId);
 
-            pw.println("mEventChanges (most recent first):");
+            pw.println("mUnderlyNetworkChanges (most recent first):");
             pw.increaseIndent();
-            mEventChanges.reverseDump(pw);
+            mUnderlyNetworkChanges.reverseDump(pw);
+            pw.decreaseIndent();
+
+            pw.println("mVpnManagerEvent (most recent first):");
+            pw.increaseIndent();
+            mVpnManagerEvents.reverseDump(pw);
             pw.decreaseIndent();
         }
     }

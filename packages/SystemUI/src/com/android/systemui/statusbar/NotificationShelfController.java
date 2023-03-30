@@ -55,7 +55,6 @@ public class NotificationShelfController {
         mKeyguardBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
         mView.useRoundnessSourceTypes(featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES));
-        mView.setSensitiveRevealAnimEndabled(featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM));
         mOnAttachStateChangeListener = new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {

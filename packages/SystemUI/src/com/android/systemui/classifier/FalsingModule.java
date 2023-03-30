@@ -43,7 +43,6 @@ public interface FalsingModule {
     String LONG_TAP_TOUCH_SLOP = "falsing_long_tap_slop";
     String DOUBLE_TAP_TOUCH_SLOP = "falsing_double_tap_touch_slop";
     String DOUBLE_TAP_TIMEOUT_MS = "falsing_double_tap_timeout_ms";
-    String IS_FOLDABLE_DEVICE = "falsing_foldable_device";
 
     /** */
     @Binds
@@ -89,17 +88,5 @@ public interface FalsingModule {
     @Named(LONG_TAP_TOUCH_SLOP)
     static float providesLongTapTouchSlop(ViewConfiguration viewConfiguration) {
         return viewConfiguration.getScaledTouchSlop() * 1.25f;
-    }
-
-    /** */
-    @Provides
-    @Named(IS_FOLDABLE_DEVICE)
-    static boolean providesIsFoldableDevice(@Main Resources resources) {
-        try {
-            return resources.getIntArray(
-                    com.android.internal.R.array.config_foldedDeviceStates).length != 0;
-        } catch (Resources.NotFoundException e) {
-            return false;
-        }
     }
 }

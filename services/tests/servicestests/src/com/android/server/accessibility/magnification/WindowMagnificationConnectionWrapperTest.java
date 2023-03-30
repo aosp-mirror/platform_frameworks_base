@@ -116,12 +116,6 @@ public class WindowMagnificationConnectionWrapperTest {
     }
 
     @Test
-    public void removeMagnificationSettingsPanel() throws RemoteException {
-        mConnectionWrapper.removeMagnificationSettingsPanel(TEST_DISPLAY);
-        verify(mConnection).removeMagnificationSettingsPanel(eq(TEST_DISPLAY));
-    }
-
-    @Test
     public void setMirrorWindowCallback() throws RemoteException {
         mConnectionWrapper.setConnectionCallback(mCallback);
         verify(mConnection).setConnectionCallback(mCallback);

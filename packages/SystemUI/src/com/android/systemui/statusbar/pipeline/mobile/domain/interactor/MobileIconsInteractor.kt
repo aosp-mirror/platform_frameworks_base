@@ -25,6 +25,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.dagger.MobileSummaryLog
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
@@ -60,12 +61,8 @@ import kotlinx.coroutines.flow.transformLatest
  * icon
  */
 interface MobileIconsInteractor {
-    /** See [MobileConnectionsRepository.mobileIsDefault]. */
-    val mobileIsDefault: StateFlow<Boolean>
-
     /** List of subscriptions, potentially filtered for CBRS */
     val filteredSubscriptions: Flow<List<SubscriptionModel>>
-
     /** True if the active mobile data subscription has data enabled */
     val activeDataConnectionHasDataEnabled: StateFlow<Boolean>
 
@@ -78,15 +75,20 @@ interface MobileIconsInteractor {
     /** Tracks the subscriptionId set as the default for data connections */
     val defaultDataSubId: StateFlow<Int>
 
+    /**
+     * The connectivity of the default mobile network. Note that this can differ from what is
+     * reported from [MobileConnectionsRepository] in some cases. E.g., when the active subscription
+     * changes but the groupUuid remains the same, we keep the old validation information for 2
+     * seconds to avoid icon flickering.
+     */
+    val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel>
+
     /** The icon mapping from network type to [MobileIconGroup] for the default subscription */
     val defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>
-
     /** Fallback [MobileIconGroup] in the case where there is no icon in the mapping */
     val defaultMobileIconGroup: StateFlow<MobileIconGroup>
-
     /** True only if the default network is mobile, and validation also failed */
     val isDefaultConnectionFailed: StateFlow<Boolean>
-
     /** True once the user has been set up */
     val isUserSetup: StateFlow<Boolean>
 
@@ -113,9 +115,6 @@ constructor(
     userSetupRepo: UserSetupRepository,
     @Application private val scope: CoroutineScope,
 ) : MobileIconsInteractor {
-
-    override val mobileIsDefault = mobileConnectionsRepo.mobileIsDefault
-
     override val activeDataConnectionHasDataEnabled: StateFlow<Boolean> =
         mobileConnectionsRepo.activeMobileDataRepository
             .flatMapLatest { it?.dataEnabled ?: flowOf(false) }
@@ -198,7 +197,7 @@ constructor(
      */
     private val forcingCellularValidation =
         mobileConnectionsRepo.activeSubChangedInGroupEvent
-            .filter { mobileConnectionsRepo.defaultConnectionIsValidated.value }
+            .filter { mobileConnectionsRepo.defaultMobileNetworkConnectivity.value.isValidated }
             .transformLatest {
                 emit(true)
                 delay(2000)
@@ -211,6 +210,32 @@ constructor(
                 initialValue = false,
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel> =
+        combine(
+                mobileConnectionsRepo.defaultMobileNetworkConnectivity,
+                forcingCellularValidation,
+            ) { networkConnectivity, forceValidation ->
+                return@combine if (forceValidation) {
+                    MobileConnectivityModel(
+                        isValidated = true,
+                        isConnected = networkConnectivity.isConnected
+                    )
+                } else {
+                    networkConnectivity
+                }
+            }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogger,
+                columnPrefix = "$LOGGING_PREFIX.defaultConnection",
+                initialValue = mobileConnectionsRepo.defaultMobileNetworkConnectivity.value,
+            )
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                mobileConnectionsRepo.defaultMobileNetworkConnectivity.value
+            )
 
     /**
      * Mapping from network type to [MobileIconGroup] using the config generated for the default
@@ -246,15 +271,12 @@ constructor(
      * other transport type is active, because then we expect there not to be validation.
      */
     override val isDefaultConnectionFailed: StateFlow<Boolean> =
-        combine(
-                mobileConnectionsRepo.mobileIsDefault,
-                mobileConnectionsRepo.defaultConnectionIsValidated,
-                forcingCellularValidation,
-            ) { mobileIsDefault, defaultConnectionIsValidated, forcingCellularValidation ->
-                when {
-                    !mobileIsDefault -> false
-                    forcingCellularValidation -> false
-                    else -> !defaultConnectionIsValidated
+        mobileConnectionsRepo.defaultMobileNetworkConnectivity
+            .mapLatest { connectivityModel ->
+                if (!connectivityModel.isConnected) {
+                    false
+                } else {
+                    !connectivityModel.isValidated
                 }
             }
             .logDiffsForTable(
@@ -279,7 +301,7 @@ constructor(
             activeDataConnectionHasDataEnabled,
             alwaysShowDataRatIcon,
             alwaysUseCdmaLevel,
-            mobileIsDefault,
+            defaultMobileNetworkConnectivity,
             defaultMobileIconMapping,
             defaultMobileIconGroup,
             defaultDataSubId,

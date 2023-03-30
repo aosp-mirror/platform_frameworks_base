@@ -21,7 +21,9 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
@@ -98,6 +100,8 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
                 mock(BiometricSettingsRepository::class.java),
                 mock(DeviceEntryFingerprintAuthRepository::class.java),
                 mock(SystemClock::class.java),
+                mock(KeyguardUpdateMonitor::class.java),
+                mock(FeatureFlags::class.java)
             )
         return createUdfpsKeyguardViewController(
             /* useModernBouncer */ true, /* useExpandedOverlay */

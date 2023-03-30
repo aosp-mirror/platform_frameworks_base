@@ -74,7 +74,9 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
     private boolean mForceUpdate = false;
 
     // We decided to force the visualization of the double-tap animated icons every time the user
-    // double-taps.
+    // double-taps. We detect a double-tap checking the previous and current state of
+    // mLetterboxVerticalPosition and mLetterboxHorizontalPosition saving the result in this
+    // variable.
     private boolean mHasUserDoubleTapped;
 
     // When the size of the letterboxed app changes and the icons are visible
@@ -153,9 +155,11 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
         mLetterboxHorizontalPosition = taskInfo.topActivityLetterboxHorizontalPosition;
         mTopActivityLetterboxWidth = taskInfo.topActivityLetterboxWidth;
         mTopActivityLetterboxHeight = taskInfo.topActivityLetterboxHeight;
-        mHasUserDoubleTapped = taskInfo.isFromLetterboxDoubleTap;
 
-        if (taskInfo.isFromLetterboxDoubleTap) {
+        mHasUserDoubleTapped =
+                mLetterboxVerticalPosition != prevLetterboxVerticalPosition
+                        || prevLetterboxHorizontalPosition != mLetterboxHorizontalPosition;
+        if (mHasUserDoubleTapped) {
             // In this case we disable the reachability for the following launch of
             // the current application. Anyway because a double tap event happened,
             // the reachability education is displayed

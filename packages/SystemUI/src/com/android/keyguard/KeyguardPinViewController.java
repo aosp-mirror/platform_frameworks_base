@@ -38,14 +38,11 @@ public class KeyguardPinViewController
     private LockPatternUtils mLockPatternUtils;
     private final FeatureFlags mFeatureFlags;
     private static final int DEFAULT_PIN_LENGTH = 6;
-    private static final int MIN_FAILED_PIN_ATTEMPTS = 5;
     private NumPadButton mBackspaceKey;
     private View mOkButton = mView.findViewById(R.id.key_enter);
 
     private int mUserId;
     private long mPinLength;
-
-    private int mPasswordFailedAttempts;
 
     protected KeyguardPinViewController(KeyguardPINView view,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -85,10 +82,8 @@ public class KeyguardPinViewController
     protected void onUserInput() {
         super.onUserInput();
         if (isAutoConfirmation()) {
-            updateOKButtonVisibility();
             updateBackSpaceVisibility();
-            if (mPasswordEntry.getText().length() == mPinLength
-                    && mOkButton.getVisibility() == View.INVISIBLE) {
+            if (mPasswordEntry.getText().length() == mPinLength) {
                 verifyPasswordAndUnlock();
             }
         }
@@ -106,7 +101,7 @@ public class KeyguardPinViewController
             mUserId = KeyguardUpdateMonitor.getCurrentUser();
             mPinLength = mLockPatternUtils.getPinLength(mUserId);
             mBackspaceKey.setTransparentMode(/* isTransparentMode= */ isAutoConfirmation());
-            updateOKButtonVisibility();
+            mOkButton.setVisibility(isAutoConfirmation() ? View.INVISIBLE : View.VISIBLE);
             updateBackSpaceVisibility();
             mPasswordEntry.setUsePinShapes(true);
             mPasswordEntry.setIsPinHinting(isAutoConfirmation() && isPinHinting());
@@ -120,18 +115,7 @@ public class KeyguardPinViewController
                 mKeyguardUpdateMonitor.needsSlowUnlockTransition(), finishRunnable);
     }
 
-
-    /**
-     * Updates the visibility of the OK button for auto confirm feature
-     */
-    private void updateOKButtonVisibility() {
-        mPasswordFailedAttempts = mLockPatternUtils.getCurrentFailedPasswordAttempts(mUserId);
-        if (isAutoConfirmation() && mPasswordFailedAttempts < MIN_FAILED_PIN_ATTEMPTS) {
-            mOkButton.setVisibility(View.INVISIBLE);
-        } else {
-            mOkButton.setVisibility(View.VISIBLE);
-        }
-    }
+    //
 
     /**
      *  Updates the visibility and the enabled state of the backspace.

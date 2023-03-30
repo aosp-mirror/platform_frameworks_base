@@ -16,11 +16,15 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.LegacyAlternateBouncer
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -37,7 +41,13 @@ constructor(
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
     private val systemClock: SystemClock,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    featureFlags: FeatureFlags,
 ) {
+    val isModernAlternateBouncerEnabled = featureFlags.isEnabled(Flags.MODERN_ALTERNATE_BOUNCER)
+    var legacyAlternateBouncer: LegacyAlternateBouncer? = null
+    var legacyAlternateBouncerVisibleTime: Long = NOT_VISIBLE
+
     var receivedDownTouch = false
     val isVisible: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
 
@@ -58,8 +68,21 @@ constructor(
      * @return whether alternateBouncer is visible
      */
     fun show(): Boolean {
-        bouncerRepository.setAlternateVisible(canShowAlternateBouncerForFingerprint())
-        return isVisibleState()
+        return when {
+            isModernAlternateBouncerEnabled -> {
+                bouncerRepository.setAlternateVisible(canShowAlternateBouncerForFingerprint())
+                isVisibleState()
+            }
+            canShowAlternateBouncerForFingerprint() -> {
+                if (legacyAlternateBouncer?.showAlternateBouncer() == true) {
+                    legacyAlternateBouncerVisibleTime = systemClock.uptimeMillis()
+                    true
+                } else {
+                    false
+                }
+            }
+            else -> false
+        }
     }
 
     /**
@@ -71,13 +94,21 @@ constructor(
      */
     fun hide(): Boolean {
         receivedDownTouch = false
-        val wasAlternateBouncerVisible = isVisibleState()
-        bouncerRepository.setAlternateVisible(false)
-        return wasAlternateBouncerVisible && !isVisibleState()
+        return if (isModernAlternateBouncerEnabled) {
+            val wasAlternateBouncerVisible = isVisibleState()
+            bouncerRepository.setAlternateVisible(false)
+            wasAlternateBouncerVisible && !isVisibleState()
+        } else {
+            legacyAlternateBouncer?.hideAlternateBouncer() ?: false
+        }
     }
 
     fun isVisibleState(): Boolean {
-        return bouncerRepository.alternateBouncerVisible.value
+        return if (isModernAlternateBouncerEnabled) {
+            bouncerRepository.alternateBouncerVisible.value
+        } else {
+            legacyAlternateBouncer?.isShowingAlternateBouncer ?: false
+        }
     }
 
     fun setAlternateBouncerUIAvailable(isAvailable: Boolean) {
@@ -85,13 +116,18 @@ constructor(
     }
 
     fun canShowAlternateBouncerForFingerprint(): Boolean {
-        return bouncerRepository.alternateBouncerUIAvailable.value &&
-            biometricSettingsRepository.isFingerprintEnrolled.value &&
-            biometricSettingsRepository.isStrongBiometricAllowed.value &&
-            biometricSettingsRepository.isFingerprintEnabledByDevicePolicy.value &&
-            !deviceEntryFingerprintAuthRepository.isLockedOut.value &&
-            !keyguardStateController.isUnlocked &&
-            !statusBarStateController.isDozing
+        return if (isModernAlternateBouncerEnabled) {
+            bouncerRepository.alternateBouncerUIAvailable.value &&
+                biometricSettingsRepository.isFingerprintEnrolled.value &&
+                biometricSettingsRepository.isStrongBiometricAllowed.value &&
+                biometricSettingsRepository.isFingerprintEnabledByDevicePolicy.value &&
+                !deviceEntryFingerprintAuthRepository.isLockedOut.value &&
+                !keyguardStateController.isUnlocked &&
+                !statusBarStateController.isDozing
+        } else {
+            legacyAlternateBouncer != null &&
+                keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(true)
+        }
     }
 
     /**
@@ -99,8 +135,12 @@ constructor(
      * alternate bouncer and show the primary bouncer.
      */
     fun hasAlternateBouncerShownWithMinTime(): Boolean {
-        return (systemClock.uptimeMillis() - bouncerRepository.lastAlternateBouncerVisibleTime) >
-            MIN_VISIBILITY_DURATION_UNTIL_TOUCHES_DISMISS_ALTERNATE_BOUNCER_MS
+        return if (isModernAlternateBouncerEnabled) {
+            (systemClock.uptimeMillis() - bouncerRepository.lastAlternateBouncerVisibleTime) >
+                MIN_VISIBILITY_DURATION_UNTIL_TOUCHES_DISMISS_ALTERNATE_BOUNCER_MS
+        } else {
+            systemClock.uptimeMillis() - legacyAlternateBouncerVisibleTime > 200
+        }
     }
 
     private fun maybeHide() {
@@ -111,5 +151,6 @@ constructor(
 
     companion object {
         private const val MIN_VISIBILITY_DURATION_UNTIL_TOUCHES_DISMISS_ALTERNATE_BOUNCER_MS = 200L
+        private const val NOT_VISIBLE = -1L
     }
 }

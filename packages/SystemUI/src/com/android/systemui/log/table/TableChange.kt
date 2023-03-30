@@ -16,31 +16,25 @@
 
 package com.android.systemui.log.table
 
-import androidx.annotation.VisibleForTesting
-
 /**
  * A object used with [TableLogBuffer] to store changes in variables over time. Is recyclable.
  *
  * Each message represents a change to exactly 1 type, specified by [DataType].
- *
- * @property isInitial see [TableLogBuffer.logChange(String, Boolean, (TableRowLogger) -> Unit].
  */
 data class TableChange(
     var timestamp: Long = 0,
     var columnPrefix: String = "",
     var columnName: String = "",
-    var isInitial: Boolean = false,
     var type: DataType = DataType.EMPTY,
     var bool: Boolean = false,
     var int: Int? = null,
     var str: String? = null,
 ) {
     /** Resets to default values so that the object can be recycled. */
-    fun reset(timestamp: Long, columnPrefix: String, columnName: String, isInitial: Boolean) {
+    fun reset(timestamp: Long, columnPrefix: String, columnName: String) {
         this.timestamp = timestamp
         this.columnPrefix = columnPrefix
         this.columnName = columnName
-        this.isInitial = isInitial
         this.type = DataType.EMPTY
         this.bool = false
         this.int = 0
@@ -67,7 +61,7 @@ data class TableChange(
 
     /** Updates this to store the same value as [change]. */
     fun updateTo(change: TableChange) {
-        reset(change.timestamp, change.columnPrefix, change.columnName, change.isInitial)
+        reset(change.timestamp, change.columnPrefix, change.columnName)
         when (change.type) {
             DataType.STRING -> set(change.str)
             DataType.INT -> set(change.int)
@@ -90,14 +84,12 @@ data class TableChange(
     }
 
     fun getVal(): String {
-        val value =
-            when (type) {
-                DataType.EMPTY -> null
-                DataType.STRING -> str
-                DataType.INT -> int
-                DataType.BOOLEAN -> bool
-            }.toString()
-        return "${if (isInitial) IS_INITIAL_PREFIX else ""}$value"
+        return when (type) {
+            DataType.EMPTY -> null
+            DataType.STRING -> str
+            DataType.INT -> int
+            DataType.BOOLEAN -> bool
+        }.toString()
     }
 
     enum class DataType {
@@ -105,9 +97,5 @@ data class TableChange(
         BOOLEAN,
         INT,
         EMPTY,
-    }
-
-    companion object {
-        @VisibleForTesting const val IS_INITIAL_PREFIX = "**"
     }
 }

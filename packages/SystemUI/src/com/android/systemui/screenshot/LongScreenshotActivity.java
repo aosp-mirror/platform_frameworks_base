@@ -47,6 +47,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.screenshot.ScrollCaptureController.LongScreenshot;
 import com.android.systemui.settings.UserTracker;
 
@@ -334,7 +335,8 @@ public class LongScreenshotActivity extends Activity {
     }
 
     private void doEdit(Uri uri) {
-        if (mScreenshotUserHandle != Process.myUserHandle()) {
+        if (mFeatureFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY) && mScreenshotUserHandle
+                != Process.myUserHandle()) {
             // TODO: Fix transition for work profile. Omitting it in the meantime.
             mActionExecutor.launchIntentAsync(
                     ActionIntentCreator.INSTANCE.createEditIntent(uri, this),
@@ -363,9 +365,21 @@ public class LongScreenshotActivity extends Activity {
     }
 
     private void doShare(Uri uri) {
-        Intent shareIntent = ActionIntentCreator.INSTANCE.createShareIntent(uri);
-        mActionExecutor.launchIntentAsync(shareIntent, null,
-                mScreenshotUserHandle.getIdentifier(), false);
+        if (mFeatureFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)) {
+            Intent shareIntent = ActionIntentCreator.INSTANCE.createShareIntent(uri);
+            mActionExecutor.launchIntentAsync(shareIntent, null,
+                    mScreenshotUserHandle.getIdentifier(), false);
+        } else {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("image/png");
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Intent sharingChooserIntent = Intent.createChooser(intent, null)
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            startActivityAsUser(sharingChooserIntent, mUserTracker.getUserHandle());
+        }
     }
 
     private void onClicked(View v) {
@@ -407,7 +421,8 @@ public class LongScreenshotActivity extends Activity {
         mOutputBitmap = renderBitmap(drawable, bounds);
         ListenableFuture<ImageExporter.Result> exportFuture = mImageExporter.export(
                 mBackgroundExecutor, UUID.randomUUID(), mOutputBitmap, ZonedDateTime.now(),
-                mScreenshotUserHandle);
+                mFeatureFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)
+                        ? mScreenshotUserHandle : Process.myUserHandle());
         exportFuture.addListener(() -> onExportCompleted(action, exportFuture), mUiExecutor);
     }
 

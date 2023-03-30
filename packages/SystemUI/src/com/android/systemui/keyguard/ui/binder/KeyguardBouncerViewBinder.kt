@@ -109,32 +109,32 @@ object KeyguardBouncerViewBinder {
                 try {
                     viewModel.setBouncerViewDelegate(delegate)
                     launch {
-                        viewModel.isShowing.collect { isShowing ->
-                            if (isShowing) {
+                        viewModel.show.collect {
+                            // Reset Security Container entirely.
+                            securityContainerController.reinflateViewFlipper {
                                 // Reset Security Container entirely.
-                                securityContainerController.reinflateViewFlipper {
-                                    // Reset Security Container entirely.
-                                    view.visibility = View.VISIBLE
-                                    securityContainerController.onBouncerVisibilityChanged(
-                                        /* isVisible= */ true
-                                    )
-                                    securityContainerController.showPrimarySecurityScreen(
-                                        /* turningOff= */ false
-                                    )
-                                    securityContainerController.appear()
-                                    securityContainerController.onResume(
-                                        KeyguardSecurityView.SCREEN_ON
-                                    )
-                                }
-                            } else {
-                                view.visibility = View.INVISIBLE
+                                view.visibility = View.VISIBLE
                                 securityContainerController.onBouncerVisibilityChanged(
-                                    /* isVisible= */ false
+                                    /* isVisible= */ true
                                 )
-                                securityContainerController.cancelDismissAction()
-                                securityContainerController.reset()
-                                securityContainerController.onPause()
+                                securityContainerController.showPrimarySecurityScreen(
+                                    /* turningOff= */ false
+                                )
+                                securityContainerController.appear()
+                                securityContainerController.onResume(KeyguardSecurityView.SCREEN_ON)
                             }
+                        }
+                    }
+
+                    launch {
+                        viewModel.hide.collect {
+                            view.visibility = View.INVISIBLE
+                            securityContainerController.onBouncerVisibilityChanged(
+                                /* isVisible= */ false
+                            )
+                            securityContainerController.cancelDismissAction()
+                            securityContainerController.reset()
+                            securityContainerController.onPause()
                         }
                     }
 

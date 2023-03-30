@@ -348,8 +348,7 @@ class ProcessErrorStateRecord {
             if (mService.mTraceErrorLogger != null
                     && mService.mTraceErrorLogger.isAddErrorIdEnabled()) {
                 errorId = mService.mTraceErrorLogger.generateErrorId();
-                mService.mTraceErrorLogger.addProcessInfoAndErrorIdToTrace(
-                        mApp.processName, pid, errorId);
+                mService.mTraceErrorLogger.addErrorIdToTrace(mApp.processName, errorId);
                 mService.mTraceErrorLogger.addSubjectToTrace(annotation, errorId);
             } else {
                 errorId = null;

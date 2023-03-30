@@ -185,22 +185,6 @@ class WindowMagnificationConnectionWrapper {
         return true;
     }
 
-    boolean removeMagnificationSettingsPanel(int displayId) {
-        if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
-            mTrace.logTrace(TAG + ".removeMagnificationSettingsPanel",
-                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION, "displayId=" + displayId);
-        }
-        try {
-            mConnection.removeMagnificationSettingsPanel(displayId);
-        } catch (RemoteException e) {
-            if (DBG) {
-                Slog.e(TAG, "Error calling removeMagnificationSettingsPanel()", e);
-            }
-            return false;
-        }
-        return true;
-    }
-
     boolean setConnectionCallback(IWindowMagnificationConnectionCallback connectionCallback) {
         if (mTrace.isA11yTracingEnabledForTypes(
                 FLAGS_WINDOW_MAGNIFICATION_CONNECTION

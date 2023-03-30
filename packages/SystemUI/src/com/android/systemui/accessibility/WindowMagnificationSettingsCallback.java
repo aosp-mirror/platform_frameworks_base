@@ -29,8 +29,7 @@ public interface WindowMagnificationSettingsCallback {
      *
      * @param index Magnification size index.
      * 0 : MagnificationSize.NONE, 1 : MagnificationSize.SMALL,
-     * 2 : MagnificationSize.MEDIUM, 3: MagnificationSize.LARGE,
-     * 4 : MagnificationSize.FULLSCREEN
+     * 2 : MagnificationSize.MEDIUM, 3: MagnificationSize.LARGE
      */
     void onSetMagnifierSize(@MagnificationSize int index);
 

@@ -98,7 +98,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private float mCornerAnimationDistance;
     private NotificationShelfController mController;
     private float mActualWidth = -1;
-    private boolean mSensitiveRevealAnimEndabled;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -261,14 +260,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             }
 
             final float stackEnd = ambientState.getStackY() + ambientState.getStackHeight();
-            if (mSensitiveRevealAnimEndabled && viewState.hidden) {
-                // if the shelf is hidden, position it at the end of the stack (plus the clip
-                // padding), such that when it appears animated, it will smoothly move in from the
-                // bottom, without jump cutting any notifications
-                viewState.setYTranslation(stackEnd + mPaddingBetweenElements);
-            } else {
-                viewState.setYTranslation(stackEnd - viewState.height);
-            }
+            viewState.setYTranslation(stackEnd - viewState.height);
         } else {
             viewState.hidden = true;
             viewState.location = ExpandableViewState.LOCATION_GONE;
@@ -403,8 +395,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                     expandingAnimated, isLastChild, shelfClipStart);
 
             // TODO(b/172289889) scale mPaddingBetweenElements with expansion amount
-            if ((!mSensitiveRevealAnimEndabled && ((isLastChild && !child.isInShelf())
-                    || backgroundForceHidden)) || aboveShelf) {
+            if ((isLastChild && !child.isInShelf()) || aboveShelf || backgroundForceHidden) {
                 notificationClipEnd = shelfStart + getIntrinsicHeight();
             } else {
                 notificationClipEnd = shelfStart - mPaddingBetweenElements;
@@ -446,14 +437,15 @@ public class NotificationShelf extends ActivatableNotificationView implements
             }
 
             if (child instanceof ActivatableNotificationView) {
-                ActivatableNotificationView anv = (ActivatableNotificationView) child;
+                ActivatableNotificationView anv =
+                        (ActivatableNotificationView) child;
                 // Because we show whole notifications on the lockscreen, the bottom notification is
                 // always "just about to enter the shelf" by normal scrolling rules.  This is fine
                 // if the shelf is visible, but if the shelf is hidden, it causes incorrect curling.
                 // notificationClipEnd handles the discrepancy between a visible and hidden shelf,
                 // so we use that when on the keyguard (and while animating away) to reduce curling.
-                final float keyguardSafeShelfStart = !mSensitiveRevealAnimEndabled
-                        && mAmbientState.isOnKeyguard() ? notificationClipEnd : shelfStart;
+                final float keyguardSafeShelfStart =
+                        mAmbientState.isOnKeyguard() ? notificationClipEnd : shelfStart;
                 updateCornerRoundnessOnScroll(anv, viewStart, keyguardSafeShelfStart);
             }
         }
@@ -999,14 +991,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
     public void setIndexOfFirstViewInShelf(ExpandableView firstViewInShelf) {
         mIndexOfFirstViewInShelf = mHostLayoutController.indexOfChild(firstViewInShelf);
-    }
-
-    /**
-     * Set whether the sensitive reveal animation feature flag is enabled
-     * @param enabled true if enabled
-     */
-    public void setSensitiveRevealAnimEndabled(boolean enabled) {
-        mSensitiveRevealAnimEndabled = enabled;
     }
 
     /**

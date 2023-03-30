@@ -29,6 +29,7 @@ import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import com.android.internal.util.ScreenshotRequest
 import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.screenshot.ScreenshotPolicy.DisplayContentInfo
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -52,10 +53,10 @@ class RequestProcessorTest {
     /** Tests the Java-compatible function wrapper, ensures callback is invoked. */
     @Test
     fun testProcessAsync() {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, false)
+
         val request =
-            ScreenshotRequest.Builder(TAKE_SCREENSHOT_PROVIDED_IMAGE, SCREENSHOT_KEY_OTHER)
-                .setBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
-                .build()
+            ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER).build()
         val processor = RequestProcessor(imageCapture, policy, flags, scope)
 
         var result: ScreenshotRequest? = null
@@ -76,11 +77,11 @@ class RequestProcessorTest {
     /** Tests the Java-compatible function wrapper, ensures callback is invoked. */
     @Test
     fun testProcessAsync_ScreenshotData() {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, false)
+
         val request =
             ScreenshotData.fromRequest(
-                ScreenshotRequest.Builder(TAKE_SCREENSHOT_PROVIDED_IMAGE, SCREENSHOT_KEY_OTHER)
-                    .setBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
-                    .build()
+                ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER).build()
             )
         val processor = RequestProcessor(imageCapture, policy, flags, scope)
 
@@ -100,7 +101,28 @@ class RequestProcessorTest {
     }
 
     @Test
+    fun testFullScreenshot_workProfilePolicyDisabled() = runBlocking {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, false)
+
+        val request =
+            ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER).build()
+        val processor = RequestProcessor(imageCapture, policy, flags, scope)
+
+        val processedRequest = processor.process(request)
+
+        // No changes
+        assertThat(processedRequest).isEqualTo(request)
+
+        val screenshotData = ScreenshotData.fromRequest(request)
+        val processedData = processor.process(screenshotData)
+
+        assertThat(processedData).isEqualTo(screenshotData)
+    }
+
+    @Test
     fun testFullScreenshot() = runBlocking {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, true)
+
         // Indicate that the primary content belongs to a normal user
         policy.setManagedProfile(USER_ID, false)
         policy.setDisplayContentInfo(
@@ -129,6 +151,8 @@ class RequestProcessorTest {
 
     @Test
     fun testFullScreenshot_managedProfile() = runBlocking {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, true)
+
         // Provide a fake task bitmap when asked
         val bitmap = makeHardwareBitmap(100, 100)
         imageCapture.image = bitmap
@@ -171,6 +195,8 @@ class RequestProcessorTest {
 
     @Test
     fun testFullScreenshot_managedProfile_nullBitmap() {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, true)
+
         // Provide a null task bitmap when asked
         imageCapture.image = null
 
@@ -194,7 +220,39 @@ class RequestProcessorTest {
     }
 
     @Test
+    fun testProvidedImageScreenshot_workProfilePolicyDisabled() = runBlocking {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, false)
+
+        val bounds = Rect(50, 50, 150, 150)
+        val processor = RequestProcessor(imageCapture, policy, flags, scope)
+
+        val bitmap = makeHardwareBitmap(100, 100)
+
+        val request =
+            ScreenshotRequest.Builder(TAKE_SCREENSHOT_PROVIDED_IMAGE, SCREENSHOT_OTHER)
+                .setTopComponent(component)
+                .setTaskId(TASK_ID)
+                .setUserId(USER_ID)
+                .setBitmap(bitmap)
+                .setBoundsOnScreen(bounds)
+                .setInsets(Insets.NONE)
+                .build()
+
+        val processedRequest = processor.process(request)
+
+        // No changes
+        assertThat(processedRequest).isEqualTo(request)
+
+        val screenshotData = ScreenshotData.fromRequest(request)
+        val processedData = processor.process(screenshotData)
+
+        assertThat(processedData).isEqualTo(screenshotData)
+    }
+
+    @Test
     fun testProvidedImageScreenshot() = runBlocking {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, true)
+
         val bounds = Rect(50, 50, 150, 150)
         val processor = RequestProcessor(imageCapture, policy, flags, scope)
 
@@ -225,6 +283,8 @@ class RequestProcessorTest {
 
     @Test
     fun testProvidedImageScreenshot_managedProfile() = runBlocking {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, true)
+
         val bounds = Rect(50, 50, 150, 150)
         val processor = RequestProcessor(imageCapture, policy, flags, scope)
 

@@ -249,8 +249,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             }
             case DO_SELECT_AUDIO_PRESENTATION: {
                 SomeArgs args = (SomeArgs) msg.obj;
-                mTvInputSessionImpl.selectAudioPresentation(
-                        (Integer) args.arg1, (Integer) args.arg2);
+                mTvInputSessionImpl.selectAudioPresentation(args.argi1, args.argi2);
                 args.recycle();
                 break;
             }
@@ -349,8 +348,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
 
     @Override
     public void selectAudioPresentation(int presentationId, int programId) {
-        mCaller.executeOrSendMessage(
-                mCaller.obtainMessageOO(DO_SELECT_AUDIO_PRESENTATION, presentationId, programId));
+        mCaller.executeOrSendMessage(mCaller.obtainMessageII(DO_SELECT_AUDIO_PRESENTATION,
+                                                             presentationId, programId));
     }
 
     @Override

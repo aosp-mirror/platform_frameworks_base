@@ -49,7 +49,7 @@ public class ModeSwitchesControllerTest extends SysuiTestCase {
     private ModeSwitchesController mModeSwitchesController;
     private View mSpyView;
     @Mock
-    private MagnificationModeSwitch.ClickListener mListener;
+    private MagnificationModeSwitch.SwitchListener mListener;
 
 
     @Before
@@ -57,7 +57,7 @@ public class ModeSwitchesControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mSupplier = new FakeSwitchSupplier(mContext.getSystemService(DisplayManager.class));
         mModeSwitchesController = new ModeSwitchesController(mSupplier);
-        mModeSwitchesController.setClickListenerDelegate(mListener);
+        mModeSwitchesController.setSwitchListenerDelegate(mListener);
         mModeSwitch = Mockito.spy(new MagnificationModeSwitch(mContext, mModeSwitchesController));
         mSpyView = Mockito.spy(new View(mContext));
     }
@@ -101,7 +101,8 @@ public class ModeSwitchesControllerTest extends SysuiTestCase {
 
         mModeSwitch.onSingleTap(mSpyView);
 
-        verify(mListener).onClick(mContext.getDisplayId());
+        verify(mListener).onSwitch(mContext.getDisplayId(),
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
     }
 
     private class FakeSwitchSupplier extends DisplayIdIndexSupplier<MagnificationModeSwitch> {

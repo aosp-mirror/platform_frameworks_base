@@ -17,8 +17,6 @@
 package com.android.server.media;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager;
-import android.app.ActivityManagerInternal;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -56,8 +54,6 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.KeyEvent;
-
-import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -426,13 +422,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
      */
     @Override
     public void close() {
-        // Log the session's active state
-        // to measure usage of foreground service resources
-        int callingUid = Binder.getCallingUid();
-        int callingPid = Binder.getCallingPid();
-        LocalServices.getService(ActivityManagerInternal.class)
-                .logFgsApiEnd(ActivityManager.FOREGROUND_SERVICE_API_TYPE_MEDIA_PLAYBACK,
-                callingUid, callingPid);
         synchronized (mLock) {
             if (mDestroyed) {
                 return;
@@ -895,22 +884,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
         @Override
         public void setActive(boolean active) throws RemoteException {
-            // Log the session's active state
-            // to measure usage of foreground service resources
-            int callingUid = Binder.getCallingUid();
-            int callingPid = Binder.getCallingPid();
-            if (active) {
-                LocalServices.getService(ActivityManagerInternal.class)
-                        .logFgsApiBegin(ActivityManager.FOREGROUND_SERVICE_API_TYPE_MEDIA_PLAYBACK,
-                                callingUid, callingPid);
-            } else {
-                LocalServices.getService(ActivityManagerInternal.class)
-                        .logFgsApiEnd(ActivityManager.FOREGROUND_SERVICE_API_TYPE_MEDIA_PLAYBACK,
-                                callingUid, callingPid);
-            }
-
             mIsActive = active;
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 mService.onSessionActiveStateChanged(MediaSessionRecord.this);
             } finally {

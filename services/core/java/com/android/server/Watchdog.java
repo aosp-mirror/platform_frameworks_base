@@ -880,8 +880,7 @@ public class Watchdog implements Dumpable {
                 CriticalEventLog.getInstance().logLinesForSystemServerTraceFile();
         final UUID errorId = mTraceErrorLogger.generateErrorId();
         if (mTraceErrorLogger.isAddErrorIdEnabled()) {
-            mTraceErrorLogger.addProcessInfoAndErrorIdToTrace("system_server", Process.myPid(),
-                    errorId);
+            mTraceErrorLogger.addErrorIdToTrace("system_server", errorId);
             mTraceErrorLogger.addSubjectToTrace(subject, errorId);
         }
 

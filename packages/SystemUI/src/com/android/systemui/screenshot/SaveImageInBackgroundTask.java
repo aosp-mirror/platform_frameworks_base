@@ -49,6 +49,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -120,13 +121,16 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         }
         // TODO: move to constructor / from ScreenshotRequest
         final UUID requestId = UUID.randomUUID();
+        final UserHandle user = mFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)
+                ? mParams.owner : getUserHandleOfForegroundApplication(mContext);
 
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
         Bitmap image = mParams.image;
         mScreenshotId = String.format(SCREENSHOT_ID_TEMPLATE, requestId);
 
-        boolean savingToOtherUser = mParams.owner != Process.myUserHandle();
+        boolean savingToOtherUser = mFlags.isEnabled(Flags.SCREENSHOT_WORK_PROFILE_POLICY)
+                && (user != Process.myUserHandle());
         // Smart actions don't yet work for cross-user saves.
         boolean smartActionsEnabled = !savingToOtherUser
                 && DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -137,7 +141,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 // Since Quick Share target recommendation does not rely on image URL, it is
                 // queried and surfaced before image compress/export. Action intent would not be
                 // used, because it does not contain image URL.
-                queryQuickShareAction(image, mParams.owner);
+                queryQuickShareAction(image, user);
             }
 
             // Call synchronously here since already on a background thread.
@@ -152,7 +156,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     mScreenshotSmartActions.getSmartActionsFuture(
                             mScreenshotId, uri, image, mSmartActionsProvider,
                             ScreenshotSmartActionType.REGULAR_SMART_ACTIONS,
-                            smartActionsEnabled, mParams.owner);
+                            smartActionsEnabled, user);
             List<Notification.Action> smartActions = new ArrayList<>();
             if (smartActionsEnabled) {
                 int timeoutMs = DeviceConfig.getInt(
@@ -168,7 +172,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             }
 
             mImageData.uri = uri;
-            mImageData.owner = mParams.owner;
+            mImageData.owner = user;
             mImageData.smartActions = smartActions;
             mImageData.shareTransition = createShareAction(mContext, mContext.getResources(), uri,
                     smartActionsEnabled);

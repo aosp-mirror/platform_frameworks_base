@@ -2643,15 +2643,7 @@ public class DisplayModeDirector {
         public void observe() {
             StatusBarManagerInternal statusBar =
                     LocalServices.getService(StatusBarManagerInternal.class);
-            if (statusBar == null) {
-                return;
-            }
-
-            // Allow UDFPS vote by registering callback, only
-            // if the device is configured to not ignore UDFPS vote.
-            boolean ignoreUdfpsVote = mContext.getResources()
-                        .getBoolean(R.bool.config_ignoreUdfpsVote);
-            if (!ignoreUdfpsVote) {
+            if (statusBar != null) {
                 statusBar.setUdfpsRefreshRateCallback(this);
             }
         }

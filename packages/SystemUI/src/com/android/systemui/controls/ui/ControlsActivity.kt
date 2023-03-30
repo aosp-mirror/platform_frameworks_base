@@ -47,8 +47,7 @@ import javax.inject.Inject
  * destroyed on SCREEN_OFF events, due to issues with occluded activities over lockscreen as well as
  * user expectations for the activity to not continue running.
  */
-// Open for testing
-open class ControlsActivity @Inject constructor(
+class ControlsActivity @Inject constructor(
     private val uiController: ControlsUiController,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val dreamManager: IDreamManager,
@@ -99,11 +98,8 @@ open class ControlsActivity @Inject constructor(
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        val interestingFlags = ActivityInfo.CONFIG_ORIENTATION or
-                ActivityInfo.CONFIG_SCREEN_SIZE or
-                ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE
-        if (lastConfiguration.diff(newConfig) and interestingFlags != 0 ) {
-            uiController.onSizeChange()
+        if (lastConfiguration.diff(newConfig) and ActivityInfo.CONFIG_ORIENTATION != 0 ) {
+            uiController.onOrientationChange()
         }
         lastConfiguration = newConfig
     }

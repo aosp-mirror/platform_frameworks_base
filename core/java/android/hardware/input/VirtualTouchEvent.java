@@ -23,8 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemClock;
-import android.view.InputEvent;
 import android.view.MotionEvent;
 
 import java.lang.annotation.Retention;
@@ -96,10 +94,9 @@ public final class VirtualTouchEvent implements Parcelable {
     private final float mY;
     private final float mPressure;
     private final float mMajorAxisSize;
-    private final long mEventTimeNanos;
 
     private VirtualTouchEvent(int pointerId, @ToolType int toolType, @Action int action,
-            float x, float y, float pressure, float majorAxisSize, long eventTimeNanos) {
+            float x, float y, float pressure, float majorAxisSize) {
         mPointerId = pointerId;
         mToolType = toolType;
         mAction = action;
@@ -107,7 +104,6 @@ public final class VirtualTouchEvent implements Parcelable {
         mY = y;
         mPressure = pressure;
         mMajorAxisSize = majorAxisSize;
-        mEventTimeNanos = eventTimeNanos;
     }
 
     private VirtualTouchEvent(@NonNull Parcel parcel) {
@@ -118,7 +114,6 @@ public final class VirtualTouchEvent implements Parcelable {
         mY = parcel.readFloat();
         mPressure = parcel.readFloat();
         mMajorAxisSize = parcel.readFloat();
-        mEventTimeNanos = parcel.readLong();
     }
 
     @Override
@@ -130,7 +125,6 @@ public final class VirtualTouchEvent implements Parcelable {
         dest.writeFloat(mY);
         dest.writeFloat(mPressure);
         dest.writeFloat(mMajorAxisSize);
-        dest.writeLong(mEventTimeNanos);
     }
 
     @Override
@@ -188,16 +182,6 @@ public final class VirtualTouchEvent implements Parcelable {
     }
 
     /**
-     * Returns the time this event occurred, in the {@link SystemClock#uptimeMillis()} time base but
-     * with nanosecond (instead of millisecond) precision.
-     *
-     * @see InputEvent#getEventTime()
-     */
-    public long getEventTimeNanos() {
-        return mEventTimeNanos;
-    }
-
-    /**
      * Builder for {@link VirtualTouchEvent}.
      */
     public static final class Builder {
@@ -209,7 +193,6 @@ public final class VirtualTouchEvent implements Parcelable {
         private float mY = Float.NaN;
         private float mPressure = Float.NaN;
         private float mMajorAxisSize = Float.NaN;
-        private long mEventTimeNanos = 0L;
 
         /**
          * Creates a {@link VirtualTouchEvent} object with the current builder configuration.
@@ -230,7 +213,7 @@ public final class VirtualTouchEvent implements Parcelable {
                         "ACTION_CANCEL and TOOL_TYPE_PALM must always appear together");
             }
             return new VirtualTouchEvent(mPointerId, mToolType, mAction, mX, mY, mPressure,
-                    mMajorAxisSize, mEventTimeNanos);
+                    mMajorAxisSize);
         }
 
         /**
@@ -332,23 +315,6 @@ public final class VirtualTouchEvent implements Parcelable {
                         "Touch event major axis size cannot be negative");
             }
             mMajorAxisSize = majorAxisSize;
-            return this;
-        }
-
-        /**
-         * Sets the time (in nanoseconds) when this specific event was generated. This may be
-         * obtained from {@link SystemClock#uptimeMillis()} (with nanosecond precision instead of
-         * millisecond), but can be different depending on the use case.
-         * This field is optional and can be omitted.
-         *
-         * @return this builder, to allow for chaining of calls
-         * @see InputEvent#getEventTime()
-         */
-        public @NonNull Builder setEventTimeNanos(long eventTimeNanos) {
-            if (eventTimeNanos < 0L) {
-                throw new IllegalArgumentException("Event time cannot be negative");
-            }
-            mEventTimeNanos = eventTimeNanos;
             return this;
         }
     }

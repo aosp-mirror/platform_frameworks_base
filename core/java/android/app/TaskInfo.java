@@ -242,12 +242,6 @@ public class TaskInfo {
     public boolean isLetterboxDoubleTapEnabled;
 
     /**
-     * Whether the update comes from a letterbox double-tap action from the user or not.
-     * @hide
-     */
-    public boolean isFromLetterboxDoubleTap;
-
-    /**
      * If {@link isLetterboxDoubleTapEnabled} it contains the current letterbox vertical position or
      * {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise.
      * @hide
@@ -503,7 +497,7 @@ public class TaskInfo {
                 && isResizeable == that.isResizeable
                 && supportsMultiWindow == that.supportsMultiWindow
                 && displayAreaFeatureId == that.displayAreaFeatureId
-                && isFromLetterboxDoubleTap == that.isFromLetterboxDoubleTap
+                && isLetterboxDoubleTapEnabled == that.isLetterboxDoubleTapEnabled
                 && topActivityLetterboxVerticalPosition == that.topActivityLetterboxVerticalPosition
                 && topActivityLetterboxWidth == that.topActivityLetterboxWidth
                 && topActivityLetterboxHeight == that.topActivityLetterboxHeight
@@ -535,9 +529,9 @@ public class TaskInfo {
         return displayId == that.displayId
                 && taskId == that.taskId
                 && topActivityInSizeCompat == that.topActivityInSizeCompat
-                && isFromLetterboxDoubleTap == that.isFromLetterboxDoubleTap
                 && topActivityEligibleForLetterboxEducation
                     == that.topActivityEligibleForLetterboxEducation
+                && isLetterboxDoubleTapEnabled == that.isLetterboxDoubleTapEnabled
                 && topActivityLetterboxVerticalPosition == that.topActivityLetterboxVerticalPosition
                 && topActivityLetterboxHorizontalPosition
                     == that.topActivityLetterboxHorizontalPosition
@@ -598,7 +592,6 @@ public class TaskInfo {
         displayAreaFeatureId = source.readInt();
         cameraCompatControlState = source.readInt();
         isLetterboxDoubleTapEnabled = source.readBoolean();
-        isFromLetterboxDoubleTap = source.readBoolean();
         topActivityLetterboxVerticalPosition = source.readInt();
         topActivityLetterboxHorizontalPosition = source.readInt();
         topActivityLetterboxWidth = source.readInt();
@@ -651,7 +644,6 @@ public class TaskInfo {
         dest.writeInt(displayAreaFeatureId);
         dest.writeInt(cameraCompatControlState);
         dest.writeBoolean(isLetterboxDoubleTapEnabled);
-        dest.writeBoolean(isFromLetterboxDoubleTap);
         dest.writeInt(topActivityLetterboxVerticalPosition);
         dest.writeInt(topActivityLetterboxHorizontalPosition);
         dest.writeInt(topActivityLetterboxWidth);
@@ -692,7 +684,6 @@ public class TaskInfo {
                 + " topActivityEligibleForLetterboxEducation= "
                         + topActivityEligibleForLetterboxEducation
                 + " topActivityLetterboxed= " + isLetterboxDoubleTapEnabled
-                + " isFromDoubleTap= " + isFromLetterboxDoubleTap
                 + " topActivityLetterboxVerticalPosition= " + topActivityLetterboxVerticalPosition
                 + " topActivityLetterboxHorizontalPosition= "
                         + topActivityLetterboxHorizontalPosition

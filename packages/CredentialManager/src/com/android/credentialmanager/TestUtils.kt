@@ -84,7 +84,7 @@ class GetTestUtils {
             return Entry(
                 key,
                 subkey,
-                RemoteEntry.toSlice(RemoteEntry(pendingIntent))
+                RemoteEntry(pendingIntent).slice
             )
         }
 
@@ -219,16 +219,12 @@ class CreateTestUtils {
                 key,
                 subkey,
                 CreateEntry.toSlice(
-                    CreateEntry(
-                            accountName = providerUserDisplayName,
-                            pendingIntent = pendingIntent,
-                            description = footerDescription,
-                            lastUsedTime = lastUsedTime,
-                            icon = null,
-                            passwordCredentialCount = passwordCount,
-                            publicKeyCredentialCount = passkeyCount,
-                            totalCredentialCount = totalCredentialCount,
-                    )
+                    providerUserDisplayName,
+                    null,
+                    footerDescription,
+                    lastUsedTime,
+                    credCountMap,
+                    pendingIntent
                 ),
                 Intent()
             )
@@ -245,7 +241,7 @@ class CreateTestUtils {
             return Entry(
                 key,
                 subkey,
-                RemoteEntry.toSlice(RemoteEntry(pendingIntent))
+                RemoteEntry(pendingIntent).slice
             )
         }
     }

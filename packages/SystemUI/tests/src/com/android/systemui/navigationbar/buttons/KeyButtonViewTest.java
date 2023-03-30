@@ -39,7 +39,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.hardware.input.InputManagerGlobal;
+import android.hardware.input.InputManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -67,7 +67,7 @@ public class KeyButtonViewTest extends SysuiTestCase {
     private KeyButtonView mKeyButtonView;
     private MetricsLogger mMetricsLogger;
     private UiEventLogger mUiEventLogger;
-    private InputManagerGlobal mInputManagerGlobal = mock(InputManagerGlobal.class);
+    private InputManager mInputManager = mock(InputManager.class);
     @Captor
     private ArgumentCaptor<KeyEvent> mInputEventCaptor;
 
@@ -79,8 +79,7 @@ public class KeyButtonViewTest extends SysuiTestCase {
         mUiEventLogger = mDependency.injectMockDependency(UiEventLogger.class);
 
         TestableLooper.get(this).runWithLooper(() -> {
-            mKeyButtonView = new KeyButtonView(mContext, null, 0,
-                    mInputManagerGlobal, mUiEventLogger);
+            mKeyButtonView = new KeyButtonView(mContext, null, 0, mInputManager, mUiEventLogger);
         });
     }
 
@@ -140,7 +139,7 @@ public class KeyButtonViewTest extends SysuiTestCase {
     public void testEventInjectedOnAbortGesture() {
         mKeyButtonView.setCode(KEYCODE_HOME);
         mKeyButtonView.abortCurrentGesture();
-        verify(mInputManagerGlobal, times(1))
+        verify(mInputManager, times(1))
                 .injectInputEvent(any(KeyEvent.class), any(Integer.class));
     }
 
@@ -148,7 +147,7 @@ public class KeyButtonViewTest extends SysuiTestCase {
     public void testNoEventInjectedOnAbortUnknownGesture() {
         mKeyButtonView.setCode(KEYCODE_UNKNOWN);
         mKeyButtonView.abortCurrentGesture();
-        verify(mInputManagerGlobal, never())
+        verify(mInputManager, never())
                 .injectInputEvent(any(KeyEvent.class), any(Integer.class));
     }
 

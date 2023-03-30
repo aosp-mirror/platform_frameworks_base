@@ -344,7 +344,7 @@ final class KeyboardBacklightController implements
                 throw new IllegalStateException("The calling process has no registered "
                         + "KeyboardBacklightListener.");
             }
-            if (record.mListener.asBinder() != listener.asBinder()) {
+            if (record.mListener != listener) {
                 throw new IllegalStateException("The calling process has a different registered "
                         + "KeyboardBacklightListener.");
             }

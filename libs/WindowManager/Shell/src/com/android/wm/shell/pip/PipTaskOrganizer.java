@@ -145,12 +145,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     // These callbacks are called on the update thread
     private final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
             new PipAnimationController.PipAnimationCallback() {
-        private boolean mIsCancelled;
         @Override
         public void onPipAnimationStart(TaskInfo taskInfo,
                 PipAnimationController.PipTransitionAnimator animator) {
             final int direction = animator.getTransitionDirection();
-            mIsCancelled = false;
             sendOnPipTransitionStarted(direction);
         }
 
@@ -158,10 +156,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         public void onPipAnimationEnd(TaskInfo taskInfo, SurfaceControl.Transaction tx,
                 PipAnimationController.PipTransitionAnimator animator) {
             final int direction = animator.getTransitionDirection();
-            if (mIsCancelled) {
-                sendOnPipTransitionFinished(direction);
-                return;
-            }
             final int animationType = animator.getAnimationType();
             final Rect destinationBounds = animator.getDestinationBounds();
             if (isInPipDirection(direction) && animator.getContentOverlayLeash() != null) {
@@ -200,7 +194,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         public void onPipAnimationCancel(TaskInfo taskInfo,
                 PipAnimationController.PipTransitionAnimator animator) {
             final int direction = animator.getTransitionDirection();
-            mIsCancelled = true;
             if (isInPipDirection(direction) && animator.getContentOverlayLeash() != null) {
                 fadeOutAndRemoveOverlay(animator.getContentOverlayLeash(),
                         animator::clearContentOverlay, true /* withStartDelay */);
@@ -1176,7 +1169,20 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
         final Rect newDestinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
         if (newDestinationBounds.equals(currentDestinationBounds)) return;
-        updateAnimatorBounds(newDestinationBounds);
+        if (animator.getAnimationType() == ANIM_TYPE_BOUNDS) {
+            if (mWaitForFixedRotation) {
+                // The new destination bounds are in next rotation (DisplayLayout has been rotated
+                // in computeRotatedBounds). The animation runs in previous rotation so the end
+                // bounds need to be transformed.
+                final Rect displayBounds = mPipBoundsState.getDisplayBounds();
+                final Rect rotatedEndBounds = new Rect(newDestinationBounds);
+                rotateBounds(rotatedEndBounds, displayBounds, mNextRotation, mCurrentRotation);
+                animator.updateEndValue(rotatedEndBounds);
+            } else {
+                animator.updateEndValue(newDestinationBounds);
+            }
+        }
+        animator.setDestinationBounds(newDestinationBounds);
         destinationBoundsOut.set(newDestinationBounds);
     }
 
@@ -1188,17 +1194,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mPipAnimationController.getCurrentAnimator();
         if (animator != null && animator.isRunning()) {
             if (animator.getAnimationType() == ANIM_TYPE_BOUNDS) {
-                if (mWaitForFixedRotation) {
-                    // The new destination bounds are in next rotation (DisplayLayout has been
-                    // rotated in computeRotatedBounds). The animation runs in previous rotation so
-                    // the end bounds need to be transformed.
-                    final Rect displayBounds = mPipBoundsState.getDisplayBounds();
-                    final Rect rotatedEndBounds = new Rect(bounds);
-                    rotateBounds(rotatedEndBounds, displayBounds, mNextRotation, mCurrentRotation);
-                    animator.updateEndValue(rotatedEndBounds);
-                } else {
-                    animator.updateEndValue(bounds);
-                }
+                animator.updateEndValue(bounds);
             }
             animator.setDestinationBounds(bounds);
         }

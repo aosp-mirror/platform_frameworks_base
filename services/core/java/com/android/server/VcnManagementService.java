@@ -1104,7 +1104,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             final NetworkCapabilities result = ncBuilder.build();
             final VcnUnderlyingNetworkPolicy policy = new VcnUnderlyingNetworkPolicy(
                     mTrackingNetworkCallback
-                            .requiresRestartForImmutableCapabilityChanges(result, linkProperties),
+                            .requiresRestartForImmutableCapabilityChanges(result),
                     result);
 
             logVdbg("getUnderlyingNetworkPolicy() called for caps: " + networkCapabilities
@@ -1354,29 +1354,19 @@ public class VcnManagementService extends IVcnManagementService.Stub {
      * without requiring a Network restart.
      */
     private class TrackingNetworkCallback extends ConnectivityManager.NetworkCallback {
-        private final Object mLockObject = new Object();
         private final Map<Network, NetworkCapabilities> mCaps = new ArrayMap<>();
-        private final Map<Network, LinkProperties> mLinkProperties = new ArrayMap<>();
 
         @Override
         public void onCapabilitiesChanged(Network network, NetworkCapabilities caps) {
-            synchronized (mLockObject) {
+            synchronized (mCaps) {
                 mCaps.put(network, caps);
             }
         }
 
         @Override
-        public void onLinkPropertiesChanged(Network network, LinkProperties lp) {
-            synchronized (mLockObject) {
-                mLinkProperties.put(network, lp);
-            }
-        }
-
-        @Override
         public void onLost(Network network) {
-            synchronized (mLockObject) {
+            synchronized (mCaps) {
                 mCaps.remove(network);
-                mLinkProperties.remove(network);
             }
         }
 
@@ -1403,28 +1393,22 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             return true;
         }
 
-        private boolean requiresRestartForImmutableCapabilityChanges(
-                NetworkCapabilities caps, LinkProperties lp) {
+        private boolean requiresRestartForImmutableCapabilityChanges(NetworkCapabilities caps) {
             if (caps.getSubscriptionIds() == null) {
                 return false;
             }
 
-            synchronized (mLockObject) {
-                // Search for an existing network (using interfce names)
-                // TODO: Get network from NetworkFactory (if exists) for this match.
-                for (Entry<Network, LinkProperties> lpEntry : mLinkProperties.entrySet()) {
-                    if (lp.getInterfaceName() != null
-                            && !lp.getInterfaceName().isEmpty()
-                            && Objects.equals(
-                                    lp.getInterfaceName(), lpEntry.getValue().getInterfaceName())) {
-                        return mCaps.get(lpEntry.getKey())
-                                        .hasCapability(NET_CAPABILITY_NOT_RESTRICTED)
+            synchronized (mCaps) {
+                for (NetworkCapabilities existing : mCaps.values()) {
+                    if (caps.getSubscriptionIds().equals(existing.getSubscriptionIds())
+                            && hasSameTransportsAndCapabilities(caps, existing)) {
+                        // Restart if any immutable capabilities have changed
+                        return existing.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)
                                 != caps.hasCapability(NET_CAPABILITY_NOT_RESTRICTED);
                     }
                 }
             }
 
-            // If no network found, by definition does not need restart.
             return false;
         }
 

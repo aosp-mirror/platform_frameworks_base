@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
@@ -35,7 +34,6 @@ import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiIntera
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
-import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel.Companion.viewModelForLocation
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -107,20 +105,15 @@ class WifiViewModelTest : SysuiTestCase() {
     @Test
     fun wifiIcon_allLocationViewModelsReceiveSameData() =
         runBlocking(IMMEDIATE) {
-            val home =
-                viewModelForLocation(underTest, statusBarPipelineFlags, StatusBarLocation.HOME)
-            val keyguard =
-                viewModelForLocation(underTest, statusBarPipelineFlags, StatusBarLocation.KEYGUARD)
-            val qs = viewModelForLocation(underTest, statusBarPipelineFlags, StatusBarLocation.QS)
-
             var latestHome: WifiIcon? = null
-            val jobHome = home.wifiIcon.onEach { latestHome = it }.launchIn(this)
+            val jobHome = underTest.home.wifiIcon.onEach { latestHome = it }.launchIn(this)
 
             var latestKeyguard: WifiIcon? = null
-            val jobKeyguard = keyguard.wifiIcon.onEach { latestKeyguard = it }.launchIn(this)
+            val jobKeyguard =
+                underTest.keyguard.wifiIcon.onEach { latestKeyguard = it }.launchIn(this)
 
             var latestQs: WifiIcon? = null
-            val jobQs = qs.wifiIcon.onEach { latestQs = it }.launchIn(this)
+            val jobQs = underTest.qs.wifiIcon.onEach { latestQs = it }.launchIn(this)
 
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 1)
@@ -145,15 +138,15 @@ class WifiViewModelTest : SysuiTestCase() {
 
             var activityIn: Boolean? = null
             val activityInJob =
-                underTest.isActivityInViewVisible.onEach { activityIn = it }.launchIn(this)
+                underTest.home.isActivityInViewVisible.onEach { activityIn = it }.launchIn(this)
 
             var activityOut: Boolean? = null
             val activityOutJob =
-                underTest.isActivityOutViewVisible.onEach { activityOut = it }.launchIn(this)
+                underTest.home.isActivityOutViewVisible.onEach { activityOut = it }.launchIn(this)
 
             var activityContainer: Boolean? = null
             val activityContainerJob =
-                underTest.isActivityContainerVisible
+                underTest.home.isActivityContainerVisible
                     .onEach { activityContainer = it }
                     .launchIn(this)
 
@@ -176,15 +169,15 @@ class WifiViewModelTest : SysuiTestCase() {
 
             var activityIn: Boolean? = null
             val activityInJob =
-                underTest.isActivityInViewVisible.onEach { activityIn = it }.launchIn(this)
+                underTest.home.isActivityInViewVisible.onEach { activityIn = it }.launchIn(this)
 
             var activityOut: Boolean? = null
             val activityOutJob =
-                underTest.isActivityOutViewVisible.onEach { activityOut = it }.launchIn(this)
+                underTest.home.isActivityOutViewVisible.onEach { activityOut = it }.launchIn(this)
 
             var activityContainer: Boolean? = null
             val activityContainerJob =
-                underTest.isActivityContainerVisible
+                underTest.home.isActivityContainerVisible
                     .onEach { activityContainer = it }
                     .launchIn(this)
 
@@ -215,15 +208,15 @@ class WifiViewModelTest : SysuiTestCase() {
 
             var activityIn: Boolean? = null
             val activityInJob =
-                underTest.isActivityInViewVisible.onEach { activityIn = it }.launchIn(this)
+                underTest.home.isActivityInViewVisible.onEach { activityIn = it }.launchIn(this)
 
             var activityOut: Boolean? = null
             val activityOutJob =
-                underTest.isActivityOutViewVisible.onEach { activityOut = it }.launchIn(this)
+                underTest.home.isActivityOutViewVisible.onEach { activityOut = it }.launchIn(this)
 
             var activityContainer: Boolean? = null
             val activityContainerJob =
-                underTest.isActivityContainerVisible
+                underTest.home.isActivityContainerVisible
                     .onEach { activityContainer = it }
                     .launchIn(this)
 
@@ -249,21 +242,18 @@ class WifiViewModelTest : SysuiTestCase() {
             createAndSetViewModel()
             wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
-            val home =
-                viewModelForLocation(underTest, statusBarPipelineFlags, StatusBarLocation.HOME)
-            val keyguard =
-                viewModelForLocation(underTest, statusBarPipelineFlags, StatusBarLocation.KEYGUARD)
-            val qs = viewModelForLocation(underTest, statusBarPipelineFlags, StatusBarLocation.QS)
-
             var latestHome: Boolean? = null
-            val jobHome = home.isActivityInViewVisible.onEach { latestHome = it }.launchIn(this)
+            val jobHome =
+                underTest.home.isActivityInViewVisible.onEach { latestHome = it }.launchIn(this)
 
             var latestKeyguard: Boolean? = null
             val jobKeyguard =
-                keyguard.isActivityInViewVisible.onEach { latestKeyguard = it }.launchIn(this)
+                underTest.keyguard.isActivityInViewVisible
+                    .onEach { latestKeyguard = it }
+                    .launchIn(this)
 
             var latestQs: Boolean? = null
-            val jobQs = qs.isActivityInViewVisible.onEach { latestQs = it }.launchIn(this)
+            val jobQs = underTest.qs.isActivityInViewVisible.onEach { latestQs = it }.launchIn(this)
 
             val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = true)
             wifiRepository.setWifiActivity(activity)
@@ -286,7 +276,7 @@ class WifiViewModelTest : SysuiTestCase() {
             wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
             var latest: Boolean? = null
-            val job = underTest.isActivityInViewVisible.onEach { latest = it }.launchIn(this)
+            val job = underTest.home.isActivityInViewVisible.onEach { latest = it }.launchIn(this)
 
             val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = false)
             wifiRepository.setWifiActivity(activity)
@@ -305,7 +295,7 @@ class WifiViewModelTest : SysuiTestCase() {
             wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
             var latest: Boolean? = null
-            val job = underTest.isActivityInViewVisible.onEach { latest = it }.launchIn(this)
+            val job = underTest.home.isActivityInViewVisible.onEach { latest = it }.launchIn(this)
 
             val activity = DataActivityModel(hasActivityIn = false, hasActivityOut = true)
             wifiRepository.setWifiActivity(activity)
@@ -324,7 +314,7 @@ class WifiViewModelTest : SysuiTestCase() {
             wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
             var latest: Boolean? = null
-            val job = underTest.isActivityOutViewVisible.onEach { latest = it }.launchIn(this)
+            val job = underTest.home.isActivityOutViewVisible.onEach { latest = it }.launchIn(this)
 
             val activity = DataActivityModel(hasActivityIn = false, hasActivityOut = true)
             wifiRepository.setWifiActivity(activity)
@@ -343,7 +333,7 @@ class WifiViewModelTest : SysuiTestCase() {
             wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
             var latest: Boolean? = null
-            val job = underTest.isActivityOutViewVisible.onEach { latest = it }.launchIn(this)
+            val job = underTest.home.isActivityOutViewVisible.onEach { latest = it }.launchIn(this)
 
             val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = false)
             wifiRepository.setWifiActivity(activity)
@@ -362,7 +352,8 @@ class WifiViewModelTest : SysuiTestCase() {
             wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
             var latest: Boolean? = null
-            val job = underTest.isActivityContainerVisible.onEach { latest = it }.launchIn(this)
+            val job =
+                underTest.home.isActivityContainerVisible.onEach { latest = it }.launchIn(this)
 
             val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = false)
             wifiRepository.setWifiActivity(activity)
@@ -381,7 +372,8 @@ class WifiViewModelTest : SysuiTestCase() {
             wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
             var latest: Boolean? = null
-            val job = underTest.isActivityContainerVisible.onEach { latest = it }.launchIn(this)
+            val job =
+                underTest.home.isActivityContainerVisible.onEach { latest = it }.launchIn(this)
 
             val activity = DataActivityModel(hasActivityIn = false, hasActivityOut = true)
             wifiRepository.setWifiActivity(activity)
@@ -400,7 +392,8 @@ class WifiViewModelTest : SysuiTestCase() {
             wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
             var latest: Boolean? = null
-            val job = underTest.isActivityContainerVisible.onEach { latest = it }.launchIn(this)
+            val job =
+                underTest.home.isActivityContainerVisible.onEach { latest = it }.launchIn(this)
 
             val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = true)
             wifiRepository.setWifiActivity(activity)
@@ -419,7 +412,8 @@ class WifiViewModelTest : SysuiTestCase() {
             wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
             var latest: Boolean? = null
-            val job = underTest.isActivityContainerVisible.onEach { latest = it }.launchIn(this)
+            val job =
+                underTest.home.isActivityContainerVisible.onEach { latest = it }.launchIn(this)
 
             val activity = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
             wifiRepository.setWifiActivity(activity)
@@ -434,7 +428,7 @@ class WifiViewModelTest : SysuiTestCase() {
     fun airplaneSpacer_notAirplaneMode_outputsFalse() =
         runBlocking(IMMEDIATE) {
             var latest: Boolean? = null
-            val job = underTest.isAirplaneSpacerVisible.onEach { latest = it }.launchIn(this)
+            val job = underTest.qs.isAirplaneSpacerVisible.onEach { latest = it }.launchIn(this)
 
             airplaneModeRepository.setIsAirplaneMode(false)
             yield()
@@ -448,7 +442,7 @@ class WifiViewModelTest : SysuiTestCase() {
     fun airplaneSpacer_airplaneForceHidden_outputsFalse() =
         runBlocking(IMMEDIATE) {
             var latest: Boolean? = null
-            val job = underTest.isAirplaneSpacerVisible.onEach { latest = it }.launchIn(this)
+            val job = underTest.qs.isAirplaneSpacerVisible.onEach { latest = it }.launchIn(this)
 
             airplaneModeRepository.setIsAirplaneMode(true)
             connectivityRepository.setForceHiddenIcons(setOf(ConnectivitySlot.AIRPLANE))
@@ -463,7 +457,7 @@ class WifiViewModelTest : SysuiTestCase() {
     fun airplaneSpacer_airplaneIconVisible_outputsTrue() =
         runBlocking(IMMEDIATE) {
             var latest: Boolean? = null
-            val job = underTest.isAirplaneSpacerVisible.onEach { latest = it }.launchIn(this)
+            val job = underTest.qs.isAirplaneSpacerVisible.onEach { latest = it }.launchIn(this)
 
             airplaneModeRepository.setIsAirplaneMode(true)
             yield()

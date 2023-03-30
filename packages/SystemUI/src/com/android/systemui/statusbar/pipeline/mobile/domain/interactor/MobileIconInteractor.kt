@@ -22,6 +22,7 @@ import com.android.settingslib.mobile.TelephonyIcons.NOT_DEFAULT_DATA
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Connected
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
@@ -45,8 +46,17 @@ interface MobileIconInteractor {
     /** The current mobile data activity */
     val activity: Flow<DataActivityModel>
 
-    /** See [MobileConnectionsRepository.mobileIsDefault]. */
-    val mobileIsDefault: Flow<Boolean>
+    /**
+     * This bit is meant to be `true` if and only if the default network capabilities (see
+     * [android.net.ConnectivityManager.registerDefaultNetworkCallback]) result in a network that
+     * has the [android.net.NetworkCapabilities.TRANSPORT_CELLULAR] represented.
+     *
+     * Note that this differs from [isDataConnected], which is tracked by telephony and has to do
+     * with the state of using this mobile connection for data as opposed to just voice. It is
+     * possible for a mobile subscription to be connected but not be in a connected data state, and
+     * thus we wouldn't want to show the network type icon.
+     */
+    val isConnected: Flow<Boolean>
 
     /**
      * True when telephony tells us that the data state is CONNECTED. See
@@ -116,7 +126,7 @@ class MobileIconInteractorImpl(
     defaultSubscriptionHasDataEnabled: StateFlow<Boolean>,
     override val alwaysShowDataRatIcon: StateFlow<Boolean>,
     override val alwaysUseCdmaLevel: StateFlow<Boolean>,
-    override val mobileIsDefault: StateFlow<Boolean>,
+    defaultMobileConnectivity: StateFlow<MobileConnectivityModel>,
     defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>,
     defaultMobileIconGroup: StateFlow<MobileIconGroup>,
     defaultDataSubId: StateFlow<Int>,
@@ -127,6 +137,8 @@ class MobileIconInteractorImpl(
     override val tableLogBuffer: TableLogBuffer = connectionRepository.tableLogBuffer
 
     override val activity = connectionRepository.dataActivityDirection
+
+    override val isConnected: Flow<Boolean> = defaultMobileConnectivity.mapLatest { it.isConnected }
 
     override val isDataEnabled: StateFlow<Boolean> = connectionRepository.dataEnabled
 

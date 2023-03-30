@@ -137,6 +137,7 @@ static struct {
     jmethodID notifyDropWindow;
     jmethodID getParentSurfaceForPointers;
     jmethodID isPerDisplayTouchModeEnabled;
+    jmethodID isStylusPointerIconEnabled;
 } gServiceClassInfo;
 
 static struct {
@@ -308,7 +309,6 @@ public:
     std::optional<std::string> getBluetoothAddress(int32_t deviceId);
     void setStylusButtonMotionEventsEnabled(bool enabled);
     FloatPoint getMouseCursorPosition();
-    void setStylusPointerIconEnabled(bool enabled);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -430,9 +430,6 @@ private:
         // True to enable a zone on the right-hand side of touchpads where clicks will be turned
         // into context (a.k.a. "right") clicks.
         bool touchpadRightClickZoneEnabled{false};
-
-        // True if a pointer icon should be shown for stylus pointers.
-        bool stylusPointerIconEnabled{false};
     } mLocked GUARDED_BY(mLock);
 
     std::atomic<bool> mInteractive;
@@ -665,6 +662,12 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->pointerGestureTapSlop = hoverTapSlop;
     }
 
+    jboolean stylusPointerIconEnabled =
+            env->CallBooleanMethod(mServiceObj, gServiceClassInfo.isStylusPointerIconEnabled);
+    if (!checkAndClearExceptionFromCallback(env, "isStylusPointerIconEnabled")) {
+        outConfig->stylusPointerIconEnabled = stylusPointerIconEnabled;
+    }
+
     { // acquire lock
         std::scoped_lock _l(mLock);
 
@@ -689,8 +692,6 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->disabledDevices = mLocked.disabledInputDevices;
 
         outConfig->stylusButtonMotionEventsEnabled = mLocked.stylusButtonMotionEventsEnabled;
-
-        outConfig->stylusPointerIconEnabled = mLocked.stylusPointerIconEnabled;
     } // release lock
 }
 
@@ -1663,21 +1664,6 @@ FloatPoint NativeInputManager::getMouseCursorPosition() {
     return pc->getPosition();
 }
 
-void NativeInputManager::setStylusPointerIconEnabled(bool enabled) {
-    { // acquire lock
-        std::scoped_lock _l(mLock);
-
-        if (mLocked.stylusPointerIconEnabled == enabled) {
-            return;
-        }
-
-        mLocked.stylusPointerIconEnabled = enabled;
-    } // release lock
-
-    mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
-}
-
 // ----------------------------------------------------------------------------
 
 static NativeInputManager* getNativeInputManager(JNIEnv* env, jobject clazz) {
@@ -2579,12 +2565,6 @@ static jfloatArray nativeGetMouseCursorPosition(JNIEnv* env, jobject nativeImplO
     return outArr;
 }
 
-static void nativeSetStylusPointerIconEnabled(JNIEnv* env, jobject nativeImplObj,
-                                              jboolean enabled) {
-    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-    im->setStylusPointerIconEnabled(enabled);
-}
-
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2679,7 +2659,6 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setStylusButtonMotionEventsEnabled", "(Z)V",
          (void*)nativeSetStylusButtonMotionEventsEnabled},
         {"getMouseCursorPosition", "()[F", (void*)nativeGetMouseCursorPosition},
-        {"setStylusPointerIconEnabled", "(Z)V", (void*)nativeSetStylusPointerIconEnabled},
 };
 
 #define FIND_CLASS(var, className) \
@@ -2839,6 +2818,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.isPerDisplayTouchModeEnabled, clazz,
                   "isPerDisplayTouchModeEnabled", "()Z");
+
+    GET_METHOD_ID(gServiceClassInfo.isStylusPointerIconEnabled, clazz, "isStylusPointerIconEnabled",
+                  "()Z");
 
     // InputDevice
 

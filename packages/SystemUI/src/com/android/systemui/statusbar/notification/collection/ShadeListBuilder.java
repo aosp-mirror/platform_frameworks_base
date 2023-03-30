@@ -110,8 +110,6 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
     private final PipelineState mPipelineState = new PipelineState();
     private final Map<String, GroupEntry> mGroups = new ArrayMap<>();
     private Collection<NotificationEntry> mAllEntries = Collections.emptyList();
-    @Nullable
-    private Collection<NotificationEntry> mPendingEntries = null;
     private int mIterationCount = 0;
 
     private final List<NotifFilter> mNotifPreGroupFilters = new ArrayList<>();
@@ -319,9 +317,11 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
                 @Override
                 public void onBuildList(Collection<NotificationEntry> entries, String reason) {
                     Assert.isMainThread();
-                    mPendingEntries = new ArrayList<>(entries);
+                    mPipelineState.requireIsBefore(STATE_BUILD_STARTED);
+
                     mLogger.logOnBuildList(reason);
-                    rebuildListIfBefore(STATE_BUILD_STARTED);
+                    mAllEntries = entries;
+                    scheduleRebuild(/* reentrant = */ false);
                 }
             };
 
@@ -397,11 +397,6 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
     private void buildList() {
         Trace.beginSection("ShadeListBuilder.buildList");
         mPipelineState.requireIsBefore(STATE_BUILD_STARTED);
-
-        if (mPendingEntries != null) {
-            mAllEntries = mPendingEntries;
-            mPendingEntries = null;
-        }
 
         if (!mNotifStabilityManager.isPipelineRunAllowed()) {
             mLogger.logPipelineRunSuppressed();

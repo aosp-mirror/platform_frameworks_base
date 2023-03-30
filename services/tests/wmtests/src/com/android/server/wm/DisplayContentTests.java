@@ -116,6 +116,7 @@ import android.hardware.HardwareBuffer;
 import android.hardware.display.VirtualDisplay;
 import android.metrics.LogMaker;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
@@ -2629,7 +2630,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testVirtualDisplayContent_withoutSurface() {
         // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
         // mirror.
-        setUpDefaultTaskDisplayAreaWindowToken();
+        final IBinder tokenToMirror = setUpDefaultTaskDisplayAreaWindowToken();
 
         // GIVEN SurfaceControl does not mirror a null surface.
         Point surfaceSize = new Point(
@@ -2644,8 +2645,8 @@ public class DisplayContentTests extends WindowTestsBase {
         // WHEN getting the DisplayContent for the new virtual display.
         DisplayContent actualDC = mWm.mRoot.getDisplayContent(displayId);
         ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
-                DEFAULT_DISPLAY);
-        session.setVirtualDisplayId(displayId);
+                tokenToMirror);
+        session.setDisplayId(displayId);
         mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
         actualDC.updateRecording();
 
@@ -2659,7 +2660,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testVirtualDisplayContent_withSurface() {
         // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
         // mirror.
-        setUpDefaultTaskDisplayAreaWindowToken();
+        final IBinder tokenToMirror = setUpDefaultTaskDisplayAreaWindowToken();
 
         // GIVEN SurfaceControl can successfully mirror the provided surface.
         Point surfaceSize = new Point(
@@ -2673,8 +2674,8 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // GIVEN a session for this display.
         ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
-                DEFAULT_DISPLAY);
-        session.setVirtualDisplayId(displayId);
+                tokenToMirror);
+        session.setDisplayId(displayId);
         mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
         mWm.mRoot.onDisplayAdded(displayId);
 
@@ -2692,7 +2693,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testVirtualDisplayContent_displayMirroring() {
         // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
         // mirror.
-        setUpDefaultTaskDisplayAreaWindowToken();
+        final IBinder tokenToMirror = setUpDefaultTaskDisplayAreaWindowToken();
 
         // GIVEN SurfaceControl can successfully mirror the provided surface.
         Point surfaceSize = new Point(
@@ -2725,15 +2726,22 @@ public class DisplayContentTests extends WindowTestsBase {
         display.release();
     }
 
+    private static class MirroringTestToken extends Binder {
+    }
+
     /**
      * Creates a WindowToken associated with the default task DisplayArea, in order for that
      * DisplayArea to be mirrored.
      */
-    private void setUpDefaultTaskDisplayAreaWindowToken() {
+    private IBinder setUpDefaultTaskDisplayAreaWindowToken() {
+        // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
+        // mirror.
+        final IBinder tokenToMirror = new MirroringTestToken();
         // GIVEN the default task display area is represented by the WindowToken.
         spyOn(mWm.mWindowContextListenerController);
         doReturn(mDefaultDisplay.getDefaultTaskDisplayArea()).when(
                 mWm.mWindowContextListenerController).getContainer(any());
+        return tokenToMirror;
     }
 
     /**

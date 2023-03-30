@@ -90,7 +90,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
-import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.MagnificationSpec;
@@ -420,13 +419,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * Adds an {@link InsetsFrameProvider} which describes what insets should be provided to
-     * this {@link WindowContainer} and its children.
+     * Sets the given {@code providerFrame} as one of the insets provider for this window
+     * container. These insets are only passed to the subtree of the current WindowContainer.
+     * For a given WindowContainer-to-Leaf path, one insetsType can't be overridden more than once.
+     * If that happens, only the latest one will be chosen.
      *
-     * @param provider describes the insets types and the frames.
+     * @param providerFrame the frame that will act as one of the insets providers for this window
+     *                      container
+     * @param insetsTypes the insets type which the providerFrame provides
      */
-    void addLocalInsetsFrameProvider(InsetsFrameProvider provider) {
-        if (provider == null) {
+    void addLocalRectInsetsSourceProvider(Rect providerFrame,
+            @InsetsState.InternalInsetsType int[] insetsTypes) {
+        if (insetsTypes == null || insetsTypes.length == 0) {
             throw new IllegalArgumentException("Insets type not specified.");
         }
         if (mDisplayContent == null) {
@@ -439,41 +443,45 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mLocalInsetsSourceProviders == null) {
             mLocalInsetsSourceProviders = new SparseArray<>();
         }
-        final int id = InsetsSource.createId(
-                provider.getOwner(), provider.getIndex(), provider.getType());
-        if (mLocalInsetsSourceProviders.get(id) != null) {
-            if (DEBUG) {
-                Slog.d(TAG, "The local insets provider for this " + provider
-                        + " already exists. Overwriting");
+        for (int i = 0; i < insetsTypes.length; i++) {
+            final @InsetsState.InternalInsetsType int type = insetsTypes[i];
+            InsetsSourceProvider insetsSourceProvider =
+                    mLocalInsetsSourceProviders.get(type);
+            if (insetsSourceProvider != null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "The local insets provider for this type " + type
+                            + " already exists. Overwriting");
+                }
             }
+            insetsSourceProvider = new RectInsetsSourceProvider(
+                    new InsetsSource(type, InsetsState.toPublicType(type)),
+                    mDisplayContent.getInsetsStateController(), mDisplayContent);
+            mLocalInsetsSourceProviders.put(insetsTypes[i], insetsSourceProvider);
+            ((RectInsetsSourceProvider) insetsSourceProvider).setRect(providerFrame);
         }
-        final RectInsetsSourceProvider insetsSourceProvider = new RectInsetsSourceProvider(
-                new InsetsSource(id, provider.getType()),
-                mDisplayContent.getInsetsStateController(), mDisplayContent);
-        mLocalInsetsSourceProviders.put(id, insetsSourceProvider);
-        insetsSourceProvider.setRect(provider.getArbitraryRectangle());
         mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
     }
 
-    void removeLocalInsetsFrameProvider(InsetsFrameProvider provider) {
-        if (provider == null) {
+    void removeLocalInsetsSourceProvider(@InsetsState.InternalInsetsType int[] insetsTypes) {
+        if (insetsTypes == null || insetsTypes.length == 0) {
             throw new IllegalArgumentException("Insets type not specified.");
         }
         if (mLocalInsetsSourceProviders == null) {
             return;
         }
 
-        final int id = InsetsSource.createId(
-                provider.getOwner(), provider.getIndex(), provider.getType());
-        if (mLocalInsetsSourceProviders.get(id) == null) {
-            if (DEBUG) {
-                Slog.d(TAG, "Given " + provider
-                        + " doesn't have a local insetsSourceProvider.");
+        for (int i = 0; i < insetsTypes.length; i++) {
+            InsetsSourceProvider insetsSourceProvider =
+                    mLocalInsetsSourceProviders.get(insetsTypes[i]);
+            if (insetsSourceProvider == null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Given insets type " + insetsTypes[i] + " doesn't have a "
+                            + "local insetsSourceProvider.");
+                }
+                continue;
             }
-            return;
+            mLocalInsetsSourceProviders.remove(insetsTypes[i]);
         }
-        mLocalInsetsSourceProviders.remove(id);
-
         // Update insets if this window is attached.
         if (mDisplayContent != null) {
             mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
@@ -1328,18 +1336,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // If we are losing visibility, then a snapshot isn't necessary and we are no-longer
         // part of a change transition.
         if (!visible) {
-            boolean skipUnfreeze = false;
             if (asTaskFragment() != null) {
                 // If the organized TaskFragment is closing while resizing, we want to keep track of
                 // its starting bounds to make sure the animation starts at the correct position.
                 // This should be called before unfreeze() because we record the starting bounds
                 // in SurfaceFreezer.
-                skipUnfreeze = asTaskFragment().setClosingChangingStartBoundsIfNeeded();
+                asTaskFragment().setClosingChangingStartBoundsIfNeeded();
             }
-
-            if (!skipUnfreeze) {
-                mSurfaceFreezer.unfreeze(getSyncTransaction());
-            }
+            mSurfaceFreezer.unfreeze(getSyncTransaction());
         }
         WindowContainer parent = getParent();
         if (parent != null) {

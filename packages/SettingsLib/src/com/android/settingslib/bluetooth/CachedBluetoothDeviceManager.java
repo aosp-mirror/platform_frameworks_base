@@ -464,59 +464,6 @@ public class CachedBluetoothDeviceManager {
         return !(mOngoingSetMemberPair == null) && mOngoingSetMemberPair.equals(device);
     }
 
-    /**
-     * In order to show the preference for the whole group, we always set the main device as the
-     * first connected device in the coordinated set, and then switch the relationship of the main
-     * device and member devices.
-     *
-     * @param newMainDevice the new Main device which is from the previous main device's member
-     *                      list.
-     */
-    public void switchRelationshipFromMemberToMain(CachedBluetoothDevice newMainDevice) {
-        if (newMainDevice == null) {
-            log("switchRelationshipFromMemberToMain: input is null");
-            return;
-        }
-        log("switchRelationshipFromMemberToMain: CachedBluetoothDevice list: " + mCachedDevices);
-
-        final CachedBluetoothDevice finalNewMainDevice = newMainDevice;
-        int newMainGroupId = newMainDevice.getGroupId();
-        CachedBluetoothDevice oldMainDevice = mCachedDevices.stream()
-                .filter(cachedDevice -> !cachedDevice.equals(finalNewMainDevice)
-                        && cachedDevice.getGroupId() == newMainGroupId).findFirst().orElse(null);
-        boolean hasMainDevice = oldMainDevice != null;
-        Set<CachedBluetoothDevice> memberSet =
-                hasMainDevice ? oldMainDevice.getMemberDevice() : null;
-        boolean isMemberDevice = memberSet != null && memberSet.contains(newMainDevice);
-        if (!hasMainDevice || !isMemberDevice) {
-            log("switchRelationshipFromMemberToMain: "
-                    + newMainDevice.getDevice().getAnonymizedAddress()
-                    + " is not the member device.");
-            return;
-        }
-
-        mCachedDevices.remove(oldMainDevice);
-        // When both LE Audio devices are disconnected, receiving member device
-        // connection. To switch content and dispatch to notify UI change
-        mBtManager.getEventManager().dispatchDeviceRemoved(oldMainDevice);
-
-        for (CachedBluetoothDevice memberDeviceItem : memberSet) {
-            if (memberDeviceItem.equals(newMainDevice)) {
-                continue;
-            }
-            newMainDevice.addMemberDevice(memberDeviceItem);
-        }
-        memberSet.clear();
-        newMainDevice.addMemberDevice(oldMainDevice);
-
-        mCachedDevices.add(newMainDevice);
-        // It is necessary to do remove and add for updating the mapping on
-        // preference and device
-        mBtManager.getEventManager().dispatchDeviceAdded(newMainDevice);
-        log("switchRelationshipFromMemberToMain: After change, CachedBluetoothDevice list: "
-                + mCachedDevices);
-    }
-
     private void log(String msg) {
         if (DEBUG) {
             Log.d(TAG, msg);

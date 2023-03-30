@@ -28,7 +28,6 @@ import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
 
-import com.android.internal.util.ContrastColorUtil;
 import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
@@ -110,7 +109,7 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
 
     public void bind(@Nullable CharSequence title, @Nullable CharSequence text,
             @Nullable View contentView) {
-        mTitleView.setText(title != null ? title.toString() : title);
+        mTitleView.setText(title);
         mTitleView.setVisibility(TextUtils.isEmpty(title) ? GONE : VISIBLE);
         if (TextUtils.isEmpty(text)) {
             mTextView.setVisibility(GONE);

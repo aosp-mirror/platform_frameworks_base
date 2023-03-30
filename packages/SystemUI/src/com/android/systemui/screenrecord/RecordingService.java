@@ -205,7 +205,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 }, false, false);
 
                 // Close quick shade
-                closeSystemDialogs();
+                sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
                 break;
         }
         return Service.START_STICKY;

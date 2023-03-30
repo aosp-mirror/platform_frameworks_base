@@ -30,6 +30,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -125,10 +126,13 @@ class BroadcastSenderTest : SysuiTestCase() {
 
     @Test
     fun sendCloseSystemDialogs_dispatchesWithWakelock() {
+        val intentCaptor = ArgumentCaptor.forClass(Intent::class.java)
+
         broadcastSender.closeSystemDialogs()
 
         runExecutorAssertingWakelock {
-            verify(mockContext).closeSystemDialogs()
+            verify(mockContext).sendBroadcast(intentCaptor.capture())
+            assertThat(intentCaptor.value.action).isEqualTo(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
         }
     }
 

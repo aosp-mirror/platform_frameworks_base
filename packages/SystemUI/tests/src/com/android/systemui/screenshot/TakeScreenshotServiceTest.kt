@@ -39,6 +39,7 @@ import com.android.internal.util.ScreenshotRequest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.SCREENSHOT_METADATA_REFACTOR
+import com.android.systemui.flags.Flags.SCREENSHOT_WORK_PROFILE_POLICY
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_CAPTURE_FAILED
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_REQUESTED_KEY_OTHER
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_REQUESTED_OVERVIEW
@@ -124,6 +125,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
             .processAsync(/* screenshot= */ any(ScreenshotData::class.java), /* callback= */ any())
 
         // Flipped in selected test cases
+        flags.set(SCREENSHOT_WORK_PROFILE_POLICY, false)
         flags.set(SCREENSHOT_METADATA_REFACTOR, false)
 
         service.attach(

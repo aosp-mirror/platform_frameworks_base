@@ -22,7 +22,6 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.input.InputManager;
-import android.hardware.input.InputManagerGlobal;
 import android.hardware.tv.cec.V1_0.Result;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.media.AudioManager;
@@ -828,7 +827,7 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
                         KeyEvent.FLAG_FROM_SYSTEM,
                         InputDevice.SOURCE_HDMI,
                         null);
-        InputManagerGlobal.getInstance()
+        InputManager.getInstance()
                 .injectInputEvent(keyEvent, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
         keyEvent.recycle();
     }

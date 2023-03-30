@@ -47,6 +47,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -423,7 +424,7 @@ public class ApkChecksums {
             @Nullable Certificate[] trustedInstallers,
             Map<Integer, ApkChecksum> checksums,
             @NonNull Injector injector) {
-        if (PackageManagerServiceUtils.isInstalledByAdb(installerPackageName)) {
+        if (TextUtils.isEmpty(installerPackageName)) {
             return;
         }
         if (trustedInstallers != null && trustedInstallers.length == 0) {

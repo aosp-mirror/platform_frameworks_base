@@ -156,13 +156,15 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
 
     void setDontShowReachabilityEducationAgain(TaskInfo taskInfo) {
         mCompatUISharedPreferences.edit().putBoolean(
-                getDontShowAgainReachabilityEduKey(taskInfo.userId), true).apply();
+                getDontShowAgainReachabilityEduKey(taskInfo.userId,
+                        taskInfo.topActivity.getPackageName()), true).apply();
     }
 
     boolean shouldShowReachabilityEducation(@NonNull TaskInfo taskInfo) {
         return getHasSeenLetterboxEducation(taskInfo.userId)
                 && !mCompatUISharedPreferences.getBoolean(
-                getDontShowAgainReachabilityEduKey(taskInfo.userId), /* default= */false);
+                getDontShowAgainReachabilityEduKey(taskInfo.userId,
+                        taskInfo.topActivity.getPackageName()), /* default= */false);
     }
 
     boolean getHasSeenLetterboxEducation(int userId) {
@@ -204,8 +206,8 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
         }
     }
 
-    private static String getDontShowAgainReachabilityEduKey(int userId) {
-        return HAS_SEEN_REACHABILITY_EDUCATION_KEY_PREFIX + "@" + userId;
+    private static String getDontShowAgainReachabilityEduKey(int userId, String packageName) {
+        return HAS_SEEN_REACHABILITY_EDUCATION_KEY_PREFIX + "_" + packageName + "@" + userId;
     }
 
     private static String getDontShowLetterboxEduKey(int userId) {

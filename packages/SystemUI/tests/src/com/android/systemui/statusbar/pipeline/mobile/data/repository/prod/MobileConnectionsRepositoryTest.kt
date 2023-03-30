@@ -22,10 +22,6 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
 import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
-import android.net.NetworkCapabilities.TRANSPORT_ETHERNET
-import android.net.NetworkCapabilities.TRANSPORT_WIFI
-import android.net.vcn.VcnTransportInfo
-import android.net.wifi.WifiInfo
 import android.os.ParcelUuid
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionInfo
@@ -42,14 +38,12 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Factory.Companion.tableBufferLogName
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
-import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlots
-import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
-import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.util.mockito.any
@@ -87,7 +81,6 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     private lateinit var connectionFactory: MobileConnectionRepositoryImpl.Factory
     private lateinit var carrierMergedFactory: CarrierMergedConnectionRepository.Factory
     private lateinit var fullConnectionFactory: FullMobileConnectionRepository.Factory
-    private lateinit var connectivityRepository: ConnectivityRepository
     private lateinit var wifiRepository: FakeWifiRepository
     private lateinit var carrierConfigRepository: CarrierConfigRepository
     @Mock private lateinit var connectivityManager: ConnectivityManager
@@ -128,17 +121,6 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             }
         }
 
-        connectivityRepository =
-            ConnectivityRepositoryImpl(
-                connectivityManager,
-                ConnectivitySlots(context),
-                context,
-                mock(),
-                mock(),
-                scope,
-                mock(),
-            )
-
         wifiRepository = FakeWifiRepository()
 
         carrierConfigRepository =
@@ -177,7 +159,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
         underTest =
             MobileConnectionsRepositoryImpl(
-                connectivityRepository,
+                connectivityManager,
                 subscriptionManager,
                 telephonyManager,
                 logger,
@@ -686,205 +668,75 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun mobileIsDefault_startsAsFalse() {
-        assertThat(underTest.mobileIsDefault.value).isFalse()
+    fun mobileConnectivity_default() {
+        assertThat(underTest.defaultMobileNetworkConnectivity.value)
+            .isEqualTo(MobileConnectivityModel(isConnected = false, isValidated = false))
     }
 
     @Test
-    fun mobileIsDefault_capsHaveCellular_isDefault() =
+    fun mobileConnectivity_isConnected_isValidated() =
         runBlocking(IMMEDIATE) {
-            val caps =
-                mock<NetworkCapabilities>().also {
-                    whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
-                }
+            val caps = createCapabilities(connected = true, validated = true)
 
-            var latest: Boolean? = null
-            val job = underTest.mobileIsDefault.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
 
             getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
 
-            assertThat(latest).isTrue()
+            assertThat(latest)
+                .isEqualTo(MobileConnectivityModel(isConnected = true, isValidated = true))
 
             job.cancel()
         }
 
     @Test
-    fun mobileIsDefault_capsDoNotHaveCellular_isNotDefault() =
+    fun mobileConnectivity_isConnected_isNotValidated() =
         runBlocking(IMMEDIATE) {
-            val caps =
-                mock<NetworkCapabilities>().also {
-                    whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(false)
-                }
+            val caps = createCapabilities(connected = true, validated = false)
 
-            var latest: Boolean? = null
-            val job = underTest.mobileIsDefault.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
 
             getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
 
-            assertThat(latest).isFalse()
-
-            job.cancel()
-        }
-
-    /** Regression test for b/272586234. */
-    @Test
-    fun mobileIsDefault_carrierMergedViaWifi_isDefault() =
-        runBlocking(IMMEDIATE) {
-            val carrierMergedInfo =
-                mock<WifiInfo>().apply { whenever(this.isCarrierMerged).thenReturn(true) }
-            val caps =
-                mock<NetworkCapabilities>().also {
-                    whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(carrierMergedInfo)
-                }
-
-            var latest: Boolean? = null
-            val job = underTest.mobileIsDefault.onEach { latest = it }.launchIn(this)
-
-            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
-
-            assertThat(latest).isTrue()
+            assertThat(latest)
+                .isEqualTo(MobileConnectivityModel(isConnected = true, isValidated = false))
 
             job.cancel()
         }
 
     @Test
-    fun mobileIsDefault_carrierMergedViaMobile_isDefault() =
+    fun mobileConnectivity_isNotConnected_isNotValidated() =
         runBlocking(IMMEDIATE) {
-            val carrierMergedInfo =
-                mock<WifiInfo>().apply { whenever(this.isCarrierMerged).thenReturn(true) }
-            val caps =
-                mock<NetworkCapabilities>().also {
-                    whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(carrierMergedInfo)
-                }
+            val caps = createCapabilities(connected = false, validated = false)
 
-            var latest: Boolean? = null
-            val job = underTest.mobileIsDefault.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
 
             getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
 
-            assertThat(latest).isTrue()
+            assertThat(latest)
+                .isEqualTo(MobileConnectivityModel(isConnected = false, isValidated = false))
 
             job.cancel()
         }
 
-    /** Regression test for b/272586234. */
+    /** In practice, I don't think this state can ever happen (!connected, validated) */
     @Test
-    fun mobileIsDefault_carrierMergedViaWifiWithVcnTransport_isDefault() =
+    fun mobileConnectivity_isNotConnected_isValidated() =
         runBlocking(IMMEDIATE) {
-            val carrierMergedInfo =
-                mock<WifiInfo>().apply { whenever(this.isCarrierMerged).thenReturn(true) }
-            val caps =
-                mock<NetworkCapabilities>().also {
-                    whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(VcnTransportInfo(carrierMergedInfo))
-                }
+            val caps = createCapabilities(connected = false, validated = true)
 
-            var latest: Boolean? = null
-            val job = underTest.mobileIsDefault.onEach { latest = it }.launchIn(this)
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
 
             getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
 
-            assertThat(latest).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
-    fun mobileIsDefault_carrierMergedViaMobileWithVcnTransport_isDefault() =
-        runBlocking(IMMEDIATE) {
-            val carrierMergedInfo =
-                mock<WifiInfo>().apply { whenever(this.isCarrierMerged).thenReturn(true) }
-            val caps =
-                mock<NetworkCapabilities>().also {
-                    whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(VcnTransportInfo(carrierMergedInfo))
-                }
-
-            var latest: Boolean? = null
-            val job = underTest.mobileIsDefault.onEach { latest = it }.launchIn(this)
-
-            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
-
-            assertThat(latest).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
-    fun mobileIsDefault_wifiDefault_mobileNotDefault() =
-        runBlocking(IMMEDIATE) {
-            val caps =
-                mock<NetworkCapabilities>().also {
-                    whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
-                }
-
-            var latest: Boolean? = null
-            val job = underTest.mobileIsDefault.onEach { latest = it }.launchIn(this)
-
-            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
-
-            assertThat(latest).isFalse()
-
-            job.cancel()
-        }
-
-    @Test
-    fun mobileIsDefault_ethernetDefault_mobileNotDefault() =
-        runBlocking(IMMEDIATE) {
-            val caps =
-                mock<NetworkCapabilities>().also {
-                    whenever(it.hasTransport(TRANSPORT_ETHERNET)).thenReturn(true)
-                }
-
-            var latest: Boolean? = null
-            val job = underTest.mobileIsDefault.onEach { latest = it }.launchIn(this)
-
-            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
-
-            assertThat(latest).isFalse()
-
-            job.cancel()
-        }
-
-    @Test
-    fun defaultConnectionIsValidated_startsAsFalse() {
-        assertThat(underTest.defaultConnectionIsValidated.value).isFalse()
-    }
-
-    @Test
-    fun defaultConnectionIsValidated_capsHaveValidated_isValidated() =
-        runBlocking(IMMEDIATE) {
-            val caps =
-                mock<NetworkCapabilities>().also {
-                    whenever(it.hasCapability(NET_CAPABILITY_VALIDATED)).thenReturn(true)
-                }
-
-            var latest: Boolean? = null
-            val job = underTest.defaultConnectionIsValidated.onEach { latest = it }.launchIn(this)
-
-            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
-
-            assertThat(latest).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
-    fun defaultConnectionIsValidated_capsHaveNotValidated_isNotValidated() =
-        runBlocking(IMMEDIATE) {
-            val caps =
-                mock<NetworkCapabilities>().also {
-                    whenever(it.hasCapability(NET_CAPABILITY_VALIDATED)).thenReturn(false)
-                }
-
-            var latest: Boolean? = null
-            val job = underTest.defaultConnectionIsValidated.onEach { latest = it }.launchIn(this)
-
-            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
-
-            assertThat(latest).isFalse()
+            assertThat(latest).isEqualTo(MobileConnectivityModel(false, true))
 
             job.cancel()
         }
@@ -900,7 +752,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             // the resources and then re-create the repo.
             underTest =
                 MobileConnectionsRepositoryImpl(
-                    connectivityRepository,
+                    connectivityManager,
                     subscriptionManager,
                     telephonyManager,
                     logger,
@@ -1006,6 +858,12 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             assertThat(latest).isEqualTo(null)
 
             job.cancel()
+        }
+
+    private fun createCapabilities(connected: Boolean, validated: Boolean): NetworkCapabilities =
+        mock<NetworkCapabilities>().also {
+            whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(connected)
+            whenever(it.hasCapability(NET_CAPABILITY_VALIDATED)).thenReturn(validated)
         }
 
     private fun getDefaultNetworkCallback(): ConnectivityManager.NetworkCallback {

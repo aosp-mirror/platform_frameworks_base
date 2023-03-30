@@ -109,7 +109,7 @@ class BroadcastSender @Inject constructor(
     @AnyThread
     fun closeSystemDialogs() {
         sendInBackground {
-            context.closeSystemDialogs()
+            context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
         }
     }
 

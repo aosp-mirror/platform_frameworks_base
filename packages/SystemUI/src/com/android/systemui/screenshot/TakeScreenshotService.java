@@ -21,6 +21,7 @@ import static android.content.Intent.ACTION_CLOSE_SYSTEM_DIALOGS;
 
 import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_PROCESS_COMPLETE;
 import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_URI;
+import static com.android.systemui.flags.Flags.SCREENSHOT_WORK_PROFILE_POLICY;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_SERVICE;
@@ -58,6 +59,7 @@ import com.android.internal.util.ScreenshotRequest;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FlagListenable.FlagEvent;
 import com.android.systemui.flags.Flags;
 
 import java.util.concurrent.Executor;
@@ -121,6 +123,7 @@ public class TakeScreenshotService extends Service {
         mContext = context;
         mBgExecutor = bgExecutor;
         mFeatureFlags = featureFlags;
+        mFeatureFlags.addListener(SCREENSHOT_WORK_PROFILE_POLICY, FlagEvent::requestNoRestart);
         mProcessor = processor;
     }
 

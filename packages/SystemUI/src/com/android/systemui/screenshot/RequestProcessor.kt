@@ -23,6 +23,7 @@ import com.android.internal.util.ScreenshotRequest
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags.SCREENSHOT_WORK_PROFILE_POLICY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.function.Consumer
@@ -56,7 +57,9 @@ class RequestProcessor @Inject constructor(
         // Whenever displayContentInfo is fetched, the topComponent is also populated
         // regardless of the managed profile status.
 
-        if (request.type != TAKE_SCREENSHOT_PROVIDED_IMAGE) {
+        if (request.type != TAKE_SCREENSHOT_PROVIDED_IMAGE &&
+                flags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)
+        ) {
 
             val info = policy.findPrimaryContent(policy.getDefaultDisplayId())
             Log.d(TAG, "findPrimaryContent: $info")
@@ -115,7 +118,9 @@ class RequestProcessor @Inject constructor(
         // Whenever displayContentInfo is fetched, the topComponent is also populated
         // regardless of the managed profile status.
 
-        if (screenshot.type != TAKE_SCREENSHOT_PROVIDED_IMAGE) {
+        if (screenshot.type != TAKE_SCREENSHOT_PROVIDED_IMAGE &&
+            flags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)
+        ) {
             val info = policy.findPrimaryContent(policy.getDefaultDisplayId())
             Log.d(TAG, "findPrimaryContent: $info")
             result.taskId = info.taskId

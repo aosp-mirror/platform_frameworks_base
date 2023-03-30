@@ -30,7 +30,6 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.hardware.input.InputManager;
-import android.hardware.input.InputManagerGlobal;
 import android.media.AudioManager;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
@@ -80,7 +79,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private final KeyButtonRipple mRipple;
     private final OverviewProxyService mOverviewProxyService;
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
-    private final InputManagerGlobal mInputManagerGlobal;
+    private final InputManager mInputManager;
     private final Paint mOvalBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private float mDarkIntensity;
     private boolean mHasOvalBg = false;
@@ -146,12 +145,12 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     }
 
     public KeyButtonView(Context context, AttributeSet attrs, int defStyle) {
-        this(context, attrs, defStyle, InputManagerGlobal.getInstance(), new UiEventLoggerImpl());
+        this(context, attrs, defStyle, InputManager.getInstance(), new UiEventLoggerImpl());
     }
 
     @VisibleForTesting
-    public KeyButtonView(Context context, AttributeSet attrs, int defStyle,
-            InputManagerGlobal manager, UiEventLogger uiEventLogger) {
+    public KeyButtonView(Context context, AttributeSet attrs, int defStyle, InputManager manager,
+            UiEventLogger uiEventLogger) {
         super(context, attrs);
         mUiEventLogger = uiEventLogger;
 
@@ -174,7 +173,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
 
         mRipple = new KeyButtonRipple(context, this, R.dimen.key_button_ripple_max_width);
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
-        mInputManagerGlobal = manager;
+        mInputManager = manager;
         setBackground(mRipple);
         setWillNotDraw(false);
         forceHasOverlappingRendering(false);
@@ -429,8 +428,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         if (displayId != INVALID_DISPLAY) {
             ev.setDisplayId(displayId);
         }
-        mInputManagerGlobal.injectInputEvent(ev,
-                InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+        mInputManager.injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 
     @Override

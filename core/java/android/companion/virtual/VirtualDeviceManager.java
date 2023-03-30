@@ -32,12 +32,15 @@ import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.virtual.audio.VirtualAudioDevice;
 import android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback;
+import android.companion.virtual.camera.VirtualCameraDevice;
+import android.companion.virtual.camera.VirtualCameraInput;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Point;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.VirtualDisplayFlag;
 import android.hardware.display.DisplayManagerGlobal;
@@ -326,7 +329,7 @@ public final class VirtualDeviceManager {
     }
 
     /**
-     * A virtual device has its own virtual display, audio output, microphone, sensors, etc. The
+     * A virtual device has its own virtual display, audio output, microphone, and camera etc. The
      * creator of a virtual device can take the output from the virtual display and stream it over
      * to another device, and inject input events that are received from the remote device.
      *
@@ -404,6 +407,8 @@ public final class VirtualDeviceManager {
                         }
                     }
                 };
+        @Nullable
+        private VirtualCameraDevice mVirtualCameraDevice;
         @Nullable
         private VirtualAudioDevice mVirtualAudioDevice;
 
@@ -578,7 +583,7 @@ public final class VirtualDeviceManager {
                 throw ex.rethrowFromSystemServer();
             }
             DisplayManagerGlobal displayManager = DisplayManagerGlobal.getInstance();
-            return displayManager.createVirtualDisplayWrapper(config, callbackWrapper,
+            return displayManager.createVirtualDisplayWrapper(config, mContext, callbackWrapper,
                     displayId);
         }
 
@@ -597,6 +602,10 @@ public final class VirtualDeviceManager {
             if (mVirtualAudioDevice != null) {
                 mVirtualAudioDevice.close();
                 mVirtualAudioDevice = null;
+            }
+            if (mVirtualCameraDevice != null) {
+                mVirtualCameraDevice.close();
+                mVirtualCameraDevice = null;
             }
         }
 
@@ -807,6 +816,34 @@ public final class VirtualDeviceManager {
                         executor, callback, () -> mVirtualAudioDevice = null);
             }
             return mVirtualAudioDevice;
+        }
+
+        /**
+         * Creates a new virtual camera. If a virtual camera was already created, it will be closed.
+         *
+         * @param cameraName name of the virtual camera.
+         * @param characteristics camera characteristics.
+         * @param virtualCameraInput callback that provides input to camera.
+         * @param executor Executor on which camera input will be sent into system. Don't
+         *         use the Main Thread for this executor.
+         * @return newly created camera;
+         *
+         * @hide
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        public VirtualCameraDevice createVirtualCameraDevice(
+                @NonNull String cameraName,
+                @NonNull CameraCharacteristics characteristics,
+                @NonNull VirtualCameraInput virtualCameraInput,
+                @NonNull Executor executor) {
+            if (mVirtualCameraDevice != null) {
+                mVirtualCameraDevice.close();
+            }
+            int deviceId = getDeviceId();
+            mVirtualCameraDevice = new VirtualCameraDevice(
+                    deviceId, cameraName, characteristics, virtualCameraInput, executor);
+            return mVirtualCameraDevice;
         }
 
         /**

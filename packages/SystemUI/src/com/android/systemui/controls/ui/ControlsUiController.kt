@@ -65,7 +65,7 @@ interface ControlsUiController {
      */
     fun getPreferredSelectedItem(structures: List<StructureInfo>): SelectedItem
 
-    fun onSizeChange()
+    fun onOrientationChange()
 }
 
 sealed class SelectedItem {

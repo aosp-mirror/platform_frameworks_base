@@ -110,7 +110,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final ContentObserver mShowWeatherObserver = new ContentObserver(null) {
         @Override
         public void onChange(boolean change) {
-            setDateWeatherVisibility();
+            setWeatherVisibility();
         }
     };
 
@@ -236,7 +236,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         );
 
         updateDoubleLineClock();
-        setDateWeatherVisibility();
+        setWeatherVisibility();
 
         mKeyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
                 mKeyguardUnlockAnimationListener);
@@ -337,7 +337,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
 
         mCurrentClockSize = clockSize;
-        setDateWeatherVisibility();
 
         ClockController clock = getClock();
         boolean appeared = mView.switchToClock(clockSize, animate);
@@ -458,7 +457,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         mClockEventController.setClock(clock);
         mView.setClock(clock, mStatusBarStateController.getState());
-        setDateWeatherVisibility();
     }
 
     @Nullable
@@ -480,18 +478,11 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
     }
 
-    private void setDateWeatherVisibility() {
-        if (mDateWeatherView != null || mWeatherView != null) {
-            mUiExecutor.execute(() -> {
-                if (mDateWeatherView != null) {
-                    mDateWeatherView.setVisibility(
-                            clockHasCustomWeatherDataDisplay() ? View.GONE : View.VISIBLE);
-                }
-                if (mWeatherView != null) {
-                    mWeatherView.setVisibility(
-                            mSmartspaceController.isWeatherEnabled() ? View.VISIBLE : View.GONE);
-                }
-            });
+    private void setWeatherVisibility() {
+        if (mWeatherView != null) {
+            mUiExecutor.execute(
+                    () -> mWeatherView.setVisibility(
+                        mSmartspaceController.isWeatherEnabled() ? View.VISIBLE : View.GONE));
         }
     }
 
@@ -518,17 +509,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         if (regionSampler != null) {
             regionSampler.dump(pw);
         }
-    }
-
-    /** Returns true if the clock handles the display of weather information */
-    private boolean clockHasCustomWeatherDataDisplay() {
-        ClockController clock = getClock();
-        if (clock == null) {
-            return false;
-        }
-
-        return ((mCurrentClockSize == LARGE) ? clock.getLargeClock() : clock.getSmallClock())
-                .getEvents().getHasCustomWeatherDataDisplay();
     }
 
     /** Gets the animations for the current clock. */

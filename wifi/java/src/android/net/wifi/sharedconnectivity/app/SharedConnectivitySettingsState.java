@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -47,8 +49,13 @@ public final class SharedConnectivitySettingsState implements Parcelable {
      */
     public static final class Builder {
         private boolean mInstantTetherEnabled;
-        private PendingIntent mInstantTetherSettingsPendingIntent;
+        private Intent mInstantTetherSettingsIntent;
+        private final Context mContext;
         private Bundle mExtras = Bundle.EMPTY;
+
+        public Builder(@NonNull Context context) {
+            mContext = context;
+        }
 
         /**
          * Sets the state of Instant Tether in settings
@@ -62,14 +69,16 @@ public final class SharedConnectivitySettingsState implements Parcelable {
         }
 
         /**
-         * Sets the {@link PendingIntent} that will open the Instant Tether settings page.
-         * The pending intent must be set as {@link PendingIntent#FLAG_IMMUTABLE}.
+         * Sets the intent that will open the Instant Tether settings page.
+         * The intent will be stored as a {@link PendingIntent} in the settings object. The pending
+         * intent will be set as {@link PendingIntent#FLAG_IMMUTABLE} and
+         * {@link PendingIntent#FLAG_ONE_SHOT}.
          *
          * @return Returns the Builder object.
          */
         @NonNull
-        public Builder setInstantTetherSettingsPendingIntent(@NonNull PendingIntent pendingIntent) {
-            mInstantTetherSettingsPendingIntent = pendingIntent;
+        public Builder setInstantTetherSettingsPendingIntent(@NonNull Intent intent) {
+            mInstantTetherSettingsIntent = intent;
             return this;
         }
 
@@ -91,21 +100,19 @@ public final class SharedConnectivitySettingsState implements Parcelable {
          */
         @NonNull
         public SharedConnectivitySettingsState build() {
-            return new SharedConnectivitySettingsState(mInstantTetherEnabled,
-                    mInstantTetherSettingsPendingIntent, mExtras);
-
-        }
-    }
-
-    private static void validate(PendingIntent pendingIntent) {
-        if (pendingIntent != null && !pendingIntent.isImmutable()) {
-            throw new IllegalArgumentException("Pending intent must be immutable");
+            if (mInstantTetherSettingsIntent != null) {
+                PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0,
+                        mInstantTetherSettingsIntent,
+                        PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT);
+                return new SharedConnectivitySettingsState(mInstantTetherEnabled,
+                        pendingIntent, mExtras);
+            }
+            return new SharedConnectivitySettingsState(mInstantTetherEnabled, null, mExtras);
         }
     }
 
     private SharedConnectivitySettingsState(boolean instantTetherEnabled,
             PendingIntent pendingIntent, @NonNull Bundle extras) {
-        validate(pendingIntent);
         mInstantTetherEnabled = instantTetherEnabled;
         mInstantTetherSettingsPendingIntent = pendingIntent;
         mExtras = extras;

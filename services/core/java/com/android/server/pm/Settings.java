@@ -3947,15 +3947,14 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
                 try {
-                    packageSetting.setEnabled(Integer.parseInt(enabledStr), 0 /* userId */,
-                            "settings");
+                    packageSetting.setEnabled(Integer.parseInt(enabledStr), 0 /* userId */, null);
                 } catch (NumberFormatException e) {
                     if (enabledStr.equalsIgnoreCase("true")) {
-                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_ENABLED, 0, "settings");
+                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_ENABLED, 0, null);
                     } else if (enabledStr.equalsIgnoreCase("false")) {
-                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DISABLED, 0, "settings");
+                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DISABLED, 0, null);
                     } else if (enabledStr.equalsIgnoreCase("default")) {
-                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, 0, "settings");
+                        packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, 0, null);
                     } else {
                         PackageManagerService.reportSettingsProblem(Log.WARN,
                                 "Error in package manager settings: package " + name
@@ -3964,7 +3963,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     }
                 }
             } else {
-                packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, 0, "settings");
+                packageSetting.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, 0, null);
             }
 
             addInstallerPackageNames(installSource);

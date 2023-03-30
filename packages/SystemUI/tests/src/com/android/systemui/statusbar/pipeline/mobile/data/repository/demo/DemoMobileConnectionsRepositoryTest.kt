@@ -91,17 +91,11 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun isDefault_defaultsToTrue() =
+    fun `connectivity - defaults to connected and validated`() =
         testScope.runTest {
-            val isDefault = underTest.mobileIsDefault.value
-            assertThat(isDefault).isTrue()
-        }
-
-    @Test
-    fun validated_defaultsToTrue() =
-        testScope.runTest {
-            val isValidated = underTest.defaultConnectionIsValidated.value
-            assertThat(isValidated).isTrue()
+            val connectivity = underTest.defaultMobileNetworkConnectivity.value
+            assertThat(connectivity.isConnected).isTrue()
+            assertThat(connectivity.isValidated).isTrue()
         }
 
     @Test

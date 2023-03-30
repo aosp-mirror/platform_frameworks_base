@@ -148,9 +148,9 @@ constructor(
                 iconInteractor.isDataEnabled,
                 iconInteractor.isDefaultConnectionFailed,
                 iconInteractor.alwaysShowDataRatIcon,
-                iconInteractor.mobileIsDefault,
-            ) { dataConnected, dataEnabled, failedConnection, alwaysShow, mobileIsDefault ->
-                alwaysShow || (dataConnected && dataEnabled && !failedConnection && mobileIsDefault)
+                iconInteractor.isConnected,
+            ) { dataConnected, dataEnabled, failedConnection, alwaysShow, connected ->
+                alwaysShow || (dataConnected && dataEnabled && !failedConnection && connected)
             }
             .distinctUntilChanged()
             .logDiffsForTable(

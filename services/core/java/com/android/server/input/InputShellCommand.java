@@ -42,7 +42,6 @@ import static android.view.KeyEvent.META_SHIFT_RIGHT_ON;
 import static java.util.Collections.unmodifiableMap;
 
 import android.hardware.input.InputManager;
-import android.hardware.input.InputManagerGlobal;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.util.ArrayMap;
@@ -110,7 +109,7 @@ public class InputShellCommand extends ShellCommand {
     }
 
     private void injectKeyEvent(KeyEvent event) {
-        InputManagerGlobal.getInstance().injectInputEvent(event,
+        InputManager.getInstance().injectInputEvent(event,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
@@ -179,7 +178,7 @@ public class InputShellCommand extends ShellCommand {
                 pointerProperties, pointerCoords, DEFAULT_META_STATE, DEFAULT_BUTTON_STATE,
                 DEFAULT_PRECISION_X, DEFAULT_PRECISION_Y, getInputDeviceId(inputSource),
                 DEFAULT_EDGE_FLAGS, inputSource, displayId, DEFAULT_FLAGS);
-        InputManagerGlobal.getInstance().injectInputEvent(event,
+        InputManager.getInstance().injectInputEvent(event,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
@@ -531,7 +530,7 @@ public class InputShellCommand extends ShellCommand {
     }
 
     private void injectKeyEventAsync(KeyEvent event) {
-        InputManagerGlobal.getInstance().injectInputEvent(event,
+        InputManager.getInstance().injectInputEvent(event,
                 InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 

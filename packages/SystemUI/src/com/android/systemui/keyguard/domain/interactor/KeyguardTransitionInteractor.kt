@@ -39,7 +39,7 @@ import kotlinx.coroutines.flow.merge
 class KeyguardTransitionInteractor
 @Inject
 constructor(
-    private val repository: KeyguardTransitionRepository,
+    repository: KeyguardTransitionRepository,
 ) {
     /** (any)->GONE transition information */
     val anyStateToGoneTransition: Flow<TransitionStep> =
@@ -61,6 +61,10 @@ constructor(
 
     /** LOCKSCREEN->AOD transition information. */
     val lockscreenToAodTransition: Flow<TransitionStep> = repository.transition(LOCKSCREEN, AOD)
+
+    /** LOCKSCREEN->PRIMARY_BOUNCER transition information. */
+    val mLockscreenToPrimaryBouncerTransition: Flow<TransitionStep> =
+        repository.transition(LOCKSCREEN, PRIMARY_BOUNCER)
 
     /** LOCKSCREEN->DREAMING transition information. */
     val lockscreenToDreamingTransition: Flow<TransitionStep> =
@@ -88,39 +92,19 @@ constructor(
             lockscreenToAodTransition,
         )
 
-    /** The last [TransitionStep] with a [TransitionState] of STARTED */
+    /* The last [TransitionStep] with a [TransitionState] of STARTED */
     val startedKeyguardTransitionStep: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.transitionState == TransitionState.STARTED }
 
-    /** The last [TransitionStep] with a [TransitionState] of CANCELED */
+    /* The last [TransitionStep] with a [TransitionState] of CANCELED */
     val canceledKeyguardTransitionStep: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.transitionState == TransitionState.CANCELED }
 
-    /** The last [TransitionStep] with a [TransitionState] of FINISHED */
+    /* The last [TransitionStep] with a [TransitionState] of FINISHED */
     val finishedKeyguardTransitionStep: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.transitionState == TransitionState.FINISHED }
 
-    /** The last completed [KeyguardState] transition */
+    /* The last completed [KeyguardState] transition */
     val finishedKeyguardState: Flow<KeyguardState> =
         finishedKeyguardTransitionStep.map { step -> step.to }
-
-    /**
-     * The amount of transition into or out of the given [KeyguardState].
-     *
-     * The value will be `0` (or close to `0`, due to float point arithmetic) if not in this step or
-     * `1` when fully in the given state.
-     */
-    fun transitionValue(
-        state: KeyguardState,
-    ): Flow<Float> {
-        return repository.transitions
-            .filter { it.from == state || it.to == state }
-            .map {
-                if (it.from == state) {
-                    1 - it.value
-                } else {
-                    it.value
-                }
-            }
-    }
 }

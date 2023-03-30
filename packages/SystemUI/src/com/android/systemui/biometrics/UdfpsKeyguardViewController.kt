@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.KeyguardViewManagerCallback
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.LegacyAlternateBouncer
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.OccludingAppBiometricUI
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
@@ -81,6 +82,8 @@ constructor(
     ) {
     private val useExpandedOverlay: Boolean =
         featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
+    private val isModernAlternateBouncerEnabled: Boolean =
+        featureFlags.isEnabled(Flags.MODERN_ALTERNATE_BOUNCER)
     private var showingUdfpsBouncer = false
     private var udfpsRequested = false
     private var qsExpansion = 0f
@@ -104,7 +107,7 @@ constructor(
                 )
             }
         }
-    private var inputBouncerExpansion = 0f
+    private var inputBouncerExpansion = 0f // only used for modernBouncer
 
     private val stateListener: StatusBarStateController.StateListener =
         object : StatusBarStateController.StateListener {
@@ -248,7 +251,7 @@ constructor(
             // that may make the view visible again.
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 listenForBouncerExpansion(this)
-                listenForAlternateBouncerVisibility(this)
+                if (isModernAlternateBouncerEnabled) listenForAlternateBouncerVisibility(this)
             }
         }
     }
@@ -292,6 +295,7 @@ constructor(
         view.updatePadding()
         updateAlpha()
         updatePauseAuth()
+        keyguardViewManager.setLegacyAlternateBouncer(legacyAlternateBouncer)
         keyguardViewManager.setOccludingAppBiometricUI(occludingAppBiometricUI)
         lockScreenShadeTransitionController.udfpsKeyguardViewController = this
         activityLaunchAnimator.addListener(activityLaunchAnimatorListener)
@@ -305,6 +309,7 @@ constructor(
         faceDetectRunning = false
         keyguardStateController.removeCallback(keyguardStateControllerCallback)
         statusBarStateController.removeCallback(stateListener)
+        keyguardViewManager.removeLegacyAlternateBouncer(legacyAlternateBouncer)
         keyguardViewManager.removeOccludingAppBiometricUI(occludingAppBiometricUI)
         keyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false)
         configurationController.removeCallback(configurationListener)
@@ -318,6 +323,7 @@ constructor(
 
     override fun dump(pw: PrintWriter, args: Array<String>) {
         super.dump(pw, args)
+        pw.println("isModernAlternateBouncerEnabled=$isModernAlternateBouncerEnabled")
         pw.println("showingUdfpsAltBouncer=$showingUdfpsBouncer")
         pw.println(
             "altBouncerInteractor#isAlternateBouncerVisible=" +
@@ -467,6 +473,22 @@ constructor(
     private fun updateScaleFactor() {
         udfpsController.mOverlayParams?.scaleFactor?.let { view.setScaleFactor(it) }
     }
+
+    private val legacyAlternateBouncer: LegacyAlternateBouncer =
+        object : LegacyAlternateBouncer {
+            override fun showAlternateBouncer(): Boolean {
+                return showUdfpsBouncer(true)
+            }
+
+            override fun hideAlternateBouncer(): Boolean {
+                return showUdfpsBouncer(false)
+            }
+
+            override fun isShowingAlternateBouncer(): Boolean {
+                return showingUdfpsBouncer
+            }
+        }
+
     companion object {
         const val TAG = "UdfpsKeyguardViewController"
     }

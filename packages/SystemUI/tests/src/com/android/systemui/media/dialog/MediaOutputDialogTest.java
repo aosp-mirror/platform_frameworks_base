@@ -306,8 +306,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
 
     @Test
     public void getStopButtonText_notSupportsBroadcast_returnsDefaultText() {
-        String stopText = mContext.getText(
-                R.string.media_output_dialog_button_stop_casting).toString();
+        String stopText = mContext.getText(R.string.keyboard_key_media_stop).toString();
         MediaOutputController mockMediaOutputController = mock(MediaOutputController.class);
         when(mockMediaOutputController.isBroadcastSupported()).thenReturn(false);
 

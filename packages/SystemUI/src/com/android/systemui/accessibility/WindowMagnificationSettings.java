@@ -17,8 +17,6 @@
 package com.android.systemui.accessibility;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
-import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
-import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import android.annotation.IntDef;
@@ -84,7 +82,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private boolean mSingleTapDetected = false;
 
     private SeekBarWithIconButtonsView mZoomSeekbar;
-    private LinearLayout mAllowDiagonalScrollingView;
     private Switch mAllowDiagonalScrollingSwitch;
     private LinearLayout mPanelView;
     private LinearLayout mSettingView;
@@ -94,15 +91,12 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private ImageButton mLargeButton;
     private Button mDoneButton;
     private Button mEditButton;
-    private ImageButton mFullScreenButton;
+    private ImageButton mChangeModeButton;
     private int mLastSelectedButtonIndex = MagnificationSize.NONE;
     private boolean mAllowDiagonalScrolling = false;
     private static final float A11Y_CHANGE_SCALE_DIFFERENCE = 1.0f;
     private static final float A11Y_SCALE_MIN_VALUE = 1.0f;
     private WindowMagnificationSettingsCallback mCallback;
-
-    // the magnification mode that triggers showing the panel
-    private int mTriggeringMode = ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
@@ -110,7 +104,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             MagnificationSize.SMALL,
             MagnificationSize.MEDIUM,
             MagnificationSize.LARGE,
-            MagnificationSize.FULLSCREEN
     })
     /** Denotes the Magnification size type. */
     public @interface MagnificationSize {
@@ -118,7 +111,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         int SMALL = 1;
         int MEDIUM = 2;
         int LARGE = 3;
-        int FULLSCREEN = 4;
     }
 
     @VisibleForTesting
@@ -170,11 +162,39 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         }
     }
 
-    private final AccessibilityDelegate mPanelDelegate = new AccessibilityDelegate() {
+    private CharSequence formatContentDescription(int viewId) {
+        if (viewId == R.id.magnifier_small_button) {
+            return mContext.getResources().getString(
+                    R.string.accessibility_magnification_small);
+        } else if (viewId == R.id.magnifier_medium_button) {
+            return mContext.getResources().getString(
+                    R.string.accessibility_magnification_medium);
+        } else if (viewId == R.id.magnifier_large_button) {
+            return mContext.getResources().getString(
+                    R.string.accessibility_magnification_large);
+        } else if (viewId == R.id.magnifier_done_button) {
+            return mContext.getResources().getString(
+                    R.string.accessibility_magnification_done);
+        } else if (viewId == R.id.magnifier_edit_button) {
+            return mContext.getResources().getString(
+                    R.string.accessibility_resize);
+        } else {
+            return mContext.getResources().getString(
+                    R.string.magnification_mode_switch_description);
+        }
+    }
+
+    private final AccessibilityDelegate mButtonDelegate = new AccessibilityDelegate() {
         @Override
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(host, info);
 
+            info.setContentDescription(formatContentDescription(host.getId()));
+            final AccessibilityAction clickAction = new AccessibilityAction(
+                    AccessibilityAction.ACTION_CLICK.getId(), mContext.getResources().getString(
+                    R.string.magnification_mode_switch_click_label));
+            info.addAction(clickAction);
+            info.setClickable(true);
             info.addAction(new AccessibilityAction(R.id.accessibility_action_move_up,
                     mContext.getString(R.string.accessibility_control_move_up)));
             info.addAction(new AccessibilityAction(R.id.accessibility_action_move_down,
@@ -227,12 +247,13 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 setMagnifierSize(MagnificationSize.MEDIUM);
             } else if (id == R.id.magnifier_large_button) {
                 setMagnifierSize(MagnificationSize.LARGE);
-            } else if (id == R.id.magnifier_full_button) {
-                setMagnifierSize(MagnificationSize.FULLSCREEN);
             } else if (id == R.id.magnifier_edit_button) {
                 editMagnifierSizeMode(true);
             } else if (id == R.id.magnifier_done_button) {
                 hideSettingPanel();
+            } else if (id == R.id.magnifier_full_button) {
+                hideSettingPanel();
+                toggleMagnificationMode();
             }
         }
     };
@@ -257,7 +278,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     @Override
     public boolean onFinish(float xOffset, float yOffset) {
         if (!mSingleTapDetected) {
-            showSettingPanel(mTriggeringMode);
+            showSettingPanel();
         }
         mSingleTapDetected = false;
         return true;
@@ -297,43 +318,27 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mCallback.onSettingsPanelVisibilityChanged(/* shown= */ false);
     }
 
-    /**
-     * Shows magnification settings panel. The panel ui would be various for
-     * different magnification mode.
-     *
-     * @param mode      The magnification mode
-     * @see android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
-     * @see android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
-     */
-    public void showSettingPanel(int mode) {
-        showSettingPanel(mode, true);
-    }
-
-    public boolean isSettingPanelShowing() {
-        return mIsVisible;
+    public void showSettingPanel() {
+        showSettingPanel(true);
     }
 
     public void setScaleSeekbar(float scale) {
         setSeekbarProgress(scale);
     }
 
-    private void transitToMagnificationMode(int mode) {
-        mCallback.onModeSwitch(mode);
+    private void toggleMagnificationMode() {
+        mCallback.onModeSwitch(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
     }
 
     /**
-     * Shows magnification panel for set magnification.
+     * Shows magnification panel for set window magnification.
      * When the panel is going to be visible by calling this method, the layout position can be
      * reset depending on the flag.
      *
-     * @param mode The magnification mode
      * @param resetPosition if the button position needs be reset
      */
-    private void showSettingPanel(int mode, boolean resetPosition) {
+    private void showSettingPanel(boolean resetPosition) {
         if (!mIsVisible) {
-            updateUIControlsIfNeed(mode);
-            mTriggeringMode = mode;
-
             if (resetPosition) {
                 mDraggableWindowBounds.set(getDraggableWindowBounds());
                 mParams.x = mDraggableWindowBounds.right;
@@ -348,37 +353,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             mCallback.onSettingsPanelVisibilityChanged(/* shown= */ true);
         }
         mContext.registerReceiver(mScreenOffReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
-    }
-
-    private void updateUIControlsIfNeed(int mode) {
-        if (mode == mTriggeringMode) {
-            return;
-        }
-
-        int selectedButtonIndex = mLastSelectedButtonIndex;
-        switch (mode) {
-            case ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN:
-                // set the edit button visibility to View.INVISIBLE to keep the height, to prevent
-                // the size title from too close to the size buttons
-                mEditButton.setVisibility(View.INVISIBLE);
-                mAllowDiagonalScrollingView.setVisibility(View.GONE);
-                // force the fullscreen button showing
-                selectedButtonIndex = MagnificationSize.FULLSCREEN;
-                break;
-
-            case ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW:
-                mEditButton.setVisibility(View.VISIBLE);
-                mAllowDiagonalScrollingView.setVisibility(View.VISIBLE);
-                if (selectedButtonIndex == MagnificationSize.FULLSCREEN) {
-                    selectedButtonIndex = MagnificationSize.NONE;
-                }
-                break;
-
-            default:
-                break;
-        }
-
-        updateSelectedButton(selectedButtonIndex);
     }
 
     private final BroadcastReceiver mScreenOffReceiver = new BroadcastReceiver() {
@@ -404,15 +378,13 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mSettingView.setFocusableInTouchMode(true);
         mSettingView.setOnTouchListener(this::onTouch);
 
-        mSettingView.setAccessibilityDelegate(mPanelDelegate);
-
         mPanelView = mSettingView.findViewById(R.id.magnifier_panel_view);
         mSmallButton = mSettingView.findViewById(R.id.magnifier_small_button);
         mMediumButton = mSettingView.findViewById(R.id.magnifier_medium_button);
         mLargeButton = mSettingView.findViewById(R.id.magnifier_large_button);
         mDoneButton = mSettingView.findViewById(R.id.magnifier_done_button);
         mEditButton = mSettingView.findViewById(R.id.magnifier_edit_button);
-        mFullScreenButton = mSettingView.findViewById(R.id.magnifier_full_button);
+        mChangeModeButton = mSettingView.findViewById(R.id.magnifier_full_button);
 
         mZoomSeekbar = mSettingView.findViewById(R.id.magnifier_zoom_slider);
         float scale = mSecureSettings.getFloatForUser(
@@ -421,8 +393,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         setSeekbarProgress(scale);
         mZoomSeekbar.setOnSeekBarChangeListener(new ZoomSeekbarChangeListener());
 
-        mAllowDiagonalScrollingView =
-                (LinearLayout) mSettingView.findViewById(R.id.magnifier_horizontal_lock_view);
         mAllowDiagonalScrollingSwitch =
                 (Switch) mSettingView.findViewById(R.id.magnifier_horizontal_lock_switch);
         mAllowDiagonalScrollingSwitch.setChecked(mAllowDiagonalScrolling);
@@ -430,11 +400,22 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             toggleDiagonalScrolling();
         });
 
+        mSmallButton.setAccessibilityDelegate(mButtonDelegate);
         mSmallButton.setOnClickListener(mButtonClickListener);
+
+        mMediumButton.setAccessibilityDelegate(mButtonDelegate);
         mMediumButton.setOnClickListener(mButtonClickListener);
+
+        mLargeButton.setAccessibilityDelegate(mButtonDelegate);
         mLargeButton.setOnClickListener(mButtonClickListener);
+
+        mDoneButton.setAccessibilityDelegate(mButtonDelegate);
         mDoneButton.setOnClickListener(mButtonClickListener);
-        mFullScreenButton.setOnClickListener(mButtonClickListener);
+
+        mChangeModeButton.setAccessibilityDelegate(mButtonDelegate);
+        mChangeModeButton.setOnClickListener(mButtonClickListener);
+
+        mEditButton.setAccessibilityDelegate(mButtonDelegate);
         mEditButton.setOnClickListener(mButtonClickListener);
 
         mSettingView.setOnApplyWindowInsetsListener((v, insets) -> {
@@ -465,7 +446,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             hideSettingPanel(/* resetPosition= */ false);
             inflateView();
             if (showSettingPanelAfterThemeChange) {
-                showSettingPanel(mTriggeringMode, /* resetPosition= */ false);
+                showSettingPanel(/* resetPosition= */ false);
             }
             return;
         }
@@ -520,18 +501,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     }
 
     private void setMagnifierSize(@MagnificationSize int index) {
-        if (index == MagnificationSize.FULLSCREEN) {
-            // transit to fullscreen magnifier if needed
-            transitToMagnificationMode(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
-        } else if (index != MagnificationSize.NONE) {
-            // update the window magnifier size
-            mCallback.onSetMagnifierSize(index);
-            // transit to window magnifier if needed
-            transitToMagnificationMode(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
-        } else {
-            return;
-        }
-
+        mCallback.onSetMagnifierSize(index);
         updateSelectedButton(index);
     }
 
@@ -603,8 +573,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             mMediumButton.setSelected(false);
         } else if (mLastSelectedButtonIndex == MagnificationSize.LARGE) {
             mLargeButton.setSelected(false);
-        } else if (mLastSelectedButtonIndex == MagnificationSize.FULLSCREEN) {
-            mFullScreenButton.setSelected(false);
         }
 
         // Set the state for selected button
@@ -614,8 +582,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             mMediumButton.setSelected(true);
         } else if (index == MagnificationSize.LARGE) {
             mLargeButton.setSelected(true);
-        } else if (index == MagnificationSize.FULLSCREEN) {
-            mFullScreenButton.setSelected(true);
         }
 
         mLastSelectedButtonIndex = index;

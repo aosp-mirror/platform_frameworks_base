@@ -248,7 +248,7 @@ public class BackgroundInstallControlService extends SystemService {
     // ADB sets installerPackageName to null, this creates a loophole to bypass BIC which will be
     // addressed with b/265203007
     private boolean installedByAdb(String initiatingPackageName) {
-        return PackageManagerServiceUtils.isInstalledByAdb(initiatingPackageName);
+        return initiatingPackageName == null;
     }
 
     private boolean wasForegroundInstallation(String installerPackageName,

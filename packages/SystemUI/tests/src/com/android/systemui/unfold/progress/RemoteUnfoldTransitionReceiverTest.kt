@@ -18,7 +18,6 @@ package com.android.systemui.unfold.progress
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.SysuiTestCase
 import org.junit.Before
 import org.junit.Test
@@ -28,27 +27,23 @@ import org.junit.runner.RunWith
 @SmallTest
 class RemoteUnfoldTransitionReceiverTest : SysuiTestCase() {
 
-    private val progressProvider =
-        RemoteUnfoldTransitionReceiver(useReceivingFilter = true) { runOnMainSync(it) }
-    private val progressProviderWithoutFilter =
-        RemoteUnfoldTransitionReceiver(useReceivingFilter = false) { it.run() }
+    private val progressProvider = RemoteUnfoldTransitionReceiver { it.run() }
     private val listener = TestUnfoldProgressListener()
 
     @Before
     fun setUp() {
         progressProvider.addCallback(listener)
-        progressProviderWithoutFilter.addCallback(listener)
     }
 
     @Test
-    fun onTransitionStarted_withFilter_propagated() {
+    fun onTransitionStarted_propagated() {
         progressProvider.onTransitionStarted()
 
         listener.assertStarted()
     }
 
     @Test
-    fun onTransitionProgress_withFilter_propagated() {
+    fun onTransitionProgress_propagated() {
         progressProvider.onTransitionStarted()
 
         progressProvider.onTransitionProgress(0.5f)
@@ -57,7 +52,7 @@ class RemoteUnfoldTransitionReceiverTest : SysuiTestCase() {
     }
 
     @Test
-    fun onTransitionEnded_withFilter_propagated() {
+    fun onTransitionEnded_propagated() {
         progressProvider.onTransitionStarted()
         progressProvider.onTransitionProgress(0.5f)
 
@@ -67,52 +62,11 @@ class RemoteUnfoldTransitionReceiverTest : SysuiTestCase() {
     }
 
     @Test
-    fun onTransitionStarted_withFilter_afterCallbackRemoved_notPropagated() {
+    fun onTransitionStarted_afterCallbackRemoved_notPropagated() {
         progressProvider.removeCallback(listener)
 
         progressProvider.onTransitionStarted()
 
         listener.assertNotStarted()
-    }
-
-    @Test
-    fun onTransitionStarted_withoutFilter_propagated() {
-        progressProviderWithoutFilter.onTransitionStarted()
-
-        listener.assertStarted()
-    }
-
-    @Test
-    fun onTransitionProgress_withoutFilter_propagated() {
-        progressProviderWithoutFilter.onTransitionStarted()
-
-        progressProviderWithoutFilter.onTransitionProgress(0.5f)
-
-        listener.assertLastProgress(0.5f)
-    }
-
-    @Test
-    fun onTransitionEnded_withoutFilter_propagated() {
-        progressProviderWithoutFilter.onTransitionStarted()
-        progressProviderWithoutFilter.onTransitionProgress(0.5f)
-
-        progressProviderWithoutFilter.onTransitionFinished()
-
-        listener.ensureTransitionFinished()
-    }
-
-    @Test
-    fun onTransitionStarted_withoutFilter_afterCallbackRemoved_notPropagated() {
-        progressProviderWithoutFilter.removeCallback(listener)
-
-        progressProviderWithoutFilter.onTransitionStarted()
-
-        listener.assertNotStarted()
-    }
-
-    private fun runOnMainSync(f: Runnable) {
-        InstrumentationRegistry.getInstrumentation().runOnMainSync { f.run() }
-        // Sleep as the animator used from the filter has a callback that happens at every frame.
-        Thread.sleep(60)
     }
 }

@@ -283,16 +283,6 @@ public class SoundTriggerHalConcurrentCaptureHandler implements ISoundTriggerHal
         mCallbackThread.flush();
     }
 
-    @Override
-    public void clientAttached(IBinder binder) {
-        mDelegate.clientAttached(binder);
-    }
-
-    @Override
-    public void clientDetached(IBinder binder) {
-        mDelegate.clientDetached(binder);
-    }
-
     /**
      * This is a thread for asynchronous delivery of callback events, having the following features:
      * <ul>

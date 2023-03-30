@@ -74,30 +74,13 @@ public final class RequestInfo implements Parcelable {
     @NonNull
     private final String mAppPackageName;
 
-    private final boolean mHasPermissionToOverrideDefault;
-
     /** Creates new {@code RequestInfo} for a create-credential flow. */
     @NonNull
     public static RequestInfo newCreateRequestInfo(
             @NonNull IBinder token, @NonNull CreateCredentialRequest createCredentialRequest,
             @NonNull String appPackageName) {
         return new RequestInfo(
-                token, TYPE_CREATE, appPackageName, createCredentialRequest, null,
-                /*hasPermissionToOverrideDefault=*/ false);
-    }
-
-    /**
-     * Creates new {@code RequestInfo} for a create-credential flow.
-     *
-     * @hide
-     */
-    @NonNull
-    public static RequestInfo newCreateRequestInfo(
-            @NonNull IBinder token, @NonNull CreateCredentialRequest createCredentialRequest,
-            @NonNull String appPackageName, boolean hasPermissionToOverrideDefault) {
-        return new RequestInfo(
-                token, TYPE_CREATE, appPackageName, createCredentialRequest, null,
-                hasPermissionToOverrideDefault);
+                token, TYPE_CREATE, appPackageName, createCredentialRequest, null);
     }
 
     /** Creates new {@code RequestInfo} for a get-credential flow. */
@@ -106,18 +89,7 @@ public final class RequestInfo implements Parcelable {
             @NonNull IBinder token, @NonNull GetCredentialRequest getCredentialRequest,
             @NonNull String appPackageName) {
         return new RequestInfo(
-                token, TYPE_GET, appPackageName, null, getCredentialRequest,
-                /*hasPermissionToOverrideDefault=*/ false);
-    }
-
-
-    /**
-     * Returns whether the calling package has the permission
-     *
-     * @hide
-     */
-    public boolean hasPermissionToOverrideDefault() {
-        return mHasPermissionToOverrideDefault;
+                token, TYPE_GET, appPackageName, null, getCredentialRequest);
     }
 
     /** Returns the request token matching the user request. */
@@ -160,14 +132,12 @@ public final class RequestInfo implements Parcelable {
     private RequestInfo(@NonNull IBinder token, @NonNull @RequestType String type,
             @NonNull String appPackageName,
             @Nullable CreateCredentialRequest createCredentialRequest,
-            @Nullable GetCredentialRequest getCredentialRequest,
-            boolean hasPermissionToOverrideDefault) {
+            @Nullable GetCredentialRequest getCredentialRequest) {
         mToken = token;
         mType = type;
         mAppPackageName = appPackageName;
         mCreateCredentialRequest = createCredentialRequest;
         mGetCredentialRequest = getCredentialRequest;
-        mHasPermissionToOverrideDefault = hasPermissionToOverrideDefault;
     }
 
     private RequestInfo(@NonNull Parcel in) {
@@ -187,7 +157,6 @@ public final class RequestInfo implements Parcelable {
         AnnotationValidations.validate(NonNull.class, null, mAppPackageName);
         mCreateCredentialRequest = createCredentialRequest;
         mGetCredentialRequest = getCredentialRequest;
-        mHasPermissionToOverrideDefault = in.readBoolean();
     }
 
     @Override
@@ -197,7 +166,6 @@ public final class RequestInfo implements Parcelable {
         dest.writeString8(mAppPackageName);
         dest.writeTypedObject(mCreateCredentialRequest, flags);
         dest.writeTypedObject(mGetCredentialRequest, flags);
-        dest.writeBoolean(mHasPermissionToOverrideDefault);
     }
 
     @Override

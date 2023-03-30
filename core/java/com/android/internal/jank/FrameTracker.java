@@ -328,7 +328,6 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         mTracingStarted = true;
         markEvent("FT#begin");
         Trace.beginAsyncSection(mSession.getName(), (int) mBeginVsyncId);
-        markEvent("FT#layerId#" + mSurfaceControl.getLayerId());
         mSurfaceControlWrapper.addJankStatsListener(this, mSurfaceControl);
         if (!mSurfaceOnly) {
             mRendererWrapper.addObserver(mObserver);
@@ -438,10 +437,8 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
                     "The length of the trace event description <%s> exceeds %d",
                     desc, MAX_LENGTH_EVENT_DESC));
         }
-        if (Trace.isTagEnabled(Trace.TRACE_TAG_APP)) {
-            Trace.instant(Trace.TRACE_TAG_APP,
-                    TextUtils.formatSimple("%s#%s", mSession.getName(), desc));
-        }
+        Trace.beginSection(TextUtils.formatSimple("%s#%s", mSession.getName(), desc));
+        Trace.endSection();
     }
 
     private void notifyCujEvent(String action) {

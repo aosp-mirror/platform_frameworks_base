@@ -50,7 +50,7 @@ public class ClassifierTest extends SysuiTestCase {
         displayMetrics.widthPixels = 1000;
         displayMetrics.heightPixels = 1000;
         mDataProvider = new FalsingDataProvider(
-                displayMetrics, mBatteryController, mFoldStateListener, mDockManager, false);
+                displayMetrics, mBatteryController, mFoldStateListener, mDockManager);
     }
 
     @After

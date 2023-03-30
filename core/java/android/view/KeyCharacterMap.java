@@ -18,7 +18,7 @@ package android.view;
 
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.hardware.input.InputManagerGlobal;
+import android.hardware.input.InputManager;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -355,7 +355,7 @@ public class KeyCharacterMap implements Parcelable {
      * is missing from the system.
      */
     public static KeyCharacterMap load(int deviceId) {
-        final InputManagerGlobal im = InputManagerGlobal.getInstance();
+        final InputManager im = InputManager.getInstance();
         InputDevice inputDevice = im.getInputDevice(deviceId);
         if (inputDevice == null) {
             inputDevice = im.getInputDevice(VIRTUAL_KEYBOARD);
@@ -722,7 +722,7 @@ public class KeyCharacterMap implements Parcelable {
      * @return True if at least one attached keyboard supports the specified key code.
      */
     public static boolean deviceHasKey(int keyCode) {
-        return InputManagerGlobal.getInstance().deviceHasKeys(new int[] { keyCode })[0];
+        return InputManager.getInstance().deviceHasKeys(new int[] { keyCode })[0];
     }
 
     /**
@@ -735,7 +735,7 @@ public class KeyCharacterMap implements Parcelable {
      * at the same index in the key codes array.
      */
     public static boolean[] deviceHasKeys(int[] keyCodes) {
-        return InputManagerGlobal.getInstance().deviceHasKeys(keyCodes);
+        return InputManager.getInstance().deviceHasKeys(keyCodes);
     }
 
     @Override

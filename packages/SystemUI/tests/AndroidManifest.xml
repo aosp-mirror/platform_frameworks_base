@@ -108,11 +108,6 @@
             android:excludeFromRecents="true"
             />
 
-        <activity android:name="com.android.systemui.controls.ui.TestableControlsActivity"
-            android:exported="false"
-            android:excludeFromRecents="true"
-            />
-
         <activity android:name="com.android.systemui.screenshot.ScrollViewActivity"
                   android:exported="false" />
 
@@ -137,14 +132,6 @@
                   android:theme="@style/Theme.SystemUI.Dialog.Alert"
                   android:finishOnCloseSystemDialogs="true"
                   android:excludeFromRecents="true" />
-
-        <activity android:name="com.android.systemui.activity.EmptyTestActivity"
-                  android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
 
         <provider
             android:name="androidx.startup.InitializationProvider"
@@ -181,18 +168,6 @@
 
         <activity
             android:name="com.android.systemui.screenshot.appclips.AppClipsActivityTest$AppClipsActivityTestable"
-            android:exported="false"
-            android:permission="com.android.systemui.permission.SELF"
-            android:excludeFromRecents="true" />
-
-        <activity
-            android:name="com.android.systemui.notetask.shortcut.LaunchNoteTaskActivity"
-            android:exported="false"
-            android:permission="com.android.systemui.permission.SELF"
-            android:excludeFromRecents="true" />
-
-        <activity
-            android:name="com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity"
             android:exported="false"
             android:permission="com.android.systemui.permission.SELF"
             android:excludeFromRecents="true" />

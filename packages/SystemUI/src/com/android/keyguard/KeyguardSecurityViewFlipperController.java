@@ -54,23 +54,19 @@ public class KeyguardSecurityViewFlipperController
     private final Factory mKeyguardSecurityViewControllerFactory;
     private final FeatureFlags mFeatureFlags;
 
-    private final ViewMediatorCallback mViewMediatorCallback;
-
     @Inject
     protected KeyguardSecurityViewFlipperController(KeyguardSecurityViewFlipper view,
             LayoutInflater layoutInflater,
             AsyncLayoutInflater asyncLayoutInflater,
             KeyguardInputViewController.Factory keyguardSecurityViewControllerFactory,
             EmergencyButtonController.Factory emergencyButtonControllerFactory,
-            FeatureFlags featureFlags,
-            ViewMediatorCallback viewMediatorCallback) {
+            FeatureFlags featureFlags) {
         super(view);
         mKeyguardSecurityViewControllerFactory = keyguardSecurityViewControllerFactory;
         mLayoutInflater = layoutInflater;
         mEmergencyButtonControllerFactory = emergencyButtonControllerFactory;
         mAsyncLayoutInflater = asyncLayoutInflater;
         mFeatureFlags = featureFlags;
-        mViewMediatorCallback = viewMediatorCallback;
     }
 
     @Override
@@ -156,7 +152,6 @@ public class KeyguardSecurityViewFlipperController
                                         keyguardSecurityCallback);
                         childController.init();
                         mChildren.add(childController);
-                        mViewMediatorCallback.setNeedsInput(childController.needsInput());
                         if (onViewInflatedListener != null) {
                             onViewInflatedListener.onViewInflated();
                         }

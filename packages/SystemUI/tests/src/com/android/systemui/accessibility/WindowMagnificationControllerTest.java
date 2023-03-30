@@ -640,10 +640,6 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         assertTrue(
                 mirrorView.performAccessibilityAction(R.id.accessibility_action_move_left, null));
         verify(mWindowMagnifierCallback, times(4)).onMove(eq(displayId));
-
-        assertTrue(mirrorView.performAccessibilityAction(
-                AccessibilityAction.ACTION_CLICK.getId(), null));
-        verify(mWindowMagnifierCallback).onClickSettingsButton(eq(displayId));
     }
 
     @Test

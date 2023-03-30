@@ -6563,7 +6563,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * This is a shortcut and <b>DOES NOT</b> include all reasons.
      * Use {@link #canScheduleUserInitiatedJobs(int, int, String)} to cover all cases.
      */
-    static boolean doesReasonCodeAllowSchedulingUserInitiatedJobs(int reasonCode) {
+    private boolean doesReasonCodeAllowSchedulingUserInitiatedJobs(int reasonCode) {
         switch (reasonCode) {
             case REASON_PROC_STATE_PERSISTENT:
             case REASON_PROC_STATE_PERSISTENT_UI:
@@ -6621,16 +6621,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        final ProcessServiceRecord psr = pr.mServices;
-        if (psr != null && psr.hasForegroundServices()) {
-            for (int s = psr.numberOfExecutingServices() - 1; s >= 0; --s) {
-                final ServiceRecord sr = psr.getExecutingServiceAt(s);
-                if (sr.isForeground && sr.mAllowUiJobScheduling) {
-                    return true;
-                }
-            }
-        }
-
         return false;
     }
 
@@ -6640,11 +6630,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     // TODO(262260570): log allow reason to an atom
     private boolean canScheduleUserInitiatedJobs(int uid, int pid, String pkgName) {
-        return canScheduleUserInitiatedJobs(uid, pid, pkgName, false);
-    }
-
-    boolean canScheduleUserInitiatedJobs(int uid, int pid, String pkgName,
-            boolean skipWhileInUseCheck) {
         synchronized (this) {
             final ProcessRecord processRecord;
             synchronized (mPidsSelfLocked) {
@@ -6674,7 +6659,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // As of Android UDC, the conditions required to grant a while-in-use permission
             // covers the majority of those cases, and so we piggyback on that logic as the base.
             // Missing cases are added after.
-            if (!skipWhileInUseCheck && mServices.canAllowWhileInUsePermissionInFgsLocked(
+            if (mServices.canAllowWhileInUsePermissionInFgsLocked(
                     pid, uid, pkgName, processRecord, backgroundStartPrivileges)) {
                 return true;
             }
@@ -8852,7 +8837,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 try {
                     AppGlobals.getPackageManager().setComponentEnabledSetting(cName,
                             PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0,
-                            UserHandle.USER_SYSTEM, "am");
+                            UserHandle.USER_SYSTEM);
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
                 }

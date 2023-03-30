@@ -154,10 +154,6 @@ interface ClockFaceEvents {
     val tickRate: ClockTickRate
         get() = ClockTickRate.PER_MINUTE
 
-    /** Call to check whether the clock consumes weather data */
-    val hasCustomWeatherDataDisplay: Boolean
-        get() = false
-
     /** Region Darkness specific to the clock face */
     fun onRegionDarknessChanged(isDark: Boolean) {}
 

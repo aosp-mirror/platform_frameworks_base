@@ -17,7 +17,6 @@
 package com.android.systemui.unfold
 
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
-import com.android.systemui.unfold.dagger.UseReceivingFilter
 import com.android.systemui.unfold.progress.RemoteUnfoldTransitionReceiver
 import com.android.systemui.unfold.util.ATraceLoggerTransitionProgressListener
 import dagger.Module
@@ -43,6 +42,4 @@ class UnfoldRemoteModule {
         remoteReceiver.addCallback(traceListener)
         return Optional.of(remoteReceiver)
     }
-
-    @Provides @UseReceivingFilter fun useReceivingFilter(): Boolean = true
 }

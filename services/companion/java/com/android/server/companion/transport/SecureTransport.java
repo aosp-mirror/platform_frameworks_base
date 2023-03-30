@@ -21,7 +21,6 @@ import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.server.companion.securechannel.AttestationVerifier;
 import com.android.server.companion.securechannel.SecureChannel;
 
@@ -36,7 +35,6 @@ class SecureTransport extends Transport implements SecureChannel.Callback {
 
     private volatile boolean mShouldProcessRequests = false;
 
-    @GuardedBy("mRequestQueue")
     private final BlockingQueue<byte[]> mRequestQueue = new ArrayBlockingQueue<>(100);
 
     SecureTransport(int associationId, ParcelFileDescriptor fd, Context context) {
@@ -58,12 +56,6 @@ class SecureTransport extends Transport implements SecureChannel.Callback {
     @Override
     public void stop() {
         mSecureChannel.stop();
-        mShouldProcessRequests = false;
-    }
-
-    @Override
-    public void close() {
-        mSecureChannel.close();
         mShouldProcessRequests = false;
     }
 
@@ -93,14 +85,12 @@ class SecureTransport extends Transport implements SecureChannel.Callback {
         }
 
         // Queue up a message to send
-        synchronized (mRequestQueue) {
-            mRequestQueue.add(ByteBuffer.allocate(HEADER_LENGTH + data.length)
-                    .putInt(message)
-                    .putInt(sequence)
-                    .putInt(data.length)
-                    .put(data)
-                    .array());
-        }
+        mRequestQueue.add(ByteBuffer.allocate(HEADER_LENGTH + data.length)
+                .putInt(message)
+                .putInt(sequence)
+                .putInt(data.length)
+                .put(data)
+                .array());
     }
 
     @Override
@@ -112,11 +102,9 @@ class SecureTransport extends Transport implements SecureChannel.Callback {
         new Thread(() -> {
             try {
                 while (mShouldProcessRequests) {
-                    synchronized (mRequestQueue) {
-                        byte[] request = mRequestQueue.poll();
-                        if (request != null) {
-                            mSecureChannel.sendSecureMessage(request);
-                        }
+                    byte[] request = mRequestQueue.poll();
+                    if (request != null) {
+                        mSecureChannel.sendSecureMessage(request);
                     }
                 }
             } catch (IOException e) {
