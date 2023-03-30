@@ -263,7 +263,7 @@
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Chiudi"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Connesso"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Connesso, batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="quick_settings_connecting" msgid="2381969772953268809">"Connessione..."</string>
+    <string name="quick_settings_connecting" msgid="2381969772953268809">"Connessione in corso..."</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Attivazione…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Risp. dati attivo"</string>
@@ -807,8 +807,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# controllo aggiunto.}many{# controlli aggiunti.}other{# controlli aggiunti.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Rimosso"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Vuoi aggiungere <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"L\'app <xliff:g id="APPNAME">%s</xliff:g> potrà scegliere quali controlli e contenuti visualizzare qui."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vuoi rimuovere i controlli per l\'app <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Aggiunto ai preferiti"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Preferito, posizione <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -833,7 +832,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Vuoi visualizzare e controllare i dispositivi dalla schermata di blocco?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Puoi aggiungere impostazioni alla schermata di blocco per i tuoi dispositivi esterni.\n\nL\'app del tuo dispositivo potrebbe consentirti di controllare alcuni dispositivi senza dover sbloccare il tuo telefono o tablet.\n\nPuoi apportare modifiche in qualsiasi momento in Impostazioni."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Vuoi controllare i dispositivi dalla schermata di blocco?"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Puoi controllare alcuni dispositivi senza sbloccare il telefono o il tablet. L\'app del dispositivo determina quali dispositivi possono essere controllati in questo modo."</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"Puoi controllare alcuni dispositivi senza sbloccare il telefono o il tablet. L\'app del tuo dispositivo determina quali dispositivi possono essere controllati in questo modo."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"No, grazie"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Sì"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Il PIN contiene lettere o simboli"</string>

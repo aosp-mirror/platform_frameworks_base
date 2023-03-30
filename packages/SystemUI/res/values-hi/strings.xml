@@ -776,7 +776,7 @@
     <string name="privacy_type_location" msgid="7991481648444066703">"जगह"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"माइक्रोफ़ोन"</string>
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"स्क्रीन रिकॉर्डिंग"</string>
-    <string name="music_controls_no_title" msgid="4166497066552290938">"कोई शीर्षक नहीं"</string>
+    <string name="music_controls_no_title" msgid="4166497066552290938">"कोई टाइटल नहीं"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टैंडबाई"</string>
     <string name="font_scaling_dialog_title" msgid="6273107303850248375">"फ़ॉन्ट का साइज़"</string>
     <string name="font_scaling_smaller" msgid="1012032217622008232">"छोटा करें"</string>

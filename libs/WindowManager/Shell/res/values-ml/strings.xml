@@ -91,6 +91,7 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"റദ്ദാക്കുക"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"റീസ്റ്റാർട്ട് ചെയ്യൂ"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"വീണ്ടും കാണിക്കരുത്"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="4507890186297500893">"ഈ ആപ്പ് നീക്കാൻ ഡബിൾ ടാപ്പ് ചെയ്യുക"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"വലുതാക്കുക"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"ചെറുതാക്കുക"</string>
     <string name="close_button_text" msgid="2913281996024033299">"അടയ്ക്കുക"</string>

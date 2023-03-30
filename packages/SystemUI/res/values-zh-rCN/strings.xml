@@ -831,7 +831,7 @@
     <string name="controls_tile_locked" msgid="731547768182831938">"设备已锁定"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"要从锁定屏幕上显示和控制设备吗？"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"您可以在锁定屏幕上添加用于控制外部设备的控件。\n\n您的设备应用可能会允许您在不解锁手机或平板电脑的情况下控制某些设备。\n\n您可以随时在“设置”中进行更改。"</string>
-    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"要从锁定屏幕上控制设备吗？"</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"要在锁屏状态下控制设备吗？"</string>
     <string name="controls_settings_trivial_controls_dialog_message" msgid="397178734990952575">"您可以在不解锁手机或平板电脑的情况下控制某些设备。您的设备配套应用将决定哪些设备可以通过这种方式进行控制。"</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"不用了"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"是"</string>

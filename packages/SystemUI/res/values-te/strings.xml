@@ -642,8 +642,8 @@
   <string-array name="nav_bar_layouts">
     <item msgid="9156773083127904112">"సాధారణం"</item>
     <item msgid="2019571224156857610">"సంక్షిప్తమైనది"</item>
-    <item msgid="7453955063378349599">"ఎడమవైపుకు వాలుగా"</item>
-    <item msgid="5874146774389433072">"కుడివైపుకు వాలుగా"</item>
+    <item msgid="7453955063378349599">"ఎడమ వైపునకు వాలుగా"</item>
+    <item msgid="5874146774389433072">"కుడి వైపునకు వాలుగా"</item>
   </string-array>
     <string name="save" msgid="3392754183673848006">"సేవ్ చేయండి"</string>
     <string name="reset" msgid="8715144064608810383">"రీసెట్ చేయండి"</string>

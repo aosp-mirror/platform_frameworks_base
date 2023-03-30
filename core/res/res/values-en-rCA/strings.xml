@@ -2053,7 +2053,7 @@
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Harmful app detected"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Allow <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> to access all device logs?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Allow one-time access"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Don’t allow"</string>
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Don\'t allow"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs. \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device."</string>
     <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs. \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device.\n\nLearn more at g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Don’t show again"</string>

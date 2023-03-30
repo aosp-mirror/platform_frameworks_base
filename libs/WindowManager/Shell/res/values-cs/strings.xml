@@ -91,6 +91,8 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Zrušit"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Restartovat"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Tuto zprávu příště nezobrazovat"</string>
+    <!-- no translation found for letterbox_reachability_reposition_text (4507890186297500893) -->
+    <skip />
     <string name="maximize_button_text" msgid="1650859196290301963">"Maximalizovat"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimalizovat"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Zavřít"</string>

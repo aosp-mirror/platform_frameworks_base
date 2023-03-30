@@ -1484,7 +1484,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"သင်သည် ဒီအက်ပ်ကို သင်၏ အလုပ် ပရိုဖိုင် ထဲမှာ အသုံးပြုနေသည်"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"ထည့်သွင်းရန်နည်းလမ်း"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"ထပ်တူ ကိုက်ညီခြင်း"</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"အသုံးပြုခွင့်"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"အများသုံးနိုင်မှု"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"နောက်ခံ"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"နောက်ခံပြောင်းခြင်း"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"အကြောင်းကြားချက် နားတောင်သူ"</string>
@@ -1677,10 +1677,10 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ဖယ်ရှားရန်"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"အသံကို အကြံပြုထားသည့် ပမာဏထက် မြှင့်ပေးရမလား?\n\nအသံကို မြင့်သည့် အဆင့်မှာ ကြာရှည်စွာ နားထောင်ခြင်းက သင်၏ နားကို ထိခိုက်စေနိုင်သည်။"</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်ကို အသုံးပြုလိုပါသလား။"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"အများသုံးနိုင်မှု ဖြတ်လမ်းလင့်ခ်ကို အသုံးပြုလိုပါသလား။"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ဖြတ်လမ်းလင့်ခ်ကို ဖွင့်ထားစဉ် အသံထိန်းခလုတ် နှစ်ခုစလုံးကို ၃ စက္ကန့်ခန့် ဖိထားခြင်းဖြင့် အများသုံးနိုင်သည့် ဝန်ဆောင်မှုကို ဖွင့်နိုင်သည်။"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများအတွက် ဖြတ်လမ်းကို ဖွင့်မလား။"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"အသံခလုတ်နှစ်ခုလုံးကို စက္ကန့်အနည်းငယ် ဖိထားခြင်းက အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများ ဖွင့်ပေးသည်။ ဤလုပ်ဆောင်ချက်က သင့်စက်အလုပ်လုပ်ပုံကို ပြောင်းလဲနိုင်သည်။\n\nလက်ရှိ ဝန်ဆောင်မှုများ-\n<xliff:g id="SERVICE">%1$s</xliff:g>\n\'ဆက်တင်များ &gt; အများသုံးစွဲနိုင်မှု\' တွင် ရွေးထားသည့် ဝန်ဆောင်မှုများကို ပြောင်းနိုင်သည်။"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"အသံခလုတ်နှစ်ခုလုံးကို စက္ကန့်အနည်းငယ် ဖိထားခြင်းက အများသုံးနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများ ဖွင့်ပေးသည်။ ဤလုပ်ဆောင်ချက်က သင့်စက်အလုပ်လုပ်ပုံကို ပြောင်းလဲနိုင်သည်။\n\nလက်ရှိ ဝန်ဆောင်မှုများ-\n<xliff:g id="SERVICE">%1$s</xliff:g>\n\'ဆက်တင်များ &gt; အများသုံးနိုင်မှု\' တွင် ရွေးထားသည့် ဝန်ဆောင်မှုများကို ပြောင်းနိုင်သည်။"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> ဖြတ်လမ်းကို ဖွင့်မလား။"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"အသံခလုတ်နှစ်ခုလုံးကို စက္ကန့်အနည်းငယ် ဖိထားခြင်းက အများသုံးနိုင်သည့် ဝန်ဆောင်မှုဖြစ်သော <xliff:g id="SERVICE">%1$s</xliff:g> ကို ဖွင့်ပေးသည်။ ဤလုပ်ဆောင်ချက်က သင့်စက်အလုပ်လုပ်ပုံကို ပြောင်းလဲနိုင်သည်။\n\nဤဖြတ်လမ်းလင့်ခ်ကို ဆက်တင်များ &gt; အများသုံးနိုင်မှုတွင် နောက်ဝန်ဆောင်မှုတစ်ခုသို့ ပြောင်းနိုင်သည်။"</string>
@@ -1689,7 +1689,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ဖွင့်"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ပိတ်"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> ကို သင့်စက်အား အပြည့်အဝထိန်းချုပ်ခွင့် ပေးလိုပါသလား။"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"အများသုံးစွဲနိုင်မှု လိုအပ်ချက်များအတွက် အထောက်အကူပြုသည့် အက်ပ်များအား အပြည့်အဝ ထိန်းချုပ်ခွင့်ပေးခြင်းသည် သင့်လျော်သော်လည်း အက်ပ်အများစုအတွက် မသင့်လျော်ပါ။"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"အများသုံးနိုင်မှု လိုအပ်ချက်များအတွက် အထောက်အကူပြုသည့် အက်ပ်များအား အပြည့်အဝ ထိန်းချုပ်ခွင့်ပေးခြင်းသည် သင့်လျော်သော်လည်း အက်ပ်အများစုအတွက် မသင့်လျော်ပါ။"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ဖန်သားပြင်ကို ကြည့်ရှုထိန်းချုပ်ခြင်း"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"၎င်းသည် မျက်နှာပြင်ပေါ်ရှိ အကြောင်းအရာအားလုံးကို ဖတ်နိုင်ပြီး အခြားအက်ပ်များအပေါ်တွင် အကြောင်းအရာကို ဖော်ပြနိုင်သည်။"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"လုပ်ဆောင်ချက်များကို ကြည့်ရှုဆောင်ရွက်ခြင်း"</string>
@@ -1697,7 +1697,7 @@
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ခွင့်ပြုရန်"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ပယ်ရန်"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ဝန်ဆောင်မှုကို စတင်အသုံးပြုရန် တို့ပါ−"</string>
-    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"အများသုံးစွဲနိုင်မှု ခလုတ်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုများကို ရွေးပါ"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"အများသုံးနိုင်မှု ခလုတ်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုများကို ရွေးပါ"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"အသံခလုတ် ဖြတ်လမ်းလင့်ခ်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုများကို ရွေးပါ"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ကို ပိတ်ထားသည်"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ဖြတ်လမ်းများကို တည်းဖြတ်ရန်"</string>
@@ -1990,7 +1990,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"သတင်းနှင့် မဂ္ဂဇင်းများ"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"မြေပုံနှင့် ခရီးလမ်းညွှန်ချက်"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"ထုတ်လုပ်နိုင်မှု"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"အများသုံးစွဲနိုင်မှု"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"အများသုံးနိုင်မှု"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"စက်ပစ္စည်း သိုလှောင်ခန်း"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB အမှားရှာပြင်ခြင်း"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"နာရီ"</string>
@@ -2130,7 +2130,7 @@
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"မိုက်ခွက်ပါနားကြပ်ချိတ်"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"ဖန်သားပြင်အတွက် အများသုံးစွဲနိုင်မှုဖြတ်လမ်းလင့်ခ်"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"ဖန်သားပြင်အတွက် အများသုံးစွဲနိုင်မှုဖြတ်လမ်းလင့်ခ် ရွေးချယ်စနစ်"</string>
-    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"အများသုံးနိုင်မှု ဖြတ်လမ်းလင့်ခ်"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"အကြောင်းကြားစာအကွက်ကို ပယ်ရန်"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad အပေါ်"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad အောက်"</string>

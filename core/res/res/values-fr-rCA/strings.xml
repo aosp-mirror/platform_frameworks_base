@@ -1718,7 +1718,7 @@
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Pour basculer entre les fonctionnalités, maintenez le doigt sur le bouton d\'accessibilité."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Pour basculer entre les fonctionnalités, balayez l\'écran vers le haut avec deux doigts et maintenez-les-y."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Pour basculer entre les fonctionnalités, balayez l\'écran vers le haut avec trois doigts et maintenez-les-y."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Zoom"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Agrandissement"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Passage au profil : <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Déconnexion de <xliff:g id="NAME">%1$s</xliff:g> en cours..."</string>

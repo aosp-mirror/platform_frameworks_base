@@ -91,6 +91,7 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"キャンセル"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"再起動"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"次回から表示しない"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="4507890186297500893">"ダブルタップすると、このアプリを移動できます"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"最大化"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"最小化"</string>
     <string name="close_button_text" msgid="2913281996024033299">"閉じる"</string>
