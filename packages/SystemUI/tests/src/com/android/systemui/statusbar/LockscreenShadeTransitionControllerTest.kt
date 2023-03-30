@@ -223,7 +223,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testGoToLockedShadeCreatesQSAnimation() {
         transitionController.goToLockedShade(null)
         verify(statusbarStateController).setState(StatusBarState.SHADE_LOCKED)
-        verify(notificationPanelController).animateToFullShade(anyLong())
+        verify(notificationPanelController).transitionToExpandedShade(anyLong())
         assertNotNull(transitionController.dragDownAnimator)
     }
 
@@ -231,7 +231,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testGoToLockedShadeDoesntCreateQSAnimation() {
         transitionController.goToLockedShade(null, needsQSAnimation = false)
         verify(statusbarStateController).setState(StatusBarState.SHADE_LOCKED)
-        verify(notificationPanelController).animateToFullShade(anyLong())
+        verify(notificationPanelController).transitionToExpandedShade(anyLong())
         assertNull(transitionController.dragDownAnimator)
     }
 
@@ -239,7 +239,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testGoToLockedShadeAlwaysCreatesQSAnimationInSplitShade() {
         enableSplitShade()
         transitionController.goToLockedShade(null, needsQSAnimation = true)
-        verify(notificationPanelController).animateToFullShade(anyLong())
+        verify(notificationPanelController).transitionToExpandedShade(anyLong())
         assertNotNull(transitionController.dragDownAnimator)
     }
 

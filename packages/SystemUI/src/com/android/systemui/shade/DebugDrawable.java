@@ -93,7 +93,7 @@ public class DebugDrawable extends Drawable {
         drawDebugInfo(canvas, (int) mLockIconViewController.getTop(), Color.GRAY,
                 "mLockIconViewController.getTop()");
 
-        if (mNotificationPanelViewController.getKeyguardShowing()) {
+        if (mNotificationPanelViewController.isKeyguardShowing()) {
             // Notifications have the space between those two lines.
             drawDebugInfo(canvas,
                     mNotificationStackScrollLayoutController.getTop()

@@ -30,6 +30,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.shade.ShadeFoldAnimator
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.ScreenOffAnimation
@@ -79,7 +80,7 @@ constructor(
     private val foldToAodLatencyTracker = FoldToAodLatencyTracker()
 
     private val startAnimationRunnable = Runnable {
-        centralSurfaces.notificationPanelViewController.startFoldToAodAnimation(
+        getShadeFoldAnimator().startFoldToAodAnimation(
             /* startAction= */ { foldToAodLatencyTracker.onAnimationStarted() },
             /* endAction= */ { setAnimationState(playing = false) },
             /* cancelAction= */ { setAnimationState(playing = false) },
@@ -93,7 +94,7 @@ constructor(
         wakefulnessLifecycle.addObserver(this)
 
         // TODO(b/254878364): remove this call to NPVC.getView()
-        centralSurfaces.notificationPanelViewController.view.repeatWhenAttached {
+        getShadeFoldAnimator().view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) { listenForDozing(this) }
         }
     }
@@ -109,7 +110,7 @@ constructor(
     override fun startAnimation(): Boolean =
         if (shouldStartAnimation()) {
             setAnimationState(playing = true)
-            centralSurfaces.notificationPanelViewController.prepareFoldToAodAnimation()
+            getShadeFoldAnimator().prepareFoldToAodAnimation()
             true
         } else {
             setAnimationState(playing = false)
@@ -120,11 +121,14 @@ constructor(
         if (isAnimationPlaying) {
             foldToAodLatencyTracker.cancel()
             cancelAnimation?.run()
-            centralSurfaces.notificationPanelViewController.cancelFoldToAodAnimation()
+            getShadeFoldAnimator().cancelFoldToAodAnimation()
         }
 
         setAnimationState(playing = false)
     }
+
+    private fun getShadeFoldAnimator(): ShadeFoldAnimator =
+        centralSurfaces.notificationPanelViewController.shadeFoldAnimator
 
     private fun setAnimationState(playing: Boolean) {
         shouldPlayAnimation = playing
@@ -154,14 +158,14 @@ constructor(
             // We should play the folding to AOD animation
 
             setAnimationState(playing = true)
-            centralSurfaces.notificationPanelViewController.prepareFoldToAodAnimation()
+            getShadeFoldAnimator().prepareFoldToAodAnimation()
 
             // We don't need to wait for the scrim as it is already displayed
             // but we should wait for the initial animation preparations to be drawn
             // (setting initial alpha/translation)
             // TODO(b/254878364): remove this call to NPVC.getView()
             OneShotPreDrawListener.add(
-                centralSurfaces.notificationPanelViewController.view,
+                getShadeFoldAnimator().view,
                 onReady
             )
         } else {
@@ -186,7 +190,8 @@ constructor(
             cancelAnimation?.run()
 
             // Post starting the animation to the next frame to avoid junk due to inset changes
-            cancelAnimation = mainExecutor.executeDelayed(startAnimationRunnable, /* delayMillis= */ 0)
+            cancelAnimation =
+                mainExecutor.executeDelayed(startAnimationRunnable, /* delayMillis= */ 0)
             shouldPlayAnimation = false
         }
     }

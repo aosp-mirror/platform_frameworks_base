@@ -16,7 +16,6 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.statusbar.phone.CentralSurfaces.CLOSE_PANEL_WHEN_EMPTIED;
 import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
-import static com.android.systemui.statusbar.phone.CentralSurfaces.MULTIUSER_DEBUG;
 
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -176,7 +175,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
         }
         remoteInputManager.setUpWithCallback(
                 remoteInputManagerCallback,
-                mNotificationPanel.createRemoteInputDelegate());
+                mNotificationPanel.getShadeNotificationPresenter().createRemoteInputDelegate());
 
         initController.addPostInitTask(() -> {
             mKeyguardIndicationController.init();
@@ -209,8 +208,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     private void maybeEndAmbientPulse() {
-        if (mNotificationPanel.hasPulsingNotifications() &&
-                !mHeadsUpManager.hasNotifications()) {
+        if (mNotificationPanel.getShadeNotificationPresenter().hasPulsingNotifications()
+                && !mHeadsUpManager.hasNotifications()) {
             // We were showing a pulse for a notification, but no notifications are pulsing anymore.
             // Finish the pulse.
             mDozeScrimController.pulseOutNow();
@@ -222,7 +221,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
         // Begin old BaseStatusBar.userSwitched
         mHeadsUpManager.setUser(newUserId);
         // End old BaseStatusBar.userSwitched
-        if (MULTIUSER_DEBUG) mNotificationPanel.setHeaderDebugInfo("USER " + newUserId);
         mCommandQueue.animateCollapsePanels();
         mMediaManager.clearCurrentMediaNotification();
         mCentralSurfaces.setLockscreenUser(newUserId);
@@ -243,7 +241,9 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     @Override
     public void onActivated(ActivatableNotificationView view) {
         onActivated();
-        if (view != null) mNotificationPanel.setActivatedChild(view);
+        if (view != null) {
+            mNotificationPanel.getShadeNotificationPresenter().setActivatedChild(view);
+        }
     }
 
     public void onActivated() {
@@ -251,7 +251,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
                 MetricsEvent.ACTION_LS_NOTE,
                 0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
         mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_NOTIFICATION_FALSE_TOUCH);
-        ActivatableNotificationView previousView = mNotificationPanel.getActivatedChild();
+        ActivatableNotificationView previousView =
+                mNotificationPanel.getShadeNotificationPresenter().getActivatedChild();
         if (previousView != null) {
             previousView.makeInactive(true /* animate */);
         }
@@ -259,8 +260,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
 
     @Override
     public void onActivationReset(ActivatableNotificationView view) {
-        if (view == mNotificationPanel.getActivatedChild()) {
-            mNotificationPanel.setActivatedChild(null);
+        if (view == mNotificationPanel.getShadeNotificationPresenter().getActivatedChild()) {
+            mNotificationPanel.getShadeNotificationPresenter().setActivatedChild(null);
             mKeyguardIndicationController.hideTransientIndication();
         }
     }
