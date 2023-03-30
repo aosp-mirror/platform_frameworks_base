@@ -44,6 +44,7 @@ interface IVirtualDeviceManager {
      * @param activityListener The listener to listen for activity changes in a virtual device.
      * @param soundEffectListener The listener to listen for sound effect playback requests.
      */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     IVirtualDevice createVirtualDevice(
             in IBinder token, String packageName, int associationId,
             in VirtualDeviceParams params, in IVirtualDeviceActivityListener activityListener,
