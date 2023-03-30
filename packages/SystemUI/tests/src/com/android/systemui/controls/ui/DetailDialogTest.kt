@@ -24,7 +24,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.wm.shell.TaskView
+import com.android.wm.shell.taskview.TaskView
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
