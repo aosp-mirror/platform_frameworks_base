@@ -233,7 +233,8 @@ abstract class DetectorSession {
 
         if (ENABLE_PROXIMITY_RESULT) {
             mAttentionManagerInternal = LocalServices.getService(AttentionManagerInternal.class);
-            if (mAttentionManagerInternal != null) {
+            if (mAttentionManagerInternal != null
+                    && mAttentionManagerInternal.isProximitySupported()) {
                 mAttentionManagerInternal.onStartProximityUpdates(mProximityCallbackInternal);
             }
         }

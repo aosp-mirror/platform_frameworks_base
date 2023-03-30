@@ -71,6 +71,7 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class AttentionManagerServiceTest {
     private static final double PROXIMITY_SUCCESS_STATE = 1.0;
+
     private AttentionManagerService mSpyAttentionManager;
     private final int mTimeout = 1000;
     private final Object mLock = new Object();
@@ -125,8 +126,19 @@ public class AttentionManagerServiceTest {
     }
 
     @Test
+    public void testRegisterProximityUpdates_returnFalseWhenProximityDisabled() {
+        mSpyAttentionManager.mIsServiceEnabled = true;
+        mSpyAttentionManager.mIsProximityEnabled = false;
+
+        assertThat(mSpyAttentionManager.onStartProximityUpdates(
+                mMockProximityUpdateCallbackInternal))
+                .isFalse();
+    }
+
+    @Test
     public void testRegisterProximityUpdates_returnFalseWhenServiceUnavailable() {
         mSpyAttentionManager.mIsServiceEnabled = true;
+        mSpyAttentionManager.mIsProximityEnabled = true;
         doReturn(false).when(mSpyAttentionManager).isServiceAvailable();
 
         assertThat(mSpyAttentionManager.onStartProximityUpdates(
@@ -138,6 +150,7 @@ public class AttentionManagerServiceTest {
     public void testRegisterProximityUpdates_returnFalseWhenPowerManagerNotInteract()
             throws RemoteException {
         mSpyAttentionManager.mIsServiceEnabled = true;
+        mSpyAttentionManager.mIsProximityEnabled = true;
         doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
         doReturn(false).when(mMockIPowerManager).isInteractive();
 
@@ -149,6 +162,7 @@ public class AttentionManagerServiceTest {
     @Test
     public void testRegisterProximityUpdates_callOnSuccess() throws RemoteException {
         mSpyAttentionManager.mIsServiceEnabled = true;
+        mSpyAttentionManager.mIsProximityEnabled = true;
         doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
         doReturn(true).when(mMockIPowerManager).isInteractive();
 
@@ -162,6 +176,7 @@ public class AttentionManagerServiceTest {
     @Test
     public void testRegisterProximityUpdates_callOnSuccessTwiceInARow() throws RemoteException {
         mSpyAttentionManager.mIsServiceEnabled = true;
+        mSpyAttentionManager.mIsProximityEnabled = true;
         doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
         doReturn(true).when(mMockIPowerManager).isInteractive();
 
@@ -188,6 +203,7 @@ public class AttentionManagerServiceTest {
     public void testUnregisterProximityUpdates_noCrashWhenCallbackMismatched()
             throws RemoteException {
         mSpyAttentionManager.mIsServiceEnabled = true;
+        mSpyAttentionManager.mIsProximityEnabled = true;
         doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
         doReturn(true).when(mMockIPowerManager).isInteractive();
         mSpyAttentionManager.onStartProximityUpdates(mMockProximityUpdateCallbackInternal);
@@ -209,6 +225,7 @@ public class AttentionManagerServiceTest {
     public void testUnregisterProximityUpdates_cancelRegistrationWhenMatched()
             throws RemoteException {
         mSpyAttentionManager.mIsServiceEnabled = true;
+        mSpyAttentionManager.mIsProximityEnabled = true;
         doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
         doReturn(true).when(mMockIPowerManager).isInteractive();
         mSpyAttentionManager.onStartProximityUpdates(mMockProximityUpdateCallbackInternal);
@@ -221,6 +238,7 @@ public class AttentionManagerServiceTest {
     public void testUnregisterProximityUpdates_noCrashWhenTwiceInARow() throws RemoteException {
         // Attention Service registers proximity updates.
         mSpyAttentionManager.mIsServiceEnabled = true;
+        mSpyAttentionManager.mIsProximityEnabled = true;
         doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
         doReturn(true).when(mMockIPowerManager).isInteractive();
         mSpyAttentionManager.onStartProximityUpdates(mMockProximityUpdateCallbackInternal);
@@ -248,6 +266,7 @@ public class AttentionManagerServiceTest {
     @Test
     public void testCheckAttention_returnFalseWhenPowerManagerNotInteract() throws RemoteException {
         mSpyAttentionManager.mIsServiceEnabled = true;
+        mSpyAttentionManager.mIsProximityEnabled = true;
         doReturn(false).when(mMockIPowerManager).isInteractive();
         AttentionCallbackInternal callback = Mockito.mock(AttentionCallbackInternal.class);
         assertThat(mSpyAttentionManager.checkAttention(mTimeout, callback)).isFalse();
@@ -256,6 +275,7 @@ public class AttentionManagerServiceTest {
     @Test
     public void testCheckAttention_callOnSuccess() throws RemoteException {
         mSpyAttentionManager.mIsServiceEnabled = true;
+        mSpyAttentionManager.mIsProximityEnabled = true;
         doReturn(true).when(mSpyAttentionManager).isServiceAvailable();
         doReturn(true).when(mMockIPowerManager).isInteractive();
         mSpyAttentionManager.mCurrentAttentionCheck = null;

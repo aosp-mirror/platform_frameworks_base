@@ -96,11 +96,14 @@ public class AttentionManagerService extends SystemService {
     @VisibleForTesting
     static final String KEY_SERVICE_ENABLED = "service_enabled";
 
-    /** Default value in absence of {@link DeviceConfig} override. */
+    /** Default service enabled value in absence of {@link DeviceConfig} override. */
     private static final boolean DEFAULT_SERVICE_ENABLED = true;
 
     @VisibleForTesting
     boolean mIsServiceEnabled;
+
+    @VisibleForTesting
+    boolean mIsProximityEnabled;
 
     /**
      * DeviceConfig flag name, describes how much time we consider a result fresh; if the check
@@ -180,6 +183,9 @@ public class AttentionManagerService extends SystemService {
             DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                     ActivityThread.currentApplication().getMainExecutor(),
                     (properties) -> onDeviceConfigChange(properties.getKeyset()));
+            mIsProximityEnabled = mContext.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_enableProximityService);
+            Slog.i(LOG_TAG, "mIsProximityEnabled is: " + mIsProximityEnabled);
         }
     }
 
@@ -351,7 +357,7 @@ public class AttentionManagerService extends SystemService {
     @VisibleForTesting
     boolean onStartProximityUpdates(ProximityUpdateCallbackInternal callbackInternal) {
         Objects.requireNonNull(callbackInternal);
-        if (!mIsServiceEnabled) {
+        if (!mIsProximityEnabled) {
             Slog.w(LOG_TAG, "Trying to call onProximityUpdate() on an unsupported device.");
             return false;
         }
@@ -488,6 +494,7 @@ public class AttentionManagerService extends SystemService {
     private void dumpInternal(IndentingPrintWriter ipw) {
         ipw.println("Attention Manager Service (dumpsys attention) state:\n");
         ipw.println("isServiceEnabled=" + mIsServiceEnabled);
+        ipw.println("mIsProximityEnabled=" + mIsProximityEnabled);
         ipw.println("mStaleAfterMillis=" + mStaleAfterMillis);
         ipw.println("AttentionServicePackageName=" + getServiceConfigPackage(mContext));
         ipw.println("Resolved component:");
@@ -516,6 +523,11 @@ public class AttentionManagerService extends SystemService {
         @Override
         public boolean isAttentionServiceSupported() {
             return AttentionManagerService.this.mIsServiceEnabled;
+        }
+
+        @Override
+        public boolean isProximitySupported() {
+            return AttentionManagerService.this.mIsProximityEnabled;
         }
 
         @Override
