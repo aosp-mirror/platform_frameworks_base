@@ -730,6 +730,27 @@ public class SplitPresenterTest {
     }
 
     @Test
+    public void testComputeSplitAttributesOnHingeSplitTypeOnDeviceWithoutFoldingFeature() {
+        final SplitAttributes hingeSplitAttrs = new SplitAttributes.Builder()
+                .setSplitType(new SplitAttributes.SplitType.HingeSplitType(
+                        SplitAttributes.SplitType.RatioSplitType.splitEqually()))
+                .build();
+        final SplitPairRule splitPairRule = createSplitPairRuleBuilder(
+                activityPair -> true,
+                activityIntentPair -> true,
+                windowMetrics -> windowMetrics.getBounds().equals(TASK_BOUNDS))
+                .setFinishSecondaryWithPrimary(DEFAULT_FINISH_SECONDARY_WITH_PRIMARY)
+                .setFinishPrimaryWithSecondary(DEFAULT_FINISH_PRIMARY_WITH_SECONDARY)
+                .setDefaultSplitAttributes(hingeSplitAttrs)
+                .build();
+        final TaskContainer.TaskProperties taskProperties = getTaskProperties();
+        doReturn(null).when(mPresenter).getFoldingFeature(any());
+
+        assertEquals(hingeSplitAttrs, mPresenter.computeSplitAttributes(taskProperties,
+                splitPairRule, hingeSplitAttrs, null /* minDimensionsPair */));
+    }
+
+    @Test
     public void testGetTaskWindowMetrics() {
         final Configuration taskConfig = new Configuration();
         taskConfig.windowConfiguration.setBounds(TASK_BOUNDS);
