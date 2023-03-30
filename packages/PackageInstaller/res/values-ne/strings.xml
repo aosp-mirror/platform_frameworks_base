@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"एप इन्स्टल गरियो।"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"तपाईं यो एप इन्स्टल गर्न चाहनुहुन्छ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"तपाईं यो एप अपडेट गर्न चाहनुहुन्छ?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"यो एप <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> बाट अपडेट गर्ने हो?\n\nयो एपले सामान्यतया <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> बाट अपडेट प्राप्त गर्छ। तपाईंले कुनै फरक स्रोतबाट अपडेट गर्नुभयो भने तपाईं भविष्यमा आफ्नो फोनमा भएको जुनसुकै स्रोतबाट अपडेटहरू प्राप्त गर्न सक्नुहुन्छ। यसो गर्दा एपको विशेषता परिवर्तन हुन सक्छ।"</string>
     <string name="install_failed" msgid="5777824004474125469">"एप स्थापना गरिएन।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"यो प्याकेज स्थापना गर्ने क्रममा अवरोध गरियो।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"प्याकेजका रूपमा स्थापना नगरिएको एप विद्यमान प्याकेजसँग मेल खाँदैन।"</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"यी प्रयोगकर्ता अज्ञात एपहरू इन्स्टल गर्न सक्नुहुन्न"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"यो प्रयोगकर्तालाई एपहरू इन्स्टल गर्ने अनुमति छैन"</string>
     <string name="ok" msgid="7871959885003339302">"ठिक छ"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"जे भए पनि अपडेट गर्नुहोस्"</string>
     <string name="manage_applications" msgid="5400164782453975580">"एपको प्रबन्ध गर्नु…"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"खाली ठाउँ छैन"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> स्थापना गर्न सकिएन। केही ठाउँ खाली गरेर फेरि प्रयास गर्नुहोस्।"</string>

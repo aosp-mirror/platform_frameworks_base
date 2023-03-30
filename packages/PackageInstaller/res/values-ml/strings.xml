@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്‌തു."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ഈ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്യണോ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ഈ ആപ്പ് അപ്‌ഡേറ്റ് ചെയ്യണോ?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> എന്നതിൽ നിന്ന് ഈ ആപ്പ് അപ്‌ഡേറ്റ് ചെയ്യണോ?\n\nഈ ആപ്പിന് സാധാരണയായി <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> എന്നതിൽ നിന്ന് അപ്‌ഡേറ്റുകൾ ലഭിക്കാറുണ്ട്. മറ്റൊരു ഉറവിടത്തിൽ നിന്ന് അപ്‌ഡേറ്റ് ചെയ്യുന്നത് വഴി, നിങ്ങളുടെ ഫോണിലെ ഏത് ഉറവിടത്തിൽ നിന്നും ഭാവിയിൽ അപ്‌ഡേറ്റുകൾ ലഭിക്കാൻ ഇടയുണ്ട്. ആപ്പ് ഫംഗ്ഷണാലിറ്റിയിൽ വ്യത്യാസം വന്നേക്കാം."</string>
     <string name="install_failed" msgid="5777824004474125469">"ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്‌തിട്ടില്ല."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"പാക്കേജ് ഇൻസ്‌റ്റാൾ ചെയ്യുന്നത് ബ്ലോക്ക് ചെയ്‌തു."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"പാക്കേജിന് നിലവിലുള്ള പാക്കേജുമായി പൊരുത്തക്കേടുള്ളതിനാൽ, ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്‌തില്ല."</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ഈ ഉപയോക്താവിന്, അജ്ഞാത ആപ്പുകൾ ഇൻസ്‌റ്റാൾ ചെയ്യാനാവില്ല"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ആപ്പുകൾ ഇൻ‌സ്‌റ്റാൾ ചെയ്യാൻ ഈ ഉപയോക്താവിന് അനുവാദമില്ല"</string>
     <string name="ok" msgid="7871959885003339302">"ശരി"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"എന്തായാലും അപ്‌ഡേറ്റ് ചെയ്യുക"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ആപ്പുകൾ മാനേജ് ചെയ്യുക"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ഇടമില്ല"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> ഇൻസ്‌റ്റാൾ ചെയ്യാനായില്ല. കുറച്ച് ഇടമുണ്ടാക്കി, വീണ്ടും ശ്രമിക്കുക."</string>
