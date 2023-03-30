@@ -88,7 +88,6 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
@@ -110,6 +109,8 @@ import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.taskview.TaskView;
+import com.android.wm.shell.taskview.TaskViewTransitions;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -1706,7 +1707,7 @@ public class BubbleController implements ConfigurationChangeListener,
 
     /**
      * Whether an intent is properly configured to display in a
-     * {@link com.android.wm.shell.TaskView}.
+     * {@link TaskView}.
      *
      * Keep checks in sync with BubbleExtractor#canLaunchInTaskView. Typically
      * that should filter out any invalid bubbles, but should protect SysUI side just in case.

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell;
+package com.android.wm.shell.taskview;
 
 import android.annotation.UiContext;
 import android.content.Context;
 
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.annotations.ExternalThread;
@@ -51,6 +52,9 @@ public class TaskViewFactoryController {
         mTaskViewTransitions = null;
     }
 
+    /**
+     * @return the underlying {@link TaskViewFactory}.
+     */
     public TaskViewFactory asTaskViewFactory() {
         return mImpl;
     }

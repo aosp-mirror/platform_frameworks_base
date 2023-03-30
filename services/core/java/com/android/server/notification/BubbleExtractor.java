@@ -182,7 +182,7 @@ public class BubbleExtractor implements NotificationSignalExtractor {
 
     /**
      * Whether an intent is properly configured to display in an {@link
-     * com.android.wm.shell.TaskView} for bubbling.
+     * TaskView} for bubbling.
      *
      * @param context       the context to use.
      * @param pendingIntent the pending intent of the bubble.

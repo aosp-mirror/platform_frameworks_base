@@ -34,10 +34,10 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import com.android.wm.shell.TaskView;
-import com.android.wm.shell.TaskViewTaskController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.taskview.TaskView;
+import com.android.wm.shell.taskview.TaskViewTaskController;
 
 /**
  * Handles creating and updating the {@link TaskView} associated with a {@link Bubble}.
