@@ -70,7 +70,7 @@ public class AudioSystem
         throw new UnsupportedOperationException("Trying to instantiate AudioSystem");
     }
 
-    /* These values must be kept in sync with system/audio.h */
+    /* These values must be kept in sync with system/media/audio/include/system/audio-hal-enums.h */
     /*
      * If these are modified, please also update Settings.System.VOLUME_SETTINGS
      * and attrs.xml and AudioManager.java.
@@ -961,7 +961,8 @@ public class AudioSystem
      */
 
     //
-    // audio device definitions: must be kept in sync with values in system/core/audio.h
+    // audio device definitions: must be kept in sync with values
+    // in system/media/audio/include/system/audio-hal-enums.h
     //
     /** @hide */
     public static final int DEVICE_NONE = 0x0;
