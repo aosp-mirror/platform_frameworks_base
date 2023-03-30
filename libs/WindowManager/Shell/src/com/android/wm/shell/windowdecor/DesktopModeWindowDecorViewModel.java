@@ -26,16 +26,20 @@ import static com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler
 import static com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FINAL_FREEFORM_SCALE;
 import static com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FREEFORM_ANIMATION_DURATION;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.Choreographer;
 import android.view.InputChannel;
@@ -541,9 +545,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     if (ev.getY() > statusBarHeight) {
                         if (DesktopModeStatus.isProto2Enabled()) {
                             mPauseRelayoutForTask = relevantDecor.mTaskInfo.taskId;
-                            mDesktopTasksController.ifPresent(
-                                    c -> c.moveToDesktopWithAnimation(relevantDecor.mTaskInfo,
-                                            getFreeformBounds(ev)));
+                            centerAndMoveToDesktopWithAnimation(relevantDecor, ev);
                         } else if (DesktopModeStatus.isProto1Enabled()) {
                             mDesktopModeController.ifPresent(c -> c.setDesktopModeActive(true));
                         }
@@ -596,23 +598,57 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         }
     }
 
-    private Rect getFreeformBounds(@NonNull MotionEvent ev) {
-        final Rect endBounds = new Rect();
-        final int finalWidth = (int) (FINAL_FREEFORM_SCALE
-                * mDragToDesktopAnimationStartBounds.width());
-        final int finalHeight = (int) (FINAL_FREEFORM_SCALE
-                * mDragToDesktopAnimationStartBounds.height());
+    /**
+     * Gets bounds of a scaled window centered relative to the screen bounds
+     * @param scale the amount to scale to relative to the Screen Bounds
+     */
+    private Rect calculateFreeformBounds(float scale) {
+        final Resources resources = mContext.getResources();
+        final DisplayMetrics metrics = resources.getDisplayMetrics();
+        final int screenWidth = metrics.widthPixels;
+        final int screenHeight = metrics.heightPixels;
 
-        endBounds.left = mDragToDesktopAnimationStartBounds.centerX() - finalWidth / 2
-                + (int) (ev.getX() - mCaptionDragStartX);
-        endBounds.right = endBounds.left + (int) (FINAL_FREEFORM_SCALE
-                * mDragToDesktopAnimationStartBounds.width());
-        endBounds.top = (int) (ev.getY()
-                - ((FINAL_FREEFORM_SCALE - DRAG_FREEFORM_SCALE)
-                * mDragToDesktopAnimationStartBounds.height() / 2));
-        endBounds.bottom = endBounds.top + finalHeight;
-
+        final float adjustmentPercentage = (1f - scale) / 2;
+        final Rect endBounds = new Rect((int) (screenWidth * adjustmentPercentage),
+                (int) (screenHeight * adjustmentPercentage),
+                (int) (screenWidth * (adjustmentPercentage + scale)),
+                (int) (screenHeight * (adjustmentPercentage + scale)));
         return endBounds;
+    }
+
+    /**
+     * Animates a window to the center, grows to freeform size, and transitions to Desktop Mode.
+     * @param relevantDecor the window decor of the task to be animated
+     * @param ev the motion event that triggers the animation
+     */
+    private void centerAndMoveToDesktopWithAnimation(DesktopModeWindowDecoration relevantDecor,
+            MotionEvent ev) {
+        ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
+        animator.setDuration(FREEFORM_ANIMATION_DURATION);
+        final SurfaceControl sc = relevantDecor.mTaskSurface;
+        final Rect endBounds = calculateFreeformBounds(DRAG_FREEFORM_SCALE);
+        final Transaction t = mTransactionFactory.get();
+        final float diffX = endBounds.centerX() - ev.getX();
+        final float diffY = endBounds.top - ev.getY();
+        final float startingX = ev.getX() - DRAG_FREEFORM_SCALE
+                * mDragToDesktopAnimationStartBounds.width() / 2;
+
+        animator.addUpdateListener(animation -> {
+            final float animatorValue = (float) animation.getAnimatedValue();
+            final float x = startingX + diffX * animatorValue;
+            final float y = ev.getY() + diffY * animatorValue;
+            t.setPosition(sc, x, y);
+            t.apply();
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mDesktopTasksController.ifPresent(
+                        c -> c.moveToDesktopWithAnimation(relevantDecor.mTaskInfo,
+                                calculateFreeformBounds(FINAL_FREEFORM_SCALE)));
+            }
+        });
+        animator.start();
     }
 
     private void startAnimation(@NonNull DesktopModeWindowDecoration focusedDecor) {
