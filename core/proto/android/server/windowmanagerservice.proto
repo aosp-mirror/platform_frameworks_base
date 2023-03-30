@@ -390,6 +390,7 @@ message ActivityRecordProto {
     optional bool enable_recents_screenshot = 35;
     optional int32 last_drop_input_mode = 36;
     optional int32 override_orientation = 37 [(.android.typedef) = "android.content.pm.ActivityInfo.ScreenOrientation"];
+    optional bool should_send_compat_fake_focus = 38;
 }
 
 /* represents WindowToken */
