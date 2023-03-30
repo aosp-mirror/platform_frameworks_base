@@ -166,7 +166,7 @@
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> üzərindən qoşuldu."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> cihazına qoşulub."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Qoşulu deyil."</string>
-    <string name="data_connection_roaming" msgid="375650836665414797">"Rominq"</string>
+    <string name="data_connection_roaming" msgid="375650836665414797">"Rouminq"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Deaktiv"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Uçuş rejimi"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN aktivdir."</string>

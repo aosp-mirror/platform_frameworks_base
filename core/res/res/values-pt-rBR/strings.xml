@@ -52,7 +52,7 @@
     <string name="enablePin" msgid="2543771964137091212">"Falha. Ative o bloqueio do chip/R-UIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
       <item quantity="other">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>

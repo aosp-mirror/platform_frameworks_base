@@ -216,7 +216,7 @@
     <string name="silent_mode" msgid="8796112363642579333">"Lydløs"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"Slå trådløs til"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"Slå trådløs fra"</string>
-    <string name="screen_lock" msgid="2072642720826409809">"Skærmlås"</string>
+    <string name="screen_lock" msgid="2072642720826409809">"Skærm­lås"</string>
     <string name="power_off" msgid="4111692782492232778">"Sluk"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"Ringeren er deaktiveret"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"Ringervibrering"</string>
@@ -240,7 +240,7 @@
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Valgmuligheder for tabletcomputeren"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Valgmuligheder for Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Indstillinger for telefon"</string>
-    <string name="global_action_lock" msgid="6949357274257655383">"Skærmlås"</string>
+    <string name="global_action_lock" msgid="6949357274257655383">"Skærm­lås"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Sluk"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Afbryderknap"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Genstart"</string>
@@ -1139,7 +1139,7 @@
     <string name="selectTextMode" msgid="3225108910999318778">"Markér tekst"</string>
     <string name="undo" msgid="3175318090002654673">"Fortryd"</string>
     <string name="redo" msgid="7231448494008532233">"Annuller fortryd"</string>
-    <string name="autofill" msgid="511224882647795296">"AutoFyld"</string>
+    <string name="autofill" msgid="511224882647795296">"Autofyld"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Tekstmarkering"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"Føj til ordbog"</string>
     <string name="deleteText" msgid="4200807474529938112">"Slet"</string>
@@ -1247,7 +1247,7 @@
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen, mens du konfigurerer dit fingeraftryk."</string>
     <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Sluk skærm"</string>
     <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Fortsæt"</string>
-    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vil du bekræfte dit fingeraftryk?"</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vil du verificere dit fingeraftryk?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen for at bekræfte dit fingeraftryk."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Sluk skærm"</string>
     <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Fortsæt"</string>
