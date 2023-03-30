@@ -52,7 +52,6 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
-import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 
@@ -73,7 +72,6 @@ public class RankingCoordinatorTest extends SysuiTestCase {
 
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private HighPriorityProvider mHighPriorityProvider;
-    @Mock private SectionStyleProvider mSectionStyleProvider;
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private NodeController mAlertingHeaderController;
     @Mock private NodeController mSilentNodeController;
@@ -100,7 +98,6 @@ public class RankingCoordinatorTest extends SysuiTestCase {
         mRankingCoordinator = new RankingCoordinator(
                 mStatusBarStateController,
                 mHighPriorityProvider,
-                mSectionStyleProvider,
                 mAlertingHeaderController,
                 mSilentHeaderController,
                 mSilentNodeController);
@@ -108,7 +105,6 @@ public class RankingCoordinatorTest extends SysuiTestCase {
         mEntry.setRanking(getRankingForUnfilteredNotif().build());
 
         mRankingCoordinator.attach(mNotifPipeline);
-        verify(mSectionStyleProvider).setMinimizedSections(any());
         verify(mNotifPipeline, times(2)).addPreGroupFilter(mNotifFilterCaptor.capture());
         mCapturedSuspendedFilter = mNotifFilterCaptor.getAllValues().get(0);
         mCapturedDozingFilter = mNotifFilterCaptor.getAllValues().get(1);
