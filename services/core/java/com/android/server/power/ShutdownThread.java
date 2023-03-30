@@ -703,17 +703,20 @@ public final class ShutdownThread extends Thread {
             // vibrate before shutting down
             Vibrator vibrator = new SystemVibrator(context);
             try {
-                vibrator.vibrate(SHUTDOWN_VIBRATE_MS, VIBRATION_ATTRIBUTES);
+                if (vibrator.hasVibrator()) {
+                    vibrator.vibrate(SHUTDOWN_VIBRATE_MS, VIBRATION_ATTRIBUTES);
+                    // vibrator is asynchronous so we need to wait to avoid shutting down too soon.
+                    try {
+                        Thread.sleep(SHUTDOWN_VIBRATE_MS);
+                    } catch (InterruptedException unused) {
+                        // this is not critical and does not require logging
+                    }
+                }
             } catch (Exception e) {
                 // Failure to vibrate shouldn't interrupt shutdown.  Just log it.
                 Log.w(TAG, "Failed to vibrate during shutdown.", e);
             }
 
-            // vibrator is asynchronous so we need to wait to avoid shutting down too soon.
-            try {
-                Thread.sleep(SHUTDOWN_VIBRATE_MS);
-            } catch (InterruptedException unused) {
-            }
         }
         // Shutdown power
         Log.i(TAG, "Performing low-level shutdown...");
