@@ -16,14 +16,18 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import static android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE;
+
 import static com.android.systemui.statusbar.notification.collection.GroupEntry.ROOT_ENTRY;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -31,6 +35,7 @@ import static org.mockito.Mockito.when;
 
 import static java.util.Objects.requireNonNull;
 
+import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
@@ -289,6 +294,42 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
 
         // THEN we do not rebind it
         verify(mNotifInflater, never()).rebindViews(eq(mEntry), any(), any());
+
+        // THEN we do not filter it because it's not the first inflation.
+        assertFalse(mUninflatedFilter.shouldFilterOut(mEntry, 0));
+    }
+
+    @Test
+    public void testEntryCancellationWillRebindViews() {
+        // Configure NotifUiAdjustmentProvider to set up SHOW_NOTIFICATION_SNOOZE value
+        mEntry = spy(mEntry);
+        mAdjustmentProvider.addDirtyListener(mock(Runnable.class));
+        when(mSecureSettings.getIntForUser(eq(SHOW_NOTIFICATION_SNOOZE), anyInt(), anyInt()))
+                .thenReturn(1);
+        ArgumentCaptor<ContentObserver> contentObserverCaptor = ArgumentCaptor.forClass(
+                ContentObserver.class);
+        verify(mSecureSettings).registerContentObserverForUser(eq(SHOW_NOTIFICATION_SNOOZE),
+                contentObserverCaptor.capture(), anyInt());
+        ContentObserver contentObserver = contentObserverCaptor.getValue();
+        contentObserver.onChange(false);
+
+        // GIVEN an inflated notification
+        mCollectionListener.onEntryInit(mEntry);
+        mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
+        verify(mNotifInflater).inflateViews(eq(mEntry), any(), any());
+        mNotifInflater.invokeInflateCallbackForEntry(mEntry);
+
+        // Verify that snooze is initially enabled: from Settings & notification is not cancelled
+        assertTrue(mAdjustmentProvider.calculateAdjustment(mEntry).isSnoozeEnabled());
+
+        // WHEN notification is cancelled, rebind views because snooze enabled value changes
+        when(mEntry.isCanceled()).thenReturn(true);
+        mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
+
+        assertFalse(mAdjustmentProvider.calculateAdjustment(mEntry).isSnoozeEnabled());
+
+        // THEN we rebind it
+        verify(mNotifInflater).rebindViews(eq(mEntry), any(), any());
 
         // THEN we do not filter it because it's not the first inflation.
         assertFalse(mUninflatedFilter.shouldFilterOut(mEntry, 0));
