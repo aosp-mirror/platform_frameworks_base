@@ -293,7 +293,7 @@ internal object SplitScreenUtils {
             wmHelper.currentState.layerState.displays.firstOrNull { !it.isVirtual }?.layerStackSpace
                 ?: error("Display not found")
         val dividerBar = device.wait(Until.findObject(dividerBarSelector), TIMEOUT_MS)
-        dividerBar.drag(Point(displayBounds.width * 1 / 3, displayBounds.height * 2 / 3))
+        dividerBar.drag(Point(displayBounds.width * 1 / 3, displayBounds.height * 2 / 3), 2000)
 
         wmHelper
             .StateSyncBuilder()
