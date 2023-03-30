@@ -542,13 +542,6 @@ public class Ringtone {
         mTitle = title;
     }
 
-    @Override
-    protected void finalize() {
-        if (mActivePlayer != null) {
-            mActivePlayer.stopAndRelease();
-        }
-    }
-
     /**
      * Play a specific ringtone. This interface is implemented by either local (this process) or
      * proxied-remote playback via AudioManager.getRingtonePlayer, so that the caller
