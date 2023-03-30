@@ -592,7 +592,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int mDoubleTapOnHomeBehavior;
 
     // Whether to lock the device after the next app transition has finished.
-    private boolean mLockAfterAppTransitionFinished;
+    boolean mLockAfterAppTransitionFinished;
 
     // Allowed theater mode wake actions
     private boolean mAllowTheaterModeWakeFromKey;
