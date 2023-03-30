@@ -127,7 +127,7 @@ public final class FillContext implements Parcelable {
                 final int index = missingNodeIndexes.keyAt(i);
                 final AutofillId id = ids[index];
 
-                if (id.equals(node.getAutofillId())) {
+                if (id != null && id.equals(node.getAutofillId())) {
                     foundNodes[index] = node;
 
                     if (mViewNodeLookupTable == null) {
