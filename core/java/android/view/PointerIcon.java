@@ -57,8 +57,9 @@ public final class PointerIcon implements Parcelable {
     /** Type constant: Null icon.  It has no bitmap. */
     public static final int TYPE_NULL = 0;
 
-    /** Type constant: no icons are specified. If all views uses this, then falls back
-     * to the default type, but this is helpful to distinguish a view explicitly want
+    /**
+     * Type constant: no icons are specified. If all views uses this, then the pointer icon falls
+     * back to the default type, but this is helpful to distinguish a view that explicitly wants
      * to have the default icon.
      * @hide
      */
