@@ -1641,12 +1641,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 any(), anyString(), anyInt(), anyString(), anyInt())).thenReturn(SHOW_IMMEDIATELY);
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
-        DeviceConfig.setProperty(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED,
-                "true",
-                false);
-        Thread.sleep(300);
 
         final String tag = "testEnqueueNotificationWithTag_FgsAddsFlags_dismissalAllowed";
 
@@ -1665,38 +1659,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mBinderService.getActiveNotifications(PKG);
         assertThat(notifs[0].getNotification().flags).isEqualTo(
                 FLAG_FOREGROUND_SERVICE | FLAG_CAN_COLORIZE | FLAG_NO_CLEAR);
-    }
-
-    @Test
-    public void testEnqueueNotificationWithTag_FGSaddsFlags_dismissalNotAllowed() throws Exception {
-        when(mAmi.applyForegroundServiceNotification(
-                any(), anyString(), anyInt(), anyString(), anyInt())).thenReturn(SHOW_IMMEDIATELY);
-        mContext.getTestablePermissions().setPermission(
-                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
-        DeviceConfig.setProperty(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED,
-                "false",
-                false);
-        Thread.sleep(300);
-
-        final String tag = "testEnqueueNotificationWithTag_FGSaddsNoClear";
-
-        Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
-                .setContentTitle("foo")
-                .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                .setFlag(FLAG_FOREGROUND_SERVICE, true)
-                .build();
-        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
-                n, UserHandle.getUserHandleForUid(mUid), null, 0);
-        mBinderService.enqueueNotificationWithTag(PKG, PKG, tag,
-                sbn.getId(), sbn.getNotification(), sbn.getUserId());
-        waitForIdle();
-
-        StatusBarNotification[] notifs =
-                mBinderService.getActiveNotifications(PKG);
-        assertThat(notifs[0].getNotification().flags).isEqualTo(
-                FLAG_FOREGROUND_SERVICE | FLAG_CAN_COLORIZE | FLAG_NO_CLEAR | FLAG_ONGOING_EVENT);
     }
 
     @Test
