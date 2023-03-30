@@ -103,6 +103,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1396,11 +1397,14 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             Log.v(TAG, "SV count: " + gnssStatus.getSatelliteCount());
         }
 
+        Set<Pair<Integer, Integer>> satellites = new HashSet<>();
         int usedInFixCount = 0;
         int maxCn0 = 0;
         int meanCn0 = 0;
         for (int i = 0; i < gnssStatus.getSatelliteCount(); i++) {
             if (gnssStatus.usedInFix(i)) {
+                satellites.add(
+                        new Pair<>(gnssStatus.getConstellationType(i), gnssStatus.getSvid(i)));
                 ++usedInFixCount;
                 if (gnssStatus.getCn0DbHz(i) > maxCn0) {
                     maxCn0 = (int) gnssStatus.getCn0DbHz(i);
@@ -1413,7 +1417,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             meanCn0 /= usedInFixCount;
         }
         // return number of sats used in fix instead of total reported
-        mLocationExtras.set(usedInFixCount, meanCn0, maxCn0);
+        mLocationExtras.set(satellites.size(), meanCn0, maxCn0);
 
         mGnssMetrics.logSvStatus(gnssStatus);
     }
