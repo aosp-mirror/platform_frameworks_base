@@ -127,8 +127,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private boolean mCanDismissLockScreen;
     private int mStatusBarState;
     private boolean mIsKeyguardShowing;
-    private boolean mUserUnlockedWithBiometric;
-    private Runnable mCancelDelayedUpdateVisibilityRunnable;
     private Runnable mOnGestureDetectedRunnable;
     private Runnable mLongPressCancelRunnable;
 
@@ -229,7 +227,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         updateIsUdfpsEnrolled();
         updateConfiguration();
         updateKeyguardShowing();
-        mUserUnlockedWithBiometric = false;
 
         mIsBouncerShowing = mKeyguardViewController.isBouncerShowing();
         mIsDozing = mStatusBarStateController.isDozing();
@@ -270,11 +267,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
         mKeyguardStateController.removeCallback(mKeyguardStateCallback);
 
-        if (mCancelDelayedUpdateVisibilityRunnable != null) {
-            mCancelDelayedUpdateVisibilityRunnable.run();
-            mCancelDelayedUpdateVisibilityRunnable = null;
-        }
-
         mAccessibilityManager.removeAccessibilityStateChangeListener(
                 mAccessibilityStateChangeListener);
     }
@@ -288,11 +280,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     private void updateVisibility() {
-        if (mCancelDelayedUpdateVisibilityRunnable != null) {
-            mCancelDelayedUpdateVisibilityRunnable.run();
-            mCancelDelayedUpdateVisibilityRunnable = null;
-        }
-
         if (!mIsKeyguardShowing && !mIsDozing) {
             mView.setVisibility(View.INVISIBLE);
             return;
@@ -300,9 +287,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
         boolean wasShowingFpIcon = mUdfpsEnrolled && !mShowUnlockIcon && !mShowLockIcon
                 && !mShowAodUnlockedIcon && !mShowAodLockIcon;
-        mShowLockIcon = !mCanDismissLockScreen && !mUserUnlockedWithBiometric && isLockScreen()
+        mShowLockIcon = !mCanDismissLockScreen && isLockScreen()
                 && (!mUdfpsEnrolled || !mRunningFPS);
-        mShowUnlockIcon = (mCanDismissLockScreen || mUserUnlockedWithBiometric) && isLockScreen();
+        mShowUnlockIcon = mCanDismissLockScreen && isLockScreen();
         mShowAodUnlockedIcon = mIsDozing && mUdfpsEnrolled && !mRunningFPS && mCanDismissLockScreen;
         mShowAodLockIcon = mIsDozing && mUdfpsEnrolled && !mRunningFPS && !mCanDismissLockScreen;
 
@@ -426,7 +413,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println(" isFlagEnabled(DOZING_MIGRATION_1): "
                 + mFeatureFlags.isEnabled(DOZING_MIGRATION_1));
         pw.println(" mIsBouncerShowing: " + mIsBouncerShowing);
-        pw.println(" mUserUnlockedWithBiometric: " + mUserUnlockedWithBiometric);
         pw.println(" mRunningFPS: " + mRunningFPS);
         pw.println(" mCanDismissLockScreen: " + mCanDismissLockScreen);
         pw.println(" mStatusBarState: " + StatusBarState.toString(mStatusBarState));
@@ -469,17 +455,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         }
     }
 
-    /**
-     * @return whether the userUnlockedWithBiometric state changed
-     */
-    private boolean updateUserUnlockedWithBiometric() {
-        final boolean wasUserUnlockedWithBiometric = mUserUnlockedWithBiometric;
-        mUserUnlockedWithBiometric =
-                mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
-                        KeyguardUpdateMonitor.getCurrentUser());
-        return wasUserUnlockedWithBiometric != mUserUnlockedWithBiometric;
-    }
-
     private StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
                 @Override
@@ -516,36 +491,15 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 }
 
                 @Override
-                public void onBiometricsCleared() {
-                    if (updateUserUnlockedWithBiometric()) {
-                        updateVisibility();
-                    }
-                }
-
-                @Override
                 public void onBiometricRunningStateChanged(boolean running,
                         BiometricSourceType biometricSourceType) {
                     final boolean wasRunningFps = mRunningFPS;
-                    final boolean userUnlockedWithBiometricChanged =
-                            updateUserUnlockedWithBiometric();
 
                     if (biometricSourceType == FINGERPRINT) {
                         mRunningFPS = running;
-                        if (wasRunningFps && !mRunningFPS) {
-                            if (mCancelDelayedUpdateVisibilityRunnable != null) {
-                                mCancelDelayedUpdateVisibilityRunnable.run();
-                            }
-
-                            // For some devices, auth is cancelled immediately on screen off but
-                            // before dozing state is set. We want to avoid briefly showing the
-                            // button in this case, so we delay updating the visibility by 50ms.
-                            mCancelDelayedUpdateVisibilityRunnable =
-                                    mExecutor.executeDelayed(() -> updateVisibility(), 50);
-                            return;
-                        }
                     }
 
-                    if (userUnlockedWithBiometricChanged || wasRunningFps != mRunningFPS) {
+                    if (wasRunningFps != mRunningFPS) {
                         updateVisibility();
                     }
                 }
@@ -556,7 +510,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         @Override
         public void onUnlockedChanged() {
             mCanDismissLockScreen = mKeyguardStateController.canDismissLockScreen();
-            updateUserUnlockedWithBiometric();
             updateKeyguardShowing();
             updateVisibility();
         }
@@ -573,9 +526,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mIsBouncerShowing = mKeyguardViewController.isBouncerShowing();
 
             updateKeyguardShowing();
-            if (mIsKeyguardShowing) {
-                updateUserUnlockedWithBiometric();
-            }
             updateVisibility();
         }
 
