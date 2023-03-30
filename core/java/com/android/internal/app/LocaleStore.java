@@ -657,6 +657,7 @@ public class LocaleStore {
                 // of supported locales.
                 result.mIsPseudo = localeInfo.mIsPseudo;
                 result.mIsTranslated = localeInfo.mIsTranslated;
+                result.mHasNumberingSystems = localeInfo.mHasNumberingSystems;
                 result.mSuggestionFlags = localeInfo.mSuggestionFlags;
                 return result;
             }
