@@ -157,14 +157,16 @@ public final class ProviderCreateSession extends ProviderSession<
             mProviderException = (CreateCredentialException) exception;
         }
         mProviderSessionMetric.collectCandidateExceptionStatus(/*hasException=*/true);
-        updateStatusAndInvokeCallback(toStatus(errorCode));
+        updateStatusAndInvokeCallback(toStatus(errorCode),
+                /*source=*/ CredentialsSource.REMOTE_PROVIDER);
     }
 
     /** Called when provider service dies. */
     @Override
     public void onProviderServiceDied(RemoteCredentialService service) {
         if (service.getComponentName().equals(mComponentName)) {
-            updateStatusAndInvokeCallback(Status.SERVICE_DEAD);
+            updateStatusAndInvokeCallback(Status.SERVICE_DEAD,
+                    /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         } else {
             Slog.i(TAG, "Component names different in onProviderServiceDied - "
                     + "this should not happen");
@@ -178,10 +180,12 @@ public final class ProviderCreateSession extends ProviderSession<
                 response.getRemoteCreateEntry());
         if (mProviderResponseDataHandler.isEmptyResponse(response)) {
             mProviderSessionMetric.collectCandidateEntryMetrics(response);
-            updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE);
+            updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE,
+                    /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         } else {
             mProviderSessionMetric.collectCandidateEntryMetrics(response);
-            updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED);
+            updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED,
+                    /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         }
     }
 

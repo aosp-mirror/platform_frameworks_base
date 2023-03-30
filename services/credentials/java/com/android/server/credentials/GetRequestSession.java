@@ -151,8 +151,9 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
 
     @Override
     public void onProviderStatusChanged(ProviderSession.Status status,
-            ComponentName componentName) {
-        Log.i(TAG, "in onStatusChanged with status: " + status);
+            ComponentName componentName, ProviderSession.CredentialsSource source) {
+        Log.i(TAG, "in onStatusChanged with status: " + status + "and source: " + source);
+
         // Auth entry was selected, and it did not have any underlying credentials
         if (status == ProviderSession.Status.NO_CREDENTIALS_FROM_AUTH_ENTRY) {
             handleEmptyAuthenticationSelection(componentName);
@@ -173,7 +174,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
         }
     }
 
-    private void handleEmptyAuthenticationSelection(ComponentName componentName) {
+    protected void handleEmptyAuthenticationSelection(ComponentName componentName) {
         // Update auth entry statuses across different provider sessions
         mProviders.keySet().forEach(key -> {
             ProviderGetSession session = (ProviderGetSession) mProviders.get(key);
