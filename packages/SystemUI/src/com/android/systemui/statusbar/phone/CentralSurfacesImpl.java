@@ -697,7 +697,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         @Override
         public void onBackProgressed(BackEvent event) {
             if (shouldBackBeHandled()) {
-                if (mNotificationPanelViewController.canPanelBeCollapsed()) {
+                if (mNotificationPanelViewController.canBeCollapsed()) {
                     float fraction = event.getProgress();
                     mNotificationPanelViewController.onBackProgressed(fraction);
                 }
@@ -1271,14 +1271,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     // re-display the notification panel if necessary (for example, if
                     // a heads-up notification was being displayed and should continue being
                     // displayed).
-                    mNotificationPanelViewController.updatePanelExpansionAndVisibility();
+                    mNotificationPanelViewController.updateExpansionAndVisibility();
                     setBouncerShowingForStatusBarComponents(mBouncerShowing);
                     checkBarModes();
                 });
         initializer.initializeStatusBar(mCentralSurfacesComponent);
 
         mStatusBarTouchableRegionManager.setup(this, mNotificationShadeWindowView);
-        mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
 
         createNavigationBar(result);
 
@@ -1351,7 +1350,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 this,
                 mGestureRec,
                 mShadeController::makeExpandedInvisible,
-                mNotificationShelfController);
+                mNotificationShelfController,
+                mHeadsUpManager);
 
         BackDropView backdrop = mNotificationShadeWindowView.findViewById(R.id.backdrop);
         mMediaManager.setup(backdrop, backdrop.findViewById(R.id.backdrop_front),
@@ -2091,16 +2091,16 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
 
         if (start) {
-            mNotificationPanelViewController.startWaitingForOpenPanelGesture();
+            mNotificationPanelViewController.startWaitingForExpandGesture();
         } else {
-            mNotificationPanelViewController.stopWaitingForOpenPanelGesture(cancel, velocity);
+            mNotificationPanelViewController.stopWaitingForExpandGesture(cancel, velocity);
         }
     }
 
     @Override
     public void animateCollapseQuickSettings() {
         if (mState == StatusBarState.SHADE) {
-            mNotificationPanelViewController.collapsePanel(
+            mNotificationPanelViewController.collapse(
                     true, false /* delayed */, 1.0f /* speedUpFactor */);
         }
     }
@@ -3296,14 +3296,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             return true;
         }
         if (mQsController.getExpanded()) {
-            mNotificationPanelViewController.animateCloseQs(false);
+            mNotificationPanelViewController.animateCollapseQs(false);
             return true;
         }
         if (mNotificationPanelViewController.closeUserSwitcherIfOpen()) {
             return true;
         }
         if (shouldBackBeHandled()) {
-            if (mNotificationPanelViewController.canPanelBeCollapsed()) {
+            if (mNotificationPanelViewController.canBeCollapsed()) {
                 // this is the Shade dismiss animation, so make sure QQS closes when it ends.
                 mNotificationPanelViewController.onBackPressed();
                 mShadeController.animateCollapseShade();
@@ -4373,7 +4373,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     mNavigationBarController.touchAutoDim(mDisplayId);
                     Trace.beginSection("CentralSurfaces#updateKeyguardState");
                     if (mState == StatusBarState.KEYGUARD) {
-                        mNotificationPanelViewController.cancelPendingPanelCollapse();
+                        mNotificationPanelViewController.cancelPendingCollapse();
                     }
                     updateDozingState();
                     checkBarModes();
