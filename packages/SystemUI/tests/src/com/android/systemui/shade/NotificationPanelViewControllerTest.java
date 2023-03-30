@@ -456,6 +456,34 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    public void keyguardStatusView_willPlayDelayedDoze_isCentered_thenNot() {
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ true);
+
+        mNotificationPanelViewController.setWillPlayDelayedDozeAmountAnimation(true);
+        setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ false);
+        assertKeyguardStatusViewCentered();
+
+        mNotificationPanelViewController.setWillPlayDelayedDozeAmountAnimation(false);
+        assertKeyguardStatusViewNotCentered();
+    }
+
+    @Test
+    public void keyguardStatusView_willPlayDelayedDoze_isCentered_thenStillCenteredIfNoNotifs() {
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ true);
+
+        mNotificationPanelViewController.setWillPlayDelayedDozeAmountAnimation(true);
+        setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ false);
+        assertKeyguardStatusViewCentered();
+
+        mNotificationPanelViewController.setWillPlayDelayedDozeAmountAnimation(false);
+        assertKeyguardStatusViewCentered();
+    }
+
+    @Test
     public void testCanCollapsePanelOnTouch_trueForKeyGuard() {
         mStatusBarStateController.setState(KEYGUARD);
 
