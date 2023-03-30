@@ -29,6 +29,7 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -307,4 +308,7 @@ public abstract class VcnUnderlyingNetworkTemplate {
     public int getMinExitDownstreamBandwidthKbps() {
         return mMinExitDownstreamBandwidthKbps;
     }
+
+    /** @hide */
+    public abstract Map<Integer, Integer> getCapabilitiesMatchCriteria();
 }
