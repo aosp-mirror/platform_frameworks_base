@@ -315,6 +315,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private ViewRootImpl mViewRootImpl;
     @Mock private WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher;
     @Mock private UserTracker mUserTracker;
+    @Mock private FingerprintManager mFingerprintManager;
     @Captor private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
     @Mock IPowerManager mPowerManagerService;
 
@@ -532,7 +533,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mCameraLauncherLazy,
                 () -> mLightRevealScrimViewModel,
                 mAlternateBouncerInteractor,
-                mUserTracker
+                mUserTracker,
+                () -> mFingerprintManager
         ) {
             @Override
             protected ViewRootImpl getViewRootImpl() {
