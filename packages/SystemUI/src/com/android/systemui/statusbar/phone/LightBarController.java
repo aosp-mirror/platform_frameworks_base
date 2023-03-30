@@ -88,6 +88,8 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private boolean mDirectReplying;
     private boolean mNavbarColorManagedByIme;
 
+    private boolean mIsCustomizingForBackNav;
+
     @Inject
     public LightBarController(
             Context ctx,
@@ -137,16 +139,17 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         for (int i = 0; i < numStacks && !stackAppearancesChanged; i++) {
             stackAppearancesChanged |= !appearanceRegions[i].equals(mAppearanceRegions[i]);
         }
-        if (stackAppearancesChanged || sbModeChanged) {
+        if (stackAppearancesChanged || sbModeChanged || mIsCustomizingForBackNav) {
             mAppearanceRegions = appearanceRegions;
             onStatusBarModeChanged(statusBarMode);
+            mIsCustomizingForBackNav = false;
         }
         mNavbarColorManagedByIme = navbarColorManagedByIme;
     }
 
     void onStatusBarModeChanged(int newBarMode) {
         mStatusBarMode = newBarMode;
-        updateStatus();
+        updateStatus(mAppearanceRegions);
     }
 
     public void onNavigationBarAppearanceChanged(@Appearance int appearance, boolean nbModeChanged,
@@ -183,6 +186,31 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         if (mQsCustomizing == customizing) return;
         mQsCustomizing = customizing;
         reevaluate();
+    }
+
+    /**
+     * Controls the light status bar temporarily for back navigation.
+     * @param appearance the custmoized appearance.
+     */
+    public void customizeStatusBarAppearance(AppearanceRegion appearance) {
+        if (appearance != null) {
+            final ArrayList<AppearanceRegion> appearancesList = new ArrayList<>();
+            appearancesList.add(appearance);
+            for (int i = 0; i < mAppearanceRegions.length; i++) {
+                final AppearanceRegion ar = mAppearanceRegions[i];
+                if (appearance.getBounds().contains(ar.getBounds())) {
+                    continue;
+                }
+                appearancesList.add(ar);
+            }
+
+            final AppearanceRegion[] newAppearances = new AppearanceRegion[appearancesList.size()];
+            updateStatus(appearancesList.toArray(newAppearances));
+            mIsCustomizingForBackNav = true;
+        } else {
+            mIsCustomizingForBackNav = false;
+            updateStatus(mAppearanceRegions);
+        }
     }
 
     /**
@@ -226,12 +254,12 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
                 && unlockMode != BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
     }
 
-    private void updateStatus() {
-        final int numStacks = mAppearanceRegions.length;
+    private void updateStatus(AppearanceRegion[] appearanceRegions) {
+        final int numStacks = appearanceRegions.length;
         final ArrayList<Rect> lightBarBounds = new ArrayList<>();
 
         for (int i = 0; i < numStacks; i++) {
-            final AppearanceRegion ar = mAppearanceRegions[i];
+            final AppearanceRegion ar = appearanceRegions[i];
             if (isLight(ar.getAppearance(), mStatusBarMode, APPEARANCE_LIGHT_STATUS_BARS)) {
                 lightBarBounds.add(ar.getBounds());
             }
@@ -247,7 +275,6 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         else if (lightBarBounds.size() == numStacks) {
             mStatusBarIconController.setIconsDarkArea(null);
             mStatusBarIconController.getTransitionsController().setIconsDark(true, animateChange());
-
         }
 
         // Not the same for every stack, magic!
