@@ -265,8 +265,6 @@ interface ISub {
     String getSubscriptionProperty(int subId, String propKey, String callingPackage,
             String callingFeatureId);
 
-    boolean setSubscriptionEnabled(boolean enable, int subId);
-
     boolean isSubscriptionEnabled(int subId);
 
     int getEnabledSubscriptionId(int slotIndex);
@@ -277,7 +275,7 @@ interface ISub {
 
     boolean canDisablePhysicalSubscription();
 
-    int setUiccApplicationsEnabled(boolean enabled, int subscriptionId);
+    void setUiccApplicationsEnabled(boolean enabled, int subscriptionId);
 
     int setDeviceToDeviceStatusSharing(int sharing, int subId);
 
