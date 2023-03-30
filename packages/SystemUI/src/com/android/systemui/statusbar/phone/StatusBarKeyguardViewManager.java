@@ -973,7 +973,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void onKeyguardFadedAway() {
         mNotificationContainer.postDelayed(() -> mNotificationShadeWindowController
                         .setKeyguardFadingAway(false), 100);
-        mNotificationPanelViewController.resetViewAlphas();
+        mNotificationPanelViewController.resetViewGroupFade();
         mCentralSurfaces.finishKeyguardFadingAway();
         mBiometricUnlockController.finishKeyguardFadingAway();
         WindowManagerGlobal.getInstance().trimMemory(
@@ -1048,7 +1048,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (hideImmediately) {
                 mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
             } else {
-                mNotificationPanelViewController.expandShadeToNotifications();
+                mNotificationPanelViewController.expandToNotifications();
             }
         }
         return;

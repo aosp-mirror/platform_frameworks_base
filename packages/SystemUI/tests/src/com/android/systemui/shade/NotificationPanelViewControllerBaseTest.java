@@ -162,6 +162,8 @@ import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
+import dagger.Lazy;
+
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
@@ -173,7 +175,6 @@ import org.mockito.stubbing.Answer;
 import java.util.List;
 import java.util.Optional;
 
-import dagger.Lazy;
 import kotlinx.coroutines.CoroutineDispatcher;
 
 public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
@@ -576,7 +577,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mCentralSurfaces,
                 null,
                 () -> {},
-                mNotificationShelfController);
+                mNotificationShelfController,
+                mHeadsUpManager);
         mNotificationPanelViewController.setTrackingStartedListener(() -> {});
         mNotificationPanelViewController.setOpenCloseListener(
                 new NotificationPanelViewController.OpenCloseListener() {
@@ -586,7 +588,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                     @Override
                     public void onOpenStarted() {}
                 });
-        mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
         ArgumentCaptor<View.OnAttachStateChangeListener> onAttachStateChangeListenerArgumentCaptor =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
         verify(mView, atLeast(1)).addOnAttachStateChangeListener(
@@ -599,7 +600,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mAccessibilityDelegate = accessibilityDelegateArgumentCaptor.getValue();
         mNotificationPanelViewController.getStatusBarStateController()
                 .addCallback(mNotificationPanelViewController.getStatusBarStateListener());
-        mNotificationPanelViewController
+        mNotificationPanelViewController.getShadeHeadsUpTracker()
                 .setHeadsUpAppearanceController(mock(HeadsUpAppearanceController.class));
         verify(mNotificationStackScrollLayoutController)
                 .setOnEmptySpaceClickListener(mEmptySpaceClickListenerCaptor.capture());
