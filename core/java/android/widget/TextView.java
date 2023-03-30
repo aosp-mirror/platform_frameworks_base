@@ -6232,7 +6232,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_lineHeight
      */
     @android.view.RemotableViewMethod
-    public void setLineHeight(int unit, @FloatRange(from = 0) float lineHeight) {
+    public void setLineHeight(
+            @TypedValue.ComplexDimensionUnit int unit,
+            @FloatRange(from = 0) float lineHeight
+    ) {
         setLineHeightPx(
                 TypedValue.applyDimension(unit, lineHeight, getDisplayMetricsOrSystem()));
     }
