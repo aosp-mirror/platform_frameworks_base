@@ -3652,17 +3652,10 @@ public class SubscriptionManager {
     }
 
     /**
-     * Enables or disables a subscription. This is currently used in the settings page. It will
-     * fail and return false if operation is not supported or failed.
+     * Enable or disable a subscription. This method is same as
+     * {@link #setUiccApplicationsEnabled(int, boolean)}.
      *
-     * To disable an active subscription on a physical (non-Euicc) SIM,
-     * {@link #canDisablePhysicalSubscription} needs to be true.
-     *
-     * <p>
-     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
-     *
-     * @param subscriptionId Subscription to be enabled or disabled. It could be a eSIM or pSIM
-     * subscription.
+     * @param subscriptionId Subscription to be enabled or disabled.
      * @param enable whether user is turning it on or off.
      *
      * @return whether the operation is successful.
@@ -3672,19 +3665,15 @@ public class SubscriptionManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean setSubscriptionEnabled(int subscriptionId, boolean enable) {
-        if (VDBG) {
-            logd("setSubscriptionActivated subId= " + subscriptionId + " enable " + enable);
-        }
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
-                return iSub.setSubscriptionEnabled(enable, subscriptionId);
+                iSub.setUiccApplicationsEnabled(enable, subscriptionId);
             }
         } catch (RemoteException ex) {
-            // ignore it
+            return false;
         }
-
-        return false;
+        return true;
     }
 
     /**
@@ -3707,11 +3696,7 @@ public class SubscriptionManager {
             logd("setUiccApplicationsEnabled subId= " + subscriptionId + " enable " + enabled);
         }
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.setUiccApplicationsEnabled(enabled, subscriptionId);
             }
@@ -3739,11 +3724,7 @@ public class SubscriptionManager {
             logd("canDisablePhysicalSubscription");
         }
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 return iSub.canDisablePhysicalSubscription();
             }
@@ -3867,10 +3848,15 @@ public class SubscriptionManager {
     }
 
     /**
-     * DO NOT USE.
-     * This API is designed for features that are not finished at this point. Do not call this API.
+     * Get the active subscription id by logical SIM slot index.
+     *
+     * @param slotIndex The logical SIM slot index.
+     * @return The active subscription id.
+     *
+     * @throws IllegalArgumentException if the provided slot index is invalid.
+     * @throws SecurityException if callers do not hold the required permission.
+     *
      * @hide
-     * TODO b/135547512: further clean up
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
