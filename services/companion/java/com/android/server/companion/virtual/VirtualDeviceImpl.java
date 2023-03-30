@@ -126,7 +126,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final VirtualDeviceManagerService mService;
     private final PendingTrampolineCallback mPendingTrampolineCallback;
     private final int mOwnerUid;
-    private final int mDeviceId;
+    private int mDeviceId;
     // Thou shall not hold the mVirtualDeviceLock over the mInputController calls.
     // Holding the lock can lead to lock inversion with GlobalWindowManagerLock.
     // 1. After display is created the window manager calls into VDM during construction
@@ -404,6 +404,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         super.close_enforcePermission();
         // Remove about-to-be-closed virtual device from the service before butchering it.
         mService.removeVirtualDevice(mDeviceId);
+        mDeviceId = Context.DEVICE_ID_INVALID;
 
         VirtualDisplayWrapper[] virtualDisplaysToBeReleased;
         synchronized (mVirtualDeviceLock) {
