@@ -171,6 +171,18 @@ class NetworkPriorityClassifier {
             return false;
         }
 
+        for (Map.Entry<Integer, Integer> entry :
+                networkPriority.getCapabilitiesMatchCriteria().entrySet()) {
+            final int cap = entry.getKey();
+            final int matchCriteria = entry.getValue();
+
+            if (matchCriteria == MATCH_REQUIRED && !caps.hasCapability(cap)) {
+                return false;
+            } else if (matchCriteria == MATCH_FORBIDDEN && caps.hasCapability(cap)) {
+                return false;
+            }
+        }
+
         if (vcnContext.isInTestMode() && caps.hasTransport(TRANSPORT_TEST)) {
             return true;
         }
@@ -317,18 +329,6 @@ class NetworkPriorityClassifier {
             }
         } else if (opportunisticMatch == MATCH_FORBIDDEN && !isOpportunistic) {
             return false;
-        }
-
-        for (Map.Entry<Integer, Integer> entry :
-                networkPriority.getCapabilitiesMatchCriteria().entrySet()) {
-            final int cap = entry.getKey();
-            final int matchCriteria = entry.getValue();
-
-            if (matchCriteria == MATCH_REQUIRED && !caps.hasCapability(cap)) {
-                return false;
-            } else if (matchCriteria == MATCH_FORBIDDEN && caps.hasCapability(cap)) {
-                return false;
-            }
         }
 
         return true;
