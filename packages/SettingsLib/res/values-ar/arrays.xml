@@ -60,7 +60,7 @@
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
     <item msgid="695678520785580527">"غير مفعّل"</item>
-    <item msgid="6336372935919715515">"تمّ تفعيل التصفية"</item>
+    <item msgid="6336372935919715515">"تمّ تفعيل الفلترة"</item>
     <item msgid="2779123106632690576">"مفعّل"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">

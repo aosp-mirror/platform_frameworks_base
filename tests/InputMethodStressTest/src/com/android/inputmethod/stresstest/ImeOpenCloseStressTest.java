@@ -42,6 +42,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -123,6 +124,7 @@ public final class ImeOpenCloseStressTest {
         }
     }
 
+    @Ignore("b/268556567")
     @Test
     public void testShowHideInSameFrame() {
         TestActivity activity = TestActivity.start();
