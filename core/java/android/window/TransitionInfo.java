@@ -190,6 +190,9 @@ public final class TransitionInfo implements Parcelable {
 
     private AnimationOptions mOptions;
 
+    /** This is only a BEST-EFFORT id used for log correlation. DO NOT USE for any real work! */
+    private int mDebugId = -1;
+
     /** @hide */
     public TransitionInfo(@TransitionType int type, @TransitionFlags int flags) {
         mType = type;
@@ -202,6 +205,7 @@ public final class TransitionInfo implements Parcelable {
         in.readTypedList(mChanges, Change.CREATOR);
         in.readTypedList(mRoots, Root.CREATOR);
         mOptions = in.readTypedObject(AnimationOptions.CREATOR);
+        mDebugId = in.readInt();
     }
 
     @Override
@@ -212,6 +216,7 @@ public final class TransitionInfo implements Parcelable {
         dest.writeTypedList(mChanges);
         dest.writeTypedList(mRoots, flags);
         dest.writeTypedObject(mOptions, flags);
+        dest.writeInt(mDebugId);
     }
 
     @NonNull
@@ -347,11 +352,24 @@ public final class TransitionInfo implements Parcelable {
         return (mFlags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0;
     }
 
+    /**
+     * Set an arbitrary "debug" id for this info. This id will not be used for any "real work",
+     * it is just for debugging and logging.
+     */
+    public void setDebugId(int id) {
+        mDebugId = id;
+    }
+
+    /** Get the "debug" id of this info. Do NOT use this for real work, only use for debugging. */
+    public int getDebugId() {
+        return mDebugId;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{t=").append(transitTypeToString(mType)).append(" f=0x")
-                .append(Integer.toHexString(mFlags)).append(" r=[");
+        sb.append("{id=").append(mDebugId).append(" t=").append(transitTypeToString(mType))
+                .append(" f=0x").append(Integer.toHexString(mFlags)).append(" r=[");
         for (int i = 0; i < mRoots.size(); ++i) {
             if (i > 0) {
                 sb.append(',');
@@ -510,6 +528,7 @@ public final class TransitionInfo implements Parcelable {
      */
     public TransitionInfo localRemoteCopy() {
         final TransitionInfo out = new TransitionInfo(mType, mFlags);
+        out.mDebugId = mDebugId;
         for (int i = 0; i < mChanges.size(); ++i) {
             out.mChanges.add(mChanges.get(i).localRemoteCopy());
         }

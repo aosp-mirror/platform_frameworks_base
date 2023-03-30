@@ -182,6 +182,14 @@ public class Transitions implements RemoteCallable<Transitions> {
 
         /** Ordered list of transitions which have been merged into this one. */
         private ArrayList<ActiveTransition> mMerged;
+
+        @Override
+        public String toString() {
+            if (mInfo != null && mInfo.getDebugId() >= 0) {
+                return "(#" + mInfo.getDebugId() + ")" + mToken;
+            }
+            return mToken.toString();
+        }
     }
 
     /** Keeps track of transitions which have been started, but aren't ready yet. */
@@ -525,8 +533,8 @@ public class Transitions implements RemoteCallable<Transitions> {
                             activeTransition -> activeTransition.mToken).toArray()));
         }
         if (activeIdx > 0) {
-            Log.e(TAG, "Transition became ready out-of-order " + transitionToken + ". Expected"
-                    + " order: " + Arrays.toString(mPendingTransitions.stream().map(
+            Log.e(TAG, "Transition became ready out-of-order " + mPendingTransitions.get(activeIdx)
+                    + ". Expected order: " + Arrays.toString(mPendingTransitions.stream().map(
                             activeTransition -> activeTransition.mToken).toArray()));
         }
         // Move from pending to ready
@@ -543,6 +551,7 @@ public class Transitions implements RemoteCallable<Transitions> {
         if (info.getType() == TRANSIT_SLEEP) {
             if (activeIdx > 0 || !mActiveTransitions.isEmpty() || mReadyTransitions.size() > 1) {
                 // Sleep starts a process of forcing all prior transitions to finish immediately
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Start finish-for-sleep");
                 finishForSleep(null /* forceFinish */);
                 return;
             }
@@ -551,8 +560,8 @@ public class Transitions implements RemoteCallable<Transitions> {
         if (info.getRootCount() == 0 && !alwaysReportToKeyguard(info)) {
             // No root-leashes implies that the transition is empty/no-op, so just do
             // housekeeping and return.
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "No transition roots (%s): %s",
-                    transitionToken, info);
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "No transition roots in %s so"
+                    + " abort", active);
             onAbort(active);
             return;
         }
@@ -581,6 +590,8 @@ public class Transitions implements RemoteCallable<Transitions> {
                 && allOccluded)) {
             // Treat this as an abort since we are bypassing any merge logic and effectively
             // finishing immediately.
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                    "Non-visible anim so abort: %s", active);
             onAbort(active);
             return;
         }
@@ -648,21 +659,21 @@ public class Transitions implements RemoteCallable<Transitions> {
             return;
         }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition %s ready while"
-                + " another transition %s is still animating. Notify the animating transition"
-                + " in case they can be merged", ready.mToken, playing.mToken);
+                + " %s is still animating. Notify the animating transition"
+                + " in case they can be merged", ready, playing);
         playing.mHandler.mergeAnimation(ready.mToken, ready.mInfo, ready.mStartT,
                 playing.mToken, (wct, cb) -> onMerged(playing, ready));
     }
 
     private void onMerged(@NonNull ActiveTransition playing, @NonNull ActiveTransition merged) {
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition was merged %s",
-                merged.mToken);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition was merged: %s into %s",
+                merged, playing);
         int readyIdx = 0;
         if (mReadyTransitions.isEmpty() || mReadyTransitions.get(0) != merged) {
-            Log.e(TAG, "Merged transition out-of-order?");
+            Log.e(TAG, "Merged transition out-of-order? " + merged);
             readyIdx = mReadyTransitions.indexOf(merged);
             if (readyIdx < 0) {
-                Log.e(TAG, "Merged a transition that is no-longer queued?");
+                Log.e(TAG, "Merged a transition that is no-longer queued? " + merged);
                 return;
             }
         }
@@ -683,6 +694,7 @@ public class Transitions implements RemoteCallable<Transitions> {
     }
 
     private void playTransition(@NonNull ActiveTransition active) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Playing animation for %s", active);
         for (int i = 0; i < mObservers.size(); ++i) {
             mObservers.get(i).onTransitionStarting(active.mToken);
         }
@@ -784,12 +796,12 @@ public class Transitions implements RemoteCallable<Transitions> {
         int activeIdx = mActiveTransitions.indexOf(active);
         if (activeIdx < 0) {
             Log.e(TAG, "Trying to finish a non-running transition. Either remote crashed or "
-                    + " a handler didn't properly deal with a merge. " + active.mToken,
+                    + " a handler didn't properly deal with a merge. " + active,
                     new RuntimeException());
             return;
         } else if (activeIdx != 0) {
             // Relevant right now since we only allow 1 active transition at a time.
-            Log.e(TAG, "Finishing a transition out of order. " + active.mToken);
+            Log.e(TAG, "Finishing a transition out of order. " + active);
         }
         mActiveTransitions.remove(activeIdx);
 
@@ -797,7 +809,7 @@ public class Transitions implements RemoteCallable<Transitions> {
             mObservers.get(i).onTransitionFinished(active.mToken, active.mAborted);
         }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition animation finished "
-                + "(aborted=%b), notifying core %s", active.mAborted, active.mToken);
+                + "(aborted=%b), notifying core %s", active.mAborted, active);
         if (active.mStartT != null) {
             // Applied by now, so clear immediately to remove any references. Do not set to null
             // yet, though, since nullness is used later to disambiguate malformed transitions.
@@ -913,6 +925,8 @@ public class Transitions implements RemoteCallable<Transitions> {
     /** Start a new transition directly. */
     public IBinder startTransition(@WindowManager.TransitionType int type,
             @NonNull WindowContainerTransaction wct, @Nullable TransitionHandler handler) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Directly starting a new transition "
+                + "type=%d wct=%s handler=%s", type, wct, handler);
         final ActiveTransition active = new ActiveTransition();
         active.mHandler = handler;
         active.mToken = mOrganizer.startNewTransition(type, wct);
@@ -944,8 +958,7 @@ public class Transitions implements RemoteCallable<Transitions> {
             return;
         }
         if (forceFinish != null && mActiveTransitions.contains(forceFinish)) {
-            Log.e(TAG, "Forcing transition to finish due to sleep timeout: "
-                    + forceFinish.mToken);
+            Log.e(TAG, "Forcing transition to finish due to sleep timeout: " + forceFinish);
             forceFinish.mAborted = true;
             // Last notify of it being consumed. Note: mHandler should never be null,
             // but check just to be safe.
@@ -963,6 +976,8 @@ public class Transitions implements RemoteCallable<Transitions> {
                 // Try to signal that we are sleeping by attempting to merge the sleep transition
                 // into the playing one.
                 final ActiveTransition nextSleep = mReadyTransitions.get(sleepIdx);
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Attempt to merge SLEEP %s"
+                        + " into %s", nextSleep, playing);
                 playing.mHandler.mergeAnimation(nextSleep.mToken, nextSleep.mInfo, dummyT,
                         playing.mToken, (wct, cb) -> {});
             } else {
