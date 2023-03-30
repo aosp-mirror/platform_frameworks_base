@@ -393,6 +393,23 @@ public class TrustManagerService extends SystemService {
                 true /* overrideHardTimeout */);
     }
 
+    private void cancelBothTrustableAlarms(int userId) {
+        TrustableTimeoutAlarmListener idleTimeout =
+                mIdleTrustableTimeoutAlarmListenerForUser.get(
+                        userId);
+        TrustableTimeoutAlarmListener trustableTimeout =
+                mTrustableTimeoutAlarmListenerForUser.get(
+                        userId);
+        if (idleTimeout != null && idleTimeout.isQueued()) {
+            idleTimeout.setQueued(false);
+            mAlarmManager.cancel(idleTimeout);
+        }
+        if (trustableTimeout != null && trustableTimeout.isQueued()) {
+            trustableTimeout.setQueued(false);
+            mAlarmManager.cancel(trustableTimeout);
+        }
+    }
+
     private void handleScheduleTrustedTimeout(int userId, boolean shouldOverride) {
         long when = SystemClock.elapsedRealtime() + TRUST_TIMEOUT_IN_MILLIS;
         TrustedTimeoutAlarmListener alarm = mTrustTimeoutAlarmListenerForUser.get(userId);
@@ -656,6 +673,11 @@ public class TrustManagerService extends SystemService {
                 if (DEBUG) Slog.d(TAG, "calling back with UNLOCKED_BY_GRANT");
                 resultCallback.complete(new GrantTrustResult(STATUS_UNLOCKED_BY_GRANT));
             }
+        }
+
+        if ((wasTrusted || wasTrustable) && pendingTrustState == TrustState.UNTRUSTED) {
+            if (DEBUG) Slog.d(TAG, "Trust was revoked, destroy trustable alarms");
+            cancelBothTrustableAlarms(userId);
         }
     }
 
@@ -1903,7 +1925,11 @@ public class TrustManagerService extends SystemService {
                     handleScheduleTrustTimeout(shouldOverride, timeoutType);
                     break;
                 case MSG_REFRESH_TRUSTABLE_TIMERS_AFTER_AUTH:
-                    refreshTrustableTimers(msg.arg1);
+                    TrustableTimeoutAlarmListener trustableAlarm =
+                            mTrustableTimeoutAlarmListenerForUser.get(msg.arg1);
+                    if (trustableAlarm != null && trustableAlarm.isQueued()) {
+                        refreshTrustableTimers(msg.arg1);
+                    }
                     break;
             }
         }
@@ -2155,7 +2181,7 @@ public class TrustManagerService extends SystemService {
             TrustedTimeoutAlarmListener otherAlarm;
             boolean otherAlarmPresent;
             if (ENABLE_ACTIVE_UNLOCK_FLAG) {
-                cancelBothTrustableAlarms();
+                cancelBothTrustableAlarms(mUserId);
                 otherAlarm = mTrustTimeoutAlarmListenerForUser.get(mUserId);
                 otherAlarmPresent = (otherAlarm != null) && otherAlarm.isQueued();
                 if (otherAlarmPresent) {
@@ -2164,23 +2190,6 @@ public class TrustManagerService extends SystemService {
                     }
                     return;
                 }
-            }
-        }
-
-        private void cancelBothTrustableAlarms() {
-            TrustableTimeoutAlarmListener idleTimeout =
-                    mIdleTrustableTimeoutAlarmListenerForUser.get(
-                            mUserId);
-            TrustableTimeoutAlarmListener trustableTimeout =
-                    mTrustableTimeoutAlarmListenerForUser.get(
-                            mUserId);
-            if (idleTimeout != null && idleTimeout.isQueued()) {
-                idleTimeout.setQueued(false);
-                mAlarmManager.cancel(idleTimeout);
-            }
-            if (trustableTimeout != null && trustableTimeout.isQueued()) {
-                trustableTimeout.setQueued(false);
-                mAlarmManager.cancel(trustableTimeout);
             }
         }
 
