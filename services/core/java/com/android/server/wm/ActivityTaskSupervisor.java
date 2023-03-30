@@ -1562,6 +1562,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     }
 
     private void removePinnedRootTaskInSurfaceTransaction(Task rootTask) {
+        rootTask.mTransitionController.requestCloseTransitionIfNeeded(rootTask);
         /**
          * Workaround: Force-stop all the activities in the root pinned task before we reparent them
          * to the fullscreen root task.  This is to guarantee that when we are removing a root task,
