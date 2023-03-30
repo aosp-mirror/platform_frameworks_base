@@ -205,7 +205,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         && mController.isSubStatusSupported()
                         && mController.isAdvancedLayoutSupported() && device.hasSubtext()) {
                     boolean isActiveWithOngoingSession =
-                            (device.hasOngoingSession() && currentlyConnected);
+                            (device.hasOngoingSession() && (currentlyConnected || isDeviceIncluded(
+                                    mController.getSelectedMediaDevice(), device)));
                     boolean isHost = device.isHostForOngoingSession()
                             && isActiveWithOngoingSession;
                     if (isHost) {
@@ -224,10 +225,17 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         if (isActiveWithOngoingSession) {
                             //Selected device which has ongoing session, disable seekbar since we
                             //only allow volume control on Host
-                            initSeekbar(device, isCurrentSeekbarInvisible);
                             mCurrentActivePosition = position;
                         }
-                        setUpDeviceIcon(device);
+                        boolean showSeekbar =
+                                (!device.hasOngoingSession() && currentlyConnected);
+                        if (showSeekbar) {
+                            updateTitleIcon(R.drawable.media_output_icon_volume,
+                                    mController.getColorItemContent());
+                            initSeekbar(device, isCurrentSeekbarInvisible);
+                        } else {
+                            setUpDeviceIcon(device);
+                        }
                         mSubTitleText.setText(device.getSubtextString());
                         Drawable deviceStatusIcon =
                                 device.hasOngoingSession() ? mContext.getDrawable(
@@ -241,8 +249,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         updateTwoLineLayoutContentAlpha(
                                 updateClickActionBasedOnSelectionBehavior(device)
                                         ? DEVICE_CONNECTED_ALPHA : DEVICE_DISCONNECTED_ALPHA);
-                        setTwoLineLayout(device, isActiveWithOngoingSession /* bFocused */,
-                                isActiveWithOngoingSession /* showSeekBar */,
+                        setTwoLineLayout(device, currentlyConnected /* bFocused */,
+                                showSeekbar  /* showSeekBar */,
                                 false /* showProgressBar */, true /* showSubtitle */,
                                 deviceStatusIcon != null /* showStatus */,
                                 isActiveWithOngoingSession /* isFakeActive */);
