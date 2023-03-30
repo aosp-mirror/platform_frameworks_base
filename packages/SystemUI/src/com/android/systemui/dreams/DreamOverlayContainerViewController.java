@@ -25,6 +25,7 @@ import static com.android.systemui.dreams.complication.ComplicationLayoutParams.
 
 import android.animation.Animator;
 import android.content.res.Resources;
+import android.graphics.Region;
 import android.os.Handler;
 import android.util.MathUtils;
 import android.view.View;
@@ -223,6 +224,9 @@ public class DreamOverlayContainerViewController extends
         mJitterStartTimeMillis = System.currentTimeMillis();
         mHandler.postDelayed(this::updateBurnInOffsets, mBurnInProtectionUpdateInterval);
         mPrimaryBouncerCallbackInteractor.addBouncerExpansionCallback(mBouncerExpansionCallback);
+        final Region emptyRegion = Region.obtain();
+        mView.getRootSurfaceControl().setTouchableRegion(emptyRegion);
+        emptyRegion.recycle();
 
         // Start dream entry animations. Skip animations for low light clock.
         if (!mStateController.isLowLightActive()) {
