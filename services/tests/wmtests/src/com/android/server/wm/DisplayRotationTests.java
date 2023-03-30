@@ -792,7 +792,7 @@ public class DisplayRotationTests {
         // ... until half-fold
         mTarget.foldStateChanged(DeviceStateController.DeviceState.HALF_FOLDED);
         assertTrue(waitForUiHandler());
-        verify(sMockWm).updateRotation(anyBoolean(), anyBoolean());
+        verify(sMockWm).updateRotation(false, false);
         assertTrue(waitForUiHandler());
         assertEquals(Surface.ROTATION_0, mTarget.rotationForOrientation(
                 SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
@@ -800,7 +800,7 @@ public class DisplayRotationTests {
         // ... then transition back to flat
         mTarget.foldStateChanged(DeviceStateController.DeviceState.OPEN);
         assertTrue(waitForUiHandler());
-        verify(sMockWm, atLeast(1)).updateRotation(anyBoolean(), anyBoolean());
+        verify(sMockWm, atLeast(1)).updateRotation(false, false);
         assertTrue(waitForUiHandler());
         assertEquals(Surface.ROTATION_270, mTarget.rotationForOrientation(
                 SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
