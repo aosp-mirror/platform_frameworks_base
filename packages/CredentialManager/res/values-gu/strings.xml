@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે શું તમારી સાચવેલી પાસકીનો ઉપયોગ કરીએ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે શું તમારા સાચવેલા સાઇન-ઇનનો ઉપયોગ કરીએ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે કોઈ સાચવેલું સાઇન-ઇન પસંદ કરો"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"કોઈ અન્ય રીતે સાઇન ઇન કરો"</string>
     <string name="snackbar_action" msgid="37373514216505085">"વ્યૂના વિકલ્પો"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ચાલુ રાખો"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"સાઇન-ઇન મેનેજ કરો"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"કોઈ અન્ય ડિવાઇસમાંથી"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"કોઈ અન્ય ડિવાઇસનો ઉપયોગ કરો"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>

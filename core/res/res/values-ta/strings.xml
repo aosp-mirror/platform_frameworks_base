@@ -800,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ஆப்ஸின் அம்சங்கள் குறித்த தகவல்களைப் பார்ப்பதற்கான அனுமதியை ஹோல்டருக்கு வழங்கும்."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"அதிகளவிலான சாம்பிளிங் ரேட்டில் சென்சார் தரவை அணுகுதல்"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 ஹெர்ட்ஸ்க்கும் அதிகமான வீதத்தில் சென்சார் தரவை மாதிரியாக்க ஆப்ஸை அனுமதிக்கும்"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"கடவுச்சொல் விதிகளை அமைக்கவும்"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"திரைப் பூட்டின் கடவுச்சொற்கள் மற்றும் பின்களில் அனுமதிக்கப்படும் நீளத்தையும் எழுத்துக்குறிகளையும் கட்டுப்படுத்தும்."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"திரையை அன்லாக் செய்வதற்கான முயற்சிகளைக் கண்காணி"</string>

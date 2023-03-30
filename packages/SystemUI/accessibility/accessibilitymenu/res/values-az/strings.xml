@@ -4,11 +4,8 @@
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Əlçatımlılıq Menyusu"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"Əlçatımlılıq Menyusu cihazınızı idarə etmək üçün böyük geniş ekran menyusu təqdim edir. Cihazı kilidləyə, səs səviyyəsinə və parlaqlığa nəzarət edə, skrinşotlar çəkə və s. edə bilərsiniz."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Assistent"</string>
-    <!-- no translation found for assistant_utterance (65509599221141377) -->
-    <skip />
+    <string name="assistant_utterance" msgid="65509599221141377">"Assistent"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Əlçatımlılıq Ayarları"</string>
-    <string name="volume_label" msgid="3682221827627150574">"Səs"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"Səs nəzarətləri"</string>
     <string name="power_label" msgid="7699720321491287839">"Yandırıb-söndürmə düyməsi"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Qidalanma düyməsi seçimləri"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Son tətbiqlər"</string>

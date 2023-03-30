@@ -66,7 +66,7 @@ open class CloseImeOnDismissPopupDialogTest(flicker: FlickerTest) : BaseTest(fli
         flicker.assertLayers {
             this.isVisible(ComponentNameMatcher.IME)
                 .then()
-                .isVisible(ComponentNameMatcher.IME_SNAPSHOT)
+                .isVisible(ComponentNameMatcher.IME_SNAPSHOT, isOptional = true)
                 .then()
                 .isInvisible(ComponentNameMatcher.IME_SNAPSHOT, isOptional = true)
                 .isInvisible(ComponentNameMatcher.IME)

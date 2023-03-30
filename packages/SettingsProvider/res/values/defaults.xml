@@ -25,6 +25,8 @@
     <!-- Comma-separated list of bluetooth, wifi, and cell. -->
     <string name="def_airplane_mode_radios" translatable="false">cell,bluetooth,uwb,wifi,wimax</string>
     <string name="airplane_mode_toggleable_radios" translatable="false">bluetooth,wifi</string>
+    <string name="def_satellite_mode_radios" translatable="false"></string>
+    <integer name="def_satellite_mode_enabled" translatable="false">0</integer>
     <string name="def_bluetooth_disabled_profiles" translatable="false">0</string>
     <bool name="def_auto_time">true</bool>
     <bool name="def_auto_time_zone">true</bool>

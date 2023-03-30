@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Changer de mode d\'agrandissement"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Agrandir tout l\'écran"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Agrandir une partie de l\'écran"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Changer"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Ouvrir les paramètres d\'agrandissement"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Faire glisser le coin pour redimensionner"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Autoriser le défilement diagonal"</string>
@@ -849,6 +848,8 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Moyen"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Petit"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Grand"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"OK"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Modifier"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Paramètres de la fenêtre d\'agrandissement"</string>
@@ -1065,8 +1066,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"modifier"</string>
     <string name="add" msgid="81036585205287996">"Ajouter"</string>
     <string name="manage_users" msgid="1823875311934643849">"Gérer les utilisateurs"</string>
-    <!-- no translation found for drag_split_not_supported (7173481676120546121) -->
-    <skip />
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"Impossible de faire glisser cette notification vers l\'écran partagé"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi non disponible"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Mode Prioritaire"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarme réglée"</string>

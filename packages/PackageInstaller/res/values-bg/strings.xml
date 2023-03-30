@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Приложението бе инсталирано."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Искате ли да инсталирате това приложение?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Искате ли да актуализирате това приложение?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Да се актуализира ли това приложение от <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nТо обикновено получава актуализации от <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Ако инсталирате актуализация от друг източник, може да получавате бъдещи актуализации от който и да е източник на телефона си. Функционалността на приложението може да се промени."</string>
     <string name="install_failed" msgid="5777824004474125469">"Приложението не бе инсталирано."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Инсталирането на пакета бе блокирано."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Приложението не бе инсталирано, тъй като пакетът е в конфликт със съществуващ пакет."</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Този потребител не може да инсталира неизвестни приложения"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Този потребител няма разрешение да инсталира приложения"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"Актуализиране въпреки това"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Прил.: Управл."</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Няма място"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> не можа да се инсталира. Освободете място и опитайте отново."</string>

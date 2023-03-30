@@ -707,6 +707,12 @@ public final class AutofillManager {
     // An allowed activity set read from device config
     private Set<String> mAllowedActivitySet = new ArraySet<>();
 
+    // Indicate whether should include all view with autofill type not none in assist structure
+    private boolean mShouldIncludeAllViewsWithAutofillTypeNotNoneInAssistStructure;
+
+    // Indicate whether should include all view in assist structure
+    private boolean mShouldIncludeAllChildrenViewInAssistStructure;
+
     // Indicates whether called the showAutofillDialog() method.
     private boolean mShowAutofillDialogCalled = false;
 
@@ -913,6 +919,12 @@ public final class AutofillManager {
             mAllowedActivitySet = getDeniedOrAllowedActivitySetFromString(
                     allowlistString, packageName);
         }
+
+        mShouldIncludeAllViewsWithAutofillTypeNotNoneInAssistStructure
+            = AutofillFeatureFlags.shouldIncludeAllViewsAutofillTypeNotNoneInAssistStructrue();
+
+        mShouldIncludeAllChildrenViewInAssistStructure
+            = AutofillFeatureFlags.shouldIncludeAllChildrenViewInAssistStructure();
     }
 
     /**
@@ -960,6 +972,20 @@ public final class AutofillManager {
         // specific activities to be allowed or denied. So the package is partially allowed or
         // denied for autofill.
         return listString.indexOf(packageName + ":") != -1;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean shouldIncludeAllChildrenViewsWithAutofillTypeNotNoneInAssistStructure()  {
+        return mShouldIncludeAllViewsWithAutofillTypeNotNoneInAssistStructure;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean shouldIncludeAllChildrenViewInAssistStructure() {
+        return mShouldIncludeAllChildrenViewInAssistStructure;
     }
 
     /**

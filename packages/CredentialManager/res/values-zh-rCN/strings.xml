@@ -10,7 +10,7 @@
     <string name="content_description_hide_password" msgid="6841375971631767996">"隐藏密码"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"通行密钥可提高安全性"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"借助通行密钥，您无需创建或记住复杂的密码"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"通行密钥是指您使用您的指纹、面孔或屏锁方式创建的加密数字钥匙"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"通行密钥是指您使用自己的指纹、面孔或屏锁创建的加密数字钥匙"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"系统会将通行密钥保存到密码管理工具中，以便您在其他设备上登录"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"详细了解通行密钥"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"无密码技术"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"要使用您已保存的\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"通行密钥吗？"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"将您已保存的登录信息用于<xliff:g id="APP_NAME">%1$s</xliff:g>？"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"为<xliff:g id="APP_NAME">%1$s</xliff:g>选择已保存的登录信息"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"使用其他登录方式"</string>
     <string name="snackbar_action" msgid="37373514216505085">"查看选项"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"继续"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"管理登录信息"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"通过另一台设备"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"使用其他设备"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>

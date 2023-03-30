@@ -193,6 +193,24 @@ public class AutofillFeatureFlags {
     public static final String DEVICE_CONFIG_SHOULD_ENABLE_AUTOFILL_ON_ALL_VIEW_TYPES =
             "should_enable_autofill_on_all_view_types";
 
+    /**
+     * Whether include all autofill type not none views in assist structure
+     *
+     * @hide
+     */
+    public static final String
+        DEVICE_CONFIG_INCLUDE_ALL_AUTOFILL_TYPE_NOT_NONE_VIEWS_IN_ASSIST_STRUCTURE =
+            "include_all_autofill_type_not_none_views_in_assist_structure";
+
+    /**
+     * Whether include all views in assist structure
+     *
+     * @hide
+     */
+    public static final String
+        DEVICE_CONFIG_INCLUDE_ALL_VIEWS_IN_ASSIST_STRUCTURE =
+            "include_all_views_in_assist_structure";
+
     // END AUTOFILL FOR ALL APPS FLAGS //
 
 
@@ -398,6 +416,28 @@ public class AutofillFeatureFlags {
             DeviceConfig.NAMESPACE_AUTOFILL,
             DEVICE_CONFIG_PACKAGE_AND_ACTIVITY_ALLOWLIST_FOR_TRIGGERING_FILL_REQUEST, "");
     }
+    /**
+     * Whether include all views that have autofill type not none in assist structure.
+     *
+     * @hide
+     */
+    public static boolean shouldIncludeAllViewsAutofillTypeNotNoneInAssistStructrue() {
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_INCLUDE_ALL_AUTOFILL_TYPE_NOT_NONE_VIEWS_IN_ASSIST_STRUCTURE, false);
+    }
+
+    /**
+     * Whether include all views in assist structure.
+     *
+     * @hide
+     */
+    public static boolean shouldIncludeAllChildrenViewInAssistStructure() {
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_INCLUDE_ALL_VIEWS_IN_ASSIST_STRUCTURE, false);
+    }
+
 
     // START AUTOFILL PCC CLASSIFICATION FUNCTIONS
 

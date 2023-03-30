@@ -621,8 +621,13 @@ final class HotwordDetectionConnection {
         ServiceConnectionFactory(@NonNull Intent intent, boolean bindInstantServiceAllowed,
                 int detectionServiceType) {
             mIntent = intent;
-            mBindingFlags = bindInstantServiceAllowed ? Context.BIND_ALLOW_INSTANT : 0;
             mDetectionServiceType = detectionServiceType;
+            int flags = bindInstantServiceAllowed ? Context.BIND_ALLOW_INSTANT : 0;
+            if (mVisualQueryDetectionComponentName != null
+                    && mHotwordDetectionComponentName != null) {
+                flags |= Context.BIND_SHARED_ISOLATED_PROCESS;
+            }
+            mBindingFlags = flags;
         }
 
         ServiceConnection createLocked() {

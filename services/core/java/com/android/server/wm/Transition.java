@@ -66,6 +66,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.IApplicationThread;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -83,7 +84,6 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
-import android.window.RemoteTransition;
 import android.window.ScreenCapture;
 import android.window.TransitionInfo;
 
@@ -160,7 +160,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private final TransitionController mController;
     private final BLASTSyncEngine mSyncEngine;
     private final Token mToken;
-    private RemoteTransition mRemoteTransition = null;
+    private IApplicationThread mRemoteAnimApp;
 
     /** Only use for clean-up after binder death! */
     private SurfaceControl.Transaction mStartTransaction = null;
@@ -1075,12 +1075,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return mForcePlaying;
     }
 
-    void setRemoteTransition(RemoteTransition remoteTransition) {
-        mRemoteTransition = remoteTransition;
+    void setRemoteAnimationApp(IApplicationThread app) {
+        mRemoteAnimApp = app;
     }
 
-    RemoteTransition getRemoteTransition() {
-        return mRemoteTransition;
+    /** Returns the app which will run the transition animation. */
+    IApplicationThread getRemoteAnimationApp() {
+        return mRemoteAnimApp;
     }
 
     void setNoAnimation(WindowContainer wc) {
@@ -2363,6 +2364,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (isTranslucent(wc)) {
                 flags |= FLAG_TRANSLUCENT;
             }
+            if (wc.mWmService.mAtmService.mBackNavigationController.isMonitorTransitionTarget(wc)) {
+                flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
+            }
             final Task task = wc.asTask();
             if (task != null) {
                 final ActivityRecord topActivity = task.getTopNonFinishingActivity();
@@ -2371,18 +2375,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                             && topActivity.mStartingData.hasImeSurface()) {
                         flags |= FLAG_WILL_IME_SHOWN;
                     }
-                    if (topActivity.mAtmService.mBackNavigationController
-                            .isMonitorTransitionTarget(topActivity)) {
-                        flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
-                    }
-                    if (topActivity != null && topActivity.mLaunchTaskBehind) {
+                    if (topActivity.mLaunchTaskBehind) {
                         Slog.e(TAG, "Unexpected launch-task-behind operation in shell transition");
                         flags |= FLAG_TASK_LAUNCHING_BEHIND;
-                    }
-                } else {
-                    if (task.mAtmService.mBackNavigationController
-                            .isMonitorTransitionTarget(task)) {
-                        flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
                     }
                 }
                 if (task.voiceSession != null) {
@@ -2397,10 +2392,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     flags |= FLAG_IS_VOICE_INTERACTION;
                 }
                 flags |= record.mTransitionChangeFlags;
-                if (record.mAtmService.mBackNavigationController
-                        .isMonitorTransitionTarget(record)) {
-                    flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
-                }
             }
             final TaskFragment taskFragment = wc.asTaskFragment();
             if (taskFragment != null && task == null) {

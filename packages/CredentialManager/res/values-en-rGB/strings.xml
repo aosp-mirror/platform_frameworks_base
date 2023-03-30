@@ -18,7 +18,7 @@
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Public key cryptography"</string>
     <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Based on FIDO Alliance (which includes Google, Apple, Microsoft and more) and W3C standards, passkeys use cryptographic key pairs. Unlike the username and string of characters that we use for passwords, a private-public key pair is created for an app or website. The private key is safely stored on your device or password manager and it confirms your identity. The public key is shared with the app or website server. With corresponding keys, you can instantly register and sign in."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Improved account security"</string>
-    <string name="improved_account_security_detail" msgid="9123750251551844860">"Each key is exclusively linked with the app or website they were created for, so you can never sign in to a fraudulent app or website by mistake. Plus, with servers only keeping public keys, hacking is a lot harder."</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Each key is exclusively linked with the app or website it was created for, so you can never sign in to a fraudulent app or website by mistake. Plus, with servers only keeping public keys, hacking is a lot harder."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Seamless transition"</string>
     <string name="seamless_transition_detail" msgid="3440478759491650823">"As we move towards a passwordless future, passwords will still be available alongside passkeys"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Choose where to save your <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Use your saved passkey for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Use your saved sign-in for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Choose a saved sign-in for <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Sign in another way"</string>
     <string name="snackbar_action" msgid="37373514216505085">"View options"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Continue"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Manage sign-ins"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"From another device"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Use a different device"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>
