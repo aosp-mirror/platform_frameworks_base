@@ -350,6 +350,10 @@ public final class AutofillClientController implements AutofillManager.AutofillC
         final boolean[] visible = new boolean[autofillIdCount];
         for (int i = 0; i < autofillIdCount; i++) {
             final AutofillId autofillId = autofillIds[i];
+            if (autofillId == null) {
+                visible[i] = false;
+                continue;
+            }
             final View view = autofillClientFindViewByAutofillIdTraversal(autofillId);
             if (view != null) {
                 if (!autofillId.isVirtualInt()) {
@@ -383,6 +387,7 @@ public final class AutofillClientController implements AutofillManager.AutofillC
 
     @Override
     public View autofillClientFindViewByAutofillIdTraversal(AutofillId autofillId) {
+        if (autofillId == null) return null;
         final ArrayList<ViewRootImpl> roots =
                 WindowManagerGlobal.getInstance().getRootViews(mActivity.getActivityToken());
         for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
@@ -410,7 +415,7 @@ public final class AutofillClientController implements AutofillManager.AutofillC
             if (rootView != null) {
                 final int viewCount = autofillIds.length;
                 for (int viewNum = 0; viewNum < viewCount; viewNum++) {
-                    if (views[viewNum] == null) {
+                    if (autofillIds[viewNum] != null && views[viewNum] == null) {
                         views[viewNum] = rootView.findViewByAutofillIdTraversal(
                                 autofillIds[viewNum].getViewId());
                     }
