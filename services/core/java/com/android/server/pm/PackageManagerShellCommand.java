@@ -24,6 +24,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.accounts.IAccountManager;
 import android.annotation.NonNull;
@@ -1950,6 +1951,8 @@ class PackageManagerShellCommand extends ShellCommand {
         List<String> packageNames = null;
         if (allPackages) {
             packageNames = mInterface.getAllPackages();
+            // Compiling the system server is only supported from odrefresh, so skip it.
+            packageNames.removeIf(packageName -> PLATFORM_PACKAGE_NAME.equals(packageName));
         } else {
             String packageName = getNextArg();
             if (packageName == null) {
