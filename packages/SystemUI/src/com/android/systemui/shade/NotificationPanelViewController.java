@@ -256,6 +256,7 @@ public final class NotificationPanelViewController implements Dumpable {
     public static final float FLING_SPEED_UP_FACTOR = 0.6f;
     public static final float FLING_CLOSING_MAX_LENGTH_SECONDS = 0.6f;
     public static final float FLING_CLOSING_SPEED_UP_FACTOR = 0.6f;
+    public static final int WAKEUP_ANIMATION_DELAY_MS = 250;
     private static final boolean DEBUG_LOGCAT = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean SPEW_LOGCAT = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
     private static final boolean DEBUG_DRAWABLE = false;
@@ -278,6 +279,7 @@ public final class NotificationPanelViewController implements Dumpable {
     private static final int NO_FIXED_DURATION = -1;
     private static final long SHADE_OPEN_SPRING_OUT_DURATION = 350L;
     private static final long SHADE_OPEN_SPRING_BACK_DURATION = 400L;
+
     /**
      * The factor of the usual high velocity that is needed in order to reach the maximum overshoot
      * when flinging. A low value will make it that most flings will reach the maximum overshoot.
@@ -604,6 +606,12 @@ public final class NotificationPanelViewController implements Dumpable {
     private boolean mGestureWaitForTouchSlop;
     private boolean mIgnoreXTouchSlop;
     private boolean mExpandLatencyTracking;
+    /**
+     * Whether we're waking up and will play the delayed doze animation in
+     * {@link NotificationWakeUpCoordinator}. If so, we'll want to keep the clock centered until the
+     * delayed doze animation starts.
+     */
+    private boolean mWillPlayDelayedDozeAmountAnimation = false;
     private final DreamingToLockscreenTransitionViewModel mDreamingToLockscreenTransitionViewModel;
     private final OccludedToLockscreenTransitionViewModel mOccludedToLockscreenTransitionViewModel;
     private final LockscreenToDreamingTransitionViewModel mLockscreenToDreamingTransitionViewModel;
@@ -1059,6 +1067,12 @@ public final class NotificationPanelViewController implements Dumpable {
                     // Position the notifications while dragging down while pulsing
                     requestScrollerTopPaddingUpdate(false /* animate */);
                 }
+            }
+
+            @Override
+            public void onDelayedDozeAmountAnimationRunning(boolean running) {
+                // On running OR finished, the animation is no longer waiting to play
+                setWillPlayDelayedDozeAmountAnimation(false);
             }
         });
 
@@ -1656,9 +1670,26 @@ public final class NotificationPanelViewController implements Dumpable {
             // Pulsing notification appears on the right. Move clock left to avoid overlap.
             return false;
         }
+        if (mWillPlayDelayedDozeAmountAnimation) {
+            return true;
+        }
         // "Visible" notifications are actually not visible on AOD (unless pulsing), so it is safe
         // to center the clock without overlap.
         return isOnAod();
+    }
+
+    /**
+     * Notify us that {@link NotificationWakeUpCoordinator} is going to play the doze wakeup
+     * animation after a delay. If so, we'll keep the clock centered until that animation starts.
+     */
+    public void setWillPlayDelayedDozeAmountAnimation(boolean willPlay) {
+        if (mWillPlayDelayedDozeAmountAnimation == willPlay) return;
+
+        mWillPlayDelayedDozeAmountAnimation = willPlay;
+        mWakeUpCoordinator.logDelayingClockWakeUpAnimation(willPlay);
+
+        // Once changing this value, see if we should move the clock.
+        positionClockAndNotifications();
     }
 
     private boolean isOnAod() {

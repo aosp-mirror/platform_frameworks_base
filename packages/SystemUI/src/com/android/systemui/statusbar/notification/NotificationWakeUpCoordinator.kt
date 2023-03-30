@@ -16,14 +16,17 @@
 
 package com.android.systemui.statusbar.notification
 
-import android.animation.ObjectAnimator
 import android.util.FloatProperty
+import android.view.animation.Interpolator
 import androidx.annotation.VisibleForTesting
+import androidx.core.animation.ObjectAnimator
 import com.android.systemui.Dumpable
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.animation.InterpolatorsAndroidX
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.NotificationPanelViewController.WAKEUP_ANIMATION_DELAY_MS
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionListener
 import com.android.systemui.statusbar.StatusBarState
@@ -36,12 +39,17 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController.OnBypassSta
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
+import com.android.systemui.util.doOnEnd
+import com.android.systemui.util.doOnStart
 import java.io.PrintWriter
 import javax.inject.Inject
+import kotlin.math.max
 import kotlin.math.min
 
 @SysUISingleton
-class NotificationWakeUpCoordinator @Inject constructor(
+class NotificationWakeUpCoordinator
+@Inject
+constructor(
     dumpManager: DumpManager,
     private val mHeadsUpManager: HeadsUpManager,
     private val statusBarStateController: StatusBarStateController,
@@ -49,27 +57,25 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private val dozeParameters: DozeParameters,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val logger: NotificationWakeUpCoordinatorLogger,
-) : OnHeadsUpChangedListener, StatusBarStateController.StateListener, ShadeExpansionListener,
+) :
+    OnHeadsUpChangedListener,
+    StatusBarStateController.StateListener,
+    ShadeExpansionListener,
     Dumpable {
-
-    private val mNotificationVisibility = object : FloatProperty<NotificationWakeUpCoordinator>(
-        "notificationVisibility") {
-
-        override fun setValue(coordinator: NotificationWakeUpCoordinator, value: Float) {
-            coordinator.setVisibilityAmount(value)
-        }
-
-        override fun get(coordinator: NotificationWakeUpCoordinator): Float? {
-            return coordinator.mLinearVisibilityAmount
-        }
-    }
     private lateinit var mStackScrollerController: NotificationStackScrollLayoutController
     private var mVisibilityInterpolator = Interpolators.FAST_OUT_SLOW_IN_REVERSE
 
-    private var mLinearDozeAmount: Float = 0.0f
-    private var mDozeAmount: Float = 0.0f
-    private var mDozeAmountSource: String = "init"
-    private var mNotifsHiddenByDozeAmountOverride: Boolean = false
+    private var inputLinearDozeAmount: Float = 0.0f
+    private var inputEasedDozeAmount: Float = 0.0f
+    private var delayedDozeAmountOverride: Float = 0.0f
+    private var delayedDozeAmountAnimator: ObjectAnimator? = null
+    /** Valid values: {1f, 0f, null} null => use input */
+    private var hardDozeAmountOverride: Float? = null
+    private var hardDozeAmountOverrideSource: String = "n/a"
+    private var outputLinearDozeAmount: Float = 0.0f
+    private var outputEasedDozeAmount: Float = 0.0f
+    @VisibleForTesting val dozeAmountInterpolator: Interpolator = Interpolators.FAST_OUT_SLOW_IN
+
     private var mNotificationVisibleAmount = 0.0f
     private var mNotificationsVisible = false
     private var mNotificationsVisibleForExpansion = false
@@ -84,27 +90,32 @@ class NotificationWakeUpCoordinator @Inject constructor(
     var fullyAwake: Boolean = false
 
     var wakingUp = false
-        set(value) {
+        private set(value) {
             field = value
             willWakeUp = false
             if (value) {
-                if (mNotificationsVisible && !mNotificationsVisibleForExpansion &&
-                    !bypassController.bypassEnabled) {
+                if (
+                    mNotificationsVisible &&
+                        !mNotificationsVisibleForExpansion &&
+                        !bypassController.bypassEnabled
+                ) {
                     // We're waking up while pulsing, let's make sure the animation looks nice
                     mStackScrollerController.wakeUpFromPulse()
                 }
                 if (bypassController.bypassEnabled && !mNotificationsVisible) {
                     // Let's make sure our huns become visible once we are waking up in case
                     // they were blocked by the proximity sensor
-                    updateNotificationVisibility(animate = shouldAnimateVisibility(),
-                            increaseSpeed = false)
+                    updateNotificationVisibility(
+                        animate = shouldAnimateVisibility(),
+                        increaseSpeed = false
+                    )
                 }
             }
         }
 
     var willWakeUp = false
         set(value) {
-            if (!value || mDozeAmount != 0.0f) {
+            if (!value || outputLinearDozeAmount != 0.0f) {
                 field = value
             }
         }
@@ -118,8 +129,10 @@ class NotificationWakeUpCoordinator @Inject constructor(
                 // Only when setting pulsing to true we want an immediate update, since we get
                 // this already when the doze service finishes which is usually before we get
                 // the waking up callback
-                updateNotificationVisibility(animate = shouldAnimateVisibility(),
-                        increaseSpeed = false)
+                updateNotificationVisibility(
+                    animate = shouldAnimateVisibility(),
+                    increaseSpeed = false
+                )
             }
         }
 
@@ -133,17 +146,17 @@ class NotificationWakeUpCoordinator @Inject constructor(
             }
         }
 
-    /**
-     * True if we can show pulsing heads up notifications
-     */
+    /** True if we can show pulsing heads up notifications */
     var canShowPulsingHuns: Boolean = false
         private set
         get() {
             var canShow = pulsing
             if (bypassController.bypassEnabled) {
                 // We also allow pulsing on the lock screen!
-                canShow = canShow || (wakingUp || willWakeUp || fullyAwake) &&
-                    statusBarStateController.state == StatusBarState.KEYGUARD
+                canShow =
+                    canShow ||
+                        (wakingUp || willWakeUp || fullyAwake) &&
+                            statusBarStateController.state == StatusBarState.KEYGUARD
                 // We want to hide the notifications when collapsed too much
                 if (collapsedEnoughToHide) {
                     canShow = false
@@ -152,30 +165,38 @@ class NotificationWakeUpCoordinator @Inject constructor(
             return canShow
         }
 
-    private val bypassStateChangedListener = object : OnBypassStateChangedListener {
-        override fun onBypassStateChanged(isEnabled: Boolean) {
-            // When the bypass state changes, we have to check whether we should re-show the
-            // notifications by clearing the doze amount override which hides them.
-            maybeClearDozeAmountOverrideHidingNotifs()
+    private val bypassStateChangedListener =
+        object : OnBypassStateChangedListener {
+            override fun onBypassStateChanged(isEnabled: Boolean) {
+                // When the bypass state changes, we have to check whether we should re-show the
+                // notifications by clearing the doze amount override which hides them.
+                maybeClearHardDozeAmountOverrideHidingNotifs()
+            }
         }
-    }
 
     init {
         dumpManager.registerDumpable(this)
         mHeadsUpManager.addListener(this)
         statusBarStateController.addCallback(this)
         bypassController.registerOnBypassStateChangedListener(bypassStateChangedListener)
-        addListener(object : WakeUpListener {
-            override fun onFullyHiddenChanged(isFullyHidden: Boolean) {
-                if (isFullyHidden && mNotificationsVisibleForExpansion) {
-                    // When the notification becomes fully invisible, let's make sure our expansion
-                    // flag also changes. This can happen if the bouncer shows when dragging down
-                    // and then the screen turning off, where we don't reset this state.
-                    setNotificationsVisibleForExpansion(visible = false, animate = false,
-                            increaseSpeed = false)
+        addListener(
+            object : WakeUpListener {
+                override fun onFullyHiddenChanged(isFullyHidden: Boolean) {
+                    if (isFullyHidden && mNotificationsVisibleForExpansion) {
+                        // When the notification becomes fully invisible, let's make sure our
+                        // expansion
+                        // flag also changes. This can happen if the bouncer shows when dragging
+                        // down
+                        // and then the screen turning off, where we don't reset this state.
+                        setNotificationsVisibleForExpansion(
+                            visible = false,
+                            animate = false,
+                            increaseSpeed = false
+                        )
+                    }
                 }
             }
-        })
+        )
     }
 
     fun setStackScroller(stackScrollerController: NotificationStackScrollLayoutController) {
@@ -221,15 +242,17 @@ class NotificationWakeUpCoordinator @Inject constructor(
         wakeUpListeners.remove(listener)
     }
 
-    private fun updateNotificationVisibility(
-        animate: Boolean,
-        increaseSpeed: Boolean
-    ) {
+    private fun updateNotificationVisibility(animate: Boolean, increaseSpeed: Boolean) {
         // TODO: handle Lockscreen wakeup for bypass when we're not pulsing anymore
         var visible = mNotificationsVisibleForExpansion || mHeadsUpManager.hasNotifications()
         visible = visible && canShowPulsingHuns
 
-        if (!visible && mNotificationsVisible && (wakingUp || willWakeUp) && mDozeAmount != 0.0f) {
+        if (
+            !visible &&
+                mNotificationsVisible &&
+                (wakingUp || willWakeUp) &&
+                outputLinearDozeAmount != 0.0f
+        ) {
             // let's not make notifications invisible while waking up, otherwise the animation
             // is strange
             return
@@ -257,7 +280,9 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
     override fun onDozeAmountChanged(linear: Float, eased: Float) {
         logger.logOnDozeAmountChanged(linear = linear, eased = eased)
-        if (overrideDozeAmountIfAnimatingScreenOff(linear)) {
+        inputLinearDozeAmount = linear
+        inputEasedDozeAmount = eased
+        if (overrideDozeAmountIfAnimatingScreenOff()) {
             return
         }
 
@@ -265,33 +290,109 @@ class NotificationWakeUpCoordinator @Inject constructor(
             return
         }
 
-        if (linear != 1.0f && linear != 0.0f &&
-            (mLinearDozeAmount == 0.0f || mLinearDozeAmount == 1.0f)) {
-            // Let's notify the scroller that an animation started
-            notifyAnimationStart(mLinearDozeAmount == 1.0f)
+        if (clearHardDozeAmountOverride()) {
+            return
         }
-        setDozeAmount(linear, eased, source = "StatusBar")
+
+        updateDozeAmount()
     }
 
-    fun setDozeAmount(
-        linear: Float,
-        eased: Float,
-        source: String,
-        hidesNotifsByOverride: Boolean = false
-    ) {
-        val changed = linear != mLinearDozeAmount
-        logger.logSetDozeAmount(linear, eased, source, statusBarStateController.state, changed)
-        mLinearDozeAmount = linear
-        mDozeAmount = eased
-        mDozeAmountSource = source
-        mNotifsHiddenByDozeAmountOverride = hidesNotifsByOverride
-        mStackScrollerController.setDozeAmount(mDozeAmount)
-        updateHideAmount()
-        if (changed && linear == 0.0f) {
-            setNotificationsVisible(visible = false, animate = false, increaseSpeed = false)
-            setNotificationsVisibleForExpansion(visible = false, animate = false,
-                    increaseSpeed = false)
+    private fun setHardDozeAmountOverride(dozing: Boolean, source: String) {
+        logger.logSetDozeAmountOverride(dozing = dozing, source = source)
+        hardDozeAmountOverride = if (dozing) 1f else 0f
+        hardDozeAmountOverrideSource = source
+        updateDozeAmount()
+    }
+
+    private fun clearHardDozeAmountOverride(): Boolean {
+        if (hardDozeAmountOverride == null) return false
+        hardDozeAmountOverride = null
+        hardDozeAmountOverrideSource = "Cleared: $hardDozeAmountOverrideSource"
+        updateDozeAmount()
+        return true
+    }
+
+    private fun updateDozeAmount() {
+        // Calculate new doze amount (linear)
+        val newOutputLinearDozeAmount =
+            hardDozeAmountOverride ?: max(inputLinearDozeAmount, delayedDozeAmountOverride)
+        val changed = outputLinearDozeAmount != newOutputLinearDozeAmount
+
+        // notify when the animation is starting
+        if (
+            newOutputLinearDozeAmount != 1.0f &&
+                newOutputLinearDozeAmount != 0.0f &&
+                (outputLinearDozeAmount == 0.0f || outputLinearDozeAmount == 1.0f)
+        ) {
+            // Let's notify the scroller that an animation started
+            notifyAnimationStart(outputLinearDozeAmount == 1.0f)
         }
+
+        // Update output doze amount
+        outputLinearDozeAmount = newOutputLinearDozeAmount
+        outputEasedDozeAmount = dozeAmountInterpolator.getInterpolation(outputLinearDozeAmount)
+        logger.logUpdateDozeAmount(
+            inputLinear = inputLinearDozeAmount,
+            delayLinear = delayedDozeAmountOverride,
+            hardOverride = hardDozeAmountOverride,
+            outputLinear = outputLinearDozeAmount,
+            state = statusBarStateController.state,
+            changed = changed
+        )
+        mStackScrollerController.setDozeAmount(outputEasedDozeAmount)
+        updateHideAmount()
+        if (changed && outputLinearDozeAmount == 0.0f) {
+            setNotificationsVisible(visible = false, animate = false, increaseSpeed = false)
+            setNotificationsVisibleForExpansion(
+                visible = false,
+                animate = false,
+                increaseSpeed = false
+            )
+        }
+    }
+
+    /**
+     * Notifies the wakeup coordinator that we're waking up.
+     *
+     * [requestDelayedAnimation] is used to request that we delay the start of the wakeup animation
+     * in order to wait for a potential fingerprint authentication to arrive, since unlocking during
+     * the wakeup animation looks chaotic.
+     *
+     * If called with [wakingUp] and [requestDelayedAnimation] both `true`, the [WakeUpListener]s
+     * are guaranteed to receive at least one [WakeUpListener.onDelayedDozeAmountAnimationRunning]
+     * call with `false` at some point in the near future. A call with `true` before that will
+     * happen if the animation is not already running.
+     */
+    fun setWakingUp(
+        wakingUp: Boolean,
+        requestDelayedAnimation: Boolean,
+    ) {
+        logger.logSetWakingUp(wakingUp, requestDelayedAnimation)
+        this.wakingUp = wakingUp
+        if (wakingUp && requestDelayedAnimation) {
+            scheduleDelayedDozeAmountAnimation()
+        }
+    }
+
+    private fun scheduleDelayedDozeAmountAnimation() {
+        val alreadyRunning = delayedDozeAmountAnimator != null
+        logger.logStartDelayedDozeAmountAnimation(alreadyRunning)
+        if (alreadyRunning) return
+        delayedDozeAmount.setValue(this, 1.0f)
+        delayedDozeAmountAnimator =
+            ObjectAnimator.ofFloat(this, delayedDozeAmount, 0.0f).apply {
+                interpolator = InterpolatorsAndroidX.LINEAR
+                duration = StackStateAnimator.ANIMATION_DURATION_WAKEUP.toLong()
+                startDelay = WAKEUP_ANIMATION_DELAY_MS.toLong()
+                doOnStart {
+                    wakeUpListeners.forEach { it.onDelayedDozeAmountAnimationRunning(true) }
+                }
+                doOnEnd {
+                    delayedDozeAmountAnimator = null
+                    wakeUpListeners.forEach { it.onDelayedDozeAmountAnimationRunning(false) }
+                }
+                start()
+            }
     }
 
     override fun onStateChanged(newState: Int) {
@@ -302,12 +403,15 @@ class NotificationWakeUpCoordinator @Inject constructor(
             // undefined state, so it's an indication that we should do state cleanup. We override
             // the doze amount to 0f (not dozing) so that the notifications are no longer hidden.
             // See: UnlockedScreenOffAnimationController.onFinishedWakingUp()
-            setDozeAmount(0f, 0f, source = "Override: Shade->Shade (lock cancelled by unlock)")
+            setHardDozeAmountOverride(
+                dozing = false,
+                source = "Override: Shade->Shade (lock cancelled by unlock)"
+            )
             this.state = newState
             return
         }
 
-        if (overrideDozeAmountIfAnimatingScreenOff(mLinearDozeAmount)) {
+        if (overrideDozeAmountIfAnimatingScreenOff()) {
             this.state = newState
             return
         }
@@ -317,7 +421,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
             return
         }
 
-        maybeClearDozeAmountOverrideHidingNotifs()
+        maybeClearHardDozeAmountOverrideHidingNotifs()
 
         this.state = newState
     }
@@ -340,15 +444,14 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
     /**
      * @return Whether the doze amount was overridden because bypass is enabled. If true, the
-     * original doze amount should be ignored.
+     *   original doze amount should be ignored.
      */
     private fun overrideDozeAmountIfBypass(): Boolean {
         if (bypassController.bypassEnabled) {
             if (statusBarStateController.state == StatusBarState.KEYGUARD) {
-                setDozeAmount(1f, 1f, source = "Override: bypass (keyguard)",
-                        hidesNotifsByOverride = true)
+                setHardDozeAmountOverride(dozing = true, source = "Override: bypass (keyguard)")
             } else {
-                setDozeAmount(0f, 0f, source = "Override: bypass (shade)")
+                setHardDozeAmountOverride(dozing = false, source = "Override: bypass (shade)")
             }
             return true
         }
@@ -362,26 +465,28 @@ class NotificationWakeUpCoordinator @Inject constructor(
      * This fixes bugs where the bypass state changing could result in stale overrides, hiding
      * notifications either on the inside screen or even after unlock.
      */
-    private fun maybeClearDozeAmountOverrideHidingNotifs() {
-        if (mNotifsHiddenByDozeAmountOverride) {
+    private fun maybeClearHardDozeAmountOverrideHidingNotifs() {
+        if (hardDozeAmountOverride == 1f) {
             val onKeyguard = statusBarStateController.state == StatusBarState.KEYGUARD
             val dozing = statusBarStateController.isDozing
             val bypass = bypassController.bypassEnabled
             val animating =
-                    screenOffAnimationController.overrideNotificationsFullyDozingOnKeyguard()
+                screenOffAnimationController.overrideNotificationsFullyDozingOnKeyguard()
             // Overrides are set by [overrideDozeAmountIfAnimatingScreenOff] and
             // [overrideDozeAmountIfBypass] based on 'animating' and 'bypass' respectively, so only
             // clear the override if both those conditions are cleared.  But also require either
             // !dozing or !onKeyguard because those conditions should indicate that we intend
             // notifications to be visible, and thus it is safe to unhide them.
             val willRemove = (!onKeyguard || !dozing) && !bypass && !animating
-            logger.logMaybeClearDozeAmountOverrideHidingNotifs(
-                    willRemove = willRemove,
-                    onKeyguard = onKeyguard, dozing = dozing,
-                    bypass = bypass, animating = animating,
+            logger.logMaybeClearHardDozeAmountOverrideHidingNotifs(
+                willRemove = willRemove,
+                onKeyguard = onKeyguard,
+                dozing = dozing,
+                bypass = bypass,
+                animating = animating,
             )
             if (willRemove) {
-                setDozeAmount(0f, 0f, source = "Removed: $mDozeAmountSource")
+                clearHardDozeAmountOverride()
             }
         }
     }
@@ -392,12 +497,11 @@ class NotificationWakeUpCoordinator @Inject constructor(
      * off and dozeAmount goes from 1f to 0f.
      *
      * @return Whether the doze amount was overridden because we are playing the screen off
-     * animation. If true, the original doze amount should be ignored.
+     *   animation. If true, the original doze amount should be ignored.
      */
-    private fun overrideDozeAmountIfAnimatingScreenOff(linearDozeAmount: Float): Boolean {
+    private fun overrideDozeAmountIfAnimatingScreenOff(): Boolean {
         if (screenOffAnimationController.overrideNotificationsFullyDozingOnKeyguard()) {
-            setDozeAmount(1f, 1f, source = "Override: animating screen off",
-                    hidesNotifsByOverride = true)
+            setHardDozeAmountOverride(dozing = true, source = "Override: animating screen off")
             return true
         }
 
@@ -406,41 +510,41 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
     private fun startVisibilityAnimation(increaseSpeed: Boolean) {
         if (mNotificationVisibleAmount == 0f || mNotificationVisibleAmount == 1f) {
-            mVisibilityInterpolator = if (mNotificationsVisible)
-                Interpolators.TOUCH_RESPONSE
-            else
-                Interpolators.FAST_OUT_SLOW_IN_REVERSE
+            mVisibilityInterpolator =
+                if (mNotificationsVisible) Interpolators.TOUCH_RESPONSE
+                else Interpolators.FAST_OUT_SLOW_IN_REVERSE
         }
         val target = if (mNotificationsVisible) 1.0f else 0.0f
-        val visibilityAnimator = ObjectAnimator.ofFloat(this, mNotificationVisibility, target)
-        visibilityAnimator.setInterpolator(Interpolators.LINEAR)
+        val visibilityAnimator = ObjectAnimator.ofFloat(this, notificationVisibility, target)
+        visibilityAnimator.interpolator = InterpolatorsAndroidX.LINEAR
         var duration = StackStateAnimator.ANIMATION_DURATION_WAKEUP.toLong()
         if (increaseSpeed) {
             duration = (duration.toFloat() / 1.5F).toLong()
         }
-        visibilityAnimator.setDuration(duration)
+        visibilityAnimator.duration = duration
         visibilityAnimator.start()
         mVisibilityAnimator = visibilityAnimator
     }
 
     private fun setVisibilityAmount(visibilityAmount: Float) {
+        logger.logSetVisibilityAmount(visibilityAmount)
         mLinearVisibilityAmount = visibilityAmount
-        mVisibilityAmount = mVisibilityInterpolator.getInterpolation(
-                visibilityAmount)
+        mVisibilityAmount = mVisibilityInterpolator.getInterpolation(visibilityAmount)
         handleAnimationFinished()
         updateHideAmount()
     }
 
     private fun handleAnimationFinished() {
-        if (mLinearDozeAmount == 0.0f || mLinearVisibilityAmount == 0.0f) {
+        if (outputLinearDozeAmount == 0.0f || mLinearVisibilityAmount == 0.0f) {
             mEntrySetToClearWhenFinished.forEach { it.setHeadsUpAnimatingAway(false) }
             mEntrySetToClearWhenFinished.clear()
         }
     }
 
     private fun updateHideAmount() {
-        val linearAmount = min(1.0f - mLinearVisibilityAmount, mLinearDozeAmount)
-        val amount = min(1.0f - mVisibilityAmount, mDozeAmount)
+        val linearAmount = min(1.0f - mLinearVisibilityAmount, outputLinearDozeAmount)
+        val amount = min(1.0f - mVisibilityAmount, outputEasedDozeAmount)
+        logger.logSetHideAmount(linearAmount)
         mStackScrollerController.setHideAmount(linearAmount, amount)
         notificationsFullyHidden = linearAmount == 1.0f
     }
@@ -458,7 +562,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     override fun onHeadsUpStateChanged(entry: NotificationEntry, isHeadsUp: Boolean) {
         var animate = shouldAnimateVisibility()
         if (!isHeadsUp) {
-            if (mLinearDozeAmount != 0.0f && mLinearVisibilityAmount != 0.0f) {
+            if (outputLinearDozeAmount != 0.0f && mLinearVisibilityAmount != 0.0f) {
                 if (entry.isRowDismissed) {
                     // if we animate, we see the shelf briefly visible. Instead we fully animate
                     // the notification and its background out
@@ -477,13 +581,16 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     private fun shouldAnimateVisibility() =
-            dozeParameters.alwaysOn && !dozeParameters.displayNeedsBlanking
+        dozeParameters.alwaysOn && !dozeParameters.displayNeedsBlanking
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println("mLinearDozeAmount: $mLinearDozeAmount")
-        pw.println("mDozeAmount: $mDozeAmount")
-        pw.println("mDozeAmountSource: $mDozeAmountSource")
-        pw.println("mNotifsHiddenByDozeAmountOverride: $mNotifsHiddenByDozeAmountOverride")
+        pw.println("inputLinearDozeAmount: $inputLinearDozeAmount")
+        pw.println("inputEasedDozeAmount: $inputEasedDozeAmount")
+        pw.println("delayedDozeAmountOverride: $delayedDozeAmountOverride")
+        pw.println("hardDozeAmountOverride: $hardDozeAmountOverride")
+        pw.println("hardDozeAmountOverrideSource: $hardDozeAmountOverrideSource")
+        pw.println("outputLinearDozeAmount: $outputLinearDozeAmount")
+        pw.println("outputEasedDozeAmount: $outputEasedDozeAmount")
         pw.println("mNotificationVisibleAmount: $mNotificationVisibleAmount")
         pw.println("mNotificationsVisible: $mNotificationsVisible")
         pw.println("mNotificationsVisibleForExpansion: $mNotificationsVisibleForExpansion")
@@ -500,16 +607,53 @@ class NotificationWakeUpCoordinator @Inject constructor(
         pw.println("canShowPulsingHuns: $canShowPulsingHuns")
     }
 
+    fun logDelayingClockWakeUpAnimation(delayingAnimation: Boolean) {
+        logger.logDelayingClockWakeUpAnimation(delayingAnimation)
+    }
+
     interface WakeUpListener {
-        /**
-         * Called whenever the notifications are fully hidden or shown
-         */
+        /** Called whenever the notifications are fully hidden or shown */
         @JvmDefault fun onFullyHiddenChanged(isFullyHidden: Boolean) {}
 
         /**
          * Called whenever the pulseExpansion changes
+         *
          * @param expandingChanged if the user has started or stopped expanding
          */
         @JvmDefault fun onPulseExpansionChanged(expandingChanged: Boolean) {}
+
+        /**
+         * Called when the animator started by [scheduleDelayedDozeAmountAnimation] begins running
+         * after the start delay, or after it ends/is cancelled.
+         */
+        @JvmDefault fun onDelayedDozeAmountAnimationRunning(running: Boolean) {}
+    }
+
+    companion object {
+        private val notificationVisibility =
+            object : FloatProperty<NotificationWakeUpCoordinator>("notificationVisibility") {
+
+                override fun setValue(coordinator: NotificationWakeUpCoordinator, value: Float) {
+                    coordinator.setVisibilityAmount(value)
+                }
+
+                override fun get(coordinator: NotificationWakeUpCoordinator): Float {
+                    return coordinator.mLinearVisibilityAmount
+                }
+            }
+
+        private val delayedDozeAmount =
+            object : FloatProperty<NotificationWakeUpCoordinator>("delayedDozeAmount") {
+
+                override fun setValue(coordinator: NotificationWakeUpCoordinator, value: Float) {
+                    coordinator.delayedDozeAmountOverride = value
+                    coordinator.logger.logSetDelayDozeAmountOverride(value)
+                    coordinator.updateDozeAmount()
+                }
+
+                override fun get(coordinator: NotificationWakeUpCoordinator): Float {
+                    return coordinator.delayedDozeAmountOverride
+                }
+            }
     }
 }
