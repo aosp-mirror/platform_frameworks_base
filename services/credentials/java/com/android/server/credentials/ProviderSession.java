@@ -75,6 +75,12 @@ public abstract class ProviderSession<T, R>
     @NonNull
     private int mProviderSessionUid;
 
+    enum CredentialsSource {
+        REMOTE_PROVIDER,
+        REGISTRY,
+        AUTH_ENTRY
+    }
+
     /**
      * Returns true if the given status reflects that the provider state is ready to be shown
      * on the credMan UI.
@@ -118,7 +124,8 @@ public abstract class ProviderSession<T, R>
      */
     public interface ProviderInternalCallback<V> {
         /** Called when status changes. */
-        void onProviderStatusChanged(Status status, ComponentName componentName);
+        void onProviderStatusChanged(Status status, ComponentName componentName,
+                CredentialsSource source);
 
         /** Called when the final credential is received through an entry selection. */
         void onFinalResponseReceived(ComponentName componentName, V response);
@@ -206,11 +213,12 @@ public abstract class ProviderSession<T, R>
     }
 
     /** Updates the status . */
-    protected void updateStatusAndInvokeCallback(@NonNull Status status) {
+    protected void updateStatusAndInvokeCallback(@NonNull Status status,
+            CredentialsSource source) {
         setStatus(status);
         mProviderSessionMetric.collectCandidateMetricUpdate(isTerminatingStatus(status),
                 isCompletionStatus(status), mProviderSessionUid);
-        mCallbacks.onProviderStatusChanged(status, mComponentName);
+        mCallbacks.onProviderStatusChanged(status, mComponentName, source);
     }
 
     /** Common method that transfers metrics from the init phase to candidates */

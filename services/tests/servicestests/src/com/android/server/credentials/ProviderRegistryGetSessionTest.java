@@ -148,7 +148,7 @@ public class ProviderRegistryGetSessionTest {
         assertThat(packageNameCaptor.getValue()).isEqualTo(CALLING_PACKAGE_NAME);
         assertThat(flattenedRequestCaptor.getValue()).containsExactly(FLATTENED_REQUEST);
         verify(mGetRequestSession).onProviderStatusChanged(statusCaptor.capture(),
-                cpComponentNameCaptor.capture());
+                cpComponentNameCaptor.capture(), ProviderSession.CredentialsSource.REGISTRY);
         assertThat(statusCaptor.getValue()).isEqualTo(ProviderSession.Status.CREDENTIALS_RECEIVED);
         assertThat(cpComponentNameCaptor.getValue()).isEqualTo(CREDENTIAL_PROVIDER_COMPONENT);
         assertThat(mProviderRegistryGetSession.mCredentialEntries).hasSize(2);
@@ -245,8 +245,6 @@ public class ProviderRegistryGetSessionTest {
                 ProviderRegistryGetSession.CREDENTIAL_ENTRY_KEY,
                 entryKey, providerPendingIntentResponse);
 
-        verify(mGetRequestSession).onProviderStatusChanged(statusCaptor.capture(),
-                cpComponentNameCaptor.capture());
         assertThat(statusCaptor.getValue()).isEqualTo(ProviderSession.Status.CREDENTIALS_RECEIVED);
         verify(mGetRequestSession).onFinalErrorReceived(cpComponentNameCaptor.capture(),
                 exceptionTypeCaptor.capture(), exceptionMessageCaptor.capture());
@@ -279,8 +277,6 @@ public class ProviderRegistryGetSessionTest {
                 ProviderRegistryGetSession.CREDENTIAL_ENTRY_KEY,
                 entryKey, providerPendingIntentResponse);
 
-        verify(mGetRequestSession).onProviderStatusChanged(statusCaptor.capture(),
-                cpComponentNameCaptor.capture());
         assertThat(statusCaptor.getValue()).isEqualTo(ProviderSession.Status.CREDENTIALS_RECEIVED);
         verify(mGetRequestSession).onFinalErrorReceived(cpComponentNameCaptor.capture(),
                 exceptionTypeCaptor.capture(), exceptionMessageCaptor.capture());
@@ -313,8 +309,6 @@ public class ProviderRegistryGetSessionTest {
                 ProviderRegistryGetSession.CREDENTIAL_ENTRY_KEY,
                 entryKey, providerPendingIntentResponse);
 
-        verify(mGetRequestSession).onProviderStatusChanged(statusCaptor.capture(),
-                cpComponentNameCaptor.capture());
         assertThat(statusCaptor.getValue()).isEqualTo(ProviderSession.Status.CREDENTIALS_RECEIVED);
         verify(mGetRequestSession).onFinalResponseReceived(cpComponentNameCaptor.capture(),
                 getCredentialResponseCaptor.capture());
