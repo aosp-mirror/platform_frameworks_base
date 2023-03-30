@@ -32,6 +32,7 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeHeadsUpTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
@@ -133,7 +134,8 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
         // has started pulling down the notification shade from the HUN and then the font size
         // changes). We need to re-fetch these values since they're used to correctly display the
         // HUN during this shade expansion.
-        mTrackedChild = notificationPanelViewController.getTrackedHeadsUpNotification();
+        mTrackedChild = notificationPanelViewController.getShadeHeadsUpTracker()
+                .getTrackedHeadsUpNotification();
         mAppearFraction = stackScrollerController.getAppearFraction();
         mExpandedHeight = stackScrollerController.getExpandedHeight();
 
@@ -170,10 +172,14 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
         mView.setOnDrawingRectChangedListener(
                 () -> updateIsolatedIconLocation(true /* requireUpdate */));
         mWakeUpCoordinator.addListener(this);
-        mNotificationPanelViewController.addTrackingHeadsUpListener(mSetTrackingHeadsUp);
-        mNotificationPanelViewController.setHeadsUpAppearanceController(this);
+        getShadeHeadsUpTracker().addTrackingHeadsUpListener(mSetTrackingHeadsUp);
+        getShadeHeadsUpTracker().setHeadsUpAppearanceController(this);
         mStackScrollerController.addOnExpandedHeightChangedListener(mSetExpandedHeight);
         mDarkIconDispatcher.addDarkReceiver(this);
+    }
+
+    private ShadeHeadsUpTracker getShadeHeadsUpTracker() {
+        return mNotificationPanelViewController.getShadeHeadsUpTracker();
     }
 
     @Override
@@ -181,8 +187,8 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
         mHeadsUpManager.removeListener(this);
         mView.setOnDrawingRectChangedListener(null);
         mWakeUpCoordinator.removeListener(this);
-        mNotificationPanelViewController.removeTrackingHeadsUpListener(mSetTrackingHeadsUp);
-        mNotificationPanelViewController.setHeadsUpAppearanceController(null);
+        getShadeHeadsUpTracker().removeTrackingHeadsUpListener(mSetTrackingHeadsUp);
+        getShadeHeadsUpTracker().setHeadsUpAppearanceController(null);
         mStackScrollerController.removeOnExpandedHeightChangedListener(mSetExpandedHeight);
         mDarkIconDispatcher.removeDarkReceiver(this);
     }

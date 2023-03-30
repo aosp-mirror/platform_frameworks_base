@@ -65,18 +65,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
             mNotificationShadeWindowController.setHeadsUpShowing(true);
             mStatusBarWindowController.setForceStatusBarVisible(true);
             if (mNotificationPanelViewController.isFullyCollapsed()) {
-                // We need to ensure that the touchable region is updated before the
-                //window will be
-                // resized, in order to not catch any touches. A layout will ensure that
-                // onComputeInternalInsets will be called and after that we can
-                //resize the layout. Let's
-                // make sure that the window stays small for one frame until the
-                //touchableRegion is set.
-                mNotificationPanelViewController.requestLayoutOnView();
-                mNotificationShadeWindowController.setForceWindowCollapsed(true);
-                mNotificationPanelViewController.postToView(() -> {
-                    mNotificationShadeWindowController.setForceWindowCollapsed(false);
-                });
+                mNotificationPanelViewController.updateTouchableRegion();
             }
         } else {
             boolean bypassKeyguard = mKeyguardBypassController.getBypassEnabled()
@@ -96,7 +85,8 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
                 //animation
                 // is finished.
                 mHeadsUpManager.setHeadsUpGoingAway(true);
-                mNotificationPanelViewController.runAfterAnimationFinished(() -> {
+                mNotificationPanelViewController.getNotificationStackScrollLayoutController()
+                        .runAfterAnimationFinished(() -> {
                     if (!mHeadsUpManager.hasPinnedHeadsUp()) {
                         mNotificationShadeWindowController.setHeadsUpShowing(false);
                         mHeadsUpManager.setHeadsUpGoingAway(false);
