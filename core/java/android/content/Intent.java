@@ -11356,12 +11356,15 @@ public class Intent implements Parcelable, Cloneable {
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder(128);
+        toString(b);
+        return b.toString();
+    }
 
+    /** @hide */
+    public void toString(@NonNull StringBuilder b) {
         b.append("Intent { ");
         toShortString(b, true, true, true, false);
         b.append(" }");
-
-        return b.toString();
     }
 
     /** @hide */
