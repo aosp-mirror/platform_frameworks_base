@@ -3738,12 +3738,10 @@ public class Vpn {
                     + mUnderlyingNetworkCapabilities + " to " + nc);
             final NetworkCapabilities oldNc = mUnderlyingNetworkCapabilities;
             mUnderlyingNetworkCapabilities = nc;
-            if (oldNc == null) {
-                // A new default network is available.
+            if (oldNc == null || !nc.getSubscriptionIds().equals(oldNc.getSubscriptionIds())) {
+                // A new default network is available, or the subscription has changed.
+                // Try to migrate the session, or failing that, start a new one.
                 startOrMigrateIkeSession(mActiveNetwork);
-            } else if (!nc.getSubscriptionIds().equals(oldNc.getSubscriptionIds())) {
-                // Renew carrierConfig values.
-                maybeMigrateIkeSessionAndUpdateVpnTransportInfo(mActiveNetwork);
             }
         }
 
