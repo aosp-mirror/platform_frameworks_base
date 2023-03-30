@@ -93,7 +93,8 @@ class InputController {
 
     /* Token -> file descriptor associations. */
     @GuardedBy("mLock")
-    private final Map<IBinder, InputDeviceDescriptor> mInputDeviceDescriptors = new ArrayMap<>();
+    private final ArrayMap<IBinder, InputDeviceDescriptor> mInputDeviceDescriptors =
+            new ArrayMap<>();
 
     private final Handler mHandler;
     private final NativeWrapper mNativeWrapper;
@@ -303,7 +304,8 @@ class InputController {
     @GuardedBy("mLock")
     private void updateActivePointerDisplayIdLocked() {
         InputDeviceDescriptor mostRecentlyCreatedMouse = null;
-        for (InputDeviceDescriptor otherInputDeviceDescriptor : mInputDeviceDescriptors.values()) {
+        for (int i = 0; i < mInputDeviceDescriptors.size(); ++i) {
+            InputDeviceDescriptor otherInputDeviceDescriptor = mInputDeviceDescriptors.valueAt(i);
             if (otherInputDeviceDescriptor.isMouse()) {
                 if (mostRecentlyCreatedMouse == null
                         || (otherInputDeviceDescriptor.getCreationOrderNumber()
@@ -338,8 +340,8 @@ class InputController {
         }
 
         synchronized (mLock) {
-            for (InputDeviceDescriptor value : mInputDeviceDescriptors.values()) {
-                if (value.mName.equals(deviceName)) {
+            for (int i = 0; i < mInputDeviceDescriptors.size(); ++i) {
+                if (mInputDeviceDescriptors.valueAt(i).mName.equals(deviceName)) {
                     throw new DeviceCreationException(
                             "Input device name already in use: " + deviceName);
                 }
@@ -471,7 +473,8 @@ class InputController {
         fout.println("    InputController: ");
         synchronized (mLock) {
             fout.println("      Active descriptors: ");
-            for (InputDeviceDescriptor inputDeviceDescriptor : mInputDeviceDescriptors.values()) {
+            for (int i = 0; i < mInputDeviceDescriptors.size(); ++i) {
+                InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.valueAt(i);
                 fout.println("        ptr: " + inputDeviceDescriptor.getNativePointer());
                 fout.println("          displayId: " + inputDeviceDescriptor.getDisplayId());
                 fout.println("          creationOrder: "
