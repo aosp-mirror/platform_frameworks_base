@@ -8434,7 +8434,7 @@ public final class ContactsContract {
             extras.putString(KEY_ACCOUNT_NAME, accountName);
             extras.putString(KEY_ACCOUNT_TYPE, accountType);
 
-            contentResolver.call(ContactsContract.AUTHORITY_URI,
+            nullSafeCall(contentResolver, ContactsContract.AUTHORITY_URI,
                     ContactsContract.SimContacts.ADD_SIM_ACCOUNT_METHOD,
                     null, extras);
         }
@@ -8457,7 +8457,7 @@ public final class ContactsContract {
             Bundle extras = new Bundle();
             extras.putInt(KEY_SIM_SLOT_INDEX, simSlotIndex);
 
-            contentResolver.call(ContactsContract.AUTHORITY_URI,
+            nullSafeCall(contentResolver, ContactsContract.AUTHORITY_URI,
                     ContactsContract.SimContacts.REMOVE_SIM_ACCOUNT_METHOD,
                     null, extras);
         }
@@ -8469,7 +8469,7 @@ public final class ContactsContract {
          */
         public static @NonNull List<SimAccount> getSimAccounts(
                 @NonNull ContentResolver contentResolver) {
-            Bundle response = contentResolver.call(ContactsContract.AUTHORITY_URI,
+            Bundle response = nullSafeCall(contentResolver, ContactsContract.AUTHORITY_URI,
                     ContactsContract.SimContacts.QUERY_SIM_ACCOUNTS_METHOD,
                     null, null);
             List<SimAccount> result = response.getParcelableArrayList(KEY_SIM_ACCOUNTS, android.provider.ContactsContract.SimAccount.class);
@@ -9088,7 +9088,8 @@ public final class ContactsContract {
          * @param contactId the id of the contact to undemote.
          */
         public static void undemote(ContentResolver contentResolver, long contactId) {
-            contentResolver.call(ContactsContract.AUTHORITY_URI, PinnedPositions.UNDEMOTE_METHOD,
+            nullSafeCall(contentResolver, ContactsContract.AUTHORITY_URI,
+                    PinnedPositions.UNDEMOTE_METHOD,
                     String.valueOf(contactId), null);
         }
 
@@ -10299,5 +10300,14 @@ public final class ContactsContract {
          */
         public static final String CONTENT_ITEM_TYPE =
                 "vnd.android.cursor.item/contact_metadata_sync_state";
+    }
+
+    private static Bundle nullSafeCall(@NonNull ContentResolver resolver, @NonNull Uri uri,
+            @NonNull String method, @Nullable String arg, @Nullable Bundle extras) {
+        try (ContentProviderClient client = resolver.acquireContentProviderClient(uri)) {
+            return client.call(method, arg, extras);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
     }
 }
