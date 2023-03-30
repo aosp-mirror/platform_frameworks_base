@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"کلید درشت‌نمایی"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"درشت‌نمایی تمام‌صفحه"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"درشت‌نمایی بخشی از صفحه"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"کلید"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"باز کردن تنظیمات درشت‌نمایی"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"برای تغییر اندازه، گوشه را بکشید"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"مجاز کردن پیمایش قطری"</string>
@@ -849,6 +848,8 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"متوسط"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"کوچک"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"بزرگ"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"تمام"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"ویرایش"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"تنظیمات پنجره ذره‌بین"</string>
@@ -1065,8 +1066,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"ویرایش کردن"</string>
     <string name="add" msgid="81036585205287996">"افزودن"</string>
     <string name="manage_users" msgid="1823875311934643849">"مدیریت کاربران"</string>
-    <!-- no translation found for drag_split_not_supported (7173481676120546121) -->
-    <skip />
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"این اعلان از عملکرد کشیدن به صفحهٔ دونیمه پشتیبانی نمی‌کند"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"‏Wi‑Fi دردسترس نیست"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"حالت اولویت"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"زنگ ساعت تنظیم شد"</string>
@@ -1087,7 +1087,7 @@
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"به <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> اجازه می‌دهید به همه گزارش‌های دستگاه دسترسی داشته باشد؟"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"مجاز کردن دسترسی یک‌باره"</string>
-    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"اجازه نمی‌دهم"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"اجازه ندادن"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"گزارش‌های دستگاه آنچه را در دستگاهتان رخ می‌دهد ثبت می‌کند. برنامه‌ها می‌توانند از این گزارش‌ها برای پیدا کردن مشکلات و رفع آن‌ها استفاده کنند.\n\nبرخی‌از گزارش‌ها ممکن است حاوی اطلاعات حساس باشند، بنابراین فقط به برنامه‌های مورداعتمادتان اجازه دسترسی به همه گزارش‌های دستگاه را بدهید. \n\nاگر به این برنامه اجازه ندهید به همه گزارش‌های دستگاه دسترسی داشته باشد، همچنان می‌تواند به گزارش‌های خودش دسترسی داشته باشد. سازنده دستگاه نیز ممکن است همچنان بتواند به برخی‌از گزارش‌ها یا اطلاعات دستگاهتان دسترسی داشته باشد."</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"بیشتر بدانید"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"در <xliff:g id="URL">%s</xliff:g> اطلاعات بیشتری دریافت کنید"</string>

@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"拡大スイッチ"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"画面全体を拡大します"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"画面の一部を拡大します"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"スイッチ"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"画面の拡大設定を開く"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"サイズを変更するには角をドラッグ"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"斜めスクロールを許可"</string>
@@ -849,13 +848,15 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"中"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"小"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"大"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"完了"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"編集"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"拡大鏡ウィンドウの設定"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"タップしてユーザー補助機能を開きます。ボタンのカスタマイズや入れ替えを [設定] で行えます。\n\n"<annotation id="link">"設定を表示"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ボタンを一時的に非表示にするには、端に移動させてください"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"元に戻す"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> 個のショートカットを削除"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> のショートカットを削除"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# 個のショートカットを削除}other{# 個のショートカットを削除}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"左上に移動"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"右上に移動"</string>
@@ -870,8 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# 件のコントロールを追加しました。}other{# 件のコントロールを追加しました。}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"削除済み"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> を追加しますか？"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> はここに表示されるコントロールとコンテンツを選択できます。"</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> のコントロールを削除しますか？"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"お気に入りに追加済み"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"お気に入りに追加済み、位置: <xliff:g id="NUMBER">%d</xliff:g>"</string>
