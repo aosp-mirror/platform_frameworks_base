@@ -929,7 +929,7 @@ public class AudioService extends IAudioService.Stub
 
     // Defines the format for the connection "address" for ALSA devices
     public static String makeAlsaAddressString(int card, int device) {
-        return "card=" + card + ";device=" + device + ";";
+        return "card=" + card + ";device=" + device;
     }
 
     public static final class Lifecycle extends SystemService {
