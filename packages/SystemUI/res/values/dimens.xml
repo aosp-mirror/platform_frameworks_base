@@ -1553,6 +1553,9 @@
     <dimen name="status_bar_user_chip_end_margin">12dp</dimen>
     <dimen name="status_bar_user_chip_text_size">12sp</dimen>
 
+    <!-- System UI Dialog -->
+    <dimen name="dialog_title_text_size">24sp</dimen>
+
     <!-- Internet panel related dimensions -->
     <dimen name="internet_dialog_list_max_height">662dp</dimen>
     <!-- The height of the WiFi network in Internet panel. -->
