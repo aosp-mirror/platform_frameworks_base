@@ -21,7 +21,7 @@
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Svaki ključ je isključivo povezan sa aplikacijom ili veb-sajtom za koje je napravljen, pa nikad ne možete greškom da se prijavite u aplikaciju ili na veb-sajt koji služe za prevaru. Osim toga, sa serverima koji čuvaju samo javne ključeve hakovanje je mnogo teže."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Besprekoran prelaz"</string>
     <string name="seamless_transition_detail" msgid="3440478759491650823">"Kako se krećemo ka budućnosti bez lozinki, lozinke će i dalje biti dostupne uz pristupne kodove"</string>
-    <string name="choose_provider_title" msgid="8870795677024868108">"Odaberite gde ćete sačuvati stavke <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"Odaberite gde ćete sačuvati: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Izaberite menadžera lozinki da biste sačuvali podatke i brže se prijavili sledeći put"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Želite da napravite pristupni kôd za: <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"Želite da sačuvate lozinku za: <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -32,7 +32,7 @@
     <string name="passwords" msgid="5419394230391253816">"lozinke"</string>
     <string name="sign_ins" msgid="4710739369149469208">"prijavljivanja"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"podaci za prijavljivanje"</string>
-    <string name="save_credential_to_title" msgid="3172811692275634301">"Sačuvaj stavku <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> u"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Sačuvaj <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> u"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Želite da napravite pristupni kôd na drugom uređaju?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Želite da za sva prijavljivanja koristite: <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"Ovaj menadžer lozinki za <xliff:g id="USERNAME">%1$s</xliff:g> će čuvati lozinke i pristupne kodove da biste se lako prijavljivali"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Želite da koristite sačuvani pristupni kôd za: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Želite da koristite sačuvane podatke za prijavljivanje za: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Odaberite sačuvano prijavljivanje za: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Prijavite se na drugi način"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Prikaži opcije"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Nastavi"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Upravljajte prijavljivanjima"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Sa drugog uređaja"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Koristi drugi uređaj"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>

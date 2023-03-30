@@ -10,7 +10,7 @@
     <string name="content_description_hide_password" msgid="6841375971631767996">"ପାସୱାର୍ଡ ଲୁଚାନ୍ତୁ"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ପାସକୀ ସହ ଅଧିକ ସୁରକ୍ଷିତ"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"ପାସକୀଗୁଡ଼ିକ ସହ ଆପଣଙ୍କୁ ଜଟିଳ ପାସୱାର୍ଡଗୁଡ଼ିକ ତିଆରି କରିବା କିମ୍ବା ମନେରଖିବାର ଆବଶ୍ୟକତା ନାହିଁ"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"ପାସକୀଗୁଡ଼ିକ ହେଉଛି ଆପଣ ଆପଣଙ୍କ ଟିପଚିହ୍ନ, ଫେସ କିମ୍ବା ସ୍କ୍ରିନ ଲକ ବ୍ୟବହାର କରି ତିଆରି କରୁଥିବା ଏକକ୍ରିପ୍ଟ କରାଯାଇଥିବା ଡିଜିଟାଲ କୀ"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"ପାସକୀ ହେଉଛି ଏନକ୍ରିପ୍ଟ ହୋଇଥିବା ଡିଜିଟାଲ କୀ\' ଯାହା ଆପଣ ଆପଣଙ୍କ ଟିପଚିହ୍ନ, ଫେସ କିମ୍ବା ସ୍କ୍ରିନ ଲକ ବ୍ୟବହାର କରି ତିଆରି କରନ୍ତି"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"ସେଗୁଡ଼ିକୁ ଏକ Password Managerରେ ସେଭ କରାଯାଏ, ଯାହା ଫଳରେ ଆପଣ ଅନ୍ୟ ଡିଭାଇସଗୁଡ଼ିକରେ ସାଇନ ଇନ କରିପାରିବେ"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"ପାସକୀଗୁଡ଼ିକ ବିଷୟରେ ଅଧିକ"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"ପାସୱାର୍ଡ ବିହୀନ ଟେକ୍ନୋଲୋଜି"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ପାଇଁ ସେଭ କରାଯାଇଥିବା ଆପଣଙ୍କ ପାସକୀ ବ୍ୟବହାର କରିବେ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> ପାଇଁ ସେଭ କରାଯାଇଥିବା ଆପଣଙ୍କ ସାଇନ-ଇନ ବ୍ୟବହାର କରିବେ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> ପାଇଁ ସେଭ କରାଯାଇଥିବା ଏକ ସାଇନ-ଇନ ବାଛନ୍ତୁ"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ଅନ୍ୟ ଏକ ଉପାୟରେ ସାଇନ ଇନ କରନ୍ତୁ"</string>
     <string name="snackbar_action" msgid="37373514216505085">"ବିକଳ୍ପଗୁଡ଼ିକୁ ଦେଖନ୍ତୁ"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ଜାରି ରଖନ୍ତୁ"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"ସାଇନ-ଇନ ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"ଅନ୍ୟ ଏକ ଡିଭାଇସରୁ"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"ଏକ ଭିନ୍ନ ଡିଭାଇସ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>

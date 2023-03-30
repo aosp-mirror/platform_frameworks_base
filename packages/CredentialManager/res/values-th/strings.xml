@@ -16,7 +16,7 @@
     <string name="passwordless_technology_title" msgid="2497513482056606668">"เทคโนโลยีที่ไม่ต้องใช้รหัสผ่าน"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"พาสคีย์ช่วยให้คุณลงชื่อเข้าใช้ได้โดยไม่ต้องใช้รหัสผ่าน ใช้เพียงแค่ลายนิ้วมือ, การจดจำใบหน้า, PIN หรือรูปแบบการลากเส้นในการยืนยันตัวตนและสร้างพาสคีย์"</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"วิทยาการเข้ารหัสคีย์สาธารณะ"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"พาสคีย์ใช้คู่คีย์การเข้ารหัสตามมาตรฐานของ FIDO Alliance (เช่น Google, Apple, Microsoft และอื่นๆ) และ W3C คู่คีย์สาธารณะและคีย์ส่วนตัวจะสร้างขึ้นสำหรับแอปหรือเว็บไซต์ที่ใช้งานคีย์ดังกล่าวต่างจากชื่อผู้ใช้และชุดอักขระที่ใช้เป็นรหัสผ่าน โดยระบบจะจัดเก็บคีย์ส่วนตัวไว้ในอุปกรณ์หรือเครื่องมือจัดการรหัสผ่านและใช้คีย์ดังกล่าวเพื่อยืนยันตัวตน ส่วนคีย์สาธารณะจะแชร์กับเซิร์ฟเวอร์ของแอปหรือเว็บไซต์ ลงทะเบียนและลงชื่อเข้าใช้ได้ทันทีด้วยคีย์ที่สอดคล้องกัน"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"พาสคีย์ใช้คู่คีย์การเข้ารหัสตามมาตรฐานของ FIDO Alliance (เช่น Google, Apple, Microsoft และอื่นๆ) และ W3C คู่คีย์สาธารณะและคีย์ส่วนตัวจะสร้างขึ้นสำหรับแอปหรือเว็บไซต์ ซึ่งต่างจากชื่อผู้ใช้และชุดอักขระที่ใช้เป็นรหัสผ่าน โดยระบบจะจัดเก็บคีย์ส่วนตัวไว้อย่างปลอดภัยในอุปกรณ์หรือเครื่องมือจัดการรหัสผ่านและใช้คีย์ดังกล่าวเพื่อยืนยันตัวตน ส่วนคีย์สาธารณะจะแชร์กับเซิร์ฟเวอร์ของแอปหรือเว็บไซต์ คุณลงทะเบียนและลงชื่อเข้าใช้ได้ทันทีด้วยคีย์ที่สอดคล้องกัน"</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"ความปลอดภัยของบัญชีที่เพิ่มมากขึ้น"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"คีย์ที่สร้างขึ้นแต่ละคีย์จะลิงก์กับแอปหรือเว็บไซต์ที่ใช้งานคีย์ดังกล่าวเท่านั้น ดังนั้นจึงไม่มีการลงชื่อเข้าใช้แอปเว็บไซต์ที่เป็นการฉ้อโกงโดยไม่ตั้งใจเกิดขึ้น นอกจากนี้ เซิร์ฟเวอร์จะบันทึกเฉพาะคีย์สาธารณะ จึงทำให้แฮ็กได้ยากขึ้น"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"การเปลี่ยนผ่านอย่างราบรื่น"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"ใช้พาสคีย์ที่บันทึกไว้สำหรับ <xliff:g id="APP_NAME">%1$s</xliff:g> ใช่ไหม"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"ใช้การลงชื่อเข้าใช้ที่บันทึกไว้สำหรับ \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" ใช่ไหม"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"เลือกการลงชื่อเข้าใช้ที่บันทึกไว้สำหรับ \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ลงชื่อเข้าใช้ด้วยวิธีอื่น"</string>
     <string name="snackbar_action" msgid="37373514216505085">"ดูตัวเลือก"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ต่อไป"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"จัดการการลงชื่อเข้าใช้"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"จากอุปกรณ์อื่น"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"ใช้อุปกรณ์อื่น"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>
