@@ -2188,7 +2188,10 @@ public class AppOpsManager {
     public static final String OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD =
             "android:capture_consentless_bugreport_on_userdebug_build";
 
-    /** Access to wrist temperature body sensors. */
+    /**
+     * Access to wrist temperature body sensors.
+     * @hide
+     */
     public static final String OPSTR_BODY_SENSORS_WRIST_TEMPERATURE =
             "android:body_sensors_wrist_temperature";
 
