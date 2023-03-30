@@ -800,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ಆ್ಯಪ್‌ನ ವೈಶಿಷ್ಟ್ಯಗಳ ಮಾಹಿತಿಯನ್ನು ವೀಕ್ಷಿಸಲು ಬಳಕೆದಾರರನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ಹೆಚ್ಚಿನ ನಮೂನೆ ದರದಲ್ಲಿ ಸೆನ್ಸಾರ್ ಡೇಟಾ ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz ಗಿಂತಲೂ ಹೆಚ್ಚಿನ ವೇಗದಲ್ಲಿ ಸೆನ್ಸಾರ್ ಡೇಟಾದ ಮಾದರಿ ಪರೀಕ್ಷಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸಿ"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ಪಾಸ್‌ವರ್ಡ್ ನಿಮಯಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ಪರದೆ ಲಾಕ್‌ನಲ್ಲಿನ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಪಿನ್‌ಗಳ ಅನುಮತಿಸಲಾದ ಅಕ್ಷರಗಳ ಪ್ರಮಾಣವನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ಪರದೆಯ ಅನ್‌ಲಾಕ್ ಪ್ರಯತ್ನಗಳನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ"</string>

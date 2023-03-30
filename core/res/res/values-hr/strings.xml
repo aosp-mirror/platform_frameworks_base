@@ -801,6 +801,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Dopušta nositelju pokretanje prikaza informacija o značajkama aplikacije."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"pristup podacima senzora pri višoj brzini uzorkovanja"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Aplikaciji omogućuje uzorkovanje podataka senzora pri brzini većoj od 200 Hz"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Postavi pravila zaporke"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Upravlja duljinom i znakovima koji su dopušteni u zaporkama i PIN-ovima zaključavanja zaslona."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Nadziri pokušaje otključavanja zaslona"</string>

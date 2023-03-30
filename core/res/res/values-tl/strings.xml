@@ -800,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Nagbibigay-daan sa may hawak na simulang tingnan ang impormasyon ng mga feature para sa isang app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"mag-access ng data ng sensor sa mataas na rate ng pag-sample"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Pinapahintulutan ang app na mag-sample ng data ng sensor sa rate na higit sa 200 Hz"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolin ang haba at ang mga character na pinapayagan sa mga password at PIN sa screen lock."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
