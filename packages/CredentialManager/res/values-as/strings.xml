@@ -16,7 +16,7 @@
     <string name="passwordless_technology_title" msgid="2497513482056606668">"পাছৱৰ্ডবিহীন প্ৰযুক্তি"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"পাছকীসমূহে আপোনাক পাছৱৰ্ডৰ ওপৰত নিৰ্ভৰ নকৰাকৈ ছাইন ইন কৰাৰ অনুমতি দিয়ে। আপুনি আপোনাৰ পৰিচয় সত্যাপন কৰিবলৈ আৰু এটা পাছকী সৃষ্টি কৰিবলৈ কেৱল আপোনাৰ ফিংগাৰপ্ৰিণ্ট, মুখাৱয়ব চিনাক্তকৰণ, পিন অথবা ছোৱাইপ কৰাৰ আৰ্হি ব্যৱহাৰ কৰিলেই হ’ল।"</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"ৰাজহুৱা চাবি ক্ৰিপ্ট’গ্ৰাফী"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO জোঁট (য’ত Google, Apple, Microsoft আৰু অধিক অন্তৰ্ভুক্ত) আৰু W3C মানকসমূহৰ ওপৰত ভিত্তি কৰি, পাছকীসমূহে ক্ৰিপ্ট’গ্ৰাফিক চাবিৰ যোৰা ব্যৱহাৰ কৰে। আমি পাছৱৰ্ডৰ বাবে ব্যৱহাৰ কৰা ব্যৱহাৰকাৰীৰ নাম আৰু বৰ্ণৰ ষ্ট্ৰিঙৰ বিপৰীতে, এটা এপ্‌ অথবা ৱেবছাইটৰ বাবে এটা ব্যক্তিগত-ৰাজহুৱা কীৰ যোৰা সৃষ্টি কৰা হয়। ব্যক্তিগত চাবিটো আপোনাৰ ডিভাইচ অথবা পাছৱৰ্ড পৰিচালকত সুৰক্ষিতভাৱে ষ্ট’ৰ কৰা হয় আৰু ই আপোনাৰ পৰিচয় নিশ্চিত কৰে। ৰাজহুৱা চাবিটো এপ্‌ অথবা ৱেবছাইটৰ ছাৰ্ভাৰৰ সৈতে শ্বেয়াৰ কৰা হয়। সংশ্লিষ্ট চাবিসমূহৰ জৰিয়তে আপুনি তাৎক্ষণিকভাৱে পঞ্জীয়ন আৰু ছাইন ইন কৰিব পাৰিব।"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO জোঁট (য’ত Google, Apple, Microsoft আৰু অধিক অন্তৰ্ভুক্ত) আৰু W3C মানকসমূহৰ ওপৰত ভিত্তি কৰি, পাছকীসমূহে ক্ৰিপ্ট’গ্ৰাফিক চাবিৰ যোৰা ব্যৱহাৰ কৰে। আমি পাছৱৰ্ডৰ বাবে ব্যৱহাৰ কৰা ব্যৱহাৰকাৰীৰ নাম আৰু বৰ্ণৰ ষ্ট্ৰিঙৰ বিপৰীতে, এটা এপ্‌ অথবা ৱেবছাইটৰ বাবে এটা ব্যক্তিগত-ৰাজহুৱা চাবিৰ যোৰা সৃষ্টি কৰা হয়। ব্যক্তিগত চাবিটো আপোনাৰ ডিভাইচ অথবা পাছৱৰ্ড পৰিচালকত সুৰক্ষিতভাৱে ষ্ট’ৰ কৰা হয় আৰু ই আপোনাৰ পৰিচয় নিশ্চিত কৰে। ৰাজহুৱা চাবিটো এপ্‌ অথবা ৱেবছাইটৰ ছাৰ্ভাৰৰ সৈতে শ্বেয়াৰ কৰা হয়। সংশ্লিষ্ট চাবিসমূহৰ জৰিয়তে আপুনি তাৎক্ষণিকভাৱে পঞ্জীয়ন আৰু ছাইন ইন কৰিব পাৰিব।"</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"একাউণ্টৰ উন্নত সুৰক্ষা"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"প্ৰতিটো চাবি বিশেষভাৱে সেই এপ্‌ অথবা ৱেবছাইটৰ সৈতে লিংক কৰা হয় যাৰ বাবে সেইটো সৃষ্টি কৰা হৈছে, সেয়ে আপুনি কেতিয়াও ভুলতে কোনো প্ৰৱঞ্চনামূলক এপ্‌ অথবা ৱেবছাইটত ছাইন ইন কৰিব নোৱাৰে। ইয়াৰ উপৰিও, কেৱল ৰাজহুৱা চাবিসমূহ ৰখা ছাৰ্ভাৰৰ ক্ষেত্ৰত হেক কৰাটো বহুত কঠিন হৈ পৰে।"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"বাধাহীন স্থানান্তৰণ"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে আপোনাৰ ছেভ হৈ থকা পাছকী ব্যৱহাৰ কৰিবনে?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে আপোনাৰ ছেভ হৈ থকা ছাইন ইন তথ্য ব্যৱহাৰ কৰিবনে?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছেভ হৈ থকা এটা ছাইন ইন বাছনি কৰক"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"অন্য উপায়েৰে ছাইন ইন কৰক"</string>
     <string name="snackbar_action" msgid="37373514216505085">"বিকল্পসমূহ চাওক"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"অব্যাহত ৰাখক"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"ছাইন ইন পৰিচালনা কৰক"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"অন্য এটা ডিভাইচৰ পৰা"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"অন্য এটা ডিভাইচ ব্যৱহাৰ কৰক"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>

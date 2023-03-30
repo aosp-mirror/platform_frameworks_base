@@ -16,7 +16,7 @@
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Technologia niewymagająca haseł"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Klucze umożliwiają logowanie się bez konieczności stosowania haseł. Wystarczy użyć odcisku palca, rozpoznawania twarzy, kodu PIN lub wzoru, aby potwierdzić tożsamość i utworzyć klucz."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kryptografia klucza publicznego"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Zgodnie z zasadami FIDO Alliance (stowarzyszenia zrzeszającego m.in. Google, Apple i Microsoft) oraz standardami W3C klucze opierają się kluczach kryptograficznych. W odróżnieniu od nazw użytkownika i ciągów znaków stanowiących hasła pary kluczy prywatnych i publicznych są tworzone dla konkretnych aplikacji i stron. Klucz prywatny jest bezpiecznie przechowywany na urządzeniu lub w menedżerze haseł i potwierdza Twoją tożsamość. Klucz publiczny jest udostępniany serwerowi aplikacji lub strony. Mając odpowiednie klucze, od razu się zarejestrujesz i zalogujesz."</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Zgodnie z zasadami FIDO Alliance (stowarzyszenia zrzeszającego m.in. Google, Apple i Microsoft) oraz standardami W3C klucze opierają się na kluczach kryptograficznych. W odróżnieniu od nazw użytkownika i ciągów znaków stanowiących hasła pary kluczy prywatnych i publicznych są tworzone dla konkretnych aplikacji i stron. Klucz prywatny jest bezpiecznie przechowywany na urządzeniu lub w menedżerze haseł i potwierdza Twoją tożsamość. Klucz publiczny jest udostępniany serwerowi aplikacji lub strony. Mając odpowiednie klucze, od razu się zarejestrujesz i zalogujesz."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Zwiększone bezpieczeństwo konta"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Każdy klucz jest połączony wyłącznie z aplikacją lub stroną, dla której został utworzony, więc nie zalogujesz się przypadkowo w fałszywej aplikacji ani na fałszywej stronie. Ponadto na serwerach są przechowywane wyłącznie klucze publiczne, co znacznie utrudnia hakowanie."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Płynne przechodzenie"</string>
@@ -31,7 +31,7 @@
     <string name="passkeys" msgid="5733880786866559847">"klucze"</string>
     <string name="passwords" msgid="5419394230391253816">"hasła"</string>
     <string name="sign_ins" msgid="4710739369149469208">"dane logowania"</string>
-    <string name="sign_in_info" msgid="2627704710674232328">"informacje dotyczące logowania"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"dane logowania"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"Zapisać <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> w:"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Utworzyć klucz na innym urządzeniu?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Używać usługi <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> w przypadku wszystkich danych logowania?"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Użyć zapisanego klucza dla aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Użyć zapisanych danych logowania dla aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Wybierz zapisane dane logowania dla aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Zaloguj się w inny sposób"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Wyświetl opcje"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Dalej"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Zarządzanie danymi logowania"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Na innym urządzeniu"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Użyj innego urządzenia"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>
