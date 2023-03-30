@@ -502,7 +502,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 "%s: onPipTransition_Canceled(), state=%s", TAG, stateToName(mState));
         mTvPipMenuController.onPipTransitionFinished(
                 PipAnimationController.isInPipDirection(direction));
-        mTvPipActionsProvider.onPipExpansionToggled(mTvPipBoundsState.isTvPipExpanded());
+        mTvPipActionsProvider.updatePipExpansionState(mTvPipBoundsState.isTvPipExpanded());
     }
 
     @Override
@@ -515,7 +515,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 "%s: onPipTransition_Finished(), state=%s, direction=%d",
                 TAG, stateToName(mState), direction);
         mTvPipMenuController.onPipTransitionFinished(enterPipTransition);
-        mTvPipActionsProvider.onPipExpansionToggled(mTvPipBoundsState.isTvPipExpanded());
+        mTvPipActionsProvider.updatePipExpansionState(mTvPipBoundsState.isTvPipExpanded());
     }
 
     private void updateExpansionState() {
