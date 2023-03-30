@@ -1309,8 +1309,9 @@ public class QuickSettingsController {
             logNotificationsTopPadding("keyguard", topPadding);
             return topPadding;
         } else {
-            topPadding = mQsFrameTranslateController.getNotificationsTopPadding(
-                    mExpansionHeight, mNotificationStackScrollLayoutController);
+            topPadding = Math.max(mQsFrameTranslateController.getNotificationsTopPadding(
+                    mExpansionHeight, mNotificationStackScrollLayoutController),
+                    mQuickQsHeaderHeight);
             logNotificationsTopPadding("default case", topPadding);
             return topPadding;
         }
