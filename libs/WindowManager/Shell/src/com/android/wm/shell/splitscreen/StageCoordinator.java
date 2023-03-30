@@ -2376,7 +2376,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 return true;
             }
         } else if (mSplitTransitions.isPendingResize(transition)) {
-            mSplitTransitions.applyResizeTransition(transition, info, startTransaction,
+            mSplitTransitions.playResizeAnimation(transition, info, startTransaction,
                     finishTransaction, finishCallback, mMainStage.mRootTaskInfo.token,
                     mSideStage.mRootTaskInfo.token, mMainStage.getSplitDecorManager(),
                     mSideStage.getSplitDecorManager());
