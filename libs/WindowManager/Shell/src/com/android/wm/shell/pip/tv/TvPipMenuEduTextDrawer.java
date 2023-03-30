@@ -260,11 +260,12 @@ class TvPipMenuEduTextDrawer extends FrameLayout {
         });
         heightAnimator.start();
 
-        mListener.onCloseEduText();
+        mListener.onCloseEduTextAnimationStart();
     }
 
     public void onCloseEduTextAnimationEnd() {
         setVisibility(GONE);
+        mListener.onCloseEduTextAnimationEnd();
     }
 
     /**
@@ -295,11 +296,8 @@ class TvPipMenuEduTextDrawer extends FrameLayout {
      * A listener for edu text drawer event states.
      */
     interface Listener {
-        /**
-         *  The edu text closing impacts the size of the Picture-in-Picture window and influences
-         *  how it is positioned on the screen.
-         */
-        void onCloseEduText();
+        void onCloseEduTextAnimationStart();
+        void onCloseEduTextAnimationEnd();
     }
 
 }
