@@ -37,7 +37,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_L
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
-import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER;
 import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_START_RECEIVER;
 
 import android.annotation.NonNull;
@@ -837,7 +836,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             }
         } else if (filter.receiverList.app != null) {
             mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(filter.receiverList.app,
-                    OOM_ADJ_REASON_START_RECEIVER);
+                    CachedAppOptimizer.UNFREEZE_REASON_START_RECEIVER);
         }
 
         try {
@@ -1131,7 +1130,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     if (sendResult) {
                         if (r.callerApp != null) {
                             mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(
-                                    r.callerApp, OOM_ADJ_REASON_FINISH_RECEIVER);
+                                    r.callerApp,
+                                    CachedAppOptimizer.UNFREEZE_REASON_FINISH_RECEIVER);
                         }
                         try {
                             if (DEBUG_BROADCAST) {
