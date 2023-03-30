@@ -968,12 +968,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipBoundsState.setShelfVisibility(visible, shelfHeight);
     }
 
-    private void setPinnedStackAnimationType(int animationType) {
-        mPipTaskOrganizer.setOneShotAnimationType(animationType);
-        mPipTransitionController.setIsFullAnimation(
-                animationType == PipAnimationController.ANIM_TYPE_BOUNDS);
-    }
-
     @VisibleForTesting
     void setPinnedStackAnimationListener(PipAnimationListener callback) {
         mPinnedStackAnimationRecentsCallback = callback;
@@ -1337,7 +1331,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         @Override
         public void setPipAnimationTypeToAlpha() {
             executeRemoteCallWithTaskPermission(mController, "setPipAnimationTypeToAlpha",
-                    (controller) -> controller.setPinnedStackAnimationType(ANIM_TYPE_ALPHA));
+                    (controller) -> controller.mPipAnimationController.setOneShotEnterAnimationType(
+                            ANIM_TYPE_ALPHA));
         }
     }
 }

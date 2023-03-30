@@ -30,14 +30,17 @@ import android.app.TaskInfo;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
+import android.os.SystemClock;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.transition.Transitions;
 
 import java.lang.annotation.Retention;
@@ -60,6 +63,14 @@ public class PipAnimationController {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AnimationType {}
+
+    /**
+     * The alpha type is set for swiping to home. But the swiped task may not enter PiP. And if
+     * another task enters PiP by non-swipe ways, e.g. call API in foreground or switch to 3-button
+     * navigation, then the alpha type is unexpected. So use a timeout to avoid applying wrong
+     * animation style to an unrelated task.
+     */
+    private static final int ONE_SHOT_ALPHA_ANIMATION_TIMEOUT_MS = 800;
 
     public static final int TRANSITION_DIRECTION_NONE = 0;
     public static final int TRANSITION_DIRECTION_SAME = 1;
@@ -109,6 +120,9 @@ public class PipAnimationController {
             });
 
     private PipTransitionAnimator mCurrentAnimator;
+    @AnimationType
+    private int mOneShotAnimationType = ANIM_TYPE_BOUNDS;
+    private long mLastOneShotAlphaAnimationTime;
 
     public PipAnimationController(PipSurfaceTransactionHelper helper) {
         mSurfaceTransactionHelper = helper;
@@ -219,6 +233,37 @@ public class PipAnimationController {
         animator.removeAllUpdateListeners();
         animator.removeAllListeners();
         animator.cancel();
+    }
+
+    /**
+     * Sets the preferred enter animation type for one time. This is typically used to set the
+     * animation type to {@link PipAnimationController#ANIM_TYPE_ALPHA}.
+     * <p>
+     * For example, gesture navigation would first fade out the PiP activity, and the transition
+     * should be responsible to animate in (such as fade in) the PiP.
+     */
+    public void setOneShotEnterAnimationType(@AnimationType int animationType) {
+        mOneShotAnimationType = animationType;
+        if (animationType == ANIM_TYPE_ALPHA) {
+            mLastOneShotAlphaAnimationTime = SystemClock.uptimeMillis();
+        }
+    }
+
+    /** Returns the preferred animation type and consumes the one-shot type if needed. */
+    @AnimationType
+    public int takeOneShotEnterAnimationType() {
+        final int type = mOneShotAnimationType;
+        if (type == ANIM_TYPE_ALPHA) {
+            // Restore to default type.
+            mOneShotAnimationType = ANIM_TYPE_BOUNDS;
+            if (SystemClock.uptimeMillis() - mLastOneShotAlphaAnimationTime
+                    > ONE_SHOT_ALPHA_ANIMATION_TIMEOUT_MS) {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "Alpha animation is expired. Use bounds animation.");
+                return ANIM_TYPE_BOUNDS;
+            }
+        }
+        return type;
     }
 
     /**
