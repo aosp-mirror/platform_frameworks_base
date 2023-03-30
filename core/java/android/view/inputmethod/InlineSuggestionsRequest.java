@@ -18,6 +18,7 @@ package android.view.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
@@ -700,7 +701,10 @@ public final class InlineSuggestionsRequest implements Parcelable {
          * provides the input view.
          *
          * Note: The default value is {@code true}.
+         *
+         * @hide
          */
+        @TestApi
         @DataClass.Generated.Member
         public @NonNull Builder setServiceSupported(boolean value) {
             checkNotUsed();
@@ -714,7 +718,10 @@ public final class InlineSuggestionsRequest implements Parcelable {
          * input view.
          *
          * Note: The default value is {@code true}.
+         *
+         * @hide
          */
+        @TestApi
         @DataClass.Generated.Member
         public @NonNull Builder setClientSupported(boolean value) {
             checkNotUsed();
