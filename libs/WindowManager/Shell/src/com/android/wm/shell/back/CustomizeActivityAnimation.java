@@ -150,9 +150,11 @@ class CustomizeActivityAnimation {
 
         // Draw background with task background color.
         if (mEnteringTarget.taskInfo != null && mEnteringTarget.taskInfo.taskDescription != null) {
-            mBackground.ensureBackground(mNextBackgroundColor == Color.TRANSPARENT
-                    ? mEnteringTarget.taskInfo.taskDescription.getBackgroundColor()
-                    : mNextBackgroundColor, mTransaction);
+            mBackground.ensureBackground(mClosingTarget.windowConfiguration.getBounds(),
+                    mNextBackgroundColor == Color.TRANSPARENT
+                            ? mEnteringTarget.taskInfo.taskDescription.getBackgroundColor()
+                            : mNextBackgroundColor,
+                    mTransaction);
         }
     }
 

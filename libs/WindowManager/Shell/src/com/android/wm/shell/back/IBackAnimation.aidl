@@ -16,8 +16,9 @@
 
 package com.android.wm.shell.back;
 
-import android.window.IOnBackInvokedCallback;
+import com.android.internal.view.AppearanceRegion;
 import android.view.IRemoteAnimationRunner;
+import android.window.IOnBackInvokedCallback;
 
 /**
  * Interface for Launcher process to register back invocation callbacks.
@@ -34,4 +35,9 @@ interface IBackAnimation {
      * Clears the previously registered {@link IOnBackInvokedCallback}.
      */
     void clearBackToLauncherCallback();
+
+    /**
+     * Uses launcher flags to update the system bar color.
+     */
+    void customizeStatusBarAppearance(in AppearanceRegion appearance);
 }
