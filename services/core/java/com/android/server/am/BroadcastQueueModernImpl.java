@@ -37,7 +37,6 @@ import static com.android.server.am.BroadcastRecord.getReceiverPackageName;
 import static com.android.server.am.BroadcastRecord.getReceiverProcessName;
 import static com.android.server.am.BroadcastRecord.getReceiverUid;
 import static com.android.server.am.BroadcastRecord.isDeliveryStateTerminal;
-import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER;
 import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_START_RECEIVER;
 
 import android.annotation.NonNull;
@@ -929,7 +928,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final IApplicationThread thread = (app != null) ? app.getOnewayThread() : null;
         if (thread != null) {
             mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(
-                    app, OOM_ADJ_REASON_FINISH_RECEIVER);
+                    app, CachedAppOptimizer.UNFREEZE_REASON_FINISH_RECEIVER);
             if (r.shareIdentity && app.uid != r.callingUid) {
                 mService.mPackageManagerInt.grantImplicitAccess(r.userId, r.intent,
                         UserHandle.getAppId(app.uid), r.callingUid, true);
@@ -1515,7 +1514,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             }
 
             mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(queue.app,
-                    OOM_ADJ_REASON_START_RECEIVER);
+                    CachedAppOptimizer.UNFREEZE_REASON_START_RECEIVER);
 
             if (queue.runningOomAdjusted) {
                 queue.app.mState.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_RECEIVER);

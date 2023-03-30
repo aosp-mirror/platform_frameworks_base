@@ -23,6 +23,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_COMPACTION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FREEZER;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
+import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ApplicationExitInfo;
@@ -54,6 +55,8 @@ import com.android.server.ServiceThread;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -93,6 +96,70 @@ public final class CachedAppOptimizer {
             "freeze_debounce_timeout";
     @VisibleForTesting static final String KEY_FREEZER_EXEMPT_INST_PKG =
             "freeze_exempt_inst_pkg";
+
+
+    static final int UNFREEZE_REASON_NONE =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_NONE;
+    static final int UNFREEZE_REASON_ACTIVITY =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_ACTIVITY;
+    static final int UNFREEZE_REASON_FINISH_RECEIVER =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_FINISH_RECEIVER;
+    static final int UNFREEZE_REASON_START_RECEIVER =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_START_RECEIVER;
+    static final int UNFREEZE_REASON_BIND_SERVICE =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_BIND_SERVICE;
+    static final int UNFREEZE_REASON_UNBIND_SERVICE =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_UNBIND_SERVICE;
+    static final int UNFREEZE_REASON_START_SERVICE =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_START_SERVICE;
+    static final int UNFREEZE_REASON_GET_PROVIDER =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_GET_PROVIDER;
+    static final int UNFREEZE_REASON_REMOVE_PROVIDER =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_REMOVE_PROVIDER;
+    static final int UNFREEZE_REASON_UI_VISIBILITY =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_UI_VISIBILITY;
+    static final int UNFREEZE_REASON_ALLOWLIST =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_ALLOWLIST;
+    static final int UNFREEZE_REASON_PROCESS_BEGIN =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_PROCESS_BEGIN;
+    static final int UNFREEZE_REASON_PROCESS_END =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_PROCESS_END;
+    static final int UNFREEZE_REASON_TRIM_MEMORY =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_TRIM_MEMORY;
+    static final int UNFREEZE_REASON_PING =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_PING;
+    static final int UNFREEZE_REASON_FILE_LOCKS =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_FILE_LOCKS;
+    static final int UNFREEZE_REASON_FILE_LOCK_CHECK_FAILURE =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_FILE_LOCK_CHECK_FAILURE;
+    static final int UNFREEZE_REASON_BINDER_TXNS =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_BINDER_TXNS;
+    static final int UNFREEZE_REASON_FEATURE_FLAGS =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_FEATURE_FLAGS;
+
+    @IntDef(prefix = {"UNFREEZE_REASON_"}, value = {
+        UNFREEZE_REASON_NONE,
+        UNFREEZE_REASON_ACTIVITY,
+        UNFREEZE_REASON_FINISH_RECEIVER,
+        UNFREEZE_REASON_START_RECEIVER,
+        UNFREEZE_REASON_BIND_SERVICE,
+        UNFREEZE_REASON_UNBIND_SERVICE,
+        UNFREEZE_REASON_START_SERVICE,
+        UNFREEZE_REASON_GET_PROVIDER,
+        UNFREEZE_REASON_REMOVE_PROVIDER,
+        UNFREEZE_REASON_UI_VISIBILITY,
+        UNFREEZE_REASON_ALLOWLIST,
+        UNFREEZE_REASON_PROCESS_BEGIN,
+        UNFREEZE_REASON_PROCESS_END,
+        UNFREEZE_REASON_TRIM_MEMORY,
+        UNFREEZE_REASON_PING,
+        UNFREEZE_REASON_FILE_LOCKS,
+        UNFREEZE_REASON_FILE_LOCK_CHECK_FAILURE,
+        UNFREEZE_REASON_BINDER_TXNS,
+        UNFREEZE_REASON_FEATURE_FLAGS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UnfreezeReason {}
 
     // RSS Indices
     private static final int RSS_TOTAL_INDEX = 0;
@@ -888,7 +955,7 @@ public final class CachedAppOptimizer {
                     }
 
                     if (!enable && opt.isFrozen()) {
-                        unfreezeAppLSP(process, OomAdjuster.OOM_ADJ_REASON_NONE);
+                        unfreezeAppLSP(process, UNFREEZE_REASON_FEATURE_FLAGS);
 
                         // Set freezerOverride *after* calling unfreezeAppLSP (it resets the flag)
                         opt.setFreezerOverride(true);
@@ -1194,7 +1261,7 @@ public final class CachedAppOptimizer {
 
     // This will ensure app will be out of the freezer for at least mFreezerDebounceTimeout.
     @GuardedBy("mAm")
-    void unfreezeTemporarily(ProcessRecord app, @OomAdjuster.OomAdjReason int reason) {
+    void unfreezeTemporarily(ProcessRecord app, @UnfreezeReason int reason) {
         if (mUseFreezer) {
             synchronized (mProcLock) {
                 if (app.mOptRecord.isFrozen() || app.mOptRecord.isPendingFreeze()) {
@@ -1224,7 +1291,7 @@ public final class CachedAppOptimizer {
     }
 
     @GuardedBy({"mAm", "mProcLock", "mFreezerLock"})
-    void unfreezeAppInternalLSP(ProcessRecord app, @OomAdjuster.OomAdjReason int reason) {
+    void unfreezeAppInternalLSP(ProcessRecord app, @UnfreezeReason int reason) {
         final int pid = app.getPid();
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
         if (opt.isPendingFreeze()) {
@@ -1318,7 +1385,7 @@ public final class CachedAppOptimizer {
     }
 
     @GuardedBy({"mAm", "mProcLock"})
-    void unfreezeAppLSP(ProcessRecord app, @OomAdjuster.OomAdjReason int reason) {
+    void unfreezeAppLSP(ProcessRecord app, @UnfreezeReason int reason) {
         synchronized (mFreezerLock) {
             unfreezeAppInternalLSP(app, reason);
         }
@@ -1950,7 +2017,7 @@ public final class CachedAppOptimizer {
                                 + name + "(" + pid + "): " + e);
                         synchronized (mAm) {
                             synchronized (mProcLock) {
-                                unfreezeAppLSP(proc, OomAdjuster.OOM_ADJ_REASON_NONE);
+                                unfreezeAppLSP(proc, UNFREEZE_REASON_FILE_LOCK_CHECK_FAILURE);
                             }
                         }
                     }
@@ -1975,10 +2042,11 @@ public final class CachedAppOptimizer {
         }
 
         @GuardedBy({"mAm", "mProcLock"})
-        private void rescheduleFreeze(final ProcessRecord proc, final String reason) {
+        private void rescheduleFreeze(final ProcessRecord proc, final String reason,
+                @UnfreezeReason int reasonCode) {
             Slog.d(TAG_AM, "Reschedule freeze for process " + proc.getPid()
                     + " " + proc.processName + " (" + reason + ")");
-            unfreezeAppLSP(proc, OomAdjuster.OOM_ADJ_REASON_NONE);
+            unfreezeAppLSP(proc, reasonCode);
             freezeAppAsyncLSP(proc);
         }
 
@@ -2024,7 +2092,7 @@ public final class CachedAppOptimizer {
                 // transactions that might be pending.
                 try {
                     if (freezeBinder(pid, true, FREEZE_BINDER_TIMEOUT_MS) != 0) {
-                        rescheduleFreeze(proc, "outstanding txns");
+                        rescheduleFreeze(proc, "outstanding txns", UNFREEZE_REASON_BINDER_TXNS);
                         return;
                     }
                 } catch (RuntimeException e) {
@@ -2076,7 +2144,8 @@ public final class CachedAppOptimizer {
                         pid,
                         name,
                         unfrozenDuration,
-                        FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__NONE);
+                        FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__NONE,
+                        UNFREEZE_REASON_NONE);
             }
 
             try {
@@ -2085,7 +2154,7 @@ public final class CachedAppOptimizer {
 
                 if ((freezeInfo & TXNS_PENDING_WHILE_FROZEN) != 0) {
                     synchronized (mProcLock) {
-                        rescheduleFreeze(proc, "new pending txns");
+                        rescheduleFreeze(proc, "new pending txns", UNFREEZE_REASON_BINDER_TXNS);
                     }
                     return;
                 }
@@ -2102,7 +2171,7 @@ public final class CachedAppOptimizer {
         }
 
         private void reportUnfreeze(int pid, int frozenDuration, String processName,
-                @OomAdjuster.OomAdjReason int reason) {
+                @UnfreezeReason int reason) {
 
             EventLog.writeEvent(EventLogTags.AM_UNFREEZE, pid, processName);
 
@@ -2114,38 +2183,8 @@ public final class CachedAppOptimizer {
                         pid,
                         processName,
                         frozenDuration,
-                        getUnfreezeReasonCode(reason));
-            }
-        }
-
-        private int getUnfreezeReasonCode(@OomAdjuster.OomAdjReason int oomAdjReason) {
-            switch (oomAdjReason) {
-                case OomAdjuster.OOM_ADJ_REASON_ACTIVITY:
-                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__ACTIVITY;
-                case OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER:
-                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__FINISH_RECEIVER;
-                case OomAdjuster.OOM_ADJ_REASON_START_RECEIVER:
-                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__START_RECEIVER;
-                case OomAdjuster.OOM_ADJ_REASON_BIND_SERVICE:
-                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__BIND_SERVICE;
-                case OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE:
-                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__UNBIND_SERVICE;
-                case OomAdjuster.OOM_ADJ_REASON_START_SERVICE:
-                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__START_SERVICE;
-                case OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER:
-                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__GET_PROVIDER;
-                case OomAdjuster.OOM_ADJ_REASON_REMOVE_PROVIDER:
-                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__REMOVE_PROVIDER;
-                case OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY:
-                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__UI_VISIBILITY;
-                case OomAdjuster.OOM_ADJ_REASON_ALLOWLIST:
-                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__ALLOWLIST;
-                case OomAdjuster.OOM_ADJ_REASON_PROCESS_BEGIN:
-                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__PROCESS_BEGIN;
-                case OomAdjuster.OOM_ADJ_REASON_PROCESS_END:
-                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__PROCESS_END;
-                default:
-                    return FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__NONE;
+                        FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON__NONE, // deprecated
+                        reason);
             }
         }
 
@@ -2171,7 +2210,7 @@ public final class CachedAppOptimizer {
                                 Slog.d(TAG_AM, app.processName + " (" + pid + ") blocks "
                                         + pr.processName + " (" + blocked + ")");
                                 // Found at least one blocked non-cached process
-                                unfreezeAppLSP(app, OomAdjuster.OOM_ADJ_REASON_NONE);
+                                unfreezeAppLSP(app, UNFREEZE_REASON_FILE_LOCKS);
                                 break;
                             }
                         }
@@ -2205,6 +2244,37 @@ public final class CachedAppOptimizer {
                 compactProcess(pid, COMPACT_ACTION_ANON_FLAG);
             }
             mPidCompacting = -1;
+        }
+    }
+
+    static int getUnfreezeReasonCodeFromOomAdjReason(@OomAdjuster.OomAdjReason int oomAdjReason) {
+        switch (oomAdjReason) {
+            case OomAdjuster.OOM_ADJ_REASON_ACTIVITY:
+                return UNFREEZE_REASON_ACTIVITY;
+            case OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER:
+                return UNFREEZE_REASON_FINISH_RECEIVER;
+            case OomAdjuster.OOM_ADJ_REASON_START_RECEIVER:
+                return UNFREEZE_REASON_START_RECEIVER;
+            case OomAdjuster.OOM_ADJ_REASON_BIND_SERVICE:
+                return UNFREEZE_REASON_BIND_SERVICE;
+            case OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE:
+                return UNFREEZE_REASON_UNBIND_SERVICE;
+            case OomAdjuster.OOM_ADJ_REASON_START_SERVICE:
+                return UNFREEZE_REASON_START_SERVICE;
+            case OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER:
+                return UNFREEZE_REASON_GET_PROVIDER;
+            case OomAdjuster.OOM_ADJ_REASON_REMOVE_PROVIDER:
+                return UNFREEZE_REASON_REMOVE_PROVIDER;
+            case OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY:
+                return UNFREEZE_REASON_UI_VISIBILITY;
+            case OomAdjuster.OOM_ADJ_REASON_ALLOWLIST:
+                return UNFREEZE_REASON_ALLOWLIST;
+            case OomAdjuster.OOM_ADJ_REASON_PROCESS_BEGIN:
+                return UNFREEZE_REASON_PROCESS_BEGIN;
+            case OomAdjuster.OOM_ADJ_REASON_PROCESS_END:
+                return UNFREEZE_REASON_PROCESS_END;
+            default:
+                return UNFREEZE_REASON_NONE;
         }
     }
 }
