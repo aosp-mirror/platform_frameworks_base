@@ -11602,6 +11602,7 @@ public class AudioService extends IAudioService.Stub
             return false;
         }
 
+        final long token = Binder.clearCallingIdentity();
         try {
             if (!projectionService.isCurrentProjection(projection)) {
                 Log.w(TAG, "App passed invalid MediaProjection token");
@@ -11611,6 +11612,8 @@ public class AudioService extends IAudioService.Stub
             Log.e(TAG, "Can't call .isCurrentProjection() on IMediaProjectionManager"
                     + projectionService.asBinder(), e);
             return false;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
 
         try {
