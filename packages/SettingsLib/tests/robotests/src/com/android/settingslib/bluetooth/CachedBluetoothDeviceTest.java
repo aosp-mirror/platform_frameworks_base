@@ -1138,6 +1138,25 @@ public class CachedBluetoothDeviceTest {
     }
 
     @Test
+    public void switchMemberDeviceContent_switchMainDevice_switchesSuccessful() {
+        mCachedDevice.mRssi = RSSI_1;
+        mCachedDevice.mJustDiscovered = JUSTDISCOVERED_1;
+        mSubCachedDevice.mRssi = RSSI_2;
+        mSubCachedDevice.mJustDiscovered = JUSTDISCOVERED_2;
+        mCachedDevice.addMemberDevice(mSubCachedDevice);
+
+        mCachedDevice.switchMemberDeviceContent(mSubCachedDevice);
+
+        assertThat(mCachedDevice.mRssi).isEqualTo(RSSI_2);
+        assertThat(mCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_2);
+        assertThat(mCachedDevice.mDevice).isEqualTo(mSubDevice);
+        assertThat(mSubCachedDevice.mRssi).isEqualTo(RSSI_1);
+        assertThat(mSubCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_1);
+        assertThat(mSubCachedDevice.mDevice).isEqualTo(mDevice);
+        assertThat(mCachedDevice.getMemberDevice().contains(mSubCachedDevice)).isTrue();
+    }
+
+    @Test
     public void isConnectedHearingAidDevice_isConnectedAshaHearingAidDevice_returnTrue() {
         when(mProfileManager.getHearingAidProfile()).thenReturn(mHearingAidProfile);
 
