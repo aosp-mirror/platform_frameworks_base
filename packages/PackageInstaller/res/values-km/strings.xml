@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"បាន​ដំឡើង​កម្មវិធី។"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"តើ​អ្នក​ចង់​ដំឡើង​កម្មវិធី​នេះ​ដែរទេ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"តើអ្នកចង់ដំឡើងកំណែ​កម្មវិធីនេះដែរទេ?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"ដំឡើងកំណែកម្មវិធីនេះពី <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> ឬ?\n\nកម្មវិធីនេះជាធម្មតាទទួលបានកំណែថ្មីពី <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>។ តាមរយៈការដំឡើងកំណែពីប្រភពផ្សេង អ្នកអាចនឹងទទួលបានកំណែថ្មីនាពេលអនាគតពីប្រភពណាក៏បាននៅលើទូរសព្ទរបស់អ្នក។ មុខងារ​កម្មវិធីអាចមានការផ្លាស់ប្ដូរ។"</string>
     <string name="install_failed" msgid="5777824004474125469">"មិន​បាន​ដំឡើង​កម្មវិធីទេ។"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"កញ្ចប់ត្រូវបានទប់ស្កាត់​មិន​ឱ្យ​ដំឡើង។"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"កម្មវិធីមិនបានដំឡើងទេ ដោយសារកញ្ចប់កម្មវិធីមិនត្រូវគ្នាជាមួយកញ្ចប់ដែលមានស្រាប់។"</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"អ្នកប្រើប្រាស់​នេះ​មិនអាច​ដំឡើងកម្មវិធីមិនស្គាល់​​បាន​ទេ"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"មិន​អនុញ្ញាត​ឱ្យអ្នក​ប្រើ​ប្រាស់នេះ​ដំឡើងកម្មវិធីទេ"</string>
     <string name="ok" msgid="7871959885003339302">"យល់ព្រម"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"មិនអីទេ ដំឡើង​កំណែ​ចុះ"</string>
     <string name="manage_applications" msgid="5400164782453975580">"គ្រប់គ្រង​កម្មវិធី"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"អស់​ទំហំផ្ទុក"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"មិន​អាច​ដំឡើង <xliff:g id="APP_NAME">%1$s</xliff:g> បានទេ។ សូម​បង្កើន​ទំហំ​ផ្ទុក​ទំនេរ​មួយចំនួន​ រួច​ព្យាយាម​ម្ដង​ទៀត។"</string>
