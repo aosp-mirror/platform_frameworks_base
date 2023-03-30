@@ -2217,10 +2217,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                         }
                         if (ustate.getEnabledState() != COMPONENT_ENABLED_STATE_DEFAULT) {
                             serializer.attributeInt(null, ATTR_ENABLED, ustate.getEnabledState());
-                            if (ustate.getLastDisableAppCaller() != null) {
-                                serializer.attribute(null, ATTR_ENABLED_CALLER,
-                                        ustate.getLastDisableAppCaller());
-                            }
+                        }
+                        if (ustate.getLastDisableAppCaller() != null) {
+                            serializer.attribute(null, ATTR_ENABLED_CALLER,
+                                    ustate.getLastDisableAppCaller());
                         }
                         if (ustate.getInstallReason() != PackageManager.INSTALL_REASON_UNKNOWN) {
                             serializer.attributeInt(null, ATTR_INSTALL_REASON,
