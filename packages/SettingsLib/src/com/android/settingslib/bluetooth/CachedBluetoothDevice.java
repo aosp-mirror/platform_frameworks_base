@@ -940,7 +940,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 + getName()
                 + ", groupId="
                 + mGroupId
-                + ", member= " + mMemberDevices
                 + ")";
     }
 
@@ -1492,6 +1491,33 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     public void removeMemberDevice(CachedBluetoothDevice memberDevice) {
         memberDevice.release();
         mMemberDevices.remove(memberDevice);
+    }
+
+    /**
+     * In order to show the preference for the whole group, we always set the main device as the
+     * first connected device in the coordinated set, and then switch the content of the main
+     * device and member devices.
+     *
+     * @param newMainDevice the new Main device which is from the previous main device's member
+     *                      list.
+     */
+    public void switchMemberDeviceContent(CachedBluetoothDevice newMainDevice) {
+        // Backup from main device
+        final BluetoothDevice tmpDevice = mDevice;
+        final short tmpRssi = mRssi;
+        final boolean tmpJustDiscovered = mJustDiscovered;
+        // Set main device from sub device
+        release();
+        mDevice = newMainDevice.mDevice;
+        mRssi = newMainDevice.mRssi;
+        mJustDiscovered = newMainDevice.mJustDiscovered;
+
+        // Set sub device from backup
+        newMainDevice.release();
+        newMainDevice.mDevice = tmpDevice;
+        newMainDevice.mRssi = tmpRssi;
+        newMainDevice.mJustDiscovered = tmpJustDiscovered;
+        fetchActiveDevices();
     }
 
     /**
