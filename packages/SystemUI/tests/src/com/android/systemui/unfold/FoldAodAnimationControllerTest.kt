@@ -51,6 +51,8 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when` as whenever
@@ -172,6 +174,28 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
             verify(latencyTracker).onActionStart(any())
             verify(latencyTracker).onActionEnd(any())
+
+            job.cancel()
+        }
+
+    @Test
+    fun onFolded_onScreenTurningOnInvokedTwice_doesNotLogLatency() =
+        runBlocking(IMMEDIATE) {
+            val job = underTest.listenForDozing(this)
+            keyguardRepository.setDozing(true)
+            setAodEnabled(enabled = true)
+
+            yield()
+
+            fold()
+            simulateScreenTurningOn()
+            reset(latencyTracker)
+
+            // This can happen > 1 time if the prox sensor is covered
+            simulateScreenTurningOn()
+
+            verify(latencyTracker, never()).onActionStart(any())
+            verify(latencyTracker, never()).onActionEnd(any())
 
             job.cancel()
         }
