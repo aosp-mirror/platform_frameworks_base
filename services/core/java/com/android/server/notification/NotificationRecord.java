@@ -545,6 +545,7 @@ public final class NotificationRecord {
         pw.println(prefix + "mAdjustments=" + mAdjustments);
         pw.println(prefix + "shortcut=" + notification.getShortcutId()
                 + " found valid? " + (mShortcutInfo != null));
+        pw.println(prefix + "mUserVisOverride=" + getPackageVisibilityOverride());
     }
 
     private void dumpNotification(PrintWriter pw, String prefix, Notification notification,
@@ -574,6 +575,7 @@ public final class NotificationRecord {
         } else {
             pw.println("null");
         }
+        pw.println(prefix + "vis=" + notification.visibility);
         pw.println(prefix + "contentView=" + formatRemoteViews(notification.contentView));
         pw.println(prefix + "bigContentView=" + formatRemoteViews(notification.bigContentView));
         pw.println(prefix + "headsUpContentView="
