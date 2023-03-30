@@ -555,6 +555,11 @@ public final class PhoneAccount implements Parcelable {
 
         /**
          * Sets the address. See {@link PhoneAccount#getAddress}.
+         * <p>
+         * Note: The entire URI value is limited to 256 characters. This check is
+         * enforced when registering the PhoneAccount via
+         * {@link TelecomManager#registerPhoneAccount(PhoneAccount)} and will cause an
+         * {@link IllegalArgumentException} to be thrown if URI is over 256.
          *
          * @param value The address of the phone account.
          * @return The builder.
@@ -588,6 +593,10 @@ public final class PhoneAccount implements Parcelable {
 
         /**
          * Sets the icon. See {@link PhoneAccount#getIcon}.
+         * <p>
+         * Note: An {@link IllegalArgumentException} if the Icon cannot be written to memory.
+         * This check is enforced when registering the PhoneAccount via
+         * {@link TelecomManager#registerPhoneAccount(PhoneAccount)}
          *
          * @param icon The icon to set.
          */
@@ -621,6 +630,10 @@ public final class PhoneAccount implements Parcelable {
         /**
          * Specifies an additional URI scheme supported by the {@link PhoneAccount}.
          *
+         * <p>
+         * Each URI scheme is limited to 256 characters.  Adding a scheme over 256 characters will
+         * cause an {@link IllegalArgumentException} to be thrown when the account is registered.
+         *
          * @param uriScheme The URI scheme.
          * @return The builder.
          */
@@ -633,6 +646,12 @@ public final class PhoneAccount implements Parcelable {
 
         /**
          * Specifies the URI schemes supported by the {@link PhoneAccount}.
+         *
+         * <p>
+         * A max of 10 URI schemes can be added per account.  Additionally, each URI scheme is
+         * limited to 256 characters. Adding more than 10 URI schemes or 256 characters on any
+         * scheme will cause an {@link IllegalArgumentException} to be thrown when the account
+         * is registered.
          *
          * @param uriSchemes The URI schemes.
          * @return The builder.
