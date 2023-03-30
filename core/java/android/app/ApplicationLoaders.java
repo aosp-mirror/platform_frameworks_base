@@ -157,15 +157,15 @@ public class ApplicationLoaders {
      * All libraries in the closure of libraries to be loaded must be in libs. A library can
      * only depend on libraries that come before it in the list.
      */
-    public void createAndCacheNonBootclasspathSystemClassLoaders(SharedLibraryInfo[] libs) {
+    public void createAndCacheNonBootclasspathSystemClassLoaders(List<SharedLibraryInfo> libs) {
         if (mSystemLibsCacheMap != null) {
             throw new IllegalStateException("Already cached.");
         }
 
-        mSystemLibsCacheMap = new HashMap<String, CachedClassLoader>();
+        mSystemLibsCacheMap = new HashMap<>();
 
-        for (SharedLibraryInfo lib : libs) {
-            createAndCacheNonBootclasspathSystemClassLoader(lib);
+        for (int i = 0; i < libs.size(); i++) {
+            createAndCacheNonBootclasspathSystemClassLoader(libs.get(i));
         }
     }
 
