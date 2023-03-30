@@ -92,23 +92,29 @@ public class PermissionMigrationHelperImpl implements PermissionMigrationHelper 
                      packageManagerLocal.withUnfilteredSnapshot()) {
             Map<String, PackageState> packageStates = snapshot.getPackageStates();
             legacyState.getPackagePermissions().forEach((packageName, permissionStates) -> {
-                PackageState packageState = packageStates.get(packageName);
-                if (packageState != null) {
-                    int appId = packageState.getAppId();
-                    appIdPermissionStates.put(appId, toLegacyPermissionStates(permissionStates));
-                } else {
-                    Log.w(LOG_TAG, "Package " + packageName + " not found.");
+                if (!permissionStates.isEmpty()) {
+                    PackageState packageState = packageStates.get(packageName);
+                    if (packageState != null) {
+                        int appId = packageState.getAppId();
+                        appIdPermissionStates.put(appId,
+                                toLegacyPermissionStates(permissionStates));
+                    } else {
+                        Log.w(LOG_TAG, "Package " + packageName + " not found.");
+                    }
                 }
             });
 
             Map<String, SharedUserApi> sharedUsers = snapshot.getSharedUsers();
             legacyState.getSharedUserPermissions().forEach((sharedUserName, permissionStates) -> {
-                SharedUserApi sharedUser = sharedUsers.get(sharedUserName);
-                if (sharedUser != null) {
-                    int appId = sharedUser.getAppId();
-                    appIdPermissionStates.put(appId, toLegacyPermissionStates(permissionStates));
-                } else {
-                    Log.w(LOG_TAG, "Shared user " + sharedUserName + " not found.");
+                if (!permissionStates.isEmpty()) {
+                    SharedUserApi sharedUser = sharedUsers.get(sharedUserName);
+                    if (sharedUser != null) {
+                        int appId = sharedUser.getAppId();
+                        appIdPermissionStates.put(appId,
+                                toLegacyPermissionStates(permissionStates));
+                    } else {
+                        Log.w(LOG_TAG, "Shared user " + sharedUserName + " not found.");
+                    }
                 }
             });
         }

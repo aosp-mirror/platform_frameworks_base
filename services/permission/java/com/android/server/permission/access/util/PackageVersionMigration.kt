@@ -16,6 +16,7 @@
 
 package com.android.server.permission.access.util
 
+import android.util.Log
 import com.android.server.LocalServices
 import com.android.server.permission.access.AccessPolicy
 import com.android.server.pm.permission.PermissionMigrationHelper
@@ -57,10 +58,13 @@ object PackageVersionMigration {
             permissionVersion == 9 && appOpVersion == 1 -> 12
             permissionVersion == 10 && appOpVersion == 1 -> 13
             permissionVersion == 10 && appOpVersion == 3 -> AccessPolicy.VERSION_LATEST
-            else -> throw IllegalArgumentException(
-                "Version combination not recognized, permission" +
-                    "version: $permissionVersion, app-op version: $appOpVersion"
-            )
+            else -> {
+                Log.w(
+                    "PackageVersionMigration", "Version combination not recognized, permission" +
+                        "version: $permissionVersion, app-op version: $appOpVersion"
+                )
+                AccessPolicy.VERSION_LATEST
+            }
         }
     }
 }
