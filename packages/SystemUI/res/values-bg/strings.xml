@@ -1017,11 +1017,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Налице е поне едно устройство."</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Докоснете и задръжте прекия път"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Отказ"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Обръщане сега"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Отворете телефона за по-добро селфи"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Да се ползва ли предната камера за по-добро селфи?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Използвайте задната камера за по-широка снимка с по-висока разделителна способност."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Този екран ще се изключи"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Превключване на екраните сега"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Отворете телефона"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Да се превключи ли екранът?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"За по-висока разделителна способност използвайте задната камера"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"За по-висока разделителна способност обърнете телефона"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Разгъване на сгъваемо устройство"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Обръщане на сгъваемо устройство"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Оставаща батерия: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>

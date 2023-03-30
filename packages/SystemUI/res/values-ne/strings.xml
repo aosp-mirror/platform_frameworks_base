@@ -1014,11 +1014,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• कम्तीमा एउटा डिभाइस उपलब्ध छ"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"सर्टकट थिचिराख्नुहोस्"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"रद्द गर्नुहोस्"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"अहिले नै फ्लिप गर्नुहोस्"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"अझ राम्रो सेल्फी खिच्न फोन अनफोल्ड गर्नुहोस्"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"अझ राम्रो सेल्फी खिच्न फ्लिप गरी अगाडिपट्टिको डिस्प्ले प्रयोग गर्ने हो?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"अझ बढी रिजोल्युसन भएको फराकिलो फोटो खिच्न पछाडिपट्टिको क्यामेरा प्रयोग गर्नुहोस्।"</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ यो स्क्रिन अफ हुने छ"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"अहिले नै स्क्रिन बदल्नुहोस्"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"फोन अनफोल्ड गर्नुहोस्"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"स्क्रिनहरू बदल्ने हो?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"उच्च रिजोल्युसनको सेल्फी खिच्न पछाडिको क्यामेरा प्रयोग गर्नुहोस्"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"उच्च रिजोल्युसनको सेल्फी खिच्न फोन फ्लिप गर्नुहोस्"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"फोल्ड गर्न मिल्ने डिभाइस अनफोल्ड गरेको देखाइएको एनिमेसन"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"फोल्ड गर्न मिल्ने डिभाइस यताउता पल्टाएर देखाइएको एनिमेसन"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> ब्याट्री बाँकी छ"</string>

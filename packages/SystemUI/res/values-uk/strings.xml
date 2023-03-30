@@ -1017,11 +1017,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Принаймні один пристрій доступний"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Натисніть і утримуйте ярлик"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Скасувати"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Перевернути"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Розгорніть телефон, щоб зробити краще селфі"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Перемкнути на фронтальну камеру для кращого селфі?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Використовуйте камеру на задній панелі, щоб зробити знімок із ширшим кутом і вищою роздільною здатністю."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Цей екран вимкнеться"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Використовувати інший екран"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Розгорніть телефон"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Використовувати інший екран?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Для вищої роздільної здатності використовуйте основну камеру"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Для вищої роздільної здатності переверніть телефон"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Розкладний пристрій у розкладеному стані"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Розкладний пристрій обертається"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Заряд акумулятора: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>

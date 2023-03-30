@@ -1017,11 +1017,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Je k dispozici alespoň jedno zařízení"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Podržte zkratku"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Zrušit"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Otočit"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Rozložte telefon, selfie bude lepší"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Otočit na přední displej pro lepší selfie?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Pomocí zadního fotoaparátu pořiďte širší fotku s vyšším rozlišením."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Tato obrazovka se vypne"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Přepnout obrazovky"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Rozevřete telefon"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Přepnout obrazovky?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Pomocí zadního fotoaparátu dosáhnete vyššího rozlišení"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Otočte telefon, abyste dosáhli vyššího rozlišení"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Rozkládání rozkládacího zařízení"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Otáčení rozkládacího zařízení"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Zbývá <xliff:g id="PERCENTAGE">%s</xliff:g> baterie"</string>

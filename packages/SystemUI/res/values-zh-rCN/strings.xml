@@ -1017,11 +1017,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• 至少有一台设备可用"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"轻触并按住快捷方式"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"取消"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"立即翻转"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"展开手机可拍出更好的自拍照"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"翻转到外屏后自拍效果更好，要试试吗？"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"您可以使用后置摄像头拍摄视角更广、分辨率更高的照片。"</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ 此屏幕将会关闭"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"立即切换屏幕"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"展开手机"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"切换屏幕？"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"若要获得更高的分辨率，请使用后置摄像头"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"若要获得更高的分辨率，请翻转手机"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"正在展开可折叠设备"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"正在翻转可折叠设备"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"电池还剩 <xliff:g id="PERCENTAGE">%s</xliff:g> 的电量"</string>

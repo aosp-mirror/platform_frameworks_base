@@ -1014,11 +1014,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ಕನಿಷ್ಠ ಒಂದು ಸಾಧನ ಲಭ್ಯವಿದೆ"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ಸ್ಪರ್ಶಿಸಿ ಹೋಲ್ಡ್ ಮಾಡಿ ಶಾರ್ಟ್‌ಕಟ್"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ರದ್ದುಗೊಳಿಸಿ"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ಈಗ ಫ್ಲಿಪ್ ಮಾಡಿ"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"ಉತ್ತಮ ಸೆಲ್ಫೀಗಾಗಿ ಫೋನ್ ಅನ್ನು ಅನ್‌ಫೋಲ್ಡ್ ಮಾಡಿ"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"ಉತ್ತಮ ಸೆಲ್ಫೀಗಾಗಿ ಮುಂಭಾಗದ ಕ್ಯಾಮರಾಗೆ ಫ್ಲಿಪ್ ಮಾಡಬೇಕೆ?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ಹೆಚ್ಚಿನ ರೆಸಲ್ಯೂಷನ್ ಹೊಂದಿರುವ ವಿಶಾಲವಾದ ಫೋಟೋಗಾಗಿ ಹಿಂಭಾಗದ ಕ್ಯಾಮರಾವನ್ನು ಬಳಸಿ."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ಈ ಸ್ಕ್ರೀನ್ ಆಫ್ ಆಗುತ್ತದೆ"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"ಈಗ ಸ್ಕ್ರೀನ್‌ಗಳನ್ನು ಬದಲಿಸಿ"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"ಫೋನ್ ಅನ್ನು ಅನ್‌ಫೋಲ್ಡ್ ಮಾಡಿ"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"ಸ್ಕ್ರೀನ್‌ಗಳನ್ನು ಬದಲಿಸಬೇಕೆ?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"ಅಧಿಕ ರೆಸಲ್ಯೂಷನ್‌ಗಾಗಿ, ಹಿಂಬದಿಯ ಕ್ಯಾಮರಾವನ್ನು ಬಳಸಿ"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"ಅಧಿಕ ರೆಸಲ್ಯೂಷನ್‌ಗಾಗಿ, ಫೋನ್ ಅನ್ನು ಫ್ಲಿಪ್ ಮಾಡಿ"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ಫೋಲ್ಡ್ ಮಾಡಬಹುದಾದ ಸಾಧನವನ್ನು ಅನ್‌ಫೋಲ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ಫೋಲ್ಡ್ ಮಾಡಬಹುದಾದ ಸಾಧನವನ್ನು ಸುತ್ತಲೂ ತಿರುಗಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> ಬ್ಯಾಟರಿ ಉಳಿದಿದೆ"</string>

@@ -1014,11 +1014,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• K dispozícii je minimálne jedno zariadenie"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pridržte skratku"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Zrušiť"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Otočiť"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Ak chcete lepšie selfie, rozložte telefón"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Otočiť na prednú obrazovku pre lepšie selfie?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Pomocou zadného fotoaparátu vytvorte širšiu fotku s vyšším rozlíšením."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Táto obrazovka sa vypne"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Prepnite obrazovky"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Rozloženie telefónu"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Chcete prepnúť obrazovky?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Ak chcete vyššie rozlíšenie, použite zadnú kameru"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Ak chcete vyššie rozlíšenie, prevráťte telefón"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Rozloženie skladacieho zariadenia"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Prevrátenie skladacieho zariadenia"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Zostáva <xliff:g id="PERCENTAGE">%s</xliff:g> batérie"</string>

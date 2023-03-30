@@ -1017,11 +1017,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• குறைந்தபட்சம் ஒரு சாதனமாவது கிடைக்க வேண்டும்"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ஷார்ட்கட்டை தொட்டுப் பிடிக்கவும்"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ரத்துசெய்"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"இப்போது மாற்றவும்"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"சிறந்த செல்ஃபிக்கு மொபைலை மடக்காதீர்கள்"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"சிறந்த செல்ஃபிக்கு முன்புற டிஸ்பிளேவிற்கு மாற்றவா?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"அதிகத் தெளிவுத்திறனுடன் அகலக் கோணத்தில் படத்தை எடுப்பதற்குப் பின்பக்கக் கேமராவைப் பயன்படுத்துங்கள்."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ இந்தத் திரை ஆஃப் ஆகிவிடும்"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"இப்போது திரைகளை மாற்றவா?"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"மொபைலை விரியுங்கள்"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"காட்சித் திரைகளை மாற்றுவது எப்படி?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"உயர் தெளிவுத்திறனுக்கு, பின்புறக் கேமராவை உபயோகிங்கள்"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"உயர் தெளிவுத்திறனுக்கு, மொபைலை ஃபிளிப் செய்யுங்கள்"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"மடக்கத்தக்க சாதனம் திறக்கப்படுகிறது"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"மடக்கத்தக்க சாதனம் ஃபிளிப் செய்யப்பட்டு திருப்பப்படுகிறது"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> பேட்டரி மீதமுள்ளது"</string>
