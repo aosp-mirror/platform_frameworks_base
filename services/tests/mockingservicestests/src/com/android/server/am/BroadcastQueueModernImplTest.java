@@ -129,7 +129,7 @@ public final class BroadcastQueueModernImplTest {
         mConstants = new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS);
         mConstants.DELAY_URGENT_MILLIS = -120_000;
         mConstants.DELAY_NORMAL_MILLIS = 10_000;
-        mConstants.DELAY_CACHED_MILLIS = 120_000;
+        mConstants.DELAY_FROZEN_MILLIS = 120_000;
 
         final BroadcastSkipPolicy emptySkipPolicy = new BroadcastSkipPolicy(mAms) {
             public boolean shouldSkip(BroadcastRecord r, Object o) {
@@ -371,13 +371,13 @@ public final class BroadcastQueueModernImplTest {
                 List.of(makeMockRegisteredReceiver()), false);
         queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, false);
 
-        queue.setProcessCached(false);
+        queue.setUidFrozen(false);
         final long notCachedRunnableAt = queue.getRunnableAt();
-        queue.setProcessCached(true);
+        queue.setUidFrozen(true);
         final long cachedRunnableAt = queue.getRunnableAt();
         assertThat(cachedRunnableAt).isGreaterThan(notCachedRunnableAt);
         assertFalse(queue.isRunnable());
-        assertEquals(BroadcastProcessQueue.REASON_CACHED_INFINITE_DEFER,
+        assertEquals(BroadcastProcessQueue.REASON_INFINITE_DEFER,
                 queue.getRunnableAtReason());
         assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
     }
@@ -398,13 +398,13 @@ public final class BroadcastQueueModernImplTest {
                 List.of(makeMockRegisteredReceiver()), false);
         queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, false);
 
-        queue.setProcessCached(false);
+        queue.setUidFrozen(false);
         final long notCachedRunnableAt = queue.getRunnableAt();
-        queue.setProcessCached(true);
+        queue.setUidFrozen(true);
         final long cachedRunnableAt = queue.getRunnableAt();
         assertThat(cachedRunnableAt).isGreaterThan(notCachedRunnableAt);
         assertTrue(queue.isRunnable());
-        assertEquals(BroadcastProcessQueue.REASON_CACHED, queue.getRunnableAtReason());
+        assertEquals(BroadcastProcessQueue.REASON_FROZEN, queue.getRunnableAtReason());
         assertEquals(ProcessList.SCHED_GROUP_BACKGROUND, queue.getPreferredSchedulingGroupLocked());
     }
 
@@ -430,13 +430,13 @@ public final class BroadcastQueueModernImplTest {
         // verify that:
         // (a) the queue is immediately runnable by existence of a fg-priority broadcast
         // (b) the next one up is the fg-priority broadcast despite its later enqueue time
-        queue.setProcessCached(false);
+        queue.setUidFrozen(false);
         assertTrue(queue.isRunnable());
         assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueClockTime);
         assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
         assertEquals(queue.peekNextBroadcastRecord(), airplaneRecord);
 
-        queue.setProcessCached(true);
+        queue.setUidFrozen(true);
         assertTrue(queue.isRunnable());
         assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueClockTime);
         assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
@@ -496,10 +496,10 @@ public final class BroadcastQueueModernImplTest {
      * Verify that a cached process that would normally be delayed becomes
      * immediately runnable when the given broadcast is enqueued.
      */
-    private void doRunnableAt_Cached(BroadcastRecord testRecord, int testRunnableAtReason) {
+    private void doRunnableAt_Frozen(BroadcastRecord testRecord, int testRunnableAtReason) {
         final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
-        queue.setProcessCached(true);
+        queue.setUidFrozen(true);
 
         final BroadcastRecord lazyRecord = makeBroadcastRecord(
                 new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED),
@@ -515,49 +515,49 @@ public final class BroadcastQueueModernImplTest {
     }
 
     @Test
-    public void testRunnableAt_Cached_Manifest() {
-        doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), null,
+    public void testRunnableAt_Frozen_Manifest() {
+        doRunnableAt_Frozen(makeBroadcastRecord(makeMockIntent(), null,
                 List.of(makeMockManifestReceiver()), null, false), REASON_CONTAINS_MANIFEST);
     }
 
     @Test
-    public void testRunnableAt_Cached_Ordered() {
-        doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), null,
+    public void testRunnableAt_Frozen_Ordered() {
+        doRunnableAt_Frozen(makeBroadcastRecord(makeMockIntent(), null,
                 List.of(makeMockRegisteredReceiver()), null, true), REASON_CONTAINS_ORDERED);
     }
 
     @Test
-    public void testRunnableAt_Cached_Foreground() {
+    public void testRunnableAt_Frozen_Foreground() {
         final Intent foregroundIntent = new Intent();
         foregroundIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        doRunnableAt_Cached(makeBroadcastRecord(foregroundIntent, null,
+        doRunnableAt_Frozen(makeBroadcastRecord(foregroundIntent, null,
                 List.of(makeMockRegisteredReceiver()), null, false), REASON_CONTAINS_FOREGROUND);
     }
 
     @Test
-    public void testRunnableAt_Cached_Interactive() {
+    public void testRunnableAt_Frozen_Interactive() {
         final BroadcastOptions options = BroadcastOptions.makeBasic();
         options.setInteractive(true);
-        doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), options,
+        doRunnableAt_Frozen(makeBroadcastRecord(makeMockIntent(), options,
                 List.of(makeMockRegisteredReceiver()), null, false), REASON_CONTAINS_INTERACTIVE);
     }
 
     @Test
-    public void testRunnableAt_Cached_Alarm() {
+    public void testRunnableAt_Frozen_Alarm() {
         final BroadcastOptions options = BroadcastOptions.makeBasic();
         options.setAlarmBroadcast(true);
-        doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), options,
+        doRunnableAt_Frozen(makeBroadcastRecord(makeMockIntent(), options,
                 List.of(makeMockRegisteredReceiver()), null, false), REASON_CONTAINS_ALARM);
     }
 
     @Test
-    public void testRunnableAt_Cached_Prioritized_NonDeferrable() {
+    public void testRunnableAt_Frozen_Prioritized_NonDeferrable() {
         final List receivers = List.of(
                 withPriority(makeManifestReceiver(PACKAGE_RED, PACKAGE_RED), 10),
                 withPriority(makeManifestReceiver(PACKAGE_GREEN, PACKAGE_GREEN), -10));
         final BroadcastOptions options = BroadcastOptions.makeBasic()
                 .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_NONE);
-        doRunnableAt_Cached(makeBroadcastRecord(makeMockIntent(), options,
+        doRunnableAt_Frozen(makeBroadcastRecord(makeMockIntent(), options,
                 receivers, null, false), REASON_CONTAINS_PRIORITIZED);
     }
 
