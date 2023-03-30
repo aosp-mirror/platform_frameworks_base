@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_PERSONAL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_OPEN_IN_WORK;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 
 import static com.android.internal.app.ResolverActivity.EXTRA_CALLING_USER;
@@ -196,9 +197,7 @@ public class IntentForwarderActivity extends Activity  {
         buttonContainer.setPadding(0, 0, 0, buttonContainer.getPaddingBottom());
 
         ((TextView) findViewById(R.id.open_cross_profile)).setText(
-                getResources().getString(
-                        R.string.miniresolver_open_in_work,
-                        target.loadLabel(packageManagerForTargetUser)));
+                getOpenInWorkMessage(target.loadLabel(packageManagerForTargetUser)));
 
         // The mini-resolver's negative button is reused in this flow to cancel the intent
         ((Button) findViewById(R.id.use_same_profile_browser)).setText(R.string.cancel);
@@ -208,6 +207,13 @@ public class IntentForwarderActivity extends Activity  {
             startActivityAsCaller(launchIntent, targetUserId);
             finish();
         });
+    }
+
+    private String getOpenInWorkMessage(CharSequence targetLabel) {
+        return getSystemService(DevicePolicyManager.class).getResources().getString(
+                MINIRESOLVER_OPEN_IN_WORK,
+                () -> getString(R.string.miniresolver_open_in_work, targetLabel),
+                targetLabel);
     }
 
     private String getForwardToPersonalMessage() {
