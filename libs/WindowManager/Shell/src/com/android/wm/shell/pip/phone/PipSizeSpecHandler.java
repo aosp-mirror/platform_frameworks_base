@@ -21,6 +21,7 @@ import static com.android.wm.shell.pip.PipUtils.dpToPx;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -366,11 +367,8 @@ public class PipSizeSpecHandler {
         mContext = context;
         mPipDisplayLayoutState = pipDisplayLayoutState;
 
-        boolean enablePipSizeLargeScreen = SystemProperties
-                .getBoolean("persist.wm.debug.enable_pip_size_large_screen", true);
-
         // choose between two implementations of size spec logic
-        if (enablePipSizeLargeScreen) {
+        if (supportsPipSizeLargeScreen()) {
             mSizeSpecSourceImpl = new SizeSpecLargeScreenOptimizedImpl();
         } else {
             mSizeSpecSourceImpl = new SizeSpecDefaultImpl();
@@ -513,6 +511,18 @@ public class PipSizeSpecHandler {
             // Size is taller, fix the height and adjust the width.
             return new Size((int) (size.getHeight() * aspectRatio), size.getHeight());
         }
+    }
+
+    @VisibleForTesting
+    boolean supportsPipSizeLargeScreen() {
+        // TODO(b/271468706): switch Tv to having a dedicated SizeSpecSource once the SizeSpecSource
+        // can be injected
+        return SystemProperties
+                .getBoolean("persist.wm.debug.enable_pip_size_large_screen", true) && !isTv();
+    }
+
+    private boolean isTv() {
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
     }
 
     /** Dumps internal state. */
