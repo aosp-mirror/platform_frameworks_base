@@ -48,8 +48,10 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.plugins.ClockEvents;
+import com.android.systemui.plugins.ClockFaceConfig;
 import com.android.systemui.plugins.ClockFaceController;
 import com.android.systemui.plugins.ClockFaceEvents;
+import com.android.systemui.plugins.ClockTickRate;
 import com.android.systemui.plugins.log.LogBuffer;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.clocks.AnimatableClockView;
@@ -185,6 +187,10 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mClockController.getAnimations()).thenReturn(mClockAnimations);
         when(mClockRegistry.createCurrentClock()).thenReturn(mClockController);
         when(mClockEventController.getClock()).thenReturn(mClockController);
+        when(mSmallClockController.getConfig())
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, false));
+        when(mLargeClockController.getConfig())
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, false));
 
         mSliceView = new View(getContext());
         when(mView.findViewById(R.id.keyguard_slice_view)).thenReturn(mSliceView);
@@ -364,6 +370,28 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         observer.onChange(true);
         mExecutor.runAllReady();
         assertEquals(View.VISIBLE, mFakeWeatherView.getVisibility());
+    }
+
+    @Test
+    public void testChangeClockDateWeatherEnabled_SetsDateWeatherViewVisibility() {
+        ArgumentCaptor<ClockRegistry.ClockChangeListener> listenerArgumentCaptor =
+                ArgumentCaptor.forClass(ClockRegistry.ClockChangeListener.class);
+        when(mSmartspaceController.isEnabled()).thenReturn(true);
+        when(mSmartspaceController.isDateWeatherDecoupled()).thenReturn(true);
+        when(mSmartspaceController.isWeatherEnabled()).thenReturn(true);
+        mController.init();
+        mExecutor.runAllReady();
+        assertEquals(View.VISIBLE, mFakeDateView.getVisibility());
+
+        when(mSmallClockController.getConfig())
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, true));
+        when(mLargeClockController.getConfig())
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, true));
+        verify(mClockRegistry).registerClockChangeListener(listenerArgumentCaptor.capture());
+        listenerArgumentCaptor.getValue().onCurrentClockChanged();
+
+        mExecutor.runAllReady();
+        assertEquals(View.GONE, mFakeDateView.getVisibility());
     }
 
     @Test
