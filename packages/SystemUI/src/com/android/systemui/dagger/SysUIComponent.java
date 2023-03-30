@@ -38,7 +38,6 @@ import com.android.systemui.unfold.UnfoldLatencyTracker;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider;
-import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.desktopmode.DesktopMode;
@@ -49,15 +48,16 @@ import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.sysui.ShellInterface;
+import com.android.wm.shell.taskview.TaskViewFactory;
 import com.android.wm.shell.transition.ShellTransitions;
+
+import dagger.BindsInstance;
+import dagger.Subcomponent;
 
 import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Provider;
-
-import dagger.BindsInstance;
-import dagger.Subcomponent;
 
 /**
  * An example Dagger Subcomponent for Core SysUI.
