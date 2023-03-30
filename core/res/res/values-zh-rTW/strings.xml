@@ -800,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"允許具有這項權限的應用程式開始查看其他應用程式的功能資訊。"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"以高取樣率存取感應器資料"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"允許應用程式以高於 200 Hz 的頻率對感應器資料進行取樣"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"管理螢幕鎖定密碼和 PIN 碼支援的字元和長度上限。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"監控螢幕解鎖嘗試次數"</string>
@@ -2324,12 +2328,9 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在使用雙螢幕顯示內容"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"裝置過熱"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"手機過熱，因此無法使用雙螢幕功能"</string>
-    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
-    <skip />
-    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
-    <skip />
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"無法使用雙螢幕功能"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"省電模式已開啟，因此無法使用雙螢幕功能。你可以前往「設定」頁面關閉這個模式。"</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"前往「設定」"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"停用"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"已設定「<xliff:g id="DEVICE_NAME">%s</xliff:g>」"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"鍵盤配置已設為<xliff:g id="LAYOUT_1">%s</xliff:g>。輕觸即可變更。"</string>

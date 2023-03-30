@@ -801,6 +801,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permite proprietarului să înceapă să vadă informațiile despre funcții pentru o aplicație."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"să acceseze date de la senzori la o rată de eșantionare mare"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permite aplicației să colecteze date de la senzori la o rată de eșantionare de peste 200 Hz"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Să seteze reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Stabilește lungimea și tipul de caractere permise pentru parolele și codurile PIN de blocare a ecranului."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Să monitorizeze încercările de deblocare a ecranului"</string>

@@ -801,6 +801,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permet que el propietari vegi la informació de les funcions d\'una aplicació."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"accedir a les dades del sensor a una freqüència de mostratge alta"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permet que l\'aplicació dugui a terme un mostratge de les dades del sensor a una freqüència superior a 200 Hz"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Definir les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Permet controlar la longitud i el nombre de caràcters permesos a les contrasenyes i als PIN del bloqueig de pantalla."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Supervisar els intents de desbloqueig de la pantalla"</string>

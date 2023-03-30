@@ -801,6 +801,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permet au détenteur de commencer à afficher les renseignements sur les fonctionnalités d\'une application."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"accéder aux données des capteurs à un taux d’échantillonnage élevé"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permet à l’application d’échantillonner les données des capteurs à une fréquence supérieure à 200 Hz"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Gérer le nombre et le type de caractères autorisés dans les mots de passe et les NIP de verrouillage de l\'écran."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Gérer les tentatives de déverrouillage de l\'écran"</string>
@@ -1728,7 +1732,7 @@
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Pour basculer entre les fonctionnalités, maintenez le doigt sur le bouton d\'accessibilité."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Pour basculer entre les fonctionnalités, balayez l\'écran vers le haut avec deux doigts et maintenez-les-y."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Pour basculer entre les fonctionnalités, balayez l\'écran vers le haut avec trois doigts et maintenez-les-y."</string>
-    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Zoom"</string>
+    <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Agrandissement"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Passage au profil : <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Déconnexion de <xliff:g id="NAME">%1$s</xliff:g> en cours..."</string>
@@ -2325,12 +2329,9 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> utilise les deux écrans pour afficher le contenu"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"L\'appareil est trop chaud"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Le double écran n\'est pas accessible, car votre téléphone est trop chaud"</string>
-    <!-- no translation found for concurrent_display_notification_power_save_title (1794569070730736281) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_power_save_content (2198116070583851493) -->
-    <skip />
-    <!-- no translation found for device_state_notification_settings_button (691937505741872749) -->
-    <skip />
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"La fonctionnalité Dual Screen n\'est pas accessible"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"La fonctionnalité Dual Screen n\'est pas accessible, car l\'économiseur de pile est activé. Vous pouvez désactiver cette option dans les paramètres."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Accéder aux paramètres"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Désactiver"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> est configuré"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Disposition du clavier définie à <xliff:g id="LAYOUT_1">%s</xliff:g>. Touchez pour modifier."</string>
