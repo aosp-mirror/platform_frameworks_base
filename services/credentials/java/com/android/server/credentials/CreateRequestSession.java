@@ -156,7 +156,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
 
     @Override
     public void onProviderStatusChanged(ProviderSession.Status status,
-            ComponentName componentName) {
+            ComponentName componentName, ProviderSession.CredentialsSource source) {
         Log.i(TAG, "in onProviderStatusChanged with status: " + status);
         // If all provider responses have been received, we can either need the UI,
         // or we need to respond with error. The only other case is the entry being

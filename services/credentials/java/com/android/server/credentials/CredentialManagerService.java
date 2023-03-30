@@ -438,15 +438,11 @@ public final class CredentialManagerService
                     + callingPackage);
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
-            if (request.getOrigin() != null) {
-                // Check privileged permissions
-                mContext.enforceCallingPermission(CREDENTIAL_MANAGER_SET_ORIGIN, null);
-            }
-            enforcePermissionForAllowedProviders(request);
-
             final int userId = UserHandle.getCallingUserId();
             final int callingUid = Binder.getCallingUid();
             enforceCallingPackage(callingPackage, callingUid);
+
+            validateGetCredentialRequest(request);
 
             // New request session, scoped for this request only.
             final GetRequestSession session =
@@ -460,7 +456,24 @@ public final class CredentialManagerService
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan);
 
-            processGetCredential(request, callback, session);
+            List<ProviderSession> providerSessions =
+                    prepareProviderSessions(request, session);
+
+            if (providerSessions.isEmpty()) {
+                try {
+                    callback.onError(
+                            GetCredentialException.TYPE_NO_CREDENTIAL,
+                            "No credentials available on this device.");
+                } catch (RemoteException e) {
+                    Log.i(
+                            TAG,
+                            "Issue invoking onError on IGetCredentialCallback "
+                                    + "callback: "
+                                    + e.getMessage());
+                }
+            }
+
+            invokeProviderSessions(providerSessions);
             return cancelTransport;
         }
 
@@ -488,75 +501,22 @@ public final class CredentialManagerService
                             getContext(),
                             userId,
                             callingUid,
-                            prepareGetCredentialCallback,
                             getCredentialCallback,
                             request,
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
                             CancellationSignal.fromTransport(cancelTransport),
-                            timestampBegan);
+                            timestampBegan,
+                            prepareGetCredentialCallback);
 
-            processGetCredential(request, prepareGetCredentialCallback, session);
-
-            return cancelTransport;
-        }
-
-        private void processGetCredential(
-                GetCredentialRequest request,
-                IPrepareGetCredentialCallback callback,
-                PrepareGetRequestSession session) {
-            List<ProviderSession> providerSessions;
-
-            if (isCredentialDescriptionApiEnabled()) {
-                List<CredentialOption> optionsThatRequireActiveCredentials =
-                        request.getCredentialOptions().stream()
-                                .filter(credentialOption -> credentialOption
-                                        .getCredentialRetrievalData()
-                                        .getStringArrayList(
-                                                CredentialOption
-                                                        .SUPPORTED_ELEMENT_KEYS) != null)
-                                .toList();
-
-                List<CredentialOption> optionsThatDoNotRequireActiveCredentials =
-                        request.getCredentialOptions().stream()
-                                .filter(credentialOption -> credentialOption
-                                        .getCredentialRetrievalData()
-                                        .getStringArrayList(
-                                                CredentialOption
-                                                        .SUPPORTED_ELEMENT_KEYS) == null)
-                                .toList();
-
-                List<ProviderSession> sessionsWithoutRemoteService =
-                        initiateProviderSessionsWithActiveContainers(
-                                session,
-                                getFilteredResultFromRegistry(optionsThatRequireActiveCredentials));
-
-                List<ProviderSession> sessionsWithRemoteService =
-                        initiateProviderSessions(
-                                session,
-                                optionsThatDoNotRequireActiveCredentials.stream()
-                                        .map(CredentialOption::getType)
-                                        .collect(Collectors.toList()));
-
-                Set<ProviderSession> all = new LinkedHashSet<>();
-                all.addAll(sessionsWithRemoteService);
-                all.addAll(sessionsWithoutRemoteService);
-
-                providerSessions = new ArrayList<>(all);
-            } else {
-                // Initiate all provider sessions
-                providerSessions =
-                        initiateProviderSessions(
-                                session,
-                                request.getCredentialOptions().stream()
-                                        .map(CredentialOption::getType)
-                                        .collect(Collectors.toList()));
-            }
+            List<ProviderSession> providerSessions = prepareProviderSessions(request, session);
 
             if (providerSessions.isEmpty()) {
                 try {
                     // TODO: fix
-                    callback.onResponse(new PrepareGetCredentialResponseInternal(
-                            false, null, false, false, null));
+                    prepareGetCredentialCallback.onResponse(
+                            new PrepareGetCredentialResponseInternal(
+                            false, null,
+                            false, false, null));
                 } catch (RemoteException e) {
                     Log.i(
                             TAG,
@@ -566,14 +526,13 @@ public final class CredentialManagerService
                 }
             }
 
-            finalizeAndEmitInitialPhaseMetric(session);
-            // TODO(b/271135048) - May still be worth emitting in the empty cases above.
-            providerSessions.forEach(ProviderSession::invokeSession);
+            invokeProviderSessions(providerSessions);
+
+            return cancelTransport;
         }
 
-        private void processGetCredential(
+        private List<ProviderSession> prepareProviderSessions(
                 GetCredentialRequest request,
-                IGetCredentialCallback callback,
                 GetRequestSession session) {
             List<ProviderSession> providerSessions;
 
@@ -623,21 +582,12 @@ public final class CredentialManagerService
                                         .collect(Collectors.toList()));
             }
 
-            if (providerSessions.isEmpty()) {
-                try {
-                    callback.onError(
-                            GetCredentialException.TYPE_NO_CREDENTIAL,
-                            "No credentials available on this device.");
-                } catch (RemoteException e) {
-                    Slog.e(
-                            TAG,
-                            "Issue invoking onError on IGetCredentialCallback "
-                                    + "callback: ", e);
-                }
-            }
-
             finalizeAndEmitInitialPhaseMetric(session);
             // TODO(b/271135048) - May still be worth emitting in the empty cases above.
+            return providerSessions;
+        }
+
+        private void invokeProviderSessions(List<ProviderSession> providerSessions) {
             providerSessions.forEach(ProviderSession::invokeSession);
         }
 
@@ -934,6 +884,14 @@ public final class CredentialManagerService
 
             session.executeUnregisterRequest(request, callingPackage);
         }
+    }
+
+    private void validateGetCredentialRequest(GetCredentialRequest request) {
+        if (request.getOrigin() != null) {
+            // Check privileged permissions
+            mContext.enforceCallingPermission(CREDENTIAL_MANAGER_SET_ORIGIN, null);
+        }
+        enforcePermissionForAllowedProviders(request);
     }
 
     private void enforcePermissionForAllowedProviders(GetCredentialRequest request) {
