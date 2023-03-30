@@ -237,6 +237,12 @@ interface NativeInputManagerService {
     /** Set whether showing a pointer icon for styluses is enabled. */
     void setStylusPointerIconEnabled(boolean enabled);
 
+    /**
+     * Report sysfs node changes. This may result in recreation of the corresponding InputDevice.
+     * The recreated device may contain new associated peripheral devices like Light, Battery, etc.
+     */
+    void sysfsNodeChanged(String sysfsNodePath);
+
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
         /** Pointer to native input manager service object, used by native code. */
@@ -484,5 +490,8 @@ interface NativeInputManagerService {
 
         @Override
         public native void setStylusPointerIconEnabled(boolean enabled);
+
+        @Override
+        public native void sysfsNodeChanged(String sysfsNodePath);
     }
 }
