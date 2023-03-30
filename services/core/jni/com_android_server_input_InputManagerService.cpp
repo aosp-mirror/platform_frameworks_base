@@ -2336,6 +2336,14 @@ static void nativeReloadDeviceAliases(JNIEnv* env, jobject nativeImplObj) {
             InputReaderConfiguration::CHANGE_DEVICE_ALIAS);
 }
 
+static void nativeSysfsNodeChanged(JNIEnv* env, jobject nativeImplObj, jstring path) {
+    ScopedUtfChars sysfsNodePathChars(env, path);
+    const std::string sysfsNodePath = sysfsNodePathChars.c_str();
+
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->getInputManager()->getReader().sysfsNodeChanged(sysfsNodePath);
+}
+
 static std::string dumpInputProperties() {
     std::string out = "Input properties:\n";
     const std::string strategy =
@@ -2651,6 +2659,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"getBatteryDevicePath", "(I)Ljava/lang/String;", (void*)nativeGetBatteryDevicePath},
         {"reloadKeyboardLayouts", "()V", (void*)nativeReloadKeyboardLayouts},
         {"reloadDeviceAliases", "()V", (void*)nativeReloadDeviceAliases},
+        {"sysfsNodeChanged", "(Ljava/lang/String;)V", (void*)nativeSysfsNodeChanged},
         {"dump", "()Ljava/lang/String;", (void*)nativeDump},
         {"monitor", "()V", (void*)nativeMonitor},
         {"isInputDeviceEnabled", "(I)Z", (void*)nativeIsInputDeviceEnabled},
