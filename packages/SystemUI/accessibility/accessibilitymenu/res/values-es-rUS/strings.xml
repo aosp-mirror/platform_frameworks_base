@@ -4,11 +4,8 @@
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Menú de Accesibilidad"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"El menú de Accesibilidad es un menú de gran tamaño que se muestra en la pantalla y te permite controlar tu dispositivo. Puedes bloquearlo, controlar el volumen y el brillo, realizar capturas de pantalla y mucho más."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Asistente"</string>
-    <!-- no translation found for assistant_utterance (65509599221141377) -->
-    <skip />
+    <string name="assistant_utterance" msgid="65509599221141377">"Asistente"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Configuración de accesibilidad"</string>
-    <string name="volume_label" msgid="3682221827627150574">"Volumen"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"Controles de volumen"</string>
     <string name="power_label" msgid="7699720321491287839">"Encendido"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Opciones de encendido"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Apps recientes"</string>

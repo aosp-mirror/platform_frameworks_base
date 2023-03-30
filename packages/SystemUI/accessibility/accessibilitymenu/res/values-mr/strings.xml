@@ -6,8 +6,6 @@
     <string name="assistant_label" msgid="6796392082252272356">"असिस्टंट"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Assistant"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"अ‍ॅक्सेसिबिलिटी सेटिंग्ज"</string>
-    <string name="volume_label" msgid="3682221827627150574">"व्हॉल्यूम"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"व्हॉल्यूम नियंत्रणे"</string>
     <string name="power_label" msgid="7699720321491287839">"पॉवर"</string>
     <string name="power_utterance" msgid="7444296686402104807">"पॉवर पर्याय"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"अलीकडील अ‍ॅप्स"</string>
@@ -19,7 +17,7 @@
     <string name="volume_up_label" msgid="8592766918780362870">"व्‍हॉल्‍यूम वाढवा"</string>
     <string name="volume_down_label" msgid="8574981863656447346">"व्‍हॉल्‍यूम कमी करा"</string>
     <string name="brightness_up_label" msgid="8010753822854544846">"ब्राइटनेस वाढवा"</string>
-    <string name="brightness_down_label" msgid="7115662941913272072">"कमी ब्राइटनेस"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"ब्राइटनेस कमी करा"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"मागील स्क्रीनवर जा"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"पुढील स्क्रीनवर जा"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"तुमचे डिव्हाइस नियंत्रित करण्यासाठी अ‍ॅक्सेसिबिलिटी मेनू मोठा स्क्रीनवरील मेनू पुरवतो. तुम्ही तुमचे डिव्हाइस लॉक करणे, व्हॉल्यूम आणि ब्राइटनेस नियंत्रित करणे, स्क्रीनशॉट घेणे आणि आणखी बरेच काही करू शकता."</string>
