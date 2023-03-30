@@ -108,12 +108,17 @@ public class TouchInsetManager {
         private void updateTouchRegions() {
             mExecutor.execute(() -> {
                 final HashMap<AttachedSurfaceControl, Region> affectedSurfaces = new HashMap<>();
+                if (mTrackedViews.isEmpty()) {
+                    return;
+                }
+
                 mTrackedViews.stream().forEach(view -> {
-                    if (!view.isAttachedToWindow()) {
+                    final AttachedSurfaceControl surface = view.getRootSurfaceControl();
+
+                    // Detached views will not have a surface control.
+                    if (surface == null) {
                         return;
                     }
-
-                    final AttachedSurfaceControl surface = view.getRootSurfaceControl();
 
                     if (!affectedSurfaces.containsKey(surface)) {
                         affectedSurfaces.put(surface, Region.obtain());
@@ -179,6 +184,7 @@ public class TouchInsetManager {
         mSessionRegions.values().stream().forEach(regionMapping -> {
             regionMapping.entrySet().stream().forEach(entry -> {
                 final AttachedSurfaceControl surface = entry.getKey();
+
                 if (!affectedSurfaces.containsKey(surface)) {
                     affectedSurfaces.put(surface, Region.obtain());
                 }
