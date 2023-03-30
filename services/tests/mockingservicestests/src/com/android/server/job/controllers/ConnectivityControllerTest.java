@@ -21,11 +21,13 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
@@ -50,6 +52,7 @@ import static org.mockito.Mockito.verify;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.job.JobInfo;
 import android.content.ComponentName;
 import android.content.Context;
@@ -81,6 +84,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import java.time.Clock;
 import java.time.ZoneOffset;
@@ -318,6 +322,109 @@ public class ConnectivityControllerTest {
             final NetworkCapabilities caps = createCapabilitiesBuilder().build();
             assertFalse(controller.isSatisfied(early, net, caps, mConstants));
             assertTrue(controller.isSatisfied(late, net, caps, mConstants));
+        }
+    }
+
+    @Test
+    public void testMeteredAllowed() throws Exception {
+        final JobInfo.Builder jobBuilder = createJob()
+                .setEstimatedNetworkBytes(DataUnit.MEBIBYTES.toBytes(1),
+                        DataUnit.MEBIBYTES.toBytes(1))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+        final JobStatus job = spy(createJobStatus(jobBuilder));
+
+        final ConnectivityController controller = new ConnectivityController(mService,
+                mFlexibilityController);
+
+        // Unmetered network is always "metered allowed"
+        {
+            final Network net = mock(Network.class);
+            final NetworkCapabilities caps = createCapabilitiesBuilder()
+                    .addCapability(NET_CAPABILITY_NOT_CONGESTED)
+                    .addCapability(NET_CAPABILITY_NOT_METERED)
+                    .build();
+            assertTrue(controller.isSatisfied(job, net, caps, mConstants));
+        }
+
+        // Temporarily unmetered network is always "metered allowed"
+        {
+            final Network net = mock(Network.class);
+            final NetworkCapabilities caps = createCapabilitiesBuilder()
+                    .addCapability(NET_CAPABILITY_NOT_CONGESTED)
+                    .addCapability(NET_CAPABILITY_TEMPORARILY_NOT_METERED)
+                    .build();
+            assertTrue(controller.isSatisfied(job, net, caps, mConstants));
+        }
+
+        // Respond with the default values in NetworkPolicyManager. If those ever change enough
+        // to cause these tests to fail, we would likely need to go and update
+        // ConnectivityController.
+        doAnswer(
+                (Answer<Integer>) invocationOnMock
+                        -> NetworkPolicyManager.getDefaultProcessNetworkCapabilities(
+                        invocationOnMock.getArgument(0)))
+                .when(mService).getUidCapabilities(anyInt());
+
+        // Foreground is always allowed for metered network
+        {
+            final Network net = mock(Network.class);
+            final NetworkCapabilities caps = createCapabilitiesBuilder()
+                    .addCapability(NET_CAPABILITY_NOT_CONGESTED)
+                    .build();
+
+            when(mService.getUidProcState(anyInt()))
+                    .thenReturn(ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
+            assertTrue(controller.isSatisfied(job, net, caps, mConstants));
+
+            when(mService.getUidProcState(anyInt()))
+                    .thenReturn(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+            assertTrue(controller.isSatisfied(job, net, caps, mConstants));
+
+            when(mService.getUidProcState(anyInt())).thenReturn(ActivityManager.PROCESS_STATE_TOP);
+            assertTrue(controller.isSatisfied(job, net, caps, mConstants));
+
+            when(mService.getUidProcState(anyInt())).thenReturn(JobInfo.BIAS_DEFAULT);
+            when(job.getFlags()).thenReturn(JobInfo.FLAG_WILL_BE_FOREGROUND);
+            assertTrue(controller.isSatisfied(job, net, caps, mConstants));
+        }
+
+        when(mService.getUidProcState(anyInt())).thenReturn(ActivityManager.PROCESS_STATE_UNKNOWN);
+        when(job.getFlags()).thenReturn(0);
+
+        // User initiated is always allowed for metered network
+        {
+            final Network net = mock(Network.class);
+            final NetworkCapabilities caps = createCapabilitiesBuilder()
+                    .addCapability(NET_CAPABILITY_NOT_CONGESTED)
+                    .build();
+            when(job.shouldTreatAsUserInitiatedJob()).thenReturn(true);
+            assertTrue(controller.isSatisfied(job, net, caps, mConstants));
+        }
+
+        // Background non-user-initiated should follow the app's restricted state
+        {
+            final Network net = mock(Network.class);
+            final NetworkCapabilities caps = createCapabilitiesBuilder()
+                    .addCapability(NET_CAPABILITY_NOT_CONGESTED)
+                    .build();
+            when(job.shouldTreatAsUserInitiatedJob()).thenReturn(false);
+            when(mNetPolicyManager.getRestrictBackgroundStatus(anyInt()))
+                    .thenReturn(ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLED);
+            assertTrue(controller.isSatisfied(job, net, caps, mConstants));
+            // Test cache
+            when(mNetPolicyManager.getRestrictBackgroundStatus(anyInt()))
+                    .thenReturn(ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED);
+            assertTrue(controller.isSatisfied(job, net, caps, mConstants));
+            // Clear cache
+            controller.onAppRemovedLocked(job.getSourcePackageName(), job.getSourceUid());
+            assertFalse(controller.isSatisfied(job, net, caps, mConstants));
+            // Test cache
+            when(mNetPolicyManager.getRestrictBackgroundStatus(anyInt()))
+                    .thenReturn(ConnectivityManager.RESTRICT_BACKGROUND_STATUS_WHITELISTED);
+            assertFalse(controller.isSatisfied(job, net, caps, mConstants));
+            // Clear cache
+            controller.onAppRemovedLocked(job.getSourcePackageName(), job.getSourceUid());
+            assertTrue(controller.isSatisfied(job, net, caps, mConstants));
         }
     }
 

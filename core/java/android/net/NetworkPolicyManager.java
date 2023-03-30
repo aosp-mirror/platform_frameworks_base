@@ -780,11 +780,11 @@ public class NetworkPolicyManager {
             case ActivityManager.PROCESS_STATE_PERSISTENT:
             case ActivityManager.PROCESS_STATE_PERSISTENT_UI:
             case ActivityManager.PROCESS_STATE_TOP:
-                return ActivityManager.PROCESS_CAPABILITY_ALL;
             case ActivityManager.PROCESS_STATE_BOUND_TOP:
             case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
             case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
-                return ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
+                return ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK
+                        | ActivityManager.PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
             default:
                 return ActivityManager.PROCESS_CAPABILITY_NONE;
         }
@@ -826,13 +826,18 @@ public class NetworkPolicyManager {
         if (uidState == null) {
             return false;
         }
-        return isProcStateAllowedWhileOnRestrictBackground(uidState.procState);
+        return isProcStateAllowedWhileOnRestrictBackground(uidState.procState, uidState.capability);
     }
 
     /** @hide */
-    public static boolean isProcStateAllowedWhileOnRestrictBackground(int procState) {
-        // Data saver and bg policy restrictions will only take procstate into account.
-        return procState <= FOREGROUND_THRESHOLD_STATE;
+    public static boolean isProcStateAllowedWhileOnRestrictBackground(int procState,
+            @ProcessCapability int capabilities) {
+        return procState <= FOREGROUND_THRESHOLD_STATE
+                // This is meant to be a user-initiated job, and therefore gets similar network
+                // access to FGS.
+                || (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+                        && (capabilities
+                              & ActivityManager.PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK) != 0);
     }
 
     /** @hide */
