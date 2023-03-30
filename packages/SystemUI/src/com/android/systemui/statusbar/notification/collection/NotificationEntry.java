@@ -321,6 +321,15 @@ public final class NotificationEntry extends ListEntry {
         mDismissState = requireNonNull(dismissState);
     }
 
+    /**
+     * True if the notification has been canceled by system server. Usually, such notifications are
+     * immediately removed from the collection, but can sometimes stick around due to lifetime
+     * extenders.
+     */
+    public boolean isCanceled() {
+        return mCancellationReason != REASON_NOT_CANCELED;
+    }
+
     @Nullable public NotifFilter getExcludingFilter() {
         return getAttachState().getExcludingFilter();
     }
