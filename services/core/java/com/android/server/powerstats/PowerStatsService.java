@@ -360,7 +360,7 @@ public class PowerStatsService extends SystemService {
                     sb.append("ALL");
                 }
                 sb.append("[");
-                for (int i = 0; i < expectedLength; i++) {
+                for (int i = 0; i < energyConsumerIds.length; i++) {
                     final int id = energyConsumerIds[i];
                     sb.append(id);
                     sb.append("(type:");
