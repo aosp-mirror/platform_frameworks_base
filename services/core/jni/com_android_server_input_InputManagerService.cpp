@@ -136,7 +136,7 @@ static struct {
     jmethodID getContextForDisplay;
     jmethodID notifyDropWindow;
     jmethodID getParentSurfaceForPointers;
-    jmethodID isStylusPointerIconEnabled;
+    jmethodID isPerDisplayTouchModeEnabled;
 } gServiceClassInfo;
 
 static struct {
@@ -368,6 +368,10 @@ public:
     virtual PointerIconStyle getDefaultStylusIconId();
     virtual PointerIconStyle getCustomPointerIconId();
     virtual void onPointerDisplayIdChanged(int32_t displayId, const FloatPoint& position);
+
+    /* --- If touch mode is enabled per display or global --- */
+
+    virtual bool isPerDisplayTouchModeEnabled();
 
 private:
     sp<InputManagerInterface> mInputManager;
@@ -1641,6 +1645,16 @@ void NativeInputManager::setStylusButtonMotionEventsEnabled(bool enabled) {
             InputReaderConfiguration::CHANGE_STYLUS_BUTTON_REPORTING);
 }
 
+bool NativeInputManager::isPerDisplayTouchModeEnabled() {
+    JNIEnv* env = jniEnv();
+    jboolean enabled =
+            env->CallBooleanMethod(mServiceObj, gServiceClassInfo.isPerDisplayTouchModeEnabled);
+    if (checkAndClearExceptionFromCallback(env, "isPerDisplayTouchModeEnabled")) {
+        return false;
+    }
+    return static_cast<bool>(enabled);
+}
+
 FloatPoint NativeInputManager::getMouseCursorPosition() {
     std::scoped_lock _l(mLock);
     const auto pc = mLocked.pointerController.lock();
@@ -2823,8 +2837,8 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.getParentSurfaceForPointers, clazz,
                   "getParentSurfaceForPointers", "(I)J");
 
-    GET_METHOD_ID(gServiceClassInfo.isStylusPointerIconEnabled, clazz, "isStylusPointerIconEnabled",
-                  "()Z");
+    GET_METHOD_ID(gServiceClassInfo.isPerDisplayTouchModeEnabled, clazz,
+                  "isPerDisplayTouchModeEnabled", "()Z");
 
     // InputDevice
 
