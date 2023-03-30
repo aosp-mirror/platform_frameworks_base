@@ -42,7 +42,7 @@
   <!-- Title for subsection of "Learn more about passkeys" screen about seamless transition. [CHAR LIMIT=80] -->
   <string name="seamless_transition_title">Seamless transition</string>
   <!-- Detail for subsection of "Learn more about passkeys" screen about seamless transition. [CHAR LIMIT=500] -->
-  <string name="seamless_transition_detail">As we move towards a passwordless future, passwords will still be available alongside passkeys</string>
+  <string name="seamless_transition_detail">As we move towards a passwordless future, passwords will still be available alongside passkeys.</string>
   <!-- This appears as the title of the modal bottom sheet which provides all available providers for users to choose. [CHAR LIMIT=200] -->
   <string name="choose_provider_title">Choose where to save your <xliff:g id="createTypes" example="passkeys">%1$s</xliff:g></string>
   <!-- This appears as the description body of the modal bottom sheet which provides all available providers for users to choose. [CHAR LIMIT=200] -->
