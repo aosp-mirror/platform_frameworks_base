@@ -82,6 +82,7 @@ import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.shared.tracing.ProtoTraceable;
+import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.EdgeBackGestureHandlerProto;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
@@ -207,6 +208,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private final Provider<BackGestureTfClassifierProvider>
             mBackGestureTfClassifierProviderProvider;
     private final FeatureFlags mFeatureFlags;
+    private final Provider<LightBarController> mLightBarControllerProvider;
 
     // The left side edge width where touch down is allowed
     private int mEdgeWidthLeft;
@@ -352,7 +354,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             FalsingManager falsingManager,
             Provider<NavigationBarEdgePanel> navigationBarEdgePanelProvider,
             Provider<BackGestureTfClassifierProvider> backGestureTfClassifierProviderProvider,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            Provider<LightBarController> lightBarControllerProvider) {
         mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = executor;
@@ -372,6 +375,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mNavBarEdgePanelProvider = navigationBarEdgePanelProvider;
         mBackGestureTfClassifierProviderProvider = backGestureTfClassifierProviderProvider;
         mFeatureFlags = featureFlags;
+        mLightBarControllerProvider = lightBarControllerProvider;
         mLastReportedConfig.setTo(mContext.getResources().getConfiguration());
         ComponentName recentsComponentName = ComponentName.unflattenFromString(
                 context.getString(com.android.internal.R.string.config_recentsComponentName));
@@ -1055,6 +1059,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         if (DEBUG_MISSING_GESTURE) {
             Log.d(DEBUG_MISSING_GESTURE_TAG, "Update display size: mDisplaySize=" + mDisplaySize);
         }
+
         if (mEdgeBackPlugin != null) {
             mEdgeBackPlugin.setDisplaySize(mDisplaySize);
         }
@@ -1148,6 +1153,13 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     public void setBackAnimation(BackAnimation backAnimation) {
         mBackAnimation = backAnimation;
         updateBackAnimationThresholds();
+        if (mLightBarControllerProvider.get() != null) {
+            mBackAnimation.setStatusBarCustomizer((appearance) -> {
+                mMainExecutor.execute(() ->
+                        mLightBarControllerProvider.get()
+                                .customizeStatusBarAppearance(appearance));
+            });
+        }
     }
 
     /**
@@ -1175,6 +1187,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         private final Provider<BackGestureTfClassifierProvider>
                 mBackGestureTfClassifierProviderProvider;
         private final FeatureFlags mFeatureFlags;
+        private final Provider<LightBarController> mLightBarControllerProvider;
 
         @Inject
         public Factory(OverviewProxyService overviewProxyService,
@@ -1194,7 +1207,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                        Provider<NavigationBarEdgePanel> navBarEdgePanelProvider,
                        Provider<BackGestureTfClassifierProvider>
                                backGestureTfClassifierProviderProvider,
-                       FeatureFlags featureFlags) {
+                       FeatureFlags featureFlags,
+                       Provider<LightBarController> lightBarControllerProvider) {
             mOverviewProxyService = overviewProxyService;
             mSysUiState = sysUiState;
             mPluginManager = pluginManager;
@@ -1212,6 +1226,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             mNavBarEdgePanelProvider = navBarEdgePanelProvider;
             mBackGestureTfClassifierProviderProvider = backGestureTfClassifierProviderProvider;
             mFeatureFlags = featureFlags;
+            mLightBarControllerProvider = lightBarControllerProvider;
         }
 
         /** Construct a {@link EdgeBackGestureHandler}. */
@@ -1234,7 +1249,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                     mFalsingManager,
                     mNavBarEdgePanelProvider,
                     mBackGestureTfClassifierProviderProvider,
-                    mFeatureFlags);
+                    mFeatureFlags,
+                    mLightBarControllerProvider);
         }
     }
 
