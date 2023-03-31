@@ -387,8 +387,15 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             return;
         }
         // Sync Transactions can't operate simultaneously with shell transition collection.
-        // The transition animation (upon showing) will sync the location itself.
-        if (isUsingShellTransitions() && mTaskViewTransitions.hasPending()) return;
+        if (isUsingShellTransitions()) {
+            if (mTaskViewTransitions.hasPending()) {
+                // There is already a transition in-flight. The window bounds will be synced
+                // once it is complete.
+                return;
+            }
+            mTaskViewTransitions.setTaskBounds(this, boundsOnScreen);
+            return;
+        }
 
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setBounds(mTaskToken, boundsOnScreen);
