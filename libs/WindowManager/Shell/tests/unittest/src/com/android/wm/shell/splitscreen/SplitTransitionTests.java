@@ -278,7 +278,7 @@ public class SplitTransitionTests extends ShellTestCase {
         // Make sure it cleans-up if recents doesn't restore
         WindowContainerTransaction commitWCT = new WindowContainerTransaction();
         mStageCoordinator.onRecentsInSplitAnimationFinish(commitWCT,
-                mock(SurfaceControl.Transaction.class));
+                mock(SurfaceControl.Transaction.class), mock(TransitionInfo.class));
         assertFalse(mStageCoordinator.isSplitScreenVisible());
     }
 
@@ -317,7 +317,7 @@ public class SplitTransitionTests extends ShellTestCase {
         mMainStage.onTaskAppeared(mMainChild, mock(SurfaceControl.class));
         mSideStage.onTaskAppeared(mSideChild, mock(SurfaceControl.class));
         mStageCoordinator.onRecentsInSplitAnimationFinish(restoreWCT,
-                mock(SurfaceControl.Transaction.class));
+                mock(SurfaceControl.Transaction.class), mock(TransitionInfo.class));
         assertTrue(mStageCoordinator.isSplitScreenVisible());
     }
 
