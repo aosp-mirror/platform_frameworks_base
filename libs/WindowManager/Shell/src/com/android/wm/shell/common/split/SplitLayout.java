@@ -1120,7 +1120,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             setDividerInteractive(!mImeShown || !mHasImeFocus || isFloating, true,
                     "onImeStartPositioning");
 
-            return needOffset ? IME_ANIMATION_NO_ALPHA : 0;
+            return mTargetYOffset != mLastYOffset ? IME_ANIMATION_NO_ALPHA : 0;
         }
 
         @Override
