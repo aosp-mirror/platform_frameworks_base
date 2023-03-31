@@ -1218,45 +1218,49 @@ public final class Display {
     }
 
     /**
-     * Returns the display's HDR capabilities.
+     * Returns the current display mode's HDR capabilities.
      *
      * @see #isHdr()
      */
     public HdrCapabilities getHdrCapabilities() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            if (mDisplayInfo.userDisabledHdrTypes.length == 0) {
-                return mDisplayInfo.hdrCapabilities;
-            }
-
             if (mDisplayInfo.hdrCapabilities == null) {
                 return null;
             }
-
-            ArraySet<Integer> enabledTypesSet = new ArraySet<>();
-            for (int supportedType : mDisplayInfo.hdrCapabilities.getSupportedHdrTypes()) {
-                boolean typeDisabled = false;
-                for (int userDisabledType : mDisplayInfo.userDisabledHdrTypes) {
-                    if (supportedType == userDisabledType) {
-                        typeDisabled = true;
-                        break;
+            int[] supportedHdrTypes;
+            if (mDisplayInfo.userDisabledHdrTypes.length == 0) {
+                int[] modeSupportedHdrTypes = getMode().getSupportedHdrTypes();
+                supportedHdrTypes = Arrays.copyOf(modeSupportedHdrTypes,
+                        modeSupportedHdrTypes.length);
+            } else {
+                ArraySet<Integer> enabledTypesSet = new ArraySet<>();
+                for (int supportedType : getMode().getSupportedHdrTypes()) {
+                    if (!contains(mDisplayInfo.userDisabledHdrTypes, supportedType)) {
+                        enabledTypesSet.add(supportedType);
                     }
                 }
-                if (!typeDisabled) {
-                    enabledTypesSet.add(supportedType);
+
+                supportedHdrTypes = new int[enabledTypesSet.size()];
+                int index = 0;
+                for (int enabledType : enabledTypesSet) {
+                    supportedHdrTypes[index++] = enabledType;
                 }
             }
-
-            int[] enabledTypes = new int[enabledTypesSet.size()];
-            int index = 0;
-            for (int enabledType : enabledTypesSet) {
-                enabledTypes[index++] = enabledType;
-            }
-            return new HdrCapabilities(enabledTypes,
+            return new HdrCapabilities(supportedHdrTypes,
                     mDisplayInfo.hdrCapabilities.mMaxLuminance,
                     mDisplayInfo.hdrCapabilities.mMaxAverageLuminance,
                     mDisplayInfo.hdrCapabilities.mMinLuminance);
         }
+    }
+
+    private boolean contains(int[] disabledHdrTypes, int hdrType) {
+        for (Integer disabledHdrFormat : disabledHdrTypes) {
+            if (disabledHdrFormat == hdrType) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
