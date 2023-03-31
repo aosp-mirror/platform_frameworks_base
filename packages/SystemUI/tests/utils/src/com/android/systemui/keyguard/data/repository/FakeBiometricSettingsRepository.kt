@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flowOf
 
 class FakeBiometricSettingsRepository : BiometricSettingsRepository {
 
@@ -39,12 +38,17 @@ class FakeBiometricSettingsRepository : BiometricSettingsRepository {
     private val _isStrongBiometricAllowed = MutableStateFlow(false)
     override val isStrongBiometricAllowed = _isStrongBiometricAllowed.asStateFlow()
 
+    private val _isNonStrongBiometricAllowed = MutableStateFlow(false)
+    override val isNonStrongBiometricAllowed: StateFlow<Boolean>
+        get() = _isNonStrongBiometricAllowed
+
     private val _isFingerprintEnabledByDevicePolicy = MutableStateFlow(false)
     override val isFingerprintEnabledByDevicePolicy =
         _isFingerprintEnabledByDevicePolicy.asStateFlow()
 
+    private val _isFaceAuthSupportedInCurrentPosture = MutableStateFlow(false)
     override val isFaceAuthSupportedInCurrentPosture: Flow<Boolean>
-        get() = flowOf(true)
+        get() = _isFaceAuthSupportedInCurrentPosture
 
     private val _isCurrentUserInLockdown = MutableStateFlow(false)
     override val isCurrentUserInLockdown: Flow<Boolean>
@@ -66,7 +70,19 @@ class FakeBiometricSettingsRepository : BiometricSettingsRepository {
         _isFaceEnrolled.value = isFaceEnrolled
     }
 
+    fun setIsFaceAuthSupportedInCurrentPosture(value: Boolean) {
+        _isFaceAuthSupportedInCurrentPosture.value = value
+    }
+
     fun setIsFaceAuthEnabled(enabled: Boolean) {
         _isFaceAuthEnabled.value = enabled
+    }
+
+    fun setIsUserInLockdown(value: Boolean) {
+        _isCurrentUserInLockdown.value = value
+    }
+
+    fun setIsNonStrongBiometricAllowed(value: Boolean) {
+        _isNonStrongBiometricAllowed.value = value
     }
 }

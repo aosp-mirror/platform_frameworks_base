@@ -157,8 +157,31 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
             assertThat(strongBiometricAllowed()).isFalse()
         }
 
+    @Test
+    fun convenienceBiometricAllowedChange() =
+        testScope.runTest {
+            createBiometricSettingsRepository()
+            val convenienceBiometricAllowed =
+                collectLastValue(underTest.isNonStrongBiometricAllowed)
+            runCurrent()
+
+            onNonStrongAuthChanged(true, PRIMARY_USER_ID)
+            assertThat(convenienceBiometricAllowed()).isTrue()
+
+            onNonStrongAuthChanged(false, ANOTHER_USER_ID)
+            assertThat(convenienceBiometricAllowed()).isTrue()
+
+            onNonStrongAuthChanged(false, PRIMARY_USER_ID)
+            assertThat(convenienceBiometricAllowed()).isFalse()
+        }
+
     private fun onStrongAuthChanged(flags: Int, userId: Int) {
         strongAuthTracker.value.stub.onStrongAuthRequiredChanged(flags, userId)
+        testableLooper?.processAllMessages() // StrongAuthTracker uses the TestableLooper
+    }
+
+    private fun onNonStrongAuthChanged(allowed: Boolean, userId: Int) {
+        strongAuthTracker.value.stub.onIsNonStrongBiometricAllowedChanged(allowed, userId)
         testableLooper?.processAllMessages() // StrongAuthTracker uses the TestableLooper
     }
 
