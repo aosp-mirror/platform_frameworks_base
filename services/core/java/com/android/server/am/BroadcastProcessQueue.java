@@ -864,6 +864,7 @@ class BroadcastProcessQueue {
     static final int REASON_CONTAINS_RESULT_TO = 15;
     static final int REASON_CONTAINS_INSTRUMENTED = 16;
     static final int REASON_CONTAINS_MANIFEST = 17;
+    static final int REASON_FOREGROUND_ACTIVITIES = 18;
 
     @IntDef(flag = false, prefix = { "REASON_" }, value = {
             REASON_EMPTY,
@@ -883,6 +884,7 @@ class BroadcastProcessQueue {
             REASON_CONTAINS_RESULT_TO,
             REASON_CONTAINS_INSTRUMENTED,
             REASON_CONTAINS_MANIFEST,
+            REASON_FOREGROUND_ACTIVITIES,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Reason {}
@@ -906,6 +908,7 @@ class BroadcastProcessQueue {
             case REASON_CONTAINS_RESULT_TO: return "CONTAINS_RESULT_TO";
             case REASON_CONTAINS_INSTRUMENTED: return "CONTAINS_INSTRUMENTED";
             case REASON_CONTAINS_MANIFEST: return "CONTAINS_MANIFEST";
+            case REASON_FOREGROUND_ACTIVITIES: return "FOREGROUND_ACTIVITIES";
             default: return Integer.toString(reason);
         }
     }
@@ -963,6 +966,11 @@ class BroadcastProcessQueue {
             } else if (mProcessInstrumented) {
                 mRunnableAt = runnableAt + constants.DELAY_URGENT_MILLIS;
                 mRunnableAtReason = REASON_INSTRUMENTED;
+            } else if (app != null && app.hasForegroundActivities()) {
+                // TODO: Listen for uid state changes to check when an uid goes in and out of
+                // the TOP state.
+                mRunnableAt = runnableAt + constants.DELAY_URGENT_MILLIS;
+                mRunnableAtReason = REASON_FOREGROUND_ACTIVITIES;
             } else if (mCountOrdered > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_ORDERED;
