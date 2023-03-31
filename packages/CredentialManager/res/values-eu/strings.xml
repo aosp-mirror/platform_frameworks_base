@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gorde duzun sarbide-gakoa erabili nahi duzu?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gorde dituzun kredentzialak erabili nahi dituzu?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Aukeratu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gorde dituzun kredentzialak"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Hasi saioa beste modu batean"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Ikusi aukerak"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Egin aurrera"</string>
@@ -64,4 +66,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Kudeatu kredentzialak"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Beste gailu batean gordetakoak"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Erabili beste gailu bat"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Utzi du bertan behera eskaera <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioak"</string>
 </resources>

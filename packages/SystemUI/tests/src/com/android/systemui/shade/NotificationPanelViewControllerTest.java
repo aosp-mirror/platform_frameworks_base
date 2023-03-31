@@ -456,6 +456,34 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    public void keyguardStatusView_willPlayDelayedDoze_isCentered_thenNot() {
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ true);
+
+        mNotificationPanelViewController.setWillPlayDelayedDozeAmountAnimation(true);
+        setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ false);
+        assertKeyguardStatusViewCentered();
+
+        mNotificationPanelViewController.setWillPlayDelayedDozeAmountAnimation(false);
+        assertKeyguardStatusViewNotCentered();
+    }
+
+    @Test
+    public void keyguardStatusView_willPlayDelayedDoze_isCentered_thenStillCenteredIfNoNotifs() {
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ true);
+
+        mNotificationPanelViewController.setWillPlayDelayedDozeAmountAnimation(true);
+        setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ false);
+        assertKeyguardStatusViewCentered();
+
+        mNotificationPanelViewController.setWillPlayDelayedDozeAmountAnimation(false);
+        assertKeyguardStatusViewCentered();
+    }
+
+    @Test
     public void testCanCollapsePanelOnTouch_trueForKeyGuard() {
         mStatusBarStateController.setState(KEYGUARD);
 
@@ -702,7 +730,8 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
                 ArgumentCaptor.forClass(ValueAnimator.AnimatorUpdateListener.class);
 
         // Start fold animation & Capture Listeners
-        mNotificationPanelViewController.startFoldToAodAnimation(() -> {}, () -> {}, () -> {});
+        mNotificationPanelViewController.getShadeFoldAnimator()
+                .startFoldToAodAnimation(() -> {}, () -> {}, () -> {});
         verify(mViewPropertyAnimator).setListener(animCaptor.capture());
         verify(mViewPropertyAnimator).setUpdateListener(updateCaptor.capture());
 
@@ -717,7 +746,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         enableSplitShade(/* enabled= */ true);
         mStatusBarStateController.setState(KEYGUARD);
 
-        mNotificationPanelViewController.expandWithQs();
+        mNotificationPanelViewController.expandToQs();
 
         verify(mLockscreenShadeTransitionController).goToLockedShade(
                 /* expandedView= */null, /* needsQSAnimation= */true);
@@ -798,7 +827,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void testQsExpansionChangedToDefaultWhenRotatingFromOrToSplitShade() {
         // to make sure shade is in expanded state
-        mNotificationPanelViewController.startWaitingForOpenPanelGesture();
+        mNotificationPanelViewController.startWaitingForExpandGesture();
 
         // switch to split shade from portrait (default state)
         enableSplitShade(/* enabled= */ true);
@@ -817,7 +846,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         mNotificationPanelViewController.setExpandedFraction(1f);
 
         assertThat(mNotificationPanelViewController.isClosing()).isFalse();
-        mNotificationPanelViewController.animateCloseQs(false);
+        mNotificationPanelViewController.animateCollapseQs(false);
 
         assertThat(mNotificationPanelViewController.isClosing()).isTrue();
     }
@@ -825,7 +854,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void getMaxPanelTransitionDistance_expanding_inSplitShade_returnsSplitShadeFullTransitionDistance() {
         enableSplitShade(true);
-        mNotificationPanelViewController.expandWithQs();
+        mNotificationPanelViewController.expandToQs();
 
         int maxDistance = mNotificationPanelViewController.getMaxPanelTransitionDistance();
 
@@ -835,7 +864,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void getMaxPanelTransitionDistance_inSplitShade_withHeadsUp_returnsBiggerValue() {
         enableSplitShade(true);
-        mNotificationPanelViewController.expandWithQs();
+        mNotificationPanelViewController.expandToQs();
         when(mHeadsUpManager.isTrackingHeadsUp()).thenReturn(true);
         when(mQsController.calculatePanelHeightExpanded(anyInt())).thenReturn(10000);
         mNotificationPanelViewController.setHeadsUpDraggingStartingHeight(
@@ -852,7 +881,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     public void getMaxPanelTransitionDistance_expandingSplitShade_keyguard_returnsNonSplitShadeValue() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(true);
-        mNotificationPanelViewController.expandWithQs();
+        mNotificationPanelViewController.expandToQs();
 
         int maxDistance = mNotificationPanelViewController.getMaxPanelTransitionDistance();
 
@@ -862,7 +891,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void getMaxPanelTransitionDistance_expanding_notSplitShade_returnsNonSplitShadeValue() {
         enableSplitShade(false);
-        mNotificationPanelViewController.expandWithQs();
+        mNotificationPanelViewController.expandToQs();
 
         int maxDistance = mNotificationPanelViewController.getMaxPanelTransitionDistance();
 
@@ -1033,11 +1062,11 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         mStatusBarStateController.setState(SHADE);
 
         mNotificationPanelViewController.setExpandedHeight(0);
-        assertThat(mNotificationPanelViewController.isShadeFullyOpen()).isFalse();
+        assertThat(mNotificationPanelViewController.isShadeFullyExpanded()).isFalse();
 
         int transitionDistance = mNotificationPanelViewController.getMaxPanelTransitionDistance();
         mNotificationPanelViewController.setExpandedHeight(transitionDistance);
-        assertThat(mNotificationPanelViewController.isShadeFullyOpen()).isTrue();
+        assertThat(mNotificationPanelViewController.isShadeFullyExpanded()).isTrue();
     }
 
     @Test
@@ -1046,12 +1075,12 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
         int transitionDistance = mNotificationPanelViewController.getMaxPanelTransitionDistance();
         mNotificationPanelViewController.setExpandedHeight(transitionDistance);
-        assertThat(mNotificationPanelViewController.isShadeFullyOpen()).isFalse();
+        assertThat(mNotificationPanelViewController.isShadeFullyExpanded()).isFalse();
     }
 
     @Test
     public void shadeExpanded_onShadeLocked() {
         mStatusBarStateController.setState(SHADE_LOCKED);
-        assertThat(mNotificationPanelViewController.isShadeFullyOpen()).isTrue();
+        assertThat(mNotificationPanelViewController.isShadeFullyExpanded()).isTrue();
     }
 }

@@ -800,6 +800,10 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Vumela isibambi ukuthi siqale ukubuka ulwazi lwezakhi lwe-app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"finyelela idatha yenzwa ngenani eliphezulu lokwenza isampuli"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Ivumela uhlelo lokusebenza lusampule idatha yenzwa ngenani elikhulu kuno-200 Hz"</string>
+    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
+    <skip />
+    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Misa imithetho yephasiwedi"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Lawula ubude nezinhlamvu ezivunyelwe kumaphasiwedi wokukhiya isikrini nama-PIN."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Qapha imizamo yokuvula isikrini sakho"</string>

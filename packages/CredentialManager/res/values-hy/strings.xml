@@ -12,7 +12,7 @@
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Անցաբառերի շնորհիվ դուք բարդ գաղտնաբառեր ստեղծելու կամ հիշելու անհրաժեշտություն չեք ունենա"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Անցաբառերը գաղտնագրված թվային բանալիներ են, որոնք ստեղծվում են մատնահետքի, դեմքով ապակողպման կամ էկրանի կողպման օգտագործմամբ"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Դուք կարող եք մուտք գործել այլ սարքերում, քանի որ անցաբառերը պահվում են գաղտնաբառերի կառավարիչում"</string>
-    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Մանրամասն անցաբառերի մասին"</string>
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Ավելին՝ անցաբառերի մասին"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Գաղտնաբառեր չպահանջող տեխնոլոգիա"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Անցաբառերը ձեզ թույլ են տալիս մուտք գործել առանց գաղտնաբառերի։ Ձեզ պարզապես հարկավոր է օգտագործել ձեր մատնահետքը, դիմաճանաչումը, PIN կոդը կամ նախշը՝ ձեր ինքնությունը հաստատելու և անցաբառ ստեղծելու համար։"</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Բաց բանալու կրիպտոգրաֆիա"</string>
@@ -23,7 +23,7 @@
     <string name="seamless_transition_detail" msgid="3440478759491650823">"Թեև մենք առանց գաղտնաբառերի ապագայի ճանապարհին ենք, դրանք դեռ հասանելի կլինեն անցաբառերի հետ մեկտեղ"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Նշեք, թե որտեղ եք ուզում պահել ձեր <xliff:g id="CREATETYPES">%1$s</xliff:g>ը"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Ընտրեք գաղտնաբառերի կառավարիչ՝ ձեր տեղեկությունները պահելու և հաջորդ անգամ ավելի արագ մուտք գործելու համար"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Ստեղծե՞լ անցաբառ «<xliff:g id="APPNAME">%1$s</xliff:g>» հավելվածի համար"</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Ստեղծե՞լ անցաբառ <xliff:g id="APPNAME">%1$s</xliff:g> հավելվածի համար"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"Պահե՞լ «<xliff:g id="APPNAME">%1$s</xliff:g>» հավելվածի գաղտնաբառը"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Պահե՞լ «<xliff:g id="APPNAME">%1$s</xliff:g>» հավելվածի մուտքի տվյալները"</string>
     <string name="passkey" msgid="632353688396759522">"անցաբառ"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Օգտագործե՞լ պահված անցաբառը <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի համար"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Օգտագործե՞լ մուտքի պահված տվյալները <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի համար"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Ընտրեք մուտքի պահված տվյալներ <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի համար"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Մուտք գործել այլ եղանակով"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Դիտել տարբերակները"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Շարունակել"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Մուտքի կառավարում"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Մեկ այլ սարքից"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Օգտագործել այլ սարք"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>

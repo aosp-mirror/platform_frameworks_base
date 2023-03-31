@@ -51,6 +51,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TimingsTraceLog;
+import android.view.WindowManager;
 import android.webkit.WebViewFactory;
 import android.widget.TextView;
 
@@ -72,6 +73,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.Provider;
 import java.security.Security;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Startup class for the zygote process.
@@ -384,33 +387,49 @@ public class ZygoteInit {
      * classpath.
      */
     private static void cacheNonBootClasspathClassLoaders() {
+        // Ordered dependencies first
+        final List<SharedLibraryInfo> libs = new ArrayList<>();
         // These libraries used to be part of the bootclasspath, but had to be removed.
         // Old system applications still get them for backwards compatibility reasons,
         // so they are cached here in order to preserve performance characteristics.
-        SharedLibraryInfo hidlBase = new SharedLibraryInfo(
+        libs.add(new SharedLibraryInfo(
                 "/system/framework/android.hidl.base-V1.0-java.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
                 null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
-                false /*isNative*/);
-        SharedLibraryInfo hidlManager = new SharedLibraryInfo(
+                false /*isNative*/));
+        libs.add(new SharedLibraryInfo(
                 "/system/framework/android.hidl.manager-V1.0-java.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
                 null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
-                false /*isNative*/);
+                false /*isNative*/));
 
-        SharedLibraryInfo androidTestBase = new SharedLibraryInfo(
+        libs.add(new SharedLibraryInfo(
                 "/system/framework/android.test.base.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
                 null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
-                false /*isNative*/);
+                false /*isNative*/));
 
-        ApplicationLoaders.getDefault().createAndCacheNonBootclasspathSystemClassLoaders(
-                new SharedLibraryInfo[]{
-                    // ordered dependencies first
-                    hidlBase,
-                    hidlManager,
-                    androidTestBase,
-                });
+        // WindowManager Extensions is an optional shared library that is required for WindowManager
+        // Jetpack to fully function. Since it is a widely used library, preload it to improve apps
+        // startup performance.
+        if (WindowManager.hasWindowExtensionsEnabled()) {
+            final String systemExtFrameworkPath =
+                    new File(Environment.getSystemExtDirectory(), "framework").getPath();
+            libs.add(new SharedLibraryInfo(
+                    systemExtFrameworkPath + "/androidx.window.extensions.jar",
+                    "androidx.window.extensions", null /*codePaths*/,
+                    "androidx.window.extensions", SharedLibraryInfo.VERSION_UNDEFINED,
+                    SharedLibraryInfo.TYPE_BUILTIN, null /*declaringPackage*/,
+                    null /*dependentPackages*/, null /*dependencies*/, false /*isNative*/));
+            libs.add(new SharedLibraryInfo(
+                    systemExtFrameworkPath + "/androidx.window.sidecar.jar",
+                    "androidx.window.sidecar", null /*codePaths*/,
+                    "androidx.window.sidecar", SharedLibraryInfo.VERSION_UNDEFINED,
+                    SharedLibraryInfo.TYPE_BUILTIN, null /*declaringPackage*/,
+                    null /*dependentPackages*/, null /*dependencies*/, false /*isNative*/));
+        }
+
+        ApplicationLoaders.getDefault().createAndCacheNonBootclasspathSystemClassLoaders(libs);
     }
 
     /**

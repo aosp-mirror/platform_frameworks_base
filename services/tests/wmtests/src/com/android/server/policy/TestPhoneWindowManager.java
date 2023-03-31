@@ -84,6 +84,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.DisplayPolicy;
 import com.android.server.wm.DisplayRotation;
 import com.android.server.wm.WindowManagerInternal;
+import com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import junit.framework.Assert;
 
@@ -289,6 +290,10 @@ class TestPhoneWindowManager {
         }
     }
 
+    void overrideShortPressOnPower(int behavior) {
+        mPhoneWindowManager.mShortPressOnPowerBehavior = behavior;
+    }
+
      // Override assist perform function.
     void overrideLongPressOnPower(int behavior) {
         mPhoneWindowManager.mLongPressOnPowerBehavior = behavior;
@@ -309,6 +314,10 @@ class TestPhoneWindowManager {
                 mPhoneWindowManager.mLongPressOnPowerAssistantTimeoutMs = 500;
                 break;
         }
+    }
+
+    void overrideCanStartDreaming(boolean canDream) {
+        doReturn(canDream).when(mDreamManagerInternal).canStartDreaming(anyBoolean());
     }
 
     void overrideDisplayState(int state) {
@@ -372,6 +381,10 @@ class TestPhoneWindowManager {
         waitForIdle();
         verify(mAccessibilityShortcutController,
                 timeout(SHORTCUT_KEY_DELAY_MILLIS)).performAccessibilityShortcut();
+    }
+
+    void assertDreamRequest() {
+        verify(mDreamManagerInternal).requestDream();
     }
 
     void assertPowerSleep() {
@@ -453,5 +466,18 @@ class TestPhoneWindowManager {
     void assertToggleCapsLock() {
         waitForIdle();
         verify(mInputManagerInternal).toggleCapsLock(anyInt());
+    }
+
+    void assertWillNotLockAfterAppTransitionFinished() {
+        Assert.assertFalse(mPhoneWindowManager.mLockAfterAppTransitionFinished);
+    }
+
+    void assertLockedAfterAppTransitionFinished() {
+        ArgumentCaptor<AppTransitionListener> transitionCaptor =
+                ArgumentCaptor.forClass(AppTransitionListener.class);
+        verify(mWindowManagerInternal).registerAppTransitionListener(
+                transitionCaptor.capture());
+        transitionCaptor.getValue().onAppTransitionFinishedLocked(any());
+        verify(mPhoneWindowManager).lockNow(null);
     }
 }

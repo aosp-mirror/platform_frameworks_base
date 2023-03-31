@@ -110,13 +110,14 @@ public class TouchInsetManagerTest extends SysuiTestCase {
 
         clearInvocations(mAttachedSurfaceControl);
         when(view.isAttachedToWindow()).thenReturn(false);
+        when(view.getRootSurfaceControl()).thenReturn(null);
 
         // Trigger detachment and verify touchable region is set.
         listener.getValue().onViewDetachedFromWindow(view);
 
         mFakeExecutor.runAllReady();
 
-        verify(mAttachedSurfaceControl).setTouchableRegion(any());
+        verify(mAttachedSurfaceControl).setTouchableRegion(eq(null));
     }
 
     @Test

@@ -32,13 +32,17 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Փոխել չափը"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Թաքցնել"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Ցուցադրել"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"Հավելվածը չի կարող աշխատել տրոհված էկրանի ռեժիմում։"</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Հավելվածը չի աջակցում էկրանի տրոհումը:"</string>
+    <!-- no translation found for dock_forced_resizable (7429086980048964687) -->
+    <skip />
+    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (2733543750291266047) -->
+    <skip />
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Այս հավելվածը հնարավոր է բացել միայն մեկ պատուհանում։"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Հավելվածը կարող է չաշխատել լրացուցիչ էկրանի վրա"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Հավելվածը չի աջակցում գործարկումը լրացուցիչ էկրանների վրա"</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Տրոհված էկրանի բաժանիչ"</string>
-    <string name="divider_title" msgid="5482989479865361192">"Տրոհված էկրանի բաժանիչ"</string>
+    <!-- no translation found for accessibility_divider (6407584574218956849) -->
+    <skip />
+    <!-- no translation found for divider_title (1963391955593749442) -->
+    <skip />
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Ձախ էկրանը՝ լիաէկրան"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Ձախ էկրանը՝ 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Ձախ էկրանը՝ 50%"</string>
@@ -68,8 +72,7 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Տեղափոխել ներքև՝ աջ"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> – կարգավորումներ"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Փակել ամպիկը"</string>
-    <!-- no translation found for bubbles_dont_bubble (3216183855437329223) -->
-    <skip />
+    <string name="bubbles_dont_bubble" msgid="3216183855437329223">"Ցույց չտալ ամպիկները"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Զրույցը չցուցադրել ամպիկի տեսքով"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Զրույցի ամպիկներ"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Նոր զրույցները կհայտնվեն լողացող պատկերակների կամ ամպիկների տեսքով։ Հպեք՝ ամպիկը բացելու համար։ Քաշեք՝ այն տեղափոխելու համար։"</string>
@@ -86,7 +89,8 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Չհաջողվե՞ց շտկել։\nՀպեք՝ փոփոխությունները չեղարկելու համար։"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Տեսախցիկի հետ կապված խնդիրներ չկա՞ն։ Փակելու համար հպեք։"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Միաժամանակ կատարեք մի քանի առաջադրանք"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Քաշեք մյուս հավելվածի մեջ՝ էկրանի տրոհումն օգտագործելու համար"</string>
+    <!-- no translation found for letterbox_education_split_screen_text (449233070804658627) -->
+    <skip />
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Կրկնակի հպեք հավելվածի կողքին՝ այն տեղափոխելու համար"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Եղավ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Ծավալեք՝ ավելին իմանալու համար։"</string>
@@ -95,6 +99,8 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Չեղարկել"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Վերագործարկել"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Այլևս ցույց չտալ"</string>
+    <!-- no translation found for letterbox_reachability_reposition_text (4507890186297500893) -->
+    <skip />
     <string name="maximize_button_text" msgid="1650859196290301963">"Ծավալել"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Ծալել"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Փակել"</string>

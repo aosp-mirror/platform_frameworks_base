@@ -67,11 +67,11 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 
+import dagger.Lazy;
+
 import java.util.Optional;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /** */
 @CentralSurfacesComponent.CentralSurfacesScope
@@ -218,7 +218,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             return;
         }
 
-        mNotificationPanelViewController.expandShadeToNotifications();
+        mNotificationPanelViewController.expandToNotifications();
     }
 
     @Override
@@ -234,7 +234,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         // Settings are not available in setup
         if (!mDeviceProvisionedController.isCurrentUserSetup()) return;
 
-        mNotificationPanelViewController.expandWithQs();
+        mNotificationPanelViewController.expandToQs();
     }
 
     @Override
@@ -300,7 +300,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             }
         }
 
-        mNotificationPanelViewController.disable(state1, state2, animate);
+        mNotificationPanelViewController.disableHeader(state1, state2, animate);
     }
 
     /**

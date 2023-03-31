@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"मॅग्निफिकेशन स्विच"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"फुल स्क्रीन मॅग्निफाय करा"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रीनचा काही भाग मॅग्निफाय करा"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"स्विच करा"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"मॅग्निफिकेशन सेटिंग्ज उघडा"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"आकार बदलण्यासाठी कोपरा ड्रॅग करा"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"तिरपे स्क्रोल करण्याची अनुमती द्या"</string>
@@ -849,6 +848,8 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"मध्‍यम"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"लहान"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"मोठा"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"पूर्ण झाले"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"संपादित करा"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"मॅग्निफायर विंडो सेटिंग्ज"</string>

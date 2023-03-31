@@ -18,11 +18,11 @@
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"सार्वजनिक कीको क्रिप्टोग्राफी"</string>
     <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO Alliance (जसमा Google, Apple, Microsoft र अन्य कम्पनी सामेल छन्) र W3C ले तोकेका मापदण्डहरूका आधारमा पासकीमा क्रिप्टोग्राफिक जोडी की प्रयोग गरिएको छ। निजी-सार्वजनिक जोडी की कुनै एप वा वेबसाइटका लागि बनाइन्छ। यो जोडी की युजरनेम र हामीले पासवर्डमा प्रयोग गर्ने वर्णहरूको स्ट्रिङभन्दा फरक हुन्छ। निजी की तपाईंको डिभाइस वा पासवर्ड म्यानेजरमा सुरक्षित रूपमा राखिन्छ र यसले तपाईंको पहिचान पुष्टि गर्छ। सार्वजनिक की चाहिँ एप वा वेबसाइटको सर्भरसँग सेयर गरिन्छ। तपाईं यी की प्रयोग गरी तुरुन्तै दर्ता वा साइन इन गर्न सक्नुहुन्छ।"</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"खाताको सुदृढ सुरक्षा"</string>
-    <string name="improved_account_security_detail" msgid="9123750251551844860">"तपाईं कहिले पनि गल्तीले कुनै कपटपूर्ण एप वा वेबसाइटमा लग इन गर्न नसक्नुहोस् भन्नाका लागि हरेक की जुन एप वा वेबसाइटको लागि बनाइएको थियो त्यसलाई खास गरी सोही एप वा वेबसाइटसँग लिंक गरिन्छ। यसका साथै, सर्भरहरूले सार्वजनिक की मात्र राखिराख्ने भएकाले ह्याक गर्न झनै कठिन भएको छ।"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"तपाईं कहिले पनि गल्तीले कुनै कपटपूर्ण एप वा वेबसाइटमा लग इन गर्न नसक्नुहोस् भन्नाका लागि हरेक की जुन एप वा वेबसाइटको लागि बनाइएको थियो त्यसलाई खास गरी सोही एप वा वेबसाइटसँग लिंक गरिन्छ। यसका साथै, सर्भरहरूले सार्वजनिक की मात्र राख्ने भएकाले ह्याक गर्न झनै कठिन हुन्छ।"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"निर्बाध ट्रान्जिसन"</string>
     <string name="seamless_transition_detail" msgid="3440478759491650823">"हामी पासवर्डरहित भविष्यतर्फ बढ्दै गर्दा पासकीका साथसाथै पासवर्ड पनि उपलब्ध भइरहने छन्"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"तपाईं आफ्ना <xliff:g id="CREATETYPES">%1$s</xliff:g> कहाँ सेभ गर्न चाहनुहुन्छ भन्ने कुरा छनौट गर्नुहोस्"</string>
-    <string name="choose_provider_body" msgid="4967074531845147434">"कुनै पासवर्ड म्यानेजरमा आफ्नो जानकारी सेभ गरी अर्को पटक अझ छिटो साइन एन गर्नुहोस्"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"कुनै पासवर्ड म्यानेजरमा आफ्नो जानकारी सेभ गरी अर्को पटक अझ छिटो साइन इन गर्नुहोस्"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> को पासकी बनाउने हो?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> को पासवर्ड सेभ गर्ने हो?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> मा साइन गर्न प्रयोग गरिनु पर्ने जानकारी सेभ गर्ने हो?"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"आफूले सेभ गरेको पासकी प्रयोग गरी <xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्ने हो?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"आफूले सेभ गरेको साइन इनसम्बन्धी जानकारी प्रयोग गरी <xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्ने हो?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्नका लागि सेभ गरिएका साइन इनसम्बन्धी जानकारी छनौट गर्नुहोस्"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"अर्कै विधि प्रयोग गरी साइन इन गर्नुहोस्"</string>
     <string name="snackbar_action" msgid="37373514216505085">"विकल्पहरू हेर्नुहोस्"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"जारी राख्नुहोस्"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"साइन इनसम्बन्धी विकल्पहरू व्यवस्थापन गर्नुहोस्"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"अर्को डिभाइसका लागि"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"अर्कै डिभाइस प्रयोग गरी हेर्नुहोस्"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>

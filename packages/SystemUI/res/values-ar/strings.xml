@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"مفتاح تبديل وضع التكبير"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"تكبير الشاشة كلها"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"تكبير جزء من الشاشة"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"تبديل"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"فتح إعدادات التكبير"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"اسحب الزاوية لتغيير الحجم."</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"السماح بالتمرير القطري"</string>
@@ -849,6 +848,8 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"متوسط"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"صغير"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"كبير"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"تم"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"تعديل"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"إعدادات نافذة مكبّر الشاشة"</string>
@@ -870,8 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{تمت إضافة عنصر تحكّم واحد.}zero{تمت إضافة # عنصر تحكّم.}two{تمت إضافة عنصرَي تحكّم.}few{تمت إضافة # عناصر تحكّم.}many{تمت إضافة # عنصر تحكّم.}other{تمت إضافة # عنصر تحكّم.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"تمت الإزالة"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"هل تريد إضافة \"<xliff:g id="APPNAME">%s</xliff:g>\"؟"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"يمكن لتطبيق \"<xliff:g id="APPNAME">%s</xliff:g>\" اختيار المحتوى وعناصر التحكّم التي تظهر هنا."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"هل تريد إزالة عناصر التحكّم في \"<xliff:g id="APPNAME">%s</xliff:g>\"؟"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"تمت الإضافة إلى المفضّلة"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"تمت الإضافة إلى المفضّلة، الموضع <xliff:g id="NUMBER">%d</xliff:g>"</string>

@@ -14,9 +14,9 @@
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"São guardadas num gestor de palavras-passe para que possa iniciar sessão noutros dispositivos"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Mais acerca das chaves de acesso"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Tecnologia sem palavras-passe"</string>
-    <string name="passwordless_technology_detail" msgid="6853928846532955882">"As chaves de acesso permitem-lhe iniciar sessão sem depender das palavras-passe. Basta usar a impressão digital, o reconhecimento facial, o PIN ou o padrão de deslize para validar a sua identidade e criar uma token de acesso."</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"As chaves de acesso permitem-lhe iniciar sessão sem depender das palavras-passe. Basta usar a impressão digital, o reconhecimento facial, o PIN ou o padrão de deslize para validar a sua identidade e criar uma chave de acesso."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Criptografia de chaves públicas"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Baseadas na FIDO Alliance e no W3C, as palavras de acesso usam pares de chaves criptográficas. Ao contrário do nome de utilizador e da string de carateres das palavras-passe, cria-se um par de chaves públicas/privadas para a app ou Website. A chave privada é armazenada de forma segura no dispositivo ou gestor de palavras-passe e confirma a identidade. A chave pública é partilhada com o servidor do Website ou app. Com as chaves correspondentes, pode registar-se e iniciar sessão instantaneamente."</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Baseadas na FIDO Alliance e no W3C, as chaves de acesso usam pares de chaves criptográficas. Ao contrário do nome de utilizador e da string de carateres das palavras-passe, cria-se um par de chaves públicas/privadas para a app ou Website. A chave privada é armazenada de forma segura no dispositivo ou gestor de palavras-passe e confirma a identidade. A chave pública é partilhada com o servidor do Website ou app. Com as chaves correspondentes, pode registar-se e iniciar sessão instantaneamente."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Segurança melhorada nas contas"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Cada chave é exclusivamente associada à app ou ao Website para o qual foi criada, por isso, nunca pode iniciar sessão numa app ou num Website fraudulento acidentalmente. Além disso, os servidores só mantêm chaves públicas, o que dificulta a pirataria."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Transição sem complicações"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Usar a sua chave de acesso guardada na app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Usar o seu início de sessão guardado na app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Escolha um início de sessão guardado para a app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Iniciar sessão de outra forma"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Ver opções"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Continuar"</string>
@@ -64,4 +66,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Faça a gestão dos inícios de sessão"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"De outro dispositivo"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Use um dispositivo diferente"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Pedido cancelado pela app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
 </resources>

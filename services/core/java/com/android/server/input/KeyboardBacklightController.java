@@ -29,6 +29,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UEventObserver;
+import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
@@ -68,6 +70,8 @@ final class KeyboardBacklightController implements
     private static final int MSG_INTERACTIVE_STATE_CHANGED = 6;
     private static final int MAX_BRIGHTNESS = 255;
     private static final int NUM_BRIGHTNESS_CHANGE_STEPS = 10;
+
+    private static final String UEVENT_KEYBOARD_BACKLIGHT_TAG = "kbd_backlight";
 
     @VisibleForTesting
     static final long USER_INACTIVITY_THRESHOLD_MILLIS = Duration.ofSeconds(30).toMillis();
@@ -120,6 +124,18 @@ final class KeyboardBacklightController implements
         Message msg = Message.obtain(mHandler, MSG_UPDATE_EXISTING_DEVICES,
                 inputManager.getInputDeviceIds());
         mHandler.sendMessage(msg);
+
+        // Observe UEvents for "kbd_backlight" sysfs nodes.
+        // We want to observe creation of such LED nodes since they might be created after device
+        // FD created and InputDevice creation logic doesn't initialize LED nodes which leads to
+        // backlight not working.
+        UEventObserver observer = new UEventObserver() {
+            @Override
+            public void onUEvent(UEvent event) {
+                onKeyboardBacklightUEvent(event);
+            }
+        };
+        observer.startObserving(UEVENT_KEYBOARD_BACKLIGHT_TAG);
     }
 
     @Override
@@ -384,6 +400,34 @@ final class KeyboardBacklightController implements
         synchronized (mKeyboardBacklightListenerRecords) {
             mKeyboardBacklightListenerRecords.remove(pid);
         }
+    }
+
+    @VisibleForTesting
+    public void onKeyboardBacklightUEvent(UEventObserver.UEvent event) {
+        if ("ADD".equalsIgnoreCase(event.get("ACTION")) && "LEDS".equalsIgnoreCase(
+                event.get("SUBSYSTEM"))) {
+            final String devPath = event.get("DEVPATH");
+            if (isValidBacklightNodePath(devPath)) {
+                mNative.sysfsNodeChanged("/sys" + devPath);
+            }
+        }
+    }
+
+    private static boolean isValidBacklightNodePath(String devPath) {
+        if (TextUtils.isEmpty(devPath)) {
+            return false;
+        }
+        int index = devPath.lastIndexOf('/');
+        if (index < 0) {
+            return false;
+        }
+        String backlightNode = devPath.substring(index + 1);
+        devPath = devPath.substring(0, index);
+        if (!devPath.endsWith("leds") || !backlightNode.contains("kbd_backlight")) {
+            return false;
+        }
+        index = devPath.lastIndexOf('/');
+        return index >= 0;
     }
 
     @Override

@@ -26,8 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"ଆପ ଇନଷ୍ଟଲ ହୋଇଗଲା।"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ଆପଣ ଏହି ଆପକୁ ଇନଷ୍ଟଲ୍ କରିବା ପାଇଁ ଚାହୁଁଛନ୍ତି କି?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ଆପଣ ଏହି ଆପକୁ ଅପଡେଟ୍ କରିବା ପାଇଁ ଚାହୁଁଛନ୍ତି କି?"</string>
-    <!-- no translation found for install_confirm_question_update_owner_reminder (3750986542284587290) -->
-    <skip />
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>ରୁ ଏହି ଆପକୁ ଅପଡେଟ କରିବେ?\n\nଏହି ଆପ ସାଧାରଣତଃ <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>ରୁ ଅପଡେଟ ପାଇଥାଏ। ଏକ ଭିନ୍ନ ସୋର୍ସରୁ ଅପଡେଟ କରି ଆପଣ ଆପଣଙ୍କ ଫୋନରେ ଯେ କୌଣସି ସୋର୍ସରୁ ଭବିଷ୍ୟତର ଅପଡେଟଗୁଡ଼ିକ ପାଇପାରନ୍ତି। ଆପ କାର୍ଯ୍ୟକ୍ଷମତା ପରିବର୍ତ୍ତନ ହୋଇପାରେ।"</string>
     <string name="install_failed" msgid="5777824004474125469">"ଆପ୍‍ ଇନଷ୍ଟଲ୍‌ ହୋଇନାହିଁ।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ଏହି ପ୍ୟାକେଜ୍‌କୁ ଇନଷ୍ଟଲ୍‍ କରାଯିବାରୁ ଅବରୋଧ କରାଯାଇଥିଲା।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ପୂର୍ବରୁ ଥିବା ପ୍ୟାକେଜ୍‍ ସହ ଏହି ପ୍ୟାକେଜ୍‌ର ସମସ୍ୟା ଉପୁଯିବାରୁ ଆପ୍‍ ଇନଷ୍ଟଲ୍‍ ହୋଇପାରିଲା ନାହିଁ।"</string>
@@ -43,8 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ଏହି ୟୁଜରଙ୍କ ଦ୍ୱାରା ଅଜଣା ଆପ୍‍ ଇନଷ୍ଟଲ୍‍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ଏହି ୟୁଜର୍‌ ଆପ୍‍ ଇନଷ୍ଟଲ୍‍ କରିପାରିବେ ନାହିଁ"</string>
     <string name="ok" msgid="7871959885003339302">"ଠିକ୍ ଅଛି"</string>
-    <!-- no translation found for update_anyway (8792432341346261969) -->
-    <skip />
+    <string name="update_anyway" msgid="8792432341346261969">"ଯେ କୌଣସି ମତେ ଅପଡେଟ କରନ୍ତୁ"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ଆପ୍‌ଗୁଡ଼ିକର ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ଆଉ ସ୍ଥାନ ନାହିଁ"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> ଇନଷ୍ଟଲ୍‌ କରାଯାଇପାରିଲା ନାହିଁ। କିଛି ସ୍ଥାନ ଖାଲିକରି ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
