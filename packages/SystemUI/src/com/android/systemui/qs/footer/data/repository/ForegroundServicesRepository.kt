@@ -32,8 +32,6 @@ import kotlinx.coroutines.flow.merge
 interface ForegroundServicesRepository {
     /**
      * The number of packages with a service running in the foreground.
-     *
-     * Note that this will be equal to 0 if [FgsManagerController.isAvailable] is false.
      */
     val foregroundServicesCount: Flow<Int>
 
@@ -52,32 +50,24 @@ constructor(
     fgsManagerController: FgsManagerController,
 ) : ForegroundServicesRepository {
     override val foregroundServicesCount: Flow<Int> =
-        fgsManagerController.isAvailable
-            .flatMapLatest { isAvailable ->
-                if (!isAvailable) {
-                    return@flatMapLatest flowOf(0)
+            conflatedCallbackFlow<Int> {
+                fun updateState(numberOfPackages: Int) {
+                    trySendWithFailureLogging(numberOfPackages, TAG)
                 }
 
-                conflatedCallbackFlow {
-                    fun updateState(numberOfPackages: Int) {
-                        trySendWithFailureLogging(numberOfPackages, TAG)
-                    }
-
-                    val listener =
+                val listener =
                         object : FgsManagerController.OnNumberOfPackagesChangedListener {
                             override fun onNumberOfPackagesChanged(numberOfPackages: Int) {
                                 updateState(numberOfPackages)
                             }
                         }
 
-                    fgsManagerController.addOnNumberOfPackagesChangedListener(listener)
-                    updateState(fgsManagerController.numRunningPackages)
-                    awaitClose {
-                        fgsManagerController.removeOnNumberOfPackagesChangedListener(listener)
-                    }
+                fgsManagerController.addOnNumberOfPackagesChangedListener(listener)
+                updateState(fgsManagerController.numRunningPackages)
+                awaitClose {
+                    fgsManagerController.removeOnNumberOfPackagesChangedListener(listener)
                 }
-            }
-            .distinctUntilChanged()
+            }.distinctUntilChanged()
 
     override val hasNewChanges: Flow<Boolean> =
         fgsManagerController.showFooterDot.flatMapLatest { showFooterDot ->

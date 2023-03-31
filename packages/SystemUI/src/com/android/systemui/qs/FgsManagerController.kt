@@ -47,7 +47,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_FOOTER_DOT
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS
@@ -80,8 +79,6 @@ import kotlinx.coroutines.flow.asStateFlow
 
 /** A controller for the dealing with services running in the foreground. */
 interface FgsManagerController {
-    /** Whether the TaskManager (and therefore this controller) is actually available. */
-    val isAvailable: StateFlow<Boolean>
 
     /** The number of packages with a service running in the foreground. */
     val numRunningPackages: Int
@@ -155,7 +152,6 @@ class FgsManagerControllerImpl @Inject constructor(
 
     companion object {
         private const val INTERACTION_JANK_TAG = "active_background_apps"
-        private const val DEFAULT_TASK_MANAGER_ENABLED = true
         private const val DEFAULT_TASK_MANAGER_SHOW_FOOTER_DOT = false
         private const val DEFAULT_TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS = true
         private const val DEFAULT_TASK_MANAGER_SHOW_USER_VISIBLE_JOBS = true
@@ -164,9 +160,6 @@ class FgsManagerControllerImpl @Inject constructor(
 
     override var newChangesSinceDialogWasDismissed = false
         private set
-
-    val _isAvailable = MutableStateFlow(false)
-    override val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
 
     val _showFooterDot = MutableStateFlow(false)
     override val showFooterDot: StateFlow<Boolean> = _showFooterDot.asStateFlow()
@@ -264,7 +257,6 @@ class FgsManagerControllerImpl @Inject constructor(
                 NAMESPACE_SYSTEMUI,
                 backgroundExecutor
             ) {
-                _isAvailable.value = it.getBoolean(TASK_MANAGER_ENABLED, _isAvailable.value)
                 _showFooterDot.value =
                     it.getBoolean(TASK_MANAGER_SHOW_FOOTER_DOT, _showFooterDot.value)
                 showStopBtnForUserAllowlistedApps = it.getBoolean(
@@ -280,11 +272,6 @@ class FgsManagerControllerImpl @Inject constructor(
                     TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS,
                     informJobSchedulerOfPendingAppStop)
             }
-
-            _isAvailable.value = deviceConfigProxy.getBoolean(
-                NAMESPACE_SYSTEMUI,
-                TASK_MANAGER_ENABLED, DEFAULT_TASK_MANAGER_ENABLED
-            )
             _showFooterDot.value = deviceConfigProxy.getBoolean(
                 NAMESPACE_SYSTEMUI,
                 TASK_MANAGER_SHOW_FOOTER_DOT, DEFAULT_TASK_MANAGER_SHOW_FOOTER_DOT

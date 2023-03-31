@@ -259,7 +259,6 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         val securityController = FakeSecurityController()
         val fgsManagerController =
             FakeFgsManagerController(
-                isAvailable = true,
                 showFooterDot = false,
                 numRunningPackages = 0,
             )
