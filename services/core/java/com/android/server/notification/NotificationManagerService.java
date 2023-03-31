@@ -656,7 +656,6 @@ public class NotificationManagerService extends SystemService {
     private ConditionProviders mConditionProviders;
     private NotificationUsageStats mUsageStats;
     private boolean mLockScreenAllowSecureNotifications = true;
-    boolean mAllowFgsDismissal = false;
     boolean mSystemExemptFromDismissal = false;
 
     private static final int MY_UID = Process.myUid();
@@ -2581,19 +2580,9 @@ public class NotificationManagerService extends SystemService {
             for (String name : properties.getKeyset()) {
                 if (SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE.equals(name)) {
                     mAssistants.resetDefaultAssistantsIfNecessary();
-                } else if (SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED.equals(name)) {
-                    String value = properties.getString(name, null);
-                    if ("true".equals(value)) {
-                        mAllowFgsDismissal = true;
-                    } else if ("false".equals(value)) {
-                        mAllowFgsDismissal = false;
-                    }
                 }
             }
         };
-        mAllowFgsDismissal = DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED, true);
         mSystemExemptFromDismissal = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
                 /* name= */ "application_exemptions",
@@ -7736,9 +7725,6 @@ public class NotificationManagerService extends SystemService {
                     // flags are set.
                     if ((notification.flags & FLAG_FOREGROUND_SERVICE) != 0) {
                         notification.flags |= FLAG_NO_CLEAR;
-                        if (!mAllowFgsDismissal) {
-                            notification.flags |= FLAG_ONGOING_EVENT;
-                        }
                     }
 
                     mRankingHelper.extractSignals(r);
