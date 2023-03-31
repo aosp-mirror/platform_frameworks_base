@@ -682,7 +682,7 @@ public final class FlexibilityController extends StateController {
         static final String KEY_RESCHEDULED_JOB_DEADLINE_MS =
                 FC_CONFIG_PREFIX + "rescheduled_job_deadline_ms";
 
-        private static final boolean DEFAULT_FLEXIBILITY_ENABLED = true;
+        private static final boolean DEFAULT_FLEXIBILITY_ENABLED = false;
         @VisibleForTesting
         static final long DEFAULT_DEADLINE_PROXIMITY_LIMIT_MS = 15 * MINUTE_IN_MILLIS;
         @VisibleForTesting
