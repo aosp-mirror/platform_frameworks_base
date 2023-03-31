@@ -91,8 +91,7 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"ይቅር"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"እንደገና ያስጀምሩ"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"ዳግም አታሳይ"</string>
-    <!-- no translation found for letterbox_reachability_reposition_text (4507890186297500893) -->
-    <skip />
+    <string name="letterbox_reachability_reposition_text" msgid="4507890186297500893">"ይህን መተግበሪያ ለማንቀሳቀስ ሁለቴ መታ ያድርጉ"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"አስፋ"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"አሳንስ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"ዝጋ"</string>
