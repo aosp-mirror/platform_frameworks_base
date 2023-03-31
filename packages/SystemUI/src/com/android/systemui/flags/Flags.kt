@@ -291,7 +291,7 @@ object Flags {
     /** Enables Font Scaling Quick Settings tile */
     // TODO(b/269341316): Tracking Bug
     @JvmField
-    val ENABLE_FONT_SCALING_TILE = unreleasedFlag(509, "enable_font_scaling_tile", teamfood = false)
+    val ENABLE_FONT_SCALING_TILE = unreleasedFlag(509, "enable_font_scaling_tile", teamfood = true)
 
     /** Enables new QS Edit Mode visual refresh */
     // TODO(b/269787742): Tracking Bug
