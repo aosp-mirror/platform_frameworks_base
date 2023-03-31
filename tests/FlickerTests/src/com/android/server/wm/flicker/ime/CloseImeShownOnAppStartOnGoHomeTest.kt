@@ -40,6 +40,7 @@ import org.junit.runners.Parameterized
  *     Don't show if this is not explicitly requested by the user and the input method
  *     is fullscreen. That would be too disruptive.
  * ```
+ *
  * More details on b/190352379
  *
  * To run this test: `atest FlickerTests:CloseImeAutoOpenWindowToHomeTest`

@@ -107,9 +107,7 @@ class DragDividerToResize(flicker: FlickerTest) : SplitScreenBase(flicker) {
         }
     }
 
-    @Presubmit
-    @Test
-    fun primaryAppWindowKeepVisible() = flicker.appWindowKeepVisible(primaryApp)
+    @Presubmit @Test fun primaryAppWindowKeepVisible() = flicker.appWindowKeepVisible(primaryApp)
 
     @Presubmit
     @Test
@@ -136,9 +134,7 @@ class DragDividerToResize(flicker: FlickerTest) : SplitScreenBase(flicker) {
         )
 
     /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    @Presubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

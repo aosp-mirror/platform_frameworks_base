@@ -38,6 +38,7 @@ import org.junit.runners.Parameterized
  *     Click on the pip window
  *     Click on dismiss button and wait window disappear
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)

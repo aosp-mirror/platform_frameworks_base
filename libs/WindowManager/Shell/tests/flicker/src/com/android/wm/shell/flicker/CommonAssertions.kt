@@ -218,36 +218,36 @@ fun FlickerTest.splitAppLayerBoundsChanges(
     assertLayers {
         if (landscapePosLeft) {
             splitAppLayerBoundsSnapToDivider(
-                component,
-                landscapePosLeft,
-                portraitPosTop,
-                scenario.endRotation
-            )
-            .then()
-            .isInvisible(component)
-            .then()
-            .splitAppLayerBoundsSnapToDivider(
-                component,
-                landscapePosLeft,
-                portraitPosTop,
-                scenario.endRotation
-            )
+                    component,
+                    landscapePosLeft,
+                    portraitPosTop,
+                    scenario.endRotation
+                )
+                .then()
+                .isInvisible(component)
+                .then()
+                .splitAppLayerBoundsSnapToDivider(
+                    component,
+                    landscapePosLeft,
+                    portraitPosTop,
+                    scenario.endRotation
+                )
         } else {
             splitAppLayerBoundsSnapToDivider(
-                component,
-                landscapePosLeft,
-                portraitPosTop,
-                scenario.endRotation
-            )
-            .then()
-            .isInvisible(component)
-            .then()
-            .splitAppLayerBoundsSnapToDivider(
-                component,
-                landscapePosLeft,
-                portraitPosTop,
-                scenario.endRotation
-            )
+                    component,
+                    landscapePosLeft,
+                    portraitPosTop,
+                    scenario.endRotation
+                )
+                .then()
+                .isInvisible(component)
+                .then()
+                .splitAppLayerBoundsSnapToDivider(
+                    component,
+                    landscapePosLeft,
+                    portraitPosTop,
+                    scenario.endRotation
+                )
         }
     }
 }

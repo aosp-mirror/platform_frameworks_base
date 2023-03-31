@@ -16,10 +16,10 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.graphics.Rect
 import android.platform.test.annotations.Postsubmit
 import android.tools.common.Rotation
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.graphics.Rect
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
@@ -33,14 +33,12 @@ import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
-/**
- * Test the snapping of a PIP window via dragging, releasing, and checking its final location.
- */
+/** Test the snapping of a PIP window via dragging, releasing, and checking its final location. */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class PipDragThenSnapTest(flicker: FlickerTest) : PipTransition(flicker){
+class PipDragThenSnapTest(flicker: FlickerTest) : PipTransition(flicker) {
     // represents the direction in which the pip window should be snapping
     private var willSnapRight: Boolean = true
 
@@ -60,8 +58,12 @@ class PipDragThenSnapTest(flicker: FlickerTest) : PipTransition(flicker){
 
                 // get the initial region bounds and cache them
                 val initRegion = pipApp.getWindowRect(wmHelper)
-                startBounds
-                        .set(initRegion.left, initRegion.top, initRegion.right, initRegion.bottom)
+                startBounds.set(
+                    initRegion.left,
+                    initRegion.top,
+                    initRegion.right,
+                    initRegion.bottom
+                )
 
                 // drag the pip window away from the edge
                 pipApp.dragPipWindowAwayFromEdge(wmHelper, 50)
