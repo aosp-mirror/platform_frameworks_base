@@ -1074,9 +1074,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                             subGrp, mLastSnapshot, mConfigs.get(subGrp));
                     for (int restrictedTransport : restrictedTransports) {
                         if (ncCopy.hasTransport(restrictedTransport)) {
-                            if (restrictedTransport == TRANSPORT_CELLULAR) {
-                                // Only make a cell network as restricted when the VCN is in
-                                // active mode.
+                            if (restrictedTransport == TRANSPORT_CELLULAR
+                                    || restrictedTransport == TRANSPORT_TEST) {
+                                // For cell or test network, only mark it as restricted when
+                                // the VCN is in active mode.
                                 isRestricted |= (vcn.getStatus() == VCN_STATUS_CODE_ACTIVE);
                             } else {
                                 isRestricted = true;
