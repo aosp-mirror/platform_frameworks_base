@@ -951,10 +951,15 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
                 @Override
                 public void onAnimationCancelled(boolean isKeyguardOccluded) {
-                    if (mOccludeByDreamAnimator != null) {
-                        mOccludeByDreamAnimator.cancel();
-                    }
-                    setOccluded(isKeyguardOccluded /* isOccluded */, false /* animate */);
+                    mContext.getMainExecutor().execute(() -> {
+                        if (mOccludeByDreamAnimator != null) {
+                            mOccludeByDreamAnimator.cancel();
+                        }
+                    });
+                    // The value of isKeyguardOccluded here may come from mergeAnimation, which
+                    // isn't reliable. In all cases, after running or cancelling this animation,
+                    // keyguard should be occluded.
+                    setOccluded(true /* isOccluded */, false /* animate */);
                     if (DEBUG) {
                         Log.d(TAG, "Occlude by Dream animation cancelled. Occluded state is now: "
                                 + mOccluded);
