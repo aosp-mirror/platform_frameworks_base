@@ -160,7 +160,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
      * Animates in the provided keyguard view, ending in the same position that it will be in on
      * AOD.
      */
-    override fun animateInKeyguard(keyguardView: View, after: Runnable) {
+    override fun animateInKeyguard(keyguardView: View, after: Runnable): AnimatorHandle {
         shouldAnimateInKeyguard = false
         keyguardView.alpha = 0f
         keyguardView.visibility = View.VISIBLE
@@ -175,11 +175,36 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         // We animate the Y properly separately using the PropertyAnimator, as the panel
         // view also needs to update the end position.
         PropertyAnimator.cancelAnimation(keyguardView, AnimatableProperty.Y)
-        PropertyAnimator.setProperty<View>(keyguardView, AnimatableProperty.Y, currentY,
-                AnimationProperties().setDuration(duration.toLong()),
-                true /* animate */)
 
-        keyguardView.animate()
+        // Start the animation on the next frame using Choreographer APIs. animateInKeyguard() is
+        // called while the system is busy processing lots of requests, so delaying the animation a
+        // frame will mitigate jank. In the event the animation is cancelled before the next frame
+        // is called, this callback will be removed
+        val keyguardAnimator = keyguardView.animate()
+        val nextFrameCallback = TraceUtils.namedRunnable("startAnimateInKeyguard") {
+            PropertyAnimator.setProperty(keyguardView, AnimatableProperty.Y, currentY,
+                    AnimationProperties().setDuration(duration.toLong()),
+                    true /* animate */)
+            keyguardAnimator.start()
+        }
+        DejankUtils.postAfterTraversal(nextFrameCallback)
+        val animatorHandle = object : AnimatorHandle {
+            private var hasCancelled = false
+            override fun cancel() {
+                if (!hasCancelled) {
+                    DejankUtils.removeCallbacks(nextFrameCallback)
+                    // If we're cancelled, reset state flags/listeners. The end action above
+                    // will not be called, which is what we want since that will finish the
+                    // screen off animation and show the lockscreen, which we don't want if we
+                    // were cancelled.
+                    aodUiAnimationPlaying = false
+                    decidedToAnimateGoingToSleep = null
+                    keyguardView.animate().setListener(null)
+                    hasCancelled = true
+                }
+            }
+        }
+        keyguardAnimator
                 .setDuration(duration.toLong())
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(1f)
@@ -205,14 +230,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 }
                 .setListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationCancel(animation: Animator?) {
-                        // If we're cancelled, reset state flags/listeners. The end action above
-                        // will not be called, which is what we want since that will finish the
-                        // screen off animation and show the lockscreen, which we don't want if we
-                        // were cancelled.
-                        aodUiAnimationPlaying = false
-                        decidedToAnimateGoingToSleep = null
-                        keyguardView.animate().setListener(null)
-
+                        animatorHandle.cancel()
                         interactionJankMonitor.cancel(CUJ_SCREEN_OFF_SHOW_AOD)
                     }
 
@@ -222,7 +240,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                                 CUJ_SCREEN_OFF_SHOW_AOD)
                     }
                 })
-                .start()
+        return animatorHandle
     }
 
     override fun onStartedWakingUp() {

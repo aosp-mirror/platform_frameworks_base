@@ -85,16 +85,17 @@ class ScreenOffAnimationController @Inject constructor(
 
     /**
      * Called when keyguard is about to be displayed and allows to perform custom animation
+     *
+     * @return A handle that can be used for cancelling the animation, if necessary
      */
-    fun animateInKeyguard(keyguardView: View, after: Runnable) =
-        animations.firstOrNull {
+    fun animateInKeyguard(keyguardView: View, after: Runnable): AnimatorHandle? {
+        animations.forEach {
             if (it.shouldAnimateInKeyguard()) {
-                it.animateInKeyguard(keyguardView, after)
-                true
-            } else {
-                false
+                return@animateInKeyguard it.animateInKeyguard(keyguardView, after)
             }
         }
+        return null
+    }
 
     /**
      * If returns true it will disable propagating touches to apps and keyguard
@@ -211,7 +212,10 @@ interface ScreenOffAnimation {
     fun onAlwaysOnChanged(alwaysOn: Boolean) {}
 
     fun shouldAnimateInKeyguard(): Boolean = false
-    fun animateInKeyguard(keyguardView: View, after: Runnable) = after.run()
+    fun animateInKeyguard(keyguardView: View, after: Runnable): AnimatorHandle? {
+        after.run()
+        return null
+    }
 
     fun shouldDelayKeyguardShow(): Boolean = false
     fun isKeyguardShowDelayed(): Boolean = false
@@ -223,4 +227,8 @@ interface ScreenOffAnimation {
     fun shouldAnimateAodIcons(): Boolean = true
     fun shouldAnimateDozingChange(): Boolean = true
     fun shouldAnimateClockChange(): Boolean = true
+}
+
+interface AnimatorHandle {
+    fun cancel()
 }
