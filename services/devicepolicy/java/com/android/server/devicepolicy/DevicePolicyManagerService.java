@@ -13544,8 +13544,31 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Slogf.v(LOG_TAG, "calling pm.setApplicationHiddenSettingAsUser(%s, %b, %d)",
                         packageName, hidden, userId);
             }
-            result = mInjector.binderWithCleanCallingIdentity(() -> mIPackageManager
-                    .setApplicationHiddenSettingAsUser(packageName, hidden, userId));
+            if (isDevicePolicyEngineEnabled()) {
+                EnforcingAdmin admin = getEnforcingAdminForCaller(who, callerPackage);
+                mDevicePolicyEngine.setLocalPolicy(
+                        PolicyDefinition.APPLICATION_HIDDEN(packageName),
+                        admin,
+                        new BooleanPolicyValue(hidden),
+                        userId);
+                Boolean resolvedPolicy = mDevicePolicyEngine.getResolvedPolicy(
+                        PolicyDefinition.APPLICATION_HIDDEN(packageName), userId);
+                result = mInjector.binderWithCleanCallingIdentity(() -> {
+                    try {
+                        // This is a best effort to continue returning the same value that was
+                        // returned before the policy engine migration.
+                        return mInjector.getIPackageManager().getPackageInfo(
+                                packageName, MATCH_UNINSTALLED_PACKAGES, userId) != null
+                                && (mIPackageManager.getApplicationHiddenSettingAsUser(
+                                        packageName, userId) == hidden);
+                    } catch (RemoteException e) {
+                        return false;
+                    }
+                });
+            } else {
+                result = mInjector.binderWithCleanCallingIdentity(() -> mIPackageManager
+                        .setApplicationHiddenSettingAsUser(packageName, hidden, userId));
+            }
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_APPLICATION_HIDDEN)

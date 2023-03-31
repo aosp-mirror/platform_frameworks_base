@@ -226,8 +226,7 @@ final class PolicyDefinition<V> {
      * Passing in {@code null} for {@code packageName} will return
      * {@link #GENERIC_APPLICATION_RESTRICTIONS}.
      */
-    static PolicyDefinition<Bundle> APPLICATION_RESTRICTIONS(
-            String packageName) {
+    static PolicyDefinition<Bundle> APPLICATION_RESTRICTIONS(String packageName) {
         if (packageName == null) {
             return GENERIC_APPLICATION_RESTRICTIONS;
         }
@@ -254,6 +253,34 @@ final class PolicyDefinition<V> {
             (Integer value, Context context, Integer userId, PolicyKey policyKey) -> true,
             new IntegerPolicySerializer());
 
+    // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
+    // actual policy with the correct arguments (i.e. packageName) when reading the policies from
+    // xml.
+    static PolicyDefinition<Boolean> GENERIC_APPLICATION_HIDDEN =
+            new PolicyDefinition<>(
+                    new PackagePolicyKey(
+                            DevicePolicyIdentifiers.APPLICATION_HIDDEN_POLICY),
+                    // TODO(b/276713779): Don't need to take in a resolution mechanism since its
+                    //  never used, but might need some refactoring to not always assume a non-null
+                    //  mechanism.
+                    TRUE_MORE_RESTRICTIVE,
+                    POLICY_FLAG_LOCAL_ONLY_POLICY,
+                    PolicyEnforcerCallbacks::setApplicationHidden,
+                    new BooleanPolicySerializer());
+
+    /**
+     * Passing in {@code null} for {@code packageName} will return
+     * {@link #GENERIC_APPLICATION_HIDDEN}.
+     */
+    static PolicyDefinition<Boolean> APPLICATION_HIDDEN(String packageName) {
+        if (packageName == null) {
+            return GENERIC_APPLICATION_HIDDEN;
+        }
+        return GENERIC_APPLICATION_HIDDEN.createPolicyDefinition(
+                new PackagePolicyKey(
+                        DevicePolicyIdentifiers.APPLICATION_HIDDEN_POLICY, packageName));
+    }
+
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
 
@@ -272,6 +299,10 @@ final class PolicyDefinition<V> {
                 GENERIC_APPLICATION_RESTRICTIONS);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.RESET_PASSWORD_TOKEN_POLICY,
                 RESET_PASSWORD_TOKEN);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.KEYGUARD_DISABLED_FEATURES_POLICY,
+                KEYGUARD_DISABLED_FEATURES);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.APPLICATION_HIDDEN_POLICY,
+                GENERIC_APPLICATION_HIDDEN);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);

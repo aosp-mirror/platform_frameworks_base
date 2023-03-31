@@ -771,28 +771,31 @@ final class DevicePolicyEngine {
         Intent intent = new Intent(PolicyUpdateReceiver.ACTION_DEVICE_POLICY_SET_RESULT);
         intent.setPackage(admin.getPackageName());
 
-        List<ResolveInfo> receivers = mContext.getPackageManager().queryBroadcastReceiversAsUser(
-                intent,
-                PackageManager.ResolveInfoFlags.of(PackageManager.GET_RECEIVERS),
-                admin.getUserId());
-        if (receivers.isEmpty()) {
-            Log.i(TAG, "Couldn't find any receivers that handle ACTION_DEVICE_POLICY_SET_RESULT"
-                    + "in package " + admin.getPackageName());
-            return;
-        }
+        Binder.withCleanCallingIdentity(() -> {
+            List<ResolveInfo> receivers =
+                    mContext.getPackageManager().queryBroadcastReceiversAsUser(
+                            intent,
+                            PackageManager.ResolveInfoFlags.of(PackageManager.GET_RECEIVERS),
+                            admin.getUserId());
+            if (receivers.isEmpty()) {
+                Log.i(TAG, "Couldn't find any receivers that handle ACTION_DEVICE_POLICY_SET_RESULT"
+                        + "in package " + admin.getPackageName());
+                return;
+            }
 
-        Bundle extras = new Bundle();
-        policyDefinition.getPolicyKey().writeToBundle(extras);
-        extras.putInt(
-                EXTRA_POLICY_TARGET_USER_ID,
-                getTargetUser(admin.getUserId(), userId));
-        extras.putInt(
-                EXTRA_POLICY_UPDATE_RESULT_KEY,
-                result);
+            Bundle extras = new Bundle();
+            policyDefinition.getPolicyKey().writeToBundle(extras);
+            extras.putInt(
+                    EXTRA_POLICY_TARGET_USER_ID,
+                    getTargetUser(admin.getUserId(), userId));
+            extras.putInt(
+                    EXTRA_POLICY_UPDATE_RESULT_KEY,
+                    result);
 
-        intent.putExtras(extras);
+            intent.putExtras(extras);
 
-        maybeSendIntentToAdminReceivers(intent, UserHandle.of(admin.getUserId()), receivers);
+            maybeSendIntentToAdminReceivers(intent, UserHandle.of(admin.getUserId()), receivers);
+        });
     }
 
     // TODO(b/261430877): Finalise the decision on which admins to send the updates to.
@@ -821,27 +824,30 @@ final class DevicePolicyEngine {
         Intent intent = new Intent(PolicyUpdateReceiver.ACTION_DEVICE_POLICY_CHANGED);
         intent.setPackage(admin.getPackageName());
 
-        List<ResolveInfo> receivers = mContext.getPackageManager().queryBroadcastReceiversAsUser(
-                intent,
-                PackageManager.ResolveInfoFlags.of(PackageManager.GET_RECEIVERS),
-                admin.getUserId());
-        if (receivers.isEmpty()) {
-            Log.i(TAG, "Couldn't find any receivers that handle ACTION_DEVICE_POLICY_CHANGED"
-                    + "in package " + admin.getPackageName());
-            return;
-        }
+        Binder.withCleanCallingIdentity(() -> {
+            List<ResolveInfo> receivers =
+                    mContext.getPackageManager().queryBroadcastReceiversAsUser(
+                            intent,
+                            PackageManager.ResolveInfoFlags.of(PackageManager.GET_RECEIVERS),
+                            admin.getUserId());
+            if (receivers.isEmpty()) {
+                Log.i(TAG, "Couldn't find any receivers that handle ACTION_DEVICE_POLICY_CHANGED"
+                        + "in package " + admin.getPackageName());
+                return;
+            }
 
-        Bundle extras = new Bundle();
-        policyDefinition.getPolicyKey().writeToBundle(extras);
-        extras.putInt(
-                EXTRA_POLICY_TARGET_USER_ID,
-                getTargetUser(admin.getUserId(), userId));
-        extras.putInt(EXTRA_POLICY_UPDATE_RESULT_KEY, reason);
-        intent.putExtras(extras);
-        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            Bundle extras = new Bundle();
+            policyDefinition.getPolicyKey().writeToBundle(extras);
+            extras.putInt(
+                    EXTRA_POLICY_TARGET_USER_ID,
+                    getTargetUser(admin.getUserId(), userId));
+            extras.putInt(EXTRA_POLICY_UPDATE_RESULT_KEY, reason);
+            intent.putExtras(extras);
+            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
-        maybeSendIntentToAdminReceivers(
-                intent, UserHandle.of(admin.getUserId()), receivers);
+            maybeSendIntentToAdminReceivers(
+                    intent, UserHandle.of(admin.getUserId()), receivers);
+        });
     }
 
     private void maybeSendIntentToAdminReceivers(
