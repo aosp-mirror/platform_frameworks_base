@@ -60,7 +60,6 @@ constructor(
      *
      * @param wmHelper Helper used to get window region.
      * @param direction UiAutomator Direction enum to indicate the swipe direction.
-     *
      * @return true if the swipe operation is successful.
      */
     fun switchToPreviousAppByQuickSwitchGesture(
@@ -96,7 +95,6 @@ constructor(
      * @param packageName The targe application's package name.
      * @param identifier The resource id of the target object.
      * @param timeout The timeout duration in milliseconds.
-     *
      * @return true if the target object exists.
      */
     @JvmOverloads

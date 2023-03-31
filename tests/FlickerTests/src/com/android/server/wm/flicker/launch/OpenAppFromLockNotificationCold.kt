@@ -135,14 +135,15 @@ open class OpenAppFromLockNotificationCold(flicker: FlickerTest) :
         }
 
         /**
-         * Ensures that posted notifications will be visible on the lockscreen and not
-         * suppressed due to being marked as seen.
+         * Ensures that posted notifications will be visible on the lockscreen and not suppressed
+         * due to being marked as seen.
          */
         @ClassRule
         @JvmField
-        val disableUnseenNotifFilterRule = SettingOverrideRule(
-            Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-            /* value= */ "0",
-        )
+        val disableUnseenNotifFilterRule =
+            SettingOverrideRule(
+                Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
+                /* value= */ "0",
+            )
     }
 }

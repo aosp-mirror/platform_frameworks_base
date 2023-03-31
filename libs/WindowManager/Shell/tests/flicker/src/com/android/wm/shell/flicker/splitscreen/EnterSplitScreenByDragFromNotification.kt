@@ -82,8 +82,8 @@ class EnterSplitScreenByDragFromNotification(flicker: FlickerTest) : SplitScreen
     @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
-    fun cujCompleted() = flicker.splitScreenEntered(primaryApp, sendNotificationApp,
-            fromOtherApp = false)
+    fun cujCompleted() =
+        flicker.splitScreenEntered(primaryApp, sendNotificationApp, fromOtherApp = false)
 
     @Presubmit
     @Test

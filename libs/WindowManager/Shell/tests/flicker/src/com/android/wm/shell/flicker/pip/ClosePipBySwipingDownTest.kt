@@ -38,6 +38,7 @@ import org.junit.runners.Parameterized
  *     Launch an app in pip mode [pipApp],
  *     Swipe the pip window to the bottom-center of the screen and wait it disappear
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
