@@ -29,6 +29,7 @@ import android.hardware.power.stats.StateResidencyResult;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IPowerStatsService;
@@ -38,6 +39,8 @@ import android.os.PowerMonitorReadings;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.power.PowerStatsInternal;
+import android.provider.DeviceConfig;
+import android.provider.DeviceConfigInterface;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -56,6 +59,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 /**
  * This class provides a system service that estimates system power usage
@@ -76,8 +80,12 @@ public class PowerStatsService extends SystemService {
     private static final String RESIDENCY_CACHE_FILENAME = "residencyCache";
     private static final long MAX_POWER_MONITOR_AGE_MILLIS = 30_000;
 
+    static final String KEY_POWER_MONITOR_API_ENABLED = "power_monitor_api_enabled";
+
     private final Injector mInjector;
     private final Clock mClock;
+    private final DeviceConfigInterface mDeviceConfig;
+    private final DeviceConfigListener mDeviceConfigListener = new DeviceConfigListener();
     private File mDataStoragePath;
 
     private Context mContext;
@@ -177,6 +185,10 @@ public class PowerStatsService extends SystemService {
                 PowerStatsInternal powerStatsInternal) {
             return new StatsPullAtomCallbackImpl(context, powerStatsInternal);
         }
+
+        DeviceConfigInterface getDeviceConfig() {
+            return DeviceConfigInterface.REAL;
+        }
     }
 
     private final IBinder mService = new IPowerStatsService.Stub() {
@@ -223,6 +235,20 @@ public class PowerStatsService extends SystemService {
         }
     };
 
+    private class DeviceConfigListener implements DeviceConfig.OnPropertiesChangedListener {
+        public Executor mExecutor = new HandlerExecutor(getHandler());
+
+        void startListening() {
+            mDeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_BATTERY_STATS,
+                    mExecutor, this);
+        }
+
+        @Override
+        public void onPropertiesChanged(DeviceConfig.Properties properties) {
+            refreshFlags();
+        }
+    }
+
     @Override
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
@@ -243,6 +269,8 @@ public class PowerStatsService extends SystemService {
 
     private void onSystemServicesReady() {
         mPullAtomCallback = mInjector.createStatsPullerImpl(mContext, mPowerStatsInternal);
+        mDeviceConfigListener.startListening();
+        refreshFlags();
     }
 
     @VisibleForTesting
@@ -330,6 +358,12 @@ public class PowerStatsService extends SystemService {
         mContext = context;
         mInjector = injector;
         mClock = injector.getClock();
+        mDeviceConfig = injector.getDeviceConfig();
+    }
+
+    void refreshFlags() {
+        setPowerMonitorApiEnabled(mDeviceConfig.getBoolean(DeviceConfig.NAMESPACE_BATTERY_STATS,
+                KEY_POWER_MONITOR_API_ENABLED, true));
     }
 
     private final class LocalService extends PowerStatsInternal {
@@ -466,8 +500,17 @@ public class PowerStatsService extends SystemService {
         }
     }
 
+    private boolean mPowerMonitorApiEnabled = true;
     private volatile PowerMonitor[] mPowerMonitors;
     private volatile PowerMonitorState[] mPowerMonitorStates;
+
+    private void setPowerMonitorApiEnabled(boolean powerMonitorApiEnabled) {
+        if (powerMonitorApiEnabled != mPowerMonitorApiEnabled) {
+            mPowerMonitorApiEnabled = powerMonitorApiEnabled;
+            mPowerMonitors = null;
+            mPowerMonitorStates = null;
+        }
+    }
 
     private void ensurePowerMonitors() {
         if (mPowerMonitors != null) {
@@ -476,6 +519,12 @@ public class PowerStatsService extends SystemService {
 
         synchronized (this) {
             if (mPowerMonitors != null) {
+                return;
+            }
+
+            if (!mPowerMonitorApiEnabled) {
+                mPowerMonitors = new PowerMonitor[0];
+                mPowerMonitorStates = new PowerMonitorState[0];
                 return;
             }
 

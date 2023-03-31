@@ -37,6 +37,8 @@ import android.os.IPowerStatsService;
 import android.os.Looper;
 import android.os.PowerMonitor;
 import android.os.ResultReceiver;
+import android.provider.DeviceConfig;
+import android.provider.DeviceConfigInterface;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -53,6 +55,7 @@ import com.android.server.powerstats.nano.PowerStatsServiceResidencyProto;
 import com.android.server.powerstats.nano.StateProto;
 import com.android.server.powerstats.nano.StateResidencyProto;
 import com.android.server.powerstats.nano.StateResidencyResultProto;
+import com.android.server.testutils.FakeDeviceConfigInterface;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -105,6 +108,7 @@ public class PowerStatsServiceTest {
     private BatteryTrigger mBatteryTrigger;
     private PowerStatsLogger mPowerStatsLogger;
     private MockClock mMockClock = new MockClock();
+    private DeviceConfigInterface mMockDeviceConfig = new FakeDeviceConfigInterface();
 
     private class MockClock extends Clock {
         public long realtime;
@@ -196,6 +200,10 @@ public class PowerStatsServiceTest {
             mTimerTrigger = new TimerTrigger(context, powerStatsLogger,
                     false /* trigger enabled */);
             return mTimerTrigger;
+        }
+
+        DeviceConfigInterface getDeviceConfig() {
+            return mMockDeviceConfig;
         }
     };
 
@@ -1073,6 +1081,7 @@ public class PowerStatsServiceTest {
     }
 
     private static class GetPowerMonitorsResult extends ResultReceiver {
+        public int resultCode;
         public long[] energyUws;
         public long[] timestamps;
 
@@ -1082,8 +1091,11 @@ public class PowerStatsServiceTest {
 
         @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
-            energyUws = resultData.getLongArray(IPowerStatsService.KEY_ENERGY);
-            timestamps = resultData.getLongArray(IPowerStatsService.KEY_TIMESTAMPS);
+            this.resultCode = resultCode;
+            if (resultData != null) {
+                energyUws = resultData.getLongArray(IPowerStatsService.KEY_ENERGY);
+                timestamps = resultData.getLongArray(IPowerStatsService.KEY_TIMESTAMPS);
+            }
         }
     }
 
@@ -1150,5 +1162,31 @@ public class PowerStatsServiceTest {
 
         assertThat(result.energyUws).isEqualTo(new long[]{300, 400});
         assertThat(result.timestamps).isEqualTo(new long[]{600_301, 600_401});
+    }
+
+    @Test
+    public void featureFlag() {
+        mMockDeviceConfig.setProperty(DeviceConfig.NAMESPACE_BATTERY_STATS,
+                PowerStatsService.KEY_POWER_MONITOR_API_ENABLED, "false", false);
+
+        mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
+
+        GetSupportedPowerMonitorsResult supportedPowerMonitorsResult =
+                new GetSupportedPowerMonitorsResult();
+        mService.getSupportedPowerMonitorsImpl(supportedPowerMonitorsResult);
+        assertThat(supportedPowerMonitorsResult.powerMonitors).isNotNull();
+        assertThat(supportedPowerMonitorsResult.powerMonitors).isEmpty();
+
+        GetPowerMonitorsResult getPowerMonitorsResult = new GetPowerMonitorsResult();
+        mService.getPowerMonitorReadingsImpl(new int[]{0}, getPowerMonitorsResult);
+        assertThat(getPowerMonitorsResult.resultCode).isEqualTo(
+                IPowerStatsService.RESULT_UNSUPPORTED_POWER_MONITOR);
+
+        mMockDeviceConfig.setProperty(DeviceConfig.NAMESPACE_BATTERY_STATS,
+                PowerStatsService.KEY_POWER_MONITOR_API_ENABLED, "true", false);
+        supportedPowerMonitorsResult = new GetSupportedPowerMonitorsResult();
+        mService.getSupportedPowerMonitorsImpl(supportedPowerMonitorsResult);
+        assertThat(Arrays.stream(supportedPowerMonitorsResult.powerMonitors)
+                .map(pm -> pm.name).toList()).contains("energyconsumer0");
     }
 }
