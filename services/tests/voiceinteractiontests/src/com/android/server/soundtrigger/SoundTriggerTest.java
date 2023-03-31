@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.hardware.soundtrigger;
+package com.android.server.soundtrigger;
 
 import android.hardware.soundtrigger.SoundTrigger.ConfidenceLevel;
 import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
@@ -22,6 +22,7 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionEvent;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
+import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
 import android.os.Parcel;
 import android.test.InstrumentationTestCase;
@@ -50,10 +51,7 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         Keyphrase unparceled = Keyphrase.CREATOR.createFromParcel(parcel);
 
         // Verify that they are the same
-        assertEquals(keyphrase.getId(), unparceled.getId());
-        assertNull(unparceled.getUsers());
-        assertEquals(keyphrase.getLocale(), unparceled.getLocale());
-        assertEquals(keyphrase.getText(), unparceled.getText());
+        assertEquals(keyphrase, unparceled);
     }
 
     @SmallTest
@@ -115,10 +113,7 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         KeyphraseSoundModel unparceled = KeyphraseSoundModel.CREATOR.createFromParcel(parcel);
 
         // Verify that they are the same
-        assertEquals(ksm.getUuid(), unparceled.getUuid());
-        assertNull(unparceled.getData());
-        assertEquals(ksm.getType(), unparceled.getType());
-        assertTrue(Arrays.equals(keyphrases, unparceled.getKeyphrases()));
+        assertEquals(ksm, unparceled);
     }
 
     @SmallTest
@@ -162,10 +157,7 @@ public class SoundTriggerTest extends InstrumentationTestCase {
         KeyphraseSoundModel unparceled = KeyphraseSoundModel.CREATOR.createFromParcel(parcel);
 
         // Verify that they are the same
-        assertEquals(ksm.getUuid(), unparceled.getUuid());
-        assertEquals(ksm.getType(), unparceled.getType());
-        assertNull(unparceled.getKeyphrases());
-        assertTrue(Arrays.equals(ksm.getData(), unparceled.getData()));
+        assertEquals(ksm, unparceled);
     }
 
     @SmallTest
@@ -226,7 +218,11 @@ public class SoundTriggerTest extends InstrumentationTestCase {
                 3 /* captureDelayMs */,
                 4 /* capturePreambleMs */,
                 false /* triggerInData */,
-                null /* captureFormat */,
+                new AudioFormat.Builder()
+                        .setSampleRate(16000)
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                        .build(),
                 null /* data */,
                 12345678 /* halEventReceivedMillis */);
 
@@ -251,7 +247,11 @@ public class SoundTriggerTest extends InstrumentationTestCase {
                 3 /* captureDelayMs */,
                 4 /* capturePreambleMs */,
                 false /* triggerInData */,
-                null /* captureFormat */,
+                new AudioFormat.Builder()
+                        .setSampleRate(16000)
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                        .build(),
                 new byte[1] /* data */,
                 12345678 /* halEventReceivedMillis */);
 
@@ -278,7 +278,11 @@ public class SoundTriggerTest extends InstrumentationTestCase {
                 3 /* captureDelayMs */,
                 4 /* capturePreambleMs */,
                 false /* triggerInData */,
-                null /* captureFormat */,
+                new AudioFormat.Builder()
+                        .setSampleRate(16000)
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                        .build(),
                 data,
                 12345678 /* halEventReceivedMillis */);
 
@@ -335,7 +339,11 @@ public class SoundTriggerTest extends InstrumentationTestCase {
                 3 /* captureDelayMs */,
                 4 /* capturePreambleMs */,
                 false /* triggerInData */,
-                null /* captureFormat */,
+                new AudioFormat.Builder()
+                        .setSampleRate(16000)
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                        .build(),
                 null /* data */,
                 null /* keyphraseExtras */,
                 12345678 /* halEventReceivedMillis */);
@@ -364,7 +372,11 @@ public class SoundTriggerTest extends InstrumentationTestCase {
                 3 /* captureDelayMs */,
                 4 /* capturePreambleMs */,
                 false /* triggerInData */,
-                null /* captureFormat */,
+                new AudioFormat.Builder()
+                        .setSampleRate(16000)
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                        .build(),
                 new byte[1] /* data */,
                 kpExtra,
                 12345678 /* halEventReceivedMillis */);
@@ -409,7 +421,11 @@ public class SoundTriggerTest extends InstrumentationTestCase {
                 3 /* captureDelayMs */,
                 4 /* capturePreambleMs */,
                 false /* triggerInData */,
-                null /* captureFormat */,
+                new AudioFormat.Builder()
+                        .setSampleRate(16000)
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                        .build(),
                 data,
                 kpExtra,
                 12345678 /* halEventReceivedMillis */);
