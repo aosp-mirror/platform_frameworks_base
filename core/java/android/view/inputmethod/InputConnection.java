@@ -1217,9 +1217,11 @@ public interface InputConnection {
      * notify cursor/anchor locations.
      *
      * @param cursorUpdateMode any combination of update modes and filters:
-     * {@link #CURSOR_UPDATE_IMMEDIATE}, {@link #CURSOR_UPDATE_MONITOR}, and date filters:
+     * {@link #CURSOR_UPDATE_IMMEDIATE}, {@link #CURSOR_UPDATE_MONITOR}, and data filters:
      * {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS}, {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
-     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER}.
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER},
+     * {@link #CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_TEXT_APPEARANCE}.
      * Pass {@code 0} to disable them. However, if an unknown flag is provided, request will be
      * rejected and method will return {@code false}.
      * @return {@code true} if the request is scheduled. {@code false} to indicate that when the
@@ -1240,7 +1242,9 @@ public interface InputConnection {
      * {@link #CURSOR_UPDATE_IMMEDIATE}, {@link #CURSOR_UPDATE_MONITOR}
      * @param cursorUpdateFilter any combination of data filters:
      * {@link #CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS}, {@link #CURSOR_UPDATE_FILTER_EDITOR_BOUNDS},
-     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER}.
+     * {@link #CURSOR_UPDATE_FILTER_INSERTION_MARKER},
+     * {@link #CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS},
+     * {@link #CURSOR_UPDATE_FILTER_TEXT_APPEARANCE}.
      *
      * <p>Pass {@code 0} to disable them. However, if an unknown flag is provided, request will be
      * rejected and method will return {@code false}.</p>
