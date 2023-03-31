@@ -45,10 +45,10 @@ public interface VirtualSensorCallback {
      *
      * @param sensor The sensor whose requested injection parameters have changed.
      * @param enabled Whether the sensor is enabled. True if any listeners are currently registered,
-     * and false otherwise.
+     *   and false otherwise.
      * @param samplingPeriod The requested sampling period of the sensor.
      * @param batchReportLatency The requested maximum time interval between the delivery of two
-     * batches of sensor events.
+     *   batches of sensor events.
      */
     void onConfigurationChanged(@NonNull VirtualSensor sensor, boolean enabled,
             @NonNull Duration samplingPeriod, @NonNull Duration batchReportLatency);

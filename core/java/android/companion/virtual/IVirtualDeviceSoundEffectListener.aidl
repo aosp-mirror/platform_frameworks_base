@@ -28,7 +28,7 @@ oneway interface IVirtualDeviceSoundEffectListener {
      * Called when there's sound effect to be played on Virtual Device.
      *
      * @param sound effect type corresponding to
-     *     {@code android.media.AudioManager.SystemSoundEffect}
+     *   {@code android.media.AudioManager.SystemSoundEffect}
      */
     void onPlaySoundEffect(int effectType);
 }

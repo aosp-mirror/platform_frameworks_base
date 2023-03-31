@@ -30,7 +30,7 @@ import android.os.RemoteException;
  * Representation of a sensor on a remote device, capable of sending events, such as an
  * accelerometer or a gyroscope.
  *
- * This registers the sensor device with the sensor framework as a runtime sensor.
+ * <p>A virtual sensor device is registered with the sensor framework as a runtime sensor.
  *
  * @hide
  */
