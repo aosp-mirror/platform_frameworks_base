@@ -4687,6 +4687,7 @@ class Task extends TaskFragment {
         if (!isAttached()) {
             return;
         }
+        mTransitionController.collect(this);
 
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
 
