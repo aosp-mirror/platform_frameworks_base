@@ -41,6 +41,41 @@ import java.util.concurrent.atomic.AtomicLong;
  * write the events from the relevant sensors directly to the shared memory regions of the
  * corresponding {@link SensorDirectChannel} instances.
  *
+ * <p>Example:
+ * <p>During sensor and virtual device creation:
+ * <pre>
+ * VirtualSensorDirectChannelWriter writer = new VirtualSensorDirectChannelWriter();
+ * VirtualSensorDirectChannelCallback callback = new VirtualSensorDirectChannelCallback() {
+ *     @Override
+ *     public void onDirectChannelCreated(int channelHandle, SharedMemory sharedMemory) {
+ *         writer.addChannel(channelHandle, sharedMemory);
+ *     }
+ *     @Override
+ *     public void onDirectChannelDestroyed(int channelHandle);
+ *         writer.removeChannel(channelHandle);
+ *     }
+ *     @Override
+ *     public void onDirectChannelConfigured(int channelHandle, VirtualSensor sensor, int rateLevel,
+ *             int reportToken)
+ *         if (!writer.configureChannel(channelHandle, sensor, rateLevel, reportToken)) {
+ *              // handle error
+ *         }
+ *     }
+ * }
+ * </pre>
+ * <p>During the virtual device lifetime:
+ * <pre>
+ * VirtualSensor sensor = ...
+ * while (shouldInjectEvents(sensor)) {
+ *     if (!writer.writeSensorEvent(sensor, event)) {
+ *         // handle error
+ *     }
+ * }
+ * writer.close();
+ * </pre>
+ * <p>Note that the virtual device owner should take the currently configured rate level into
+ * account when deciding whether and how often to inject events for a particular sensor.
+ *
  * @see android.hardware.SensorDirectChannel#configure
  * @see VirtualSensorDirectChannelCallback
  *
