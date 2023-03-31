@@ -163,7 +163,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
         pw.println("  remove-inactive-associations");
         pw.println("      Remove self-managed associations that have not been active ");
         pw.println("      for a long time (90 days or as configured via ");
-        pw.println("      \"debug.cdm.cdmservice.cleanup_time_window\" system property). ");
+        pw.println("      \"debug.cdm.cdmservice.removal_time_window\" system property). ");
         pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
     }
 }
