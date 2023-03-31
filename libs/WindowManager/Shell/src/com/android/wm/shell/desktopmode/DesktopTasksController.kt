@@ -122,7 +122,7 @@ class DesktopTasksController(
     }
 
     /** Move a task to desktop */
-    fun moveToDesktop(task: ActivityManager.RunningTaskInfo) {
+    fun moveToDesktop(task: RunningTaskInfo) {
         ProtoLog.v(WM_SHELL_DESKTOP_MODE, "moveToDesktop: %d", task.taskId)
 
         val wct = WindowContainerTransaction()
@@ -181,7 +181,7 @@ class DesktopTasksController(
     }
 
     /** Move a task to fullscreen */
-    fun moveToFullscreen(task: ActivityManager.RunningTaskInfo) {
+    fun moveToFullscreen(task: RunningTaskInfo) {
         ProtoLog.v(WM_SHELL_DESKTOP_MODE, "moveToFullscreen: %d", task.taskId)
 
         val wct = WindowContainerTransaction()
@@ -206,7 +206,7 @@ class DesktopTasksController(
     }
 
     /** Move a task to the front **/
-    fun moveTaskToFront(taskInfo: ActivityManager.RunningTaskInfo) {
+    fun moveTaskToFront(taskInfo: RunningTaskInfo) {
         val wct = WindowContainerTransaction()
         wct.reorder(taskInfo.token, true)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
@@ -273,7 +273,7 @@ class DesktopTasksController(
         request: TransitionRequestInfo
     ): WindowContainerTransaction? {
         // Check if we should skip handling this transition
-        val task: ActivityManager.RunningTaskInfo? = request.triggerTask
+        val task: RunningTaskInfo? = request.triggerTask
         val shouldHandleRequest =
             when {
                 // Only handle open or to front transitions
@@ -382,16 +382,15 @@ class DesktopTasksController(
             taskSurface: SurfaceControl,
             y: Float
     ) {
-        val statusBarHeight = displayController
-                .getDisplayLayout(taskInfo.displayId)?.stableInsets()?.top ?: 0
         if (taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
+            val statusBarHeight = getStatusBarHeight(taskInfo)
             if (y <= statusBarHeight && visualIndicator == null) {
                 visualIndicator = DesktopModeVisualIndicator(syncQueue, taskInfo,
                         displayController, context, taskSurface, shellTaskOrganizer,
                         rootTaskDisplayAreaOrganizer)
-                visualIndicator?.createFullscreenIndicator()
+                visualIndicator?.createFullscreenIndicatorWithAnimatedBounds()
             } else if (y > statusBarHeight && visualIndicator != null) {
-                visualIndicator?.releaseFullscreenIndicator()
+                visualIndicator?.releaseVisualIndicator()
                 visualIndicator = null
             }
         }
@@ -407,14 +406,71 @@ class DesktopTasksController(
             taskInfo: RunningTaskInfo,
             y: Float
     ) {
-        val statusBarHeight = displayController
-                .getDisplayLayout(taskInfo.displayId)?.stableInsets()?.top ?: 0
+        val statusBarHeight = getStatusBarHeight(taskInfo)
         if (y <= statusBarHeight && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
-            visualIndicator?.releaseFullscreenIndicator()
+            visualIndicator?.releaseVisualIndicator()
             visualIndicator = null
             moveToFullscreenWithAnimation(taskInfo)
         }
     }
+
+    /**
+     * Perform checks required on drag move. Create/release fullscreen indicator and transitions
+     * indicator to freeform or fullscreen dimensions as needed.
+     *
+     * @param taskInfo the task being dragged.
+     * @param taskSurface SurfaceControl of dragged task.
+     * @param y coordinate of dragged task. Used for checks against status bar height.
+     */
+    fun onDragPositioningMoveThroughStatusBar(
+            taskInfo: RunningTaskInfo,
+            taskSurface: SurfaceControl,
+            y: Float
+    ) {
+        if (visualIndicator == null) {
+            visualIndicator = DesktopModeVisualIndicator(syncQueue, taskInfo,
+                    displayController, context, taskSurface, shellTaskOrganizer,
+                    rootTaskDisplayAreaOrganizer)
+            visualIndicator?.createFullscreenIndicator()
+        }
+        val indicator = visualIndicator ?: return
+        if (y >= getFreeformTransitionStatusBarDragThreshold(taskInfo)) {
+            if (indicator.isFullscreen) {
+                indicator.transitionFullscreenIndicatorToFreeform()
+            }
+        } else if (!indicator.isFullscreen) {
+            indicator.transitionFreeformIndicatorToFullscreen()
+        }
+    }
+
+    /**
+     * Perform checks required when drag ends under status bar area.
+     *
+     * @param taskInfo the task being dragged.
+     * @param y height of drag, to be checked against status bar height.
+     */
+    fun onDragPositioningEndThroughStatusBar(
+            taskInfo: RunningTaskInfo,
+            freeformBounds: Rect
+    ) {
+        moveToDesktopWithAnimation(taskInfo, freeformBounds)
+        visualIndicator?.releaseVisualIndicator()
+        visualIndicator = null
+    }
+
+
+    private fun getStatusBarHeight(taskInfo: RunningTaskInfo): Int {
+        return displayController.getDisplayLayout(taskInfo.displayId)?.stableInsets()?.top ?: 0
+    }
+
+    /**
+     * Returns the threshold at which we transition a task into freeform when dragging a
+     * fullscreen task down from the status bar
+     */
+    private fun getFreeformTransitionStatusBarDragThreshold(taskInfo: RunningTaskInfo): Int {
+        return 2 * getStatusBarHeight(taskInfo)
+    }
+
 
     /**
      * Adds a listener to find out about changes in the visibility of freeform tasks.
