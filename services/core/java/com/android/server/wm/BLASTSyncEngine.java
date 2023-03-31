@@ -228,7 +228,7 @@ class BLASTSyncEngine {
             if (mReady == ready) {
                 return;
             }
-            ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Set ready", mSyncId);
+            ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Set ready %b", mSyncId, ready);
             mReady = ready;
             if (!ready) return;
             mWm.mWindowPlacerLocked.requestTraversal();

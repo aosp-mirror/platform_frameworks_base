@@ -1297,6 +1297,12 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-874087484": {
+      "message": "SyncGroup %d: Set ready %b",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
+    },
     "-869242375": {
       "message": "Content Recording: Unable to start recording due to invalid region for display %d",
       "level": "VERBOSE",
@@ -4002,12 +4008,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "1689989893": {
-      "message": "SyncGroup %d: Set ready",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_SYNC_ENGINE",
-      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
     "1699269281": {
       "message": "Don't organize or trigger events for untrusted displayId=%d",
