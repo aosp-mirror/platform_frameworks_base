@@ -38,9 +38,18 @@ public class RemoteTransition implements Parcelable {
     /** The application thread that will be running the remote transition. */
     private @Nullable IApplicationThread mAppThread;
 
+    /** A name for this that can be used for debugging. */
+    private @Nullable String mDebugName;
+
     /** Constructs with no app thread (animation runs in shell). */
     public RemoteTransition(@NonNull IRemoteTransition remoteTransition) {
-        this(remoteTransition, null /* appThread */);
+        this(remoteTransition, null /* appThread */, null /* debugName */);
+    }
+
+    /** Constructs with no app thread (animation runs in shell). */
+    public RemoteTransition(@NonNull IRemoteTransition remoteTransition,
+            @Nullable String debugName) {
+        this(remoteTransition, null /* appThread */, debugName);
     }
 
     /** Get the IBinder associated with the underlying IRemoteTransition. */
@@ -70,15 +79,19 @@ public class RemoteTransition implements Parcelable {
      *   The actual remote-transition interface used to run the transition animation.
      * @param appThread
      *   The application thread that will be running the remote transition.
+     * @param debugName
+     *   A name for this that can be used for debugging.
      */
     @DataClass.Generated.Member
     public RemoteTransition(
             @NonNull IRemoteTransition remoteTransition,
-            @Nullable IApplicationThread appThread) {
+            @Nullable IApplicationThread appThread,
+            @Nullable String debugName) {
         this.mRemoteTransition = remoteTransition;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mRemoteTransition);
         this.mAppThread = appThread;
+        this.mDebugName = debugName;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -97,6 +110,14 @@ public class RemoteTransition implements Parcelable {
     @DataClass.Generated.Member
     public @Nullable IApplicationThread getAppThread() {
         return mAppThread;
+    }
+
+    /**
+     * A name for this that can be used for debugging.
+     */
+    @DataClass.Generated.Member
+    public @Nullable String getDebugName() {
+        return mDebugName;
     }
 
     /**
@@ -119,6 +140,15 @@ public class RemoteTransition implements Parcelable {
         return this;
     }
 
+    /**
+     * A name for this that can be used for debugging.
+     */
+    @DataClass.Generated.Member
+    public @NonNull RemoteTransition setDebugName(@NonNull String value) {
+        mDebugName = value;
+        return this;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -127,7 +157,8 @@ public class RemoteTransition implements Parcelable {
 
         return "RemoteTransition { " +
                 "remoteTransition = " + mRemoteTransition + ", " +
-                "appThread = " + mAppThread +
+                "appThread = " + mAppThread + ", " +
+                "debugName = " + mDebugName +
         " }";
     }
 
@@ -139,9 +170,11 @@ public class RemoteTransition implements Parcelable {
 
         byte flg = 0;
         if (mAppThread != null) flg |= 0x2;
+        if (mDebugName != null) flg |= 0x4;
         dest.writeByte(flg);
         dest.writeStrongInterface(mRemoteTransition);
         if (mAppThread != null) dest.writeStrongInterface(mAppThread);
+        if (mDebugName != null) dest.writeString(mDebugName);
     }
 
     @Override
@@ -158,11 +191,13 @@ public class RemoteTransition implements Parcelable {
         byte flg = in.readByte();
         IRemoteTransition remoteTransition = IRemoteTransition.Stub.asInterface(in.readStrongBinder());
         IApplicationThread appThread = (flg & 0x2) == 0 ? null : IApplicationThread.Stub.asInterface(in.readStrongBinder());
+        String debugName = (flg & 0x4) == 0 ? null : in.readString();
 
         this.mRemoteTransition = remoteTransition;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mRemoteTransition);
         this.mAppThread = appThread;
+        this.mDebugName = debugName;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -182,10 +217,10 @@ public class RemoteTransition implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1630690027011L,
+            time = 1678926409863L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/window/RemoteTransition.java",
-            inputSignatures = "private @android.annotation.NonNull android.window.IRemoteTransition mRemoteTransition\nprivate @android.annotation.Nullable android.app.IApplicationThread mAppThread\npublic @android.annotation.Nullable android.os.IBinder asBinder()\nclass RemoteTransition extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genSetters=true, genAidl=true)")
+            inputSignatures = "private @android.annotation.NonNull android.window.IRemoteTransition mRemoteTransition\nprivate @android.annotation.Nullable android.app.IApplicationThread mAppThread\nprivate @android.annotation.Nullable java.lang.String mDebugName\npublic @android.annotation.Nullable android.os.IBinder asBinder()\nclass RemoteTransition extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genSetters=true, genAidl=true)")
     @Deprecated
     private void __metadata() {}
 

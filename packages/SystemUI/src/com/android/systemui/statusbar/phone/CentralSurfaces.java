@@ -157,7 +157,8 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
         if (animationAdapter != null) {
             if (ENABLE_SHELL_TRANSITIONS) {
                 options = ActivityOptions.makeRemoteTransition(
-                        RemoteTransitionAdapter.adaptRemoteAnimation(animationAdapter));
+                        RemoteTransitionAdapter.adaptRemoteAnimation(animationAdapter,
+                                "SysUILaunch"));
             } else {
                 options = ActivityOptions.makeRemoteAnimation(animationAdapter);
             }
