@@ -7214,47 +7214,52 @@ public final class ActiveServices {
      */
     protected boolean dumpService(FileDescriptor fd, PrintWriter pw, String name, int[] users,
             String[] args, int opti, boolean dumpAll) {
-        final ArrayList<ServiceRecord> services = new ArrayList<>();
+        try {
+            mAm.mOomAdjuster.mCachedAppOptimizer.enableFreezer(false);
+            final ArrayList<ServiceRecord> services = new ArrayList<>();
 
-        final Predicate<ServiceRecord> filter = DumpUtils.filterRecord(name);
+            final Predicate<ServiceRecord> filter = DumpUtils.filterRecord(name);
 
-        synchronized (mAm) {
-            if (users == null) {
-                users = mAm.mUserController.getUsers();
-            }
-
-            for (int user : users) {
-                ServiceMap smap = mServiceMap.get(user);
-                if (smap == null) {
-                    continue;
+            synchronized (mAm) {
+                if (users == null) {
+                    users = mAm.mUserController.getUsers();
                 }
-                ArrayMap<ComponentName, ServiceRecord> alls = smap.mServicesByInstanceName;
-                for (int i=0; i<alls.size(); i++) {
-                    ServiceRecord r1 = alls.valueAt(i);
 
-                    if (filter.test(r1)) {
-                        services.add(r1);
+                for (int user : users) {
+                    ServiceMap smap = mServiceMap.get(user);
+                    if (smap == null) {
+                        continue;
+                    }
+                    ArrayMap<ComponentName, ServiceRecord> alls = smap.mServicesByInstanceName;
+                    for (int i=0; i<alls.size(); i++) {
+                        ServiceRecord r1 = alls.valueAt(i);
+
+                        if (filter.test(r1)) {
+                            services.add(r1);
+                        }
                     }
                 }
             }
-        }
 
-        if (services.size() <= 0) {
-            return false;
-        }
-
-        // Sort by component name.
-        services.sort(Comparator.comparing(WithComponentName::getComponentName));
-
-        boolean needSep = false;
-        for (int i=0; i<services.size(); i++) {
-            if (needSep) {
-                pw.println();
+            if (services.size() <= 0) {
+                return false;
             }
-            needSep = true;
-            dumpService("", fd, pw, services.get(i), args, dumpAll);
+
+            // Sort by component name.
+            services.sort(Comparator.comparing(WithComponentName::getComponentName));
+
+            boolean needSep = false;
+            for (int i=0; i<services.size(); i++) {
+                if (needSep) {
+                    pw.println();
+                }
+                needSep = true;
+                dumpService("", fd, pw, services.get(i), args, dumpAll);
+            }
+            return true;
+        } finally {
+            mAm.mOomAdjuster.mCachedAppOptimizer.enableFreezer(true);
         }
-        return true;
     }
 
     /**
