@@ -31,6 +31,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
@@ -88,6 +89,15 @@ public class TransitionUtil {
         return (change.getTaskInfo() == null)
                 && !change.hasFlags(FLAG_IS_WALLPAPER)
                 && !change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
+    }
+
+    /** Returns `true` if `change` is only re-ordering. */
+    public static boolean isOrderOnly(TransitionInfo.Change change) {
+        return change.getMode() == TRANSIT_CHANGE
+                && (change.getFlags() & FLAG_MOVED_TO_TOP) != 0
+                && change.getStartAbsBounds().equals(change.getEndAbsBounds())
+                && (change.getLastParent() == null
+                        || change.getLastParent().equals(change.getParent()));
     }
 
     /**
