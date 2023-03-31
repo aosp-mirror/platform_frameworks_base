@@ -13897,17 +13897,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 + "RECEIVER_NOT_EXPORTED flag");
             }
 
-            // STOPSHIP(b/259139792): Allow apps that are currently targeting U and in process of
-            // updating their receivers to be exempt from this requirement until their receivers
-            // are flagged.
-            if (requireExplicitFlagForDynamicReceivers) {
-                if ("com.shannon.imsservice".equals(callerPackage)) {
-                    // Note, a versionCode check for this package is not performed because this
-                    // package consumes the SecurityException, so it wouldn't be caught during
-                    // presubmit.
-                    requireExplicitFlagForDynamicReceivers = false;
-                }
-            }
             if (!onlyProtectedBroadcasts) {
                 if (receiver == null && !explicitExportStateDefined) {
                     // sticky broadcast, no flag specified (flag isn't required)
