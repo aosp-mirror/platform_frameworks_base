@@ -60,6 +60,8 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
+import static android.os.PowerExemptionManager.REASON_CARRIER_PRIVILEGED_APP;
+import static android.os.PowerExemptionManager.REASON_DENIED;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
@@ -90,6 +92,7 @@ import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -132,8 +135,10 @@ import android.permission.PermissionManager;
 import android.provider.DeviceConfig;
 import android.service.notification.StatusBarNotification;
 import android.telephony.TelephonyManager;
+import android.telephony.TelephonyManager.CarrierPrivilegesCallback;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SparseArray;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -176,9 +181,12 @@ import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
@@ -233,8 +241,42 @@ public final class BackgroundRestrictionTest {
 
     private static final int BATTERY_FULL_CHARGE_MAH = 5_000;
 
+    private static final String[] MOCK_PRIVILEGED_PACKAGES_0 = new String[] {
+        TEST_PACKAGE_BASE + 0,
+        TEST_PACKAGE_BASE + 1,
+    };
+    private static final String[] MOCK_PRIVILEGED_PACKAGES_1 = new String[] {
+        TEST_PACKAGE_BASE + 2,
+        TEST_PACKAGE_BASE + 3,
+    };
+    private static final String[] MOCK_PRIVILEGED_PACKAGES_2 = new String[] {
+        TEST_PACKAGE_BASE + 4,
+        TEST_PACKAGE_BASE + 5,
+    };
+    private static final int[] MOCK_PRIVILEGED_UIDS_0 = new int[] {
+        UserHandle.getUid(TEST_USER0, TEST_PACKAGE_APPID_BASE + 0),
+        UserHandle.getUid(TEST_USER0, TEST_PACKAGE_APPID_BASE + 1),
+    };
+    private static final int[] MOCK_PRIVILEGED_UIDS_1 = new int[] {
+        UserHandle.getUid(TEST_USER0, TEST_PACKAGE_APPID_BASE + 2),
+        UserHandle.getUid(TEST_USER0, TEST_PACKAGE_APPID_BASE + 3),
+    };
+    private static final int[] MOCK_PRIVILEGED_UIDS_2 = new int[] {
+        UserHandle.getUid(TEST_USER0, TEST_PACKAGE_APPID_BASE + 4),
+        UserHandle.getUid(TEST_USER0, TEST_PACKAGE_APPID_BASE + 5),
+    };
+    private static final String[][] MOCK_PRIVILEGED_PACKAGES = new String[][] {
+        MOCK_PRIVILEGED_PACKAGES_0,
+        MOCK_PRIVILEGED_PACKAGES_1,
+    };
+    private static final int[][] MOCK_PRIVILEGED_UIDS = new int[][] {
+        MOCK_PRIVILEGED_UIDS_0,
+        MOCK_PRIVILEGED_UIDS_1,
+    };
+
     @Mock private ActivityManagerInternal mActivityManagerInternal;
     @Mock private ActivityManagerService mActivityManagerService;
+    @Mock private ActivityManagerConstants mActivityManagerConstants;
     @Mock private AppOpsManager mAppOpsManager;
     @Mock private AppStandbyInternal mAppStandbyInternal;
     @Mock private AppHibernationManagerInternal mAppHibernationInternal;
@@ -254,6 +296,8 @@ public final class BackgroundRestrictionTest {
     @Mock private RoleManager mRoleManager;
     @Mock private TelephonyManager mTelephonyManager;
     @Mock private IAppOpsService mIAppOpsService;
+
+    private PhoneCarrierPrivileges mPhoneCarrierPrivileges;
 
     private long mCurrentTimeMillis;
 
@@ -297,6 +341,14 @@ public final class BackgroundRestrictionTest {
         mInjector = spy(new TestBgRestrictionInjector(mContext));
         mBgRestrictionController = spy(new AppRestrictionController(mInjector,
                     mActivityManagerService));
+
+        mActivityManagerService.mConstants = mActivityManagerConstants;
+        mPhoneCarrierPrivileges = new PhoneCarrierPrivileges(
+                mInjector.getTelephonyManager(), MOCK_PRIVILEGED_PACKAGES.length);
+        for (int i = 0; i < MOCK_PRIVILEGED_PACKAGES.length; i++) {
+            mPhoneCarrierPrivileges.addNewPrivilegePackages(i,
+                    MOCK_PRIVILEGED_PACKAGES[i], MOCK_PRIVILEGED_UIDS[i]);
+        }
 
         doReturn(PROCESS_STATE_FOREGROUND_SERVICE).when(mActivityManagerInternal)
                 .getUidProcessState(anyInt());
@@ -2984,6 +3036,78 @@ public final class BackgroundRestrictionTest {
         verifyLoadedSettings(settings);
     }
 
+    @Test
+    public void testCarrierPrivilegedAppListener() throws Exception {
+        final long shortMs = 1_000L;
+        for (int i = 0; i < MOCK_PRIVILEGED_PACKAGES.length; i++) {
+            verifyPotentialSystemExemptionReason(REASON_CARRIER_PRIVILEGED_APP,
+                    MOCK_PRIVILEGED_PACKAGES[i],
+                    MOCK_PRIVILEGED_UIDS[i]);
+        }
+        verifyPotentialSystemExemptionReason(REASON_DENIED,
+                MOCK_PRIVILEGED_PACKAGES_2,
+                MOCK_PRIVILEGED_UIDS_2);
+
+        mPhoneCarrierPrivileges.addNewPrivilegePackages(0,
+                MOCK_PRIVILEGED_PACKAGES_2,
+                MOCK_PRIVILEGED_UIDS_2);
+        Thread.sleep(shortMs);
+
+        verifyPotentialSystemExemptionReason(REASON_CARRIER_PRIVILEGED_APP,
+                MOCK_PRIVILEGED_PACKAGES_2,
+                MOCK_PRIVILEGED_UIDS_2);
+
+        verifyPotentialSystemExemptionReason(REASON_DENIED,
+                MOCK_PRIVILEGED_PACKAGES_0,
+                MOCK_PRIVILEGED_UIDS_0);
+
+        verifyPotentialSystemExemptionReason(REASON_CARRIER_PRIVILEGED_APP,
+                MOCK_PRIVILEGED_PACKAGES_1,
+                MOCK_PRIVILEGED_UIDS_1);
+
+        mPhoneCarrierPrivileges.addNewPrivilegePackages(1,
+                new String[0], new int[0]);
+        Thread.sleep(shortMs);
+
+        verifyPotentialSystemExemptionReason(REASON_CARRIER_PRIVILEGED_APP,
+                MOCK_PRIVILEGED_PACKAGES_2,
+                MOCK_PRIVILEGED_UIDS_2);
+
+        verifyPotentialSystemExemptionReason(REASON_DENIED,
+                MOCK_PRIVILEGED_PACKAGES_0,
+                MOCK_PRIVILEGED_UIDS_0);
+
+        verifyPotentialSystemExemptionReason(REASON_DENIED,
+                MOCK_PRIVILEGED_PACKAGES_1,
+                MOCK_PRIVILEGED_UIDS_1);
+
+        mPhoneCarrierPrivileges.addNewPrivilegePackages(0,
+                MOCK_PRIVILEGED_PACKAGES_0,
+                MOCK_PRIVILEGED_UIDS_0);
+        Thread.sleep(shortMs);
+
+        verifyPotentialSystemExemptionReason(REASON_DENIED,
+                MOCK_PRIVILEGED_PACKAGES_2,
+                MOCK_PRIVILEGED_UIDS_2);
+
+        verifyPotentialSystemExemptionReason(REASON_CARRIER_PRIVILEGED_APP,
+                MOCK_PRIVILEGED_PACKAGES_0,
+                MOCK_PRIVILEGED_UIDS_0);
+
+        verifyPotentialSystemExemptionReason(REASON_DENIED,
+                MOCK_PRIVILEGED_PACKAGES_1,
+                MOCK_PRIVILEGED_UIDS_1);
+    }
+
+    private void verifyPotentialSystemExemptionReason(int expectedReason,
+            String[] packages, int[] uids) throws Exception {
+        for (int i = 0; i < packages.length; i++) {
+            assertEquals(expectedReason,
+                    mBgRestrictionController.getPotentialSystemExemptionReason(
+                            uids[i], packages[i]));
+        }
+    }
+
     private void verifyLoadedSettings(RestrictionSettings settings) throws Exception {
         // Make a new copy and reset it.
         RestrictionSettings test = (RestrictionSettings) settings.clone();
@@ -3017,6 +3141,47 @@ public final class BackgroundRestrictionTest {
                         new ImmutableBatteryUsage(0.0d, 0.0d, batteryUsage[i], 0.0d, 0.0d), null));
         }
         return result;
+    }
+
+    private class PhoneCarrierPrivileges {
+        private final SparseArray<Pair<String[], int[]>> mPackages = new SparseArray<>();
+        private final SparseArray<Pair<Executor, CarrierPrivilegesCallback>> mListeners =
+                new SparseArray<>();
+
+        PhoneCarrierPrivileges(TelephonyManager telephonyManager, int phoneIds) {
+            doReturn(phoneIds).when(telephonyManager).getActiveModemCount();
+            doAnswer(inv -> {
+                registerCarrierPrivilegesCallback(
+                        inv.getArgument(0),
+                        inv.getArgument(1),
+                        inv.getArgument(2));
+                return null;
+            }).when(telephonyManager).registerCarrierPrivilegesCallback(
+                    anyInt(), anyObject(), anyObject());
+        }
+
+        public void registerCarrierPrivilegesCallback(int phoneId, Executor executor,
+                CarrierPrivilegesCallback callback) {
+            mListeners.put(phoneId, Pair.create(executor, callback));
+            final Pair<String[], int[]> pkgs = mPackages.get(phoneId);
+            final Set<String> pkgNames = pkgs != null
+                    ? Arrays.stream(pkgs.first).collect(Collectors.toUnmodifiableSet())
+                    : Collections.emptySet();
+            final Set<Integer> uids = pkgs != null
+                    ? Arrays.stream(pkgs.second).boxed().collect(Collectors.toUnmodifiableSet())
+                    : Collections.emptySet();
+            executor.execute(() -> callback.onCarrierPrivilegesChanged(pkgNames, uids));
+        }
+
+        public void addNewPrivilegePackages(int phoneId, String[] pkgNames, int[] uids) {
+            mPackages.put(phoneId, Pair.create(pkgNames, uids));
+            final Pair<Executor, CarrierPrivilegesCallback> callback = mListeners.get(phoneId);
+            if (callback != null) {
+                callback.first.execute(() -> callback.second.onCarrierPrivilegesChanged(
+                        Arrays.stream(pkgNames).collect(Collectors.toUnmodifiableSet()),
+                        Arrays.stream(uids).boxed().collect(Collectors.toUnmodifiableSet())));
+            }
+        }
     }
 
     private class TestBgRestrictionInjector extends AppRestrictionController.Injector {

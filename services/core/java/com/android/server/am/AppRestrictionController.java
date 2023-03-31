@@ -136,6 +136,7 @@ import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.telephony.TelephonyManager.CarrierPrivilegesCallback;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -311,10 +312,18 @@ public final class AppRestrictionController {
     private final Object mCarrierPrivilegedLock = new Object();
 
     /**
-     * List of carrier-privileged apps that should be excluded from standby.
+     * List of carrier-privileged apps that should be excluded from standby,
+     * the key of this array here is the phone id.
      */
     @GuardedBy("mCarrierPrivilegedLock")
-    private List<String> mCarrierPrivilegedApps;
+    private final SparseArray<Set<String>> mCarrierPrivilegedApps = new SparseArray<>();
+
+    /**
+     * Holding the callbacks to the carrier privileged app changes.
+     *
+     * it's lock free.
+     */
+    private volatile ArrayList<PhoneCarrierPrivilegesCallback> mCarrierPrivilegesCallbacks;
 
     /**
      * Whether or not we've loaded the restriction settings from the persistent storage.
@@ -357,19 +366,6 @@ public final class AppRestrictionController {
                             onUidAdded(uid);
                         }
                     }
-                }
-                // fall through.
-                case Intent.ACTION_PACKAGE_CHANGED: {
-                    final String pkgName = intent.getData().getSchemeSpecificPart();
-                    final String[] cmpList = intent.getStringArrayExtra(
-                            Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
-                    // If this is PACKAGE_ADDED (cmpList == null), or if it's a whole-package
-                    // enable/disable event (cmpList is just the package name itself), drop
-                    // our carrier privileged app & system-app caches and let them refresh
-                    if (cmpList == null
-                            || (cmpList.length == 1 && pkgName.equals(cmpList[0]))) {
-                        clearCarrierPrivilegedApps();
-                    }
                 } break;
                 case Intent.ACTION_PACKAGE_FULLY_REMOVED: {
                     final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
@@ -411,6 +407,10 @@ public final class AppRestrictionController {
                     if (userId >= 0) {
                         onUserRemoved(userId);
                     }
+                } break;
+                case TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED: {
+                    unregisterCarrierPrivilegesCallbacks();
+                    registerCarrierPrivilegesCallbacks();
                 } break;
             }
         }
@@ -1508,6 +1508,7 @@ public final class AppRestrictionController {
         initRolesInInterest();
         registerForUidObservers();
         registerForSystemBroadcasts();
+        registerCarrierPrivilegesCallbacks();
         mNotificationHelper.onSystemReady();
         mInjector.getAppStateTracker().addBackgroundRestrictedAppListener(
                 mBackgroundRestrictionListener);
@@ -2823,6 +2824,7 @@ public final class AppRestrictionController {
         final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
         final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
         final AppOpsManager appOpsManager = mInjector.getAppOpsManager();
+        final ActivityManagerService activityManagerService = mInjector.getActivityManagerService();
         final int userId = UserHandle.getUserId(uid);
         if (isSystemModule(pkg)) {
             return REASON_SYSTEM_MODULE;
@@ -2836,7 +2838,7 @@ public final class AppRestrictionController {
             return REASON_DPO_PROTECTED_APP;
         } else if (appStandbyInternal.isActiveDeviceAdmin(pkg, userId)) {
             return REASON_ACTIVE_DEVICE_ADMIN;
-        } else if (mActivityManagerService.mConstants.mFlagSystemExemptPowerRestrictionsEnabled
+        } else if (activityManagerService.mConstants.mFlagSystemExemptPowerRestrictionsEnabled
                 && appOpsManager.checkOpNoThrow(
                 AppOpsManager.OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS, uid, pkg)
                 == AppOpsManager.MODE_ALLOWED) {
@@ -2879,32 +2881,61 @@ public final class AppRestrictionController {
 
     private boolean isCarrierApp(String packageName) {
         synchronized (mCarrierPrivilegedLock) {
-            if (mCarrierPrivilegedApps == null) {
-                fetchCarrierPrivilegedAppsCPL();
-            }
             if (mCarrierPrivilegedApps != null) {
-                return mCarrierPrivilegedApps.contains(packageName);
+                for (int i = mCarrierPrivilegedApps.size() - 1; i >= 0; i--) {
+                    if (mCarrierPrivilegedApps.valueAt(i).contains(packageName)) {
+                        return true;
+                    }
+                }
             }
             return false;
         }
     }
 
-    private void clearCarrierPrivilegedApps() {
-        if (DEBUG_BG_RESTRICTION_CONTROLLER) {
-            Slog.i(TAG, "Clearing carrier privileged apps list");
+    private void registerCarrierPrivilegesCallbacks() {
+        final TelephonyManager telephonyManager = mInjector.getTelephonyManager();
+        if (telephonyManager == null) {
+            return;
         }
-        synchronized (mCarrierPrivilegedLock) {
-            mCarrierPrivilegedApps = null; // Need to be refetched.
+
+        final int numPhones = telephonyManager.getActiveModemCount();
+        final ArrayList<PhoneCarrierPrivilegesCallback> callbacks = new ArrayList<>();
+        for (int i = 0; i < numPhones; i++) {
+            final PhoneCarrierPrivilegesCallback callback = new PhoneCarrierPrivilegesCallback(i);
+            callbacks.add(callback);
+            telephonyManager.registerCarrierPrivilegesCallback(i, mBgExecutor, callback);
+        }
+        mCarrierPrivilegesCallbacks = callbacks;
+    }
+
+    private void unregisterCarrierPrivilegesCallbacks() {
+        final TelephonyManager telephonyManager = mInjector.getTelephonyManager();
+        if (telephonyManager == null) {
+            return;
+        }
+        final ArrayList<PhoneCarrierPrivilegesCallback> callbacks = mCarrierPrivilegesCallbacks;
+        if (callbacks != null) {
+            for (int i = callbacks.size() - 1; i >= 0; i--) {
+                telephonyManager.unregisterCarrierPrivilegesCallback(callbacks.get(i));
+            }
+            mCarrierPrivilegesCallbacks = null;
         }
     }
 
-    @GuardedBy("mCarrierPrivilegedLock")
-    private void fetchCarrierPrivilegedAppsCPL() {
-        final TelephonyManager telephonyManager = mInjector.getTelephonyManager();
-        mCarrierPrivilegedApps =
-                telephonyManager.getCarrierPrivilegedPackagesForAllActiveSubscriptions();
-        if (DEBUG_BG_RESTRICTION_CONTROLLER) {
-            Slog.d(TAG, "apps with carrier privilege " + mCarrierPrivilegedApps);
+    private class PhoneCarrierPrivilegesCallback implements CarrierPrivilegesCallback {
+        private final int mPhoneId;
+
+        PhoneCarrierPrivilegesCallback(int phoneId) {
+            mPhoneId = phoneId;
+        }
+
+        @Override
+        public void onCarrierPrivilegesChanged(@NonNull Set<String> privilegedPackageNames,
+                @NonNull Set<Integer> privilegedUids) {
+            synchronized (mCarrierPrivilegedLock) {
+                mCarrierPrivilegedApps.put(mPhoneId,
+                        Collections.unmodifiableSet(privilegedPackageNames));
+            }
         }
     }
 
@@ -3272,7 +3303,6 @@ public final class AppRestrictionController {
     private void registerForSystemBroadcasts() {
         final IntentFilter packageFilter = new IntentFilter();
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
         packageFilter.addDataScheme("package");
         mContext.registerReceiverForAllUsers(mBroadcastReceiver, packageFilter, null, mBgHandler);
@@ -3285,6 +3315,9 @@ public final class AppRestrictionController {
         bootFilter.addAction(Intent.ACTION_LOCKED_BOOT_COMPLETED);
         mContext.registerReceiverAsUser(mBootReceiver, UserHandle.SYSTEM,
                 bootFilter, null, mBgHandler);
+        final IntentFilter telFilter = new IntentFilter(
+                TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED);
+        mContext.registerReceiverForAllUsers(mBroadcastReceiver, telFilter, null, mBgHandler);
     }
 
     private void unregisterForSystemBroadcasts() {
