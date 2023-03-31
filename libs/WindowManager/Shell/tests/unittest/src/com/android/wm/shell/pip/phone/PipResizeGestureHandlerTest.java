@@ -155,7 +155,7 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
         mPipResizeGestureHandler.onPinchResize(upEvent);
 
         verify(mPipTaskOrganizer, times(1))
-                .scheduleAnimateResizePip(any(), any(), anyInt(), anyFloat(), any());
+                .scheduleAnimateResizePip(any(), any(), anyInt(), anyFloat(), any(), any());
 
         assertTrue("The new size should be bigger than the original PiP size.",
                 mPipResizeGestureHandler.getLastResizeBounds().width()
@@ -194,7 +194,7 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
         mPipResizeGestureHandler.onPinchResize(upEvent);
 
         verify(mPipTaskOrganizer, times(1))
-                .scheduleAnimateResizePip(any(), any(), anyInt(), anyFloat(), any());
+                .scheduleAnimateResizePip(any(), any(), anyInt(), anyFloat(), any(), any());
 
         assertTrue("The new size should be smaller than the original PiP size.",
                 mPipResizeGestureHandler.getLastResizeBounds().width()
