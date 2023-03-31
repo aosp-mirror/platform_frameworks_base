@@ -22,7 +22,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import android.widget.FrameLayout
-import androidx.core.animation.AnimatorTestRule
+import androidx.core.animation.AnimatorTestRule2
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -70,7 +70,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
     private lateinit var systemStatusAnimationScheduler: SystemStatusAnimationScheduler
     private val fakeFeatureFlags = FakeFeatureFlags()
 
-    @get:Rule val animatorTestRule = AnimatorTestRule()
+    @get:Rule val animatorTestRule = AnimatorTestRule2()
 
     @Before
     fun setup() {

@@ -1031,7 +1031,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mTmpTransaction.apply();
 
         // Handle back animation if it's already started.
-        mController.mAtm.mBackNavigationController.handleDeferredBackAnimation(mTargets);
+        mController.mAtm.mBackNavigationController.onTransitionFinish(mTargets, this);
         mController.mFinishingTransition = null;
     }
 
@@ -1136,8 +1136,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             mFlags |= TRANSIT_FLAG_KEYGUARD_LOCKED;
         }
         // Check whether the participants were animated from back navigation.
-        final boolean markBackAnimated = mController.mAtm.mBackNavigationController
-                .containsBackAnimationTargets(this);
+        mController.mAtm.mBackNavigationController.onTransactionReady(this);
         // Resolve the animating targets from the participants.
         mTargets = calculateTargets(mParticipants, mChanges);
         final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, transaction);
@@ -1150,9 +1149,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             mTargetDisplays.add(dc);
         }
 
-        if (markBackAnimated) {
-            mController.mAtm.mBackNavigationController.clearBackAnimations(mStartTransaction);
-        }
         if (mOverrideOptions != null) {
             info.setAnimationOptions(mOverrideOptions);
             if (mOverrideOptions.getType() == ANIM_OPEN_CROSS_PROFILE_APPS) {

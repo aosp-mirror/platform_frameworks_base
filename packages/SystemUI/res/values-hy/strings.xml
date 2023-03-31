@@ -832,7 +832,6 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Խոշորացման փոփոխություն"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Խոշորացնել ամբողջ էկրանը"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Խոշորացնել էկրանի որոշակի հատվածը"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Փոխել"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Բացել խոշորացման կարգավորումները"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Քաշեք անկյունը՝ չափը փոխելու համար"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Թույլատրել անկյունագծով ոլորումը"</string>
@@ -849,6 +848,8 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Միջին"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Փոքր"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Մեծ"</string>
+    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
+    <skip />
     <string name="accessibility_magnification_done" msgid="263349129937348512">"Պատրաստ է"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Փոփոխել"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Խոշորացույցի պատուհանի կարգավորումներ"</string>
@@ -870,8 +871,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Ավելացվեց կառավարման # տարր։}one{Ավելացվեց կառավարման # տարր։}other{Ավելացվեց կառավարման # տարր։}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Հեռացված է"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Ավելացնե՞լ <xliff:g id="APPNAME">%s</xliff:g> հավելվածը"</string>
-    <!-- no translation found for controls_panel_authorization (7045551688535104194) -->
-    <skip />
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> հավելվածը կարող է ընտրել, թե որ կարգավորումները և ինչ բովանդակություն ցուցադրվեն այստեղ։"</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Հեռացնե՞լ <xliff:g id="APPNAME">%s</xliff:g> հավելվածի համար կարգավորումները։"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Ավելացված է ընտրանիում"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Ավելացված է ընտրանիում, դիրքը՝ <xliff:g id="NUMBER">%d</xliff:g>"</string>

@@ -315,6 +315,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private ViewRootImpl mViewRootImpl;
     @Mock private WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher;
     @Mock private UserTracker mUserTracker;
+    @Mock private FingerprintManager mFingerprintManager;
     @Captor private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
     @Mock IPowerManager mPowerManagerService;
 
@@ -532,7 +533,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mCameraLauncherLazy,
                 () -> mLightRevealScrimViewModel,
                 mAlternateBouncerInteractor,
-                mUserTracker
+                mUserTracker,
+                () -> mFingerprintManager
         ) {
             @Override
             protected ViewRootImpl getViewRootImpl() {
@@ -855,7 +857,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
                 mOnBackInvokedCallback.capture());
 
-        when(mNotificationPanelViewController.canPanelBeCollapsed()).thenReturn(true);
+        when(mNotificationPanelViewController.canBeCollapsed()).thenReturn(true);
         mOnBackInvokedCallback.getValue().onBackInvoked();
         verify(mShadeController).animateCollapseShade();
     }
@@ -875,7 +877,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         OnBackAnimationCallback onBackAnimationCallback =
                 (OnBackAnimationCallback) (mOnBackInvokedCallback.getValue());
-        when(mNotificationPanelViewController.canPanelBeCollapsed()).thenReturn(true);
+        when(mNotificationPanelViewController.canBeCollapsed()).thenReturn(true);
 
         BackEvent fakeSwipeInFromLeftEdge = new BackEvent(20.0f, 100.0f, 1.0f, BackEvent.EDGE_LEFT);
         onBackAnimationCallback.onBackProgressed(fakeSwipeInFromLeftEdge);
@@ -897,7 +899,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         OnBackAnimationCallback onBackAnimationCallback =
                 (OnBackAnimationCallback) (mOnBackInvokedCallback.getValue());
-        when(mNotificationPanelViewController.canPanelBeCollapsed()).thenReturn(true);
+        when(mNotificationPanelViewController.canBeCollapsed()).thenReturn(true);
 
         BackEvent fakeSwipeInFromLeftEdge = new BackEvent(20.0f, 10.0f, 0.0f, BackEvent.EDGE_LEFT);
         onBackAnimationCallback.onBackProgressed(fakeSwipeInFromLeftEdge);
@@ -1233,7 +1235,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         setFoldedStates(FOLD_STATE_FOLDED);
         setGoToSleepStates(FOLD_STATE_FOLDED);
         mCentralSurfaces.setBarStateForTest(SHADE);
-        when(mNotificationPanelViewController.isShadeFullyOpen()).thenReturn(true);
+        when(mNotificationPanelViewController.isShadeFullyExpanded()).thenReturn(true);
 
         setDeviceState(FOLD_STATE_UNFOLDED);
 
@@ -1245,7 +1247,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         setFoldedStates(FOLD_STATE_FOLDED);
         setGoToSleepStates(FOLD_STATE_FOLDED);
         mCentralSurfaces.setBarStateForTest(KEYGUARD);
-        when(mNotificationPanelViewController.isShadeFullyOpen()).thenReturn(true);
+        when(mNotificationPanelViewController.isShadeFullyExpanded()).thenReturn(true);
 
         setDeviceState(FOLD_STATE_UNFOLDED);
 
@@ -1258,7 +1260,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         setFoldedStates(FOLD_STATE_FOLDED);
         setGoToSleepStates(FOLD_STATE_FOLDED);
         mCentralSurfaces.setBarStateForTest(SHADE);
-        when(mNotificationPanelViewController.isShadeFullyOpen()).thenReturn(false);
+        when(mNotificationPanelViewController.isShadeFullyExpanded()).thenReturn(false);
 
         setDeviceState(FOLD_STATE_UNFOLDED);
 

@@ -4,11 +4,8 @@
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Menu Aksesibilitas"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"Menu Aksesibilitas menyediakan menu di layar dengan ukuran besar untuk mengontrol perangkat Anda. Anda dapat mengunci perangkat, mengontrol volume dan kecerahan, mengambil screenshot, dan banyak lagi."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Asisten"</string>
-    <!-- no translation found for assistant_utterance (65509599221141377) -->
-    <skip />
+    <string name="assistant_utterance" msgid="65509599221141377">"Asisten"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Setelan Aksesibilitas"</string>
-    <string name="volume_label" msgid="3682221827627150574">"Volume"</string>
-    <string name="volume_utterance" msgid="408291570329066290">"Kontrol volume"</string>
     <string name="power_label" msgid="7699720321491287839">"Power"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Opsi power"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Aplikasi terbaru"</string>

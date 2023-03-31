@@ -32,13 +32,17 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"വലുപ്പം മാറ്റുക"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"സ്റ്റാഷ് ചെയ്യൽ"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"അൺസ്റ്റാഷ് ചെയ്യൽ"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"സ്‌ക്രീൻ വിഭജന മോഡിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"സ്പ്ലിറ്റ്-സ്ക്രീനിനെ ആപ്പ് പിന്തുണയ്ക്കുന്നില്ല."</string>
+    <!-- no translation found for dock_forced_resizable (7429086980048964687) -->
+    <skip />
+    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (2733543750291266047) -->
+    <skip />
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ഈ ആപ്പ് ഒരു വിൻഡോയിൽ മാത്രമേ തുറക്കാനാകൂ."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"രണ്ടാം ഡിസ്‌പ്ലേയിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"രണ്ടാം ഡിസ്‌പ്ലേകളിൽ സമാരംഭിക്കുന്നതിനെ ആപ്പ് അനുവദിക്കുന്നില്ല."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"സ്പ്ലിറ്റ്-സ്ക്രീൻ ഡിവൈഡർ"</string>
-    <string name="divider_title" msgid="5482989479865361192">"സ്‌ക്രീൻ വിഭജന മോഡ് ഡിവൈഡർ"</string>
+    <!-- no translation found for accessibility_divider (6407584574218956849) -->
+    <skip />
+    <!-- no translation found for divider_title (1963391955593749442) -->
+    <skip />
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"ഇടത് പൂർണ്ണ സ്ക്രീൻ"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"ഇടത് 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"ഇടത് 50%"</string>
@@ -85,7 +89,8 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"അത് പരിഹരിച്ചില്ലേ?\nപുനഃസ്ഥാപിക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ക്യാമറാ പ്രശ്നങ്ങളൊന്നുമില്ലേ? നിരസിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"കൂടുതൽ കാണുക, ചെയ്യുക"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"സ്‌ക്രീൻ വിഭജന മോഡിന്, മറ്റൊരു ആപ്പ് വലിച്ചിടുക"</string>
+    <!-- no translation found for letterbox_education_split_screen_text (449233070804658627) -->
+    <skip />
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ആപ്പിന്റെ സ്ഥാനം മാറ്റാൻ അതിന് പുറത്ത് ഡബിൾ ടാപ്പ് ചെയ്യുക"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"മനസ്സിലായി"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"കൂടുതൽ വിവരങ്ങൾക്ക് വികസിപ്പിക്കുക."</string>
@@ -94,6 +99,7 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"റദ്ദാക്കുക"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"റീസ്റ്റാർട്ട് ചെയ്യൂ"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"വീണ്ടും കാണിക്കരുത്"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="4507890186297500893">"ഈ ആപ്പ് നീക്കാൻ ഡബിൾ ടാപ്പ് ചെയ്യുക"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"വലുതാക്കുക"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"ചെറുതാക്കുക"</string>
     <string name="close_button_text" msgid="2913281996024033299">"അടയ്ക്കുക"</string>

@@ -72,7 +72,7 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
 
     @Override // from provider session
     public void onProviderStatusChanged(ProviderSession.Status status,
-            ComponentName componentName) {
+            ComponentName componentName, ProviderSession.CredentialsSource source) {
         Log.i(TAG, "in onStatusChanged with status: " + status);
         if (ProviderSession.isTerminatingStatus(status)) {
             Log.i(TAG, "in onStatusChanged terminating status");

@@ -26,7 +26,7 @@
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"هل تريد إنشاء مفتاح مرور لتطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\"؟"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"هل تريد حفظ كلمة المرور لتطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\"؟"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"هل تريد حفظ معلومات تسجيل الدخول لتطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\"؟"</string>
-    <string name="passkey" msgid="632353688396759522">"مفتاح مرور"</string>
+    <string name="passkey" msgid="632353688396759522">"مفتاح المرور"</string>
     <string name="password" msgid="6738570945182936667">"كلمة المرور"</string>
     <string name="passkeys" msgid="5733880786866559847">"مفاتيح المرور"</string>
     <string name="passwords" msgid="5419394230391253816">"كلمات المرور"</string>
@@ -52,6 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"هل تريد استخدام مفتاح المرور المحفوظ لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"هل تريد استخدام بيانات اعتماد تسجيل الدخول المحفوظة لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"اختيار بيانات اعتماد تسجيل دخول محفوظة لـ \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"تسجيل الدخول بطريقة أخرى"</string>
     <string name="snackbar_action" msgid="37373514216505085">"عرض الخيارات"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"متابعة"</string>
@@ -64,4 +66,6 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"إداراة عمليات تسجيل الدخول"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"من جهاز آخر"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"استخدام جهاز مختلف"</string>
+    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
+    <skip />
 </resources>
