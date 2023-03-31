@@ -302,13 +302,13 @@ public class KeyguardService extends Service {
         Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_GOING_AWAY");
         TransitionFilter f = new TransitionFilter();
         f.mFlags = TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
-        mShellTransitions.registerRemote(f,
-                new RemoteTransition(wrap(mExitAnimationRunner), getIApplicationThread()));
+        mShellTransitions.registerRemote(f, new RemoteTransition(
+                wrap(mExitAnimationRunner), getIApplicationThread(), "ExitKeyguard"));
 
         Slog.d(TAG, "KeyguardService registerRemote: TRANSIT_KEYGUARD_(UN)OCCLUDE");
         // Register for occluding
         final RemoteTransition occludeTransition = new RemoteTransition(
-                mOccludeAnimation, getIApplicationThread());
+                mOccludeAnimation, getIApplicationThread(), "KeyguardOcclude");
         f = new TransitionFilter();
         f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
         f.mRequirements = new TransitionFilter.Requirement[]{
@@ -327,7 +327,7 @@ public class KeyguardService extends Service {
 
         // Now register for un-occlude.
         final RemoteTransition unoccludeTransition = new RemoteTransition(
-                mUnoccludeAnimation, getIApplicationThread());
+                mUnoccludeAnimation, getIApplicationThread(), "KeyguardUnocclude");
         f = new TransitionFilter();
         f.mFlags = TRANSIT_FLAG_KEYGUARD_LOCKED;
         f.mRequirements = new TransitionFilter.Requirement[]{
@@ -382,7 +382,7 @@ public class KeyguardService extends Service {
         f.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
         mShellTransitions.registerRemote(f, new RemoteTransition(
                 wrap(mKeyguardViewMediator.getOccludeByDreamAnimationRunner()),
-                getIApplicationThread()));
+                getIApplicationThread(), "KeyguardOccludeByDream"));
     }
 
     @Override
