@@ -265,7 +265,7 @@ public final class SurfaceControl implements Parcelable {
             int transformHint);
     private static native void nativeRemoveCurrentInputFocus(long nativeObject, int displayId);
     private static native void nativeSetFocusedWindow(long transactionObj, IBinder toToken,
-            String windowName, IBinder focusedToken, String focusedWindowName, int displayId);
+            String windowName, int displayId);
     private static native void nativeSetFrameTimelineVsync(long transactionObj,
             long frameTimelineVsyncId);
     private static native void nativeAddJankDataListener(long nativeListener,
@@ -3604,28 +3604,7 @@ public final class SurfaceControl implements Parcelable {
          */
         public Transaction setFocusedWindow(@NonNull IBinder token, String windowName,
                 int displayId) {
-            nativeSetFocusedWindow(mNativeObject, token,  windowName,
-                    null /* focusedToken */, null /* focusedWindowName */, displayId);
-            return this;
-        }
-
-        /**
-         * Set focus on the window identified by the input {@code token} if the window identified by
-         * the input {@code focusedToken} is currently focused. If the {@code focusedToken} does not
-         * have focus, the request is dropped.
-         *
-         * This is used by forward focus transfer requests from clients that host embedded windows,
-         * and want to transfer focus to/from them.
-         *
-         * @hide
-         */
-        public Transaction requestFocusTransfer(@NonNull IBinder token,
-                                                String windowName,
-                                                @NonNull IBinder focusedToken,
-                                                String focusedWindowName,
-                                                int displayId) {
-            nativeSetFocusedWindow(mNativeObject, token, windowName, focusedToken,
-                    focusedWindowName, displayId);
+            nativeSetFocusedWindow(mNativeObject, token, windowName, displayId);
             return this;
         }
 
