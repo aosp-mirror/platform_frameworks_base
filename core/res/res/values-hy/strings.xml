@@ -2121,7 +2121,7 @@
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Հավելվածը ձայնագրելու թույլտվություն չունի, սակայն կկարողանա գրանցել ձայնն այս USB սարքի միջոցով։"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Սկիզբ"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Հետ"</string>
-    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Վերջին օգտագործած հավելվածները"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Վերջին հավելվածներ"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Ծանուցումներ"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Արագ կարգավորումներ"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Սնուցման պատուհան"</string>

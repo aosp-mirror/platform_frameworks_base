@@ -248,13 +248,13 @@
     <string name="global_action_emergency" msgid="1387617624177105088">"জৰুৰীকালীন কল"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"বাগ সম্পর্কীয় অভিযোগ"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"ছেশ্বন সমাপ্ত কৰক"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"স্ক্ৰীণশ্বট"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"স্ক্ৰীনশ্বট"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"বাগ সম্পর্কীয় অভিযোগ"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"এই কার্যই ইমেইল বাৰ্তা হিচাপে পঠিয়াবলৈ আপোনাৰ ডিভাইচৰ বৰ্তমান অৱস্থাৰ বিষয়ে তথ্য সংগ্ৰহ কৰিব৷ ইয়াক বাগ সম্পর্কীয় অভিযোগ পঠিওৱা কাৰ্য আৰম্ভ কৰোঁতে অলপ সময় লাগিব; অনুগ্ৰহ কৰি ধৈৰ্য ধৰক।"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ইণ্টাৰেক্টিভ অভিযোগ"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"বেছিভাগ পৰিস্থিতিত এয়া ব্যৱহাৰ কৰক। ই আপোনাক অভিযোগৰ অগ্ৰগতি ট্ৰেক কৰিবলৈ, সমস্যাটোৰ সম্পর্কে অধিক বিৱৰণ দিবলৈ আৰু স্ক্ৰীণশ্বট ল\'বলৈ অনুমতি দিয়ে। ই কম ব্যৱহাৰ হোৱা সেই শাখাসমূহক অন্তৰ্ভুক্ত নকৰিব পাৰে যিবোৰক অভিযোগ কৰিবলৈ দীৰ্ঘ সময়ৰ প্ৰয়োজন হয়।"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"বেছিভাগ পৰিস্থিতিত এয়া ব্যৱহাৰ কৰক। ই আপোনাক অভিযোগৰ অগ্ৰগতি ট্ৰেক কৰিবলৈ, সমস্যাটোৰ সম্পর্কে অধিক বিৱৰণ দিবলৈ আৰু স্ক্ৰীনশ্বট ল\'বলৈ অনুমতি দিয়ে। ই কম ব্যৱহাৰ হোৱা সেই শাখাসমূহক অন্তৰ্ভুক্ত নকৰিব পাৰে যিবোৰক অভিযোগ কৰিবলৈ দীৰ্ঘ সময়ৰ প্ৰয়োজন হয়।"</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"সম্পূৰ্ণ অভিযোগ"</string>
-    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"যেতিয়া আপোনাৰ ডিভাইচটোৱে সঁহাৰি নিদিয়া হয় বা ই অতি লেহেমীয়া হৈ পৰে বা যেতিয়া আপোনাক আটাইবোৰ অভিযোগৰ শাখাৰ প্ৰয়োজন হয় তেতিয়া ছিষ্টেমত কম হস্তক্ষেপৰ বাবে এই বিকল্প ব্যৱহাৰ কৰক। আপোনাক অধিক বিৱৰণ দিবলৈ বা অতিৰিক্ত স্ক্ৰীণশ্বট ল’বলৈ নিদিয়ে।"</string>
+    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"যেতিয়া আপোনাৰ ডিভাইচটোৱে সঁহাৰি নিদিয়া হয় বা ই অতি লেহেমীয়া হৈ পৰে বা যেতিয়া আপোনাক আটাইবোৰ অভিযোগৰ শাখাৰ প্ৰয়োজন হয় তেতিয়া ছিষ্টেমত কম হস্তক্ষেপৰ বাবে এই বিকল্প ব্যৱহাৰ কৰক। আপোনাক অধিক বিৱৰণ দিবলৈ বা অতিৰিক্ত স্ক্ৰীনশ্বট ল’বলৈ নিদিয়ে।"</string>
     <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{ত্ৰুটি সম্পর্কীয় অভিযোগৰ বাবে # ছেকেণ্ডৰ ভিতৰত স্ক্ৰীনশ্বট লোৱা হ\'ব।}one{ত্ৰুটি সম্পর্কীয় অভিযোগৰ বাবে # ছেকেণ্ডৰ ভিতৰত স্ক্ৰীনশ্বট লোৱা হ\'ব।}other{ত্ৰুটি সম্পর্কীয় অভিযোগৰ বাবে # ছেকেণ্ডৰ ভিতৰত স্ক্ৰীনশ্বট লোৱা হ\'ব।}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"বাগ ৰিপ’ৰ্টৰ সৈতে স্ক্ৰীনশ্বট লোৱা হ’ল"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"বাগ ৰিপ’ৰ্টৰ সৈতে স্ক্ৰীনশ্বট ল’ব পৰা নগ’ল"</string>
@@ -2126,7 +2126,7 @@
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"ক্ষিপ্ৰ ছেটিং"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"পাৱাৰ ডায়লগ"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"লক স্ক্ৰীন"</string>
-    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"স্ক্ৰীণশ্বট"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"স্ক্ৰীনশ্বট"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"হেডছেটৰ হুক"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"স্ক্ৰীনত সাধ্য সুবিধাৰ শ্বৰ্টকাট"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"স্ক্ৰীনত সাধ্য সুবিধাসমূহৰ শ্বৰ্টকাট বাছনি কৰাৰ সুবিধা"</string>

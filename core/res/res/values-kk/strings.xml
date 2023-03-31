@@ -2121,7 +2121,7 @@
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Қолданбаға жазу рұқсаты берілмеді, бірақ ол осы USB құрылғысы арқылы дыбыс жаза алады."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Негізгі экран"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Артқа"</string>
-    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Соңғы пайдаланылған қолданбалар"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Соңғы қолданбалар"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Хабарландырулар"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Жылдам параметрлер"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Қуат диалогтік терезесі"</string>
