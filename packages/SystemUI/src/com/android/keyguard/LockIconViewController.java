@@ -22,7 +22,6 @@ import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static com.android.keyguard.LockIconView.ICON_FINGERPRINT;
 import static com.android.keyguard.LockIconView.ICON_LOCK;
 import static com.android.keyguard.LockIconView.ICON_UNLOCK;
-import static com.android.systemui.classifier.Classifier.LOCK_ICON;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.flags.Flags.DOZING_MIGRATION_1;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
@@ -644,7 +643,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     private void onLongPress() {
         cancelTouches();
-        if (mFalsingManager.isFalseTouch(LOCK_ICON)) {
+        if (mFalsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) {
             Log.v(TAG, "lock icon long-press rejected by the falsing manager.");
             return;
         }
