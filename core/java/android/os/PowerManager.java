@@ -1150,13 +1150,17 @@ public final class PowerManager {
                 }
             };
 
-    private final PropertyInvalidatedCache<Void, Boolean> mInteractiveCache =
-            new PropertyInvalidatedCache<Void, Boolean>(MAX_CACHE_ENTRIES,
+    private final PropertyInvalidatedCache<Integer, Boolean> mInteractiveCache =
+            new PropertyInvalidatedCache<Integer, Boolean>(MAX_CACHE_ENTRIES,
                 CACHE_KEY_IS_INTERACTIVE_PROPERTY) {
                 @Override
-                public Boolean recompute(Void query) {
+                public Boolean recompute(Integer displayId) {
                     try {
-                        return mService.isInteractive();
+                        if (displayId == null) {
+                            return mService.isInteractive();
+                        } else {
+                            return mService.isDisplayInteractive(displayId);
+                        }
                     } catch (RemoteException e) {
                         throw e.rethrowFromSystemServer();
                     }
@@ -1802,6 +1806,18 @@ public final class PowerManager {
         return mInteractiveCache.query(null);
     }
 
+    /**
+     * Returns the interactive state for a specific display, which may not be the same as the
+     * global wakefulness (which is true when any display is awake).
+     *
+     * @param displayId
+     * @return whether the given display is present and interactive, or false
+     *
+     * @hide
+     */
+    public boolean isInteractive(int displayId) {
+        return mInteractiveCache.query(displayId);
+    }
 
     /**
      * Returns {@code true} if this device supports rebooting userspace.
