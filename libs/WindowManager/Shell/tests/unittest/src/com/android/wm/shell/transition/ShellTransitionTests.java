@@ -277,7 +277,7 @@ public class ShellTransitionTests extends ShellTestCase {
         IBinder transitToken = new Binder();
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */,
-                        new RemoteTransition(testRemote)));
+                        new RemoteTransition(testRemote, "Test")));
         verify(mOrganizer, times(1)).startTransition(eq(transitToken), any());
         TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
@@ -422,7 +422,7 @@ public class ShellTransitionTests extends ShellTestCase {
                 new TransitionFilter.Requirement[]{new TransitionFilter.Requirement()};
         filter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
 
-        transitions.registerRemote(filter, new RemoteTransition(testRemote));
+        transitions.registerRemote(filter, new RemoteTransition(testRemote, "Test"));
         mMainExecutor.flushAll();
 
         IBinder transitToken = new Binder();
@@ -466,11 +466,12 @@ public class ShellTransitionTests extends ShellTestCase {
         final int transitType = TRANSIT_FIRST_CUSTOM + 1;
 
         OneShotRemoteHandler oneShot = new OneShotRemoteHandler(mMainExecutor,
-                new RemoteTransition(testRemote));
+                new RemoteTransition(testRemote, "Test"));
         // Verify that it responds to the remote but not other things.
         IBinder transitToken = new Binder();
         assertNotNull(oneShot.handleRequest(transitToken,
-                new TransitionRequestInfo(transitType, null, new RemoteTransition(testRemote))));
+                new TransitionRequestInfo(transitType, null,
+                        new RemoteTransition(testRemote, "Test"))));
         assertNull(oneShot.handleRequest(transitToken,
                 new TransitionRequestInfo(transitType, null, null)));
 

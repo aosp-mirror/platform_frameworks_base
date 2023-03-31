@@ -1184,6 +1184,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Resolve the animating targets from the participants.
         mTargets = calculateTargets(mParticipants, mChanges);
         final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, transaction);
+        info.setDebugId(mSyncId);
 
         // Repopulate the displays based on the resolved targets.
         mTargetDisplays.clear();
