@@ -18,6 +18,7 @@ package com.android.systemui.notetask
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.notetask.NoteTaskEntryPoint.APP_CLIPS
+import com.android.systemui.notetask.NoteTaskEntryPoint.KEYBOARD_SHORTCUT
 import com.android.systemui.notetask.NoteTaskEntryPoint.QUICK_AFFORDANCE
 import com.android.systemui.notetask.NoteTaskEntryPoint.TAIL_BUTTON
 import com.android.systemui.notetask.NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT
@@ -51,6 +52,7 @@ class NoteTaskEventLogger @Inject constructor(private val uiEventLogger: UiEvent
                 WIDGET_PICKER_SHORTCUT -> NOTE_OPENED_VIA_SHORTCUT
                 QUICK_AFFORDANCE -> NOTE_OPENED_VIA_KEYGUARD_QUICK_AFFORDANCE
                 APP_CLIPS -> return
+                KEYBOARD_SHORTCUT -> return
                 null -> return
             }
         uiEventLogger.log(event, info.uid, info.packageName)
@@ -70,6 +72,7 @@ class NoteTaskEventLogger @Inject constructor(private val uiEventLogger: UiEvent
                 WIDGET_PICKER_SHORTCUT -> return
                 QUICK_AFFORDANCE -> return
                 APP_CLIPS -> return
+                KEYBOARD_SHORTCUT -> return
                 null -> return
             }
         uiEventLogger.log(event, info.uid, info.packageName)

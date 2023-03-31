@@ -731,7 +731,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mAutofillManagerInternal.onBackKeyPressed();
                     break;
                 case MSG_SYSTEM_KEY_PRESS:
-                    sendSystemKeyToStatusBar(msg.arg1);
+                    sendSystemKeyToStatusBar((KeyEvent) msg.obj);
                     break;
                 case MSG_HANDLE_ALL_APPS:
                     launchAllAppsAction();
@@ -951,7 +951,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean handledByPowerManager = mPowerManagerInternal.interceptPowerKeyDown(event);
 
         // Inform the StatusBar; but do not allow it to consume the event.
-        sendSystemKeyToStatusBarAsync(event.getKeyCode());
+        sendSystemKeyToStatusBarAsync(event);
 
         // If the power key has still not yet been handled, then detect short
         // press, long press, or multi press and decide what to do.
@@ -3036,7 +3036,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case KeyEvent.KEYCODE_N:
                 if (down && event.isMetaPressed()) {
-                    toggleNotificationPanel();
+                    if (event.isCtrlPressed()) {
+                        sendSystemKeyToStatusBarAsync(event);
+                    } else {
+                        toggleNotificationPanel();
+                    }
                     return key_consumed;
                 }
                 break;
@@ -4154,7 +4158,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
                 if (down) {
-                    sendSystemKeyToStatusBarAsync(event.getKeyCode());
+                    sendSystemKeyToStatusBarAsync(event);
 
                     NotificationManager nm = getNotificationService();
                     if (nm != null && !mHandleVolumeKeysInWM) {
@@ -4432,7 +4436,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_STYLUS_BUTTON_TERTIARY:
             case KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL: {
                 if (down && mStylusButtonsEnabled) {
-                    sendSystemKeyToStatusBarAsync(keyCode);
+                    sendSystemKeyToStatusBarAsync(event);
                 }
                 result &= ~ACTION_PASS_TO_USER;
                 break;
@@ -4529,7 +4533,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (!mAccessibilityManager.isEnabled()
                     || !mAccessibilityManager.sendFingerprintGesture(event.getKeyCode())) {
                 if (mSystemNavigationKeysEnabled) {
-                    sendSystemKeyToStatusBarAsync(event.getKeyCode());
+                    sendSystemKeyToStatusBarAsync(event);
                 }
             }
         }
@@ -4538,11 +4542,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /**
      * Notify the StatusBar that a system key was pressed.
      */
-    private void sendSystemKeyToStatusBar(int keyCode) {
+    private void sendSystemKeyToStatusBar(KeyEvent key) {
         IStatusBarService statusBar = getStatusBarService();
         if (statusBar != null) {
             try {
-                statusBar.handleSystemKey(keyCode);
+                statusBar.handleSystemKey(key);
             } catch (RemoteException e) {
                 // Oh well.
             }
@@ -4552,8 +4556,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /**
      * Notify the StatusBar that a system key was pressed without blocking the current thread.
      */
-    private void sendSystemKeyToStatusBarAsync(int keyCode) {
-        Message message = mHandler.obtainMessage(MSG_SYSTEM_KEY_PRESS, keyCode, 0);
+    private void sendSystemKeyToStatusBarAsync(KeyEvent keyEvent) {
+        Message message = mHandler.obtainMessage(MSG_SYSTEM_KEY_PRESS, keyEvent);
         message.setAsynchronous(true);
         mHandler.sendMessage(message);
     }
