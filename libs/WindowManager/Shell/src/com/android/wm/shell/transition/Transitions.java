@@ -986,6 +986,7 @@ public class Transitions implements RemoteCallable<Transitions> {
             onFinish(forceFinish, null, null);
         }
         final SurfaceControl.Transaction dummyT = new SurfaceControl.Transaction();
+        final TransitionInfo dummyInfo = new TransitionInfo(TRANSIT_SLEEP, 0 /* flags */);
         while (!mActiveTransitions.isEmpty() && !mSleepHandler.mSleepTransitions.isEmpty()) {
             final ActiveTransition playing = mActiveTransitions.get(0);
             int sleepIdx = findByToken(mReadyTransitions, mSleepHandler.mSleepTransitions.get(0));
@@ -995,7 +996,7 @@ public class Transitions implements RemoteCallable<Transitions> {
                 final ActiveTransition nextSleep = mReadyTransitions.get(sleepIdx);
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Attempt to merge SLEEP %s"
                         + " into %s", nextSleep, playing);
-                playing.mHandler.mergeAnimation(nextSleep.mToken, nextSleep.mInfo, dummyT,
+                playing.mHandler.mergeAnimation(nextSleep.mToken, dummyInfo, dummyT,
                         playing.mToken, (wct, cb) -> {});
             } else {
                 Log.e(TAG, "Couldn't find sleep transition in ready list: "
