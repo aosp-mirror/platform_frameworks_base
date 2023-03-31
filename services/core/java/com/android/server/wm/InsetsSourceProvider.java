@@ -58,7 +58,7 @@ import java.util.function.Consumer;
  * Controller for a specific inset source on the server. It's called provider as it provides the
  * {@link InsetsSource} to the client that uses it in {@link android.view.InsetsSourceConsumer}.
  */
-abstract class InsetsSourceProvider {
+class InsetsSourceProvider {
 
     protected final DisplayContent mDisplayContent;
     protected final @NonNull InsetsSource mSource;

@@ -4122,7 +4122,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         private void hideInsetSourceViewOverflows() {
-            final SparseArray<WindowContainerInsetsSourceProvider> providers =
+            final SparseArray<InsetsSourceProvider> providers =
                     getDisplayContent().getInsetsStateController().getSourceProviders();
             for (int i = providers.size(); i >= 0; i--) {
                 final InsetsSourceProvider insetProvider = providers.valueAt(i);

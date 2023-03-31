@@ -42,20 +42,20 @@ import org.junit.runner.RunWith;
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class WindowContainerInsetsSourceProviderTest extends WindowTestsBase {
+public class InsetsSourceProviderTest extends WindowTestsBase {
 
     private InsetsSource mSource = new InsetsSource(
             InsetsSource.createId(null, 0, statusBars()), statusBars());
-    private WindowContainerInsetsSourceProvider mProvider;
+    private InsetsSourceProvider mProvider;
     private InsetsSource mImeSource = new InsetsSource(ID_IME, ime());
-    private WindowContainerInsetsSourceProvider mImeProvider;
+    private InsetsSourceProvider mImeProvider;
 
     @Before
     public void setUp() throws Exception {
         mSource.setVisible(true);
-        mProvider = new WindowContainerInsetsSourceProvider(mSource,
+        mProvider = new InsetsSourceProvider(mSource,
                 mDisplayContent.getInsetsStateController(), mDisplayContent);
-        mImeProvider = new WindowContainerInsetsSourceProvider(mImeSource,
+        mImeProvider = new InsetsSourceProvider(mImeSource,
                 mDisplayContent.getInsetsStateController(), mDisplayContent);
     }
 
