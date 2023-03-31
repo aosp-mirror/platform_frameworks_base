@@ -233,7 +233,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static Clock sUptimeMillisClock = new MySimpleClock(ZoneOffset.UTC) {
         @Override
         public long millis() {
@@ -241,7 +241,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     };
 
-    @VisibleForTesting
     public static Clock sElapsedRealtimeClock = new MySimpleClock(ZoneOffset.UTC) {
         @Override
         public long millis() {

@@ -33,7 +33,9 @@ import android.annotation.Nullable;
 import android.app.job.JobInfo;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
@@ -66,6 +68,11 @@ public final class FlexibilityController extends StateController {
             | CONSTRAINT_CHARGING
             | CONSTRAINT_IDLE;
 
+    /** List of flexible constraints a job can opt into. */
+    static final int OPTIONAL_FLEXIBLE_CONSTRAINTS = CONSTRAINT_BATTERY_NOT_LOW
+            | CONSTRAINT_CHARGING
+            | CONSTRAINT_IDLE;
+
     /** List of all job flexible constraints whose satisfaction is job specific. */
     private static final int JOB_SPECIFIC_FLEXIBLE_CONSTRAINTS = CONSTRAINT_CONNECTIVITY;
 
@@ -75,6 +82,9 @@ public final class FlexibilityController extends StateController {
 
     private static final int NUM_JOB_SPECIFIC_FLEXIBLE_CONSTRAINTS =
             Integer.bitCount(JOB_SPECIFIC_FLEXIBLE_CONSTRAINTS);
+
+    static final int NUM_OPTIONAL_FLEXIBLE_CONSTRAINTS =
+            Integer.bitCount(OPTIONAL_FLEXIBLE_CONSTRAINTS);
 
     static final int NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS =
             Integer.bitCount(SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS);
@@ -130,6 +140,7 @@ public final class FlexibilityController extends StateController {
     final FlexibilityAlarmQueue mFlexibilityAlarmQueue;
     @VisibleForTesting
     final FcConfig mFcConfig;
+    private final FcHandler mHandler;
     @VisibleForTesting
     final PrefetchController mPrefetchController;
 
@@ -174,9 +185,12 @@ public final class FlexibilityController extends StateController {
                 }
             };
 
+    private static final int MSG_UPDATE_JOBS = 0;
+
     public FlexibilityController(
             JobSchedulerService service, PrefetchController prefetchController) {
         super(service);
+        mHandler = new FcHandler(AppSchedulingModuleThread.get().getLooper());
         mDeviceSupportsFlexConstraints = !mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_AUTOMOTIVE);
         mFlexibilityEnabled &= mDeviceSupportsFlexConstraints;
@@ -238,15 +252,16 @@ public final class FlexibilityController extends StateController {
     boolean isFlexibilitySatisfiedLocked(JobStatus js) {
         return !mFlexibilityEnabled
                 || mService.getUidBias(js.getSourceUid()) == JobInfo.BIAS_TOP_APP
-                || mService.isCurrentlyRunningLocked(js)
                 || getNumSatisfiedFlexibleConstraintsLocked(js)
-                >= js.getNumRequiredFlexibleConstraints();
+                        >= js.getNumRequiredFlexibleConstraints()
+                || mService.isCurrentlyRunningLocked(js);
     }
 
     @VisibleForTesting
     @GuardedBy("mLock")
     int getNumSatisfiedFlexibleConstraintsLocked(JobStatus js) {
         return Integer.bitCount(mSatisfiedFlexibleConstraints & js.getPreferredConstraintFlags())
+                // Connectivity is job-specific, so must be handled separately.
                 + (js.getHasAccessToUnmetered() ? 1 : 0);
     }
 
@@ -267,33 +282,11 @@ public final class FlexibilityController extends StateController {
                        + " constraint: " + constraint + " state: " + state);
             }
 
-            final int prevSatisfied = Integer.bitCount(mSatisfiedFlexibleConstraints);
             mSatisfiedFlexibleConstraints =
                     (mSatisfiedFlexibleConstraints & ~constraint) | (state ? constraint : 0);
-            final int curSatisfied = Integer.bitCount(mSatisfiedFlexibleConstraints);
-
-            // Only the max of the number of required flexible constraints will need to be updated
-            // The rest did not have a change in state and are still satisfied or unsatisfied.
-            final int numConstraintsToUpdate = Math.max(curSatisfied, prevSatisfied);
-
-            // In order to get the range of all potentially satisfied jobs, we start at the number
-            // of satisfied system-wide constraints and iterate to the max number of potentially
-            // satisfied constraints, determined by how many job-specific constraints exist.
-            for (int j = 0; j <= NUM_JOB_SPECIFIC_FLEXIBLE_CONSTRAINTS; j++) {
-                final ArraySet<JobStatus> jobsByNumConstraints = mFlexibilityTracker
-                        .getJobsByNumRequiredConstraints(numConstraintsToUpdate + j);
-
-                if (jobsByNumConstraints == null) {
-                    // If there are no more jobs to iterate through we can just return.
-                    return;
-                }
-
-                for (int i = 0; i < jobsByNumConstraints.size(); i++) {
-                    JobStatus js = jobsByNumConstraints.valueAt(i);
-                    js.setFlexibilityConstraintSatisfied(
-                            nowElapsed, isFlexibilitySatisfiedLocked(js));
-                }
-            }
+            // Push the job update to the handler to avoid blocking other controllers and
+            // potentially batch back-to-back controller state updates together.
+            mHandler.obtainMessage(MSG_UPDATE_JOBS).sendToTarget();
         }
     }
 
@@ -626,6 +619,44 @@ public final class FlexibilityController extends StateController {
                     }
                 }
                 mStateChangedListener.onControllerStateChanged(changedJobs);
+            }
+        }
+    }
+
+    private class FcHandler extends Handler {
+        FcHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_UPDATE_JOBS:
+                    removeMessages(MSG_UPDATE_JOBS);
+
+                    synchronized (mLock) {
+                        final long nowElapsed = sElapsedRealtimeClock.millis();
+                        final ArraySet<JobStatus> changedJobs = new ArraySet<>();
+
+                        for (int o = 0; o <= NUM_OPTIONAL_FLEXIBLE_CONSTRAINTS; ++o) {
+                            final ArraySet<JobStatus> jobsByNumConstraints = mFlexibilityTracker
+                                    .getJobsByNumRequiredConstraints(o);
+
+                            if (jobsByNumConstraints != null) {
+                                for (int i = 0; i < jobsByNumConstraints.size(); i++) {
+                                    final JobStatus js = jobsByNumConstraints.valueAt(i);
+                                    if (js.setFlexibilityConstraintSatisfied(
+                                            nowElapsed, isFlexibilitySatisfiedLocked(js))) {
+                                        changedJobs.add(js);
+                                    }
+                                }
+                            }
+                        }
+                        if (changedJobs.size() > 0) {
+                            mStateChangedListener.onControllerStateChanged(changedJobs);
+                        }
+                    }
+                    break;
             }
         }
     }
