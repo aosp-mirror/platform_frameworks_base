@@ -25,7 +25,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.timeout
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.junit.MockitoJUnit
@@ -49,17 +49,31 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testEnableDetector_shouldPostRunnable() {
+    fun testEnableDetector_expandWithTrack_shouldPostRunnable() {
         detector.enable(action)
         // simulate notification expand
         shadeExpansionStateManager.onPanelExpansionChanged(5566f, true, true, 5566f)
-        verify(action, timeout(5000).times(1)).run()
+        verify(action).run()
+    }
+
+    @Test
+    fun testEnableDetector_trackOnly_shouldPostRunnable() {
+        detector.enable(action)
+        // simulate notification expand
+        shadeExpansionStateManager.onPanelExpansionChanged(5566f, false, true, 5566f)
+        verify(action).run()
+    }
+
+    @Test
+    fun testEnableDetector_expandOnly_shouldPostRunnable() {
+        detector.enable(action)
+        // simulate notification expand
+        shadeExpansionStateManager.onPanelExpansionChanged(5566f, true, false, 5566f)
+        verify(action).run()
     }
 
     @Test
     fun testEnableDetector_shouldNotPostRunnable() {
-        var detector =
-            AuthDialogPanelInteractionDetector(shadeExpansionStateManager, mContext.mainExecutor)
         detector.enable(action)
         detector.disable()
         shadeExpansionStateManager.onPanelExpansionChanged(5566f, true, true, 5566f)
