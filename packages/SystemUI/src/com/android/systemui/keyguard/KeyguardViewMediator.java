@@ -952,20 +952,15 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 @Nullable private ValueAnimator mOccludeByDreamAnimator;
 
                 @Override
-                public void onAnimationCancelled(boolean isKeyguardOccluded) {
+                public void onAnimationCancelled() {
                     mContext.getMainExecutor().execute(() -> {
                         if (mOccludeByDreamAnimator != null) {
                             mOccludeByDreamAnimator.cancel();
                         }
                     });
-                    // The value of isKeyguardOccluded here may come from mergeAnimation, which
-                    // isn't reliable. In all cases, after running or cancelling this animation,
-                    // keyguard should be occluded.
+
+                    Log.d(TAG, "OccludeByDreamAnimator#onAnimationCancelled. Set occluded = true");
                     setOccluded(true /* isOccluded */, false /* animate */);
-                    if (DEBUG) {
-                        Log.d(TAG, "Occlude by Dream animation cancelled. Occluded state is now: "
-                                + mOccluded);
-                    }
                 }
 
                 @Override
@@ -977,6 +972,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         // Usually we rely on animation completion to synchronize occluded status,
                         // but there was no animation to play, so just update it now.
                         setOccluded(true /* isOccluded */, false /* animate */);
+                        finishedCallback.onAnimationFinished();
                     }
                 }
 
@@ -984,11 +980,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
                         IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
                     if (apps == null || apps.length == 0 || apps[0] == null) {
-                        if (DEBUG) {
-                            Log.d(TAG, "No apps provided to the OccludeByDream runner; "
-                                    + "skipping occluding animation.");
-                        }
-                        finishedCallback.onAnimationFinished();
+                        Log.d(TAG, "No apps provided to the OccludeByDream runner; "
+                                + "skipping occluding animation.");
                         return false;
                     }
 
@@ -998,7 +991,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     if (!isDream) {
                         Log.w(TAG, "The occluding app isn't Dream; "
                                 + "finishing up. Please check that the config is correct.");
-                        finishedCallback.onAnimationFinished();
                         return false;
                     }
 
@@ -1064,17 +1056,14 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 private final Matrix mUnoccludeMatrix = new Matrix();
 
                 @Override
-                public void onAnimationCancelled(boolean isKeyguardOccluded) {
+                public void onAnimationCancelled() {
                     mContext.getMainExecutor().execute(() -> {
                         if (mUnoccludeAnimator != null) {
                             mUnoccludeAnimator.cancel();
                         }
                     });
 
-                    setOccluded(isKeyguardOccluded /* isOccluded */, false /* animate */);
-                    Log.d(TAG, "Unocclude animation cancelled. Occluded state is now: "
-                            + mOccluded);
-
+                    Log.d(TAG, "Unocclude animation cancelled.");
                     mInteractionJankMonitor.cancel(CUJ_LOCKSCREEN_OCCLUSION);
                 }
 
@@ -3388,9 +3377,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         }
 
         @Override
-        public void onAnimationCancelled(boolean isKeyguardOccluded) throws RemoteException {
+        public void onAnimationCancelled() throws RemoteException {
             if (mRunner != null) {
-                mRunner.onAnimationCancelled(isKeyguardOccluded);
+                mRunner.onAnimationCancelled();
             }
         }
 
@@ -3436,13 +3425,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         }
 
         @Override
-        public void onAnimationCancelled(boolean isKeyguardOccluded) throws RemoteException {
-            super.onAnimationCancelled(isKeyguardOccluded);
-
-            Log.d(TAG, "Occlude animation cancelled by WM. "
-                    + "Setting occluded state to: " + isKeyguardOccluded);
-            setOccluded(isKeyguardOccluded /* occluded */, false /* animate */);
-
+        public void onAnimationCancelled() throws RemoteException {
+            super.onAnimationCancelled();
+            Log.d(TAG, "Occlude animation cancelled by WM.");
             mInteractionJankMonitor.cancel(CUJ_LOCKSCREEN_OCCLUSION);
         }
     }

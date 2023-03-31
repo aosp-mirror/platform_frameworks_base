@@ -87,7 +87,7 @@ public class AppChangeTransitionTests extends WindowTestsBase {
         }
 
         @Override
-        public void onAnimationCancelled(boolean isKeyguardOccluded) {
+        public void onAnimationCancelled() {
         }
 
         @Override

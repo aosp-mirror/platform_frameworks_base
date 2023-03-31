@@ -206,7 +206,7 @@ public abstract class RemoteAnimationRunnerCompat extends IRemoteAnimationRunner
                 t.close();
                 info.releaseAllSurfaces();
                 if (finishRunnable == null) return;
-                onAnimationCancelled(false /* isKeyguardOccluded */);
+                onAnimationCancelled();
                 finishRunnable.run();
             }
         };
