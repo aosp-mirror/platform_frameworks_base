@@ -1016,6 +1016,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             dc.removeImeSurfaceImmediately();
             dc.handleCompleteDeferredRemoval();
         }
+        validateKeyguardOcclusion();
         validateVisibility();
 
         mState = STATE_FINISHED;
@@ -1171,8 +1172,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             handleLegacyRecentsStartBehavior(mTargetDisplays.get(i), info);
             if (mRecentsDisplayId != INVALID_DISPLAY) break;
         }
-
-        handleNonAppWindowsInTransition(mType, mFlags);
 
         // The callback is only populated for custom activity-level client animations
         sendRemoteCallback(mClientAnimationStartCallback);
@@ -1474,19 +1473,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         } else {
             // Reparent the SurfaceControl of nav bar token back.
             t.reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
-        }
-    }
-
-    private void handleNonAppWindowsInTransition(
-            @TransitionType int transit, @TransitionFlags int flags) {
-        if ((flags & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
-            // If the occlusion changed but the transition isn't an occlude/unocclude transition,
-            // then we have to notify KeyguardService directly. This can happen if there is
-            // another ongoing transition when the app changes occlusion OR if the app dies or
-            // is killed. Both of these are common during tests.
-            if (transit != TRANSIT_KEYGUARD_OCCLUDE && transit != TRANSIT_KEYGUARD_UNOCCLUDE) {
-                mController.mAtm.mWindowManager.mPolicy.applyKeyguardOcclusionChange();
-            }
         }
     }
 
@@ -2180,6 +2166,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             return ROTATION_ANIMATION_UNSPECIFIED;
         }
         return mainWin.getAttrs().rotationAnimation;
+    }
+
+    private void validateKeyguardOcclusion() {
+        if ((mFlags & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
+            mController.mStateValidators.add(
+                mController.mAtm.mWindowManager.mPolicy::applyKeyguardOcclusionChange);
+        }
     }
 
     private void validateVisibility() {
