@@ -30,10 +30,19 @@ class FakeDeviceEntryFingerprintAuthRepository : DeviceEntryFingerprintAuthRepos
     override val isRunning: Flow<Boolean>
         get() = _isRunning
 
-    override val availableFpSensorType: BiometricType?
-        get() = null
+    private var fpSensorType = MutableStateFlow<BiometricType?>(null)
+    override val availableFpSensorType: Flow<BiometricType?>
+        get() = fpSensorType
 
     fun setLockedOut(lockedOut: Boolean) {
         _isLockedOut.value = lockedOut
+    }
+
+    fun setIsRunning(value: Boolean) {
+        _isRunning.value = value
+    }
+
+    fun setAvailableFpSensorType(value: BiometricType?) {
+        fpSensorType.value = value
     }
 }
