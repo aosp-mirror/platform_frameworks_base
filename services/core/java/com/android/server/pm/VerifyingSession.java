@@ -652,20 +652,33 @@ final class VerifyingSession {
 
     private boolean isAdbVerificationEnabled(PackageInfoLite pkgInfoLite, int userId,
             boolean requestedDisableVerification) {
+        boolean verifierIncludeAdb = android.provider.Settings.Global.getInt(
+                mPm.mContext.getContentResolver(),
+                android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0;
+
         if (mPm.isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS)) {
+            if (!verifierIncludeAdb) {
+                Slog.w(TAG, "Force verification of ADB install because of user restriction.");
+            }
             return true;
         }
-        // Check if the developer wants to skip verification for ADB installs
+
+        // Check if the verification disabled globally, first.
+        if (!verifierIncludeAdb) {
+            return false;
+        }
+
+        // Check if the developer wants to skip verification for ADB installs.
         if (requestedDisableVerification) {
             if (!packageExists(pkgInfoLite.packageName)) {
-                // Always verify fresh install
+                // Always verify fresh install.
                 return true;
             }
-            // Only skip when apk is debuggable
+            // Only skip when apk is debuggable.
             return !pkgInfoLite.debuggable;
         }
-        return android.provider.Settings.Global.getInt(mPm.mContext.getContentResolver(),
-                android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0;
+
+        return true;
     }
 
     /**
