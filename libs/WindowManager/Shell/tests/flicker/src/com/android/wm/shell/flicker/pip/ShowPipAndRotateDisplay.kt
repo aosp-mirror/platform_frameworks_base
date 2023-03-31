@@ -43,6 +43,7 @@ import org.junit.runners.Parameterized
  *     Rotate the screen from [flicker.scenario.startRotation] to [flicker.scenario.endRotation]
  *     (usually, 0->90 and 90->0)
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)

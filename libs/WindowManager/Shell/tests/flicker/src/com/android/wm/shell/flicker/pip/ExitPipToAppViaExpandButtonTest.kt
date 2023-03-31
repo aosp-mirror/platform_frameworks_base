@@ -42,6 +42,7 @@ import org.junit.runners.Parameterized
  *     Expand [pipApp] app to full screen by clicking on the pip window and
  *     then on the expand button
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)

@@ -221,9 +221,10 @@ class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
                     .getIdentifier("image_wallpaper_component", "string", "android")
             // frameworks/base/core/res/res/values/config.xml returns package plus class name,
             // but wallpaper layer has only class name
-            val rawComponentMatcher = ComponentNameMatcher.unflattenFromString(
-                instrumentation.targetContext.resources.getString(resourceId)
-            )
+            val rawComponentMatcher =
+                ComponentNameMatcher.unflattenFromString(
+                    instrumentation.targetContext.resources.getString(resourceId)
+                )
 
             return ComponentNameMatcher(rawComponentMatcher.className)
         }
