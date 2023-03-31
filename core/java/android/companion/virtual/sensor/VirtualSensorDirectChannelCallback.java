@@ -45,6 +45,8 @@ import android.os.SharedMemory;
  * <p>The callback is tied to the VirtualDevice's lifetime as the virtual sensors are created when
  * the device is created and destroyed when the device is destroyed.
  *
+ * @see VirtualSensorDirectChannelWriter
+ *
  * @hide
  */
 @SystemApi
@@ -94,7 +96,7 @@ public interface VirtualSensorDirectChannelCallback {
      * @param sensor The sensor, for which the channel was configured.
      * @param rateLevel The rate level used to configure the direct sensor channel.
      * @param reportToken A positive sensor report token, used to differentiate between events from
-     * different sensors within the same channel.
+     *   different sensors within the same channel.
      *
      * @see VirtualSensorConfig.Builder#setHighestDirectReportRateLevel(int)
      * @see VirtualSensorConfig.Builder#setDirectChannelTypesSupported(int)
