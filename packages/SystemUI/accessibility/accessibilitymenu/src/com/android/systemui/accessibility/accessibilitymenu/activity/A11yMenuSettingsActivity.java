@@ -24,7 +24,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Browser;
 import android.provider.Settings;
+import android.view.View;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -54,6 +56,13 @@ public class A11yMenuSettingsActivity extends FragmentActivity {
         public void onCreatePreferences(Bundle bundle, String s) {
             setPreferencesFromResource(R.xml.accessibilitymenu_preferences, s);
             initializeHelpAndFeedbackPreference();
+        }
+
+        @Override
+        public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+            view.setLayoutDirection(
+                    view.getResources().getConfiguration().getLayoutDirection());
         }
 
         /**
