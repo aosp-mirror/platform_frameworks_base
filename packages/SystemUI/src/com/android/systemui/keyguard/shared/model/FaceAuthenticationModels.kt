@@ -18,7 +18,10 @@ package com.android.systemui.keyguard.shared.model
 
 import android.hardware.face.FaceManager
 
-/** Authentication status provided by [com.android.keyguard.faceauth.KeyguardFaceAuthManager] */
+/**
+ * Authentication status provided by
+ * [com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository]
+ */
 sealed class AuthenticationStatus
 
 /** Success authentication status. */
