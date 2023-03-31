@@ -21,6 +21,7 @@ import static com.android.server.am.BroadcastRecord.deliveryStateToString;
 import static com.android.server.am.BroadcastRecord.isDeliveryStateTerminal;
 import static com.android.server.am.BroadcastRecord.isReceiverEquals;
 
+import android.annotation.CheckResult;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -188,7 +189,7 @@ class BroadcastProcessQueue {
     private @Reason int mRunnableAtReason = REASON_EMPTY;
     private boolean mRunnableAtInvalidated;
 
-    private boolean mProcessCached;
+    private boolean mUidFrozen;
     private boolean mProcessInstrumented;
     private boolean mProcessPersistent;
 
@@ -341,7 +342,12 @@ class BroadcastProcessQueue {
      * Predicates that choose to remove a broadcast <em>must</em> finish
      * delivery of the matched broadcast, to ensure that situations like ordered
      * broadcasts are handled consistently.
+     *
+     * @return if this operation may have changed internal state, indicating
+     *         that the caller is responsible for invoking
+     *         {@link BroadcastQueueModernImpl#updateRunnableList}
      */
+    @CheckResult
     public boolean forEachMatchingBroadcast(@NonNull BroadcastPredicate predicate,
             @NonNull BroadcastConsumer consumer, boolean andRemove) {
         boolean didSomething = false;
@@ -354,6 +360,7 @@ class BroadcastProcessQueue {
         return didSomething;
     }
 
+    @CheckResult
     private boolean forEachMatchingBroadcastInQueue(@NonNull ArrayDeque<SomeArgs> queue,
             @NonNull BroadcastPredicate predicate, @NonNull BroadcastConsumer consumer,
             boolean andRemove) {
@@ -370,6 +377,10 @@ class BroadcastProcessQueue {
                     args.recycle();
                     it.remove();
                     onBroadcastDequeued(record, recordIndex, recordWouldBeSkipped);
+                } else {
+                    // Even if we're leaving broadcast in queue, it may have
+                    // been mutated in such a way to change our runnable time
+                    invalidateRunnableAt();
                 }
                 didSomething = true;
             }
@@ -381,33 +392,43 @@ class BroadcastProcessQueue {
 
     /**
      * Update the actively running "warm" process for this process.
+     *
+     * @return if this operation may have changed internal state, indicating
+     *         that the caller is responsible for invoking
+     *         {@link BroadcastQueueModernImpl#updateRunnableList}
      */
-    public void setProcess(@Nullable ProcessRecord app) {
+    @CheckResult
+    public boolean setProcessAndUidFrozen(@Nullable ProcessRecord app, boolean uidFrozen) {
         this.app = app;
-        if (app != null) {
-            setProcessCached(app.isCached());
-            setProcessInstrumented(app.getActiveInstrumentation() != null);
-            setProcessPersistent(app.isPersistent());
-        } else {
-            setProcessCached(false);
-            setProcessInstrumented(false);
-            setProcessPersistent(false);
-        }
 
         // Since we may have just changed our PID, invalidate cached strings
         mCachedToString = null;
         mCachedToShortString = null;
+
+        boolean didSomething = false;
+        if (app != null) {
+            didSomething |= setProcessInstrumented(app.getActiveInstrumentation() != null);
+            didSomething |= setProcessPersistent(app.isPersistent());
+            didSomething |= setUidFrozen(uidFrozen);
+        } else {
+            didSomething |= setProcessInstrumented(false);
+            didSomething |= setProcessPersistent(false);
+            didSomething |= setUidFrozen(uidFrozen);
+        }
+        return didSomething;
     }
 
     /**
-     * Update if this process is in the "cached" state, typically signaling that
+     * Update if this UID is in the "frozen" state, typically signaling that
      * broadcast dispatch should be paused or delayed.
      */
-    @VisibleForTesting
-    void setProcessCached(boolean cached) {
-        if (mProcessCached != cached) {
-            mProcessCached = cached;
+    private boolean setUidFrozen(boolean frozen) {
+        if (mUidFrozen != frozen) {
+            mUidFrozen = frozen;
             invalidateRunnableAt();
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -416,10 +437,13 @@ class BroadcastProcessQueue {
      * signaling that broadcast dispatch should bypass all pauses or delays, to
      * avoid holding up test suites.
      */
-    public void setProcessInstrumented(boolean instrumented) {
+    private boolean setProcessInstrumented(boolean instrumented) {
         if (mProcessInstrumented != instrumented) {
             mProcessInstrumented = instrumented;
             invalidateRunnableAt();
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -427,10 +451,13 @@ class BroadcastProcessQueue {
      * Update if this process is in the "persistent" state, which signals broadcast dispatch should
      * bypass all pauses or delays to prevent the system from becoming out of sync with itself.
      */
-    public void setProcessPersistent(boolean persistent) {
+    private boolean setProcessPersistent(boolean persistent) {
         if (mProcessPersistent != persistent) {
             mProcessPersistent = persistent;
             invalidateRunnableAt();
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -650,8 +677,20 @@ class BroadcastProcessQueue {
         return mActive != null;
     }
 
-    void forceDelayBroadcastDelivery(long delayedDurationMs) {
-        mForcedDelayedDurationMs = delayedDurationMs;
+    /**
+     * @return if this operation may have changed internal state, indicating
+     *         that the caller is responsible for invoking
+     *         {@link BroadcastQueueModernImpl#updateRunnableList}
+     */
+    @CheckResult
+    boolean forceDelayBroadcastDelivery(long delayedDurationMs) {
+        if (mForcedDelayedDurationMs != delayedDurationMs) {
+            mForcedDelayedDurationMs = delayedDurationMs;
+            invalidateRunnableAt();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -723,10 +762,21 @@ class BroadcastProcessQueue {
      * broadcasts would be prioritized for dispatching, even if there are urgent broadcasts
      * waiting. This is typically used in case there are callers waiting for "barrier" to be
      * reached.
+     *
+     * @return if this operation may have changed internal state, indicating
+     *         that the caller is responsible for invoking
+     *         {@link BroadcastQueueModernImpl#updateRunnableList}
      */
+    @CheckResult
     @VisibleForTesting
-    void setPrioritizeEarliest(boolean prioritizeEarliest) {
-        mPrioritizeEarliest = prioritizeEarliest;
+    boolean setPrioritizeEarliest(boolean prioritizeEarliest) {
+        if (mPrioritizeEarliest != prioritizeEarliest) {
+            mPrioritizeEarliest = prioritizeEarliest;
+            invalidateRunnableAt();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -813,7 +863,7 @@ class BroadcastProcessQueue {
 
     public boolean isDeferredUntilActive() {
         if (mRunnableAtInvalidated) updateRunnableAt();
-        return mRunnableAtReason == BroadcastProcessQueue.REASON_CACHED_INFINITE_DEFER;
+        return mRunnableAtReason == BroadcastProcessQueue.REASON_INFINITE_DEFER;
     }
 
     public boolean hasDeferredBroadcasts() {
@@ -848,14 +898,14 @@ class BroadcastProcessQueue {
     }
 
     static final int REASON_EMPTY = 0;
-    static final int REASON_CACHED = 1;
+    static final int REASON_FROZEN = 1;
     static final int REASON_NORMAL = 2;
     static final int REASON_MAX_PENDING = 3;
     static final int REASON_BLOCKED = 4;
     static final int REASON_INSTRUMENTED = 5;
     static final int REASON_PERSISTENT = 6;
     static final int REASON_FORCE_DELAYED = 7;
-    static final int REASON_CACHED_INFINITE_DEFER = 8;
+    static final int REASON_INFINITE_DEFER = 8;
     static final int REASON_CONTAINS_FOREGROUND = 10;
     static final int REASON_CONTAINS_ORDERED = 11;
     static final int REASON_CONTAINS_ALARM = 12;
@@ -867,14 +917,14 @@ class BroadcastProcessQueue {
 
     @IntDef(flag = false, prefix = { "REASON_" }, value = {
             REASON_EMPTY,
-            REASON_CACHED,
+            REASON_FROZEN,
             REASON_NORMAL,
             REASON_MAX_PENDING,
             REASON_BLOCKED,
             REASON_INSTRUMENTED,
             REASON_PERSISTENT,
             REASON_FORCE_DELAYED,
-            REASON_CACHED_INFINITE_DEFER,
+            REASON_INFINITE_DEFER,
             REASON_CONTAINS_FOREGROUND,
             REASON_CONTAINS_ORDERED,
             REASON_CONTAINS_ALARM,
@@ -890,14 +940,14 @@ class BroadcastProcessQueue {
     static @NonNull String reasonToString(@Reason int reason) {
         switch (reason) {
             case REASON_EMPTY: return "EMPTY";
-            case REASON_CACHED: return "CACHED";
+            case REASON_FROZEN: return "FROZEN";
             case REASON_NORMAL: return "NORMAL";
             case REASON_MAX_PENDING: return "MAX_PENDING";
             case REASON_BLOCKED: return "BLOCKED";
             case REASON_INSTRUMENTED: return "INSTRUMENTED";
             case REASON_PERSISTENT: return "PERSISTENT";
             case REASON_FORCE_DELAYED: return "FORCE_DELAYED";
-            case REASON_CACHED_INFINITE_DEFER: return "INFINITE_DEFER";
+            case REASON_INFINITE_DEFER: return "INFINITE_DEFER";
             case REASON_CONTAINS_FOREGROUND: return "CONTAINS_FOREGROUND";
             case REASON_CONTAINS_ORDERED: return "CONTAINS_ORDERED";
             case REASON_CONTAINS_ALARM: return "CONTAINS_ALARM";
@@ -978,12 +1028,12 @@ class BroadcastProcessQueue {
             } else if (mProcessPersistent) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_PERSISTENT;
-            } else if (mProcessCached) {
+            } else if (mUidFrozen) {
                 if (r.deferUntilActive) {
                     // All enqueued broadcasts are deferrable, defer
                     if (mCountDeferred == mCountEnqueued) {
                         mRunnableAt = Long.MAX_VALUE;
-                        mRunnableAtReason = REASON_CACHED_INFINITE_DEFER;
+                        mRunnableAtReason = REASON_INFINITE_DEFER;
                     } else {
                         // At least one enqueued broadcast isn't deferrable, repick time and reason
                         // for this record. If a later record is not deferrable and is one of these
@@ -998,14 +1048,14 @@ class BroadcastProcessQueue {
                             mRunnableAt = runnableAt;
                             mRunnableAtReason = REASON_CONTAINS_RESULT_TO;
                         } else {
-                            mRunnableAt = runnableAt + constants.DELAY_CACHED_MILLIS;
-                            mRunnableAtReason = REASON_CACHED;
+                            mRunnableAt = runnableAt + constants.DELAY_FROZEN_MILLIS;
+                            mRunnableAtReason = REASON_FROZEN;
                         }
                     }
                 } else {
                     // This record isn't deferrable
-                    mRunnableAt = runnableAt + constants.DELAY_CACHED_MILLIS;
-                    mRunnableAtReason = REASON_CACHED;
+                    mRunnableAt = runnableAt + constants.DELAY_FROZEN_MILLIS;
+                    mRunnableAtReason = REASON_FROZEN;
                 }
             } else if (mCountResultTo > 0) {
                 // All resultTo broadcasts are infinitely deferrable, so if the app
@@ -1187,8 +1237,8 @@ class BroadcastProcessQueue {
     @NeverCompile
     private void dumpProcessState(@NonNull IndentingPrintWriter pw) {
         final StringBuilder sb = new StringBuilder();
-        if (mProcessCached) {
-            sb.append("CACHED");
+        if (mUidFrozen) {
+            sb.append("FROZEN");
         }
         if (mProcessInstrumented) {
             if (sb.length() > 0) sb.append("|");
