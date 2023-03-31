@@ -81,6 +81,17 @@ public class DisplayPolicyTests extends WindowTestsBase {
         return win;
     }
 
+    private WindowState createDreamWindow() {
+        final WindowState win = createDreamWindow(null, TYPE_BASE_APPLICATION, "dream");
+        final WindowManager.LayoutParams attrs = win.mAttrs;
+        attrs.width = MATCH_PARENT;
+        attrs.height = MATCH_PARENT;
+        attrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        attrs.format = PixelFormat.OPAQUE;
+        return win;
+    }
+
     private WindowState createDimmingDialogWindow(boolean canBeImTarget) {
         final WindowState win = spy(createWindow(null, TYPE_APPLICATION, "dimmingDialog"));
         final WindowManager.LayoutParams attrs = win.mAttrs;
@@ -383,5 +394,26 @@ public class DisplayPolicyTests extends WindowTestsBase {
         displayPolicy.setCanSystemBarsBeShownByUser(true);
         displayPolicy.requestTransientBars(mNavBarWindow, true);
         assertTrue(mDisplayContent.getInsetsPolicy().isTransient(navigationBars()));
+    }
+
+    @UseTestDisplay(addWindows = { W_NAVIGATION_BAR })
+    @Test
+    public void testTransientBarsSuppressedOnDreams() {
+        final WindowState win = createDreamWindow();
+
+        ((TestWindowManagerPolicy) mWm.mPolicy).mIsUserSetupComplete = true;
+        win.mAttrs.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+        win.setRequestedVisibleTypes(0, navigationBars());
+
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+        displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
+        final InsetsSourceProvider navBarProvider = mNavBarWindow.getControllableInsetProvider();
+        navBarProvider.updateControlForTarget(win, false);
+        navBarProvider.getSource().setVisible(false);
+
+        displayPolicy.setCanSystemBarsBeShownByUser(true);
+        displayPolicy.requestTransientBars(mNavBarWindow, true);
+
+        assertFalse(mDisplayContent.getInsetsPolicy().isTransient(navigationBars()));
     }
 }
