@@ -324,6 +324,10 @@ public class Transitions implements RemoteCallable<Transitions> {
         mRemoteTransitionHandler.removeFiltered(remoteTransition);
     }
 
+    RemoteTransitionHandler getRemoteTransitionHandler() {
+        return mRemoteTransitionHandler;
+    }
+
     /** Registers an observer on the lifecycle of transitions. */
     public void registerObserver(@NonNull TransitionObserver observer) {
         mObservers.add(observer);
