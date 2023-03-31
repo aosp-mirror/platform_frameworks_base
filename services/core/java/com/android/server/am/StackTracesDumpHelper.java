@@ -93,7 +93,7 @@ public class StackTracesDumpHelper {
             Future<ArrayList<Integer>> nativePidsFuture, StringWriter logExceptionCreatingFile,
             @NonNull Executor auxiliaryTaskExecutor, AnrLatencyTracker latencyTracker) {
         return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePidsFuture,
-                logExceptionCreatingFile, null, null, null, auxiliaryTaskExecutor, null,
+                logExceptionCreatingFile, null, null, null, null, auxiliaryTaskExecutor, null,
                 latencyTracker);
     }
 
@@ -108,7 +108,7 @@ public class StackTracesDumpHelper {
             AnrLatencyTracker latencyTracker) {
         return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePidsFuture,
                 logExceptionCreatingFile, null, subject, criticalEventSection,
-                auxiliaryTaskExecutor, null, latencyTracker);
+                /* memoryHeaders= */ null, auxiliaryTaskExecutor, null, latencyTracker);
     }
 
     /**
@@ -119,8 +119,8 @@ public class StackTracesDumpHelper {
             ProcessCpuTracker processCpuTracker, SparseBooleanArray lastPids,
             Future<ArrayList<Integer>> nativePidsFuture, StringWriter logExceptionCreatingFile,
             AtomicLong firstPidEndOffset, String subject, String criticalEventSection,
-            @NonNull Executor auxiliaryTaskExecutor, Future<File> firstPidFilePromise,
-            AnrLatencyTracker latencyTracker) {
+            String memoryHeaders, @NonNull Executor auxiliaryTaskExecutor,
+           Future<File> firstPidFilePromise, AnrLatencyTracker latencyTracker) {
         try {
 
             if (latencyTracker != null) {
@@ -160,9 +160,10 @@ public class StackTracesDumpHelper {
                 return null;
             }
 
-            if (subject != null || criticalEventSection != null) {
+            if (subject != null || criticalEventSection != null || memoryHeaders != null) {
                 appendtoANRFile(tracesFile.getAbsolutePath(),
-                        (subject != null ? "Subject: " + subject + "\n\n" : "")
+                        (subject != null ? "Subject: " + subject + "\n" : "")
+                        + (memoryHeaders != null ? memoryHeaders + "\n\n" : "")
                         + (criticalEventSection != null ? criticalEventSection : ""));
             }
 
