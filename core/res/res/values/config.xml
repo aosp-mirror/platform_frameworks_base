@@ -5223,6 +5223,11 @@
          of known compatibility issues. -->
     <string-array name="config_highRefreshRateBlacklist"></string-array>
 
+    <!-- The list of packages to force slowJpegMode for Apps using Camera API1 -->
+    <string-array name="config_forceSlowJpegModeList" translatable="false">
+        <!-- Add packages here -->
+    </string-array>
+
     <!-- Whether or not to hide the navigation bar when the soft keyboard is visible in order to
          create additional screen real estate outside beyond the keyboard. Note that the user needs
          to have a confirmed way to dismiss the keyboard when desired. -->
@@ -6356,23 +6361,6 @@
 
     <!-- Package name of Health Connect data migrator application.  -->
     <string name="config_healthConnectMigratorPackageName"></string>
-
-    <!-- The Universal Stylus Initiative (USI) protocol version supported by each display.
-         (@see https://universalstylus.org/).
-
-         The i-th value in this array corresponds to the supported USI version of the i-th display
-         listed in config_displayUniqueIdArray. On a single-display device, the
-         config_displayUniqueIdArray may be empty, in which case the only value in this array should
-         be the USI version for the main built-in display.
-
-         If the display does not support USI, the version value should be an empty string. If the
-         display supports USI, the version must be in the following format:
-           "<major-version>.<minor-version>"
-
-         For example, "", "1.0", and "2.0" are valid values. -->
-    <string-array name="config_displayUsiVersionArray" translatable="false">
-        <item>""</item>
-    </string-array>
 
     <!-- Whether system apps should be scanned in the stopped state during initial boot.
         Packages can be added by OEMs in an allowlist, to prevent them from being scanned as

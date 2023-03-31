@@ -109,6 +109,9 @@ interface ClockEvents {
     /** Call whenever the locale changes */
     fun onLocaleChanged(locale: Locale) {}
 
+    val isReactiveToTone
+        get() = true
+
     /** Call whenever the color palette should update */
     fun onColorPaletteChanged(resources: Resources) {}
 
@@ -164,8 +167,12 @@ interface ClockFaceEvents {
     val hasCustomWeatherDataDisplay: Boolean
         get() = false
 
-    /** Region Darkness specific to the clock face */
-    fun onRegionDarknessChanged(isDark: Boolean) {}
+    /**
+     * Region Darkness specific to the clock face.
+     * - isRegionDark = dark theme -> clock should be light
+     * - !isRegionDark = light theme -> clock should be dark
+     */
+    fun onRegionDarknessChanged(isRegionDark: Boolean) {}
 
     /**
      * Call whenever font settings change. Pass in a target font size in pixels. The specific clock

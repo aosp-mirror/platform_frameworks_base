@@ -29,6 +29,7 @@ import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.external.QSExternalModule;
+import com.android.systemui.qs.pipeline.dagger.QSPipelineModule;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
@@ -40,13 +41,13 @@ import com.android.systemui.statusbar.policy.SafetyController;
 import com.android.systemui.statusbar.policy.WalletController;
 import com.android.systemui.util.settings.SecureSettings;
 
-import java.util.Map;
-
-import javax.inject.Named;
-
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.Multibinds;
+
+import java.util.Map;
+
+import javax.inject.Named;
 
 /**
  * Module for QS dependencies
@@ -56,7 +57,8 @@ import dagger.multibindings.Multibinds;
                 MediaModule.class,
                 QSExternalModule.class,
                 QSFlagsModule.class,
-                QSHostModule.class
+                QSHostModule.class,
+                QSPipelineModule.class,
         }
 )
 public interface QSModule {

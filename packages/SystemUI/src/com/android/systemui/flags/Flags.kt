@@ -635,7 +635,7 @@ object Flags {
     // TODO(b/269132640): Tracking Bug
     @JvmField
     val APP_PANELS_REMOVE_APPS_ALLOWED =
-        unreleasedFlag(2003, "app_panels_remove_apps_allowed", teamfood = false)
+        unreleasedFlag(2003, "app_panels_remove_apps_allowed", teamfood = true)
 
     // 2100 - Falsing Manager
     @JvmField val FALSING_FOR_LONG_TAPS = releasedFlag(2100, "falsing_for_long_taps")
@@ -697,7 +697,7 @@ object Flags {
     // TODO(b/272036292): Tracking Bug
     @JvmField
     val LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION =
-            unreleasedFlag(2602, "large_shade_granular_alpha_interpolation", teamfood = true)
+            releasedFlag(2602, "large_shade_granular_alpha_interpolation")
 
     // TODO(b/272805037): Tracking Bug
     @JvmField

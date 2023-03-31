@@ -393,23 +393,27 @@ public final class JobServiceContext implements ServiceConnection {
                     .setFlags(Intent.FLAG_FROM_BACKGROUND);
             boolean binding = false;
             try {
-                final int bindFlags;
+                final Context.BindServiceFlags bindFlags;
                 if (job.shouldTreatAsUserInitiatedJob()) {
-                    // TODO (191785864, 261999509): add an appropriate flag so user-initiated jobs
-                    //    can bypass data saver
-                    bindFlags = Context.BIND_AUTO_CREATE
-                            | Context.BIND_ALMOST_PERCEPTIBLE
-                            | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
-                            | Context.BIND_NOT_APP_COMPONENT_USAGE;
+                    bindFlags = Context.BindServiceFlags.of(
+                            Context.BIND_AUTO_CREATE
+                                    | Context.BIND_ALMOST_PERCEPTIBLE
+                                    | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
+                                    | Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS
+                                    | Context.BIND_NOT_APP_COMPONENT_USAGE);
                 } else if (job.shouldTreatAsExpeditedJob()) {
-                    bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                            | Context.BIND_ALMOST_PERCEPTIBLE
-                            | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
-                            | Context.BIND_NOT_APP_COMPONENT_USAGE;
+                    bindFlags = Context.BindServiceFlags.of(
+                            Context.BIND_AUTO_CREATE
+                                    | Context.BIND_NOT_FOREGROUND
+                                    | Context.BIND_ALMOST_PERCEPTIBLE
+                                    | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
+                                    | Context.BIND_NOT_APP_COMPONENT_USAGE);
                 } else {
-                    bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                            | Context.BIND_NOT_PERCEPTIBLE
-                            | Context.BIND_NOT_APP_COMPONENT_USAGE;
+                    bindFlags = Context.BindServiceFlags.of(
+                            Context.BIND_AUTO_CREATE
+                                    | Context.BIND_NOT_FOREGROUND
+                                    | Context.BIND_NOT_PERCEPTIBLE
+                                    | Context.BIND_NOT_APP_COMPONENT_USAGE);
                 }
                 binding = mContext.bindServiceAsUser(intent, this, bindFlags,
                         UserHandle.of(job.getUserId()));

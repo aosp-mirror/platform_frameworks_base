@@ -4424,13 +4424,14 @@ public class AudioService extends IAudioService.Stub
                 return;
         }
 
-        // Forcefully set LE audio volume as a workaround, since in some cases
-        // (like the outgoing call) the value of 'device' is not DEVICE_OUT_BLE_*
-        // even when BLE is connected.
+        // In some cases (like the outgoing or rejected call) the value of 'device' is not
+        // DEVICE_OUT_BLE_* even when BLE is connected. Changing the volume level in such case
+        // may cuase the other devices volume level leaking into the LeAudio device settings.
         if (!AudioSystem.isLeAudioDeviceType(device)) {
-            Log.w(TAG, "setLeAudioVolumeOnModeUpdate got unexpected device=" + device
-                    + ", forcing to device=" + AudioSystem.DEVICE_OUT_BLE_HEADSET);
-            device = AudioSystem.DEVICE_OUT_BLE_HEADSET;
+            Log.w(TAG, "setLeAudioVolumeOnModeUpdate ignoring invalid device="
+                    + device + ", mode=" + mode + ", index=" + index + " maxIndex=" + maxIndex
+                    + " streamType=" + streamType);
+            return;
         }
 
         if (DEBUG_VOL) {
@@ -11602,6 +11603,7 @@ public class AudioService extends IAudioService.Stub
             return false;
         }
 
+        final long token = Binder.clearCallingIdentity();
         try {
             if (!projectionService.isCurrentProjection(projection)) {
                 Log.w(TAG, "App passed invalid MediaProjection token");
@@ -11611,6 +11613,8 @@ public class AudioService extends IAudioService.Stub
             Log.e(TAG, "Can't call .isCurrentProjection() on IMediaProjectionManager"
                     + projectionService.asBinder(), e);
             return false;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
 
         try {

@@ -188,7 +188,7 @@ public final class BatteryController extends RestrictingController {
             mLastReportedStatsdStablePower = stablePower;
         }
         if (mLastReportedStatsdBatteryNotLow == null
-                || mLastReportedStatsdBatteryNotLow != stablePower) {
+                || mLastReportedStatsdBatteryNotLow != batteryNotLow) {
             logDeviceWideConstraintStateToStatsd(JobStatus.CONSTRAINT_BATTERY_NOT_LOW,
                     batteryNotLow);
             mLastReportedStatsdBatteryNotLow = batteryNotLow;

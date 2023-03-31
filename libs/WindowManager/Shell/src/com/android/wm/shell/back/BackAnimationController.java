@@ -55,6 +55,7 @@ import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.view.AppearanceRegion;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
@@ -142,6 +143,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             });
 
     private final BackAnimationBackground mAnimationBackground;
+    private StatusBarCustomizer mCustomizer;
 
     public BackAnimationController(
             @NonNull ShellInit shellInit,
@@ -268,6 +270,12 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             mShellExecutor.execute(() -> BackAnimationController.this.setSwipeThresholds(
                     triggerThreshold, progressThreshold));
         }
+
+        @Override
+        public void setStatusBarCustomizer(StatusBarCustomizer customizer) {
+            mCustomizer = customizer;
+            mAnimationBackground.setStatusBarCustomizer(customizer);
+        }
     }
 
     private static class IBackAnimationImpl extends IBackAnimation.Stub
@@ -294,9 +302,20 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                             BackNavigationInfo.TYPE_RETURN_TO_HOME));
         }
 
+        public void customizeStatusBarAppearance(AppearanceRegion appearance) {
+            executeRemoteCallWithTaskPermission(mController, "useLauncherSysBarFlags",
+                    (controller) -> controller.customizeStatusBarAppearance(appearance));
+        }
+
         @Override
         public void invalidate() {
             mController = null;
+        }
+    }
+
+    private void customizeStatusBarAppearance(AppearanceRegion appearance) {
+        if (mCustomizer != null) {
+            mCustomizer.customizeStatusBarAppearance(appearance);
         }
     }
 

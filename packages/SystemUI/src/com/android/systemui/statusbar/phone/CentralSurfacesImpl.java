@@ -67,6 +67,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.hardware.devicestate.DeviceStateManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Binder;
@@ -262,6 +263,7 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 
 /**
  * A class handling initialization and coordination between some of the key central surfaces in
@@ -453,9 +455,19 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @VisibleForTesting
     DozeServiceHost mDozeServiceHost;
-    private boolean mWakeUpComingFromTouch;
     private LightRevealScrim mLightRevealScrim;
     private PowerButtonReveal mPowerButtonReveal;
+
+    private boolean mWakeUpComingFromTouch;
+
+    /**
+     * Whether we should delay the wakeup animation (which shows the notifications and moves the
+     * clock view). This is typically done when waking up from a 'press to unlock' gesture on a
+     * device with a side fingerprint sensor, so that if the fingerprint scan is successful, we
+     * can play the unlock animation directly rather than interrupting the wakeup animation part
+     * way through.
+     */
+    private boolean mShouldDelayWakeUpAnimation = false;
 
     private final Object mQueueLock = new Object();
 
@@ -518,6 +530,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final MessageRouter mMessageRouter;
     private final WallpaperManager mWallpaperManager;
     private final UserTracker mUserTracker;
+    private final Provider<FingerprintManager> mFingerprintManager;
 
     private CentralSurfacesComponent mCentralSurfacesComponent;
 
@@ -683,7 +696,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         @Override
         public void onBackProgressed(BackEvent event) {
             if (shouldBackBeHandled()) {
-                if (mNotificationPanelViewController.canPanelBeCollapsed()) {
+                if (mNotificationPanelViewController.canBeCollapsed()) {
                     float fraction = event.getProgress();
                     mNotificationPanelViewController.onBackProgressed(fraction);
                 }
@@ -790,7 +803,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             Lazy<CameraLauncher> cameraLauncherLazy,
             Lazy<LightRevealScrimViewModel> lightRevealScrimViewModelLazy,
             AlternateBouncerInteractor alternateBouncerInteractor,
-            UserTracker userTracker
+            UserTracker userTracker,
+            Provider<FingerprintManager> fingerprintManager
     ) {
         mContext = context;
         mNotificationsController = notificationsController;
@@ -873,6 +887,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mCameraLauncherLazy = cameraLauncherLazy;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mUserTracker = userTracker;
+        mFingerprintManager = fingerprintManager;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -1255,14 +1270,13 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     // re-display the notification panel if necessary (for example, if
                     // a heads-up notification was being displayed and should continue being
                     // displayed).
-                    mNotificationPanelViewController.updatePanelExpansionAndVisibility();
+                    mNotificationPanelViewController.updateExpansionAndVisibility();
                     setBouncerShowingForStatusBarComponents(mBouncerShowing);
                     checkBarModes();
                 });
         initializer.initializeStatusBar(mCentralSurfacesComponent);
 
         mStatusBarTouchableRegionManager.setup(this, mNotificationShadeWindowView);
-        mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
 
         createNavigationBar(result);
 
@@ -1335,7 +1349,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 this,
                 mGestureRec,
                 mShadeController::makeExpandedInvisible,
-                mNotificationShelfController);
+                mNotificationShelfController,
+                mHeadsUpManager);
 
         BackDropView backdrop = mNotificationShadeWindowView.findViewById(R.id.backdrop);
         mMediaManager.setup(backdrop, backdrop.findViewById(R.id.backdrop_front),
@@ -2073,16 +2088,16 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
 
         if (start) {
-            mNotificationPanelViewController.startWaitingForOpenPanelGesture();
+            mNotificationPanelViewController.startWaitingForExpandGesture();
         } else {
-            mNotificationPanelViewController.stopWaitingForOpenPanelGesture(cancel, velocity);
+            mNotificationPanelViewController.stopWaitingForExpandGesture(cancel, velocity);
         }
     }
 
     @Override
     public void animateCollapseQuickSettings() {
         if (mState == StatusBarState.SHADE) {
-            mNotificationPanelViewController.collapsePanel(
+            mNotificationPanelViewController.collapse(
                     true, false /* delayed */, 1.0f /* speedUpFactor */);
         }
     }
@@ -3181,6 +3196,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     }
 
+    public boolean shouldDelayWakeUpAnimation() {
+        return mShouldDelayWakeUpAnimation;
+    }
+
     private void updateDozingState() {
         Trace.traceCounter(Trace.TRACE_TAG_APP, "dozing", mDozing ? 1 : 0);
         Trace.beginSection("CentralSurfaces#updateDozingState");
@@ -3191,11 +3210,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         boolean keyguardVisibleOrWillBe =
                 keyguardVisible || (mDozing && mDozeParameters.shouldDelayKeyguardShow());
 
-        boolean wakeAndUnlock = mBiometricUnlockController.getMode()
-                == BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
-        boolean animate = (!mDozing && mDozeServiceHost.shouldAnimateWakeup() && !wakeAndUnlock)
-                || (mDozing && mDozeParameters.shouldControlScreenOff()
-                && keyguardVisibleOrWillBe);
+        boolean animate = (!mDozing && shouldAnimateDozeWakeup())
+                || (mDozing && mDozeParameters.shouldControlScreenOff() && keyguardVisibleOrWillBe);
 
         mNotificationPanelViewController.setDozing(mDozing, animate);
         updateQsExpansionEnabled();
@@ -3277,14 +3293,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             return true;
         }
         if (mQsController.getExpanded()) {
-            mNotificationPanelViewController.animateCloseQs(false);
+            mNotificationPanelViewController.animateCollapseQs(false);
             return true;
         }
         if (mNotificationPanelViewController.closeUserSwitcherIfOpen()) {
             return true;
         }
         if (shouldBackBeHandled()) {
-            if (mNotificationPanelViewController.canPanelBeCollapsed()) {
+            if (mNotificationPanelViewController.canBeCollapsed()) {
                 // this is the Shade dismiss animation, so make sure QQS closes when it ends.
                 mNotificationPanelViewController.onBackPressed();
                 mShadeController.animateCollapseShade();
@@ -3550,7 +3566,44 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             DejankUtils.startDetectingBlockingIpcs(tag);
             mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
                 mDeviceInteractive = true;
-                mWakeUpCoordinator.setWakingUp(true);
+
+                if (shouldAnimateDozeWakeup()) {
+                    // If this is false, the power button must be physically pressed in order to
+                    // trigger fingerprint authentication.
+                    final boolean touchToUnlockAnytime = Settings.Secure.getIntForUser(
+                            mContext.getContentResolver(),
+                            Settings.Secure.SFPS_PERFORMANT_AUTH_ENABLED,
+                            -1,
+                            mUserTracker.getUserId()) > 0;
+
+                    // Delay if we're waking up, not mid-doze animation (which means we are
+                    // cancelling a sleep), from the power button, on a device with a power button
+                    // FPS, and 'press to unlock' is required.
+                    mShouldDelayWakeUpAnimation =
+                            !isPulsing()
+                                    && mStatusBarStateController.getDozeAmount() == 1f
+                                    && mWakefulnessLifecycle.getLastWakeReason()
+                                    == PowerManager.WAKE_REASON_POWER_BUTTON
+                                    && mFingerprintManager.get().isPowerbuttonFps()
+                                    && mFingerprintManager.get().hasEnrolledFingerprints()
+                                    && !touchToUnlockAnytime;
+                    if (DEBUG_WAKEUP_DELAY) {
+                        Log.d(TAG, "mShouldDelayWakeUpAnimation=" + mShouldDelayWakeUpAnimation);
+                    }
+                } else {
+                    // If we're not animating anyway, we do not need to delay it.
+                    mShouldDelayWakeUpAnimation = false;
+                    if (DEBUG_WAKEUP_DELAY) {
+                        Log.d(TAG, "mShouldDelayWakeUpAnimation CLEARED");
+                    }
+                }
+
+                mNotificationPanelViewController.setWillPlayDelayedDozeAmountAnimation(
+                        mShouldDelayWakeUpAnimation);
+                mWakeUpCoordinator.setWakingUp(
+                        /* wakingUp= */ true,
+                        mShouldDelayWakeUpAnimation);
+
                 if (!mKeyguardBypassController.getBypassEnabled()) {
                     mHeadsUpManager.releaseAllImmediately();
                 }
@@ -3577,7 +3630,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         @Override
         public void onFinishedWakingUp() {
             mWakeUpCoordinator.setFullyAwake(true);
-            mWakeUpCoordinator.setWakingUp(false);
+            mWakeUpCoordinator.setWakingUp(false, false);
             if (mKeyguardStateController.isOccluded()
                     && !mDozeParameters.canControlUnlockedScreenOff()) {
                 // When the keyguard is occluded we don't use the KEYGUARD state which would
@@ -4317,7 +4370,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     mNavigationBarController.touchAutoDim(mDisplayId);
                     Trace.beginSection("CentralSurfaces#updateKeyguardState");
                     if (mState == StatusBarState.KEYGUARD) {
-                        mNotificationPanelViewController.cancelPendingPanelCollapse();
+                        mNotificationPanelViewController.cancelPendingCollapse();
                     }
                     updateDozingState();
                     checkBarModes();
@@ -4449,5 +4502,16 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
         }
         return mUserTracker.getUserHandle();
+    }
+
+    /**
+     * Whether we want to animate the wake animation AOD to lockscreen. This is done only if the
+     * doze service host says we can, and also we're not wake and unlocking (in which case the
+     * AOD instantly hides).
+     */
+    private boolean shouldAnimateDozeWakeup() {
+        return mDozeServiceHost.shouldAnimateWakeup()
+                && mBiometricUnlockController.getMode()
+                != BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
     }
 }

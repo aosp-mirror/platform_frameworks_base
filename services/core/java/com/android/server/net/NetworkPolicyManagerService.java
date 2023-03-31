@@ -5550,7 +5550,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // Do this without the lock held. handleUidChanged() and handleUidGone() are
             // called from the handler, so there's no multi-threading issue.
             if (updated) {
-                updateNetworkStats(uid, isProcStateAllowedWhileOnRestrictBackground(procState));
+                updateNetworkStats(uid,
+                        isProcStateAllowedWhileOnRestrictBackground(procState, capability));
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);

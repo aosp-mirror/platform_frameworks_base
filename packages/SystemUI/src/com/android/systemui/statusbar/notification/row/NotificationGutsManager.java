@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.notification.collection.render.NotifGutsVi
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.wmshell.BubblesManager;
 
@@ -119,6 +120,7 @@ public class NotificationGutsManager implements NotifGutsViewManager {
     private final UiEventLogger mUiEventLogger;
     private final ShadeController mShadeController;
     private NotifGutsViewListener mGutsListener;
+    private final HeadsUpManagerPhone mHeadsUpManagerPhone;
 
     @Inject
     public NotificationGutsManager(Context context,
@@ -141,7 +143,8 @@ public class NotificationGutsManager implements NotifGutsViewManager {
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             StatusBarStateController statusBarStateController,
             DeviceProvisionedController deviceProvisionedController,
-            MetricsLogger metricsLogger) {
+            MetricsLogger metricsLogger,
+            HeadsUpManagerPhone headsUpManagerPhone) {
         mContext = context;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mMainHandler = mainHandler;
@@ -163,6 +166,7 @@ public class NotificationGutsManager implements NotifGutsViewManager {
         mStatusBarStateController = statusBarStateController;
         mDeviceProvisionedController = deviceProvisionedController;
         mMetricsLogger = metricsLogger;
+        mHeadsUpManagerPhone = headsUpManagerPhone;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -259,7 +263,7 @@ public class NotificationGutsManager implements NotifGutsViewManager {
             if (mGutsListener != null) {
                 mGutsListener.onGutsClose(entry);
             }
-            String key = entry.getKey();
+            mHeadsUpManagerPhone.setGutsShown(row.getEntry(), false);
         });
 
         View gutsView = item.getGutsView();
@@ -420,7 +424,7 @@ public class NotificationGutsManager implements NotifGutsViewManager {
     }
 
     /**
-     * Sets up the {@link ConversationInfo} inside the notification row's guts.
+     * Sets up the {@link NotificationConversationInfo} inside the notification row's guts.
      * @param row view to set up the guts for
      * @param notificationInfoView view to set up/bind within {@code row}
      */
@@ -641,6 +645,7 @@ public class NotificationGutsManager implements NotifGutsViewManager {
                 row.closeRemoteInput();
                 mListContainer.onHeightChanged(row, true /* needsAnimation */);
                 mGutsMenuItem = menuItem;
+                mHeadsUpManagerPhone.setGutsShown(row.getEntry(), true);
             }
         };
         guts.post(mOpenRunnable);

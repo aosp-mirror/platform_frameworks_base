@@ -2322,7 +2322,10 @@ public final class AutofillManager {
      *
      * @param executor specifies the thread upon which the callbacks will be invoked.
      * @param callback which handles autofill request to provide client's suggestions.
+     *
+     * @hide
      */
+    @TestApi
     @RequiresPermission(PROVIDE_OWN_AUTOFILL_SUGGESTIONS)
     public void setAutofillRequestCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull AutofillRequestCallback callback) {
@@ -2339,7 +2342,10 @@ public final class AutofillManager {
 
     /**
      * clears the client's suggestions callback for autofill.
+     *
+     * @hide
      */
+    @TestApi
     public void clearAutofillRequestCallback() {
         synchronized (mLock) {
             mRequestCallbackExecutor = null;

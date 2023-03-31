@@ -1407,13 +1407,13 @@
     <dimen name="pulse_expansion_max_top_overshoot">32dp</dimen>
 
     <!-- The drag amount required for the split shade to fully expand. -->
-    <dimen name="split_shade_full_transition_distance">200dp</dimen>
+    <dimen name="split_shade_full_transition_distance">400dp</dimen>
     <!--
         The drag amount required for the scrim to fully fade in when expanding the split shade.
         Currently setting it a little longer than the full shade transition distance, to avoid
         having a state where the screen is fully black without any content showing.
     -->
-    <dimen name="split_shade_scrim_transition_distance">300dp</dimen>
+    <dimen name="split_shade_scrim_transition_distance">600dp</dimen>
 
     <dimen name="people_space_widget_radius">28dp</dimen>
     <dimen name="people_space_image_radius">20dp</dimen>

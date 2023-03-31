@@ -393,6 +393,10 @@ class BroadcastProcessQueue {
             setProcessInstrumented(false);
             setProcessPersistent(false);
         }
+
+        // Since we may have just changed our PID, invalidate cached strings
+        mCachedToString = null;
+        mCachedToShortString = null;
     }
 
     /**
@@ -1128,16 +1132,16 @@ class BroadcastProcessQueue {
     @Override
     public String toString() {
         if (mCachedToString == null) {
-            mCachedToString = "BroadcastProcessQueue{"
-                    + Integer.toHexString(System.identityHashCode(this))
-                    + " " + processName + "/" + UserHandle.formatUid(uid) + "}";
+            mCachedToString = "BroadcastProcessQueue{" + toShortString() + "}";
         }
         return mCachedToString;
     }
 
     public String toShortString() {
         if (mCachedToShortString == null) {
-            mCachedToShortString = processName + "/" + UserHandle.formatUid(uid);
+            mCachedToShortString = Integer.toHexString(System.identityHashCode(this))
+                    + " " + ((app != null) ? app.getPid() : "?") + ":" + processName + "/"
+                    + UserHandle.formatUid(uid);
         }
         return mCachedToShortString;
     }

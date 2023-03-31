@@ -86,6 +86,7 @@ public class TvPipCustomAction extends TvPipAction {
         Bundle extras = new Bundle();
         extras.putCharSequence(Notification.EXTRA_PICTURE_CONTENT_DESCRIPTION,
                 mRemoteAction.getContentDescription());
+        extras.putBoolean(Notification.EXTRA_CONTAINS_CUSTOM_VIEW, true);
         builder.addExtras(extras);
 
         builder.setSemanticAction(isCloseAction()

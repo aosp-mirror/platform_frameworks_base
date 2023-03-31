@@ -45,7 +45,6 @@ import static com.android.server.am.ActivityManagerService.appendMemInfo;
 import static com.android.server.am.ActivityManagerService.getKsmInfo;
 import static com.android.server.am.ActivityManagerService.stringifyKBSize;
 import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
-import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.DUMP_ACTIVITIES_CMD;
 
@@ -1119,7 +1118,7 @@ public class AppProfiler {
                     Slog.v(TAG_OOM_ADJ, msg + app.processName + " to " + level);
                 }
                 mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(app,
-                        OOM_ADJ_REASON_NONE);
+                        CachedAppOptimizer.UNFREEZE_REASON_TRIM_MEMORY);
                 thread.scheduleTrimMemory(level);
             } catch (RemoteException e) {
             }

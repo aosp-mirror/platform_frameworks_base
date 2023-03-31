@@ -609,6 +609,21 @@ public final class CameraManager {
     }
 
     /**
+     * <p>Query the capabilities of a camera device. These capabilities are
+     * immutable for a given camera.</p>
+     *
+     * <p>The value of {@link CameraCharacteristics.SENSOR_ORIENTATION} will change for landscape
+     * cameras depending on whether overrideToPortrait is enabled. If enabled, these cameras will
+     * appear to be portrait orientation instead, provided that the override is supported by the
+     * camera device. Only devices that can be opened by {@link #openCamera} will report a changed
+     * {@link CameraCharacteristics.SENSOR_ORIENTATION}.</p>
+     *
+     * @param cameraId The id of the camera device to query. This could be either a standalone
+     * camera ID which can be directly opened by {@link #openCamera}, or a physical camera ID that
+     * can only used as part of a logical multi-camera.
+     * @param overrideToPortrait Whether to apply the landscape to portrait override.
+     * @return The properties of the given camera
+     *
      * @hide
      */
     @TestApi

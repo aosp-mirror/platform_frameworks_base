@@ -832,6 +832,14 @@ final class BroadcastRecord extends Binder {
         }
     }
 
+    static @Nullable String getReceiverClassName(@NonNull Object receiver) {
+        if (receiver instanceof BroadcastFilter) {
+            return ((BroadcastFilter) receiver).getReceiverClassName();
+        } else /* if (receiver instanceof ResolveInfo) */ {
+            return ((ResolveInfo) receiver).activityInfo.name;
+        }
+    }
+
     static int getReceiverPriority(@NonNull Object receiver) {
         if (receiver instanceof BroadcastFilter) {
             return ((BroadcastFilter) receiver).getPriority();
@@ -1068,9 +1076,7 @@ final class BroadcastRecord extends Binder {
             if (label == null) {
                 label = intent.toString();
             }
-            mCachedToString = "BroadcastRecord{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " u" + userId + " " + label + "}";
+            mCachedToString = "BroadcastRecord{" + toShortString() + "}";
         }
         return mCachedToString;
     }
@@ -1082,7 +1088,7 @@ final class BroadcastRecord extends Binder {
                 label = intent.toString();
             }
             mCachedToShortString = Integer.toHexString(System.identityHashCode(this))
-                    + ":" + label + "/u" + userId;
+                    + " " + label + "/u" + userId;
         }
         return mCachedToShortString;
     }

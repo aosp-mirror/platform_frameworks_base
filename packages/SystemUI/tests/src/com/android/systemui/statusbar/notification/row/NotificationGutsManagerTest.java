@@ -81,6 +81,7 @@ import com.android.systemui.statusbar.notification.people.PeopleNotificationIden
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.wmshell.BubblesManager;
 
@@ -134,6 +135,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private AssistantFeedbackController mAssistantFeedbackController;
     @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     @Mock private StatusBarStateController mStatusBarStateController;
+    @Mock private HeadsUpManagerPhone mHeadsUpManagerPhone;
 
     @Before
     public void setUp() {
@@ -153,7 +155,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 mNotificationLockscreenUserManager,
                 mStatusBarStateController,
                 mDeviceProvisionedController,
-                mMetricsLogger);
+                mMetricsLogger,
+                mHeadsUpManagerPhone);
         mGutsManager.setUpWithPresenter(mPresenter, mNotificationListContainer,
                 mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
@@ -192,12 +195,15 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 anyInt(),
                 anyBoolean(),
                 any(Runnable.class));
+        verify(mHeadsUpManagerPhone).setGutsShown(realRow.getEntry(), true);
 
         assertEquals(View.VISIBLE, guts.getVisibility());
-        mGutsManager.closeAndSaveGuts(false, false, false, 0, 0, false);
+        mGutsManager.closeAndSaveGuts(false, false, true, 0, 0, false);
 
         verify(guts).closeControls(anyBoolean(), anyBoolean(), anyInt(), anyInt(), anyBoolean());
         verify(row, times(1)).setGutsView(any());
+        mTestableLooper.processAllMessages();
+        verify(mHeadsUpManagerPhone).setGutsShown(realRow.getEntry(), false);
     }
 
     @Test

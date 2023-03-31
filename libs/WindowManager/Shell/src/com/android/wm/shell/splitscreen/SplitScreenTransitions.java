@@ -212,7 +212,7 @@ class SplitScreenTransitions {
         }
     }
 
-    void applyResizeTransition(@NonNull IBinder transition, @NonNull TransitionInfo info,
+    void playResizeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,

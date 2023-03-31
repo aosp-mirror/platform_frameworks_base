@@ -766,7 +766,7 @@ public class QuickSettingsController {
     /** TODO(b/269742565) Remove this logging */
     private void checkCorrectSplitShadeState(float height) {
         if (mSplitShadeEnabled && height == 0
-                && mPanelViewControllerLazy.get().isShadeFullyOpen()) {
+                && mPanelViewControllerLazy.get().isShadeFullyExpanded()) {
             Log.wtfStack(TAG, "qsExpansion set to 0 while split shade is expanding or open");
         }
     }
@@ -989,11 +989,20 @@ public class QuickSettingsController {
 
         // TODO (b/265193930): remove dependency on NPVC
         float shadeExpandedFraction = mBarState == KEYGUARD
-                ? mPanelViewControllerLazy.get().getLockscreenShadeDragProgress()
+                ? getLockscreenShadeDragProgress()
                 : mShadeExpandedFraction;
         mShadeHeaderController.setShadeExpandedFraction(shadeExpandedFraction);
         mShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
         mShadeHeaderController.setQsVisible(mVisible);
+    }
+
+    float getLockscreenShadeDragProgress() {
+        // mTransitioningToFullShadeProgress > 0 means we're doing regular lockscreen to shade
+        // transition. If that's not the case we should follow QS expansion fraction for when
+        // user is pulling from the same top to go directly to expanded QS
+        return getTransitioningToFullShadeProgress() > 0
+                ? mLockscreenShadeTransitionController.getQSDragProgress()
+                : computeExpansionFraction();
     }
 
     /** */
@@ -1309,8 +1318,9 @@ public class QuickSettingsController {
             logNotificationsTopPadding("keyguard", topPadding);
             return topPadding;
         } else {
-            topPadding = mQsFrameTranslateController.getNotificationsTopPadding(
-                    mExpansionHeight, mNotificationStackScrollLayoutController);
+            topPadding = Math.max(mQsFrameTranslateController.getNotificationsTopPadding(
+                    mExpansionHeight, mNotificationStackScrollLayoutController),
+                    mQuickQsHeaderHeight);
             logNotificationsTopPadding("default case", topPadding);
             return topPadding;
         }
@@ -1521,7 +1531,7 @@ public class QuickSettingsController {
         if (scrollY > 0 && !mFullyExpanded) {
             // TODO (b/265193930): remove dependency on NPVC
             // If we are scrolling QS, we should be fully expanded.
-            mPanelViewControllerLazy.get().expandWithQs();
+            mPanelViewControllerLazy.get().expandToQs();
         }
     }
 
@@ -1726,7 +1736,7 @@ public class QuickSettingsController {
                     return true;
                 }
                 // TODO (b/265193930): remove dependency on NPVC
-                if (mPanelViewControllerLazy.get().getKeyguardShowing()
+                if (mPanelViewControllerLazy.get().isKeyguardShowing()
                         && shouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, 0)) {
                     // Dragging down on the lockscreen statusbar should prohibit other interactions
                     // immediately, otherwise we'll wait on the touchslop. This is to allow
@@ -1790,7 +1800,7 @@ public class QuickSettingsController {
                     return true;
                 } else {
                     mShadeLog.logQsTrackingNotStarted(mInitialTouchY, y, h, touchSlop,
-                            getExpanded(), mPanelViewControllerLazy.get().getKeyguardShowing(),
+                            getExpanded(), mPanelViewControllerLazy.get().isKeyguardShowing(),
                             isExpansionEnabled());
                 }
                 break;

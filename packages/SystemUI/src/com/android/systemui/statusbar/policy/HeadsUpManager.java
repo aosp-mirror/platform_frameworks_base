@@ -281,6 +281,10 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         mUser = user;
     }
 
+    public int getUser() {
+        return  mUser;
+    }
+
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("HeadsUpManager state:");
         dumpInternal(pw, args);

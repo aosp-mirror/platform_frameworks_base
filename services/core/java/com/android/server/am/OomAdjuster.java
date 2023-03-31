@@ -24,6 +24,7 @@ import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
@@ -2273,6 +2274,15 @@ public class OomAdjuster {
                                 capability |= PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
                             }
                         }
+                        if ((cstate.getCurCapability()
+                                & PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK) != 0) {
+                            if (clientProcState <= PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                                // This is used to grant network access to User Initiated Jobs.
+                                if (cr.hasFlag(Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS)) {
+                                    capability |= PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
+                                }
+                            }
+                        }
 
                         if (shouldSkipDueToCycle(app, cstate, procState, adj, cycleReEval)) {
                             continue;
@@ -3447,7 +3457,8 @@ public class OomAdjuster {
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
         // if an app is already frozen and shouldNotFreeze becomes true, immediately unfreeze
         if (opt.isFrozen() && opt.shouldNotFreeze()) {
-            mCachedAppOptimizer.unfreezeAppLSP(app, oomAdjReason);
+            mCachedAppOptimizer.unfreezeAppLSP(app,
+                    CachedAppOptimizer.getUnfreezeReasonCodeFromOomAdjReason(oomAdjReason));
             return;
         }
 
@@ -3457,7 +3468,8 @@ public class OomAdjuster {
                 && !opt.shouldNotFreeze()) {
             mCachedAppOptimizer.freezeAppAsyncLSP(app);
         } else if (state.getSetAdj() < CACHED_APP_MIN_ADJ) {
-            mCachedAppOptimizer.unfreezeAppLSP(app, oomAdjReason);
+            mCachedAppOptimizer.unfreezeAppLSP(app,
+                    CachedAppOptimizer.getUnfreezeReasonCodeFromOomAdjReason(oomAdjReason));
         }
     }
 }

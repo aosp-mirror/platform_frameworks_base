@@ -82,7 +82,8 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
     public void onProviderResponseSuccess(@Nullable Void response) {
         Log.i(TAG, "in onProviderResponseSuccess");
         mProviderResponseSet = true;
-        updateStatusAndInvokeCallback(Status.COMPLETE);
+        updateStatusAndInvokeCallback(Status.COMPLETE,
+                /*source=*/ CredentialsSource.REMOTE_PROVIDER);
     }
 
     /** Called when the provider response resulted in a failure. */
@@ -92,14 +93,16 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
             mProviderException = (ClearCredentialStateException) exception;
         }
         mProviderSessionMetric.collectCandidateExceptionStatus(/*hasException=*/true);
-        updateStatusAndInvokeCallback(toStatus(errorCode));
+        updateStatusAndInvokeCallback(toStatus(errorCode),
+                /*source=*/ CredentialsSource.REMOTE_PROVIDER);
     }
 
     /** Called when provider service dies. */
     @Override // Callback from the remote provider
     public void onProviderServiceDied(RemoteCredentialService service) {
         if (service.getComponentName().equals(mComponentName)) {
-            updateStatusAndInvokeCallback(Status.SERVICE_DEAD);
+            updateStatusAndInvokeCallback(Status.SERVICE_DEAD,
+                    /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         } else {
             Slog.i(TAG, "Component names different in onProviderServiceDied - "
                     + "this should not happen");
