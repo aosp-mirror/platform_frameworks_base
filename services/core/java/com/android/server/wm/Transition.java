@@ -50,6 +50,7 @@ import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_INPUT_METHOD;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_OCCLUDES_KEYGUARD;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
@@ -181,6 +182,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
     /** The displays that this transition is running on. */
     private final ArrayList<DisplayContent> mTargetDisplays = new ArrayList<>();
+
+    /**
+     * The (non alwaysOnTop) tasks which were on-top of their display before the transition. If
+     * tasks are nested, all the tasks that are parents of the on-top task are also included.
+     */
+    private final ArrayList<Task> mOnTopTasksStart = new ArrayList<>();
 
     /**
      * Set of participating windowtokens (activity/wallpaper) which are visible at the end of
@@ -515,6 +522,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mParticipants.add(wc);
         if (wc.getDisplayContent() != null && !mTargetDisplays.contains(wc.getDisplayContent())) {
             mTargetDisplays.add(wc.getDisplayContent());
+            addOnTopTasks(wc.getDisplayContent(), mOnTopTasksStart);
         }
         if (info.mShowWallpaper) {
             // Collect the wallpaper token (for isWallpaper(wc)) so it is part of the sync set.
@@ -524,6 +532,27 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 collect(wallpaper.mToken);
             }
         }
+    }
+
+    /** Adds the top non-alwaysOnTop tasks within `task` to `out`. */
+    private static void addOnTopTasks(Task task, ArrayList<Task> out) {
+        for (int i = task.getChildCount() - 1; i >= 0; --i) {
+            final Task child = task.getChildAt(i).asTask();
+            if (child == null) return;
+            if (child.getWindowConfiguration().isAlwaysOnTop()) continue;
+            out.add(child);
+            addOnTopTasks(child, out);
+            break;
+        }
+    }
+
+    /** Get the top non-alwaysOnTop leaf task on the display `dc`. */
+    private static void addOnTopTasks(DisplayContent dc, ArrayList<Task> out) {
+        final Task topNotAlwaysOnTop = dc.getRootTask(
+                t -> !t.getWindowConfiguration().isAlwaysOnTop());
+        if (topNotAlwaysOnTop == null) return;
+        out.add(topNotAlwaysOnTop);
+        addOnTopTasks(topNotAlwaysOnTop, out);
     }
 
     /**
@@ -1000,11 +1029,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 InsetsControlTarget prevImeTarget = dc.getImeTarget(
                         DisplayContent.IME_TARGET_CONTROL);
                 InsetsControlTarget newImeTarget = null;
+                TaskDisplayArea transientTDA = null;
                 // Transient-launch activities cannot be IME target (WindowState#canBeImeTarget),
                 // so re-compute in case the IME target is changed after transition.
                 for (int t = 0; t < mTransientLaunches.size(); ++t) {
                     if (mTransientLaunches.keyAt(t).getDisplayContent() == dc) {
                         newImeTarget = dc.computeImeTarget(true /* updateImeTarget */);
+                        transientTDA = mTransientLaunches.keyAt(i).getTaskDisplayArea();
                         break;
                     }
                 }
@@ -1014,6 +1045,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     // the current focused task.
                     InputMethodManagerInternal.get().updateImeWindowStatus(
                             false /* disableImeIcon */);
+                }
+                // An uncommitted transient launch can leave incomplete lifecycles if visibilities
+                // didn't change (eg. re-ordering with translucent tasks will leave launcher
+                // in RESUMED state), so force an update here.
+                if (!hasVisibleTransientLaunch && transientTDA != null) {
+                    transientTDA.pauseBackTasks(null /* resuming */);
                 }
             }
             dc.removeImeSurfaceImmediately();
@@ -1140,6 +1177,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
         // Check whether the participants were animated from back navigation.
         mController.mAtm.mBackNavigationController.onTransactionReady(this);
+
+        collectOrderChanges();
+
         // Resolve the animating targets from the participants.
         mTargets = calculateTargets(mParticipants, mChanges);
         final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, transaction);
@@ -1289,6 +1329,27 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         // Since we created root-leash but no longer reference it from core, release it now
         info.releaseAnimSurfaces();
+    }
+
+    /** Collect tasks which moved-to-top but didn't change otherwise. */
+    @VisibleForTesting
+    void collectOrderChanges() {
+        if (mOnTopTasksStart.isEmpty()) return;
+        final ArrayList<Task> onTopTasksEnd = new ArrayList<>();
+        for (int i = 0; i < mTargetDisplays.size(); ++i) {
+            addOnTopTasks(mTargetDisplays.get(i), onTopTasksEnd);
+        }
+        for (int i = 0; i < onTopTasksEnd.size(); ++i) {
+            final Task task = onTopTasksEnd.get(i);
+            if (mOnTopTasksStart.contains(task)) continue;
+            mParticipants.add(task);
+            int changeIdx = mChanges.indexOfKey(task);
+            if (changeIdx < 0) {
+                mChanges.put(task, new ChangeInfo(task));
+                changeIdx = mChanges.indexOfKey(task);
+            }
+            mChanges.valueAt(changeIdx).mFlags |= ChangeInfo.FLAG_CHANGE_MOVED_TO_TOP;
+        }
     }
 
     private void postCleanupOnFailure() {
@@ -2246,13 +2307,17 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
          */
         private static final int FLAG_CHANGE_YES_ANIMATION = 0x10;
 
+        /** Whether this change's container moved to the top. */
+        private static final int FLAG_CHANGE_MOVED_TO_TOP = 0x20;
+
         @IntDef(prefix = { "FLAG_" }, value = {
                 FLAG_NONE,
                 FLAG_SEAMLESS_ROTATION,
                 FLAG_TRANSIENT_LAUNCH,
                 FLAG_ABOVE_TRANSIENT_LAUNCH,
                 FLAG_CHANGE_NO_ANIMATION,
-                FLAG_CHANGE_YES_ANIMATION
+                FLAG_CHANGE_YES_ANIMATION,
+                FLAG_CHANGE_MOVED_TO_TOP
         })
         @Retention(RetentionPolicy.SOURCE)
         @interface Flag {}
@@ -2283,7 +2348,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         int mDisplayId = -1;
         @ActivityInfo.Config int mKnownConfigChanges;
 
-        /** These are just extra info. They aren't used for change-detection. */
+        /** Extra information about this change. */
         @Flag int mFlags = FLAG_NONE;
 
         /** Snapshot surface and luma, if relevant. */
@@ -2335,7 +2400,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     || (mWindowingMode != 0 && mContainer.getWindowingMode() != mWindowingMode)
                     || !mContainer.getBounds().equals(mAbsoluteBounds)
                     || mRotation != mContainer.getWindowConfiguration().getRotation()
-                    || mDisplayId != getDisplayId(mContainer);
+                    || mDisplayId != getDisplayId(mContainer)
+                    || (mFlags & ChangeInfo.FLAG_CHANGE_MOVED_TO_TOP) != 0;
         }
 
         @TransitionInfo.TransitionMode
@@ -2435,6 +2501,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if ((mFlags & FLAG_CHANGE_NO_ANIMATION) != 0
                     && (mFlags & FLAG_CHANGE_YES_ANIMATION) == 0) {
                 flags |= FLAG_NO_ANIMATION;
+            }
+            if ((mFlags & FLAG_CHANGE_MOVED_TO_TOP) != 0) {
+                flags |= FLAG_MOVED_TO_TOP;
             }
             return flags;
         }
