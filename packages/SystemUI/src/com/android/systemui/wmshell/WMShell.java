@@ -295,8 +295,8 @@ public final class WMShell implements
             @Override
             public void notifyExpandNotification() {
                 mSysUiMainExecutor.execute(
-                        () -> mCommandQueue.handleSystemKey(
-                                KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN));
+                        () -> mCommandQueue.handleSystemKey(new KeyEvent(KeyEvent.ACTION_DOWN,
+                                KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN)));
             }
         });
 
