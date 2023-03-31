@@ -41,9 +41,12 @@ constructor(
     @VisibleForTesting
     val callbacks =
         object : CommandQueue.Callbacks {
-            override fun handleSystemKey(keyCode: Int) {
-                if (keyCode == KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL) {
+            override fun handleSystemKey(key: KeyEvent) {
+                if (key.keyCode == KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL) {
                     controller.showNoteTask(NoteTaskEntryPoint.TAIL_BUTTON)
+                } else if (key.keyCode == KeyEvent.KEYCODE_N && key.isMetaPressed &&
+                        key.isCtrlPressed) {
+                    controller.showNoteTask(NoteTaskEntryPoint.KEYBOARD_SHORTCUT)
                 }
             }
         }
