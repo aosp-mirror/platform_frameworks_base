@@ -316,6 +316,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final ArrayList<InputMethodInfo> mMethodList = new ArrayList<>();
     final ArrayMap<String, InputMethodInfo> mMethodMap = new ArrayMap<>();
     final InputMethodSubtypeSwitchingController mSwitchingController;
+    final HardwareKeyboardShortcutController mHardwareKeyboardShortcutController =
+            new HardwareKeyboardShortcutController();
 
     /**
      * Tracks how many times {@link #mMethodMap} was updated.
@@ -1731,6 +1733,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         AdditionalSubtypeUtils.load(mAdditionalSubtypeMap, userId);
         mSwitchingController =
                 InputMethodSubtypeSwitchingController.createInstanceLocked(mSettings, context);
+        mHardwareKeyboardShortcutController.reset(mSettings);
         mMenuController = new InputMethodMenuController(this);
         mBindingController =
                 bindingControllerForTesting != null
@@ -3268,6 +3271,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // TODO: Make sure that mSwitchingController and mSettings are sharing the
         // the same enabled IMEs list.
         mSwitchingController.resetCircularListLocked(mContext);
+        mHardwareKeyboardShortcutController.reset(mSettings);
 
         sendOnNavButtonFlagsChangedLocked();
     }
@@ -5293,6 +5297,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // TODO: Make sure that mSwitchingController and mSettings are sharing the
         // the same enabled IMEs list.
         mSwitchingController.resetCircularListLocked(mContext);
+        mHardwareKeyboardShortcutController.reset(mSettings);
 
         sendOnNavButtonFlagsChangedLocked();
 
@@ -5827,10 +5832,37 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void switchKeyboardLayout(int direction) {
             synchronized (ImfLock.class) {
-                if (direction > 0) {
-                    switchToNextInputMethodLocked(null /* token */, true /* onlyCurrentIme */);
-                } else {
-                    // TODO(b/258853866): Support backwards switching.
+                final InputMethodInfo currentImi = mMethodMap.get(getSelectedMethodIdLocked());
+                if (currentImi == null) {
+                    return;
+                }
+                final InputMethodSubtypeHandle currentSubtypeHandle =
+                        InputMethodSubtypeHandle.of(currentImi, mCurrentSubtype);
+                final InputMethodSubtypeHandle nextSubtypeHandle =
+                        mHardwareKeyboardShortcutController.onSubtypeSwitch(currentSubtypeHandle,
+                                direction > 0);
+                if (nextSubtypeHandle == null) {
+                    return;
+                }
+                final InputMethodInfo nextImi = mMethodMap.get(nextSubtypeHandle.getImeId());
+                if (nextImi == null) {
+                    return;
+                }
+
+                final int subtypeCount = nextImi.getSubtypeCount();
+                if (subtypeCount == 0) {
+                    if (nextSubtypeHandle.equals(InputMethodSubtypeHandle.of(nextImi, null))) {
+                        setInputMethodLocked(nextImi.getId(), NOT_A_SUBTYPE_ID);
+                    }
+                    return;
+                }
+
+                for (int i = 0; i < subtypeCount; ++i) {
+                    if (nextSubtypeHandle.equals(
+                            InputMethodSubtypeHandle.of(nextImi, nextImi.getSubtypeAt(i)))) {
+                        setInputMethodLocked(nextImi.getId(), i);
+                        return;
+                    }
                 }
             }
         }
