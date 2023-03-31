@@ -113,6 +113,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
     private SurfaceSession mSurfaceSession = new SurfaceSession();
     private SurfaceControl mRootLeash;
+    private SurfaceControl mDividerLeash;
     private ActivityManager.RunningTaskInfo mRootTask;
     private StageCoordinator mStageCoordinator;
     private Transitions mTransitions;
@@ -129,12 +130,14 @@ public class StageCoordinatorTests extends ShellTestCase {
                 mTaskOrganizer, mMainStage, mSideStage, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool,
                 mMainExecutor, Optional.empty()));
+        mDividerLeash = new SurfaceControl.Builder(mSurfaceSession).setName("fakeDivider").build();
 
         when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
         when(mSplitLayout.getBounds2()).thenReturn(mBounds2);
         when(mSplitLayout.getRootBounds()).thenReturn(mRootBounds);
         when(mSplitLayout.isLandscape()).thenReturn(false);
         when(mSplitLayout.applyTaskChanges(any(), any(), any())).thenReturn(true);
+        when(mSplitLayout.getDividerLeash()).thenReturn(mDividerLeash);
 
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mRootLeash = new SurfaceControl.Builder(mSurfaceSession).setName("test").build();

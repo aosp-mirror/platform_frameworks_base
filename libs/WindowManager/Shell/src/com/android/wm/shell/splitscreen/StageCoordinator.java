@@ -891,10 +891,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSyncQueue.queue(wrapAsSplitRemoteAnimation(adapter), WindowManager.TRANSIT_OPEN, wct);
         }
 
-        mSyncQueue.runInSync(t -> {
-            setDividerVisibility(true, t);
-        });
-
         setEnterInstanceId(instanceId);
     }
 
@@ -933,6 +929,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @Override
             public void onAnimationCancelled(boolean isKeyguardOccluded) {
                 onRemoteAnimationFinishedOrCancelled(evictWct);
+                setDividerVisibility(true, null);
                 try {
                     adapter.getRunner().onAnimationCancelled(isKeyguardOccluded);
                 } catch (RemoteException e) {
@@ -973,6 +970,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                             t.setPosition(apps[i].leash, 0, 0);
                         }
                     }
+                    setDividerVisibility(true, t);
                     t.apply();
 
                     IRemoteAnimationFinishedCallback wrapCallback =
@@ -1463,6 +1461,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     void finishEnterSplitScreen(SurfaceControl.Transaction t) {
         mSplitLayout.init();
         setDividerVisibility(true, t);
+        // Ensure divider surface are re-parented back into the hierarchy at the end of the
+        // transition. See Transition#buildFinishTransaction for more detail.
+        t.reparent(mSplitLayout.getDividerLeash(), mRootTaskLeash);
+
         updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
         t.show(mRootTaskLeash);
         setSplitsVisible(true);
@@ -1772,6 +1774,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         setDividerVisibility(mainStageVisible, null);
     }
 
+    // Set divider visibility flag and try to apply it, the param transaction is used to apply.
+    // See applyDividerVisibility for more detail.
     private void setDividerVisibility(boolean visible, @Nullable SurfaceControl.Transaction t) {
         if (visible == mDividerVisible) {
             return;
@@ -1798,14 +1802,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             return;
         }
 
-        if (t != null) {
-            applyDividerVisibility(t);
-        } else {
-            mSyncQueue.runInSync(transaction -> applyDividerVisibility(transaction));
-        }
+        applyDividerVisibility(t);
     }
 
-    private void applyDividerVisibility(SurfaceControl.Transaction t) {
+    // Apply divider visibility by current visibility flag. If param transaction is non-null, it
+    // will apply by that transaction, if it is null and visible, it will run a fade-in animation,
+    // otherwise hide immediately.
+    private void applyDividerVisibility(@Nullable SurfaceControl.Transaction t) {
         final SurfaceControl dividerLeash = mSplitLayout.getDividerLeash();
         if (dividerLeash == null) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
@@ -1822,7 +1825,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mDividerFadeInAnimator.cancel();
         }
 
-        if (mDividerVisible) {
+        mSplitLayout.getRefDividerBounds(mTempRect1);
+        if (t != null) {
+            t.setVisibility(dividerLeash, mDividerVisible);
+            t.setLayer(dividerLeash, Integer.MAX_VALUE);
+            t.setPosition(dividerLeash, mTempRect1.left, mTempRect1.top);
+        } else if (mDividerVisible) {
             final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
             mDividerFadeInAnimator = ValueAnimator.ofFloat(0f, 1f);
             mDividerFadeInAnimator.addUpdateListener(animation -> {
@@ -1862,7 +1870,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
             mDividerFadeInAnimator.start();
         } else {
-            t.hide(dividerLeash);
+            final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
+            transaction.hide(dividerLeash);
+            transaction.apply();
+            mTransactionPool.release(transaction);
         }
     }
 
@@ -2446,7 +2457,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         finishEnterSplitScreen(finishT);
-        addDividerBarToTransition(info, finishT, true /* show */);
+        addDividerBarToTransition(info, true /* show */);
         return true;
     }
 
@@ -2589,7 +2600,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (dismissTransition.mDismissTop == STAGE_TYPE_UNDEFINED) {
             // TODO: Have a proper remote for this. Until then, though, reset state and use the
             //       normal animation stuff (which falls back to the normal launcher remote).
-            t.hide(mSplitLayout.getDividerLeash());
+            setDividerVisibility(false, t);
             mSplitLayout.release(t);
             mSplitTransitions.mPendingDismiss = null;
             return false;
@@ -2607,7 +2618,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     });
         }
 
-        addDividerBarToTransition(info, finishT, false /* show */);
+        addDividerBarToTransition(info, false /* show */);
         return true;
     }
 
@@ -2648,11 +2659,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         logExit(EXIT_REASON_UNKNOWN);
     }
 
-    private void addDividerBarToTransition(@NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction finishT, boolean show) {
+    private void addDividerBarToTransition(@NonNull TransitionInfo info, boolean show) {
         final SurfaceControl leash = mSplitLayout.getDividerLeash();
         final TransitionInfo.Change barChange = new TransitionInfo.Change(null /* token */, leash);
         mSplitLayout.getRefDividerBounds(mTempRect1);
+        barChange.setParent(mRootTaskInfo.token);
         barChange.setStartAbsBounds(mTempRect1);
         barChange.setEndAbsBounds(mTempRect1);
         barChange.setMode(show ? TRANSIT_TO_FRONT : TRANSIT_TO_BACK);
@@ -2660,15 +2671,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // Technically this should be order-0, but this is running after layer assignment
         // and it's a special case, so just add to end.
         info.addChange(barChange);
-
-        if (show) {
-            finishT.setLayer(leash, Integer.MAX_VALUE);
-            finishT.setPosition(leash, mTempRect1.left, mTempRect1.top);
-            finishT.show(leash);
-            // Ensure divider surface are re-parented back into the hierarchy at the end of the
-            // transition. See Transition#buildFinishTransaction for more detail.
-            finishT.reparent(leash, mRootTaskLeash);
-        }
     }
 
     RemoteAnimationTarget getDividerBarLegacyTarget() {
