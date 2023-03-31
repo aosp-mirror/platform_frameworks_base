@@ -29,6 +29,7 @@ import android.media.MediaRoute2Info;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.view.KeyEvent;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.logging.InstanceId;
@@ -110,7 +111,7 @@ interface IStatusBarService
     void remTile(in ComponentName tile);
     void clickTile(in ComponentName tile);
     @UnsupportedAppUsage
-    void handleSystemKey(in int key);
+    void handleSystemKey(in KeyEvent key);
     int getLastSystemKey();
 
     /**

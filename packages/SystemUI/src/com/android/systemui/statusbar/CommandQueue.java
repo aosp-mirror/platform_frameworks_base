@@ -53,6 +53,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
@@ -302,7 +303,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void remQsTile(ComponentName tile) { }
         default void clickTile(ComponentName tile) { }
 
-        default void handleSystemKey(int arg1) { }
+        default void handleSystemKey(KeyEvent arg1) { }
         default void showPinningEnterExitToast(boolean entering) { }
         default void showPinningEscapeToast() { }
         default void handleShowGlobalActionsMenu() { }
@@ -891,9 +892,9 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void handleSystemKey(int key) {
+    public void handleSystemKey(KeyEvent key) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_HANDLE_SYSTEM_KEY, key, 0).sendToTarget();
+            mHandler.obtainMessage(MSG_HANDLE_SYSTEM_KEY, key).sendToTarget();
         }
     }
 
@@ -1534,7 +1535,7 @@ public class CommandQueue extends IStatusBar.Stub implements
                     break;
                 case MSG_HANDLE_SYSTEM_KEY:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).handleSystemKey(msg.arg1);
+                        mCallbacks.get(i).handleSystemKey((KeyEvent) msg.obj);
                     }
                     break;
                 case MSG_SHOW_GLOBAL_ACTIONS:
