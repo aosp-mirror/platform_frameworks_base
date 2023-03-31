@@ -28,6 +28,7 @@ import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVE
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
+import static com.android.server.am.ActivityManagerDebugConfig.LOG_WRITER_INFO;
 import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList;
 import static com.android.server.am.BroadcastProcessQueue.reasonToString;
 import static com.android.server.am.BroadcastProcessQueue.removeFromRunnableList;
@@ -1247,7 +1248,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * the given {@link Predicate}.
      */
     private boolean testAllProcessQueues(@NonNull Predicate<BroadcastProcessQueue> test,
-            @NonNull String label, @Nullable PrintWriter pw) {
+            @NonNull String label, @NonNull PrintWriter pw) {
         for (int i = 0; i < mProcessQueues.size(); i++) {
             BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
             while (leaf != null) {
@@ -1255,14 +1256,16 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     final long now = SystemClock.uptimeMillis();
                     if (now > mLastTestFailureTime + DateUtils.SECOND_IN_MILLIS) {
                         mLastTestFailureTime = now;
-                        logv("Test " + label + " failed due to " + leaf.toShortString(), pw);
+                        pw.println("Test " + label + " failed due to " + leaf.toShortString());
+                        pw.flush();
                     }
                     return false;
                 }
                 leaf = leaf.processNameNext;
             }
         }
-        logv("Test " + label + " passed", pw);
+        pw.println("Test " + label + " passed");
+        pw.flush();
         return true;
     }
 
@@ -1349,30 +1352,30 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     public boolean isIdleLocked() {
-        return isIdleLocked(null);
+        return isIdleLocked(LOG_WRITER_INFO);
     }
 
-    public boolean isIdleLocked(@Nullable PrintWriter pw) {
+    public boolean isIdleLocked(@NonNull PrintWriter pw) {
         return testAllProcessQueues(q -> q.isIdle(), "idle", pw);
     }
 
     @Override
     public boolean isBeyondBarrierLocked(@UptimeMillisLong long barrierTime) {
-        return isBeyondBarrierLocked(barrierTime, null);
+        return isBeyondBarrierLocked(barrierTime, LOG_WRITER_INFO);
     }
 
     public boolean isBeyondBarrierLocked(@UptimeMillisLong long barrierTime,
-            @Nullable PrintWriter pw) {
+            @NonNull PrintWriter pw) {
         return testAllProcessQueues(q -> q.isBeyondBarrierLocked(barrierTime), "barrier", pw);
     }
 
     @Override
-    public void waitForIdle(@Nullable PrintWriter pw) {
+    public void waitForIdle(@NonNull PrintWriter pw) {
         waitFor(() -> isIdleLocked(pw));
     }
 
     @Override
-    public void waitForBarrier(@Nullable PrintWriter pw) {
+    public void waitForBarrier(@NonNull PrintWriter pw) {
         final long now = SystemClock.uptimeMillis();
         waitFor(() -> isBeyondBarrierLocked(now, pw));
     }
