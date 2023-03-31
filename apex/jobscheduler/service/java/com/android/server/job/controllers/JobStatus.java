@@ -590,9 +590,10 @@ public final class JobStatus {
             this.sourceTag = tag;
         }
 
+        final String bnNamespace = namespace == null ? "" :  "@" + namespace + "@";
         this.batteryName = this.sourceTag != null
-                ? this.sourceTag + ":" + job.getService().getPackageName()
-                : job.getService().flattenToShortString();
+                ? bnNamespace + this.sourceTag + ":" + job.getService().getPackageName()
+                : bnNamespace + job.getService().flattenToShortString();
         this.tag = "*job*/" + this.batteryName + "#" + job.getId();
 
         this.earliestRunTimeElapsedMillis = earliestRunTimeElapsedMillis;
