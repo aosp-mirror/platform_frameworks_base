@@ -283,11 +283,15 @@ public class NotificationShadeWindowViewController {
                 }
                 mLockIconViewController.onTouchEvent(
                         ev,
-                        () -> mService.wakeUpIfDozing(
-                                mClock.uptimeMillis(),
-                                mView,
-                                "LOCK_ICON_TOUCH",
-                                PowerManager.WAKE_REASON_GESTURE)
+                        /* onGestureDetectedRunnable */
+                        () -> {
+                            mService.userActivity();
+                            mService.wakeUpIfDozing(
+                                    mClock.uptimeMillis(),
+                                    mView,
+                                    "LOCK_ICON_TOUCH",
+                                    PowerManager.WAKE_REASON_GESTURE);
+                        }
                 );
 
                 // In case we start outside of the view bounds (below the status bar), we need to
