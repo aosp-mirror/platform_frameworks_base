@@ -56,7 +56,7 @@ class InsetsStateController {
     private final InsetsState mState = new InsetsState();
     private final DisplayContent mDisplayContent;
 
-    private final SparseArray<WindowContainerInsetsSourceProvider> mProviders = new SparseArray<>();
+    private final SparseArray<InsetsSourceProvider> mProviders = new SparseArray<>();
     private final ArrayMap<InsetsControlTarget, ArrayList<InsetsSourceProvider>>
             mControlTargetProvidersMap = new ArrayMap<>();
     private final SparseArray<InsetsControlTarget> mIdControlTargetMap = new SparseArray<>();
@@ -106,22 +106,22 @@ class InsetsStateController {
         return result;
     }
 
-    SparseArray<WindowContainerInsetsSourceProvider> getSourceProviders() {
+    SparseArray<InsetsSourceProvider> getSourceProviders() {
         return mProviders;
     }
 
     /**
      * @return The provider of a specific source ID.
      */
-    WindowContainerInsetsSourceProvider getOrCreateSourceProvider(int id, @InsetsType int type) {
-        WindowContainerInsetsSourceProvider provider = mProviders.get(id);
+    InsetsSourceProvider getOrCreateSourceProvider(int id, @InsetsType int type) {
+        InsetsSourceProvider provider = mProviders.get(id);
         if (provider != null) {
             return provider;
         }
         final InsetsSource source = mState.getOrCreateSource(id, type);
         provider = id == ID_IME
                 ? new ImeInsetsSourceProvider(source, this, mDisplayContent)
-                : new WindowContainerInsetsSourceProvider(source, this, mDisplayContent);
+                : new InsetsSourceProvider(source, this, mDisplayContent);
         mProviders.put(id, provider);
         return provider;
     }
@@ -334,7 +334,7 @@ class InsetsStateController {
         }
         mDisplayContent.mWmService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
             for (int i = mProviders.size() - 1; i >= 0; i--) {
-                final WindowContainerInsetsSourceProvider provider = mProviders.valueAt(i);
+                final InsetsSourceProvider provider = mProviders.valueAt(i);
                 provider.onSurfaceTransactionApplied();
             }
             final ArraySet<InsetsControlTarget> newControlTargets = new ArraySet<>();
