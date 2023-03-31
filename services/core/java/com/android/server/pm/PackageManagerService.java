@@ -7258,6 +7258,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      * TODO: In the meantime, can this be moved to a schedule call?
      * TODO(b/182523293): This should be removed once we finish migration of permission storage.
      */
+    @SuppressWarnings("GuardedBy")
     void writeSettingsLPrTEMP(boolean sync) {
         snapshotComputer(false);
         mPermissionManager.writeLegacyPermissionsTEMP(mSettings.mPermissions);
@@ -7307,6 +7308,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static boolean isPreapprovalRequestAvailable() {
         final long token = Binder.clearCallingIdentity();
         try {
+            if (!Resources.getSystem().getBoolean(
+                    com.android.internal.R.bool.config_isPreApprovalRequestAvailable)) {
+                return false;
+            }
             return DeviceConfig.getBoolean(NAMESPACE_PACKAGE_MANAGER_SERVICE,
                     PROPERTY_IS_PRE_APPROVAL_REQUEST_AVAILABLE, true /* defaultValue */);
         } finally {
