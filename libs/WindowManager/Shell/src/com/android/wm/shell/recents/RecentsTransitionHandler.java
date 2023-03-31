@@ -456,7 +456,10 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         cancel(mWillFinishToHome);
                         return;
                     }
-                    hasChangingApp = true;
+                    // Don't consider order-only changes as changing apps.
+                    if (!TransitionUtil.isOrderOnly(change)) {
+                        hasChangingApp = true;
+                    }
                 }
             }
             if (hasChangingApp && foundRecentsClosing) {
@@ -484,13 +487,14 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             }
             boolean didMergeThings = false;
             if (closingTasks != null) {
-                // Cancelling a task-switch. Move the tasks back to mPausing from mOpening
+                // Potentially cancelling a task-switch. Move the tasks back to mPausing if they
+                // are in mOpening.
                 for (int i = 0; i < closingTasks.size(); ++i) {
                     final TransitionInfo.Change change = closingTasks.get(i);
                     int openingIdx = TaskState.indexOf(mOpeningTasks, change);
                     if (openingIdx < 0) {
-                        Slog.e(TAG, "Back to existing recents animation from an unrecognized "
-                                + "task: " + change.getTaskInfo().taskId);
+                        Slog.w(TAG, "Closing a task that wasn't opening, this may be split or"
+                                + " something unexpected: " + change.getTaskInfo().taskId);
                         continue;
                     }
                     mPausingTasks.add(mOpeningTasks.remove(openingIdx));

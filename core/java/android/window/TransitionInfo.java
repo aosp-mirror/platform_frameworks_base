@@ -149,8 +149,11 @@ public final class TransitionInfo implements Parcelable {
     /** The task is launching behind home. */
     public static final int FLAG_TASK_LAUNCHING_BEHIND = 1 << 19;
 
+    /** The task became the top-most task even if it didn't change visibility. */
+    public static final int FLAG_MOVED_TO_TOP = 1 << 20;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 20;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 21;
 
     /** The change belongs to a window that won't contain activities. */
     public static final int FLAGS_IS_NON_APP_WINDOW =
@@ -179,6 +182,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_BACK_GESTURE_ANIMATED,
             FLAG_NO_ANIMATION,
             FLAG_TASK_LAUNCHING_BEHIND,
+            FLAG_MOVED_TO_TOP,
             FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
