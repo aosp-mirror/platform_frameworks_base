@@ -66,7 +66,6 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 
 import java.io.PrintWriter;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -244,7 +243,12 @@ public class RotationButtonController {
 
         mListenersRegistered = false;
 
-        mContext.unregisterReceiver(mDockedReceiver);
+        try {
+            mContext.unregisterReceiver(mDockedReceiver);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Docked receiver already unregistered", e);
+        }
+
         if (mRotationWatcherRegistered) {
             try {
                 WindowManagerGlobal.getWindowManagerService().removeRotationWatcher(
