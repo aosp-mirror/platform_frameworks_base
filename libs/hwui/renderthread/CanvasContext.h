@@ -264,6 +264,8 @@ private:
 
     FrameInfo* getFrameInfoFromLast4(uint64_t frameNumber, uint32_t surfaceControlId);
 
+    Frame getFrame();
+
     // The same type as Frame.mWidth and Frame.mHeight
     int32_t mLastFrameWidth = 0;
     int32_t mLastFrameHeight = 0;
