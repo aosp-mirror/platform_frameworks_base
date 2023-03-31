@@ -1046,18 +1046,30 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
      */
     void showToastWhereUidIsRunning(int uid, String text, @Toast.Duration int duration,
             Looper looper) {
+        ArrayList<Integer> displayIdsForUid = getDisplayIdsWhereUidIsRunning(uid);
+        if (displayIdsForUid.isEmpty()) {
+            return;
+        }
+        DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+        for (int i = 0; i < displayIdsForUid.size(); i++) {
+            Display display = displayManager.getDisplay(displayIdsForUid.get(i));
+            if (display != null && display.isValid()) {
+                Toast.makeText(mContext.createDisplayContext(display), looper, text,
+                        duration).show();
+            }
+        }
+    }
+
+    private ArrayList<Integer> getDisplayIdsWhereUidIsRunning(int uid) {
+        ArrayList<Integer> displayIdsForUid = new ArrayList<>();
         synchronized (mVirtualDeviceLock) {
-            DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
             for (int i = 0; i < mVirtualDisplays.size(); i++) {
                 if (mVirtualDisplays.valueAt(i).getWindowPolicyController().containsUid(uid)) {
-                    Display display = displayManager.getDisplay(mVirtualDisplays.keyAt(i));
-                    if (display != null && display.isValid()) {
-                        Toast.makeText(mContext.createDisplayContext(display), looper, text,
-                                duration).show();
-                    }
+                    displayIdsForUid.add(mVirtualDisplays.keyAt(i));
                 }
             }
         }
+        return displayIdsForUid;
     }
 
     boolean isDisplayOwnedByVirtualDevice(int displayId) {
