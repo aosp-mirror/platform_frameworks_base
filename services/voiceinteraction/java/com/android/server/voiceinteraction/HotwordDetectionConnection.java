@@ -74,9 +74,8 @@ import com.android.server.voiceinteraction.VoiceInteractionManagerServiceImpl.De
 
 import java.io.PrintWriter;
 import java.time.Instant;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -122,8 +121,8 @@ final class HotwordDetectionConnection {
     private static final int DETECTION_SERVICE_TYPE_VISUAL_QUERY = 2;
 
     // TODO: This may need to be a Handler(looper)
-    private final ScheduledExecutorService mScheduledExecutorService =
-            Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledThreadPoolExecutor mScheduledExecutorService =
+            new ScheduledThreadPoolExecutor(1);
     @Nullable private final ScheduledFuture<?> mCancellationTaskFuture;
     private final IBinder.DeathRecipient mAudioServerDeathRecipient = this::audioServerDied;
     @NonNull private final ServiceConnectionFactory mHotwordDetectionServiceConnectionFactory;
@@ -210,6 +209,7 @@ final class HotwordDetectionConnection {
         if (mReStartPeriodSeconds <= 0) {
             mCancellationTaskFuture = null;
         } else {
+            mScheduledExecutorService.setRemoveOnCancelPolicy(true);
             // TODO: we need to be smarter here, e.g. schedule it a bit more often,
             //  but wait until the current session is closed.
             mCancellationTaskFuture = mScheduledExecutorService.scheduleAtFixedRate(() -> {
