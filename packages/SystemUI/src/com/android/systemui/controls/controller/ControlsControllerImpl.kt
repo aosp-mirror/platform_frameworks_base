@@ -31,7 +31,6 @@ import android.service.controls.actions.ControlAction
 import android.util.ArrayMap
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
-import com.android.internal.notification.NotificationAccessConfirmationActivityContract.EXTRA_USER_ID
 import com.android.systemui.Dumpable
 import com.android.systemui.backup.BackupHelper
 import com.android.systemui.controls.ControlStatus
@@ -44,7 +43,6 @@ import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.people.widget.PeopleSpaceWidgetProvider.EXTRA_USER_HANDLE
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl.Companion.PREFS_CONTROLS_FILE
