@@ -41,6 +41,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
@@ -77,6 +78,7 @@ public class TileServices extends IQSService.Stub {
     private final UserTracker mUserTracker;
     private final StatusBarIconController mStatusBarIconController;
     private final PanelInteractor mPanelInteractor;
+    private final CustomTileAddedRepository mCustomTileAddedRepository;
 
     private int mMaxBound = DEFAULT_MAX_BOUND;
 
@@ -89,7 +91,8 @@ public class TileServices extends IQSService.Stub {
             KeyguardStateController keyguardStateController,
             CommandQueue commandQueue,
             StatusBarIconController statusBarIconController,
-            PanelInteractor panelInteractor) {
+            PanelInteractor panelInteractor,
+            CustomTileAddedRepository customTileAddedRepository) {
         mHost = host;
         mKeyguardStateController = keyguardStateController;
         mContext = mHost.getContext();
@@ -101,6 +104,7 @@ public class TileServices extends IQSService.Stub {
         mStatusBarIconController = statusBarIconController;
         mCommandQueue.addCallback(mRequestListeningCallback);
         mPanelInteractor = panelInteractor;
+        mCustomTileAddedRepository = customTileAddedRepository;
     }
 
     public Context getContext() {
@@ -128,7 +132,7 @@ public class TileServices extends IQSService.Stub {
     protected TileServiceManager onCreateTileService(ComponentName component,
             BroadcastDispatcher broadcastDispatcher) {
         return new TileServiceManager(this, mHandlerProvider.get(), component,
-                broadcastDispatcher, mUserTracker);
+                broadcastDispatcher, mUserTracker, mCustomTileAddedRepository);
     }
 
     public void freeService(CustomTile tile, TileServiceManager service) {
