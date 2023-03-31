@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierCon
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Factory.Companion.tableBufferLogName
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeSubscriptionManagerProxy
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlots
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
@@ -98,6 +99,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var logBufferFactory: TableLogBufferFactory
 
     private val mobileMappings = FakeMobileMappingsProxy()
+    private val subscriptionManagerProxy = FakeSubscriptionManagerProxy()
 
     private val scope = CoroutineScope(IMMEDIATE)
 
@@ -179,6 +181,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             MobileConnectionsRepositoryImpl(
                 connectivityRepository,
                 subscriptionManager,
+                subscriptionManagerProxy,
                 telephonyManager,
                 logger,
                 summaryLogger,
@@ -662,6 +665,8 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             var latest: Int? = null
             val job = underTest.defaultDataSubId.onEach { latest = it }.launchIn(this)
 
+            assertThat(latest).isEqualTo(INVALID_SUBSCRIPTION_ID)
+
             fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
                 receiver.onReceive(
                     context,
@@ -681,6 +686,42 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             }
 
             assertThat(latest).isEqualTo(SUB_1_ID)
+
+            job.cancel()
+        }
+
+    @Test
+    fun defaultDataSubId_fetchesInitialValueOnStart() =
+        runBlocking(IMMEDIATE) {
+            subscriptionManagerProxy.defaultDataSubId = 2
+            var latest: Int? = null
+            val job = underTest.defaultDataSubId.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(2)
+
+            job.cancel()
+        }
+
+    @Test
+    fun defaultDataSubId_fetchesCurrentOnRestart() =
+        runBlocking(IMMEDIATE) {
+            subscriptionManagerProxy.defaultDataSubId = 2
+            var latest: Int? = null
+            var job = underTest.defaultDataSubId.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(2)
+
+            job.cancel()
+
+            // Collectors go away but come back later
+
+            latest = null
+
+            subscriptionManagerProxy.defaultDataSubId = 1
+
+            job = underTest.defaultDataSubId.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(1)
 
             job.cancel()
         }
@@ -902,6 +943,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 MobileConnectionsRepositoryImpl(
                     connectivityRepository,
                     subscriptionManager,
+                    subscriptionManagerProxy,
                     telephonyManager,
                     logger,
                     summaryLogger,

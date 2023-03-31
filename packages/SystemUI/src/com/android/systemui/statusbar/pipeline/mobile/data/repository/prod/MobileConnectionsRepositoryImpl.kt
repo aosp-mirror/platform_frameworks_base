@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameMode
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.mobile.util.SubscriptionManagerProxy
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
@@ -65,6 +66,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
@@ -76,6 +78,7 @@ class MobileConnectionsRepositoryImpl
 constructor(
     connectivityRepository: ConnectivityRepository,
     private val subscriptionManager: SubscriptionManager,
+    private val subscriptionManagerProxy: SubscriptionManagerProxy,
     private val telephonyManager: TelephonyManager,
     private val logger: MobileInputLogger,
     @MobileSummaryLog private val tableLogger: TableLogBuffer,
@@ -195,7 +198,7 @@ constructor(
     override val defaultDataSubId: StateFlow<Int> =
         broadcastDispatcher
             .broadcastFlow(
-                IntentFilter(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
+                IntentFilter(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED),
             ) { intent, _ ->
                 intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY, INVALID_SUBSCRIPTION_ID)
             }
@@ -204,14 +207,11 @@ constructor(
                 tableLogger,
                 LOGGING_PREFIX,
                 columnName = "defaultSubId",
-                initialValue = SubscriptionManager.getDefaultDataSubscriptionId(),
+                initialValue = INVALID_SUBSCRIPTION_ID,
             )
+            .onStart { emit(subscriptionManagerProxy.getDefaultDataSubscriptionId()) }
             .onEach { defaultDataSubIdChangeEvent.tryEmit(Unit) }
-            .stateIn(
-                scope,
-                SharingStarted.WhileSubscribed(),
-                SubscriptionManager.getDefaultDataSubscriptionId()
-            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), INVALID_SUBSCRIPTION_ID)
 
     private val carrierConfigChangedEvent =
         broadcastDispatcher

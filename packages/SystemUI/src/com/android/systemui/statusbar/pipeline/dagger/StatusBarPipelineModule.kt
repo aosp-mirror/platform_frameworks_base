@@ -37,6 +37,8 @@ import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIc
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxyImpl
+import com.android.systemui.statusbar.pipeline.mobile.util.SubscriptionManagerProxy
+import com.android.systemui.statusbar.pipeline.mobile.util.SubscriptionManagerProxyImpl
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepository
@@ -65,8 +67,7 @@ abstract class StatusBarPipelineModule {
 
     @Binds abstract fun wifiRepository(impl: WifiRepositorySwitcher): WifiRepository
 
-    @Binds
-    abstract fun wifiInteractor(impl: WifiInteractorImpl): WifiInteractor
+    @Binds abstract fun wifiInteractor(impl: WifiInteractorImpl): WifiInteractor
 
     @Binds
     abstract fun mobileConnectionsRepository(
@@ -76,6 +77,11 @@ abstract class StatusBarPipelineModule {
     @Binds abstract fun userSetupRepository(impl: UserSetupRepositoryImpl): UserSetupRepository
 
     @Binds abstract fun mobileMappingsProxy(impl: MobileMappingsProxyImpl): MobileMappingsProxy
+
+    @Binds
+    abstract fun subscriptionManagerProxy(
+        impl: SubscriptionManagerProxyImpl
+    ): SubscriptionManagerProxy
 
     @Binds
     abstract fun mobileIconsInteractor(impl: MobileIconsInteractorImpl): MobileIconsInteractor
