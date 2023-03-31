@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.validMobileEvent
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileConnectionsRepositoryImpl
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeSubscriptionManagerProxy
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
@@ -89,6 +90,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
 
     private val fakeNetworkEventsFlow = MutableStateFlow<FakeNetworkEventModel?>(null)
     private val mobileMappings = FakeMobileMappingsProxy()
+    private val subscriptionManagerProxy = FakeSubscriptionManagerProxy()
 
     private val scope = CoroutineScope(IMMEDIATE)
 
@@ -117,6 +119,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
             MobileConnectionsRepositoryImpl(
                 connectivityRepository,
                 subscriptionManager,
+                subscriptionManagerProxy,
                 telephonyManager,
                 logger,
                 summaryLogger,
