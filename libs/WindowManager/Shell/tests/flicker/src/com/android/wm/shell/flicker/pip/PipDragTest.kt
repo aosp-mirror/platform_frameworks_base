@@ -30,9 +30,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
-/**
- * Test the dragging of a PIP window.
- */
+/** Test the dragging of a PIP window. */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -59,9 +57,7 @@ class PipDragTest(flicker: FlickerTest) : PipTransition(flicker) {
                 pipApp.exit(wmHelper)
                 tapl.setEnableRotation(false)
             }
-            transitions {
-                pipApp.dragPipWindowAwayFromEdgeWithoutRelease(wmHelper, 50)
-            }
+            transitions { pipApp.dragPipWindowAwayFromEdgeWithoutRelease(wmHelper, 50) }
         }
 
     @Postsubmit

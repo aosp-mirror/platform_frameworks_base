@@ -44,9 +44,7 @@ abstract class EnterPipTransition(flicker: FlickerTest) : PipTransition(flicker)
     @Presubmit
     @Test
     open fun pipAppLayerAlwaysVisible() {
-        flicker.assertLayers {
-            this.isVisible(pipApp)
-        }
+        flicker.assertLayers { this.isVisible(pipApp) }
     }
 
     /** Checks the content overlay appears then disappears during the animation */
@@ -55,11 +53,7 @@ abstract class EnterPipTransition(flicker: FlickerTest) : PipTransition(flicker)
     open fun pipOverlayLayerAppearThenDisappear() {
         val overlay = ComponentNameMatcher.PIP_CONTENT_OVERLAY
         flicker.assertLayers {
-            this.notContains(overlay)
-                .then()
-                .contains(overlay)
-                .then()
-                .notContains(overlay)
+            this.notContains(overlay).then().contains(overlay).then().notContains(overlay)
         }
     }
 
