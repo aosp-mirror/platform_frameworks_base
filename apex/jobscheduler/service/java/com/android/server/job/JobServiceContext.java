@@ -471,7 +471,12 @@ public final class JobServiceContext implements ServiceConnection {
                     job.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER),
                     mExecutionStartTimeElapsed - job.enqueueTime,
                     job.getJob().isUserInitiated(),
-                    job.shouldTreatAsUserInitiatedJob());
+                    job.shouldTreatAsUserInitiatedJob(),
+                    job.getJob().isPeriodic(),
+                    job.getJob().getMinLatencyMillis(),
+                    job.getEstimatedNetworkDownloadBytes(),
+                    job.getEstimatedNetworkUploadBytes(),
+                    job.getWorkCount());
             final String sourcePackage = job.getSourcePackageName();
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
                 final String componentPackage = job.getServiceComponent().getPackageName();
@@ -1435,9 +1440,14 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE),
                 completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY),
                 completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER),
-                0,
+                mExecutionStartTimeElapsed - completedJob.enqueueTime,
                 completedJob.getJob().isUserInitiated(),
-                completedJob.startedAsUserInitiatedJob);
+                completedJob.startedAsUserInitiatedJob,
+                completedJob.getJob().isPeriodic(),
+                completedJob.getJob().getMinLatencyMillis(),
+                completedJob.getEstimatedNetworkDownloadBytes(),
+                completedJob.getEstimatedNetworkUploadBytes(),
+                completedJob.getWorkCount());
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
                     getId());
