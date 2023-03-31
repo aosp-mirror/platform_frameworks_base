@@ -20,6 +20,8 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QSTileHost
+import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository
+import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedSharedPrefsRepository
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractorImpl
 import dagger.Binds
@@ -42,6 +44,20 @@ interface QSHostModule {
         ): PanelInteractor {
             return if (featureFlags.isEnabled(Flags.QS_PIPELINE_NEW_HOST)) {
                 panelInteractorImpl
+            } else {
+                qsHost
+            }
+        }
+
+        @Provides
+        @JvmStatic
+        fun provideCustomTileAddedRepository(
+            featureFlags: FeatureFlags,
+            qsHost: QSHost,
+            customTileAddedRepository: CustomTileAddedSharedPrefsRepository
+        ): CustomTileAddedRepository {
+            return if (featureFlags.isEnabled(Flags.QS_PIPELINE_NEW_HOST)) {
+                customTileAddedRepository
             } else {
                 qsHost
             }

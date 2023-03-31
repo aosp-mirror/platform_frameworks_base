@@ -42,6 +42,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
@@ -98,6 +99,8 @@ public class TileServicesTest extends SysuiTestCase {
     private PanelInteractor mPanelInteractor;
     @Captor
     private ArgumentCaptor<CommandQueue.Callbacks> mCallbacksArgumentCaptor;
+    @Mock
+    private CustomTileAddedRepository mCustomTileAddedRepository;
 
     @Before
     public void setUp() throws Exception {
@@ -115,7 +118,7 @@ public class TileServicesTest extends SysuiTestCase {
 
         mTileService = new TestTileServices(mQSHost, provider, mBroadcastDispatcher,
                 mUserTracker, mKeyguardStateController, mCommandQueue, mStatusBarIconController,
-                mPanelInteractor);
+                mPanelInteractor, mCustomTileAddedRepository);
     }
 
     @After
@@ -293,9 +296,11 @@ public class TileServicesTest extends SysuiTestCase {
         TestTileServices(QSHost host, Provider<Handler> handlerProvider,
                 BroadcastDispatcher broadcastDispatcher, UserTracker userTracker,
                 KeyguardStateController keyguardStateController, CommandQueue commandQueue,
-                StatusBarIconController statusBarIconController, PanelInteractor panelInteractor) {
+                StatusBarIconController statusBarIconController, PanelInteractor panelInteractor,
+                CustomTileAddedRepository customTileAddedRepository) {
             super(host, handlerProvider, broadcastDispatcher, userTracker, keyguardStateController,
-                    commandQueue, statusBarIconController, panelInteractor);
+                    commandQueue, statusBarIconController, panelInteractor,
+                    customTileAddedRepository);
         }
 
         @Override
