@@ -179,6 +179,9 @@ import static com.android.server.wm.ActivityRecordProto.PROC_ID;
 import static com.android.server.wm.ActivityRecordProto.PROVIDES_MAX_BOUNDS;
 import static com.android.server.wm.ActivityRecordProto.REPORTED_DRAWN;
 import static com.android.server.wm.ActivityRecordProto.REPORTED_VISIBLE;
+import static com.android.server.wm.ActivityRecordProto.SHOULD_FORCE_ROTATE_FOR_CAMERA_COMPAT;
+import static com.android.server.wm.ActivityRecordProto.SHOULD_REFRESH_ACTIVITY_FOR_CAMERA_COMPAT;
+import static com.android.server.wm.ActivityRecordProto.SHOULD_REFRESH_ACTIVITY_VIA_PAUSE_FOR_CAMERA_COMPAT;
 import static com.android.server.wm.ActivityRecordProto.SHOULD_SEND_COMPAT_FAKE_FOCUS;
 import static com.android.server.wm.ActivityRecordProto.STARTING_DISPLAYED;
 import static com.android.server.wm.ActivityRecordProto.STARTING_MOVED;
@@ -10228,6 +10231,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(LAST_DROP_INPUT_MODE, mLastDropInputMode);
         proto.write(OVERRIDE_ORIENTATION, getOverrideOrientation());
         proto.write(SHOULD_SEND_COMPAT_FAKE_FOCUS, shouldSendCompatFakeFocus());
+        proto.write(SHOULD_FORCE_ROTATE_FOR_CAMERA_COMPAT,
+                mLetterboxUiController.shouldForceRotateForCameraCompat());
+        proto.write(SHOULD_REFRESH_ACTIVITY_FOR_CAMERA_COMPAT,
+                mLetterboxUiController.shouldRefreshActivityForCameraCompat());
+        proto.write(SHOULD_REFRESH_ACTIVITY_VIA_PAUSE_FOR_CAMERA_COMPAT,
+                mLetterboxUiController.shouldRefreshActivityViaPauseForCameraCompat());
     }
 
     @Override
