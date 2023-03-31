@@ -1732,6 +1732,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         final int gestureHeight = userContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.navigation_bar_gesture_height);
         final boolean handlingGesture = mEdgeBackGestureHandler.isHandlingGestures();
+        final InsetsFrameProvider mandatoryGestureProvider = new InsetsFrameProvider(
+                mInsetsSourceOwner, 0, WindowInsets.Type.mandatorySystemGestures());
+        if (handlingGesture) {
+            mandatoryGestureProvider.setInsetsSize(Insets.of(0, 0, 0, gestureHeight));
+        }
         final int gestureInsetsLeft = handlingGesture
                 ? mEdgeBackGestureHandler.getEdgeWidthLeft() + safeInsetsLeft : 0;
         final int gestureInsetsRight = handlingGesture
@@ -1739,9 +1744,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         return new InsetsFrameProvider[] {
                 navBarProvider,
                 tappableElementProvider,
-                new InsetsFrameProvider(
-                        mInsetsSourceOwner, 0, WindowInsets.Type.mandatorySystemGestures())
-                        .setInsetsSize(Insets.of(0, 0, 0, gestureHeight)),
+                mandatoryGestureProvider,
                 new InsetsFrameProvider(mInsetsSourceOwner, 0, WindowInsets.Type.systemGestures())
                         .setSource(InsetsFrameProvider.SOURCE_DISPLAY)
                         .setInsetsSize(Insets.of(gestureInsetsLeft, 0, 0, 0)),
