@@ -54,6 +54,7 @@ import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler;
+import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
@@ -677,13 +678,15 @@ public abstract class WMShellModule {
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             Transitions transitions,
-            EnterDesktopTaskTransitionHandler transitionHandler,
+            EnterDesktopTaskTransitionHandler enterDesktopTransitionHandler,
+            ExitDesktopTaskTransitionHandler exitDesktopTransitionHandler,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return new DesktopTasksController(context, shellInit, shellController, displayController,
                 shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer, transitions,
-                transitionHandler, desktopModeTaskRepository, mainExecutor);
+                enterDesktopTransitionHandler, exitDesktopTransitionHandler,
+                desktopModeTaskRepository, mainExecutor);
     }
 
     @WMSingleton
@@ -691,6 +694,15 @@ public abstract class WMShellModule {
     static EnterDesktopTaskTransitionHandler provideEnterDesktopModeTaskTransitionHandler(
             Transitions transitions) {
         return new EnterDesktopTaskTransitionHandler(transitions);
+    }
+
+    @WMSingleton
+    @Provides
+    static ExitDesktopTaskTransitionHandler provideExitDesktopTaskTransitionHandler(
+            Transitions transitions,
+            Context context
+    ) {
+        return new ExitDesktopTaskTransitionHandler(transitions, context);
     }
 
     @WMSingleton
