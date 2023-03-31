@@ -20,13 +20,13 @@ import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.common.Rotation
 import android.tools.common.datatypes.component.ComponentNameMatcher
-import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
+import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.FixMethodOrder
@@ -86,9 +86,7 @@ open class ShowImeOnAppStartWhenLaunchingAppFromQuickSwitchTest(flicker: Flicker
         }
     }
     /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    @Presubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
     @Presubmit
     @Test

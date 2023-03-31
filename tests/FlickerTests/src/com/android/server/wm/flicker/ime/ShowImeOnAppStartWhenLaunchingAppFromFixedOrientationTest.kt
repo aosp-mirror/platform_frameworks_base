@@ -19,7 +19,6 @@ package com.android.server.wm.flicker.ime
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import android.tools.device.flicker.isShellTransitionsEnabled
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -27,6 +26,7 @@ import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
+import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.snapshotStartingWindowLayerCoversExactlyOnApp
 import org.junit.Assume
