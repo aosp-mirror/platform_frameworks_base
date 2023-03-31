@@ -783,7 +783,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      *         a chance we won't thus legacy-entry (via pause+userLeaving) will return false.
      */
     private boolean checkEnterPipOnFinish(@NonNull ActivityRecord ar) {
-        if (!mCanPipOnFinish || !ar.isVisible() || ar.getTask() == null) return false;
+        if (!mCanPipOnFinish || !ar.isVisible() || ar.getTask() == null || !ar.isState(RESUMED)) {
+            return false;
+        }
 
         if (ar.pictureInPictureArgs != null && ar.pictureInPictureArgs.isAutoEnterEnabled()) {
             if (didCommitTransientLaunch()) {
@@ -796,18 +798,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
 
         // Legacy pip-entry (not via isAutoEnterEnabled).
-        boolean canPip = ar.getDeferHidingClient();
-        if (!canPip && didCommitTransientLaunch()) {
+        if (didCommitTransientLaunch() && ar.supportsPictureInPicture()) {
             // force enable pip-on-task-switch now that we've committed to actually launching to the
             // transient activity, and then recalculate whether we can attempt pip.
             ar.supportsEnterPipOnTaskSwitch = true;
-            canPip = ar.checkEnterPictureInPictureState(
-                    "finishTransition", true /* beforeStopping */)
-                    && ar.isState(RESUMED);
         }
-        if (!canPip) return false;
+
         try {
-            // Legacy PIP-enter requires pause event with user-leaving.
+            // If not going auto-pip, the activity should be paused with user-leaving.
             mController.mAtm.mTaskSupervisor.mUserLeaving = true;
             ar.getTaskFragment().startPausing(false /* uiSleeping */,
                     null /* resuming */, "finishTransition");
@@ -851,6 +849,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         boolean hasParticipatedDisplay = false;
         boolean hasVisibleTransientLaunch = false;
+        boolean enterAutoPip = false;
         // Commit all going-invisible containers
         for (int i = 0; i < mParticipants.size(); ++i) {
             final WindowContainer<?> participant = mParticipants.valueAt(i);
@@ -886,6 +885,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         }
                         ar.commitVisibility(false /* visible */, false /* performLayout */,
                                 true /* fromTransition */);
+                    } else {
+                        enterAutoPip = true;
                     }
                 }
                 if (mChanges.get(ar).mVisible != visibleAtTransitionEnd) {
@@ -940,8 +941,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
 
         if (hasVisibleTransientLaunch) {
-            // Notify the change about the transient-below task that becomes invisible.
-            mController.mAtm.getTaskChangeNotificationController().notifyTaskStackChanged();
+            // Notify the change about the transient-below task if entering auto-pip.
+            if (enterAutoPip) {
+                mController.mAtm.getTaskChangeNotificationController().notifyTaskStackChanged();
+            }
             // Prevent spurious background app switches.
             mController.mAtm.stopAppSwitches();
             // The end of transient launch may not reorder task, so make sure to compute the latest
