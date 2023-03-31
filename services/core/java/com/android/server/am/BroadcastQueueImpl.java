@@ -835,7 +835,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                         OOM_ADJ_REASON_START_RECEIVER);
             }
         } else if (filter.receiverList.app != null) {
-            mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(filter.receiverList.app,
+            mService.mOomAdjuster.unfreezeTemporarily(filter.receiverList.app,
                     CachedAppOptimizer.UNFREEZE_REASON_START_RECEIVER);
         }
 
@@ -1129,7 +1129,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     }
                     if (sendResult) {
                         if (r.callerApp != null) {
-                            mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(
+                            mService.mOomAdjuster.unfreezeTemporarily(
                                     r.callerApp,
                                     CachedAppOptimizer.UNFREEZE_REASON_FINISH_RECEIVER);
                         }
