@@ -6730,8 +6730,11 @@ public class NotificationManagerService extends SystemService {
         handleSavePolicyFile();
     }
 
-    private void makeStickyHun(Notification notification) {
-        notification.flags |= FLAG_FSI_REQUESTED_BUT_DENIED;
+    private void makeStickyHun(Notification notification, String pkg, @UserIdInt int userId) {
+        if (mPermissionHelper.hasRequestedPermission(
+                Manifest.permission.USE_FULL_SCREEN_INTENT, pkg, userId)) {
+            notification.flags |= FLAG_FSI_REQUESTED_BUT_DENIED;
+        }
         if (notification.contentIntent == null) {
             // On notification click, if contentIntent is null, SystemUI launches the
             // fullScreenIntent instead.
@@ -6795,10 +6798,9 @@ public class NotificationManagerService extends SystemService {
                     SystemUiSystemPropertiesFlags.NotificationFlags.SHOW_STICKY_HUN_FOR_DENIED_FSI);
 
             if (forceDemoteFsiToStickyHun) {
-                makeStickyHun(notification);
+                makeStickyHun(notification, pkg, userId);
 
             } else if (showStickyHunIfDenied) {
-
                 final AttributionSource source = new AttributionSource.Builder(notificationUid)
                         .setPackageName(pkg)
                         .build();
@@ -6807,7 +6809,7 @@ public class NotificationManagerService extends SystemService {
                         Manifest.permission.USE_FULL_SCREEN_INTENT, source, /* message= */ null);
 
                 if (permissionResult != PermissionManager.PERMISSION_GRANTED) {
-                    makeStickyHun(notification);
+                    makeStickyHun(notification, pkg, userId);
                 }
 
             } else {
