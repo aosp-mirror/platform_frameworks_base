@@ -228,6 +228,21 @@ TEST(ResourceUtilsTest, ItemsWithWhitespaceAreParsedCorrectly) {
               Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_FLOAT, expected_float_flattened))));
 }
 
+TEST(ResourceUtilsTest, FloatAndBigIntegerParsedCorrectly) {
+  const float expected_float = 0.125f;
+  const uint32_t expected_float_flattened = *(uint32_t*)&expected_float;
+  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute("0.125", ResTable_map::TYPE_FLOAT),
+              Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_FLOAT, expected_float_flattened))));
+
+  EXPECT_EQ(ResourceUtils::TryParseItemForAttribute("1099511627776", ResTable_map::TYPE_INTEGER),
+            std::unique_ptr<Item>(nullptr));
+
+  const float big_float = 1099511627776.0f;
+  const uint32_t big_flattened = *(uint32_t*)&big_float;
+  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute("1099511627776", ResTable_map::TYPE_FLOAT),
+              Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_FLOAT, big_flattened))));
+}
+
 TEST(ResourceUtilsTest, ParseSdkVersionWithCodename) {
   EXPECT_THAT(ResourceUtils::ParseSdkVersion("Q"), Eq(std::optional<int>(10000)));
   EXPECT_THAT(ResourceUtils::ParseSdkVersion("Q.fingerprint"), Eq(std::optional<int>(10000)));

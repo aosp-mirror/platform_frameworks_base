@@ -670,8 +670,19 @@ std::unique_ptr<Item> TryParseItemForAttribute(
     // Try parsing this as a float.
     auto floating_point = TryParseFloat(value);
     if (floating_point) {
+      // Only check if the parsed result lost precision when the parsed item is
+      // android::Res_value::TYPE_FLOAT and there is other possible types saved in type_mask, like
+      // ResTable_map::TYPE_INTEGER.
       if (type_mask & AndroidTypeToAttributeTypeMask(floating_point->value.dataType)) {
-        return std::move(floating_point);
+        const bool mayOnlyBeFloat = (type_mask & ~float_mask) == 0;
+        const bool parsedAsFloat = floating_point->value.dataType == android::Res_value::TYPE_FLOAT;
+        if (!mayOnlyBeFloat && parsedAsFloat) {
+          if (floating_point->toPrettyString() == value.data()) {
+            return std::move(floating_point);
+          }
+        } else {
+          return std::move(floating_point);
+        }
       }
     }
   }
