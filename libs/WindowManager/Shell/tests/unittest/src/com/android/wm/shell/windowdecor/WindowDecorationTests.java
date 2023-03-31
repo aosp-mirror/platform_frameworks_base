@@ -583,7 +583,7 @@ public class WindowDecorationTests extends ShellTestCase {
             int cornerRadius = loadDimensionPixelSize(resources, mCaptionMenuCornerRadiusId);
             String name = "Test Window";
             WindowDecoration.AdditionalWindow additionalWindow =
-                    addWindow(R.layout.desktop_mode_decor_handle_menu, name,
+                    addWindow(R.layout.desktop_mode_window_decor_handle_menu_app_info_pill, name,
                             mMockSurfaceControlAddWindowT,
                             x - mRelayoutResult.mDecorContainerOffsetX,
                             y - mRelayoutResult.mDecorContainerOffsetY,
