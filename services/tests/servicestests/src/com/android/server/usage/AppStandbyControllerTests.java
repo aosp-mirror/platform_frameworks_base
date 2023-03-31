@@ -125,6 +125,9 @@ public class AppStandbyControllerTests {
     private static final String ADMIN_PKG2 = "com.android.admin2";
     private static final String ADMIN_PKG3 = "com.android.admin3";
 
+    private static final String ADMIN_PROTECTED_PKG = "com.android.admin.protected";
+    private static final String ADMIN_PROTECTED_PKG2 = "com.android.admin.protected2";
+
     private static final long MINUTE_MS = 60 * 1000;
     private static final long HOUR_MS = 60 * MINUTE_MS;
     private static final long DAY_MS = 24 * HOUR_MS;
@@ -1370,6 +1373,19 @@ public class AppStandbyControllerTests {
     }
 
     @Test
+    public void testSetAdminProtectedPackages() {
+        assertAdminProtectedPackagesForTest(USER_ID, (String[]) null);
+        assertAdminProtectedPackagesForTest(USER_ID2, (String[]) null);
+
+        setAdminProtectedPackages(USER_ID, ADMIN_PROTECTED_PKG, ADMIN_PROTECTED_PKG2);
+        assertAdminProtectedPackagesForTest(USER_ID, ADMIN_PROTECTED_PKG, ADMIN_PROTECTED_PKG2);
+        assertAdminProtectedPackagesForTest(USER_ID2, (String[]) null);
+
+        setAdminProtectedPackages(USER_ID, (String[]) null);
+        assertAdminProtectedPackagesForTest(USER_ID, (String[]) null);
+    }
+
+    @Test
     public void testUserInteraction_CrossProfile() throws Exception {
         mInjector.mRunningUsers = new int[] {USER_ID, USER_ID2, USER_ID3};
         mInjector.mCrossProfileTargets = Arrays.asList(USER_HANDLE_USER2);
@@ -1591,6 +1607,28 @@ public class AppStandbyControllerTests {
 
     private void setActiveAdmins(int userId, String... admins) {
         mController.setActiveAdminApps(new ArraySet<>(Arrays.asList(admins)), userId);
+    }
+
+    private void setAdminProtectedPackages(int userId, String... packageNames) {
+        Set<String> adminProtectedPackages = packageNames != null ? new ArraySet<>(
+                Arrays.asList(packageNames)) : null;
+        mController.setAdminProtectedPackages(adminProtectedPackages, userId);
+    }
+
+    private void assertAdminProtectedPackagesForTest(int userId, String... packageNames) {
+        final Set<String> actualAdminProtectedPackages =
+                mController.getAdminProtectedPackagesForTest(userId);
+        if (packageNames == null) {
+            if (actualAdminProtectedPackages != null && !actualAdminProtectedPackages.isEmpty()) {
+                fail("Admin protected packages should be null; " + getAdminAppsStr(userId,
+                        actualAdminProtectedPackages));
+            }
+            return;
+        }
+        assertEquals(packageNames.length, actualAdminProtectedPackages.size());
+        for (String adminProtectedPackage : packageNames) {
+            assertTrue(actualAdminProtectedPackages.contains(adminProtectedPackage));
+        }
     }
 
     private void setAndAssertBucket(String pkg, int user, int bucket, int reason) throws Exception {

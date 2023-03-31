@@ -233,6 +233,10 @@ public class AppStandbyController implements AppStandbyInternal {
     @GuardedBy("mActiveAdminApps")
     private final SparseArray<Set<String>> mActiveAdminApps = new SparseArray<>();
 
+    /** List of admin protected packages. Can contain {@link android.os.UserHandle#USER_ALL}. */
+    @GuardedBy("mAdminProtectedPackages")
+    private final SparseArray<Set<String>> mAdminProtectedPackages = new SparseArray<>();
+
     /**
      * Set of system apps that are headless (don't have any declared activities, enabled or
      * disabled). Presence in this map indicates that the app is a headless system app.
@@ -1019,6 +1023,9 @@ public class AppStandbyController implements AppStandbyInternal {
             synchronized (mActiveAdminApps) {
                 mActiveAdminApps.remove(userId);
             }
+            synchronized (mAdminProtectedPackages) {
+                mAdminProtectedPackages.remove(userId);
+            }
         }
     }
 
@@ -1105,6 +1112,10 @@ public class AppStandbyController implements AppStandbyInternal {
             }
 
             if (isActiveDeviceAdmin(packageName, userId)) {
+                return STANDBY_BUCKET_EXEMPTED;
+            }
+
+            if (isAdminProtectedPackages(packageName, userId)) {
                 return STANDBY_BUCKET_EXEMPTED;
             }
 
@@ -1510,6 +1521,17 @@ public class AppStandbyController implements AppStandbyInternal {
         }
     }
 
+    private boolean isAdminProtectedPackages(String packageName, int userId) {
+        synchronized (mAdminProtectedPackages) {
+            if (mAdminProtectedPackages.contains(UserHandle.USER_ALL)
+                    && mAdminProtectedPackages.get(UserHandle.USER_ALL).contains(packageName)) {
+                return true;
+            }
+            return mAdminProtectedPackages.contains(userId)
+                    && mAdminProtectedPackages.get(userId).contains(packageName);
+        }
+    }
+
     @Override
     public void addActiveDeviceAdmin(String adminPkg, int userId) {
         synchronized (mActiveAdminApps) {
@@ -1534,6 +1556,17 @@ public class AppStandbyController implements AppStandbyInternal {
     }
 
     @Override
+    public void setAdminProtectedPackages(Set<String> packageNames, int userId) {
+        synchronized (mAdminProtectedPackages) {
+            if (packageNames == null || packageNames.isEmpty()) {
+                mAdminProtectedPackages.remove(userId);
+            } else {
+                mAdminProtectedPackages.put(userId, packageNames);
+            }
+        }
+    }
+
+    @Override
     public void onAdminDataAvailable() {
         mAdminDataAvailableLatch.countDown();
     }
@@ -1552,6 +1585,13 @@ public class AppStandbyController implements AppStandbyInternal {
     Set<String> getActiveAdminAppsForTest(int userId) {
         synchronized (mActiveAdminApps) {
             return mActiveAdminApps.get(userId);
+        }
+    }
+
+    @VisibleForTesting
+    Set<String> getAdminProtectedPackagesForTest(int userId) {
+        synchronized (mAdminProtectedPackages) {
+            return mAdminProtectedPackages.get(userId);
         }
     }
 
