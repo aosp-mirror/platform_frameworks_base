@@ -90,8 +90,6 @@ class TrustedOverlayHost {
         requireOverlaySurfaceControl();
         mOverlays.add(p);
 
-        mWmService.mEmbeddedWindowController.setIsOverlay(p.getInputToken());
-
         SurfaceControl.Transaction t = mWmService.mTransactionFactory.get();
         t.reparent(p.getSurfaceControl(), mSurfaceControl)
             .show(p.getSurfaceControl());
