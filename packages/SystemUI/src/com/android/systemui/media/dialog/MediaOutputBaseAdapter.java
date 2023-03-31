@@ -66,6 +66,8 @@ public abstract class MediaOutputBaseAdapter extends
 
     protected final MediaOutputController mController;
 
+    private static final int UNMUTE_DEFAULT_VOLUME = 2;
+
     Context mContext;
     View mHolderView;
     boolean mIsDragging;
@@ -193,10 +195,6 @@ public abstract class MediaOutputBaseAdapter extends
             mTwoLineTitleText.setTextColor(mController.getColorItemContent());
             if (mController.isAdvancedLayoutSupported()) {
                 mVolumeValueText.setTextColor(mController.getColorItemContent());
-                mTitleIcon.setOnTouchListener(((v, event) -> {
-                    mSeekBar.dispatchTouchEvent(event);
-                    return false;
-                }));
             }
             mSeekBar.setProgressTintList(
                     ColorStateList.valueOf(mController.getColorSeekbarProgress()));
@@ -546,13 +544,21 @@ public abstract class MediaOutputBaseAdapter extends
         private void enableSeekBar(MediaDevice device) {
             mSeekBar.setEnabled(true);
             mSeekBar.setOnTouchListener((v, event) -> false);
-            if (mController.isAdvancedLayoutSupported()) {
-                updateIconAreaClickListener((v) -> {
+            updateIconAreaClickListener((v) -> {
+                if (device.getCurrentVolume() == 0) {
+                    mController.adjustVolume(device, UNMUTE_DEFAULT_VOLUME);
+                    updateUnmutedVolumeIcon();
+                    mTitleIcon.setOnTouchListener(((iconV, event) -> false));
+                } else {
                     mSeekBar.resetVolume();
                     mController.adjustVolume(device, 0);
                     updateMutedVolumeIcon();
-                });
-            }
+                    mTitleIcon.setOnTouchListener(((iconV, event) -> {
+                        mSeekBar.dispatchTouchEvent(event);
+                        return false;
+                    }));
+                }
+            });
         }
 
         protected void setUpDeviceIcon(MediaDevice device) {
