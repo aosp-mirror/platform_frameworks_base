@@ -68,7 +68,8 @@ class DesktopTasksController(
         private val syncQueue: SyncTransactionQueue,
         private val rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
         private val transitions: Transitions,
-        private val animationTransitionHandler: EnterDesktopTaskTransitionHandler,
+        private val enterDesktopTaskTransitionHandler: EnterDesktopTaskTransitionHandler,
+        private val exitDesktopTaskTransitionHandler: ExitDesktopTaskTransitionHandler,
         private val desktopModeTaskRepository: DesktopModeTaskRepository,
         @ShellMainThread private val mainExecutor: ShellExecutor
 ) : RemoteCallable<DesktopTasksController>, Transitions.TransitionHandler {
@@ -149,7 +150,7 @@ class DesktopTasksController(
         wct.setBounds(taskInfo.token, startBounds)
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            animationTransitionHandler.startTransition(
+            enterDesktopTaskTransitionHandler.startTransition(
                     Transitions.TRANSIT_ENTER_FREEFORM, wct)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
@@ -167,7 +168,8 @@ class DesktopTasksController(
         wct.setBounds(taskInfo.token, freeformBounds)
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            animationTransitionHandler.startTransition(Transitions.TRANSIT_ENTER_DESKTOP_MODE, wct)
+            enterDesktopTaskTransitionHandler.startTransition(
+                Transitions.TRANSIT_ENTER_DESKTOP_MODE, wct)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
         }
@@ -186,6 +188,18 @@ class DesktopTasksController(
         addMoveToFullscreenChanges(wct, task.token)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
+        } else {
+            shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
+    fun moveToFullscreenWithAnimation(task: ActivityManager.RunningTaskInfo) {
+        val wct = WindowContainerTransaction()
+        addMoveToFullscreenChanges(wct, task.token)
+
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            exitDesktopTaskTransitionHandler.startTransition(
+            Transitions.TRANSIT_EXIT_DESKTOP_MODE, wct)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
         }
@@ -396,9 +410,9 @@ class DesktopTasksController(
         val statusBarHeight = displayController
                 .getDisplayLayout(taskInfo.displayId)?.stableInsets()?.top ?: 0
         if (y <= statusBarHeight && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
-            moveToFullscreen(taskInfo.taskId)
             visualIndicator?.releaseFullscreenIndicator()
             visualIndicator = null
+            moveToFullscreenWithAnimation(taskInfo)
         }
     }
 
