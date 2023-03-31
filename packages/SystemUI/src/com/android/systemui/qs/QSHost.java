@@ -26,6 +26,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
+import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.util.leak.GarbageMonitor;
 
@@ -34,7 +35,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public interface QSHost extends PanelInteractor {
+public interface QSHost extends PanelInteractor, CustomTileAddedRepository {
     String TILES_SETTING = Settings.Secure.QS_TILES;
     int POSITION_AT_END = -1;
 
@@ -101,9 +102,6 @@ public interface QSHost extends PanelInteractor {
     void addTile(ComponentName tile, boolean end);
     void removeTileByUser(ComponentName tile);
     void changeTilesByUser(List<String> previousTiles, List<String> newTiles);
-
-    boolean isTileAdded(ComponentName componentName, int userId);
-    void setTileAdded(ComponentName componentName, int userId, boolean added);
 
     int indexOf(String tileSpec);
 
