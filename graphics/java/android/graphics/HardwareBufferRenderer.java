@@ -275,11 +275,22 @@ public class HardwareBufferRenderer implements AutoCloseable {
             Consumer<RenderResult> wrapped = consumable -> executor.execute(
                     () -> renderCallback.accept(consumable));
             if (!isClosed()) {
+                int renderWidth;
+                int renderHeight;
+                if (mTransform == SurfaceControl.BUFFER_TRANSFORM_ROTATE_90
+                        || mTransform == SurfaceControl.BUFFER_TRANSFORM_ROTATE_270) {
+                    renderWidth = mHardwareBuffer.getHeight();
+                    renderHeight = mHardwareBuffer.getWidth();
+                } else {
+                    renderWidth = mHardwareBuffer.getWidth();
+                    renderHeight = mHardwareBuffer.getHeight();
+                }
+
                 nRender(
                         mProxy,
                         mTransform,
-                        mHardwareBuffer.getWidth(),
-                        mHardwareBuffer.getHeight(),
+                        renderWidth,
+                        renderHeight,
                         mColorSpace.getNativeInstance(),
                         wrapped);
             } else {

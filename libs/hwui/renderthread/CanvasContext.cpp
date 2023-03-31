@@ -528,6 +528,14 @@ void CanvasContext::notifyFramePending() {
     sendLoadResetHint();
 }
 
+Frame CanvasContext::getFrame() {
+    if (mHardwareBuffer != nullptr) {
+        return {mBufferParams.getLogicalWidth(), mBufferParams.getLogicalHeight(), 0};
+    } else {
+        return mRenderPipeline->getFrame();
+    }
+}
+
 void CanvasContext::draw() {
     if (auto grContext = getGrContext()) {
         if (grContext->abandoned()) {
@@ -569,7 +577,8 @@ void CanvasContext::draw() {
 
     mCurrentFrameInfo->markIssueDrawCommandsStart();
 
-    Frame frame = mRenderPipeline->getFrame();
+    Frame frame = getFrame();
+
     SkRect windowDirty = computeDirtyRect(frame, &dirty);
 
     ATRACE_FORMAT("Drawing " RECT_STRING, SK_RECT_ARGS(dirty));
