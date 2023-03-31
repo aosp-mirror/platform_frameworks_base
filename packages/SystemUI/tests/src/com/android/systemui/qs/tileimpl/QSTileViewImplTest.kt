@@ -317,6 +317,26 @@ class QSTileViewImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testDisableByPolicyThenRemoved_changesColor() {
+        val stateActive = QSTile.State()
+        stateActive.state = Tile.STATE_ACTIVE
+
+        val stateDisabledByPolicy = stateActive.copy()
+        stateDisabledByPolicy.disabledByPolicy = true
+
+        tileView.changeState(stateActive)
+        val activeColors = tileView.getCurrentColors()
+
+        tileView.changeState(stateDisabledByPolicy)
+        // It has unavailable colors
+        assertThat(tileView.getCurrentColors()).isNotEqualTo(activeColors)
+
+        // When we get back to not disabled by policy tile, it should go back to active colors
+        tileView.changeState(stateActive)
+        assertThat(tileView.getCurrentColors()).containsExactlyElementsIn(activeColors)
+    }
+
+    @Test
     fun testDisabledByPolicy_secondaryLabelText() {
         val testA11yLabel = "TEST_LABEL"
         context.orCreateTestableResources
