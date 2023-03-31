@@ -101,7 +101,7 @@ interface IVirtualDeviceManager {
      *
      * @param deviceId id of the virtual device.
      * @param sound effect type corresponding to
-     *     {@code android.media.AudioManager.SystemSoundEffect}
+     *   {@code android.media.AudioManager.SystemSoundEffect}
      */
     void playSoundEffect(int deviceId, int effectType);
 }
