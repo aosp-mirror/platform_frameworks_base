@@ -107,14 +107,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
         // start fresh
         mDismissing = false;
         mView.resetPasswordText(false /* animate */, false /* announce */);
-        // if the user is currently locked out, enforce it.
-        long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
-                KeyguardUpdateMonitor.getCurrentUser());
-        if (shouldLockout(deadline)) {
-            handleAttemptLockout(deadline);
-        } else {
-            resetState();
-        }
+        resetState();
     }
 
     @Override
@@ -277,7 +270,12 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     @Override
     public void onResume(int reason) {
         mResumed = true;
-        reset();
+        // if the user is currently locked out, enforce it.
+        long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
+                KeyguardUpdateMonitor.getCurrentUser());
+        if (shouldLockout(deadline)) {
+            handleAttemptLockout(deadline);
+        }
     }
 
     @Override
