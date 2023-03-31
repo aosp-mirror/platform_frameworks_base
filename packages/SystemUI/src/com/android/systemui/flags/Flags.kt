@@ -101,12 +101,12 @@ object Flags {
         releasedFlag(174148361, "notification_inline_reply_animation")
 
     val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
-        releasedFlag(254647461, "filter_unseen_notifs_on_keyguard", teamfood = true)
+        releasedFlag(254647461, "filter_unseen_notifs_on_keyguard")
 
     // TODO(b/263414400): Tracking Bug
     @JvmField
     val NOTIFICATION_ANIMATE_BIG_PICTURE =
-        releasedFlag(120, "notification_animate_big_picture", teamfood = true)
+        releasedFlag(120, "notification_animate_big_picture")
 
     @JvmField
     val ANIMATED_NOTIFICATION_SHADE_INSETS =
@@ -184,7 +184,7 @@ object Flags {
     // flag for controlling auto pin confirmation and material u shapes in bouncer
     @JvmField
     val AUTO_PIN_CONFIRMATION =
-        releasedFlag(224, "auto_pin_confirmation", "auto_pin_confirmation", teamfood = true)
+        releasedFlag(224, "auto_pin_confirmation", "auto_pin_confirmation")
 
     // TODO(b/262859270): Tracking Bug
     @JvmField val FALSING_OFF_FOR_UNFOLDED = releasedFlag(225, "falsing_off_for_unfolded")
@@ -621,15 +621,15 @@ object Flags {
     @JvmField val NOTE_TASKS = releasedFlag(1900, "keycode_flag")
 
     // 2000 - device controls
-    @Keep @JvmField val USE_APP_PANELS = releasedFlag(2000, "use_app_panels", teamfood = true)
+    @Keep @JvmField val USE_APP_PANELS = releasedFlag(2000, "use_app_panels")
 
     @JvmField
     val APP_PANELS_ALL_APPS_ALLOWED =
-        releasedFlag(2001, "app_panels_all_apps_allowed", teamfood = true)
+        releasedFlag(2001, "app_panels_all_apps_allowed")
 
     @JvmField
     val CONTROLS_MANAGEMENT_NEW_FLOWS =
-        releasedFlag(2002, "controls_management_new_flows", teamfood = true)
+        releasedFlag(2002, "controls_management_new_flows")
 
     // Enables removing app from Home control panel as a part of a new flow
     // TODO(b/269132640): Tracking Bug
