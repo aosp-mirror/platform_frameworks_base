@@ -2944,6 +2944,7 @@ package android.service.voice {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetectorForTest(@NonNull String, @NonNull java.util.Locale, @NonNull android.hardware.soundtrigger.SoundTrigger.ModuleProperties, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetectorForTest(@NonNull String, @NonNull java.util.Locale, @Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull android.hardware.soundtrigger.SoundTrigger.ModuleProperties, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @NonNull public final java.util.List<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> listModuleProperties();
+    method public final void setTestModuleForAlwaysOnHotwordDetectorEnabled(boolean);
   }
 
   public static class VoiceInteractionSession.ActivityId {
