@@ -524,11 +524,6 @@ public final class SystemUiDeviceConfigFlags {
     public static final String DEFAULT_QR_CODE_SCANNER = "default_qr_code_scanner";
 
     /**
-     * (boolean) Whether the task manager entrypoint is enabled.
-     */
-    public static final String TASK_MANAGER_ENABLED = "task_manager_enabled";
-
-    /**
      * (boolean) Whether the task manager should show an attention grabbing dot when tasks changed.
      */
     public static final String TASK_MANAGER_SHOW_FOOTER_DOT = "task_manager_show_footer_dot";
