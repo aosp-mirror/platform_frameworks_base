@@ -34,6 +34,7 @@ import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
+import android.window.SurfaceSyncGroup;
 import android.window.TaskConstants;
 import android.window.WindowContainerTransaction;
 
@@ -192,13 +193,13 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mDecorWindowContext = mContext.createConfigurationContext(taskConfig);
             if (params.mLayoutResId != 0) {
                 outResult.mRootView = (T) LayoutInflater.from(mDecorWindowContext)
-                                .inflate(params.mLayoutResId, null);
+                        .inflate(params.mLayoutResId, null);
             }
         }
 
         if (outResult.mRootView == null) {
             outResult.mRootView = (T) LayoutInflater.from(mDecorWindowContext)
-                            .inflate(params.mLayoutResId , null);
+                    .inflate(params.mLayoutResId, null);
         }
 
         // DecorationContainerSurface
@@ -382,18 +383,20 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     /**
      * Create a window associated with this WindowDecoration.
      * Note that subclass must dispose of this when the task is hidden/closed.
-     * @param layoutId layout to make the window from
-     * @param t the transaction to apply
-     * @param xPos x position of new window
-     * @param yPos y position of new window
-     * @param width width of new window
-     * @param height height of new window
+     *
+     * @param layoutId     layout to make the window from
+     * @param t            the transaction to apply
+     * @param xPos         x position of new window
+     * @param yPos         y position of new window
+     * @param width        width of new window
+     * @param height       height of new window
      * @param shadowRadius radius of the shadow of the new window
      * @param cornerRadius radius of the corners of the new window
      * @return the {@link AdditionalWindow} that was added.
      */
     AdditionalWindow addWindow(int layoutId, String namePrefix, SurfaceControl.Transaction t,
-            int xPos, int yPos, int width, int height, int shadowRadius, int cornerRadius) {
+            SurfaceSyncGroup ssg, int xPos, int yPos, int width, int height, int shadowRadius,
+            int cornerRadius) {
         final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
         SurfaceControl windowSurfaceControl = builder
                 .setName(namePrefix + " of Task=" + mTaskInfo.taskId)
@@ -417,12 +420,12 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 windowSurfaceControl, null /* hostInputToken */);
         SurfaceControlViewHost viewHost = mSurfaceControlViewHostFactory
                 .create(mDecorWindowContext, mDisplay, windowManager);
-        viewHost.setView(v, lp);
+        ssg.add(viewHost.getSurfacePackage(), () -> viewHost.setView(v, lp));
         return new AdditionalWindow(windowSurfaceControl, viewHost,
                 mSurfaceControlTransactionSupplier);
     }
 
-    static class RelayoutParams{
+    static class RelayoutParams {
         RunningTaskInfo mRunningTaskInfo;
         int mLayoutResId;
         int mCaptionHeightId;

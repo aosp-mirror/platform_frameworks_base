@@ -42,6 +42,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.window.SurfaceSyncGroup;
 import android.window.WindowContainerTransaction;
 
 import com.android.launcher3.icons.IconProvider;
@@ -311,51 +312,50 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * Create and display handle menu window
      */
     void createHandleMenu() {
+        final SurfaceSyncGroup ssg = new SurfaceSyncGroup(TAG);
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         updateHandleMenuPillPositions();
 
-        createAppInfoPill(t);
+        createAppInfoPill(t, ssg);
 
         // Only show windowing buttons in proto2. Proto1 uses a system-level mode only.
         final boolean shouldShowWindowingPill = DesktopModeStatus.isProto2Enabled();
         if (shouldShowWindowingPill) {
-            createWindowingPill(t);
+            createWindowingPill(t, ssg);
         }
 
-        createMoreActionsPill(t);
+        createMoreActionsPill(t, ssg);
 
-        mSyncQueue.runInSync(transaction -> {
-            transaction.merge(t);
-            t.close();
-        });
+        ssg.addTransaction(t);
+        ssg.markSyncReady();
         setupHandleMenu(shouldShowWindowingPill);
     }
 
-    private void createAppInfoPill(SurfaceControl.Transaction t) {
+    private void createAppInfoPill(SurfaceControl.Transaction t, SurfaceSyncGroup ssg) {
         final int x = (int) mHandleMenuAppInfoPillPosition.x;
         final int y = (int) mHandleMenuAppInfoPillPosition.y;
         mHandleMenuAppInfoPill = addWindow(
                 R.layout.desktop_mode_window_decor_handle_menu_app_info_pill,
                 "Menu's app info pill",
-                t, x, y, mMenuWidth, mAppInfoPillHeight, mShadowRadius, mCornerRadius);
+                t, ssg, x, y, mMenuWidth, mAppInfoPillHeight, mShadowRadius, mCornerRadius);
     }
 
-    private void createWindowingPill(SurfaceControl.Transaction t) {
+    private void createWindowingPill(SurfaceControl.Transaction t, SurfaceSyncGroup ssg) {
         final int x = (int) mHandleMenuWindowingPillPosition.x;
         final int y = (int) mHandleMenuWindowingPillPosition.y;
         mHandleMenuWindowingPill = addWindow(
                 R.layout.desktop_mode_window_decor_handle_menu_windowing_pill,
                 "Menu's windowing pill",
-                t, x, y, mMenuWidth, mWindowingPillHeight, mShadowRadius, mCornerRadius);
+                t, ssg, x, y, mMenuWidth, mWindowingPillHeight, mShadowRadius, mCornerRadius);
     }
 
-    private void createMoreActionsPill(SurfaceControl.Transaction t) {
+    private void createMoreActionsPill(SurfaceControl.Transaction t, SurfaceSyncGroup ssg) {
         final int x = (int) mHandleMenuMoreActionsPillPosition.x;
         final int y = (int) mHandleMenuMoreActionsPillPosition.y;
         mHandleMenuMoreActionsPill = addWindow(
                 R.layout.desktop_mode_window_decor_handle_menu_more_actions_pill,
                 "Menu's more actions pill",
-                t, x, y, mMenuWidth, mMoreActionsPillHeight, mShadowRadius, mCornerRadius);
+                t, ssg, x, y, mMenuWidth, mMoreActionsPillHeight, mShadowRadius, mCornerRadius);
     }
 
     private void setupHandleMenu(boolean windowingPillShown) {

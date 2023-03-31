@@ -303,6 +303,7 @@ public class SurfaceControlViewHost {
     /** @hide */
     public SurfaceControlViewHost(@NonNull Context c, @NonNull Display d,
             @NonNull WindowlessWindowManager wwm, @NonNull String callsite) {
+        mSurfaceControl = wwm.mRootSurface;
         mWm = wwm;
         mViewRoot = new ViewRootImpl(c, d, mWm, new WindowlessWindowLayout());
         mCloseGuard.openWithCallSite("release", callsite);
