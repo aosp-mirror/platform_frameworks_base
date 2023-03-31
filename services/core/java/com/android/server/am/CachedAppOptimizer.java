@@ -2056,7 +2056,7 @@ public final class CachedAppOptimizer {
                 frozen = opt.isFrozen();
 
                 final UidRecord uidRec = proc.getUidRecord();
-                if (frozen && uidRec.areAllProcessesFrozen()) {
+                if (frozen && uidRec != null && uidRec.areAllProcessesFrozen()) {
                     uidRec.setFrozen(true);
                     mFreezeHandler.sendMessage(mFreezeHandler.obtainMessage(
                             UID_FROZEN_STATE_CHANGED_MSG, proc));
