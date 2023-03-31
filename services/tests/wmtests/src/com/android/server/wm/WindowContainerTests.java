@@ -484,7 +484,7 @@ public class WindowContainerTests extends WindowTestsBase {
                 windowState.mSurfaceAnimator).getAnimationType();
         assertTrue(parent.isAnimating(CHILDREN));
 
-        windowState.setControllableInsetProvider(mock(WindowContainerInsetsSourceProvider.class));
+        windowState.setControllableInsetProvider(mock(InsetsSourceProvider.class));
         assertFalse(parent.isAnimating(CHILDREN));
     }
 
