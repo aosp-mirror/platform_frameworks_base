@@ -38,6 +38,7 @@ import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_CRI
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_LOW;
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_MODERATE;
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_NORMAL;
+import static com.android.server.am.ActivityManagerDebugConfig.LOG_WRITER_INFO;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.AppBatteryTracker.BatteryUsage.BATTERY_USAGE_COUNT;
@@ -112,6 +113,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.DisplayMetrics;
+import android.util.TeeWriter;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.window.SplashScreen;
@@ -3364,11 +3366,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runWaitForBroadcastIdle(PrintWriter pw) throws RemoteException {
+        pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
         mInternal.waitForBroadcastIdle(pw);
         return 0;
     }
 
     int runWaitForBroadcastBarrier(PrintWriter pw) throws RemoteException {
+        pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
         boolean flushBroadcastLoopers = false;
         boolean flushApplicationThreads = false;
         String opt;
@@ -3387,6 +3391,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runWaitForApplicationBarrier(PrintWriter pw) throws RemoteException {
+        pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
         mInternal.waitForApplicationBarrier(pw);
         return 0;
     }
