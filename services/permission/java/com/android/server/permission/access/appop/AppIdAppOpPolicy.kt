@@ -17,14 +17,20 @@
 package com.android.server.permission.access.appop
 
 import android.app.AppOpsManager
+import com.android.server.permission.access.AccessState
 import com.android.server.permission.access.AccessUri
 import com.android.server.permission.access.AppOpUri
 import com.android.server.permission.access.GetStateScope
 import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.UidUri
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.pm.pkg.PackageState
 
 class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
+    private val migration = AppIdAppOpMigration()
+
+    private val upgrade = AppIdAppOpUpgrade(this)
+
     @Volatile
     private var onAppOpModeChangedListeners = IndexedListSet<OnAppOpModeChangedListener>()
     private val onAppOpModeChangedListenersLock = Any()
@@ -115,6 +121,18 @@ class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
         synchronized(onAppOpModeChangedListenersLock) {
             onAppOpModeChangedListeners = onAppOpModeChangedListeners - listener
         }
+    }
+
+    override fun migrateUserState(state: AccessState, userId: Int) {
+        with(migration) { migrateUserState(state, userId) }
+    }
+
+    override fun MutateStateScope.upgradePackageState(
+        packageState: PackageState,
+        userId: Int,
+        version: Int,
+    ) {
+        with(upgrade) { upgradePackageState(packageState, userId, version) }
     }
 
     /**

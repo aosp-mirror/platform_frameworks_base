@@ -19,7 +19,6 @@ package com.android.server.appop;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.OP_SCHEDULE_EXACT_ALARM;
-import static android.app.AppOpsManager.opToDefaultMode;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -30,7 +29,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserPackage;
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -41,24 +39,16 @@ import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.XmlUtils;
-import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * Legacy implementation for App-ops service's app-op mode (uid and package) storage and access.
@@ -110,6 +100,8 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
 
     @GuardedBy("mLock")
     final SparseArray<ArrayMap<String, SparseIntArray>> mUserPackageModes = new SparseArray<>();
+
+    private final LegacyAppOpStateParser mAppOpsStateParser = new LegacyAppOpStateParser();
 
     final AtomicFile mFile;
     final Runnable mWriteRunner = new Runnable() {
@@ -502,58 +494,7 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
     public void readState() {
         synchronized (mFile) {
             synchronized (mLock) {
-                FileInputStream stream;
-                try {
-                    stream = mFile.openRead();
-                } catch (FileNotFoundException e) {
-                    Slog.i(TAG, "No existing app ops " + mFile.getBaseFile() + "; starting empty");
-                    mVersionAtBoot = NO_FILE_VERSION;
-                    return;
-                }
-
-                try {
-                    TypedXmlPullParser parser = Xml.resolvePullParser(stream);
-                    int type;
-                    while ((type = parser.next()) != XmlPullParser.START_TAG
-                            && type != XmlPullParser.END_DOCUMENT) {
-                        // Parse next until we reach the start or end
-                    }
-
-                    if (type != XmlPullParser.START_TAG) {
-                        throw new IllegalStateException("no start tag found");
-                    }
-
-                    mVersionAtBoot = parser.getAttributeInt(null, "v", NO_VERSION);
-
-                    int outerDepth = parser.getDepth();
-                    while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                            && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-                        if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                            continue;
-                        }
-
-                        String tagName = parser.getName();
-                        if (tagName.equals("pkg")) {
-                            // version 2 has the structure pkg -> uid -> op ->
-                            // in version 3, since pkg and uid states are kept completely
-                            // independent we switch to user -> pkg -> op
-                            readPackage(parser);
-                        } else if (tagName.equals("uid")) {
-                            readUidOps(parser);
-                        } else if (tagName.equals("user")) {
-                            readUser(parser);
-                        } else {
-                            Slog.w(TAG, "Unknown element under <app-ops>: "
-                                    + parser.getName());
-                            XmlUtils.skipCurrentTag(parser);
-                        }
-                    }
-                    return;
-                } catch (XmlPullParserException e) {
-                    throw new RuntimeException(e);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                mVersionAtBoot = mAppOpsStateParser.readState(mFile, mUidModes, mUserPackageModes);
             }
         }
     }
@@ -571,162 +512,6 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
         }
         if (doWrite) {
             writeState();
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void readUidOps(TypedXmlPullParser parser) throws NumberFormatException,
-            XmlPullParserException, IOException {
-        final int uid = parser.getAttributeInt(null, "n");
-        SparseIntArray modes = mUidModes.get(uid);
-        if (modes == null) {
-            modes = new SparseIntArray();
-            mUidModes.put(uid, modes);
-        }
-
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-
-            String tagName = parser.getName();
-            if (tagName.equals("op")) {
-                final int code = parser.getAttributeInt(null, "n");
-                final int mode = parser.getAttributeInt(null, "m");
-
-                if (mode != opToDefaultMode(code)) {
-                    modes.put(code, mode);
-                }
-            } else {
-                Slog.w(TAG, "Unknown element under <uid>: "
-                        + parser.getName());
-                XmlUtils.skipCurrentTag(parser);
-            }
-        }
-    }
-
-    /*
-     * Used for migration when pkg is the depth=1 tag
-     */
-    @GuardedBy("mLock")
-    private void readPackage(TypedXmlPullParser parser)
-            throws NumberFormatException, XmlPullParserException, IOException {
-        String pkgName = parser.getAttributeValue(null, "n");
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-
-            String tagName = parser.getName();
-            if (tagName.equals("uid")) {
-                readUid(parser, pkgName);
-            } else {
-                Slog.w(TAG, "Unknown element under <pkg>: "
-                        + parser.getName());
-                XmlUtils.skipCurrentTag(parser);
-            }
-        }
-    }
-
-    /*
-     * Used for migration when uid is the depth=2 tag
-     */
-    @GuardedBy("mLock")
-    private void readUid(TypedXmlPullParser parser, String pkgName)
-            throws NumberFormatException, XmlPullParserException, IOException {
-        int userId = UserHandle.getUserId(parser.getAttributeInt(null, "n"));
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-
-            String tagName = parser.getName();
-            if (tagName.equals("op")) {
-                readOp(parser, userId, pkgName);
-            } else {
-                Slog.w(TAG, "Unknown element under <pkg>: "
-                        + parser.getName());
-                XmlUtils.skipCurrentTag(parser);
-            }
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void readUser(TypedXmlPullParser parser)
-            throws NumberFormatException, XmlPullParserException, IOException {
-        int userId = parser.getAttributeInt(null, "n");
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-
-            String tagName = parser.getName();
-            if (tagName.equals("pkg")) {
-                readPackage(parser, userId);
-            } else {
-                Slog.w(TAG, "Unknown element under <user>: "
-                        + parser.getName());
-                XmlUtils.skipCurrentTag(parser);
-            }
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void readPackage(TypedXmlPullParser parser, int userId)
-            throws NumberFormatException, XmlPullParserException, IOException {
-        String pkgName = parser.getAttributeValue(null, "n");
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-
-            String tagName = parser.getName();
-            if (tagName.equals("op")) {
-                readOp(parser, userId, pkgName);
-            } else {
-                Slog.w(TAG, "Unknown element under <pkg>: "
-                        + parser.getName());
-                XmlUtils.skipCurrentTag(parser);
-            }
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void readOp(TypedXmlPullParser parser, int userId, @NonNull String pkgName)
-            throws NumberFormatException, XmlPullParserException {
-        final int opCode = parser.getAttributeInt(null, "n");
-        final int defaultMode = AppOpsManager.opToDefaultMode(opCode);
-        final int mode = parser.getAttributeInt(null, "m", defaultMode);
-
-        if (mode != defaultMode) {
-            ArrayMap<String, SparseIntArray> packageModes = mUserPackageModes.get(userId);
-            if (packageModes == null) {
-                packageModes = new ArrayMap<>();
-                mUserPackageModes.put(userId, packageModes);
-            }
-
-            SparseIntArray modes = packageModes.get(pkgName);
-            if (modes == null) {
-                modes = new SparseIntArray();
-                packageModes.put(pkgName, modes);
-            }
-
-            modes.put(opCode, mode);
         }
     }
 
