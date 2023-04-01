@@ -71,7 +71,7 @@ class DismissSplitScreenByGoHome(flicker: FlickerTest) : SplitScreenBase(flicker
     // TODO(b/245472831): Move back to presubmit after shell transitions landing.
     @FlakyTest(bugId = 245472831)
     @Test
-    fun secondaryAppLayerBecomesInvisible() = flicker.layerBecomesInvisible(primaryApp)
+    fun secondaryAppLayerBecomesInvisible() = flicker.layerBecomesInvisible(secondaryApp)
 
     // TODO(b/245472831): Move back to presubmit after shell transitions landing.
     @FlakyTest(bugId = 245472831)

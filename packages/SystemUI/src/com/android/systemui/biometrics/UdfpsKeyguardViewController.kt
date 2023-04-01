@@ -390,11 +390,14 @@ constructor(
             return true
         }
 
-        // Only pause auth if we're not on the keyguard AND we're not transitioning to doze
-        // (ie: dozeAmount = 0f). For the UnlockedScreenOffAnimation, the statusBarState is
+        // Only pause auth if we're not on the keyguard AND we're not transitioning to doze.
+        // For the UnlockedScreenOffAnimation, the statusBarState is
         // delayed. However, we still animate in the UDFPS affordance with the
-        // mUnlockedScreenOffDozeAnimator.
-        if (statusBarState != StatusBarState.KEYGUARD && lastDozeAmount == 0f) {
+        // unlockedScreenOffDozeAnimator.
+        if (
+            statusBarState != StatusBarState.KEYGUARD &&
+                !unlockedScreenOffAnimationController.isAnimationPlaying()
+        ) {
             return true
         }
         if (isBouncerExpansionGreaterThan(.5f)) {

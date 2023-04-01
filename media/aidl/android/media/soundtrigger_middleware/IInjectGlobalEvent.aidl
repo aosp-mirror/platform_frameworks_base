@@ -25,14 +25,14 @@ import android.media.soundtrigger_middleware.IAcknowledgeEvent;
 oneway interface IInjectGlobalEvent {
 
     /**
-     * Request a fake STHAL restart.
+     * Trigger a fake STHAL restart.
      * This invalidates the {@link IInjectGlobalEvent}.
      */
     void triggerRestart();
 
     /**
-     * Triggers global resource contention into the fake STHAL. Loads/startRecognition
-     * will fail with RESOURCE_CONTENTION.
+     * Set global resource contention within the fake STHAL. Loads/startRecognition
+     * will fail with {@code RESOURCE_CONTENTION} until unset.
      * @param isContended - true to enable resource contention. false to disable resource contention
      *                      and resume normal functionality.
      * @param callback - Call {@link IAcknowledgeEvent#eventReceived()} on this interface once
@@ -40,4 +40,11 @@ oneway interface IInjectGlobalEvent {
      */
     void setResourceContention(boolean isContended, IAcknowledgeEvent callback);
 
+    /**
+     * Trigger an
+     * {@link android.hardware.soundtrigger3.ISoundTriggerHwGlobalCallback#onResourcesAvailable}
+     * callback from the fake STHAL. This callback is used to signal to the framework that
+     * previous operations which failed may now succeed.
+     */
+    void triggerOnResourcesAvailable();
 }

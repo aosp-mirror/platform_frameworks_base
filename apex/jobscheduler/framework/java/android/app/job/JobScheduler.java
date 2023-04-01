@@ -270,6 +270,9 @@ public abstract class JobScheduler {
      * otherwise. Attempting to update a job scheduled in another namespace will not be possible
      * but will instead create or update the job inside the current namespace. A JobScheduler
      * instance dedicated to a namespace must be used to schedule or update jobs in that namespace.
+     *
+     * <p class="note">Since leading and trailing whitespace can lead to hard-to-debug issues,
+     * they will be {@link String#trim() trimmed}. An empty String (after trimming) is not allowed.
      * @see #getNamespace()
      */
     @NonNull
@@ -285,6 +288,15 @@ public abstract class JobScheduler {
     @Nullable
     public String getNamespace() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /** @hide */
+    @Nullable
+    public static String sanitizeNamespace(@Nullable String namespace) {
+        if (namespace == null) {
+            return null;
+        }
+        return namespace.trim().intern();
     }
 
     /**

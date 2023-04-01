@@ -61,7 +61,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:padding="4dp"
-            android:contentDescription="@string/collapse_menu_text"
+            android:contentDescription="@string/expand_menu_text"
             android:src="@drawable/ic_baseline_expand_more_24"
             android:tint="@color/desktop_mode_caption_expand_button_dark"
             android:background="@null"

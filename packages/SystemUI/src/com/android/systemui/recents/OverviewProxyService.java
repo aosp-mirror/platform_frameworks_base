@@ -336,7 +336,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void expandNotificationPanel() {
             verifyCallerAndClearCallingIdentity("expandNotificationPanel",
-                    () -> mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN));
+                    () -> mCommandQueue.handleSystemKey(new KeyEvent(KeyEvent.ACTION_DOWN,
+                            KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN)));
         }
 
         @Override

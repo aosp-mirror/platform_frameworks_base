@@ -405,20 +405,14 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                     }
                     if (handler.getLooper().isCurrentThread()) {
                         servedView.onInputConnectionClosedInternal();
-                        final ViewRootImpl viewRoot = servedView.getViewRootImpl();
-                        if (viewRoot != null) {
-                            viewRoot.getHandwritingInitiator().onInputConnectionClosed(servedView);
-                        }
                     } else {
                         handler.post(servedView::onInputConnectionClosedInternal);
-                        handler.post(() -> {
-                            final ViewRootImpl viewRoot = servedView.getViewRootImpl();
-                            if (viewRoot != null) {
-                                viewRoot.getHandwritingInitiator()
-                                        .onInputConnectionClosed(servedView);
-                            }
-                        });
                     }
+                }
+
+                final ViewRootImpl viewRoot = servedView.getViewRootImpl();
+                if (viewRoot != null) {
+                    viewRoot.getHandwritingInitiator().onInputConnectionClosed(servedView);
                 }
             }
         });

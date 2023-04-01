@@ -36,9 +36,12 @@ class RenderProxy;
 class HardwareBufferRenderParams {
 public:
     HardwareBufferRenderParams() = default;
-    HardwareBufferRenderParams(const SkMatrix& transform, const sk_sp<SkColorSpace>& colorSpace,
+    HardwareBufferRenderParams(int32_t logicalWidth, int32_t logicalHeight,
+                               const SkMatrix& transform, const sk_sp<SkColorSpace>& colorSpace,
                                RenderCallback&& callback)
-            : mTransform(transform)
+            : mLogicalWidth(logicalWidth)
+            , mLogicalHeight(logicalHeight)
+            , mTransform(transform)
             , mColorSpace(colorSpace)
             , mRenderCallback(std::move(callback)) {}
     const SkMatrix& getTransform() const { return mTransform; }
@@ -50,7 +53,12 @@ public:
         }
     }
 
+    int32_t getLogicalWidth() { return mLogicalWidth; }
+    int32_t getLogicalHeight() { return mLogicalHeight; }
+
 private:
+    int32_t mLogicalWidth;
+    int32_t mLogicalHeight;
     SkMatrix mTransform = SkMatrix::I();
     sk_sp<SkColorSpace> mColorSpace = SkColorSpace::MakeSRGB();
     RenderCallback mRenderCallback = nullptr;

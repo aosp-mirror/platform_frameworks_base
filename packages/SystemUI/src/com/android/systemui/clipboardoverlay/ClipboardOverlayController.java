@@ -308,7 +308,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
                 if (model.isSensitive()) {
                     mView.showTextPreview(mContext.getString(R.string.clipboard_asterisks), true);
                 } else {
-                    mView.showTextPreview(model.getText(), false);
+                    mView.showTextPreview(model.getText().toString(), false);
                 }
                 mView.setEditAccessibilityAction(true);
                 mOnPreviewTapped = this::editText;
@@ -527,7 +527,7 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     }
 
     private void showEditableText(CharSequence text, boolean hidden) {
-        mView.showTextPreview(text, hidden);
+        mView.showTextPreview(text.toString(), hidden);
         mView.setEditAccessibilityAction(true);
         mOnPreviewTapped = this::editText;
     }

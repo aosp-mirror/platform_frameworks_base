@@ -1548,19 +1548,20 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void enforceGetAppOpsStatsPermissionIfNeeded(int uid, String packageName) {
-        final int callingUid = Binder.getCallingUid();
         // We get to access everything
-        if (callingUid == Process.myPid()) {
+        final int callingPid = Binder.getCallingPid();
+        if (callingPid == Process.myPid()) {
             return;
         }
         // Apps can access their own data
+        final int callingUid = Binder.getCallingUid();
         if (uid == callingUid && packageName != null
                 && checkPackage(uid, packageName) == MODE_ALLOWED) {
             return;
         }
         // Otherwise, you need a permission...
-        mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
-                Binder.getCallingPid(), callingUid, null);
+        mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS, callingPid,
+                callingUid, null);
     }
 
     /**

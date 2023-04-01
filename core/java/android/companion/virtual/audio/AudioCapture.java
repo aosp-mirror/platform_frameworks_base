@@ -56,12 +56,12 @@ public final class AudioCapture {
 
     /**
      * Sets the {@link AudioRecord} to handle audio capturing.
-     * Callers may call this multiple times with different audio records to change
-     * the underlying {@link AudioRecord} without stopping and re-starting recording.
      *
-     * @param audioRecord The underlying {@link AudioRecord} to use for capture,
-     * or null if no audio (i.e. silence) should be captured while still keeping the
-     * record in a recording state.
+     * <p>Callers may call this multiple times with different audio records to change the underlying
+     * {@link AudioRecord} without stopping and re-starting recording.
+     *
+     * @param audioRecord The underlying {@link AudioRecord} to use for capture, or null if no audio
+     *   (i.e. silence) should be captured while still keeping the record in a recording state.
      */
     void setAudioRecord(@Nullable AudioRecord audioRecord) {
         Log.d(TAG, "set AudioRecord with " + audioRecord);

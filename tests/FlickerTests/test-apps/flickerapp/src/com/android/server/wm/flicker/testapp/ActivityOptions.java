@@ -67,6 +67,12 @@ public class ActivityOptions {
                 FLICKER_APP_PACKAGE + ".NonResizeableActivity");
     }
 
+    public static class NonResizeablePortraitActivity {
+        public static final String LABEL = "NonResizeablePortraitActivity";
+        public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                FLICKER_APP_PACKAGE + ".NonResizeablePortraitActivity");
+    }
+
     public static class DialogThemedActivity {
         public static final String LABEL = "DialogThemedActivity";
         public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,

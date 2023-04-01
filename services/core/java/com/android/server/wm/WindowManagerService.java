@@ -8624,7 +8624,8 @@ public class WindowManagerService extends IWindowManager.Stub
             EmbeddedWindowController.EmbeddedWindow win =
                     new EmbeddedWindowController.EmbeddedWindow(session, this, window,
                             mInputToWindowMap.get(hostInputToken), callingUid, callingPid,
-                            sanitizedType, displayId, focusGrantToken, inputHandleName);
+                            sanitizedType, displayId, focusGrantToken, inputHandleName,
+                            (flags & FLAG_NOT_FOCUSABLE) == 0);
             clientChannel = win.openInputChannel();
             mEmbeddedWindowController.add(clientChannel.getToken(), win);
             applicationHandle = win.getApplicationHandle();
@@ -8745,6 +8746,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             name = win.toString();
             applicationHandle = win.getApplicationHandle();
+            win.setIsFocusable((flags & FLAG_NOT_FOCUSABLE) == 0);
         }
 
         updateInputChannel(channelToken, win.mOwnerUid, win.mOwnerPid, displayId, surface, name,
@@ -9022,24 +9024,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.e(TAG, "Embedded window does not belong to the host");
                 return;
             }
-            SurfaceControl.Transaction t = mTransactionFactory.get();
             if (grantFocus) {
-                t.requestFocusTransfer(embeddedWindow.getInputChannelToken(), embeddedWindow.toString(),
-                        hostWindow.mInputChannel.getToken(),
-                        hostWindow.getName(),
-                        hostWindow.getDisplayId()).apply();
+                hostWindow.mInputWindowHandle.setFocusTransferTarget(
+                        embeddedWindow.getInputChannelToken());
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
                         "Transfer focus request " + embeddedWindow,
                         "reason=grantEmbeddedWindowFocus(true)");
             } else {
-                t.requestFocusTransfer(hostWindow.mInputChannel.getToken(), hostWindow.getName(),
-                        embeddedWindow.getInputChannelToken(),
-                        embeddedWindow.toString(),
-                        hostWindow.getDisplayId()).apply();
+                hostWindow.mInputWindowHandle.setFocusTransferTarget(null);
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
                         "Transfer focus request " + hostWindow,
                         "reason=grantEmbeddedWindowFocus(false)");
             }
+            DisplayContent dc = mRoot.getDisplayContent(hostWindow.getDisplayId());
+            if (dc != null) {
+                dc.getInputMonitor().updateInputWindowsLw(true);
+            }
+
             ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus win=%s grantFocus=%s",
                     embeddedWindow, grantFocus);
         }

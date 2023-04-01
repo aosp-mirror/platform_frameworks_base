@@ -20,7 +20,7 @@
     <string name="app_label">Companion Device Manager</string>
 
     <!-- Title of the device association confirmation dialog. -->
-    <string name="confirmation_title">Allow &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to access &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%2$s</xliff:g>&lt;/strong&gt;</string>
+    <string name="confirmation_title">Allow &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to access &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%2$s</xliff:g>&lt;/strong&gt;?</string>
 
     <!-- ================= DEVICE_PROFILE_WATCH and null profile ================= -->
 
@@ -31,10 +31,10 @@
     <string name="chooser_title">Choose a <xliff:g id="profile_name" example="watch">%1$s</xliff:g> to be managed by &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%2$s</xliff:g>&lt;/strong&gt;</string>
 
     <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile (type) [CHAR LIMIT=NONE] -->
-    <string name="summary_watch">The app is needed to manage your <xliff:g id="device_name" example="My Watch">%1$s</xliff:g>. <xliff:g id="app_name" example="Android Wear">%2$s</xliff:g> will be allowed to sync info, like the name of someone calling, interact with your notifications and access your Phone, SMS, Contacts, Calendar, Call logs and Nearby devices permissions.</string>
+    <string name="summary_watch">This app is needed to manage your <xliff:g id="device_name" example="My Watch">%1$s</xliff:g>. <xliff:g id="app_name" example="Android Wear">%2$s</xliff:g> will be allowed to sync info, like the name of someone calling, interact with your notifications and access your Phone, SMS, Contacts, Calendar, Call logs and Nearby devices permissions.</string>
 
     <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile for singleDevice(type) [CHAR LIMIT=NONE] -->
-    <string name="summary_watch_single_device">The app is needed to manage your <xliff:g id="device_name" example="My Watch">%1$s</xliff:g>. <xliff:g id="app_name" example="Android Wear">%2$s</xliff:g> will be allowed to sync info, like the name of someone calling, and access these permissions:</string>
+    <string name="summary_watch_single_device">This app will be allowed to sync info, like the name of someone calling, and access these permissions on your <xliff:g id="device_name" example="phone">%1$s</xliff:g></string>
 
     <!-- ================= DEVICE_PROFILE_GLASSES ================= -->
 
@@ -48,7 +48,7 @@
     <string name="summary_glasses_multi_device">This app is needed to manage <xliff:g id="device_name" example="My Glasses">%1$s</xliff:g>. <xliff:g id="app_name" example="Glasses">%2$s</xliff:g> will be allowed to interact with your notifications and access your Phone, SMS, Contacts, Microphone and Nearby devices permissions.</string>
 
     <!-- Description of the privileges the application will get if associated with the companion device of GLASSES profile for singleDevice(type) [CHAR LIMIT=NONE] -->
-    <string name="summary_glasses_single_device">This app will be allowed to access these permissions on your phone:</string>
+    <string name="summary_glasses_single_device">This app will be allowed to access these permissions on your <xliff:g id="device_name" example="phone">%1$s</xliff:g></string>
 
     <!-- ================= DEVICE_PROFILE_APP_STREAMING ================= -->
 
@@ -97,10 +97,10 @@
     <string name="profile_name_generic">device</string>
 
     <!-- Description of the privileges the application will get if associated with the companion device of unspecified profile (type) [CHAR LIMIT=NONE] -->
-    <string name="summary_generic_single_device">This app will be able to sync info, like the name of someone calling, between your phone and <xliff:g id="device_name" example="My Watch">%1$s</xliff:g>.</string>
+    <string name="summary_generic_single_device">This app will be able to sync info, like the name of someone calling, between your phone and <xliff:g id="device_name" example="My Watch">%1$s</xliff:g></string>
 
     <!-- Description of the privileges the application will get if associated with the companion device of unspecified profile (type) [CHAR LIMIT=NONE] -->
-    <string name="summary_generic">This app will be able to sync info, like the name of someone calling, between your phone and the chosen device.</string>
+    <string name="summary_generic">This app will be able to sync info, like the name of someone calling, between your phone and the chosen device</string>
 
     <!-- ================= Buttons ================= -->
 
@@ -193,5 +193,11 @@
 
     <!-- Description of nearby_device_streaming permission of corresponding profile [CHAR LIMIT=NONE] -->
     <string name="permission_nearby_device_streaming_summary">Stream apps and other system features from your phone</string>
+
+    <!-- The type of the device for phone [CHAR LIMIT=30] -->
+    <string name="device_type" product="default">phone</string>
+
+    <!-- The type of the device for tablet [CHAR LIMIT=30] -->
+    <string name="device_type" product="tablet">tablet</string>
 
 </resources>
