@@ -89,7 +89,7 @@ public class RemoteTransitionCompat {
                 }
             }
         };
-        return new RemoteTransition(remote, appThread);
+        return new RemoteTransition(remote, appThread, "Recents");
     }
 
     /**
