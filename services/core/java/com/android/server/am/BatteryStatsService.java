@@ -654,6 +654,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             mHandler.post(() -> {
+                mCpuWakeupStats.onUidRemoved(uid);
                 synchronized (mStats) {
                     mStats.removeUidStatsLocked(uid, elapsedRealtime);
                 }
@@ -764,6 +765,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
+                mCpuWakeupStats.noteUidProcessState(uid, state);
                 synchronized (mStats) {
                     mStats.noteUidProcessStateLocked(uid, state, elapsedRealtime, uptime);
                 }
