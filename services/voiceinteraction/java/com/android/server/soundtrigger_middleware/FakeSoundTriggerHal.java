@@ -276,16 +276,15 @@ public class FakeSoundTriggerHal extends ISoundTriggerHw.Stub {
         // for our clients.
         mGlobalEventSession = new IInjectGlobalEvent.Stub() {
             /**
-             * Overrides IInjectGlobalEvent method.
              * Simulate a HAL process restart. This method is not included in regular HAL interface,
              * since the entire process is restarted by sending a signal.
              * Since we run in-proc, we must offer an explicit restart method.
              * oneway
              */
             @Override
-            public void triggerRestart() throws RemoteException {
+            public void triggerRestart() {
                 synchronized (FakeSoundTriggerHal.this.mLock) {
-                    if (mIsDead) throw new DeadObjectException();
+                    if (mIsDead) return;
                     mIsDead = true;
                     mInjectionDispatcher.wrap((ISoundTriggerInjection cb) ->
                             cb.onRestarted(this));
@@ -305,15 +304,15 @@ public class FakeSoundTriggerHal extends ISoundTriggerHw.Stub {
                 }
             }
 
-            /**
-             * Overrides IInjectGlobalEvent method.
-             * oneway
-             */
+            // oneway
             @Override
             public void setResourceContention(boolean isResourcesContended,
-                        IAcknowledgeEvent callback) throws RemoteException {
+                        IAcknowledgeEvent callback) {
                 synchronized (FakeSoundTriggerHal.this.mLock) {
-                    if (mIsDead) throw new DeadObjectException();
+                    // oneway, so don't throw on death
+                    if (mIsDead || mIsResourceContended == isResourcesContended) {
+                        return;
+                    }
                     mIsResourceContended = isResourcesContended;
                     // Introducing contention is the only injection which can't be
                     // observed by the ST client.
@@ -325,7 +324,19 @@ public class FakeSoundTriggerHal extends ISoundTriggerHw.Stub {
                     }
                 }
             }
+
+            // oneway
+            @Override
+            public void triggerOnResourcesAvailable() {
+                synchronized (FakeSoundTriggerHal.this.mLock) {
+                    // oneway, so don't throw on death
+                    if (mIsDead) return;
+                    mGlobalCallbackDispatcher.wrap((ISoundTriggerHwGlobalCallback cb) ->
+                            cb.onResourcesAvailable());
+                }
+            }
         };
+
         // Register the global event injection interface
         mInjectionDispatcher.wrap((ISoundTriggerInjection cb)
                 -> cb.registerGlobalEventInjection(mGlobalEventSession));
