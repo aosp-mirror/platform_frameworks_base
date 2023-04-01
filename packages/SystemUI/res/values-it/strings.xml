@@ -249,7 +249,7 @@
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Chiudi"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Connesso"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Connesso, batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="quick_settings_connecting" msgid="2381969772953268809">"Connessione..."</string>
+    <string name="quick_settings_connecting" msgid="2381969772953268809">"Connessione in corso..."</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Attivazione…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Risp. dati attivo"</string>
