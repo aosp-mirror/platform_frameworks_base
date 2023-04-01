@@ -1562,6 +1562,18 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
         ipw.decreaseIndent();
 
+        ipw.println("Historical Aggregate Gnss Measurement Provider Data:");
+        ipw.increaseIndent();
+        ArrayMap<CallerIdentity, LocationEventLog.GnssMeasurementAggregateStats>
+                gnssAggregateStats = EVENT_LOG.copyGnssMeasurementAggregateStats();
+        for (int i = 0; i < gnssAggregateStats.size(); i++) {
+            ipw.print(gnssAggregateStats.keyAt(i));
+            ipw.print(": ");
+            gnssAggregateStats.valueAt(i).updateTotals();
+            ipw.println(gnssAggregateStats.valueAt(i));
+        }
+        ipw.decreaseIndent();
+
         if (mGnssManagerService != null) {
             ipw.println("GNSS Manager:");
             ipw.increaseIndent();

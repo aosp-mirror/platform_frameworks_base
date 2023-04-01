@@ -135,8 +135,12 @@ public final class GnssMeasurementRequest implements Parcelable {
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append("GnssMeasurementRequest[");
-        s.append("@");
-        TimeUtils.formatDuration(mIntervalMillis, s);
+        if (mIntervalMillis == PASSIVE_INTERVAL) {
+            s.append("passive");
+        } else {
+            s.append("@");
+            TimeUtils.formatDuration(mIntervalMillis, s);
+        }
         if (mFullTracking) {
             s.append(", FullTracking");
         }

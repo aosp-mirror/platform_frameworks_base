@@ -30,6 +30,7 @@ import static java.lang.Math.min;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import android.annotation.Nullable;
+import android.location.GnssMeasurementRequest;
 import android.location.LocationRequest;
 import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
@@ -58,14 +59,17 @@ public class LocationEventLog extends LocalEventLog<Object> {
 
     private static int getLocationsLogSize() {
         if (D) {
-            return 200;
+            return 400;
         } else {
-            return 100;
+            return 200;
         }
     }
 
     @GuardedBy("mAggregateStats")
     private final ArrayMap<String, ArrayMap<CallerIdentity, AggregateStats>> mAggregateStats;
+
+    @GuardedBy("mGnssMeasAggregateStats")
+    private final ArrayMap<CallerIdentity, GnssMeasurementAggregateStats> mGnssMeasAggregateStats;
 
     @GuardedBy("this")
     private final LocationsEventLog mLocationsLog;
@@ -73,6 +77,7 @@ public class LocationEventLog extends LocalEventLog<Object> {
     private LocationEventLog() {
         super(getLogSize(), Object.class);
         mAggregateStats = new ArrayMap<>(4);
+        mGnssMeasAggregateStats = new ArrayMap<>();
         mLocationsLog = new LocationsEventLog(getLocationsLogSize());
     }
 
@@ -100,6 +105,29 @@ public class LocationEventLog extends LocalEventLog<Object> {
             if (stats == null) {
                 stats = new AggregateStats();
                 packageMap.put(aggregate, stats);
+            }
+            return stats;
+        }
+    }
+
+    /** Copies out gnss measurement aggregated stats. */
+    public ArrayMap<CallerIdentity, GnssMeasurementAggregateStats>
+            copyGnssMeasurementAggregateStats() {
+        synchronized (mGnssMeasAggregateStats) {
+            ArrayMap<CallerIdentity, GnssMeasurementAggregateStats> copy = new ArrayMap<>(
+                    mGnssMeasAggregateStats);
+            return copy;
+        }
+    }
+
+    private GnssMeasurementAggregateStats getGnssMeasurementAggregateStats(
+            CallerIdentity identity) {
+        synchronized (mGnssMeasAggregateStats) {
+            CallerIdentity aggregate = CallerIdentity.forAggregation(identity);
+            GnssMeasurementAggregateStats stats = mGnssMeasAggregateStats.get(aggregate);
+            if (stats == null) {
+                stats = new GnssMeasurementAggregateStats();
+                mGnssMeasAggregateStats.put(aggregate, stats);
             }
             return stats;
         }
@@ -219,6 +247,29 @@ public class LocationEventLog extends LocalEventLog<Object> {
     public void logLocationPowerSaveMode(
             @LocationPowerSaveMode int locationPowerSaveMode) {
         addLog(new LocationPowerSaveModeEvent(locationPowerSaveMode));
+    }
+
+    /** Logs a new client registration for a GNSS Measurement. */
+    public void logGnssMeasurementClientRegistered(CallerIdentity identity,
+            GnssMeasurementRequest request) {
+        addLog(new GnssMeasurementClientRegisterEvent(true, identity, request));
+        getGnssMeasurementAggregateStats(identity).markRequestAdded(request.getIntervalMillis(),
+                request.isFullTracking());
+    }
+
+    /** Logs a new client unregistration for a GNSS Measurement. */
+    public void logGnssMeasurementClientUnregistered(CallerIdentity identity) {
+        addLog(new GnssMeasurementClientRegisterEvent(false, identity, null));
+        getGnssMeasurementAggregateStats(identity).markRequestRemoved();
+    }
+
+    /** Logs a GNSS measurement event deliver for a client. */
+    public void logGnssMeasurementsDelivered(int numGnssMeasurements,
+            CallerIdentity identity) {
+        synchronized (this) {
+            mLocationsLog.logDeliveredGnssMeasurements(numGnssMeasurements, identity);
+        }
+        getGnssMeasurementAggregateStats(identity).markGnssMeasurementDelivered();
     }
 
     private void addLog(Object logEvent) {
@@ -528,6 +579,50 @@ public class LocationEventLog extends LocalEventLog<Object> {
         }
     }
 
+    private static final class GnssMeasurementClientRegisterEvent{
+
+        private final boolean mRegistered;
+        private final CallerIdentity mIdentity;
+        @Nullable
+        private final GnssMeasurementRequest mGnssMeasurementRequest;
+
+        GnssMeasurementClientRegisterEvent(boolean registered,
+                CallerIdentity identity, @Nullable GnssMeasurementRequest measurementRequest) {
+            mRegistered = registered;
+            mIdentity = identity;
+            mGnssMeasurementRequest = measurementRequest;
+        }
+
+        @Override
+        public String toString() {
+            if (mRegistered) {
+                return "gnss measurements +registration " + mIdentity + " -> "
+                        + mGnssMeasurementRequest;
+            } else {
+                return "gnss measurements -registration " + mIdentity;
+            }
+        }
+    }
+
+    private static final class GnssMeasurementDeliverEvent {
+
+        private final int mNumGnssMeasurements;
+        @Nullable
+        private final CallerIdentity mIdentity;
+
+        GnssMeasurementDeliverEvent(int numGnssMeasurements,
+                @Nullable CallerIdentity identity) {
+            mNumGnssMeasurements = numGnssMeasurements;
+            mIdentity = identity;
+        }
+
+        @Override
+        public String toString() {
+            return "gnss measurements delivered GnssMeasurements[" + mNumGnssMeasurements + "]"
+                    + " to " + mIdentity;
+        }
+    }
+
     private static final class LocationsEventLog extends LocalEventLog<Object> {
 
         LocationsEventLog(int size) {
@@ -536,6 +631,11 @@ public class LocationEventLog extends LocalEventLog<Object> {
 
         public void logProviderReceivedLocations(String provider, int numLocations) {
             addLog(new ProviderReceiveLocationEvent(provider, numLocations));
+        }
+
+        public void logDeliveredGnssMeasurements(int numGnssMeasurements,
+                CallerIdentity identity) {
+            addLog(new GnssMeasurementDeliverEvent(numGnssMeasurements, identity));
         }
 
         public void logProviderDeliveredLocations(String provider, int numLocations,
@@ -665,6 +765,91 @@ public class LocationEventLog extends LocalEventLog<Object> {
                 return "passive";
             } else {
                 return MILLISECONDS.toSeconds(intervalMs) + "s";
+            }
+        }
+    }
+
+    /**
+     * Aggregate statistics for GNSS measurements.
+     */
+    public static final class GnssMeasurementAggregateStats {
+        @GuardedBy("this")
+        private int mAddedRequestCount;
+        @GuardedBy("this")
+        private int mReceivedMeasurementEventCount;
+        @GuardedBy("this")
+        private long mAddedTimeTotalMs;
+        @GuardedBy("this")
+        private long mAddedTimeLastUpdateRealtimeMs;
+        @GuardedBy("this")
+        private long mFastestIntervalMs = Long.MAX_VALUE;
+        @GuardedBy("this")
+        private long mSlowestIntervalMs = 0;
+        @GuardedBy("this")
+        private boolean mHasFullTracking;
+        @GuardedBy("this")
+        private boolean mHasDutyCycling;
+
+        GnssMeasurementAggregateStats() {
+        }
+
+        synchronized void markRequestAdded(long intervalMillis, boolean fullTracking) {
+            if (mAddedRequestCount++ == 0) {
+                mAddedTimeLastUpdateRealtimeMs = SystemClock.elapsedRealtime();
+            }
+            if (fullTracking) {
+                mHasFullTracking = true;
+            } else {
+                mHasDutyCycling = true;
+            }
+            mFastestIntervalMs = min(intervalMillis, mFastestIntervalMs);
+            mSlowestIntervalMs = max(intervalMillis, mSlowestIntervalMs);
+        }
+
+        synchronized void markRequestRemoved() {
+            updateTotals();
+            --mAddedRequestCount;
+            Preconditions.checkState(mAddedRequestCount >= 0);
+        }
+
+        synchronized void markGnssMeasurementDelivered() {
+            mReceivedMeasurementEventCount++;
+        }
+
+        public synchronized void updateTotals() {
+            if (mAddedRequestCount > 0) {
+                long realtimeMs = SystemClock.elapsedRealtime();
+                mAddedTimeTotalMs += realtimeMs - mAddedTimeLastUpdateRealtimeMs;
+                mAddedTimeLastUpdateRealtimeMs = realtimeMs;
+            }
+        }
+
+        @Override
+        public synchronized String toString() {
+            return "min/max interval = "
+                    + intervalToString(mFastestIntervalMs) + "/"
+                    + intervalToString(mSlowestIntervalMs)
+                    + ", total duration = " + formatDuration(mAddedTimeTotalMs)
+                    + ", tracking mode = " + trackingModeToString() + ", GNSS measurement events = "
+                    + mReceivedMeasurementEventCount;
+        }
+
+        private static String intervalToString(long intervalMs) {
+            if (intervalMs == GnssMeasurementRequest.PASSIVE_INTERVAL) {
+                return "passive";
+            } else {
+                return MILLISECONDS.toSeconds(intervalMs) + "s";
+            }
+        }
+
+        @GuardedBy("this")
+        private String trackingModeToString() {
+            if (mHasFullTracking && mHasDutyCycling) {
+                return "mixed tracking mode";
+            } else if (mHasFullTracking) {
+                return "always full-tracking";
+            } else {
+                return "always duty-cycling";
             }
         }
     }
