@@ -92,8 +92,8 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
-class KeyguardFaceAuthManagerTest : SysuiTestCase() {
-    private lateinit var underTest: KeyguardFaceAuthManagerImpl
+class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
+    private lateinit var underTest: DeviceEntryFaceAuthRepositoryImpl
 
     @Mock private lateinit var faceManager: FaceManager
     @Mock private lateinit var bypassController: KeyguardBypassController
@@ -174,14 +174,14 @@ class KeyguardFaceAuthManagerTest : SysuiTestCase() {
         whenever(faceManager.sensorPropertiesInternal)
             .thenReturn(listOf(createFaceSensorProperties(supportsFaceDetection = true)))
         whenever(bypassController.bypassEnabled).thenReturn(true)
-        underTest = createFaceAuthManagerImpl(faceManager, bypassController)
+        underTest = createDeviceEntryFaceAuthRepositoryImpl(faceManager, bypassController)
     }
 
-    private fun createFaceAuthManagerImpl(
+    private fun createDeviceEntryFaceAuthRepositoryImpl(
         fmOverride: FaceManager? = faceManager,
         bypassControllerOverride: KeyguardBypassController? = bypassController
     ) =
-        KeyguardFaceAuthManagerImpl(
+        DeviceEntryFaceAuthRepositoryImpl(
             mContext,
             fmOverride,
             fakeUserRepository,
@@ -190,7 +190,7 @@ class KeyguardFaceAuthManagerTest : SysuiTestCase() {
             testDispatcher,
             sessionTracker,
             uiEventLogger,
-            FaceAuthenticationLogger(logcatLogBuffer("KeyguardFaceAuthManagerLog")),
+            FaceAuthenticationLogger(logcatLogBuffer("DeviceEntryFaceAuthRepositoryLog")),
             biometricSettingsRepository,
             deviceEntryFingerprintAuthRepository,
             trustRepository,
@@ -270,17 +270,20 @@ class KeyguardFaceAuthManagerTest : SysuiTestCase() {
     @Test
     fun faceDetectionSupportIsTheCorrectValue() =
         testScope.runTest {
-            assertThat(createFaceAuthManagerImpl(fmOverride = null).isDetectionSupported).isFalse()
+            assertThat(
+                    createDeviceEntryFaceAuthRepositoryImpl(fmOverride = null).isDetectionSupported
+                )
+                .isFalse()
 
             whenever(faceManager.sensorPropertiesInternal).thenReturn(null)
-            assertThat(createFaceAuthManagerImpl().isDetectionSupported).isFalse()
+            assertThat(createDeviceEntryFaceAuthRepositoryImpl().isDetectionSupported).isFalse()
 
             whenever(faceManager.sensorPropertiesInternal).thenReturn(listOf())
-            assertThat(createFaceAuthManagerImpl().isDetectionSupported).isFalse()
+            assertThat(createDeviceEntryFaceAuthRepositoryImpl().isDetectionSupported).isFalse()
 
             whenever(faceManager.sensorPropertiesInternal)
                 .thenReturn(listOf(createFaceSensorProperties(supportsFaceDetection = false)))
-            assertThat(createFaceAuthManagerImpl().isDetectionSupported).isFalse()
+            assertThat(createDeviceEntryFaceAuthRepositoryImpl().isDetectionSupported).isFalse()
 
             whenever(faceManager.sensorPropertiesInternal)
                 .thenReturn(
@@ -289,7 +292,7 @@ class KeyguardFaceAuthManagerTest : SysuiTestCase() {
                         createFaceSensorProperties(supportsFaceDetection = true)
                     )
                 )
-            assertThat(createFaceAuthManagerImpl().isDetectionSupported).isFalse()
+            assertThat(createDeviceEntryFaceAuthRepositoryImpl().isDetectionSupported).isFalse()
 
             whenever(faceManager.sensorPropertiesInternal)
                 .thenReturn(
@@ -298,7 +301,7 @@ class KeyguardFaceAuthManagerTest : SysuiTestCase() {
                         createFaceSensorProperties(supportsFaceDetection = false)
                     )
                 )
-            assertThat(createFaceAuthManagerImpl().isDetectionSupported).isTrue()
+            assertThat(createDeviceEntryFaceAuthRepositoryImpl().isDetectionSupported).isTrue()
         }
 
     @Test
@@ -325,7 +328,7 @@ class KeyguardFaceAuthManagerTest : SysuiTestCase() {
         testScope.runTest {
             whenever(faceManager.sensorPropertiesInternal)
                 .thenReturn(listOf(createFaceSensorProperties(supportsFaceDetection = true)))
-            underTest = createFaceAuthManagerImpl()
+            underTest = createDeviceEntryFaceAuthRepositoryImpl()
             initCollectors()
 
             underTest.detect()
@@ -341,13 +344,14 @@ class KeyguardFaceAuthManagerTest : SysuiTestCase() {
         testScope.runTest {
             whenever(faceManager.sensorPropertiesInternal)
                 .thenReturn(listOf(createFaceSensorProperties(supportsFaceDetection = false)))
-            underTest = createFaceAuthManagerImpl()
+            underTest = createDeviceEntryFaceAuthRepositoryImpl()
             initCollectors()
             clearInvocations(faceManager)
 
             underTest.detect()
 
-            verify(faceManager, never()).detectFace(any(), any(), any())
+            verify(faceManager, never())
+                .detectFace(any(), any(), any(FaceAuthenticateOptions::class.java))
         }
 
     @Test
@@ -395,7 +399,7 @@ class KeyguardFaceAuthManagerTest : SysuiTestCase() {
 
             clearInvocations(faceManager)
             underTest.cancel()
-            advanceTimeBy(KeyguardFaceAuthManagerImpl.DEFAULT_CANCEL_SIGNAL_TIMEOUT + 1)
+            advanceTimeBy(DeviceEntryFaceAuthRepositoryImpl.DEFAULT_CANCEL_SIGNAL_TIMEOUT + 1)
 
             underTest.authenticate(FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER)
             faceAuthenticateIsCalled()
@@ -408,7 +412,7 @@ class KeyguardFaceAuthManagerTest : SysuiTestCase() {
                 R.array.config_face_acquire_device_entry_ignorelist,
                 intArrayOf(10, 11)
             )
-            underTest = createFaceAuthManagerImpl()
+            underTest = createDeviceEntryFaceAuthRepositoryImpl()
             initCollectors()
 
             underTest.authenticate(FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER)
@@ -428,7 +432,10 @@ class KeyguardFaceAuthManagerTest : SysuiTestCase() {
             underTest.dump(PrintWriter(StringWriter()), emptyArray())
 
             underTest =
-                createFaceAuthManagerImpl(fmOverride = null, bypassControllerOverride = null)
+                createDeviceEntryFaceAuthRepositoryImpl(
+                    fmOverride = null,
+                    bypassControllerOverride = null
+                )
             fakeUserRepository.setSelectedUserInfo(primaryUser)
 
             underTest.dump(PrintWriter(StringWriter()), emptyArray())
@@ -547,7 +554,7 @@ class KeyguardFaceAuthManagerTest : SysuiTestCase() {
             whenever(faceManager.sensorPropertiesInternal)
                 .thenReturn(listOf(createFaceSensorProperties(supportsFaceDetection = true)))
             whenever(bypassController.bypassEnabled).thenReturn(true)
-            underTest = createFaceAuthManagerImpl()
+            underTest = createDeviceEntryFaceAuthRepositoryImpl()
             initCollectors()
             allPreconditionsToRunFaceAuthAreTrue()
 
@@ -568,7 +575,7 @@ class KeyguardFaceAuthManagerTest : SysuiTestCase() {
         testScope.runTest {
             featureFlags.set(FACE_AUTH_REFACTOR, false)
 
-            underTest = createFaceAuthManagerImpl()
+            underTest = createDeviceEntryFaceAuthRepositoryImpl()
             initCollectors()
 
             // Collecting any flows exposed in the public API doesn't throw any error
