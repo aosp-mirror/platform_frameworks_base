@@ -831,7 +831,9 @@ public class Location implements Parcelable {
      * will be present for any location.
      *
      * <ul>
-     * <li> satellites - the number of satellites used to derive a GNSS fix
+     * <li> satellites - the number of satellites used to derive a GNSS fix. This key was deprecated
+     * in API 34 because the information can be obtained through more accurate means, such as by
+     * referencing {@link GnssStatus#usedInFix}.
      * </ul>
      */
     public @Nullable Bundle getExtras() {

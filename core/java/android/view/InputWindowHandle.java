@@ -158,6 +158,14 @@ public final class InputWindowHandle {
      */
     public Matrix transform;
 
+    /**
+     * The input token for the window to which focus should be transferred when this input window
+     * can be successfully focused. If null, this input window will not transfer its focus to
+     * any other window.
+     */
+    @Nullable
+    public IBinder focusTransferTarget;
+
     private native void nativeDispose();
 
     public InputWindowHandle(InputApplicationHandle inputApplicationHandle, int displayId) {
@@ -195,6 +203,7 @@ public final class InputWindowHandle {
             transform = new Matrix();
             transform.set(other.transform);
         }
+        focusTransferTarget = other.focusTransferTarget;
     }
 
     @Override

@@ -20,7 +20,6 @@ import android.platform.test.annotations.Presubmit
 import android.tools.common.datatypes.component.ComponentNameMatcher
 import android.tools.common.traces.ConditionsFactory
 import android.tools.device.flicker.isShellTransitionsEnabled
-import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -28,6 +27,7 @@ import android.tools.device.flicker.legacy.FlickerTestFactory
 import android.tools.device.traces.parsers.WindowManagerStateHelper
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
+import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.navBarLayerIsVisibleAtStartAndEnd
 import com.android.server.wm.flicker.statusBarLayerIsVisibleAtStartAndEnd
 import org.junit.Assume

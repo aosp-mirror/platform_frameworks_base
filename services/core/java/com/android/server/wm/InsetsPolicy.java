@@ -223,10 +223,10 @@ class InsetsPolicy {
 
         startAnimation(false /* show */, () -> {
             synchronized (mDisplayContent.mWmService.mGlobalLock) {
-                final SparseArray<WindowContainerInsetsSourceProvider> providers =
+                final SparseArray<InsetsSourceProvider> providers =
                         mStateController.getSourceProviders();
                 for (int i = providers.size() - 1; i >= 0; i--) {
-                    final WindowContainerInsetsSourceProvider provider = providers.valueAt(i);
+                    final InsetsSourceProvider provider = providers.valueAt(i);
                     if (!isTransient(provider.getSource().getType())) {
                         continue;
                     }
@@ -341,11 +341,10 @@ class InsetsPolicy {
             }
         }
 
-        final SparseArray<WindowContainerInsetsSourceProvider> providers =
-                mStateController.getSourceProviders();
+        final SparseArray<InsetsSourceProvider> providers = mStateController.getSourceProviders();
         final int windowType = attrs.type;
         for (int i = providers.size() - 1; i >= 0; i--) {
-            final WindowContainerInsetsSourceProvider otherProvider = providers.valueAt(i);
+            final InsetsSourceProvider otherProvider = providers.valueAt(i);
             if (otherProvider.overridesFrame(windowType)) {
                 if (state == originalState) {
                     state = new InsetsState(state);

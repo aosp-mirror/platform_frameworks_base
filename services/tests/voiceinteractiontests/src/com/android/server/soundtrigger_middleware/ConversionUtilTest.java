@@ -16,36 +16,18 @@
 
 package com.android.server.soundtrigger_middleware;
 
-import static android.hardware.soundtrigger.ConversionUtil.aidl2apiAudioFormatWithDefault;
-import static android.hardware.soundtrigger.ConversionUtil.aidl2apiPhrase;
-import static android.hardware.soundtrigger.ConversionUtil.aidl2apiRecognitionConfig;
-import static android.hardware.soundtrigger.ConversionUtil.api2aidlPhrase;
-import static android.hardware.soundtrigger.ConversionUtil.api2aidlRecognitionConfig;
-import static android.hardware.soundtrigger.ConversionUtil.byteArrayToSharedMemory;
-import static android.hardware.soundtrigger.ConversionUtil.sharedMemoryToByteArray;
-import static android.hardware.soundtrigger.SoundTrigger.ConfidenceLevel;
-import static android.hardware.soundtrigger.SoundTrigger.RECOGNITION_MODE_GENERIC;
-import static android.hardware.soundtrigger.SoundTrigger.RECOGNITION_MODE_USER_AUTHENTICATION;
-import static android.hardware.soundtrigger.SoundTrigger.RECOGNITION_MODE_USER_IDENTIFICATION;
-import static android.hardware.soundtrigger.SoundTrigger.RECOGNITION_MODE_VOICE_TRIGGER;
-
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import android.hardware.audio.common.V2_0.Uuid;
-import android.hardware.soundtrigger.SoundTrigger;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Locale;
-
 @RunWith(AndroidJUnit4.class)
 public class ConversionUtilTest {
-    private static final String TAG = "ConversionUtilTest";
+    private static final String TAG = "SoundTriggerMiddlewareConversionUtilTest";
 
     @Test
     public void testUuidRoundTrip() {
@@ -61,55 +43,5 @@ public class ConversionUtilTest {
 
         Uuid reconstructed = ConversionUtil.aidl2hidlUuid(aidl);
         assertEquals(hidl, reconstructed);
-    }
-
-    @Test
-    public void testDefaultAudioFormatConstruction() {
-        // This method should generate a real format when passed null
-        final var format = aidl2apiAudioFormatWithDefault(
-                null /** exercise default **/,
-                true /** isInput **/
-                );
-        assertNotNull(format);
-    }
-
-    @Test
-    public void testRecognitionConfigRoundTrip() {
-        final int flags = SoundTrigger.ModuleProperties.AUDIO_CAPABILITY_ECHO_CANCELLATION
-                | SoundTrigger.ModuleProperties.AUDIO_CAPABILITY_NOISE_SUPPRESSION;
-        final var data = new byte[] {0x11, 0x22};
-        final var keyphrases = new SoundTrigger.KeyphraseRecognitionExtra[2];
-        keyphrases[0] = new SoundTrigger.KeyphraseRecognitionExtra(99,
-                RECOGNITION_MODE_VOICE_TRIGGER | RECOGNITION_MODE_USER_IDENTIFICATION, 13,
-                    new ConfidenceLevel[] {new ConfidenceLevel(9999, 50),
-                                           new ConfidenceLevel(5000, 80)});
-        keyphrases[1] = new SoundTrigger.KeyphraseRecognitionExtra(101,
-                RECOGNITION_MODE_GENERIC, 8, new ConfidenceLevel[] {
-                    new ConfidenceLevel(7777, 30),
-                    new ConfidenceLevel(2222, 60)});
-
-        var apiconfig = new SoundTrigger.RecognitionConfig(true, false /** must be false **/,
-                keyphrases, data, flags);
-        assertEquals(apiconfig, aidl2apiRecognitionConfig(api2aidlRecognitionConfig(apiconfig)));
-    }
-
-    @Test
-    public void testByteArraySharedMemRoundTrip() {
-        final var data = new byte[] { 0x11, 0x22, 0x33, 0x44,
-                (byte) 0xde, (byte) 0xad, (byte) 0xbe, (byte) 0xef };
-        assertArrayEquals(data, sharedMemoryToByteArray(byteArrayToSharedMemory(data, "name"),
-                    10000000));
-
-    }
-
-    @Test
-    public void testPhraseRoundTrip() {
-        final var users = new int[] {10001, 10002};
-        final var apiphrase = new SoundTrigger.Keyphrase(17 /** id **/,
-                RECOGNITION_MODE_VOICE_TRIGGER | RECOGNITION_MODE_USER_AUTHENTICATION,
-                Locale.forLanguageTag("no_NO"),
-                "Hello Android", /** keyphrase **/
-                users);
-        assertEquals(apiphrase, aidl2apiPhrase(api2aidlPhrase(apiphrase)));
     }
 }

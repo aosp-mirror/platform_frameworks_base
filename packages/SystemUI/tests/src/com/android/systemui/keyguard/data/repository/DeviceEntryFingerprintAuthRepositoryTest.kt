@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT
 import android.hardware.biometrics.BiometricSourceType
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -30,7 +31,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -68,11 +68,6 @@ class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 dumpManager,
             )
-    }
-
-    @After
-    fun tearDown() {
-        //        verify(keyguardUpdateMonitor).removeCallback(updateMonitorCallback.value)
     }
 
     @Test
@@ -129,29 +124,55 @@ class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun enabledFingerprintTypeProvidesTheCorrectOutput() =
+    fun enabledFingerprintTypeProvidesTheCorrectOutputForSpfs() =
         testScope.runTest {
             whenever(authController.isSfpsSupported).thenReturn(true)
             whenever(authController.isUdfpsSupported).thenReturn(false)
             whenever(authController.isRearFpsSupported).thenReturn(false)
 
-            assertThat(underTest.availableFpSensorType).isEqualTo(BiometricType.SIDE_FINGERPRINT)
+            val availableFpSensorType = collectLastValue(underTest.availableFpSensorType)
+            assertThat(availableFpSensorType()).isEqualTo(BiometricType.SIDE_FINGERPRINT)
+        }
 
+    @Test
+    fun enabledFingerprintTypeProvidesTheCorrectOutputForUdfps() =
+        testScope.runTest {
             whenever(authController.isSfpsSupported).thenReturn(false)
             whenever(authController.isUdfpsSupported).thenReturn(true)
             whenever(authController.isRearFpsSupported).thenReturn(false)
+            val availableFpSensorType = collectLastValue(underTest.availableFpSensorType)
+            assertThat(availableFpSensorType()).isEqualTo(BiometricType.UNDER_DISPLAY_FINGERPRINT)
+        }
 
-            assertThat(underTest.availableFpSensorType)
-                .isEqualTo(BiometricType.UNDER_DISPLAY_FINGERPRINT)
-
+    @Test
+    fun enabledFingerprintTypeProvidesTheCorrectOutputForRearFps() =
+        testScope.runTest {
             whenever(authController.isSfpsSupported).thenReturn(false)
             whenever(authController.isUdfpsSupported).thenReturn(false)
             whenever(authController.isRearFpsSupported).thenReturn(true)
 
-            assertThat(underTest.availableFpSensorType).isEqualTo(BiometricType.REAR_FINGERPRINT)
+            val availableFpSensorType = collectLastValue(underTest.availableFpSensorType)
 
+            assertThat(availableFpSensorType()).isEqualTo(BiometricType.REAR_FINGERPRINT)
+        }
+
+    @Test
+    fun enabledFingerprintTypeProvidesTheCorrectOutputAfterAllAuthenticatorsAreRegistered() =
+        testScope.runTest {
+            whenever(authController.isSfpsSupported).thenReturn(false)
+            whenever(authController.isUdfpsSupported).thenReturn(false)
             whenever(authController.isRearFpsSupported).thenReturn(false)
+            whenever(authController.areAllFingerprintAuthenticatorsRegistered()).thenReturn(false)
 
-            assertThat(underTest.availableFpSensorType).isNull()
+            val availableFpSensorType = collectLastValue(underTest.availableFpSensorType)
+            runCurrent()
+
+            val callback = ArgumentCaptor.forClass(AuthController.Callback::class.java)
+            verify(authController).addCallback(callback.capture())
+            assertThat(availableFpSensorType()).isNull()
+
+            whenever(authController.isUdfpsSupported).thenReturn(true)
+            callback.value.onAllAuthenticatorsRegistered(TYPE_FINGERPRINT)
+            assertThat(availableFpSensorType()).isEqualTo(BiometricType.UNDER_DISPLAY_FINGERPRINT)
         }
 }

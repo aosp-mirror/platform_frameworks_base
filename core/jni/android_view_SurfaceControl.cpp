@@ -1820,17 +1820,11 @@ static void nativeRemoveCurrentInputFocus(JNIEnv* env, jclass clazz, jlong trans
 }
 
 static void nativeSetFocusedWindow(JNIEnv* env, jclass clazz, jlong transactionObj,
-                                   jobject toTokenObj, jstring windowNameJstr,
-                                   jobject focusedTokenObj, jstring focusedWindowNameJstr,
-                                   jint displayId) {
+                                   jobject toTokenObj, jstring windowNameJstr, jint displayId) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     if (toTokenObj == NULL) return;
 
     sp<IBinder> toToken(ibinderForJavaObject(env, toTokenObj));
-    sp<IBinder> focusedToken;
-    if (focusedTokenObj != NULL) {
-        focusedToken = ibinderForJavaObject(env, focusedTokenObj);
-    }
 
     FocusRequest request;
     request.token = toToken;
@@ -1839,11 +1833,6 @@ static void nativeSetFocusedWindow(JNIEnv* env, jclass clazz, jlong transactionO
         request.windowName = windowName.c_str();
     }
 
-    request.focusedToken = focusedToken;
-    if (focusedWindowNameJstr != NULL) {
-        ScopedUtfChars focusedWindowName(env, focusedWindowNameJstr);
-        request.focusedWindowName = focusedWindowName.c_str();
-    }
     request.timestamp = systemTime(SYSTEM_TIME_MONOTONIC);
     request.displayId = displayId;
     transaction->setFocusedWindow(request);
@@ -2236,7 +2225,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetHandle },
     {"nativeSetFixedTransformHint", "(JJI)V",
             (void*)nativeSetFixedTransformHint},
-    {"nativeSetFocusedWindow", "(JLandroid/os/IBinder;Ljava/lang/String;Landroid/os/IBinder;Ljava/lang/String;I)V",
+    {"nativeSetFocusedWindow", "(JLandroid/os/IBinder;Ljava/lang/String;I)V",
             (void*)nativeSetFocusedWindow},
     {"nativeRemoveCurrentInputFocus", "(JI)V",
             (void*)nativeRemoveCurrentInputFocus},

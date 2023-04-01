@@ -33,6 +33,7 @@ import com.android.systemui.plugins.PluginLifecycleManager
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.plugins.PluginManager
 import com.android.systemui.util.Assert
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +41,18 @@ import kotlinx.coroutines.launch
 
 private const val DEBUG = true
 private val KEY_TIMESTAMP = "appliedTimestamp"
+
+private fun <TKey, TVal> ConcurrentHashMap<TKey, TVal>.concurrentGetOrPut(
+    key: TKey,
+    value: TVal,
+    onNew: () -> Unit
+): TVal {
+    val result = this.putIfAbsent(key, value)
+    if (result == null) {
+        onNew()
+    }
+    return result ?: value
+}
 
 /** ClockRegistry aggregates providers and plugins */
 open class ClockRegistry(
@@ -64,7 +77,7 @@ open class ClockRegistry(
         fun onAvailableClocksChanged() {}
     }
 
-    private val availableClocks = mutableMapOf<ClockId, ClockInfo>()
+    private val availableClocks = ConcurrentHashMap<ClockId, ClockInfo>()
     private val clockChangeListeners = mutableListOf<ClockChangeListener>()
     private val settingObserver =
         object : ContentObserver(null) {
@@ -92,17 +105,11 @@ open class ClockRegistry(
                 var isClockListChanged = false
                 for (clock in plugin.getClocks()) {
                     val id = clock.clockId
-                    var isNew = false
                     val info =
-                        availableClocks.getOrPut(id) {
-                            isNew = true
-                            ClockInfo(clock, plugin, manager)
+                        availableClocks.concurrentGetOrPut(id, ClockInfo(clock, plugin, manager)) {
+                            isClockListChanged = true
+                            onConnected(id)
                         }
-
-                    if (isNew) {
-                        isClockListChanged = true
-                        onConnected(id)
-                    }
 
                     if (manager != info.manager) {
                         Log.e(
@@ -254,10 +261,8 @@ open class ClockRegistry(
             return
         }
 
-        android.util.Log.e("HAWK", "triggerOnCurrentClockChanged")
         scope.launch(mainDispatcher) {
             assertMainThread()
-            android.util.Log.e("HAWK", "isClockChanged")
             isClockChanged.set(false)
             clockChangeListeners.forEach { it.onCurrentClockChanged() }
         }
@@ -270,10 +275,8 @@ open class ClockRegistry(
             return
         }
 
-        android.util.Log.e("HAWK", "triggerOnAvailableClocksChanged")
         scope.launch(mainDispatcher) {
             assertMainThread()
-            android.util.Log.e("HAWK", "isClockListChanged")
             isClockListChanged.set(false)
             clockChangeListeners.forEach { it.onAvailableClocksChanged() }
         }
@@ -356,7 +359,7 @@ open class ClockRegistry(
     }
 
     private var isVerifying = AtomicBoolean(false)
-    private fun verifyLoadedProviders() {
+    fun verifyLoadedProviders() {
         val shouldSchedule = isVerifying.compareAndSet(false, true)
         if (!shouldSchedule) {
             return

@@ -48,8 +48,6 @@ class FakeKeyguardBouncerRepository : KeyguardBouncerRepository {
     override val showMessage = _showMessage.asStateFlow()
     private val _resourceUpdateRequests = MutableStateFlow(false)
     override val resourceUpdateRequests = _resourceUpdateRequests.asStateFlow()
-    override val bouncerPromptReason = 0
-    override val bouncerErrorMessage: CharSequence? = null
     private val _isAlternateBouncerVisible = MutableStateFlow(false)
     override val alternateBouncerVisible = _isAlternateBouncerVisible.asStateFlow()
     override var lastAlternateBouncerVisibleTime: Long = 0L

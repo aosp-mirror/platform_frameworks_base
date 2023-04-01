@@ -41,9 +41,12 @@ import java.util.Set;
  * <p>The properties describing a
  * {@link CameraDevice CameraDevice}.</p>
  *
- * <p>These properties are fixed for a given CameraDevice, and can be queried
+ * <p>These properties are primarily fixed for a given CameraDevice, and can be queried
  * through the {@link CameraManager CameraManager}
- * interface with {@link CameraManager#getCameraCharacteristics}.</p>
+ * interface with {@link CameraManager#getCameraCharacteristics}. Beginning with API level 32, some
+ * properties such as {@link #SENSOR_ORIENTATION} may change dynamically based on the state of the
+ * device. For information on whether a specific value is fixed, see the documentation for its key.
+ * </p>
  *
  * <p>When obtained by a client that does not hold the CAMERA permission, some metadata values are
  * not included. The list of keys that require the permission is given by
@@ -280,9 +283,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * <p>The field definitions can be
      * found in {@link CameraCharacteristics}.</p>
-     *
-     * <p>Querying the value for the same key more than once will return a value
-     * which is equal to the previous queried value.</p>
      *
      * @throws IllegalArgumentException if the key was not valid
      *

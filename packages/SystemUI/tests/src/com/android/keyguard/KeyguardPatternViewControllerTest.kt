@@ -122,22 +122,8 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
   }
 
   @Test
-  fun reset() {
-    mKeyguardPatternViewController.reset()
-    verify(mLockPatternView).setInStealthMode(anyBoolean())
-    verify(mLockPatternView).enableInput()
-    verify(mLockPatternView).setEnabled(true)
-    verify(mLockPatternView).clearPattern()
-    verify(mLockPatternUtils).getLockoutAttemptDeadline(anyInt())
-  }
-
-  @Test
   fun resume() {
     mKeyguardPatternViewController.onResume(KeyguardSecurityView.VIEW_REVEALED)
-    verify(mLockPatternView).setInStealthMode(anyBoolean())
-    verify(mLockPatternView).enableInput()
-    verify(mLockPatternView).setEnabled(true)
-    verify(mLockPatternView).clearPattern()
     verify(mLockPatternUtils).getLockoutAttemptDeadline(anyInt())
   }
 }

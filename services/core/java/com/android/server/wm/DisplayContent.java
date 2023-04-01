@@ -5153,12 +5153,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         @Override
         void updateAboveInsetsState(InsetsState aboveInsetsState,
-                SparseArray<InsetsSourceProvider> localInsetsSourceProvidersFromParent,
+                SparseArray<InsetsSource> localInsetsSourcesFromParent,
                 ArraySet<WindowState> insetsChangedWindows) {
             if (skipImeWindowsDuringTraversal(mDisplayContent)) {
                 return;
             }
-            super.updateAboveInsetsState(aboveInsetsState, localInsetsSourceProvidersFromParent,
+            super.updateAboveInsetsState(aboveInsetsState, localInsetsSourcesFromParent,
                     insetsChangedWindows);
         }
 

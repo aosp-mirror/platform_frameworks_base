@@ -465,7 +465,9 @@ public class FakeSoundTriggerHal extends ISoundTriggerHw.Stub {
             if (session == null) {
                 Slog.wtf(TAG, "Attempted to start recognition with invalid handle");
             }
-
+            if (mIsResourceContended) {
+                throw new ServiceSpecificException(Status.RESOURCE_CONTENTION);
+            }
             if (session.getIsUnloaded()) {
                 // TODO(b/274470274) this is a deficiency in the existing HAL API, there is no way
                 // to handle this race gracefully

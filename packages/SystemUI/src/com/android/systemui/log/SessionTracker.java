@@ -28,6 +28,8 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -60,6 +62,7 @@ public class SessionTracker implements CoreStartable {
     private final AuthController mAuthController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardStateController mKeyguardStateController;
+    private final UiEventLogger mUiEventLogger;
     private final Map<Integer, InstanceId> mSessionToInstanceId = new HashMap<>();
 
     private boolean mKeyguardSessionStarted;
@@ -69,12 +72,14 @@ public class SessionTracker implements CoreStartable {
             IStatusBarService statusBarService,
             AuthController authController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            KeyguardStateController keyguardStateController
+            KeyguardStateController keyguardStateController,
+            UiEventLogger uiEventLogger
     ) {
         mStatusBarManagerService = statusBarService;
         mAuthController = authController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardStateController = keyguardStateController;
+        mUiEventLogger = uiEventLogger;
     }
 
     @Override
@@ -116,6 +121,10 @@ public class SessionTracker implements CoreStartable {
     }
 
     private void endSession(int type) {
+        endSession(type, null);
+    }
+
+    private void endSession(int type, @Nullable SessionUiEvent endSessionUiEvent) {
         if (mSessionToInstanceId.getOrDefault(type, null) == null) {
             Log.e(TAG, "session [" + getString(type) + "] was not started");
             return;
@@ -126,6 +135,9 @@ public class SessionTracker implements CoreStartable {
         try {
             if (DEBUG) {
                 Log.d(TAG, "Session end for [" + getString(type) + "] id=" + instanceId);
+            }
+            if (endSessionUiEvent != null) {
+                mUiEventLogger.log(endSessionUiEvent, instanceId);
             }
             mStatusBarManagerService.onSessionEnded(type, instanceId);
         } catch (RemoteException e) {
@@ -139,7 +151,7 @@ public class SessionTracker implements CoreStartable {
         @Override
         public void onStartedGoingToSleep(int why) {
             if (mKeyguardSessionStarted) {
-                endSession(SESSION_KEYGUARD);
+                endSession(SESSION_KEYGUARD, SessionUiEvent.KEYGUARD_SESSION_END_GOING_TO_SLEEP);
             }
 
             // Start a new session whenever the device goes to sleep
@@ -162,7 +174,8 @@ public class SessionTracker implements CoreStartable {
                 startSession(SESSION_KEYGUARD);
             } else if (!keyguardShowing && wasSessionStarted) {
                 mKeyguardSessionStarted = false;
-                endSession(SESSION_KEYGUARD);
+                endSession(SESSION_KEYGUARD,
+                        SessionUiEvent.KEYGUARD_SESSION_END_KEYGUARD_GOING_AWAY);
             }
         }
     };
@@ -199,5 +212,23 @@ public class SessionTracker implements CoreStartable {
         }
 
         return "unknownType=" + sessionType;
+    }
+
+    enum SessionUiEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "A keyguard session ended due to the keyguard going away.")
+        KEYGUARD_SESSION_END_KEYGUARD_GOING_AWAY(1354),
+
+        @UiEvent(doc = "A keyguard session ended due to display going to sleep.")
+        KEYGUARD_SESSION_END_GOING_TO_SLEEP(1355);
+
+        private final int mId;
+        SessionUiEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
     }
 }

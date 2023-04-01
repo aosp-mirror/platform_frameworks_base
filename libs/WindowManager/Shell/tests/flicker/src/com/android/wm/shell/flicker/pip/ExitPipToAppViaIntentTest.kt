@@ -41,6 +41,7 @@ import org.junit.runners.Parameterized
  *     Launch another full screen mode [testApp]
  *     Expand [pipApp] app to full screen via an intent
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)

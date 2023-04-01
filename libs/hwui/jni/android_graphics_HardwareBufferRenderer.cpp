@@ -85,28 +85,20 @@ static void HardwareBufferRenderer_destroy(jlong renderProxy) {
 }
 
 static SkMatrix createMatrixFromBufferTransform(SkScalar width, SkScalar height, int transform) {
-    auto matrix = SkMatrix();
     switch (transform) {
         case ANATIVEWINDOW_TRANSFORM_ROTATE_90:
-            matrix.setRotate(90);
-            matrix.postTranslate(width, 0);
-            break;
+            return SkMatrix::MakeAll(0, -1, height, 1, 0, 0, 0, 0, 1);
         case ANATIVEWINDOW_TRANSFORM_ROTATE_180:
-            matrix.setRotate(180);
-            matrix.postTranslate(width, height);
-            break;
+            return SkMatrix::MakeAll(-1, 0, width, 0, -1, height, 0, 0, 1);
         case ANATIVEWINDOW_TRANSFORM_ROTATE_270:
-            matrix.setRotate(270);
-            matrix.postTranslate(0, width);
-            break;
+            return SkMatrix::MakeAll(0, 1, 0, -1, 0, width, 0, 0, 1);
         default:
             ALOGE("Invalid transform provided. Transform should be validated from"
                   "the java side. Leveraging identity transform as a fallback");
             [[fallthrough]];
         case ANATIVEWINDOW_TRANSFORM_IDENTITY:
-            break;
+            return SkMatrix::I();
     }
-    return matrix;
 }
 
 static int android_graphics_HardwareBufferRenderer_render(JNIEnv* env, jobject, jlong renderProxy,
@@ -117,8 +109,8 @@ static int android_graphics_HardwareBufferRenderer_render(JNIEnv* env, jobject, 
     auto skHeight = static_cast<SkScalar>(height);
     auto matrix = createMatrixFromBufferTransform(skWidth, skHeight, transform);
     auto colorSpace = GraphicsJNI::getNativeColorSpace(colorspacePtr);
-    proxy->setHardwareBufferRenderParams(
-            HardwareBufferRenderParams(matrix, colorSpace, createRenderCallback(env, consumer)));
+    proxy->setHardwareBufferRenderParams(HardwareBufferRenderParams(
+            width, height, matrix, colorSpace, createRenderCallback(env, consumer)));
     nsecs_t vsync = systemTime(SYSTEM_TIME_MONOTONIC);
     UiFrameInfoBuilder(proxy->frameInfo())
                 .setVsync(vsync, vsync, UiFrameInfoBuilder::INVALID_VSYNC_ID,

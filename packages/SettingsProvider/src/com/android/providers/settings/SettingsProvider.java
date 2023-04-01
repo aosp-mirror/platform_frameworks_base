@@ -2323,7 +2323,15 @@ public class SettingsProvider extends ContentProvider {
             return;
         } else if (hasAllowlistPermission) {
             for (String flag : flags) {
-                if (!DeviceConfig.getAdbWritableFlags().contains(flag)) {
+                boolean namespaceAllowed = false;
+                for (String allowlistedPrefix : WritableNamespacePrefixes.ALLOWLIST) {
+                    if (flag.startsWith(allowlistedPrefix)) {
+                        namespaceAllowed = true;
+                        break;
+                    }
+                }
+
+                if (!namespaceAllowed && !DeviceConfig.getAdbWritableFlags().contains(flag)) {
                     throw new SecurityException("Permission denial for flag '"
                         + flag
                         + "'; allowlist permission granted, but must add flag to the allowlist.");

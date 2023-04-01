@@ -1981,6 +1981,14 @@ public class DisplayPolicy {
             return;
         }
 
+        if (controlTarget != null) {
+            final WindowState win = controlTarget.getWindow();
+
+            if (win != null && win.isActivityTypeDream()) {
+                return;
+            }
+        }
+
         final @InsetsType int restorePositionTypes = (Type.statusBars() | Type.navigationBars())
                 & controlTarget.getRequestedVisibleTypes();
 

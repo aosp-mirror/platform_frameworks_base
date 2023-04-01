@@ -2226,15 +2226,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             } else if (isOpening && inFullscreen) {
                 final int activityType = triggerTask.getActivityType();
                 if (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS) {
-                    if (request.getRemoteTransition() != null) {
-                        // starting recents/home, so don't handle this and let it fall-through to
-                        // the remote handler.
-                        return null;
-                    }
-                    // Need to use the old stuff for non-remote animations, otherwise we don't
-                    // exit split-screen.
-                    mSplitTransitions.setRecentTransition(transition, null /* remote */,
-                            this::onRecentsInSplitAnimationFinish);
+                    // starting recents/home, so don't handle this and let it fall-through to
+                    // the remote handler.
+                    return null;
                 }
             }
         } else {
@@ -2363,8 +2357,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mSplitTransitions.isPendingEnter(transition)) {
             shouldAnimate = startPendingEnterAnimation(
                     transition, info, startTransaction, finishTransaction);
-        } else if (mSplitTransitions.isPendingRecent(transition)) {
-            onRecentsInSplitAnimationStart(startTransaction);
         } else if (mSplitTransitions.isPendingDismiss(transition)) {
             shouldAnimate = startPendingDismissAnimation(
                     mSplitTransitions.mPendingDismiss, info, startTransaction, finishTransaction);
@@ -2589,7 +2581,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     private boolean startPendingDismissAnimation(
-            @NonNull SplitScreenTransitions.DismissTransition dismissTransition,
+            @NonNull SplitScreenTransitions.DismissSession dismissTransition,
             @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction t,
             @NonNull SurfaceControl.Transaction finishT) {
         prepareDismissAnimation(dismissTransition.mDismissTop, dismissTransition.mReason, info,
@@ -2626,7 +2618,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     /** Call this when the recents animation during split-screen finishes. */
     public void onRecentsInSplitAnimationFinish(WindowContainerTransaction finishWct,
-            SurfaceControl.Transaction finishT) {
+            SurfaceControl.Transaction finishT, TransitionInfo info) {
         // Check if the recent transition is finished by returning to the current
         // split, so we can restore the divider bar.
         for (int i = 0; i < finishWct.getHierarchyOps().size(); ++i) {
@@ -2643,8 +2635,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
         }
 
+        // TODO(b/275664132): Remove dismissing split screen here to fit in back-to-split support.
         // Dismiss the split screen if it's not returning to split.
         prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, finishWct);
+        for (TransitionInfo.Change change : info.getChanges()) {
+            if (change.getTaskInfo() != null && TransitionUtil.isClosingType(change.getMode())) {
+                finishT.setCrop(change.getLeash(), null).hide(change.getLeash());
+            }
+        }
         setSplitsVisible(false);
         setDividerVisibility(false, finishT);
         logExit(EXIT_REASON_UNKNOWN);

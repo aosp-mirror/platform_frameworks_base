@@ -33,7 +33,10 @@ android_test {
 
     test_suites: ["device-tests"],
 
-    data: [":perfetto_artifacts"],
+    data: [
+        ":QueriesAll0",
+        ":perfetto_artifacts",
+    ],
 
     certificate: "platform",
 

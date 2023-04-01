@@ -308,7 +308,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
      * settings. Down action closes the entire panel.
      */
     @Override
-    public void handleSystemKey(int key) {
+    public void handleSystemKey(KeyEvent key) {
         if (CentralSurfaces.SPEW) {
             Log.d(CentralSurfaces.TAG, "handleNavigationKey: " + key);
         }
@@ -320,11 +320,11 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         // Panels are not available in setup
         if (!mDeviceProvisionedController.isCurrentUserSetup()) return;
 
-        if (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP == key) {
+        if (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP == key.getKeyCode()) {
             mMetricsLogger.action(MetricsEvent.ACTION_SYSTEM_NAVIGATION_KEY_UP);
             mNotificationPanelViewController.collapse(
                     false /* delayed */, 1.0f /* speedUpFactor */);
-        } else if (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN == key) {
+        } else if (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN == key.getKeyCode()) {
             mMetricsLogger.action(MetricsEvent.ACTION_SYSTEM_NAVIGATION_KEY_DOWN);
             if (mNotificationPanelViewController.isFullyCollapsed()) {
                 if (mVibrateOnOpening) {

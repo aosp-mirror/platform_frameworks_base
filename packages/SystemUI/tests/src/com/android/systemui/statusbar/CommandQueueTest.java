@@ -33,6 +33,7 @@ import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
@@ -397,9 +398,10 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testHandleSysKey() {
-        mCommandQueue.handleSystemKey(1);
+        KeyEvent testEvent = new KeyEvent(1, 1);
+        mCommandQueue.handleSystemKey(testEvent);
         waitForIdleSync();
-        verify(mCallbacks).handleSystemKey(eq(1));
+        verify(mCallbacks).handleSystemKey(eq(testEvent));
     }
 
     @Test

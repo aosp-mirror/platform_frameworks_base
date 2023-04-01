@@ -77,6 +77,29 @@
                 app:layout_constraintStart_toStartOf="parent"/>
 
             <Button
+                android:id="@+id/rearrange"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <Button
+                android:id="@+id/addControls"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:text="@string/controls_favorite_add_controls"
+                style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <Button
                 android:id="@+id/done"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"

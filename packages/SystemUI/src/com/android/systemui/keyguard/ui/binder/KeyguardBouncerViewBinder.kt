@@ -121,6 +121,7 @@ object KeyguardBouncerViewBinder {
                                     securityContainerController.showPrimarySecurityScreen(
                                         /* turningOff= */ false
                                     )
+                                    securityContainerController.setInitialMessage()
                                     securityContainerController.appear()
                                     securityContainerController.onResume(
                                         KeyguardSecurityView.SCREEN_ON
