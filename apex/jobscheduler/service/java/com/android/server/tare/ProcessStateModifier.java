@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.IUidObserver;
+import android.app.UidObserver;
 import android.os.RemoteException;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
@@ -61,7 +62,7 @@ class ProcessStateModifier extends Modifier {
     @GuardedBy("mLock")
     private final SparseIntArray mUidProcStateBucketCache = new SparseIntArray();
 
-    private final IUidObserver mUidObserver = new IUidObserver.Stub() {
+    private final IUidObserver mUidObserver = new UidObserver() {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             final int newBucket = getProcStateBucket(procState);
@@ -84,22 +85,6 @@ class ProcessStateModifier extends Modifier {
                 mUidProcStateBucketCache.delete(uid);
                 notifyStateChangedLocked(uid);
             }
-        }
-
-        @Override
-        public void onUidActive(int uid) {
-        }
-
-        @Override
-        public void onUidIdle(int uid, boolean disabled) {
-        }
-
-        @Override
-        public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override
-        public void onUidProcAdjChanged(int uid) {
         }
     };
 
