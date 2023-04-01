@@ -64,6 +64,7 @@ import android.permission.IPermissionManager;
 import android.permission.PermissionCheckerManager;
 import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
+import android.service.voice.VoiceInteractionManagerInternal;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -967,12 +968,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // the private data in your process; or by you explicitly calling to another
             // app passing the source, in which case you must trust the other side;
 
-            final int callingUid = Binder.getCallingUid();
-            if (source.getUid() != callingUid && mContext.checkPermission(
+            final int callingUid = resolveUid(Binder.getCallingUid());
+            final int sourceUid = resolveUid(source.getUid());
+            if (sourceUid != callingUid && mContext.checkPermission(
                     Manifest.permission.UPDATE_APP_OPS_STATS, /*pid*/ -1, callingUid)
                     != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("Cannot register attribution source for uid:"
-                        + source.getUid() + " from uid:" + callingUid);
+                        + sourceUid + " from uid:" + callingUid);
             }
 
             final PackageManagerInternal packageManagerInternal = LocalServices.getService(
@@ -981,10 +983,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // TODO(b/234653108): Clean up this UID/package & cross-user check.
             // If calling from the system process, allow registering attribution for package from
             // any user
-            int userId = UserHandle.getUserId((callingUid == Process.SYSTEM_UID ? source.getUid()
+            int userId = UserHandle.getUserId((callingUid == Process.SYSTEM_UID ? sourceUid
                     : callingUid));
             if (packageManagerInternal.getPackageUid(source.getPackageName(), 0, userId)
-                    != source.getUid()) {
+                    != sourceUid) {
                 throw new SecurityException("Cannot register attribution source for package:"
                         + source.getPackageName() + " from uid:" + callingUid);
             }
@@ -1009,6 +1011,21 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 }
                 return false;
             }
+        }
+
+        private int resolveUid(int uid) {
+            final VoiceInteractionManagerInternal vimi = LocalServices
+                    .getService(VoiceInteractionManagerInternal.class);
+            if (vimi == null) {
+                return uid;
+            }
+            final VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity
+                    hotwordDetectionServiceIdentity = vimi.getHotwordDetectionServiceIdentity();
+            if (hotwordDetectionServiceIdentity != null
+                    && uid == hotwordDetectionServiceIdentity.getIsolatedUid()) {
+                return hotwordDetectionServiceIdentity.getOwnerUid();
+            }
+            return uid;
         }
     }
 
