@@ -172,11 +172,15 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      * Update position of the view with an optional animation
      */
     public void updatePosition(int x, int y, float scale, boolean animate) {
+        float oldY = mView.getY();
         PropertyAnimator.setProperty(mView, AnimatableProperty.Y, y, CLOCK_ANIMATION_PROPERTIES,
                 animate);
 
         mKeyguardClockSwitchController.updatePosition(x, scale, CLOCK_ANIMATION_PROPERTIES,
                 animate);
+        if (oldY != y) {
+            mKeyguardClockSwitchController.updateKeyguardStatusViewOffset();
+        }
     }
 
     /**
