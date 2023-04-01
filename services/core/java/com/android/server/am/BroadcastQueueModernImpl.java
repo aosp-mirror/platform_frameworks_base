@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_FROZEN;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
 
@@ -47,7 +48,7 @@ import android.app.ActivityManager;
 import android.app.ApplicationExitInfo;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
-import android.app.UidObserver;
+import android.app.IUidFrozenStateChangedCallback;
 import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -71,6 +72,7 @@ import android.util.MathUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -207,6 +209,16 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @GuardedBy("mService")
     private final AtomicReference<ArraySet<BroadcastRecord>> mReplacedBroadcastsCache =
             new AtomicReference<>();
+
+    /**
+     * Map from UID to its last known "frozen" state.
+     * <p>
+     * We manually maintain this data structure since the lifecycle of
+     * {@link ProcessRecord} and {@link BroadcastProcessQueue} can be
+     * mismatched.
+     */
+    @GuardedBy("mService")
+    private final SparseBooleanArray mUidFrozen = new SparseBooleanArray();
 
     private final BroadcastConstants mConstants;
     private final BroadcastConstants mFgConstants;
@@ -485,6 +497,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final BroadcastProcessQueue queue = getProcessQueue(app);
         if (queue != null) {
             queue.setProcess(app);
+            queue.setUidFrozen(mUidFrozen.get(queue.uid, false));
         }
 
         boolean didSomething = false;
@@ -526,6 +539,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final BroadcastProcessQueue queue = getProcessQueue(app);
         if (queue != null) {
             queue.setProcess(null);
+            queue.setUidFrozen(mUidFrozen.get(queue.uid, false));
         }
 
         if ((mRunningColdStart != null) && (mRunningColdStart == queue)) {
@@ -1325,23 +1339,34 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         mFgConstants.startObserving(mHandler, resolver);
         mBgConstants.startObserving(mHandler, resolver);
 
-        mService.registerUidObserver(new UidObserver() {
+        mService.registerUidFrozenStateChangedCallback(new IUidFrozenStateChangedCallback.Stub() {
             @Override
-            public void onUidCachedChanged(int uid, boolean cached) {
+            public void onUidFrozenStateChanged(int[] uids, int[] frozenStates) {
                 synchronized (mService) {
-                    BroadcastProcessQueue leaf = mProcessQueues.get(uid);
-                    while (leaf != null) {
-                        // Update internal state by refreshing values previously
-                        // read from any known running process
-                        leaf.setProcess(leaf.app);
-                        updateQueueDeferred(leaf);
-                        updateRunnableList(leaf);
-                        leaf = leaf.processNameNext;
+                    for (int i = 0; i < uids.length; i++) {
+                        final int uid = uids[i];
+                        final boolean frozen = frozenStates[i] == UID_FROZEN_STATE_FROZEN;
+                        if (frozen) {
+                            mUidFrozen.put(uid, true);
+                        } else {
+                            mUidFrozen.delete(uid);
+                        }
+
+                        BroadcastProcessQueue leaf = mProcessQueues.get(uid);
+                        while (leaf != null) {
+                            // Update internal state by refreshing values previously
+                            // read from any known running process
+                            leaf.setProcess(leaf.app);
+                            leaf.setUidFrozen(frozen);
+                            updateQueueDeferred(leaf);
+                            updateRunnableList(leaf);
+                            leaf = leaf.processNameNext;
+                        }
+                        enqueueUpdateRunningList();
                     }
-                    enqueueUpdateRunningList();
                 }
             }
-        }, ActivityManager.UID_OBSERVER_CACHED, 0, "android");
+        });
 
         // Kick off periodic health checks
         mLocalHandler.sendEmptyMessage(MSG_CHECK_HEALTH);
@@ -1498,6 +1523,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private void updateWarmProcess(@NonNull BroadcastProcessQueue queue) {
         if (!queue.isProcessWarm()) {
             queue.setProcess(mService.getProcessRecordLocked(queue.processName, queue.uid));
+            queue.setUidFrozen(mUidFrozen.get(queue.uid, false));
         }
     }
 
@@ -1692,6 +1718,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
         BroadcastProcessQueue created = new BroadcastProcessQueue(mConstants, processName, uid);
         created.setProcess(mService.getProcessRecordLocked(processName, uid));
+        created.setUidFrozen(mUidFrozen.get(uid, false));
 
         if (leaf == null) {
             mProcessQueues.put(uid, created);
@@ -1814,9 +1841,15 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         ipw.decreaseIndent();
         ipw.println();
 
-        ipw.println(" Broadcasts with ignored delivery group policies:");
+        ipw.println("Broadcasts with ignored delivery group policies:");
         ipw.increaseIndent();
         mService.dumpDeliveryGroupPolicyIgnoredActions(ipw);
+        ipw.decreaseIndent();
+        ipw.println();
+
+        ipw.println("Frozen UIDs:");
+        ipw.increaseIndent();
+        ipw.println(mUidFrozen.toString());
         ipw.decreaseIndent();
         ipw.println();
 
