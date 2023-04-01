@@ -27,7 +27,6 @@ import com.android.keyguard.KeyguardConstants
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
-import com.android.settingslib.Utils
 import com.android.systemui.DejankUtils
 import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
@@ -42,12 +41,12 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 /**
  * Encapsulates business logic for interacting with the lock-screen primary (pin/pattern/password)
@@ -82,12 +81,6 @@ constructor(
     /** Runnable to show the primary bouncer. */
     val showRunnable = Runnable {
         repository.setPrimaryShow(true)
-        primaryBouncerView.delegate?.showPromptReason(repository.bouncerPromptReason)
-        (repository.bouncerErrorMessage as? String)?.let {
-            repository.setShowMessage(
-                BouncerShowMessageModel(message = it, Utils.getColorError(context))
-            )
-        }
         repository.setPrimaryShowingSoon(false)
         primaryBouncerCallbackInteractor.dispatchVisibilityChanged(View.VISIBLE)
     }
