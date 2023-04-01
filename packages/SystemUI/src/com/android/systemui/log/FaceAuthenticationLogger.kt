@@ -9,15 +9,15 @@ import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel.DEBUG
 import javax.inject.Inject
 
-private const val TAG = "KeyguardFaceAuthManagerLog"
+private const val TAG = "DeviceEntryFaceAuthRepositoryLog"
 
 /**
  * Helper class for logging for
- * [com.android.systemui.keyguard.data.repository.KeyguardFaceAuthManager]
+ * [com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository]
  *
  * To enable logcat echoing for an entire buffer:
  * ```
- *   adb shell settings put global systemui/buffer/KeyguardFaceAuthManagerLog <logLevel>
+ *   adb shell settings put global systemui/buffer/DeviceEntryFaceAuthRepositoryLog <logLevel>
  *
  * ```
  */

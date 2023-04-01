@@ -73,7 +73,7 @@ import kotlinx.coroutines.withContext
  * API to run face authentication and detection for device entry / on keyguard (as opposed to the
  * biometric prompt).
  */
-interface KeyguardFaceAuthManager {
+interface DeviceEntryFaceAuthRepository {
     /** Provide the current face authentication state for device entry. */
     val isAuthenticated: Flow<Boolean>
 
@@ -108,7 +108,7 @@ interface KeyguardFaceAuthManager {
 }
 
 @SysUISingleton
-class KeyguardFaceAuthManagerImpl
+class DeviceEntryFaceAuthRepositoryImpl
 @Inject
 constructor(
     context: Context,
@@ -127,7 +127,7 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     dumpManager: DumpManager,
-) : KeyguardFaceAuthManager, Dumpable {
+) : DeviceEntryFaceAuthRepository, Dumpable {
     private var authCancellationSignal: CancellationSignal? = null
     private var detectCancellationSignal: CancellationSignal? = null
     private var faceAcquiredInfoIgnoreList: Set<Int>
@@ -144,13 +144,13 @@ constructor(
         get() = _detectionStatus.filterNotNull()
 
     private val _isLockedOut = MutableStateFlow(false)
-    override val isLockedOut: Flow<Boolean> = _isLockedOut
+    override val isLockedOut: StateFlow<Boolean> = _isLockedOut
 
     val isDetectionSupported =
         faceManager?.sensorPropertiesInternal?.firstOrNull()?.supportsFaceDetection ?: false
 
     private val _isAuthRunning = MutableStateFlow(false)
-    override val isAuthRunning: Flow<Boolean>
+    override val isAuthRunning: StateFlow<Boolean>
         get() = _isAuthRunning
 
     private val keyguardSessionId: InstanceId?
@@ -199,7 +199,7 @@ constructor(
                 )
                 .boxed()
                 .collect(Collectors.toSet())
-        dumpManager.registerCriticalDumpable("KeyguardFaceAuthManagerImpl", this)
+        dumpManager.registerCriticalDumpable("DeviceEntryFaceAuthRepositoryImpl", this)
 
         observeFaceAuthGatingChecks()
         observeFaceDetectGatingChecks()
@@ -495,7 +495,7 @@ constructor(
     }
 
     companion object {
-        const val TAG = "KeyguardFaceAuthManager"
+        const val TAG = "DeviceEntryFaceAuthRepository"
 
         /**
          * If no cancel signal has been received after this amount of time, assume that it is
@@ -505,7 +505,7 @@ constructor(
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println("KeyguardFaceAuthManagerImpl state:")
+        pw.println("DeviceEntryFaceAuthRepositoryImpl state:")
         pw.println("  cancellationInProgress: $cancellationInProgress")
         pw.println("  _isLockedOut.value: ${_isLockedOut.value}")
         pw.println("  _isAuthRunning.value: ${_isAuthRunning.value}")
