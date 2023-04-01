@@ -56,6 +56,7 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:paddingStart="16dp"
+      android:paddingEnd="16dp"
       android:gravity="center_vertical"
       android:textColor="@color/colorControlNormal"
       android:textSize="@dimen/label_text_size"
