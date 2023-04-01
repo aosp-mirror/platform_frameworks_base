@@ -67,6 +67,15 @@ oneway interface ISatellite {
             in IIntegerConsumer resultCallback);
 
     /**
+     * Allow cellular modem scanning while satellite mode is on.
+     * @param enabled  {@code true} to enable cellular modem while satellite mode is on
+     * and {@code false} to disable
+     * @param errorCallback The callback to receive the error code result of the operation.
+     */
+    void enableCellularModemWhileSatelliteModeIsOn(in boolean enabled,
+        in IIntegerConsumer errorCallback);
+
+    /**
      * Request to enable or disable the satellite modem and demo mode. If the satellite modem
      * is enabled, this may also disable the cellular modem, and if the satellite modem is disabled,
      * this may also re-enable the cellular modem.
