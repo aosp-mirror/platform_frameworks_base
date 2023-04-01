@@ -26,8 +26,9 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 import android.os.Handler;
+import android.util.IntArray;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -57,9 +58,23 @@ public class CpuWakeupStatsTest {
     private static final int TEST_UID_4 = 56926423;
     private static final int TEST_UID_5 = 76421423;
 
+    private static final int TEST_PROC_STATE_1 = 72331;
+    private static final int TEST_PROC_STATE_2 = 792351;
+    private static final int TEST_PROC_STATE_3 = 138831;
+    private static final int TEST_PROC_STATE_4 = 23231;
+    private static final int TEST_PROC_STATE_5 = 42;
+
     private static final Context sContext = InstrumentationRegistry.getTargetContext();
     private final Handler mHandler = Mockito.mock(Handler.class);
     private final ThreadLocalRandom mRandom = ThreadLocalRandom.current();
+
+    private void populateDefaultProcStates(CpuWakeupStats obj) {
+        obj.mUidProcStates.put(TEST_UID_1, TEST_PROC_STATE_1);
+        obj.mUidProcStates.put(TEST_UID_2, TEST_PROC_STATE_2);
+        obj.mUidProcStates.put(TEST_UID_3, TEST_PROC_STATE_3);
+        obj.mUidProcStates.put(TEST_UID_4, TEST_PROC_STATE_4);
+        obj.mUidProcStates.put(TEST_UID_5, TEST_PROC_STATE_5);
+    }
 
     @Test
     public void removesOldWakeups() {
@@ -96,6 +111,8 @@ public class CpuWakeupStatsTest {
         final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
         final long wakeupTime = 12423121;
 
+        populateDefaultProcStates(obj);
+
         obj.noteWakeupTimeAndReason(wakeupTime, 1, KERNEL_REASON_ALARM_IRQ);
 
         // Outside the window, so should be ignored.
@@ -106,21 +123,28 @@ public class CpuWakeupStatsTest {
         // Should be attributed
         obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime + 5, TEST_UID_3, TEST_UID_5);
 
-        final SparseArray<SparseBooleanArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
+        final SparseArray<SparseIntArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
         assertThat(attribution).isNotNull();
         assertThat(attribution.size()).isEqualTo(1);
         assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_ALARM)).isTrue();
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_1)).isEqualTo(false);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_2)).isEqualTo(false);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_3)).isEqualTo(true);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_4)).isEqualTo(false);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_5)).isEqualTo(true);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).indexOfKey(TEST_UID_1)).isLessThan(
+                0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).indexOfKey(TEST_UID_2)).isLessThan(
+                0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_3)).isEqualTo(
+                TEST_PROC_STATE_3);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).indexOfKey(TEST_UID_4)).isLessThan(
+                0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_5)).isEqualTo(
+                TEST_PROC_STATE_5);
     }
 
     @Test
     public void wifiIrqAttributionSolo() {
         final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
         final long wakeupTime = 12423121;
+
+        populateDefaultProcStates(obj);
 
         obj.noteWakeupTimeAndReason(wakeupTime, 1, KERNEL_REASON_WIFI_IRQ);
 
@@ -132,21 +156,25 @@ public class CpuWakeupStatsTest {
         // Should be attributed
         obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_WIFI, wakeupTime + 3, TEST_UID_4, TEST_UID_5);
 
-        final SparseArray<SparseBooleanArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
+        final SparseArray<SparseIntArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
         assertThat(attribution).isNotNull();
         assertThat(attribution.size()).isEqualTo(1);
         assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_WIFI)).isTrue();
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_1)).isEqualTo(false);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_2)).isEqualTo(false);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_3)).isEqualTo(false);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_4)).isEqualTo(true);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_5)).isEqualTo(true);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).indexOfKey(TEST_UID_1)).isLessThan(0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).indexOfKey(TEST_UID_2)).isLessThan(0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).indexOfKey(TEST_UID_3)).isLessThan(0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_4)).isEqualTo(
+                TEST_PROC_STATE_4);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_5)).isEqualTo(
+                TEST_PROC_STATE_5);
     }
 
     @Test
     public void alarmAndWifiIrqAttribution() {
         final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
         final long wakeupTime = 92123210;
+
+        populateDefaultProcStates(obj);
 
         obj.noteWakeupTimeAndReason(wakeupTime, 4,
                 KERNEL_REASON_WIFI_IRQ + ":" + KERNEL_REASON_ALARM_IRQ);
@@ -173,23 +201,31 @@ public class CpuWakeupStatsTest {
         obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_WIFI, wakeupTime - 1, TEST_UID_2,
                 TEST_UID_5);
 
-        final SparseArray<SparseBooleanArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
+        final SparseArray<SparseIntArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
         assertThat(attribution).isNotNull();
         assertThat(attribution.size()).isEqualTo(2);
 
         assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_ALARM)).isTrue();
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_1)).isEqualTo(false);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_2)).isEqualTo(false);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_3)).isEqualTo(true);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_4)).isEqualTo(true);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_5)).isEqualTo(true);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).indexOfKey(TEST_UID_1)).isLessThan(
+                0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).indexOfKey(TEST_UID_2)).isLessThan(
+                0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_3)).isEqualTo(
+                TEST_PROC_STATE_3);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_4)).isEqualTo(
+                TEST_PROC_STATE_4);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_5)).isEqualTo(
+                TEST_PROC_STATE_5);
 
         assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_WIFI)).isTrue();
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_1)).isEqualTo(true);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_2)).isEqualTo(true);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_3)).isEqualTo(false);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_4)).isEqualTo(false);
-        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_5)).isEqualTo(true);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_1)).isEqualTo(
+                TEST_PROC_STATE_1);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_2)).isEqualTo(
+                TEST_PROC_STATE_2);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).indexOfKey(TEST_UID_3)).isLessThan(0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).indexOfKey(TEST_UID_4)).isLessThan(0);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_5)).isEqualTo(
+                TEST_PROC_STATE_5);
     }
 
     @Test
@@ -206,12 +242,12 @@ public class CpuWakeupStatsTest {
         obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_WIFI, wakeupTime - 3, TEST_UID_4,
                 TEST_UID_5);
 
-        final SparseArray<SparseBooleanArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
+        final SparseArray<SparseIntArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
         assertThat(attribution).isNotNull();
         assertThat(attribution.size()).isEqualTo(1);
         assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_UNKNOWN)).isTrue();
-        final SparseBooleanArray uids = attribution.get(CPU_WAKEUP_SUBSYSTEM_UNKNOWN);
-        assertThat(uids == null || uids.size() == 0).isTrue();
+        final SparseIntArray uidProcStates = attribution.get(CPU_WAKEUP_SUBSYSTEM_UNKNOWN);
+        assertThat(uidProcStates == null || uidProcStates.size() == 0).isTrue();
     }
 
     @Test
@@ -258,5 +294,40 @@ public class CpuWakeupStatsTest {
 
         // Any nearby activity should not end up in the attribution map.
         assertThat(obj.mWakeupAttribution.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void uidProcStateBookkeeping() {
+        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
+
+        assertThat(obj.mUidProcStates.size()).isEqualTo(0);
+
+        final IntArray uids = new IntArray(87);
+        for (int i = 0; i < 87; i++) {
+            final int uid = mRandom.nextInt(1 << 20);
+            if (uids.indexOf(uid) < 0) {
+                uids.add(uid);
+            }
+        }
+
+        for (int i = 0; i < uids.size(); i++) {
+            final int uid = uids.get(i);
+            for (int j = 0; j < 43; j++) {
+                final int procState = mRandom.nextInt(1 << 15);
+                obj.noteUidProcessState(uid, procState);
+                assertThat(obj.mUidProcStates.get(uid)).isEqualTo(procState);
+            }
+            assertThat(obj.mUidProcStates.size()).isEqualTo(i + 1);
+        }
+
+        for (int i = 0; i < uids.size(); i++) {
+            obj.onUidRemoved(uids.get(i));
+            assertThat(obj.mUidProcStates.indexOfKey(uids.get(i))).isLessThan(0);
+        }
+
+        assertThat(obj.mUidProcStates.size()).isEqualTo(0);
+
+        obj.onUidRemoved(213);
+        assertThat(obj.mUidProcStates.size()).isEqualTo(0);
     }
 }
