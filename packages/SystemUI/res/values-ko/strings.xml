@@ -792,7 +792,7 @@
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"잠금 화면에서 기기를 표시하고 제어하시겠습니까?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"외부 기기에 대한 제어 권한을 잠금 화면에 추가할 수 있습니다.\n\n기기 앱을 사용하여 휴대전화나 태블릿의 잠금을 해제하지 않고 해당 기기를 제어할 수도 있습니다.\n\n언제든지 설정에서 옵션을 변경할 수 있습니다."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"잠금 화면에서 기기를 제어하시겠습니까?"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"휴대전화나 태블릿의 화면을 잠금 해제하지 않고 해당 기기를 제어할 수 있습니다.\n\n기기 앱에 이러한 방식으로 어떤 기기를 제어할 수 있는지 표시됩니다."</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"일부 기기의 경우 휴대전화나 태블릿을 잠금 해제하지 않고 해당 기기를 제어할 수 있습니다.\n\n이러한 방식으로 제어 가능한 기기를 기기 앱에서 결정합니다."</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"아니요"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"예"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN에 문자나 기호가 포함됨"</string>
