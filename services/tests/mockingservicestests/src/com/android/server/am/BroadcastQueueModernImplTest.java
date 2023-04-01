@@ -20,6 +20,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST;
+import static com.android.server.am.ActivityManagerDebugConfig.LOG_WRITER_INFO;
 import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_ALARM;
 import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_FOREGROUND;
 import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_INTERACTIVE;
@@ -1141,7 +1142,7 @@ public final class BroadcastQueueModernImplTest {
             mImpl.enqueueBroadcastLocked(makeBroadcastRecord(timeTick, optionsTimeTick));
             mImpl.enqueueBroadcastLocked(makeBroadcastRecord(timeTick, optionsTimeTick));
         }
-        mImpl.waitForIdle(null);
+        mImpl.waitForIdle(LOG_WRITER_INFO);
 
         // Verify that there is only one delivery event reported since one of the broadcasts
         // should have been skipped.

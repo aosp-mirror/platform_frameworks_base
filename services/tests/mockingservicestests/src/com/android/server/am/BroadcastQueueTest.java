@@ -20,6 +20,7 @@ import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZ
 import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_UNFROZEN;
 import static android.os.UserHandle.USER_SYSTEM;
 
+import static com.android.server.am.ActivityManagerDebugConfig.LOG_WRITER_INFO;
 import static com.android.server.am.BroadcastProcessQueue.reasonToString;
 import static com.android.server.am.BroadcastRecord.deliveryStateToString;
 import static com.android.server.am.BroadcastRecord.isReceiverEquals;
@@ -673,7 +674,7 @@ public class BroadcastQueueTest {
     }
 
     private void waitForIdle() throws Exception {
-        mQueue.waitForIdle(null);
+        mQueue.waitForIdle(LOG_WRITER_INFO);
     }
 
     private void verifyScheduleReceiver(ProcessRecord app, Intent intent) throws Exception {
@@ -787,9 +788,6 @@ public class BroadcastQueueTest {
         mQueue.dumpToDropBoxLocked(TAG);
 
         BroadcastQueue.logv(TAG);
-        BroadcastQueue.logv(TAG, null);
-        BroadcastQueue.logv(TAG, new PrintWriter(new ByteArrayOutputStream()));
-
         BroadcastQueue.logw(TAG);
 
         assertNotNull(mQueue.toString());
@@ -1903,10 +1901,10 @@ public class BroadcastQueueTest {
             assertFalse(mQueue.isBeyondBarrierLocked(afterSecond));
         }
 
-        mQueue.waitForBarrier(null);
+        mQueue.waitForBarrier(LOG_WRITER_INFO);
         assertTrue(mQueue.isBeyondBarrierLocked(afterFirst));
 
-        mQueue.waitForIdle(null);
+        mQueue.waitForIdle(LOG_WRITER_INFO);
         assertTrue(mQueue.isIdleLocked());
         assertTrue(mQueue.isBeyondBarrierLocked(beforeFirst));
         assertTrue(mQueue.isBeyondBarrierLocked(afterFirst));
