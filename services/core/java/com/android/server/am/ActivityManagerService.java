@@ -135,6 +135,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SERVICE;
+import static com.android.server.am.ActivityManagerDebugConfig.LOG_WRITER_INFO;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CLEANUP;
@@ -18725,27 +18726,25 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void waitForBroadcastIdle() {
-        waitForBroadcastIdle(/* printWriter= */ null);
+        waitForBroadcastIdle(LOG_WRITER_INFO);
     }
 
-    public void waitForBroadcastIdle(@Nullable PrintWriter pw) {
+    public void waitForBroadcastIdle(@NonNull PrintWriter pw) {
         enforceCallingPermission(permission.DUMP, "waitForBroadcastIdle()");
         BroadcastLoopers.waitForIdle(pw);
         for (BroadcastQueue queue : mBroadcastQueues) {
             queue.waitForIdle(pw);
         }
-        if (pw != null) {
-            pw.println("All broadcast queues are idle!");
-            pw.flush();
-        }
+        pw.println("All broadcast queues are idle!");
+        pw.flush();
     }
 
     @Override
     public void waitForBroadcastBarrier() {
-        waitForBroadcastBarrier(/* printWriter= */ null, false, false);
+        waitForBroadcastBarrier(LOG_WRITER_INFO, false, false);
     }
 
-    public void waitForBroadcastBarrier(@Nullable PrintWriter pw,
+    public void waitForBroadcastBarrier(@NonNull PrintWriter pw,
             boolean flushBroadcastLoopers, boolean flushApplicationThreads) {
         enforceCallingPermission(permission.DUMP, "waitForBroadcastBarrier()");
         if (flushBroadcastLoopers) {
@@ -18763,11 +18762,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Wait for all pending {@link IApplicationThread} events to be processed in
      * all currently running apps.
      */
-    public void waitForApplicationBarrier(@Nullable PrintWriter pw) {
-        if (pw == null) {
-            pw = new PrintWriter(new LogWriter(Log.VERBOSE, TAG));
-        }
-
+    public void waitForApplicationBarrier(@NonNull PrintWriter pw) {
         final CountDownLatch finishedLatch = new CountDownLatch(1);
         final AtomicInteger pingCount = new AtomicInteger(0);
         final AtomicInteger pongCount = new AtomicInteger(0);
@@ -18817,15 +18812,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             try {
                 if (finishedLatch.await(1, TimeUnit.SECONDS)) {
                     pw.println("Finished application barriers!");
+                    pw.flush();
                     return;
                 } else {
                     pw.println("Waiting for application barriers, at " + pongCount.get() + " of "
                             + pingCount.get() + "...");
+                    pw.flush();
                 }
             } catch (InterruptedException ignored) {
             }
         }
         pw.println("Gave up waiting for application barriers!");
+        pw.flush();
     }
 
     void setIgnoreDeliveryGroupPolicy(@NonNull String broadcastAction) {
