@@ -99,23 +99,6 @@ class EmbeddedWindowController {
         }
     }
 
-    WindowState getHostWindow(IBinder inputToken) {
-        EmbeddedWindow embeddedWindow = mWindows.get(inputToken);
-        return embeddedWindow != null ? embeddedWindow.mHostWindowState : null;
-    }
-
-    boolean isOverlay(IBinder inputToken) {
-        EmbeddedWindow embeddedWindow = mWindows.get(inputToken);
-        return embeddedWindow != null ? embeddedWindow.getIsOverlay() : false;
-    }
-
-    void setIsOverlay(IBinder focusGrantToken) {
-        EmbeddedWindow embeddedWindow = mWindowsByFocusToken.get(focusGrantToken);
-        if (embeddedWindow != null) {
-            embeddedWindow.setIsOverlay();
-        }
-    }
-
     void remove(IWindow client) {
         for (int i = mWindows.size() - 1; i >= 0; i--) {
             EmbeddedWindow ew = mWindows.valueAt(i);
@@ -176,14 +159,15 @@ class EmbeddedWindowController {
         public Session mSession;
         InputChannel mInputChannel;
         final int mWindowType;
-        // Track whether the EmbeddedWindow is a system hosted overlay via
-        // {@link OverlayHost}. In the case of client hosted overlays, the client
-        // view hierarchy will take care of invoking requestEmbeddedWindowFocus
-        // but for system hosted overlays we have to do this via tapOutsideDetection
-        // and this variable is mostly used for tracking that.
-        boolean mIsOverlay = false;
 
-        private IBinder mFocusGrantToken;
+        /**
+         * A unique token associated with the embedded window that can be used by the host window
+         * to request focus transfer to the embedded. This is not the input token since we don't
+         * want to give clients access to each others input token.
+         */
+        private final IBinder mFocusGrantToken;
+
+        private boolean mIsFocusable;
 
         /**
          * @param session  calling session to check ownership of the window
@@ -199,7 +183,8 @@ class EmbeddedWindowController {
          */
         EmbeddedWindow(Session session, WindowManagerService service, IWindow clientToken,
                        WindowState hostWindowState, int ownerUid, int ownerPid, int windowType,
-                       int displayId, IBinder focusGrantToken, String inputHandleName) {
+                       int displayId, IBinder focusGrantToken, String inputHandleName,
+                       boolean isFocusable) {
             mSession = session;
             mWmService = service;
             mClient = clientToken;
@@ -214,6 +199,7 @@ class EmbeddedWindowController {
             final String hostWindowName =
                     (mHostWindowState != null) ? "-" + mHostWindowState.getWindowTag().toString()
                             : "";
+            mIsFocusable = isFocusable;
             mName = "Embedded{" + inputHandleName + hostWindowName + "}";
         }
 
@@ -279,13 +265,6 @@ class EmbeddedWindowController {
             return mOwnerUid;
         }
 
-        void setIsOverlay() {
-            mIsOverlay = true;
-        }
-        boolean getIsOverlay() {
-            return mIsOverlay;
-        }
-
         IBinder getFocusGrantToken() {
             return mFocusGrantToken;
         }
@@ -297,20 +276,33 @@ class EmbeddedWindowController {
             return null;
         }
 
+        void setIsFocusable(boolean isFocusable) {
+            mIsFocusable = isFocusable;
+        }
+
         /**
-         * System hosted overlays need the WM to invoke grantEmbeddedWindowFocus and
-         * so we need to participate inside handlePointerDownOutsideFocus logic
-         * however client hosted overlays will rely on the hosting view hierarchy
-         * to grant and revoke focus, and so the server side logic is not needed.
+         * When an embedded window is touched when it's not currently focus, we need to switch
+         * focus to that embedded window unless the embedded window was marked as not focusable.
          */
         @Override
         public boolean receiveFocusFromTapOutside() {
-            return mIsOverlay;
+            return mIsFocusable;
         }
 
         private void handleTap(boolean grantFocus) {
             if (mInputChannel != null) {
-                mWmService.grantEmbeddedWindowFocus(mSession, mFocusGrantToken, grantFocus);
+                if (mHostWindowState != null) {
+                    mWmService.grantEmbeddedWindowFocus(mSession, mHostWindowState.mClient,
+                            mFocusGrantToken, grantFocus);
+                    if (grantFocus) {
+                        // If granting focus to the embedded when tapped, we need to ensure the host
+                        // gains focus as well or the transfer won't take effect since it requires
+                        // the host to transfer the focus to the embedded.
+                        mHostWindowState.handleTapOutsideFocusInsideSelf();
+                    }
+                } else {
+                    mWmService.grantEmbeddedWindowFocus(mSession, mFocusGrantToken, grantFocus);
+                }
             }
         }
 
