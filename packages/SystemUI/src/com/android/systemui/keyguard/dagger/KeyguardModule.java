@@ -44,6 +44,7 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardDataQuickAffordanceModule;
+import com.android.systemui.keyguard.data.repository.KeyguardFaceAuthModule;
 import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
 import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionModule;
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceModule;
@@ -67,8 +68,6 @@ import java.util.concurrent.Executor;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
-import kotlinx.coroutines.CoroutineDispatcher;
-import kotlinx.coroutines.CoroutineScope;
 
 /**
  * Dagger Module providing keyguard.
@@ -83,6 +82,7 @@ import kotlinx.coroutines.CoroutineScope;
             KeyguardDataQuickAffordanceModule.class,
             KeyguardQuickAffordanceModule.class,
             KeyguardRepositoryModule.class,
+            KeyguardFaceAuthModule.class,
             StartKeyguardTransitionModule.class,
         })
 public class KeyguardModule {

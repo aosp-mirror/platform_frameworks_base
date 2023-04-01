@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import android.hardware.biometrics.BiometricAuthenticator
+import android.hardware.biometrics.BiometricAuthenticator.Modality
 import android.hardware.biometrics.BiometricSourceType
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
@@ -33,6 +35,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates state about device entry fingerprint auth mechanism. */
@@ -49,7 +52,7 @@ interface DeviceEntryFingerprintAuthRepository {
     /**
      * Fingerprint sensor type present on the device, null if fingerprint sensor is not available.
      */
-    val availableFpSensorType: BiometricType?
+    val availableFpSensorType: Flow<BiometricType?>
 }
 
 /**
@@ -77,11 +80,39 @@ constructor(
         pw.println("isLockedOut=${isLockedOut.value}")
     }
 
-    override val availableFpSensorType: BiometricType?
-        get() =
-            if (authController.isUdfpsSupported) BiometricType.UNDER_DISPLAY_FINGERPRINT
-            else if (authController.isSfpsSupported) BiometricType.SIDE_FINGERPRINT
-            else if (authController.isRearFpsSupported) BiometricType.REAR_FINGERPRINT else null
+    override val availableFpSensorType: Flow<BiometricType?>
+        get() {
+            return if (authController.areAllFingerprintAuthenticatorsRegistered()) {
+                flowOf(getFpSensorType())
+            } else {
+                conflatedCallbackFlow {
+                    val callback =
+                        object : AuthController.Callback {
+                            override fun onAllAuthenticatorsRegistered(@Modality modality: Int) {
+                                if (modality == BiometricAuthenticator.TYPE_FINGERPRINT)
+                                    trySendWithFailureLogging(
+                                        getFpSensorType(),
+                                        TAG,
+                                        "onAllAuthenticatorsRegistered, emitting fpSensorType"
+                                    )
+                            }
+                        }
+                    authController.addCallback(callback)
+                    trySendWithFailureLogging(
+                        getFpSensorType(),
+                        TAG,
+                        "initial value for fpSensorType"
+                    )
+                    awaitClose { authController.removeCallback(callback) }
+                }
+            }
+        }
+
+    private fun getFpSensorType(): BiometricType? {
+        return if (authController.isUdfpsSupported) BiometricType.UNDER_DISPLAY_FINGERPRINT
+        else if (authController.isSfpsSupported) BiometricType.SIDE_FINGERPRINT
+        else if (authController.isRearFpsSupported) BiometricType.REAR_FINGERPRINT else null
+    }
 
     override val isLockedOut: StateFlow<Boolean> =
         conflatedCallbackFlow {
