@@ -55,6 +55,7 @@ java_test_host {
         "cts-install-lib-host",
     ],
     data: [
+        ":StagedInstallInternalTestApp",
         ":apex.apexd_test",
         ":com.android.apex.apkrollback.test_v1",
         ":com.android.apex.apkrollback.test_v2",
