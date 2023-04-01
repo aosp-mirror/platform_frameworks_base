@@ -222,7 +222,7 @@ public class BroadcastQueueTest {
         realAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
         realAms.mActivityTaskManager.initialize(null, null, mContext.getMainLooper());
         realAms.mAtmInternal = spy(realAms.mActivityTaskManager.getAtmInternal());
-        realAms.mOomAdjuster.mCachedAppOptimizer = spy(realAms.mOomAdjuster.mCachedAppOptimizer);
+        realAms.mOomAdjuster = spy(realAms.mOomAdjuster);
         realAms.mPackageManagerInt = mPackageManagerInt;
         realAms.mUsageStatsService = mUsageStatsManagerInt;
         realAms.mProcessesReady = true;
@@ -951,7 +951,7 @@ public class BroadcastQueueTest {
                 // cold-started apps to be thawed, but the modern stack does
             } else {
                 // Confirm that app was thawed
-                verify(mAms.mOomAdjuster.mCachedAppOptimizer, atLeastOnce()).unfreezeTemporarily(
+                verify(mAms.mOomAdjuster, atLeastOnce()).unfreezeTemporarily(
                         eq(receiverApp), eq(OomAdjuster.OOM_ADJ_REASON_START_RECEIVER));
 
                 // Confirm that we added package to process
@@ -1394,7 +1394,7 @@ public class BroadcastQueueTest {
                 anyInt(), any());
 
         // Finally, verify that we thawed the final receiver
-        verify(mAms.mOomAdjuster.mCachedAppOptimizer).unfreezeTemporarily(eq(callerApp),
+        verify(mAms.mOomAdjuster).unfreezeTemporarily(eq(callerApp),
                 eq(OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER));
     }
 
