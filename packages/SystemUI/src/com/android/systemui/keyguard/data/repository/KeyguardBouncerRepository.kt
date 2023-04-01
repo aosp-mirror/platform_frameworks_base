@@ -65,8 +65,6 @@ interface KeyguardBouncerRepository {
     val keyguardAuthenticated: StateFlow<Boolean?>
     val showMessage: StateFlow<BouncerShowMessageModel?>
     val resourceUpdateRequests: StateFlow<Boolean>
-    val bouncerPromptReason: Int
-    val bouncerErrorMessage: CharSequence?
     val alternateBouncerVisible: StateFlow<Boolean>
     val alternateBouncerUIAvailable: StateFlow<Boolean>
     val sideFpsShowing: StateFlow<Boolean>
@@ -145,11 +143,6 @@ constructor(
     override val showMessage = _showMessage.asStateFlow()
     private val _resourceUpdateRequests = MutableStateFlow(false)
     override val resourceUpdateRequests = _resourceUpdateRequests.asStateFlow()
-    override val bouncerPromptReason: Int
-        get() = viewMediatorCallback.bouncerPromptReason
-    override val bouncerErrorMessage: CharSequence?
-        get() = viewMediatorCallback.consumeCustomMessage()
-
     /** Values associated with the AlternateBouncer */
     private val _alternateBouncerVisible = MutableStateFlow(false)
     override val alternateBouncerVisible = _alternateBouncerVisible.asStateFlow()

@@ -496,7 +496,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
         }
 
         // Colors
-        if (state.state != lastState || state.disabledByPolicy || lastDisabledByPolicy) {
+        if (state.state != lastState || state.disabledByPolicy != lastDisabledByPolicy) {
             singleAnimator.cancel()
             mQsLogger?.logTileBackgroundColorUpdateIfInternetTile(
                     state.spec,

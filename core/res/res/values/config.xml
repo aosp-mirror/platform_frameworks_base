@@ -6379,4 +6379,6 @@
     <!-- Whether we should persist the brightness value in nits for the default display even if
          the underlying display device changes. -->
     <bool name="config_persistBrightnessNitsForDefaultDisplay">false</bool>
+    <!-- Whether to request the approval before commit sessions. -->
+    <bool name="config_isPreApprovalRequestAvailable">true</bool>
 </resources>

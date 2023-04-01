@@ -384,8 +384,15 @@ class RemoteTransitionAdapter {
         }
 
         @JvmStatic
-        fun adaptRemoteAnimation(adapter: RemoteAnimationAdapter): RemoteTransition {
-            return RemoteTransition(adaptRemoteRunner(adapter.runner), adapter.callingApplication)
+        fun adaptRemoteAnimation(
+            adapter: RemoteAnimationAdapter,
+            debugName: String
+        ): RemoteTransition {
+            return RemoteTransition(
+                adaptRemoteRunner(adapter.runner),
+                adapter.callingApplication,
+                debugName
+            )
         }
     }
 

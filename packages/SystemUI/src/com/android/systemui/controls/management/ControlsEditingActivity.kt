@@ -27,6 +27,7 @@ import android.view.ViewGroup
 import android.view.ViewStub
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
 import androidx.activity.ComponentActivity
@@ -38,8 +39,9 @@ import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.ui.ControlsActivity
-import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.settings.UserTracker
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -48,17 +50,19 @@ import javax.inject.Inject
  * Activity for rearranging and removing controls for a given structure
  */
 open class ControlsEditingActivity @Inject constructor(
+    featureFlags: FeatureFlags,
     @Main private val mainExecutor: Executor,
     private val controller: ControlsControllerImpl,
     private val userTracker: UserTracker,
     private val customIconCache: CustomIconCache,
-    private val uiController: ControlsUiController
 ) : ComponentActivity() {
 
     companion object {
         private const val DEBUG = false
         private const val TAG = "ControlsEditingActivity"
         const val EXTRA_STRUCTURE = ControlsFavoritingActivity.EXTRA_STRUCTURE
+        const val EXTRA_APP = ControlsFavoritingActivity.EXTRA_APP
+        const val EXTRA_FROM_FAVORITING = "extra_from_favoriting"
         private val SUBTITLE_ID = R.string.controls_favorite_rearrange
         private val EMPTY_TEXT_ID = R.string.controls_favorite_removed
     }
@@ -68,7 +72,12 @@ open class ControlsEditingActivity @Inject constructor(
     private lateinit var model: FavoritesModel
     private lateinit var subtitle: TextView
     private lateinit var saveButton: View
+    private lateinit var addControls: View
 
+    private var isFromFavoriting: Boolean = false
+
+    private val isNewFlowEnabled: Boolean =
+        featureFlags.isEnabled(Flags.CONTROLS_MANAGEMENT_NEW_FLOWS)
     private val userTrackerCallback: UserTracker.Callback = object : UserTracker.Callback {
         private val startingUser = controller.currentUserId
 
@@ -93,7 +102,7 @@ open class ControlsEditingActivity @Inject constructor(
         intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)?.let {
             component = it
         } ?: run(this::finish)
-
+        isFromFavoriting = intent.getBooleanExtra(EXTRA_FROM_FAVORITING, false)
         intent.getCharSequenceExtra(EXTRA_STRUCTURE)?.let {
             structure = it
         } ?: run(this::finish)
@@ -165,8 +174,42 @@ open class ControlsEditingActivity @Inject constructor(
     }
 
     private fun bindButtons() {
+        addControls = requireViewById<Button>(R.id.addControls).apply {
+            isEnabled = true
+            visibility = if (isNewFlowEnabled) View.VISIBLE else View.GONE
+            setOnClickListener {
+                if (saveButton.isEnabled) {
+                    // The user has made changes
+                    Toast.makeText(
+                        applicationContext,
+                        R.string.controls_favorite_toast_no_changes,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                if (isFromFavoriting) {
+                    animateExitAndFinish()
+                } else {
+                    startActivity(Intent(context, ControlsFavoritingActivity::class.java).also {
+                        it.putExtra(ControlsFavoritingActivity.EXTRA_STRUCTURE, structure)
+                        it.putExtra(Intent.EXTRA_COMPONENT_NAME, component)
+                        it.putExtra(
+                            ControlsFavoritingActivity.EXTRA_APP,
+                            intent.getCharSequenceExtra(EXTRA_APP),
+                        )
+                        it.putExtra(
+                            ControlsFavoritingActivity.EXTRA_SOURCE,
+                            ControlsFavoritingActivity.EXTRA_SOURCE_VALUE_FROM_EDITING,
+                        )
+                    },
+                                  ActivityOptions.makeSceneTransitionAnimation(
+                                      this@ControlsEditingActivity
+                                  ).toBundle(),
+                    )
+                }
+            }
+        }
         saveButton = requireViewById<Button>(R.id.done).apply {
-            isEnabled = false
+            isEnabled = isFromFavoriting
             setText(R.string.save)
             setOnClickListener {
                 saveFavorites()
@@ -193,6 +236,8 @@ open class ControlsEditingActivity @Inject constructor(
                 subtitle.setText(SUBTITLE_ID)
             }
         }
+
+        override fun onChange() = Unit
 
         override fun onFirstChange() {
             saveButton.isEnabled = true

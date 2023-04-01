@@ -1586,61 +1586,109 @@ public final class WindowContainerTransaction implements Parcelable {
             return mShortcutInfo;
         }
 
+        /** Gets a string representation of a hierarchy-op type. */
+        public static String hopToString(int type) {
+            switch (type) {
+                case HIERARCHY_OP_TYPE_REPARENT: return "reparent";
+                case HIERARCHY_OP_TYPE_REORDER: return "reorder";
+                case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT: return "ChildrenTasksReparent";
+                case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: return "SetLaunchRoot";
+                case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS: return "SetAdjacentRoot";
+                case HIERARCHY_OP_TYPE_LAUNCH_TASK: return "LaunchTask";
+                case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT: return "SetAdjacentFlagRoot";
+                case HIERARCHY_OP_TYPE_PENDING_INTENT: return "PendingIntent";
+                case HIERARCHY_OP_TYPE_START_SHORTCUT: return "StartShortcut";
+                case HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER: return "addInsetsFrameProvider";
+                case HIERARCHY_OP_TYPE_REMOVE_INSETS_FRAME_PROVIDER:
+                    return "removeInsetsFrameProvider";
+                case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP: return "setAlwaysOnTop";
+                case HIERARCHY_OP_TYPE_REMOVE_TASK: return "RemoveTask";
+                case HIERARCHY_OP_TYPE_FINISH_ACTIVITY: return "finishActivity";
+                case HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS: return "ClearAdjacentRoot";
+                case HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH:
+                    return "setReparentLeafTaskIfRelaunch";
+                case HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION:
+                    return "addTaskFragmentOperation";
+                default: return "HOP(" + type + ")";
+            }
+        }
+
         @Override
         public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("{").append(hopToString(mType)).append(": ");
             switch (mType) {
                 case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT:
-                    return "{ChildrenTasksReparent: from=" + mContainer + " to=" + mReparent
-                            + " mToTop=" + mToTop + " mReparentTopOnly=" + mReparentTopOnly
-                            + " mWindowingMode=" + Arrays.toString(mWindowingModes)
-                            + " mActivityType=" + Arrays.toString(mActivityTypes) + "}";
+                    sb.append("from=").append(mContainer).append(" to=").append(mReparent)
+                            .append(" mToTop=").append(mToTop)
+                            .append(" mReparentTopOnly=").append(mReparentTopOnly)
+                            .append(" mWindowingMode=").append(Arrays.toString(mWindowingModes))
+                            .append(" mActivityType=").append(Arrays.toString(mActivityTypes));
+                    break;
                 case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT:
-                    return "{SetLaunchRoot: container=" + mContainer
-                            + " mWindowingMode=" + Arrays.toString(mWindowingModes)
-                            + " mActivityType=" + Arrays.toString(mActivityTypes) + "}";
+                    sb.append("container=").append(mContainer)
+                            .append(" mWindowingMode=").append(Arrays.toString(mWindowingModes))
+                            .append(" mActivityType=").append(Arrays.toString(mActivityTypes));
+                    break;
                 case HIERARCHY_OP_TYPE_REPARENT:
-                    return "{reparent: " + mContainer + " to " + (mToTop ? "top of " : "bottom of ")
-                            + mReparent + "}";
+                    sb.append(mContainer).append(" to ").append(mToTop ? "top of " : "bottom of ")
+                            .append(mReparent);
+                    break;
                 case HIERARCHY_OP_TYPE_REORDER:
-                    return "{reorder: " + mContainer + " to " + (mToTop ? "top" : "bottom") + "}";
+                    sb.append(mContainer).append(" to ").append(mToTop ? "top" : "bottom");
+                    break;
                 case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS:
-                    return "{SetAdjacentRoot: container=" + mContainer
-                            + " adjacentRoot=" + mReparent + "}";
+                    sb.append("container=").append(mContainer)
+                            .append(" adjacentRoot=").append(mReparent);
+                    break;
                 case HIERARCHY_OP_TYPE_LAUNCH_TASK:
-                    return "{LaunchTask: " + mLaunchOptions + "}";
+                    sb.append(mLaunchOptions);
+                    break;
                 case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT:
-                    return "{SetAdjacentFlagRoot: container=" + mContainer + " clearRoot=" + mToTop
-                            + "}";
+                    sb.append("container=").append(mContainer).append(" clearRoot=").append(mToTop);
+                    break;
                 case HIERARCHY_OP_TYPE_START_SHORTCUT:
-                    return "{StartShortcut: options=" + mLaunchOptions + " info=" + mShortcutInfo
-                            + "}";
+                    sb.append("options=").append(mLaunchOptions)
+                            .append(" info=").append(mShortcutInfo);
+                    break;
+                case HIERARCHY_OP_TYPE_PENDING_INTENT:
+                    sb.append("options=").append(mLaunchOptions);
+                    break;
                 case HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER:
-                    return "{addRectInsetsProvider: container=" + mContainer
-                            + " provider=" + mInsetsFrameProvider + "}";
                 case HIERARCHY_OP_TYPE_REMOVE_INSETS_FRAME_PROVIDER:
-                    return "{removeLocalInsetsProvider: container=" + mContainer
-                            + " provider=" + mInsetsFrameProvider + "}";
+                    sb.append("container=").append(mContainer)
+                            .append(" provider=").append(mInsetsFrameProvider);
+                    break;
                 case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP:
-                    return "{setAlwaysOnTop: container=" + mContainer
-                            + " alwaysOnTop=" + mAlwaysOnTop + "}";
+                    sb.append("container=").append(mContainer)
+                            .append(" alwaysOnTop=").append(mAlwaysOnTop);
+                    break;
                 case HIERARCHY_OP_TYPE_REMOVE_TASK:
-                    return "{RemoveTask: task=" + mContainer + "}";
+                    sb.append("task=").append(mContainer);
+                    break;
                 case HIERARCHY_OP_TYPE_FINISH_ACTIVITY:
-                    return "{finishActivity: activity=" + mContainer + "}";
+                    sb.append("activity=").append(mContainer);
+                    break;
                 case HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS:
-                    return "{ClearAdjacentRoot: container=" + mContainer + "}";
+                    sb.append("container=").append(mContainer);
+                    break;
                 case HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH:
-                    return "{setReparentLeafTaskIfRelaunch: container= " + mContainer
-                            + " reparentLeafTaskIfRelaunch= " + mReparentLeafTaskIfRelaunch + "}";
+                    sb.append("container= ").append(mContainer)
+                            .append(" reparentLeafTaskIfRelaunch= ")
+                            .append(mReparentLeafTaskIfRelaunch);
+                    break;
                 case HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION:
-                    return "{addTaskFragmentOperation: fragmentToken= " + mContainer
-                            + " operation= " + mTaskFragmentOperation + "}";
+                    sb.append("fragmentToken= ").append(mContainer)
+                            .append(" operation= ").append(mTaskFragmentOperation);
+                    break;
                 default:
-                    return "{mType=" + mType + " container=" + mContainer + " reparent=" + mReparent
-                            + " mToTop=" + mToTop
-                            + " mWindowingMode=" + Arrays.toString(mWindowingModes)
-                            + " mActivityType=" + Arrays.toString(mActivityTypes) + "}";
+                    sb.append("container=").append(mContainer)
+                            .append(" reparent=").append(mReparent)
+                            .append(" mToTop=").append(mToTop)
+                            .append(" mWindowingMode=").append(Arrays.toString(mWindowingModes))
+                            .append(" mActivityType=").append(Arrays.toString(mActivityTypes));
             }
+            return sb.append("}").toString();
         }
 
         @Override

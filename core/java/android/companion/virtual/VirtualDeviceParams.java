@@ -34,6 +34,7 @@ import android.companion.virtual.sensor.VirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorDirectChannelCallback;
 import android.content.ComponentName;
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SharedMemory;
@@ -680,7 +681,7 @@ public final class VirtualDeviceParams implements Parcelable {
          * {@link #NAVIGATION_POLICY_DEFAULT_ALLOWED}, meaning activities are allowed to launch
          * unless they are in {@code blockedCrossTaskNavigations}.
          *
-         * <p> This method must not be called if {@link #setAllowedCrossTaskNavigations(Set)} has
+         * <p>This method must not be called if {@link #setAllowedCrossTaskNavigations(Set)} has
          * been called.
          *
          * @throws IllegalArgumentException if {@link #setAllowedCrossTaskNavigations(Set)} has
@@ -847,11 +848,11 @@ public final class VirtualDeviceParams implements Parcelable {
          * <p>Requires {@link #DEVICE_POLICY_CUSTOM} to be set for {@link #POLICY_TYPE_AUDIO},
          * otherwise {@link #build()} method will throw {@link IllegalArgumentException} if
          * the playback session id is set to value other than
-         * {@link android.media.AudioManager.AUDIO_SESSION_ID_GENERATE}.
+         * {@link android.media.AudioManager#AUDIO_SESSION_ID_GENERATE}.
          *
          * @param playbackSessionId requested device-specific audio session id for playback
-         * @see android.media.AudioManager.generateAudioSessionId()
-         * @see android.media.AudioTrack.Builder.setContext(Context)
+         * @see android.media.AudioManager#generateAudioSessionId()
+         * @see android.media.AudioTrack.Builder#setContext(Context)
          */
         @NonNull
         public Builder setAudioPlaybackSessionId(int playbackSessionId) {
@@ -871,11 +872,11 @@ public final class VirtualDeviceParams implements Parcelable {
          * <p>Requires {@link #DEVICE_POLICY_CUSTOM} to be set for {@link #POLICY_TYPE_AUDIO},
          * otherwise {@link #build()} method will throw {@link IllegalArgumentException} if
          * the recording session id is set to value other than
-         * {@link android.media.AudioManager.AUDIO_SESSION_ID_GENERATE}.
+         * {@link android.media.AudioManager#AUDIO_SESSION_ID_GENERATE}.
          *
          * @param recordingSessionId requested device-specific audio session id for playback
-         * @see android.media.AudioManager.generateAudioSessionId()
-         * @see android.media.AudioRecord.Builder.setContext(Context)
+         * @see android.media.AudioManager#generateAudioSessionId()
+         * @see android.media.AudioRecord.Builder#setContext(Context)
          */
         @NonNull
         public Builder setAudioRecordingSessionId(int recordingSessionId) {

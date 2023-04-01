@@ -250,16 +250,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -282,7 +282,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <style name="Theme.DeviceDefault" parent="Theme.DeviceDefaultBase" />
@@ -345,16 +344,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -377,7 +376,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar.  This theme
@@ -439,16 +437,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -471,7 +469,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar and
@@ -535,16 +532,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -567,7 +564,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} that has no title bar and translucent
@@ -630,16 +626,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -662,7 +658,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- DeviceDefault theme for dialog windows and activities. This changes the window to be
@@ -733,16 +728,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -765,7 +760,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog} that has a nice minimum width for a
@@ -827,16 +821,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -859,7 +853,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog} without an action bar -->
@@ -920,16 +913,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -952,7 +945,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog_NoActionBar} that has a nice minimum width
@@ -1014,16 +1006,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -1046,7 +1038,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- Variant of Theme.DeviceDefault.Dialog that has a fixed size. -->
@@ -1124,16 +1115,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -1156,7 +1147,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- DeviceDefault theme for a window without an action bar that will be displayed either
@@ -1219,16 +1209,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -1251,7 +1241,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- DeviceDefault theme for a presentation window on a secondary display. -->
@@ -1312,16 +1301,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -1344,7 +1333,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- DeviceDefault theme for panel windows. This removes all extraneous window
@@ -1407,16 +1395,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -1439,7 +1427,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- DeviceDefault theme for windows that want to have the user's selected wallpaper appear
@@ -1501,16 +1488,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -1533,7 +1520,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- DeviceDefault theme for windows that want to have the user's selected wallpaper appear
@@ -1595,16 +1581,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -1627,7 +1613,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- DeviceDefault style for input methods, which is used by the
@@ -1689,16 +1674,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -1721,7 +1706,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- DeviceDefault style for input methods, which is used by the
@@ -1783,16 +1767,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -1815,7 +1799,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Material.Dialog.Alert">
@@ -1877,16 +1860,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -1909,7 +1892,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- Theme for the dialog shown when an app crashes or ANRs. -->
@@ -1976,16 +1958,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -2008,7 +1990,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <style name="Theme.DeviceDefault.Dialog.NoFrame" parent="Theme.Material.Dialog.NoFrame">
@@ -2068,16 +2049,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -2100,7 +2081,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with a light-colored style -->
@@ -2298,16 +2278,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -2330,8 +2310,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- Variant of the DeviceDefault (light) theme that has a solid (opaque) action bar with an
@@ -2393,16 +2371,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -2425,8 +2403,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar -->
@@ -2487,16 +2463,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -2519,8 +2495,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar and no status bar.
@@ -2582,16 +2556,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -2614,8 +2588,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar and no status bar
@@ -2679,16 +2651,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -2711,8 +2683,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} that has no title bar and translucent
@@ -2775,16 +2745,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -2807,8 +2777,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- DeviceDefault light theme for dialog windows and activities. This changes the window to be
@@ -2877,16 +2845,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -2909,8 +2877,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog} that has a nice minimum width for a
@@ -2975,16 +2941,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -3007,11 +2973,9 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
-     <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog} without an action bar -->
+    <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog} without an action bar -->
     <style name="Theme.DeviceDefault.Light.Dialog.NoActionBar" parent="Theme.Material.Light.Dialog.NoActionBar">
         <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault.Light</item>
         <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
@@ -3072,16 +3036,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -3104,8 +3068,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog_NoActionBar} that has a nice minimum
@@ -3170,16 +3132,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -3202,8 +3164,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- Variant of Theme.DeviceDefault.Dialog that has a fixed size. -->
@@ -3249,16 +3209,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -3281,8 +3241,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- Variant of Theme.DeviceDefault.Dialog.NoActionBar that has a fixed size. -->
@@ -3328,16 +3286,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -3360,8 +3318,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- DeviceDefault light theme for a window that will be displayed either full-screen on smaller
@@ -3426,16 +3382,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -3458,8 +3414,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- DeviceDefault light theme for a window without an action bar that will be displayed either
@@ -3525,16 +3479,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -3557,8 +3511,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- DeviceDefault light theme for a presentation window on a secondary display. -->
@@ -3622,16 +3574,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -3654,8 +3606,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- DeviceDefault light theme for panel windows. This removes all extraneous window
@@ -3718,16 +3668,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -3750,8 +3700,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.Material.Light.Dialog.Alert">
@@ -3813,16 +3761,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -3845,8 +3793,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <style name="Theme.DeviceDefault.Dialog.Alert.DayNight" parent="Theme.DeviceDefault.Light.Dialog.Alert" />
@@ -3908,16 +3854,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -3940,8 +3886,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <style name="Theme.DeviceDefault.Light.Voice" parent="Theme.Material.Light.Voice">
@@ -4001,16 +3945,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -4033,8 +3977,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- DeviceDefault theme for a window that should look like the Settings app.  -->
@@ -4347,16 +4289,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -4379,7 +4321,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <style name="Theme.DeviceDefault.Settings.DialogBase" parent="Theme.Material.Light.BaseDialog">
@@ -4543,16 +4484,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -4575,7 +4516,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <style name="Theme.DeviceDefault.Settings.Dialog.Alert" parent="Theme.Material.Settings.Dialog.Alert">
@@ -4639,16 +4579,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -4671,7 +4611,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <style name="Theme.DeviceDefault.Settings.Dialog.NoActionBar" parent="Theme.DeviceDefault.Light.Dialog.NoActionBar" />
@@ -4813,16 +4752,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -4845,8 +4784,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <!-- Theme overlay that replaces colorAccent with the colorAccent from {@link #Theme_DeviceDefault_DayNight}. -->
@@ -4870,16 +4807,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -4902,7 +4839,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
 
     <style name="Theme.DeviceDefault.Light.Dialog.Alert.UserSwitchingDialog" parent="Theme.DeviceDefault.NoActionBar.Fullscreen">
@@ -4922,16 +4858,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_light</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_light</item>
         <item name="materialColorErrorContainer">@color/system_error_container_light</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_light</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_light</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -4954,8 +4890,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-        <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
-
     </style>
 
     <style name="Theme.DeviceDefault.Notification" parent="@style/Theme.Material.Notification">
@@ -4986,16 +4920,16 @@ easier.
         <item name="materialColorSecondaryFixedDim">@color/system_secondary_fixed_dim</item>
         <item name="materialColorOnErrorContainer">@color/system_on_error_container_dark</item>
         <item name="materialColorOnSecondaryFixed">@color/system_on_secondary_fixed</item>
-        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_dark</item>
+        <item name="materialColorOnSurfaceInverse">@color/system_on_surface_light</item>
         <item name="materialColorTertiaryFixedDim">@color/system_tertiary_fixed_dim</item>
         <item name="materialColorOnTertiaryFixed">@color/system_on_tertiary_fixed</item>
         <item name="materialColorPrimaryFixedDim">@color/system_primary_fixed_dim</item>
         <item name="materialColorSecondaryContainer">@color/system_secondary_container_dark</item>
         <item name="materialColorErrorContainer">@color/system_error_container_dark</item>
         <item name="materialColorOnPrimaryFixed">@color/system_on_primary_fixed</item>
-        <item name="materialColorPrimaryInverse">@color/system_primary_dark</item>
+        <item name="materialColorPrimaryInverse">@color/system_primary_light</item>
         <item name="materialColorSecondaryFixed">@color/system_secondary_fixed</item>
-        <item name="materialColorSurfaceInverse">@color/system_surface_dark</item>
+        <item name="materialColorSurfaceInverse">@color/system_surface_light</item>
         <item name="materialColorSurfaceVariant">@color/system_surface_variant_dark</item>
         <item name="materialColorTertiaryContainer">@color/system_tertiary_container_dark</item>
         <item name="materialColorTertiaryFixed">@color/system_tertiary_fixed</item>
@@ -5018,7 +4952,6 @@ easier.
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
-
     </style>
     <style name="Theme.DeviceDefault.AutofillHalfScreenDialogList" parent="Theme.DeviceDefault.DayNight">
         <item name="colorListDivider">@color/list_divider_opacity_device_default_light</item>

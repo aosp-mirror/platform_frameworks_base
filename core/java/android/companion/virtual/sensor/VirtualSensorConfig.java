@@ -31,7 +31,9 @@ import java.util.Objects;
 
 /**
  * Configuration for creation of a virtual sensor.
+ *
  * @see VirtualSensor
+ *
  * @hide
  */
 @SystemApi
@@ -122,6 +124,7 @@ public final class VirtualSensorConfig implements Parcelable {
 
     /**
      * Returns the vendor string of the sensor.
+     *
      * @see Builder#setVendor
      */
     @Nullable
@@ -130,7 +133,8 @@ public final class VirtualSensorConfig implements Parcelable {
     }
 
     /**
-     * Returns maximum range of the sensor in the sensor's unit.
+     * Returns the maximum range of the sensor in the sensor's unit.
+     *
      * @see Sensor#getMaximumRange
      */
     public float getMaximumRange() {
@@ -138,7 +142,8 @@ public final class VirtualSensorConfig implements Parcelable {
     }
 
     /**
-     * Returns The resolution of the sensor in the sensor's unit.
+     * Returns the resolution of the sensor in the sensor's unit.
+     *
      * @see Sensor#getResolution
      */
     public float getResolution() {
@@ -146,7 +151,8 @@ public final class VirtualSensorConfig implements Parcelable {
     }
 
     /**
-     * Returns The power in mA used by this sensor while in use.
+     * Returns the power in mA used by this sensor while in use.
+     *
      * @see Sensor#getPower
      */
     public float getPower() {
@@ -154,8 +160,9 @@ public final class VirtualSensorConfig implements Parcelable {
     }
 
     /**
-     * Returns The minimum delay allowed between two events in microseconds, or zero depending on
+     * Returns the minimum delay allowed between two events in microseconds, or zero depending on
      * the sensor type.
+     *
      * @see Sensor#getMinDelay
      */
     public int getMinDelay() {
@@ -163,7 +170,8 @@ public final class VirtualSensorConfig implements Parcelable {
     }
 
     /**
-     * Returns The maximum delay between two sensor events in microseconds.
+     * Returns the maximum delay between two sensor events in microseconds.
+     *
      * @see Sensor#getMaxDelay
      */
     public int getMaxDelay() {
@@ -201,6 +209,7 @@ public final class VirtualSensorConfig implements Parcelable {
 
     /**
      * Returns the sensor flags.
+     *
      * @hide
      */
     public int getFlags() {
@@ -233,7 +242,7 @@ public final class VirtualSensorConfig implements Parcelable {
          *
          * @param type The type of the sensor, matching {@link Sensor#getType}.
          * @param name The name of the sensor. Must be unique among all sensors with the same type
-         *             that belong to the same virtual device.
+         *   that belong to the same virtual device.
          */
         public Builder(@IntRange(from = 1) int type, @NonNull String name) {
             if (type <= 0) {
@@ -275,6 +284,7 @@ public final class VirtualSensorConfig implements Parcelable {
 
         /**
          * Sets the maximum range of the sensor in the sensor's unit.
+         *
          * @see Sensor#getMaximumRange
          */
         @NonNull
@@ -285,6 +295,7 @@ public final class VirtualSensorConfig implements Parcelable {
 
         /**
          * Sets the resolution of the sensor in the sensor's unit.
+         *
          * @see Sensor#getResolution
          */
         @NonNull
@@ -295,6 +306,7 @@ public final class VirtualSensorConfig implements Parcelable {
 
         /**
          * Sets the power in mA used by this sensor while in use.
+         *
          * @see Sensor#getPower
          */
         @NonNull
@@ -305,6 +317,7 @@ public final class VirtualSensorConfig implements Parcelable {
 
         /**
          * Sets the minimum delay allowed between two events in microseconds.
+         *
          * @see Sensor#getMinDelay
          */
         @NonNull
@@ -315,6 +328,7 @@ public final class VirtualSensorConfig implements Parcelable {
 
         /**
          * Sets the maximum delay between two sensor events in microseconds.
+         *
          * @see Sensor#getMaxDelay
          */
         @NonNull
@@ -339,11 +353,11 @@ public final class VirtualSensorConfig implements Parcelable {
          * Sets whether direct sensor channel of the given types is supported.
          *
          * @param memoryTypes A combination of {@link SensorDirectChannel.MemoryType} flags
-         * indicating the types of shared memory supported for creating direct channels. Only
-         * {@link SensorDirectChannel#TYPE_MEMORY_FILE} direct channels may be supported for virtual
-         * sensors.
+         *   indicating the types of shared memory supported for creating direct channels. Only
+         *   {@link SensorDirectChannel#TYPE_MEMORY_FILE} direct channels may be supported for
+         *   virtual sensors.
          * @throws IllegalArgumentException if {@link SensorDirectChannel#TYPE_HARDWARE_BUFFER} is
-         * set to be supported.
+         *   set to be supported.
          */
         @NonNull
         public VirtualSensorConfig.Builder setDirectChannelTypesSupported(

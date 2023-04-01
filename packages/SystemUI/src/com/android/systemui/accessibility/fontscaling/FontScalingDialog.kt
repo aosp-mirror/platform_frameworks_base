@@ -21,6 +21,7 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
 import android.provider.Settings
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.SeekBar
@@ -49,8 +50,7 @@ class FontScalingDialog(
     private lateinit var seekBarWithIconButtonsView: SeekBarWithIconButtonsView
     private var lastProgress: Int = -1
 
-    private val configuration: Configuration =
-        Configuration(context.getResources().getConfiguration())
+    private val configuration: Configuration = Configuration(context.resources.configuration)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTitle(R.string.font_scaling_dialog_title)
@@ -84,29 +84,43 @@ class FontScalingDialog(
 
         seekBarWithIconButtonsView.setOnSeekBarChangeListener(
             object : OnSeekBarChangeListener {
+                var isTrackingTouch = false
+
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                    if (progress != lastProgress) {
-                        if (!fontSizeHasBeenChangedFromTile) {
-                            backgroundExecutor.execute { updateSecureSettingsIfNeeded() }
-                            fontSizeHasBeenChangedFromTile = true
-                        }
-
-                        backgroundExecutor.execute { updateFontScale(strEntryValues[progress]) }
-
-                        lastProgress = progress
+                    if (!isTrackingTouch) {
+                        // The seekbar progress is changed by icon buttons
+                        changeFontSize(progress)
+                    } else {
+                        // Provide preview configuration for text instead of changing the system
+                        // font scale before users release their finger from the seekbar.
+                        createTextPreview(progress)
                     }
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {
-                    // Do nothing
+                    isTrackingTouch = true
                 }
 
                 override fun onStopTrackingTouch(seekBar: SeekBar) {
-                    // Do nothing
+                    isTrackingTouch = false
+                    changeFontSize(seekBar.progress)
                 }
             }
         )
         doneButton.setOnClickListener { dismiss() }
+    }
+
+    private fun changeFontSize(progress: Int) {
+        if (progress != lastProgress) {
+            if (!fontSizeHasBeenChangedFromTile) {
+                backgroundExecutor.execute { updateSecureSettingsIfNeeded() }
+                fontSizeHasBeenChangedFromTile = true
+            }
+
+            backgroundExecutor.execute { updateFontScale(strEntryValues[progress]) }
+
+            lastProgress = progress
+        }
     }
 
     private fun fontSizeValueToIndex(value: Float): Int {
@@ -151,6 +165,20 @@ class FontScalingDialog(
                 ON
             )
         }
+    }
+
+    /** Provides font size preview for text before putting the final settings to the system. */
+    fun createTextPreview(index: Int) {
+        val previewConfig = Configuration(configuration)
+        previewConfig.fontScale = strEntryValues[index].toFloat()
+
+        val previewConfigContext = context.createConfigurationContext(previewConfig)
+        previewConfigContext.theme.setTo(context.theme)
+
+        title.setTextSize(
+            TypedValue.COMPLEX_UNIT_PX,
+            previewConfigContext.resources.getDimension(R.dimen.dialog_title_text_size)
+        )
     }
 
     companion object {

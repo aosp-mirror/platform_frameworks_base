@@ -40,6 +40,7 @@ import android.metrics.LogMaker;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
@@ -64,6 +65,7 @@ import com.android.keyguard.KeyguardSecurityContainer.BouncerUiEvent;
 import com.android.keyguard.KeyguardSecurityContainer.SwipeListener;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
+import com.android.settingslib.Utils;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
@@ -632,6 +634,16 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mView.onResume(
                 mSecurityModel.getSecurityMode(KeyguardUpdateMonitor.getCurrentUser()),
                 mKeyguardStateController.isFaceAuthEnabled());
+    }
+
+    /** Sets an initial message that would override the default message */
+    public void setInitialMessage() {
+        CharSequence customMessage = mViewMediatorCallback.consumeCustomMessage();
+        if (!TextUtils.isEmpty(customMessage)) {
+            showMessage(customMessage, Utils.getColorError(getContext()));
+            return;
+        }
+        showPromptReason(mViewMediatorCallback.getBouncerPromptReason());
     }
 
     /**

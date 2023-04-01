@@ -369,6 +369,39 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
         verifyZeroInteractions(context, bubbles, eventLogger)
     }
+
+    @Test
+    fun showNoteTask_keyboardShortcut_shouldStartActivity() {
+        val expectedInfo =
+                NOTE_TASK_INFO.copy(
+                        entryPoint = NoteTaskEntryPoint.KEYBOARD_SHORTCUT,
+                        isKeyguardLocked = true,
+                )
+        whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
+        whenever(resolver.resolveInfo(any(), any())).thenReturn(expectedInfo)
+
+        createNoteTaskController()
+                .showNoteTask(
+                        entryPoint = expectedInfo.entryPoint!!,
+                )
+
+        val intentCaptor = argumentCaptor<Intent>()
+        val userCaptor = argumentCaptor<UserHandle>()
+        verify(context).startActivityAsUser(capture(intentCaptor), capture(userCaptor))
+        intentCaptor.value.let { intent ->
+            assertThat(intent.action).isEqualTo(Intent.ACTION_CREATE_NOTE)
+            assertThat(intent.`package`).isEqualTo(NOTE_TASK_PACKAGE_NAME)
+            assertThat(intent.flags and FLAG_ACTIVITY_NEW_TASK).isEqualTo(FLAG_ACTIVITY_NEW_TASK)
+            assertThat(intent.flags and FLAG_ACTIVITY_MULTIPLE_TASK)
+                    .isEqualTo(FLAG_ACTIVITY_MULTIPLE_TASK)
+            assertThat(intent.flags and FLAG_ACTIVITY_NEW_DOCUMENT)
+                    .isEqualTo(FLAG_ACTIVITY_NEW_DOCUMENT)
+            assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, true)).isFalse()
+        }
+        assertThat(userCaptor.value).isEqualTo(userTracker.userHandle)
+        verify(eventLogger).logNoteTaskOpened(expectedInfo)
+        verifyZeroInteractions(bubbles)
+    }
     // endregion
 
     // region setNoteTaskShortcutEnabled

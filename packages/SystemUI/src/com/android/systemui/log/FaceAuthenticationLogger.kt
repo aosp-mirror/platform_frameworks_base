@@ -7,17 +7,17 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.dagger.FaceAuthLog
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel.DEBUG
-import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
-private const val TAG = "KeyguardFaceAuthManagerLog"
+private const val TAG = "DeviceEntryFaceAuthRepositoryLog"
 
 /**
- * Helper class for logging for [com.android.keyguard.faceauth.KeyguardFaceAuthManager]
+ * Helper class for logging for
+ * [com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository]
  *
  * To enable logcat echoing for an entire buffer:
  * ```
- *   adb shell settings put global systemui/buffer/KeyguardFaceAuthManagerLog <logLevel>
+ *   adb shell settings put global systemui/buffer/DeviceEntryFaceAuthRepositoryLog <logLevel>
  *
  * ```
  */
@@ -82,8 +82,19 @@ constructor(
         )
     }
 
-    fun skippingBecauseAlreadyRunning(@CompileTimeConstant operation: String) {
-        logBuffer.log(TAG, DEBUG, "isAuthRunning is true, skipping $operation")
+    fun skippingDetection(isAuthRunning: Boolean, detectCancellationNotNull: Boolean) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                bool1 = isAuthRunning
+                bool2 = detectCancellationNotNull
+            },
+            {
+                "Skipping running detection: isAuthRunning: $bool1, " +
+                    "detectCancellationNotNull: $bool2"
+            }
+        )
     }
 
     fun faceDetectionStarted() {
@@ -176,5 +187,34 @@ constructor(
             },
             { "Face authenticated successfully: userId: $int1, isStrongBiometric: $bool1" }
         )
+    }
+
+    fun observedConditionChanged(newValue: Boolean, context: String) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                bool1 = newValue
+                str1 = context
+            },
+            { "Observed condition changed: $str1, new value: $bool1" }
+        )
+    }
+
+    fun canFaceAuthRunChanged(canRun: Boolean) {
+        logBuffer.log(TAG, DEBUG, { bool1 = canRun }, { "canFaceAuthRun value changed to $bool1" })
+    }
+
+    fun canRunDetectionChanged(canRunDetection: Boolean) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            { bool1 = canRunDetection },
+            { "canRunDetection value changed to $bool1" }
+        )
+    }
+
+    fun cancellingFaceAuth() {
+        logBuffer.log(TAG, DEBUG, "cancelling face auth because a gating condition became false")
     }
 }

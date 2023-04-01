@@ -187,17 +187,18 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                 && isOpeningType(request.getType())
                 && request.getTriggerTask() != null
                 && request.getTriggerTask().getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                && (request.getTriggerTask().getActivityType() == ACTIVITY_TYPE_HOME
-                        || request.getTriggerTask().getActivityType() == ACTIVITY_TYPE_RECENTS)
-                && request.getRemoteTransition() != null) {
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a recents request while "
+                && request.getTriggerTask().getActivityType() == ACTIVITY_TYPE_HOME) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a going-home request while "
                     + "Split-Screen is active, so treat it as Mixed.");
             Pair<Transitions.TransitionHandler, WindowContainerTransaction> handler =
                     mPlayer.dispatchRequest(transition, request, this);
             if (handler == null) {
-                android.util.Log.e(Transitions.TAG, "   No handler for remote? This is unexpected"
-                        + ", there should at-least be RemoteHandler.");
-                return null;
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                        " Lean on the remote transition handler to fetch a proper remote via"
+                                + " TransitionFilter");
+                handler = new Pair<>(
+                        mPlayer.getRemoteTransitionHandler(),
+                        new WindowContainerTransaction());
             }
             final MixedTransition mixed = new MixedTransition(
                     MixedTransition.TYPE_RECENTS_DURING_SPLIT, transition);
@@ -234,6 +235,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     private TransitionInfo subCopy(@NonNull TransitionInfo info,
             @WindowManager.TransitionType int newType, boolean withChanges) {
         final TransitionInfo out = new TransitionInfo(newType, withChanges ? info.getFlags() : 0);
+        out.setDebugId(info.getDebugId());
         if (withChanges) {
             for (int i = 0; i < info.getChanges().size(); ++i) {
                 out.getChanges().add(info.getChanges().get(i));
@@ -515,7 +517,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             // If pair-to-pair switching, the post-recents clean-up isn't needed.
             if (mixed.mAnimType != MixedTransition.ANIM_TYPE_PAIR_TO_PAIR) {
                 wct = wct != null ? wct : new WindowContainerTransaction();
-                mSplitHandler.onRecentsInSplitAnimationFinish(wct, finishTransaction);
+                mSplitHandler.onRecentsInSplitAnimationFinish(wct, finishTransaction, info);
             }
             mSplitHandler.onTransitionAnimationComplete();
             finishCallback.onTransitionFinished(wct, wctCB);

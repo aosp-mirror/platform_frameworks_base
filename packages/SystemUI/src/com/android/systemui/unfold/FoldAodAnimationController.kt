@@ -156,6 +156,7 @@ constructor(
         } else if (isFolded && !isFoldHandled && alwaysOnEnabled && isDozing) {
             // Screen turning on for the first time after folding and we are already dozing
             // We should play the folding to AOD animation
+            isFoldHandled = true
 
             setAnimationState(playing = true)
             getShadeFoldAnimator().prepareFoldToAodAnimation()
@@ -190,8 +191,10 @@ constructor(
             cancelAnimation?.run()
 
             // Post starting the animation to the next frame to avoid junk due to inset changes
-            cancelAnimation =
-                mainExecutor.executeDelayed(startAnimationRunnable, /* delayMillis= */ 0)
+            cancelAnimation = mainExecutor.executeDelayed(
+                startAnimationRunnable,
+                /* delayMillis= */ 0
+            )
             shouldPlayAnimation = false
         }
     }

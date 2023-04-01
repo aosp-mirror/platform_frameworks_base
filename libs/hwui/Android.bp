@@ -738,6 +738,9 @@ cc_test {
         "tests/unit/VectorDrawableTests.cpp",
         "tests/unit/WebViewFunctorManagerTests.cpp",
     ],
+    data: [
+        ":hwuimicro",
+    ],
 }
 
 // ------------------------

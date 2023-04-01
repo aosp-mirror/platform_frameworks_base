@@ -16,6 +16,7 @@
 package android.net.vcn;
 
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
@@ -75,6 +76,7 @@ public final class VcnConfig implements Parcelable {
     static {
         ALLOWED_TRANSPORTS.add(TRANSPORT_WIFI);
         ALLOWED_TRANSPORTS.add(TRANSPORT_CELLULAR);
+        ALLOWED_TRANSPORTS.add(TRANSPORT_TEST);
     }
 
     private static final String PACKAGE_NAME_KEY = "mPackageName";
@@ -154,6 +156,11 @@ public final class VcnConfig implements Parcelable {
                         "Found invalid transport "
                                 + transport
                                 + " which might be from a new version of VcnConfig");
+            }
+
+            if (transport == TRANSPORT_TEST && !mIsTestModeProfile) {
+                throw new IllegalArgumentException(
+                        "Found TRANSPORT_TEST in a non-test-mode profile");
             }
         }
     }

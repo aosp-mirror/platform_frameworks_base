@@ -301,8 +301,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             return true;
         }
 
-        // check if no-animation and skip animation if so.
-        if (Transitions.isAllNoAnimation(info)) {
+        // Early check if the transition doesn't warrant an animation.
+        if (Transitions.isAllNoAnimation(info) || Transitions.isAllOrderOnly(info)) {
             startTransaction.apply();
             finishTransaction.apply();
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);

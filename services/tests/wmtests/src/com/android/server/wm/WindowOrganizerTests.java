@@ -801,8 +801,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 new Rect(0, 0, 1080, 200));
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
 
-        assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSourceProviders
-                .valueAt(0).getSource().getType()).isEqualTo(
+        assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSources
+                .valueAt(0).getType()).isEqualTo(
                         WindowInsets.Type.systemOverlays());
     }
 
@@ -831,7 +831,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 WindowInsets.Type.systemOverlays());
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct2);
 
-        assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSourceProviders.size()).isEqualTo(0);
+        assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSources.size()).isEqualTo(0);
     }
 
     @Test

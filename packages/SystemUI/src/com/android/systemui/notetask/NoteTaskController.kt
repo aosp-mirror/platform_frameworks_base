@@ -296,7 +296,8 @@ private fun createNoteTaskIntent(info: NoteTaskInfo): Intent =
 
         // EXTRA_USE_STYLUS_MODE does not mean a stylus is in-use, but a stylus entrypoint
         // was used to start the note task.
-        putExtra(Intent.EXTRA_USE_STYLUS_MODE, true)
+        val useStylusMode = info.entryPoint != NoteTaskEntryPoint.KEYBOARD_SHORTCUT
+        putExtra(Intent.EXTRA_USE_STYLUS_MODE, useStylusMode)
 
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         // We should ensure the note experience can be opened both as a full screen (lockscreen)
