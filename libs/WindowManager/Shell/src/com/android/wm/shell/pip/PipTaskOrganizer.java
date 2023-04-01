@@ -73,6 +73,7 @@ import android.window.TaskOrganizer;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
+import android.window.WindowContainerTransactionCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -141,6 +142,23 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final Optional<SplitScreenController> mSplitScreenOptional;
     protected final ShellTaskOrganizer mTaskOrganizer;
     protected final ShellExecutor mMainExecutor;
+
+    // the runnable to execute after WindowContainerTransactions is applied to finish resizing pip
+    private Runnable mPipFinishResizeWCTRunnable;
+
+    private final WindowContainerTransactionCallback mPipFinishResizeWCTCallback =
+            new WindowContainerTransactionCallback() {
+        @Override
+        public void onTransactionReady(int id, SurfaceControl.Transaction t) {
+            t.apply();
+
+            // execute the runnable if non-null after WCT is applied to finish resizing pip
+            if (mPipFinishResizeWCTRunnable != null) {
+                mPipFinishResizeWCTRunnable.run();
+                mPipFinishResizeWCTRunnable = null;
+            }
+        }
+    };
 
     // These callbacks are called on the update thread
     private final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
@@ -1249,8 +1267,23 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     /**
      * Animates resizing of the pinned stack given the duration and start bounds.
      * This is used when the starting bounds is not the current PiP bounds.
+     *
+     * @param pipFinishResizeWCTRunnable callback to run after window updates are complete
      */
     public void scheduleAnimateResizePip(Rect fromBounds, Rect toBounds, int duration,
+            float startingAngle, Consumer<Rect> updateBoundsCallback,
+            Runnable pipFinishResizeWCTRunnable) {
+        mPipFinishResizeWCTRunnable = pipFinishResizeWCTRunnable;
+        if (mPipFinishResizeWCTRunnable != null) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "mPipFinishResizeWCTRunnable is set to be called once window updates");
+        }
+
+        scheduleAnimateResizePip(fromBounds, toBounds, duration, startingAngle,
+                updateBoundsCallback);
+    }
+
+    private void scheduleAnimateResizePip(Rect fromBounds, Rect toBounds, int duration,
             float startingAngle, Consumer<Rect> updateBoundsCallback) {
         if (mWaitForFixedRotation) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
@@ -1555,7 +1588,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             mSplitScreenOptional.ifPresent(splitScreenController ->
                     splitScreenController.enterSplitScreen(mTaskInfo.taskId, wasPipTopLeft, wct));
         } else {
-            mTaskOrganizer.applyTransaction(wct);
+            mTaskOrganizer.applySyncTransaction(wct, mPipFinishResizeWCTCallback);
         }
     }
 

@@ -588,8 +588,16 @@ public class PipResizeGestureHandler {
                 final float snapFraction = mPipBoundsAlgorithm.getSnapFraction(
                         mLastResizeBounds, movementBounds);
                 mPipBoundsAlgorithm.applySnapFraction(mLastResizeBounds, snapFraction);
+
+                // disable the pinch resizing until the final bounds are updated
+                final boolean prevEnablePinchResize = mEnablePinchResize;
+                mEnablePinchResize = false;
+
                 mPipTaskOrganizer.scheduleAnimateResizePip(startBounds, mLastResizeBounds,
-                        PINCH_RESIZE_SNAP_DURATION, mAngle, mUpdateResizeBoundsCallback);
+                        PINCH_RESIZE_SNAP_DURATION, mAngle, mUpdateResizeBoundsCallback, () -> {
+                            // reset the pinch resizing to its default state
+                            mEnablePinchResize = prevEnablePinchResize;
+                        });
             } else {
                 mPipTaskOrganizer.scheduleFinishResizePip(mLastResizeBounds,
                         PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE,
