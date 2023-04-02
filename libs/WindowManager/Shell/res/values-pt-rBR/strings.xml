@@ -32,17 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Redimensionar"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Ocultar"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Exibir"</string>
-    <!-- no translation found for dock_forced_resizable (7429086980048964687) -->
-    <skip />
-    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (2733543750291266047) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"É possível que o app não funcione com a tela dividida"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"O app não oferece suporte à divisão de tela"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Este app só pode ser aberto em uma única janela."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"É possível que o app não funcione em uma tela secundária."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"O app não é compatível com a inicialização em telas secundárias."</string>
-    <!-- no translation found for accessibility_divider (6407584574218956849) -->
-    <skip />
-    <!-- no translation found for divider_title (1963391955593749442) -->
-    <skip />
+    <string name="accessibility_divider" msgid="6407584574218956849">"Divisor de tela"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Divisor de tela"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Lado esquerdo em tela cheia"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Esquerda a 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Esquerda a 50%"</string>
@@ -89,8 +85,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"O problema não foi corrigido?\nToque para reverter"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Não tem problemas com a câmera? Toque para dispensar."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Veja e faça mais"</string>
-    <!-- no translation found for letterbox_education_split_screen_text (449233070804658627) -->
-    <skip />
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Arraste outro app para dividir a tela"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Toque duas vezes fora de um app para reposicionar"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Entendi"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Abra para ver mais informações."</string>
@@ -115,4 +110,6 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Captura de tela"</string>
     <string name="close_text" msgid="4986518933445178928">"Fechar"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Fechar menu"</string>
+    <!-- no translation found for expand_menu_text (3847736164494181168) -->
+    <skip />
 </resources>
