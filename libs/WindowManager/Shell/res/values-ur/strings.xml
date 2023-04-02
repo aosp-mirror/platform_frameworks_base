@@ -21,7 +21,7 @@
     <string name="pip_phone_expand" msgid="2579292903468287504">"پھیلائیں"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"ترتیبات"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"اسپلٹ اسکرین تک رسائی"</string>
-    <string name="pip_menu_title" msgid="5393619322111827096">"مینو"</string>
+    <string name="pip_menu_title" msgid="5393619322111827096">"مینیو"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> تصویر میں تصویر میں ہے"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"اگر آپ نہیں چاہتے ہیں کہ <xliff:g id="NAME">%s</xliff:g> اس خصوصیت کا استعمال کرے تو ترتیبات کھولنے کے لیے تھپتھپا کر اسے آف کرے۔"</string>
     <string name="pip_play" msgid="3496151081459417097">"چلائیں"</string>
@@ -106,5 +106,5 @@
     <string name="select_text" msgid="5139083974039906583">"منتخب کریں"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"اسکرین شاٹ"</string>
     <string name="close_text" msgid="4986518933445178928">"بند کریں"</string>
-    <string name="collapse_menu_text" msgid="7515008122450342029">"مینو بند کریں"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"مینیو بند کریں"</string>
 </resources>
