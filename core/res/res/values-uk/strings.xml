@@ -1486,7 +1486,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Ви використовуєте цей додаток у своєму робочому профілі"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Метод введення"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Синхр."</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"Спеціальні можливості"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"Доступність"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Фоновий мал."</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Змінити фоновий малюнок"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Сервіс читання сповіщень"</string>
@@ -1690,8 +1690,8 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Не вмикати"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"УВІМК."</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ВИМК."</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Надати сервісу <xliff:g id="SERVICE">%1$s</xliff:g> повний доступ до вашого пристрою?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ доречний для додатків, які надають спеціальні можливості, але його не варто відкривати для більшості інших додатків."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Надати сервісу \"<xliff:g id="SERVICE">%1$s</xliff:g>\" повний доступ до вашого пристрою?"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ потрібен додаткам, які підтримують функції доступності, але його не варто відкривати для більшості інших додатків."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Перегляд і контроль екрана"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Цей сервіс може переглядати всі дані на екрані й показувати контент поверх інших додатків."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Перегляд і виконання дій"</string>
@@ -1992,7 +1992,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Новини та журнали"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Карти й навігація"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Продуктивність"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"Спеціальні можливості"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Доступність"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Пам’ять пристрою"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Налагодження USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"години"</string>

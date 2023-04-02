@@ -1276,18 +1276,18 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Une empreinte de mémoire du processus lié à l\'application <xliff:g id="PROC">%1$s</xliff:g> peut être partagée. Attention : Cette empreinte peut contenir des renseignements personnels auxquels le processus a accès, y compris du texte que vous avez entré."</string>
     <string name="sendText" msgid="493003724401350724">"Sélectionner une action pour le texte"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Volume de la sonnerie"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Volume"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Volume du contenu multimédia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Lecture via Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Sonnerie silencieuse sélectionnée"</string>
     <string name="volume_call" msgid="7625321655265747433">"Volume des appels entrants"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Volume d\'appels entrants sur Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Volume de l\'alarme"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Volume des alarmes"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Volume des notifications"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Volume Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Volume de la sonnerie"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Volume d\'appel"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Volume"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Volume des appels"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Volume du contenu multimédia"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Volume des notifications"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Sonnerie par défaut"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Défaut (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>

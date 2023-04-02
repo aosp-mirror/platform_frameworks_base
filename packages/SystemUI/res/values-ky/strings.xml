@@ -680,7 +680,7 @@
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"<xliff:g id="POSITION">%1$d</xliff:g>-позиция"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Карта кошулду"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Карта өчүрүлдү"</string>
-    <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Ыкчам жөндөөлөр түзөткүчү."</string>
+    <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Ыкчам параметрлер түзөткүчү."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> эскертмеси: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Жөндөөлөрдү ачуу."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Ыкчам жөндөөлөрдү ачуу."</string>
