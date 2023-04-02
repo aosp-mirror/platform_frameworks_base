@@ -49,6 +49,7 @@ import kotlin.math.sign
 
 private const val TAG = "BackPanelController"
 private const val ENABLE_FAILSAFE = true
+private const val FAILSAFE_DELAY_MS = 350L
 
 private const val PX_PER_SEC = 1000
 private const val PX_PER_MS = 1
@@ -63,9 +64,9 @@ private const val MIN_DURATION_FLING_ANIMATION = 160L
 private const val MIN_DURATION_ENTRY_TO_ACTIVE_CONSIDERED_AS_FLING = 100L
 private const val MIN_DURATION_INACTIVE_TO_ACTIVE_CONSIDERED_AS_FLING = 400L
 
-private const val FAILSAFE_DELAY_MS = 350L
-private const val POP_ON_FLING_DELAY = 50L
-private const val POP_ON_FLING_SCALE = 3f
+private const val POP_ON_FLING_DELAY = 60L
+private const val POP_ON_FLING_SCALE = 2f
+private const val POP_ON_COMMITTED_SCALE = 3f
 
 internal val VIBRATE_ACTIVATED_EFFECT =
         VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
@@ -773,7 +774,9 @@ class BackPanelController internal constructor(
                             GestureState.ENTRY,
                             GestureState.INACTIVE,
                             GestureState.CANCELLED -> params.preThresholdIndicator.scalePivotX
-                            else -> params.committedIndicator.scalePivotX
+                            GestureState.ACTIVE -> params.activeIndicator.scalePivotX
+                            GestureState.FLUNG,
+                            GestureState.COMMITTED -> params.committedIndicator.scalePivotX
                         },
                         horizontalTranslation = when (currentState) {
                             GestureState.GONE -> {
@@ -920,7 +923,7 @@ class BackPanelController internal constructor(
                     mainHandler.postDelayed(onEndSetGoneStateListener.runnable,
                             MIN_DURATION_COMMITTED_ANIMATION)
                 } else {
-                    mView.popScale(POP_ON_FLING_SCALE)
+                    mView.popScale(POP_ON_COMMITTED_SCALE)
                     mainHandler.postDelayed(onAlphaEndSetGoneStateListener.runnable,
                             MIN_DURATION_COMMITTED_ANIMATION)
                 }
