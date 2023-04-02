@@ -2114,7 +2114,7 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Upozornenia"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Rýchle nastavenia"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Dialógové okno napájania"</string>
-    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Uzamknúť obrazovku"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Zamknúť obrazovku"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Snímka obrazovky"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Hák na slúchadlá s mikrofónom"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Skratka dostupnosti na obrazovke"</string>
