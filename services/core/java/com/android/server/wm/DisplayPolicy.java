@@ -2148,6 +2148,14 @@ public class DisplayPolicy {
             return;
         }
 
+        if (controlTarget != null) {
+            final WindowState win = controlTarget.getWindow();
+
+            if (win != null && win.isActivityTypeDream()) {
+                return;
+            }
+        }
+
         final @InsetsType int restorePositionTypes =
                 (controlTarget.getRequestedVisibility(ITYPE_NAVIGATION_BAR)
                         ? Type.navigationBars() : 0)

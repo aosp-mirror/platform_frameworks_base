@@ -31,7 +31,6 @@ import android.animation.ValueAnimator;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.testing.AndroidTestingRunner;
-import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
@@ -101,20 +100,16 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     @Mock
     UiEventLogger mUiEventLogger;
 
-    final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
-
     private static final float TOUCH_REGION = .3f;
     private static final int SCREEN_WIDTH_PX = 1024;
     private static final int SCREEN_HEIGHT_PX = 100;
 
+    private static final Rect SCREEN_BOUNDS = new Rect(0, 0, 1024, 100);
+
     @Before
     public void setup() {
-        mDisplayMetrics.widthPixels = SCREEN_WIDTH_PX;
-        mDisplayMetrics.heightPixels = SCREEN_HEIGHT_PX;
-
         MockitoAnnotations.initMocks(this);
         mTouchHandler = new BouncerSwipeTouchHandler(
-                mDisplayMetrics,
                 mScrimManager,
                 Optional.of(mCentralSurfaces),
                 mNotificationShadeWindowController,
@@ -127,10 +122,10 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
 
         when(mScrimManager.getCurrentController()).thenReturn(mScrimController);
         when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
-        when(mCentralSurfaces.getDisplayHeight()).thenReturn((float) SCREEN_HEIGHT_PX);
         when(mValueAnimatorCreator.create(anyFloat(), anyFloat())).thenReturn(mValueAnimator);
         when(mVelocityTrackerFactory.obtain()).thenReturn(mVelocityTracker);
         when(mFlingAnimationUtils.getMinVelocityPxPerSecond()).thenReturn(Float.MAX_VALUE);
+        when(mTouchSession.getBounds()).thenReturn(SCREEN_BOUNDS);
     }
 
     /**
@@ -139,7 +134,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     @Test
     public void testSessionStart() {
         final Region region = Region.obtain();
-        mTouchHandler.getTouchInitiationRegion(region);
+        mTouchHandler.getTouchInitiationRegion(SCREEN_BOUNDS, region);
 
         final Rect bounds = region.getBounds();
 

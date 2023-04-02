@@ -16,6 +16,9 @@
 
 package com.android.systemui.dreams.touch;
 
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.GestureDetector;
 import android.view.InputEvent;
@@ -31,6 +34,7 @@ import androidx.lifecycle.LifecycleOwner;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.touch.dagger.InputSessionComponent;
 import com.android.systemui.shared.system.InputChannelCompat;
+import com.android.systemui.util.display.DisplayHelper;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -69,7 +73,8 @@ public class DreamOverlayTouchMonitor {
                 }
 
                 final TouchSessionImpl touchSession =
-                        new TouchSessionImpl(this, touchSessionImpl);
+                        new TouchSessionImpl(this, touchSessionImpl.getBounds(),
+                                touchSessionImpl);
                 mActiveTouchSessions.add(touchSession);
                 completer.set(touchSession);
             });
@@ -96,6 +101,10 @@ public class DreamOverlayTouchMonitor {
 
                     completer.set(predecessor);
                 }
+
+                if (mActiveTouchSessions.isEmpty() && mStopMonitoringPending) {
+                    stopMonitoring(false);
+                }
             });
 
             return "DreamOverlayTouchMonitor::pop";
@@ -120,10 +129,13 @@ public class DreamOverlayTouchMonitor {
 
         private final TouchSessionImpl mPredecessor;
         private final DreamOverlayTouchMonitor mTouchMonitor;
+        private final Rect mBounds;
 
-        TouchSessionImpl(DreamOverlayTouchMonitor touchMonitor, TouchSessionImpl predecessor) {
+        TouchSessionImpl(DreamOverlayTouchMonitor touchMonitor, Rect bounds,
+                TouchSessionImpl predecessor) {
             mPredecessor = predecessor;
             mTouchMonitor = touchMonitor;
+            mBounds = bounds;
         }
 
         @Override
@@ -185,6 +197,11 @@ public class DreamOverlayTouchMonitor {
         private void onRemoved() {
             mCallbacks.forEach(callback -> callback.onRemoved());
         }
+
+        @Override
+        public Rect getBounds() {
+            return mBounds;
+        }
     }
 
     /**
@@ -201,7 +218,12 @@ public class DreamOverlayTouchMonitor {
 
         @Override
         public void onPause(@NonNull LifecycleOwner owner) {
-            stopMonitoring();
+            stopMonitoring(false);
+        }
+
+        @Override
+        public void onDestroy(LifecycleOwner owner) {
+            stopMonitoring(true);
         }
     };
 
@@ -209,7 +231,7 @@ public class DreamOverlayTouchMonitor {
      * When invoked, instantiates a new {@link InputSession} to monitor touch events.
      */
     private void startMonitoring() {
-        stopMonitoring();
+        stopMonitoring(true);
         mCurrentInputSession = mInputSessionFactory.create(
                 "dreamOverlay",
                 mInputEventListener,
@@ -221,8 +243,13 @@ public class DreamOverlayTouchMonitor {
     /**
      * Destroys any active {@link InputSession}.
      */
-    private void stopMonitoring() {
+    private void stopMonitoring(boolean force) {
         if (mCurrentInputSession == null) {
+            return;
+        }
+
+        if (!mActiveTouchSessions.isEmpty() && !force) {
+            mStopMonitoringPending = true;
             return;
         }
 
@@ -237,11 +264,15 @@ public class DreamOverlayTouchMonitor {
 
         mCurrentInputSession.dispose();
         mCurrentInputSession = null;
+        mStopMonitoringPending = false;
     }
 
 
     private final HashSet<TouchSessionImpl> mActiveTouchSessions = new HashSet<>();
     private final Collection<DreamTouchHandler> mHandlers;
+    private final DisplayHelper mDisplayHelper;
+
+    private boolean mStopMonitoringPending;
 
     private InputChannelCompat.InputEventListener mInputEventListener =
             new InputChannelCompat.InputEventListener() {
@@ -253,8 +284,11 @@ public class DreamOverlayTouchMonitor {
                         new HashMap<>();
 
                 for (DreamTouchHandler handler : mHandlers) {
+                    final Rect maxBounds = mDisplayHelper.getMaxBounds(ev.getDisplayId(),
+                            TYPE_APPLICATION_OVERLAY);
+
                     final Region initiationRegion = Region.obtain();
-                    handler.getTouchInitiationRegion(initiationRegion);
+                    handler.getTouchInitiationRegion(maxBounds, initiationRegion);
 
                     if (!initiationRegion.isEmpty()) {
                         // Initiation regions require a motion event to determine pointer location
@@ -272,8 +306,8 @@ public class DreamOverlayTouchMonitor {
                         }
                     }
 
-                    final TouchSessionImpl sessionStack =
-                            new TouchSessionImpl(DreamOverlayTouchMonitor.this, null);
+                    final TouchSessionImpl sessionStack = new TouchSessionImpl(
+                            DreamOverlayTouchMonitor.this, maxBounds, null);
                     mActiveTouchSessions.add(sessionStack);
                     sessionMap.put(handler, sessionStack);
                 }
@@ -389,11 +423,13 @@ public class DreamOverlayTouchMonitor {
             @Main Executor executor,
             Lifecycle lifecycle,
             InputSessionComponent.Factory inputSessionFactory,
+            DisplayHelper displayHelper,
             Set<DreamTouchHandler> handlers) {
         mHandlers = handlers;
         mInputSessionFactory = inputSessionFactory;
         mExecutor = executor;
         mLifecycle = lifecycle;
+        mDisplayHelper = displayHelper;
     }
 
     /**
