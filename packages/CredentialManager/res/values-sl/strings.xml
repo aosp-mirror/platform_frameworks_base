@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Večja varnost računov"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Vsak ključ je neločljivo povezan z aplikacijo ali spletnim mestom, za katero je bil ustvarjen, zato se nikoli ne morete pomotoma prijaviti v goljufivo aplikacijo ali spletno mesto. Poleg tega so v strežnikih shranjeni le javni ključi, zato je vdiranje v račune precej oteženo."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Prehod brez zapletov"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Na poti v prihodnost brez gesel bodo poleg ključev za dostop še vedno v uporabi tudi gesla."</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Na poti v prihodnost brez gesel bodo poleg ključev za dostop še vedno v uporabi tudi gesla."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Izbira mesta za shranjevanje <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Izberite upravitelja gesel za shranjevanje podatkov za prijavo, da se boste naslednjič lahko hitreje prijavili."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Želite ustvariti ključ za dostop do aplikacije <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -54,6 +54,8 @@
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Izberite shranjene podatke za prijavo v aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
     <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Prijava na drug način"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Prikaz možnosti"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Naprej"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Upravljanje podatkov za prijavo"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Iz druge naprave"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Uporaba druge naprave"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Zahtevo je preklicala aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
 </resources>

@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Аккаунттун коопсуздугу жакшыртылды"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Ар бир ачкыч өзү арналган колдонмо же вебсайт менен гана байланыштырылгандыктан, эч качан шылуундардын колдонмолоруна же вебсайттарына жаңылыштык менен кирип албайсыз. Мындан тышкары, серверлерде жалпыга ачык ачкычтар гана сакталгандыктан, хакерлик кылуу кыйла кыйын."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Тез которулуу"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Сырсөзсүз келечекти көздөй баратсак да, аларды киргизүүчү ачкычтар менен бирге колдоно берүүгө болот"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Сырсөзсүз келечекти көздөй баратсак да, аларды киргизүүчү ачкычтар менен бирге колдоно берүүгө болот."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g> кайда сакталарын тандаңыз"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Маалыматыңызды сактоо жана кийинки жолу тезирээк кирүү үчүн сырсөздөрдү башкаргычты тандаңыз"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> колдонмосуна киргизүүчү ачкыч түзөсүзбү?"</string>
@@ -52,7 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосуна кирүү үчүн сакталган ачкычты колдоносузбу?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> үчүн сакталган кирүү параметрин колдоносузбу?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> үчүн кирүү маалыматын тандаңыз"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> үчүн параметр тандайсызбы?"</string>
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
     <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Башка жол менен кирүү"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Параметрлерди көрүү"</string>
@@ -66,6 +67,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Кирүү параметрлерин тескөө"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Башка түзмөктөн"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Башка түзмөктү колдонуу"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Сурамды <xliff:g id="APP_NAME">%1$s</xliff:g> жокко чыгарды"</string>
 </resources>

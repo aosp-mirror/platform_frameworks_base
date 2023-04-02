@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"ความปลอดภัยของบัญชีที่เพิ่มมากขึ้น"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"คีย์ที่สร้างขึ้นแต่ละคีย์จะลิงก์กับแอปหรือเว็บไซต์ที่ใช้งานคีย์ดังกล่าวเท่านั้น ดังนั้นจึงไม่มีการลงชื่อเข้าใช้แอปเว็บไซต์ที่เป็นการฉ้อโกงโดยไม่ตั้งใจเกิดขึ้น นอกจากนี้ เซิร์ฟเวอร์จะบันทึกเฉพาะคีย์สาธารณะ จึงทำให้แฮ็กได้ยากขึ้น"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"การเปลี่ยนผ่านอย่างราบรื่น"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"ในขณะที่เราก้าวไปสู่อนาคตที่ไม่ต้องใช้รหัสผ่านนั้น รหัสผ่านจะยังคงใช้ได้อยู่ควบคู่ไปกับการเปลี่ยนไปใช้พาสคีย์"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"ในขณะที่เราก้าวไปสู่อนาคตที่ไม่ต้องใช้รหัสผ่านนั้น รหัสผ่านจะยังคงใช้ได้อยู่ควบคู่ไปกับการเปลี่ยนไปใช้พาสคีย์"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"เลือกว่าต้องการบันทึก<xliff:g id="CREATETYPES">%1$s</xliff:g>ไว้ที่ใด"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"เลือกเครื่องมือจัดการรหัสผ่านเพื่อบันทึกข้อมูลและลงชื่อเข้าใช้เร็วขึ้นในครั้งถัดไป"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"สร้างพาสคีย์สำหรับ <xliff:g id="APPNAME">%1$s</xliff:g> ไหม"</string>
@@ -54,6 +54,8 @@
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"เลือกการลงชื่อเข้าใช้ที่บันทึกไว้สำหรับ \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
     <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ลงชื่อเข้าใช้ด้วยวิธีอื่น"</string>
     <string name="snackbar_action" msgid="37373514216505085">"ดูตัวเลือก"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ต่อไป"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"จัดการการลงชื่อเข้าใช้"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"จากอุปกรณ์อื่น"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"ใช้อุปกรณ์อื่น"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"ยกเลิกคำขอแล้วโดย <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
 </resources>

@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Mais segurança para sua conta"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Cada chave está vinculada exclusivamente ao app ou site para a qual foi criada. Isso impede que você faça login em um app ou site fraudulento por engano. Além disso, os servidores mantêm apenas chaves públicas, dificultando qualquer invasão."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Transição simplificada"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Estamos avançando rumo a um futuro sem senhas, mas elas ainda vão estar disponíveis junto às chaves de acesso"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Estamos avançando em direção a um futuro sem senhas, mas elas ainda vão estar disponíveis junto às chaves de acesso."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Escolha onde salvar suas <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecione um gerenciador de senhas para salvar suas informações e fazer login mais rapidamente na próxima vez"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Criar uma chave de acesso para o app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,7 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Usar sua chave de acesso salva para o app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Usar suas informações de login salvas para <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Escolher um login salvo para <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Escolher uma opção para o app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
     <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Fazer login de outra forma"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Conferir opções"</string>

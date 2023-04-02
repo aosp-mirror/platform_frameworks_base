@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"மேம்படுத்தப்பட்ட கணக்குப் பாதுகாப்பு"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"ஒவ்வொரு குறியீடும் எந்த ஆப்ஸ்/இணையதளத்திற்காக உருவாக்கப்பட்டதோ அதனுடன் மட்டுமே இணைக்கப்பட்டிருக்கும். இது மோசடியான ஆப்ஸ்/இணையதளத்தில் நீங்கள் தவறுதலாக உள்நுழைவதைத் தடுக்கும். அத்துடன், சேவையகங்களில் பொதுக் குறியீடுகள் மட்டுமே சேமிக்கப்படுவதால் கணக்கை ஹேக் செய்வது மிகக் கடினமாகும்."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"தடையற்ற டிரான்ஸிஷன்"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"கடவுச்சொல்லற்ற எதிர்காலத்தை நோக்கி நாம் பயணிக்கிறோம். கடவுச்சாவிகளைப் பயன்படுத்தும் இதே வேளையில் கடவுச்சொற்களையும் பயன்படுத்த முடியும்"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"கடவுச்சொல்லற்ற எதிர்காலத்தை நோக்கி நாம் பயணிக்கிறோம். கடவுச்சாவிகளைப் பயன்படுத்தும் இதே வேளையில் கடவுச்சொற்களையும் பயன்படுத்த முடியும்."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"உங்கள் <xliff:g id="CREATETYPES">%1$s</xliff:g> எங்கே சேமிக்கப்பட வேண்டும் என்பதைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"உங்கள் தகவல்களைச் சேமித்து அடுத்த முறை விரைவாக உள்நுழைய ஒரு கடவுச்சொல் நிர்வாகியைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸுக்கான கடவுச்சாவியை உருவாக்கவா?"</string>
@@ -54,6 +54,8 @@
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கு ஏற்கெனவே சேமிக்கப்பட்ட உள்நுழைவுத் தகவலைத் தேர்வுசெய்யவும்"</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
     <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"வேறு முறையில் உள்நுழைக"</string>
     <string name="snackbar_action" msgid="37373514216505085">"விருப்பங்களைக் காட்டு"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"தொடர்க"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"உள்நுழைவுகளை நிர்வகித்தல்"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"மற்றொரு சாதனத்திலிருந்து பயன்படுத்து"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"வேறு சாதனத்தைப் பயன்படுத்து"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸால் கோரிக்கை ரத்துசெய்யப்பட்டது"</string>
 </resources>
