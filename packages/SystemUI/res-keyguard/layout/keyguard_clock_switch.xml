@@ -28,9 +28,10 @@
     <FrameLayout
         android:id="@+id/lockscreen_clock_view"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/small_clock_height"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
+        android:clipChildren="false"
         android:paddingStart="@dimen/clock_padding_start"
         android:visibility="invisible" />
     <FrameLayout

@@ -390,6 +390,13 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             PropertyAnimator.setProperty(mStatusArea, AnimatableProperty.TRANSLATION_X,
                     x, props, animate);
         }
+
+    }
+
+    void updateKeyguardStatusViewOffset() {
+        // updateClockTargetRegions will call onTargetRegionChanged
+        // which will require the correct translationY property of keyguardStatusView after updating
+        mView.updateClockTargetRegions();
     }
 
     /**
