@@ -21,7 +21,6 @@ import static com.android.server.am.BroadcastRecord.deliveryStateToString;
 import static com.android.server.am.BroadcastRecord.isDeliveryStateTerminal;
 import static com.android.server.am.BroadcastRecord.isReceiverEquals;
 
-import android.annotation.CheckResult;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -342,12 +341,7 @@ class BroadcastProcessQueue {
      * Predicates that choose to remove a broadcast <em>must</em> finish
      * delivery of the matched broadcast, to ensure that situations like ordered
      * broadcasts are handled consistently.
-     *
-     * @return if this operation may have changed internal state, indicating
-     *         that the caller is responsible for invoking
-     *         {@link BroadcastQueueModernImpl#updateRunnableList}
      */
-    @CheckResult
     public boolean forEachMatchingBroadcast(@NonNull BroadcastPredicate predicate,
             @NonNull BroadcastConsumer consumer, boolean andRemove) {
         boolean didSomething = false;
@@ -360,7 +354,6 @@ class BroadcastProcessQueue {
         return didSomething;
     }
 
-    @CheckResult
     private boolean forEachMatchingBroadcastInQueue(@NonNull ArrayDeque<SomeArgs> queue,
             @NonNull BroadcastPredicate predicate, @NonNull BroadcastConsumer consumer,
             boolean andRemove) {
@@ -377,10 +370,6 @@ class BroadcastProcessQueue {
                     args.recycle();
                     it.remove();
                     onBroadcastDequeued(record, recordIndex, recordWouldBeSkipped);
-                } else {
-                    // Even if we're leaving broadcast in queue, it may have
-                    // been mutated in such a way to change our runnable time
-                    invalidateRunnableAt();
                 }
                 didSomething = true;
             }
@@ -392,43 +381,30 @@ class BroadcastProcessQueue {
 
     /**
      * Update the actively running "warm" process for this process.
-     *
-     * @return if this operation may have changed internal state, indicating
-     *         that the caller is responsible for invoking
-     *         {@link BroadcastQueueModernImpl#updateRunnableList}
      */
-    @CheckResult
-    public boolean setProcessAndUidFrozen(@Nullable ProcessRecord app, boolean uidFrozen) {
+    public void setProcess(@Nullable ProcessRecord app) {
         this.app = app;
+        if (app != null) {
+            setProcessInstrumented(app.getActiveInstrumentation() != null);
+            setProcessPersistent(app.isPersistent());
+        } else {
+            setProcessInstrumented(false);
+            setProcessPersistent(false);
+        }
 
         // Since we may have just changed our PID, invalidate cached strings
         mCachedToString = null;
         mCachedToShortString = null;
-
-        boolean didSomething = false;
-        if (app != null) {
-            didSomething |= setProcessInstrumented(app.getActiveInstrumentation() != null);
-            didSomething |= setProcessPersistent(app.isPersistent());
-            didSomething |= setUidFrozen(uidFrozen);
-        } else {
-            didSomething |= setProcessInstrumented(false);
-            didSomething |= setProcessPersistent(false);
-            didSomething |= setUidFrozen(uidFrozen);
-        }
-        return didSomething;
     }
 
     /**
      * Update if this UID is in the "frozen" state, typically signaling that
      * broadcast dispatch should be paused or delayed.
      */
-    private boolean setUidFrozen(boolean frozen) {
+    public void setUidFrozen(boolean frozen) {
         if (mUidFrozen != frozen) {
             mUidFrozen = frozen;
             invalidateRunnableAt();
-            return true;
-        } else {
-            return false;
         }
     }
 
@@ -437,13 +413,10 @@ class BroadcastProcessQueue {
      * signaling that broadcast dispatch should bypass all pauses or delays, to
      * avoid holding up test suites.
      */
-    private boolean setProcessInstrumented(boolean instrumented) {
+    public void setProcessInstrumented(boolean instrumented) {
         if (mProcessInstrumented != instrumented) {
             mProcessInstrumented = instrumented;
             invalidateRunnableAt();
-            return true;
-        } else {
-            return false;
         }
     }
 
@@ -451,13 +424,10 @@ class BroadcastProcessQueue {
      * Update if this process is in the "persistent" state, which signals broadcast dispatch should
      * bypass all pauses or delays to prevent the system from becoming out of sync with itself.
      */
-    private boolean setProcessPersistent(boolean persistent) {
+    public void setProcessPersistent(boolean persistent) {
         if (mProcessPersistent != persistent) {
             mProcessPersistent = persistent;
             invalidateRunnableAt();
-            return true;
-        } else {
-            return false;
         }
     }
 
@@ -677,20 +647,8 @@ class BroadcastProcessQueue {
         return mActive != null;
     }
 
-    /**
-     * @return if this operation may have changed internal state, indicating
-     *         that the caller is responsible for invoking
-     *         {@link BroadcastQueueModernImpl#updateRunnableList}
-     */
-    @CheckResult
-    boolean forceDelayBroadcastDelivery(long delayedDurationMs) {
-        if (mForcedDelayedDurationMs != delayedDurationMs) {
-            mForcedDelayedDurationMs = delayedDurationMs;
-            invalidateRunnableAt();
-            return true;
-        } else {
-            return false;
-        }
+    void forceDelayBroadcastDelivery(long delayedDurationMs) {
+        mForcedDelayedDurationMs = delayedDurationMs;
     }
 
     /**
@@ -762,21 +720,10 @@ class BroadcastProcessQueue {
      * broadcasts would be prioritized for dispatching, even if there are urgent broadcasts
      * waiting. This is typically used in case there are callers waiting for "barrier" to be
      * reached.
-     *
-     * @return if this operation may have changed internal state, indicating
-     *         that the caller is responsible for invoking
-     *         {@link BroadcastQueueModernImpl#updateRunnableList}
      */
-    @CheckResult
     @VisibleForTesting
-    boolean setPrioritizeEarliest(boolean prioritizeEarliest) {
-        if (mPrioritizeEarliest != prioritizeEarliest) {
-            mPrioritizeEarliest = prioritizeEarliest;
-            invalidateRunnableAt();
-            return true;
-        } else {
-            return false;
-        }
+    void setPrioritizeEarliest(boolean prioritizeEarliest) {
+        mPrioritizeEarliest = prioritizeEarliest;
     }
 
     /**

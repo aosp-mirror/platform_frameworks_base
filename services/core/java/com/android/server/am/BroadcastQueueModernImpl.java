@@ -360,6 +360,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // If app isn't running, and there's nothing in the queue, clean up
         if (queue.isEmpty() && !queue.isActive() && !queue.isProcessWarm()) {
             removeProcessQueue(queue.processName, queue.uid);
+        } else {
+            updateQueueDeferred(queue);
         }
     }
 
@@ -494,7 +496,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // relevant per-process queue
         final BroadcastProcessQueue queue = getProcessQueue(app);
         if (queue != null) {
-            setQueueProcess(queue, app);
+            queue.setProcess(app);
+            queue.setUidFrozen(mUidFrozen.get(queue.uid, false));
         }
 
         boolean didSomething = false;
@@ -535,7 +538,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // relevant per-process queue
         final BroadcastProcessQueue queue = getProcessQueue(app);
         if (queue != null) {
-            setQueueProcess(queue, null);
+            queue.setProcess(null);
+            queue.setUidFrozen(mUidFrozen.get(queue.uid, false));
         }
 
         if ((mRunningColdStart != null) && (mRunningColdStart == queue)) {
@@ -562,7 +566,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 return (r.receivers.get(i) instanceof BroadcastFilter);
             }, mBroadcastConsumerSkip, true);
             if (didSomething || queue.isEmpty()) {
-                updateQueueDeferred(queue);
                 updateRunnableList(queue);
                 enqueueUpdateRunningList();
             }
@@ -628,7 +631,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 setDeliveryState(queue, null, r, i, receiver, BroadcastRecord.DELIVERY_DEFERRED,
                         "deferred at enqueue time");
             }
-            updateQueueDeferred(queue);
             updateRunnableList(queue);
             enqueueUpdateRunningList();
         }
@@ -1077,7 +1079,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
             final int queueIndex = getRunningIndexOf(queue);
             mRunning[queueIndex] = null;
-            updateQueueDeferred(queue);
             updateRunnableList(queue);
             enqueueUpdateRunningList();
 
@@ -1160,7 +1161,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                                 getReceiverUid(otherReceiver));
                         if (otherQueue != null) {
                             otherQueue.invalidateRunnableAt();
-                            updateQueueDeferred(otherQueue);
                             updateRunnableList(otherQueue);
                         }
                     }
@@ -1291,7 +1291,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 if (queuePredicate.test(leaf)) {
                     if (leaf.forEachMatchingBroadcast(broadcastPredicate,
                             broadcastConsumer, andRemove)) {
-                        updateQueueDeferred(leaf);
                         updateRunnableList(leaf);
                         didSomething = true;
                     }
@@ -1305,40 +1304,29 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return didSomething;
     }
 
-    private boolean forEachMatchingQueue(
+    private void forEachMatchingQueue(
             @NonNull Predicate<BroadcastProcessQueue> queuePredicate,
             @NonNull Consumer<BroadcastProcessQueue> queueConsumer) {
-        boolean didSomething = false;
         for (int i = mProcessQueues.size() - 1; i >= 0; i--) {
             BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
             while (leaf != null) {
                 if (queuePredicate.test(leaf)) {
                     queueConsumer.accept(leaf);
-                    updateQueueDeferred(leaf);
                     updateRunnableList(leaf);
-                    didSomething = true;
                 }
                 leaf = leaf.processNameNext;
             }
         }
-        if (didSomething) {
-            enqueueUpdateRunningList();
-        }
-        return didSomething;
     }
 
-    @SuppressWarnings("CheckResult")
-    private void updateQueueDeferred(@NonNull BroadcastProcessQueue leaf) {
+    private void updateQueueDeferred(
+            @NonNull BroadcastProcessQueue leaf) {
         if (leaf.isDeferredUntilActive()) {
-            // We ignore the returned value here since callers are invoking us
-            // just before updateRunnableList()
             leaf.forEachMatchingBroadcast((r, i) -> {
                 return r.deferUntilActive && (r.getDeliveryState(i)
                         == BroadcastRecord.DELIVERY_PENDING);
             }, mBroadcastConsumerDefer, false);
         } else if (leaf.hasDeferredBroadcasts()) {
-            // We ignore the returned value here since callers are invoking us
-            // just before updateRunnableList()
             leaf.forEachMatchingBroadcast((r, i) -> {
                 return r.deferUntilActive && (r.getDeliveryState(i)
                         == BroadcastRecord.DELIVERY_DEFERRED);
@@ -1368,7 +1356,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                         while (leaf != null) {
                             // Update internal state by refreshing values previously
                             // read from any known running process
-                            setQueueProcess(leaf, leaf.app);
+                            leaf.setProcess(leaf.app);
+                            leaf.setUidFrozen(frozen);
+                            updateQueueDeferred(leaf);
+                            updateRunnableList(leaf);
                             leaf = leaf.processNameNext;
                         }
                         enqueueUpdateRunningList();
@@ -1529,20 +1520,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     private void updateWarmProcess(@NonNull BroadcastProcessQueue queue) {
         if (!queue.isProcessWarm()) {
-            setQueueProcess(queue, mService.getProcessRecordLocked(queue.processName, queue.uid));
-        }
-    }
-
-    /**
-     * Update the {@link ProcessRecord} associated with the given
-     * {@link BroadcastProcessQueue}. Also updates any runnable status that
-     * might have changed as a side-effect.
-     */
-    private void setQueueProcess(@NonNull BroadcastProcessQueue queue,
-            @Nullable ProcessRecord app) {
-        if (queue.setProcessAndUidFrozen(app, mUidFrozen.get(queue.uid, false))) {
-            updateQueueDeferred(queue);
-            updateRunnableList(queue);
+            queue.setProcess(mService.getProcessRecordLocked(queue.processName, queue.uid));
+            queue.setUidFrozen(mUidFrozen.get(queue.uid, false));
         }
     }
 
@@ -1736,7 +1715,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
 
         BroadcastProcessQueue created = new BroadcastProcessQueue(mConstants, processName, uid);
-        setQueueProcess(created, mService.getProcessRecordLocked(processName, uid));
+        created.setProcess(mService.getProcessRecordLocked(processName, uid));
+        created.setUidFrozen(mUidFrozen.get(uid, false));
 
         if (leaf == null) {
             mProcessQueues.put(uid, created);

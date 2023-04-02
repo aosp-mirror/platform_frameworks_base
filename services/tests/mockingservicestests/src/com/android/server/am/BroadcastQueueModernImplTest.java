@@ -371,9 +371,9 @@ public final class BroadcastQueueModernImplTest {
                 List.of(makeMockRegisteredReceiver()), false);
         queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, false);
 
-        queue.setProcessAndUidFrozen(null, false);
+        queue.setUidFrozen(false);
         final long notCachedRunnableAt = queue.getRunnableAt();
-        queue.setProcessAndUidFrozen(null, true);
+        queue.setUidFrozen(true);
         final long cachedRunnableAt = queue.getRunnableAt();
         assertThat(cachedRunnableAt).isGreaterThan(notCachedRunnableAt);
         assertFalse(queue.isRunnable());
@@ -398,9 +398,9 @@ public final class BroadcastQueueModernImplTest {
                 List.of(makeMockRegisteredReceiver()), false);
         queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, false);
 
-        queue.setProcessAndUidFrozen(null, false);
+        queue.setUidFrozen(false);
         final long notCachedRunnableAt = queue.getRunnableAt();
-        queue.setProcessAndUidFrozen(null, true);
+        queue.setUidFrozen(true);
         final long cachedRunnableAt = queue.getRunnableAt();
         assertThat(cachedRunnableAt).isGreaterThan(notCachedRunnableAt);
         assertTrue(queue.isRunnable());
@@ -430,13 +430,13 @@ public final class BroadcastQueueModernImplTest {
         // verify that:
         // (a) the queue is immediately runnable by existence of a fg-priority broadcast
         // (b) the next one up is the fg-priority broadcast despite its later enqueue time
-        queue.setProcessAndUidFrozen(null, false);
+        queue.setUidFrozen(false);
         assertTrue(queue.isRunnable());
         assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueClockTime);
         assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
         assertEquals(queue.peekNextBroadcastRecord(), airplaneRecord);
 
-        queue.setProcessAndUidFrozen(null, true);
+        queue.setUidFrozen(true);
         assertTrue(queue.isRunnable());
         assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueClockTime);
         assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
@@ -499,7 +499,7 @@ public final class BroadcastQueueModernImplTest {
     private void doRunnableAt_Frozen(BroadcastRecord testRecord, int testRunnableAtReason) {
         final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
-        queue.setProcessAndUidFrozen(null, true);
+        queue.setUidFrozen(true);
 
         final BroadcastRecord lazyRecord = makeBroadcastRecord(
                 new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED),
