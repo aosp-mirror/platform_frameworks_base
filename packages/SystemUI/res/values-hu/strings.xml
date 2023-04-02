@@ -458,6 +458,10 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"letiltás"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Hang és rezgés"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Beállítások"</string>
+    <!-- no translation found for csd_lowered_title (1786173629015030856) -->
+    <skip />
+    <!-- no translation found for csd_system_lowered_text (2001603282316829500) -->
+    <skip />
     <string name="screen_pinning_title" msgid="9058007390337841305">"Az alkalmazás ki van tűzve"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva a Vissza és az Áttekintés lehetőséget."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva a Vissza és a Kezdőképernyő elemet."</string>
@@ -848,8 +852,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Közepes"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Kicsi"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Nagy"</string>
-    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
-    <skip />
+    <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"Teljes képernyő"</string>
     <string name="accessibility_magnification_done" msgid="263349129937348512">"Kész"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Szerkesztés"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Nagyítóablak beállításai"</string>
@@ -885,6 +888,12 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Minden vezérlő eltávolítva"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"A rendszer nem mentette a módosításokat"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Többi alkalmazás megtekintése"</string>
+    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
+    <skip />
+    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
+    <skip />
+    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Nem sikerült betölteni a vezérlőket. Ellenőrizze a(z) <xliff:g id="APP">%s</xliff:g> alkalmazást, és győződjön meg arról, hogy nem változtak az alkalmazásbeállítások."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Nem állnak rendelkezésre kompatibilis vezérlők"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Más"</string>
