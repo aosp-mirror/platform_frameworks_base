@@ -51,6 +51,11 @@ data class UiState(
     // True if the UI has one and only one auto selectable entry. Its provider activity will be
     // launched immediately, and canceling it will cancel the whole UI flow.
     val isAutoSelectFlow: Boolean = false,
+    val cancelRequestState: CancelUiRequestState?,
+)
+
+data class CancelUiRequestState(
+    val appDisplayName: String?,
 )
 
 class CredentialSelectorViewModel(
@@ -74,6 +79,10 @@ class CredentialSelectorViewModel(
         Log.d(Constants.LOG_TAG, "User cancelled, finishing the ui")
         credManRepo.onUserCancel()
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
+    }
+
+    fun onCancellationUiRequested(appDisplayName: String?) {
+        uiState = uiState.copy(cancelRequestState = CancelUiRequestState(appDisplayName))
     }
 
     /** Close the activity and don't report anything to the backend.
