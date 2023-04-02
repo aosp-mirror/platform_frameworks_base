@@ -123,7 +123,7 @@
     <string name="accessibility_back" msgid="6530104400086152611">"Nazaj"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Začetni zaslon"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Meni"</string>
-    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Funkcije za ljudi s posebnimi potrebami"</string>
+    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Dostopnost"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Sukanje zaslona"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"Pregled"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Fotoaparat"</string>
@@ -475,13 +475,13 @@
     <string name="stream_notification" msgid="7930294049046243939">"Obvestilo"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Dvojna večtonska frekvenca"</string>
-    <string name="stream_accessibility" msgid="3873610336741987152">"Funkcije za ljudi s posebnimi potrebami"</string>
+    <string name="stream_accessibility" msgid="3873610336741987152">"Dostopnost"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Zvonjenje"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Vibriranje"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Utišano"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Dotaknite se, če želite vklopiti zvok."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Dotaknite se, če želite nastaviti vibriranje. V storitvah za ljudi s posebnimi potrebami bo morda izklopljen zvok."</string>
-    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Dotaknite se, če želite izklopiti zvok. V storitvah za ljudi s posebnimi potrebami bo morda izklopljen zvok."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Dotaknite se, če želite nastaviti vibriranje. V storitvah za dostopnost bo morda izklopljen zvok."</string>
+    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Dotaknite se, če želite izklopiti zvok. V storitvah za dostopnost bo morda izklopljen zvok."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Dotaknite se, če želite nastaviti vibriranje."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Dotaknite se, če želite izklopiti zvok."</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Dotaknite se, če želite spremeniti način zvonjenja."</string>
@@ -793,7 +793,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Povečanje celotnega zaslona"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Povečava dela zaslona"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Stikalo"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Dotaknite se za funkcije za ljudi s posebnimi potrebami. Ta gumb lahko prilagodite ali zamenjate v nastavitvah.\n\n"<annotation id="link">"Ogled nastavitev"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Dotaknite se za funkcije dostopnosti. Ta gumb lahko prilagodite ali zamenjate v nastavitvah.\n\n"<annotation id="link">"Ogled nastavitev"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Če želite gumb začasno skriti, ga premaknite ob rob."</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Premakni zgoraj levo"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Premakni zgoraj desno"</string>
