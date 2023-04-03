@@ -89,6 +89,9 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.launcher3.icons.BubbleBadgeIconFactory;
+import com.android.launcher3.icons.BubbleIconFactory;
+import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
@@ -317,8 +320,13 @@ public class BubbleController implements ConfigurationChangeListener,
         mBubblePositioner = positioner;
         mBubbleData = data;
         mSavedUserBubbleData = new SparseArray<>();
-        mBubbleIconFactory = new BubbleIconFactory(context);
-        mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(context);
+        mBubbleIconFactory = new BubbleIconFactory(context,
+                context.getResources().getDimensionPixelSize(R.dimen.bubble_size));
+        mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(context,
+                context.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
+                context.getResources().getColor(R.color.important_conversation),
+                context.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.importance_ring_stroke_width));
         mDisplayController = displayController;
         mTaskViewTransitions = taskViewTransitions;
         mOneHandedOptional = oneHandedOptional;
@@ -927,8 +935,13 @@ public class BubbleController implements ConfigurationChangeListener,
         if (mStackView != null) {
             mStackView.onThemeChanged();
         }
-        mBubbleIconFactory = new BubbleIconFactory(mContext);
-        mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext);
+        mBubbleIconFactory = new BubbleIconFactory(mContext,
+                mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size));
+        mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext,
+                mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
+                mContext.getResources().getColor(R.color.important_conversation),
+                mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.importance_ring_stroke_width));
 
         // Reload each bubble
         for (Bubble b : mBubbleData.getBubbles()) {
@@ -964,8 +977,13 @@ public class BubbleController implements ConfigurationChangeListener,
                 mDensityDpi = newConfig.densityDpi;
                 mScreenBounds.set(newConfig.windowConfiguration.getBounds());
                 mBubbleData.onMaxBubblesChanged();
-                mBubbleIconFactory = new BubbleIconFactory(mContext);
-                mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext);
+                mBubbleIconFactory = new BubbleIconFactory(mContext,
+                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size));
+                mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext,
+                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
+                        mContext.getResources().getColor(R.color.important_conversation),
+                        mContext.getResources().getDimensionPixelSize(
+                                com.android.internal.R.dimen.importance_ring_stroke_width));
                 mStackView.onDisplaySizeChanged();
             }
             if (newConfig.fontScale != mFontScale) {
