@@ -18765,7 +18765,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         // too quickly in parallel below
         pingCount.incrementAndGet();
 
-        synchronized (this) {
         synchronized (mProcLock) {
             final ArrayMap<String, SparseArray<ProcessRecord>> pmap =
                     mProcessList.getProcessNamesLOSP().getMap();
@@ -18789,7 +18788,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             }
-        }
         }
 
         // Now that we've dispatched all "ping" events above, we can send our
