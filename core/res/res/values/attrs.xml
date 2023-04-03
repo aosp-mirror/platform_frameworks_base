@@ -9088,6 +9088,8 @@
         <attr name="dotActivatedColor" format="color|reference"/>
         <!-- Keep dot in activated state until segment completion -->
         <attr name="keepDotActivated" format="boolean"/>
+        <!-- Enlarge vertex entry area for some form factors -->
+        <attr name="enlargeVertexEntryArea" format="boolean"/>
     </declare-styleable>
 
     <!-- =============================== -->

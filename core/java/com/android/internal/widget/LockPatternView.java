@@ -167,6 +167,7 @@ public class LockPatternView extends View {
     private int mDotColor;
     private int mDotActivatedColor;
     private boolean mKeepDotActivated;
+    private boolean mEnlargeVertex;
 
     private final Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mLinearOutSlowInInterpolator;
@@ -341,6 +342,7 @@ public class LockPatternView extends View {
         mDotColor = a.getColor(R.styleable.LockPatternView_dotColor, mRegularColor);
         mDotActivatedColor = a.getColor(R.styleable.LockPatternView_dotActivatedColor, mDotColor);
         mKeepDotActivated = a.getBoolean(R.styleable.LockPatternView_keepDotActivated, false);
+        mEnlargeVertex = a.getBoolean(R.styleable.LockPatternView_enlargeVertexEntryArea, false);
 
         int pathColor = a.getColor(R.styleable.LockPatternView_pathColor, mRegularColor);
         mPathPaint.setColor(pathColor);
@@ -957,12 +959,20 @@ public class LockPatternView extends View {
             for (int column = 0; column < 3; column++) {
                 float centerY = getCenterYForRow(row);
                 float centerX = getCenterXForColumn(column);
+                float hitRadiusSquared;
 
-                // Maximize vertax dots' hit radius for the small(watch) screen.
-                // This eases users to draw more patterns with diagnal lines, while keeps drawing
-                // patterns with vertax dots easy.
-                float hitRadiusSquared = isVertex(row, column) ? (mDotHitMaxRadius
-                        * mDotHitMaxRadius) : (mDotHitRadius * mDotHitRadius);
+                if (mEnlargeVertex) {
+                    // Maximize vertex dots' hit radius for the small screen.
+                    // This eases users to draw more patterns with diagnal lines, while keeps
+                    // drawing patterns with vertex dots easy.
+                    hitRadiusSquared =
+                            isVertex(row, column)
+                                    ? (mDotHitMaxRadius * mDotHitMaxRadius)
+                                    : (mDotHitRadius * mDotHitRadius);
+                } else {
+                    hitRadiusSquared = mDotHitRadius * mDotHitRadius;
+                }
+
                 if ((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY)
                         < hitRadiusSquared) {
                     return Cell.of(row, column);
@@ -973,7 +983,7 @@ public class LockPatternView extends View {
     }
 
     private boolean isVertex(int row, int column) {
-        return (row != 1 && column != 1);
+        return !(row == 1 || column == 1);
     }
 
     @Override
