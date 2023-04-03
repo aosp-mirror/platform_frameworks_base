@@ -138,6 +138,68 @@ public class PermissionHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testHasRequestedPermission_otherPermission() throws Exception {
+        final String permission = "correct";
+
+        String packageName = "testHasRequestedPermission_otherPermission";
+
+        PackageInfo info = new PackageInfo();
+        info.packageName = packageName;
+        info.requestedPermissions = new String[]{"something else"};
+
+        when(mPackageManager.getPackageInfo(packageName, GET_PERMISSIONS, 0)).thenReturn(info);
+
+        assertThat(mPermissionHelper.hasRequestedPermission(permission, packageName, 0)).isFalse();
+
+    }
+
+    @Test
+    public void testHasRequestedPermission_noPermissions() throws Exception {
+        final String permission = "correct";
+
+        String packageName = "testHasRequestedPermission_noPermissions";
+
+        PackageInfo info = new PackageInfo();
+        info.packageName = packageName;
+
+        when(mPackageManager.getPackageInfo(packageName, GET_PERMISSIONS, 0)).thenReturn(info);
+
+        assertThat(mPermissionHelper.hasRequestedPermission(permission, packageName, 0)).isFalse();
+    }
+
+    @Test
+    public void testHasRequestedPermission_singlePermissions() throws Exception {
+        final String permission = "correct";
+
+        String packageName = "testHasRequestedPermission_twoPermissions";
+
+        PackageInfo info = new PackageInfo();
+        info.packageName = packageName;
+        info.requestedPermissions =
+                new String[]{permission};
+
+        when(mPackageManager.getPackageInfo(packageName, GET_PERMISSIONS, 0)).thenReturn(info);
+
+        assertThat(mPermissionHelper.hasRequestedPermission(permission, packageName, 0)).isTrue();
+    }
+
+    @Test
+    public void testHasRequestedPermission_twoPermissions() throws Exception {
+        final String permission = "correct";
+
+        String packageName = "testHasRequestedPermission_twoPermissions";
+
+        PackageInfo info = new PackageInfo();
+        info.packageName = packageName;
+        info.requestedPermissions =
+                new String[]{"something else", permission};
+
+        when(mPackageManager.getPackageInfo(packageName, GET_PERMISSIONS, 0)).thenReturn(info);
+
+        assertThat(mPermissionHelper.hasRequestedPermission(permission, packageName, 0)).isTrue();
+    }
+
+    @Test
     public void testGetAppsGrantedPermission_noApps() throws Exception {
         int userId = 1;
         ParceledListSlice<PackageInfo> infos = ParceledListSlice.emptyList();
