@@ -79,6 +79,7 @@ import java.util.function.Supplier;
 
 public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private static final String TAG = "DesktopModeWindowDecorViewModel";
+
     private final DesktopModeWindowDecoration.Factory mDesktopModeWindowDecorFactory;
     private final ActivityTaskManager mActivityTaskManager;
     private final ShellTaskOrganizer mTaskOrganizer;
@@ -542,7 +543,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mTransitionDragActive = false;
                     final int statusBarHeight = getStatusBarHeight(
                             relevantDecor.mTaskInfo.displayId);
-                    if (ev.getY() > statusBarHeight) {
+                    if (ev.getY() > 2 * statusBarHeight) {
                         if (DesktopModeStatus.isProto2Enabled()) {
                             mPauseRelayoutForTask = relevantDecor.mTaskInfo.taskId;
                             centerAndMoveToDesktopWithAnimation(relevantDecor, ev);
@@ -567,9 +568,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     return;
                 }
                 if (mTransitionDragActive) {
-                    final int statusBarHeight = mDisplayController
-                            .getDisplayLayout(
-                                    relevantDecor.mTaskInfo.displayId).stableInsets().top;
+                    mDesktopTasksController.ifPresent(
+                            c -> c.onDragPositioningMoveThroughStatusBar(relevantDecor.mTaskInfo,
+                            relevantDecor.mTaskSurface, ev.getY()));
+                    final int statusBarHeight = getStatusBarHeight(
+                            relevantDecor.mTaskInfo.displayId);
                     if (ev.getY() > statusBarHeight) {
                         if (!mDragToDesktopAnimationStarted) {
                             mDragToDesktopAnimationStarted = true;
@@ -644,7 +647,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             @Override
             public void onAnimationEnd(Animator animation) {
                 mDesktopTasksController.ifPresent(
-                        c -> c.moveToDesktopWithAnimation(relevantDecor.mTaskInfo,
+                        c -> c.onDragPositioningEndThroughStatusBar(
+                                relevantDecor.mTaskInfo,
                                 calculateFreeformBounds(FINAL_FREEFORM_SCALE)));
             }
         });
