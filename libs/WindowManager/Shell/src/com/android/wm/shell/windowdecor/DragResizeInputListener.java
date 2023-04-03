@@ -42,9 +42,6 @@ import android.view.WindowManagerGlobal;
 
 import com.android.internal.view.BaseIWindow;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * An input event listener registered to InputDispatcher to receive input events on task edges and
  * and corners. Converts them to drag resize requests.
@@ -214,10 +211,6 @@ class DragResizeInputListener implements AutoCloseable {
                     PRIVATE_FLAG_TRUSTED_OVERLAY,
                     0 /* inputFeatures */,
                     touchRegion);
-            List<Rect> cornersList = Arrays.asList(
-                    mLeftTopCornerBounds, mLeftBottomCornerBounds,
-                    mRightTopCornerBounds, mRightBottomCornerBounds);
-            mWindowSession.reportSystemGestureExclusionChanged(mFakeWindow, cornersList);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
