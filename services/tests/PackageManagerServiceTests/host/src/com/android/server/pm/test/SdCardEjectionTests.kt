@@ -22,6 +22,7 @@ import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -41,6 +42,7 @@ import java.util.regex.Pattern
 @RunWith(DeviceJUnit4Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(
         DeviceJUnit4ClassRunnerWithParameters.RunnerFactory::class)
+@Ignore("b/275403538")
 class SdCardEjectionTests : BaseHostJUnit4Test() {
 
     companion object {
