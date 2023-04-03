@@ -115,28 +115,25 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE = 1 << 26;
     // Device dreaming state
     public static final int SYSUI_STATE_DEVICE_DREAMING = 1 << 27;
-    // Whether the screen is currently on. Note that the screen is considered on while turning on,
-    // but not while turning off.
-    public static final int SYSUI_STATE_SCREEN_ON = 1 << 28;
-    // Whether the screen is currently transitioning into the state indicated by
-    // SYSUI_STATE_SCREEN_ON.
-    public static final int SYSUI_STATE_SCREEN_TRANSITION = 1 << 29;
+    // Whether the device is currently awake (as opposed to asleep, see WakefulnessLifecycle).
+    // Note that the device is awake on while waking up on, but not while going to sleep.
+    public static final int SYSUI_STATE_AWAKE = 1 << 28;
+    // Whether the device is currently transitioning between awake/asleep indicated by
+    // SYSUI_STATE_AWAKE.
+    public static final int SYSUI_STATE_WAKEFULNESS_TRANSITION = 1 << 29;
     // The notification panel expansion fraction is > 0
     public static final int SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE = 1 << 30;
 
-    // Mask for SystemUiStateFlags to isolate SYSUI_STATE_SCREEN_ON and
-    // SYSUI_STATE_SCREEN_TRANSITION, to match SCREEN_STATE_*
-    public static final int SYSUI_STATE_SCREEN_STATE_MASK =
-            SYSUI_STATE_SCREEN_ON | SYSUI_STATE_SCREEN_TRANSITION;
-    // Screen is off.
-    public static final int SCREEN_STATE_OFF = 0;
-    // Screen is on.
-    public static final int SCREEN_STATE_ON = SYSUI_STATE_SCREEN_ON;
-    // Screen is still on, but transitioning to turn off.
-    public static final int SCREEN_STATE_TURNING_OFF = SYSUI_STATE_SCREEN_TRANSITION;
-    // Screen was off and is now turning on.
-    public static final int SCREEN_STATE_TURNING_ON =
-            SYSUI_STATE_SCREEN_TRANSITION | SYSUI_STATE_SCREEN_ON;
+    // Mask for SystemUiStateFlags to isolate SYSUI_STATE_AWAKE and
+    // SYSUI_STATE_WAKEFULNESS_TRANSITION, to match WAKEFULNESS_* constants
+    public static final int SYSUI_STATE_WAKEFULNESS_MASK =
+            SYSUI_STATE_AWAKE | SYSUI_STATE_WAKEFULNESS_TRANSITION;
+    // Mirroring the WakefulnessLifecycle#Wakefulness states
+    public static final int WAKEFULNESS_ASLEEP = 0;
+    public static final int WAKEFULNESS_AWAKE = SYSUI_STATE_AWAKE;
+    public static final int WAKEFULNESS_GOING_TO_SLEEP = SYSUI_STATE_WAKEFULNESS_TRANSITION;
+    public static final int WAKEFULNESS_WAKING =
+            SYSUI_STATE_WAKEFULNESS_TRANSITION | SYSUI_STATE_AWAKE;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -167,8 +164,9 @@ public class QuickStepContract {
             SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING,
             SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE,
             SYSUI_STATE_DEVICE_DREAMING,
-            SYSUI_STATE_SCREEN_ON,
-            SYSUI_STATE_SCREEN_TRANSITION,
+            SYSUI_STATE_AWAKE,
+            SYSUI_STATE_WAKEFULNESS_TRANSITION,
+            SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE,
     })
     public @interface SystemUiStateFlags {}
 
@@ -190,7 +188,7 @@ public class QuickStepContract {
             str.add("navbar_hidden");
         }
         if ((flags & SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED) != 0) {
-            str.add("notif_visible");
+            str.add("notif_expanded");
         }
         if ((flags & SYSUI_STATE_QUICK_SETTINGS_EXPANDED) != 0) {
             str.add("qs_visible");
@@ -258,11 +256,14 @@ public class QuickStepContract {
         if ((flags & SYSUI_STATE_DEVICE_DREAMING) != 0) {
             str.add("device_dreaming");
         }
-        if ((flags & SYSUI_STATE_SCREEN_TRANSITION) != 0) {
-            str.add("screen_transition");
+        if ((flags & SYSUI_STATE_WAKEFULNESS_TRANSITION) != 0) {
+            str.add("wakefulness_transition");
         }
-        if ((flags & SYSUI_STATE_SCREEN_ON) != 0) {
-            str.add("screen_on");
+        if ((flags & SYSUI_STATE_AWAKE) != 0) {
+            str.add("awake");
+        }
+        if ((flags & SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE) != 0) {
+            str.add("notif_visible");
         }
 
         return str.toString();
