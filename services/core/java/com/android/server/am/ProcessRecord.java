@@ -45,6 +45,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.server.ServerProtoEnums;
+import android.system.OsConstants;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
@@ -1182,8 +1183,8 @@ class ProcessRecord implements WindowProcessListener {
                 EventLog.writeEvent(EventLogTags.AM_KILL,
                         userId, mPid, processName, mState.getSetAdj(), reason);
                 Process.killProcessQuiet(mPid);
-                if (asyncKPG) ProcessList.killProcessGroup(uid, mPid);
-                else Process.killProcessGroup(uid, mPid);
+                if (!asyncKPG) Process.sendSignalToProcessGroup(uid, mPid, OsConstants.SIGKILL);
+                ProcessList.killProcessGroup(uid, mPid);
             } else {
                 mPendingStart = false;
             }
