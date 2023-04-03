@@ -4884,9 +4884,30 @@ public class CarrierConfigManager {
      * The max acceptable value of this config is 24 hours.
      *
      * @hide
+     * @deprecated Use {@link #KEY_DATA_SWITCH_VALIDATION_MIN_INTERVAL_MILLIS_LONG} instead.
      */
+    @Deprecated
     public static final String KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG =
             "data_switch_validation_min_gap_long";
+
+    /**
+     * Data switch validation minimal interval, in milliseconds.
+     *
+     * If a connection to the default (Internet) PDN for the current subscription is validated on
+     * a given operator within a given tracking area, re-validations to that matching operator will
+     * be skipped if they would occur within the specified interval. Instead, the connection will
+     * automatically considered validated.
+     *
+     * If the network was validated within the interval but the latest validation result was false,
+     * the validation will not be skipped. If not set or set to 0, validation will not be skipped.
+     *
+     * The valid range of value is between 0 millisecond and 24 hours, inclusive in both sides. The
+     * default value is 24 hours.
+     *
+     * @see android.net.NetworkCapabilities#NET_CAPABILITY_VALIDATED
+     */
+    public static final String KEY_DATA_SWITCH_VALIDATION_MIN_INTERVAL_MILLIS_LONG =
+            KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG;
 
     /**
      * A boolean property indicating whether this subscription should be managed as an opportunistic
@@ -9335,7 +9356,8 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_GBA_UA_TLS_CIPHER_SUITE_INT, TlsParams.TLS_NULL_WITH_NULL_NULL);
 
         sDefaults.putBoolean(KEY_SHOW_FORWARDED_NUMBER_BOOL, false);
-        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, TimeUnit.DAYS.toMillis(1));
+        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_INTERVAL_MILLIS_LONG,
+                TimeUnit.DAYS.toMillis(1));
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
                 new String[0]);
         sDefaults.putStringArray(KEY_APN_PRIORITY_STRING_ARRAY, new String[] {
