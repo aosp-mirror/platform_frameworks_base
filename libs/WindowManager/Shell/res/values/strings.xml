@@ -221,9 +221,10 @@
          the screen. This time the double-tap can happen on the top or bottom of the screen.
          To teach the user about this feature, we display an education explaining how the double-tap
          works and how the app can be moved on the screen.
-         This is the text we show to the user below an animated icon visualizing the double-tap
-         action. [CHAR LIMIT=NONE] -->
-    <string name="letterbox_reachability_reposition_text">Double-tap to move this app</string>
+         This is the text we show to the user below an icon visualizing the double-tap
+         action. The description should be split in two lines separated by "\n" like for this
+         locale. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_reachability_reposition_text">Double-tap to\nmove this app</string>
 
     <!-- Freeform window caption strings -->
     <!-- Accessibility text for the maximize window button [CHAR LIMIT=NONE] -->
