@@ -23,7 +23,6 @@ import static android.app.admin.PolicyUpdateResult.RESULT_FAILURE_HARDWARE_LIMIT
 import static android.app.admin.PolicyUpdateResult.RESULT_POLICY_CLEARED;
 import static android.app.admin.PolicyUpdateResult.RESULT_POLICY_SET;
 import static android.content.pm.UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT;
-import static android.provider.DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -47,7 +46,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.DeviceConfig;
 import android.telephony.TelephonyManager;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -85,9 +83,6 @@ final class DevicePolicyEngine {
     private static final String CELLULAR_2G_USER_RESTRICTION_ID =
             DevicePolicyIdentifiers.getIdentifierForUserRestriction(
                     UserManager.DISALLOW_CELLULAR_2G);
-
-    private static final String ENABLE_COEXISTENCE_FLAG = "enable_coexistence";
-    private static final boolean DEFAULT_ENABLE_COEXISTENCE_FLAG = true;
 
     private final Context mContext;
     private final UserManager mUserManager;
@@ -1150,38 +1145,6 @@ final class DevicePolicyEngine {
     //  map and enforcing admins for this is be accurate.
     boolean hasActivePolicies() {
         return mEnforcingAdmins.size() > 0;
-    }
-
-    /**
-     * Returns {@code true} if the coexistence flag is enabled or:
-     * <ul>
-     * <li>If the provided package is an admin with existing policies
-     * <li>A new admin and no other admin have policies set
-     * <li>More than one admin have policies set
-     */
-    boolean canAdminAddPolicies(String packageName, int userId) {
-        if (isCoexistenceFlagEnabled()) {
-            return true;
-        }
-
-        if (mEnforcingAdmins.contains(userId)
-                && mEnforcingAdmins.get(userId).stream().anyMatch(admin ->
-                admin.getPackageName().equals(packageName))) {
-            return true;
-        }
-
-        int numOfEnforcingAdmins = 0;
-        for (int i = 0; i < mEnforcingAdmins.size(); i++) {
-            numOfEnforcingAdmins += mEnforcingAdmins.get(i).size();
-        }
-        return numOfEnforcingAdmins == 0 || numOfEnforcingAdmins > 1;
-    }
-
-    private boolean isCoexistenceFlagEnabled() {
-        return DeviceConfig.getBoolean(
-                NAMESPACE_DEVICE_POLICY_MANAGER,
-                ENABLE_COEXISTENCE_FLAG,
-                DEFAULT_ENABLE_COEXISTENCE_FLAG);
     }
 
     private <V> boolean checkFor2gFailure(@NonNull PolicyDefinition<V> policyDefinition,
