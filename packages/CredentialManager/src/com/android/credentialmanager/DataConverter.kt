@@ -64,7 +64,7 @@ import androidx.credentials.provider.RemoteEntry
 import org.json.JSONObject
 
 // TODO: remove all !! checks
-private fun getAppLabel(
+fun getAppLabel(
     pm: PackageManager,
     appPackageName: String
 ): String? {

@@ -30,11 +30,13 @@ import androidx.activity.viewModels
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.credentialmanager.common.Constants
 import com.android.credentialmanager.common.DialogState
 import com.android.credentialmanager.common.ProviderActivityResult
 import com.android.credentialmanager.common.StartBalIntentSenderForResultContract
+import com.android.credentialmanager.common.ui.Snackbar
 import com.android.credentialmanager.createflow.CreateCredentialScreen
 import com.android.credentialmanager.createflow.hasContentToDisplay
 import com.android.credentialmanager.getflow.GetCredentialScreen
@@ -49,10 +51,9 @@ class CredentialSelectorActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         Log.d(Constants.LOG_TAG, "Creating new CredentialSelectorActivity")
         try {
-            if (CredentialManagerRepo.getCancelUiRequestToken(intent) != null) {
-                Log.d(
-                    Constants.LOG_TAG, "Received UI cancellation intent; cancelling the activity.")
-                this.finish()
+            val (isCancellationRequest, shouldShowCancellationUi, _) =
+                maybeCancelUIUponRequest(intent)
+            if (isCancellationRequest && !shouldShowCancellationUi) {
                 return
             }
             val userConfigRepo = UserConfigRepo(this)
@@ -75,14 +76,15 @@ class CredentialSelectorActivity : ComponentActivity() {
         setIntent(intent)
         Log.d(Constants.LOG_TAG, "Existing activity received new intent")
         try {
-            val cancelUiRequestToken = CredentialManagerRepo.getCancelUiRequestToken(intent)
             val viewModel: CredentialSelectorViewModel by viewModels()
-            if (cancelUiRequestToken != null &&
-                viewModel.shouldCancelCurrentUi(cancelUiRequestToken)) {
-                Log.d(
-                    Constants.LOG_TAG, "Received UI cancellation intent; cancelling the activity.")
-                this.finish()
-                return
+            val (isCancellationRequest, shouldShowCancellationUi, appDisplayName) =
+                maybeCancelUIUponRequest(intent, viewModel)
+            if (isCancellationRequest) {
+                if (shouldShowCancellationUi) {
+                    viewModel.onCancellationUiRequested(appDisplayName)
+                } else {
+                    return
+                }
             } else {
                 val userConfigRepo = UserConfigRepo(this)
                 val credManRepo = CredentialManagerRepo(this, intent, userConfigRepo)
@@ -93,11 +95,41 @@ class CredentialSelectorActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Cancels the UI activity if requested by the backend. Different from the other finishing
+     * helpers, this does not report anything back to the Credential Manager service backend.
+     *
+     * Can potentially show a transient snackbar before finishing, if the request specifies so.
+     *
+     * Returns <isCancellationRequest, shouldShowCancellationUi, appDisplayName>.
+     */
+    private fun maybeCancelUIUponRequest(
+        intent: Intent,
+        viewModel: CredentialSelectorViewModel? = null
+    ): Triple<Boolean, Boolean, String?> {
+        val cancelUiRequest = CredentialManagerRepo.getCancelUiRequest(intent)
+            ?: return Triple(false, false, null)
+        if (viewModel != null && !viewModel.shouldCancelCurrentUi(cancelUiRequest.token)) {
+            // Cancellation was for a different request, don't cancel the current UI.
+            return Triple(false, false, null)
+        }
+        val shouldShowCancellationUi = cancelUiRequest.shouldShowCancellationUi()
+        Log.d(
+            Constants.LOG_TAG, "Received UI cancellation intent. Should show cancellation" +
+            " ui = $shouldShowCancellationUi")
+        val appDisplayName = getAppLabel(packageManager, cancelUiRequest.appPackageName)
+        if (!shouldShowCancellationUi) {
+            this.finish()
+        }
+        return Triple(true, shouldShowCancellationUi, appDisplayName)
+    }
+
+
     @ExperimentalMaterialApi
     @Composable
-    fun CredentialManagerBottomSheet(
+    private fun CredentialManagerBottomSheet(
         credManRepo: CredentialManagerRepo,
-        userConfigRepo: UserConfigRepo
+        userConfigRepo: UserConfigRepo,
     ) {
         val viewModel: CredentialSelectorViewModel = viewModel {
             CredentialSelectorViewModel(credManRepo, userConfigRepo)
@@ -113,7 +145,17 @@ class CredentialSelectorActivity : ComponentActivity() {
 
         val createCredentialUiState = viewModel.uiState.createCredentialUiState
         val getCredentialUiState = viewModel.uiState.getCredentialUiState
-        if (createCredentialUiState != null && hasContentToDisplay(createCredentialUiState)) {
+        val cancelRequestState = viewModel.uiState.cancelRequestState
+        if (cancelRequestState != null) {
+            if (cancelRequestState.appDisplayName == null) {
+                Log.d(Constants.LOG_TAG, "Received UI cancel request with an invalid package name.")
+                this.finish()
+                return
+            } else {
+                UiCancellationScreen(cancelRequestState.appDisplayName)
+            }
+        } else if (
+            createCredentialUiState != null && hasContentToDisplay(createCredentialUiState)) {
             CreateCredentialScreen(
                 viewModel = viewModel,
                 createCredentialUiState = createCredentialUiState,
@@ -122,15 +164,15 @@ class CredentialSelectorActivity : ComponentActivity() {
         } else if (getCredentialUiState != null && hasContentToDisplay(getCredentialUiState)) {
             if (isFallbackScreen(getCredentialUiState)) {
                 GetGenericCredentialScreen(
-                        viewModel = viewModel,
-                        getCredentialUiState = getCredentialUiState,
-                        providerActivityLauncher = launcher
+                    viewModel = viewModel,
+                    getCredentialUiState = getCredentialUiState,
+                    providerActivityLauncher = launcher
                 )
             } else {
                 GetCredentialScreen(
-                        viewModel = viewModel,
-                        getCredentialUiState = getCredentialUiState,
-                        providerActivityLauncher = launcher
+                    viewModel = viewModel,
+                    getCredentialUiState = getCredentialUiState,
+                    providerActivityLauncher = launcher
                 )
             }
         } else {
@@ -171,5 +213,14 @@ class CredentialSelectorActivity : ComponentActivity() {
             requestInfo?.token, resultReceiver
         )
         this.finish()
+    }
+
+    @Composable
+    private fun UiCancellationScreen(appDisplayName: String) {
+        Snackbar(
+            contentText = stringResource(R.string.request_cancelled_by, appDisplayName),
+            onDismiss = { this@CredentialSelectorActivity.finish() },
+            dismissOnTimeout = true,
+        )
     }
 }
