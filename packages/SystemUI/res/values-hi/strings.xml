@@ -385,7 +385,7 @@
     <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"क्या आपको शेयर या रिकॉर्ड करने की <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> को अनुमति देनी है?"</string>
     <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"पूरी स्क्रीन"</string>
     <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"सिर्फ़ एक ऐप्लिकेशन"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"शेयर, रिकॉर्ड या कास्ट करते समय, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> के पास स्क्रीन पर दिख रही हर चीज़ या डिवाइस पर चल रहे हर मीडिया का ऐक्सेस होता है. इसलिए, शेयर, रिकॉर्ड या कास्ट करते समय, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज या किसी और संवेदनशील जानकारी को लेकर खास सावधानी बरतें."</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"शेयर, रिकॉर्ड या कास्ट करते समय <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> के पास स्क्रीन पर दिख रही हर चीज़ या डिवाइस पर चल रहे हर मीडिया का ऐक्सेस होता है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज या किसी और संवेदनशील जानकारी को लेकर खास सावधानी बरतें."</string>
     <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"शेयर, रिकॉर्ड या कास्ट करते समय, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> के पास उस ऐप्लिकेशन पर दिख रही हर चीज़ या उस पर चल रहे हर मीडिया का ऐक्सेस होता है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज या किसी और संवेदनशील जानकारी को लेकर खास सावधानी बरतें."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"जारी रखें"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"ऐप्लिकेशन शेयर करें या उसकी रिकॉर्डिंग करें"</string>
@@ -458,6 +458,10 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"बंद करें"</string>
     <string name="sound_settings" msgid="8874581353127418308">"आवाज़ और वाइब्रेशन"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"सेटिंग"</string>
+    <!-- no translation found for csd_lowered_title (1786173629015030856) -->
+    <skip />
+    <!-- no translation found for csd_system_lowered_text (2001603282316829500) -->
+    <skip />
     <string name="screen_pinning_title" msgid="9058007390337841305">"ऐप्लिकेशन पिन किया गया है"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"इससे वह तब तक दिखता रहता है, जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, \'वापस जाएं\' और \'खास जानकारी\' को दबाकर रखें."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"इससे वह तब तक दिखाई देती है जब तक आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, होम और वापस जाएं वाले बटन को दबाकर रखें."</string>
@@ -848,8 +852,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"मध्यम"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"छोटा"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"बड़ा"</string>
-    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
-    <skip />
+    <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"फ़ुल स्क्रीन"</string>
     <string name="accessibility_magnification_done" msgid="263349129937348512">"हो गया"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"बदलाव करें"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"ज़ूम करने की सुविधा वाली विंडो से जुड़ी सेटिंग"</string>
@@ -885,6 +888,12 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सभी कंट्रोल हटा दिए गए"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"बदलाव सेव नहीं किए गए"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"दूसरे ऐप्लिकेशन देखें"</string>
+    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
+    <skip />
+    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
+    <skip />
+    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"कंट्रोल लोड नहीं किए जा सके. <xliff:g id="APP">%s</xliff:g> ऐप्लिकेशन देखें, ताकि यह पक्का किया जा सके कि ऐप्लिकेशन की सेटिंग में कोई बदलाव नहीं हुआ है."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"इस सेटिंग के साथ काम करने वाले कंट्रोल उपलब्ध नहीं हैं"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>

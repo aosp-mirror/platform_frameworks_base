@@ -71,14 +71,14 @@
     <string name="global_action_screenshot" msgid="2760267567509131654">"স্ক্ৰীনশ্বট"</string>
     <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock অক্ষম কৰা আছে"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"এখন প্ৰতিচ্ছবি পঠিয়াইছে"</string>
-    <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্ৰীণশ্বট ছেভ কৰি থকা হৈছে…"</string>
+    <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্ৰীনশ্বট ছেভ কৰি থকা হৈছে…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"কৰ্মস্থানৰ প্ৰ’ফাইলত স্ক্ৰীনশ্বট ছেভ কৰি থকা হৈছে…"</string>
-    <string name="screenshot_saved_title" msgid="8893267638659083153">"স্ক্ৰীণশ্বট ছেভ কৰা হ’ল"</string>
-    <string name="screenshot_failed_title" msgid="3259148215671936891">"স্ক্ৰীণশ্বট ছেভ কৰিব পৰা নগ\'ল"</string>
+    <string name="screenshot_saved_title" msgid="8893267638659083153">"স্ক্ৰীনশ্বট ছেভ কৰা হ’ল"</string>
+    <string name="screenshot_failed_title" msgid="3259148215671936891">"স্ক্ৰীনশ্বট ছেভ কৰিব পৰা নগ\'ল"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"স্ক্ৰীনশ্বট ছেভ কৰিবলৈ ডিভাইচটো আনলক কৰিবই লাগিব"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"স্ক্ৰীণশ্বট আকৌ ল\'বলৈ চেষ্টা কৰক"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"স্ক্ৰীনশ্বট আকৌ ল\'বলৈ চেষ্টা কৰক"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"স্ক্ৰীনশ্বট ছেভ কৰিব নোৱাৰি"</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"এপটোৱে বা আপোনাৰ প্ৰতিষ্ঠানে স্ক্ৰীণশ্বট ল\'বলৈ অনুমতি নিদিয়ে"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"এপটোৱে বা আপোনাৰ প্ৰতিষ্ঠানে স্ক্ৰীনশ্বট ল\'বলৈ অনুমতি নিদিয়ে"</string>
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"স্ক্ৰীনশ্বট লোৱাটো আপোনাৰ আইটি প্ৰশাসকে অৱৰোধ কৰিছে"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"সম্পাদনা কৰক"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"স্ক্ৰীনশ্বট সম্পাদনা কৰক"</string>
@@ -458,6 +458,10 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"অক্ষম কৰক"</string>
     <string name="sound_settings" msgid="8874581353127418308">"ধ্বনি আৰু কম্পন"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ছেটিং"</string>
+    <!-- no translation found for csd_lowered_title (1786173629015030856) -->
+    <skip />
+    <!-- no translation found for csd_system_lowered_text (2001603282316829500) -->
+    <skip />
     <string name="screen_pinning_title" msgid="9058007390337841305">"এপ্‌টো পিন কৰা আছে"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ \'পিছলৈ যাওক\' আৰু \'অৱলোকন\'-ত স্পৰ্শ কৰি থাকক।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ পিছলৈ যাওক আৰু হ\'মত স্পৰ্শ কৰি সেঁচি ধৰক।"</string>
@@ -848,8 +852,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"মধ্যমীয়া"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"সৰু"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"ডাঙৰ"</string>
-    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
-    <skip />
+    <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"পূৰ্ণ স্ক্ৰীন"</string>
     <string name="accessibility_magnification_done" msgid="263349129937348512">"কৰা হ’ল"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"সম্পাদনা কৰক"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"বিবৰ্ধকৰ ৱিণ্ড’ৰ ছেটিং"</string>
@@ -885,6 +888,12 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"আটাইবোৰ নিয়ন্ত্ৰণ আঁতৰোৱা হৈছে"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"সালসলনিসমূহ ছেভ নহ’ল"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"অন্য এপ্‌সমূহ চাওক"</string>
+    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
+    <skip />
+    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
+    <skip />
+    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"নিয়ন্ত্ৰণসমূহ ল’ড কৰিবপৰা নগ’ল। এপ্‌টোৰ ছেটিং সলনি কৰা হোৱা নাই বুলি নিশ্চিত কৰিবলৈ <xliff:g id="APP">%s</xliff:g> এপ্‌টো পৰীক্ষা কৰক।"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"সমিল নিয়ন্ত্ৰণসমূহ উপলব্ধ নহয়"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"অন্য"</string>
