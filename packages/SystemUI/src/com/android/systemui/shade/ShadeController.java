@@ -64,6 +64,11 @@ public interface ShadeController {
     boolean closeShadeIfOpen();
 
     /**
+     * Returns whether the shade state is the keyguard or not.
+     */
+    boolean isKeyguard();
+
+    /**
      * Returns whether the shade is currently open.
      * Even though in the current implementation shade is in expanded state on keyguard, this
      * method makes distinction between shade being truly open and plain keyguard state:

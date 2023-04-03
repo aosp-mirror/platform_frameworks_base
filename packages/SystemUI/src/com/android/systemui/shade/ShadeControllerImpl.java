@@ -154,6 +154,11 @@ public final class ShadeControllerImpl implements ShadeController {
     }
 
     @Override
+    public boolean isKeyguard() {
+        return mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
+    }
+
+    @Override
     public boolean isShadeFullyOpen() {
         return mNotificationPanelViewController.isShadeFullyExpanded();
     }
