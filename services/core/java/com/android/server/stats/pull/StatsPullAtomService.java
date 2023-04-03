@@ -147,7 +147,6 @@ import android.security.metrics.Keystore2AtomWithOverflow;
 import android.security.metrics.KeystoreAtom;
 import android.security.metrics.KeystoreAtomPayload;
 import android.security.metrics.RkpErrorStats;
-import android.security.metrics.RkpPoolStats;
 import android.security.metrics.StorageStats;
 import android.stats.storage.StorageEnums;
 import android.telephony.ModemActivityInfo;
@@ -722,7 +721,6 @@ public class StatsPullAtomService extends SystemService {
                             return pullInstalledIncrementalPackagesLocked(atomTag, data);
                         }
                     case FrameworkStatsLog.KEYSTORE2_STORAGE_STATS:
-                    case FrameworkStatsLog.RKP_POOL_STATS:
                     case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_GENERAL_INFO:
                     case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_AUTH_INFO:
                     case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_PURPOSE_AND_MODES_INFO:
@@ -928,7 +926,6 @@ public class StatsPullAtomService extends SystemService {
         registerSettingsStats();
         registerInstalledIncrementalPackages();
         registerKeystoreStorageStats();
-        registerRkpPoolStats();
         registerKeystoreKeyCreationWithGeneralInfo();
         registerKeystoreKeyCreationWithAuthInfo();
         registerKeystoreKeyCreationWithPurposeModesInfo();
@@ -4226,14 +4223,6 @@ public class StatsPullAtomService extends SystemService {
                 mStatsCallbackImpl);
     }
 
-    private void registerRkpPoolStats() {
-        mStatsManager.setPullAtomCallback(
-                FrameworkStatsLog.RKP_POOL_STATS,
-                null, // use default PullAtomMetadata values,
-                DIRECT_EXECUTOR,
-                mStatsCallbackImpl);
-    }
-
     private void registerKeystoreKeyCreationWithGeneralInfo() {
         mStatsManager.setPullAtomCallback(
                 FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_GENERAL_INFO,
@@ -4337,19 +4326,6 @@ public class StatsPullAtomService extends SystemService {
             pulledData.add(FrameworkStatsLog.buildStatsEvent(
                     FrameworkStatsLog.KEYSTORE2_STORAGE_STATS, atom.storage_type,
                     atom.size, atom.unused_size));
-        }
-        return StatsManager.PULL_SUCCESS;
-    }
-
-    int parseRkpPoolStats(KeystoreAtom[] atoms, List<StatsEvent> pulledData) {
-        for (KeystoreAtom atomWrapper : atoms) {
-            if (atomWrapper.payload.getTag() != KeystoreAtomPayload.rkpPoolStats) {
-                return StatsManager.PULL_SKIP;
-            }
-            RkpPoolStats atom = atomWrapper.payload.getRkpPoolStats();
-            pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                    FrameworkStatsLog.RKP_POOL_STATS, atom.security_level, atom.expiring,
-                    atom.unassigned, atom.attested, atom.total));
         }
         return StatsManager.PULL_SUCCESS;
     }
@@ -4486,8 +4462,6 @@ public class StatsPullAtomService extends SystemService {
             switch (atomTag) {
                 case FrameworkStatsLog.KEYSTORE2_STORAGE_STATS:
                     return parseKeystoreStorageStats(atoms, pulledData);
-                case FrameworkStatsLog.RKP_POOL_STATS:
-                    return parseRkpPoolStats(atoms, pulledData);
                 case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_GENERAL_INFO:
                     return parseKeystoreKeyCreationWithGeneralInfo(atoms, pulledData);
                 case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_AUTH_INFO:
