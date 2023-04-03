@@ -43,7 +43,7 @@ class UIMetrics() {
     }
 
     @Composable
-    fun log(event: UiEventLogger.UiEventEnum, packageName: String) {
+    fun log(event: UiEventLogger.UiEventEnum, packageName: String?) {
         val instanceId: InstanceId = mInstanceId
         LaunchedEffect(true) {
             mUiEventLogger.logWithInstanceId(event, /*uid=*/0, packageName, instanceId)
@@ -51,13 +51,13 @@ class UIMetrics() {
     }
 
     @Composable
-    fun log(event: UiEventLogger.UiEventEnum, instanceId: InstanceId, packageName: String) {
+    fun log(event: UiEventLogger.UiEventEnum, instanceId: InstanceId, packageName: String?) {
         LaunchedEffect(true) {
             mUiEventLogger.logWithInstanceId(event, /*uid=*/0, packageName, instanceId)
         }
     }
 
-    fun logNormal(event: UiEventLogger.UiEventEnum, packageName: String) {
+    fun logNormal(event: UiEventLogger.UiEventEnum, packageName: String?) {
         mUiEventLogger.logWithInstanceId(event, /*uid=*/0, packageName, mInstanceId)
     }
 }
