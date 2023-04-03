@@ -49,6 +49,8 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.rule.ActivityTestRule;
@@ -98,6 +100,9 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
     private UserTracker mUserTracker;
     @Mock
     private UiEventLogger mUiEventLogger;
+    @Mock
+    private UserManager mUserManager;
+
     @Main
     private Handler mMainHandler;
 
@@ -109,7 +114,7 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
                 protected AppClipsTrampolineActivityTestable create(Intent unUsed) {
                     return new AppClipsTrampolineActivityTestable(mDevicePolicyManager,
                             mFeatureFlags, mOptionalBubbles, mNoteTaskController, mPackageManager,
-                            mUserTracker, mUiEventLogger, mMainHandler);
+                            mUserTracker, mUiEventLogger, mUserManager, mMainHandler);
                 }
             };
 
@@ -264,6 +269,40 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
         verify(mUiEventLogger).log(SCREENSHOT_FOR_NOTE_TRIGGERED, TEST_UID, TEST_CALLING_PACKAGE);
     }
 
+    @Test
+    public void startAppClipsActivity_throughWPUser_shouldStartMainUserActivity()
+            throws NameNotFoundException {
+        when(mUserManager.isManagedProfile()).thenReturn(true);
+        when(mUserManager.getMainUser()).thenReturn(UserHandle.SYSTEM);
+        mockToSatisfyAllPrerequisites();
+
+        AppClipsTrampolineActivityTestable activity = mActivityRule.launchActivity(mActivityIntent);
+        waitForIdleSync();
+
+        Intent actualIntent = activity.mStartedIntent;
+        assertThat(actualIntent.getComponent()).isEqualTo(
+                new ComponentName(mContext, AppClipsTrampolineActivity.class));
+        assertThat(actualIntent.getFlags()).isEqualTo(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+        assertThat(activity.mStartingUser).isEqualTo(UserHandle.SYSTEM);
+    }
+
+    @Test
+    public void startAppClipsActivity_throughWPUser_noMainUser_shouldFinishWithFailed()
+            throws NameNotFoundException {
+        when(mUserManager.isManagedProfile()).thenReturn(true);
+        when(mUserManager.getMainUser()).thenReturn(null);
+
+        mockToSatisfyAllPrerequisites();
+
+        mActivityRule.launchActivity(mActivityIntent);
+        waitForIdleSync();
+
+        ActivityResult actualResult = mActivityRule.getActivityResult();
+        assertThat(actualResult.getResultCode()).isEqualTo(Activity.RESULT_OK);
+        assertThat(getStatusCodeExtra(actualResult.getResultData()))
+                .isEqualTo(CAPTURE_CONTENT_FOR_NOTE_FAILED);
+    }
+
     private void mockToSatisfyAllPrerequisites() throws NameNotFoundException {
         when(mFeatureFlags.isEnabled(SCREENSHOT_APP_CLIPS)).thenReturn(true);
         when(mOptionalBubbles.isEmpty()).thenReturn(false);
@@ -282,6 +321,9 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
     public static final class AppClipsTrampolineActivityTestable extends
             AppClipsTrampolineActivity {
 
+        Intent mStartedIntent;
+        UserHandle mStartingUser;
+
         public AppClipsTrampolineActivityTestable(DevicePolicyManager devicePolicyManager,
                 FeatureFlags flags,
                 Optional<Bubbles> optionalBubbles,
@@ -289,9 +331,10 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
                 PackageManager packageManager,
                 UserTracker userTracker,
                 UiEventLogger uiEventLogger,
+                UserManager userManager,
                 @Main Handler mainHandler) {
             super(devicePolicyManager, flags, optionalBubbles, noteTaskController, packageManager,
-                    userTracker, uiEventLogger, mainHandler);
+                    userTracker, uiEventLogger, userManager, mainHandler);
         }
 
         @Override
@@ -302,6 +345,12 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
         @Override
         public void startActivity(Intent unUsed) {
             // Ignore this intent to avoid App Clips screenshot editing activity from starting.
+        }
+
+        @Override
+        public void startActivityAsUser(Intent startedIntent, UserHandle startingUser) {
+            mStartedIntent = startedIntent;
+            mStartingUser = startingUser;
         }
     }
 
