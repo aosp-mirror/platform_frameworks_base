@@ -7917,6 +7917,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mAtmService.getTaskChangeNotificationController().notifyActivityRequestedOrientationChanged(
                 task.mTaskId, requestedOrientation);
+
+        mDisplayContent.getDisplayRotation().onSetRequestedOrientation();
     }
 
     /*
