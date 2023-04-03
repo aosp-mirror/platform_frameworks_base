@@ -290,7 +290,7 @@ public class ScreenshotController {
         if (DEBUG_INPUT) {
             Log.d(TAG, "Predictive Back callback dispatched");
         }
-        respondToBack();
+        respondToKeyDismissal();
     };
 
     private ScreenshotView mScreenshotView;
@@ -615,7 +615,7 @@ public class ScreenshotController {
         }
     }
 
-    private void respondToBack() {
+    private void respondToKeyDismissal() {
         dismissScreenshot(SCREENSHOT_DISMISSED_OTHER);
     }
 
@@ -675,11 +675,11 @@ public class ScreenshotController {
         mScreenshotView.setDefaultTimeoutMillis(mScreenshotHandler.getDefaultTimeoutMillis());
 
         mScreenshotView.setOnKeyListener((v, keyCode, event) -> {
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
                 if (DEBUG_INPUT) {
-                    Log.d(TAG, "onKeyEvent: KeyEvent.KEYCODE_BACK");
+                    Log.d(TAG, "onKeyEvent: " + keyCode);
                 }
-                respondToBack();
+                respondToKeyDismissal();
                 return true;
             }
             return false;
