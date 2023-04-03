@@ -20,7 +20,6 @@ import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import android.tools.device.flicker.isShellTransitionsEnabled
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -29,7 +28,6 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -65,17 +63,9 @@ open class CloseImeToHomeOnFinishActivityTest(flicker: FlickerTest) : BaseTest(f
 
     @Presubmit @Test fun imeLayerBecomesInvisible() = flicker.imeLayerBecomesInvisible()
 
-    @Presubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-    }
-
     @FlakyTest(bugId = 246284124)
     @Test
-    fun visibleLayersShownMoreThanOneConsecutiveEntry_shellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
