@@ -4447,7 +4447,8 @@
 
      See android.credentials.CredentialManager
     -->
-    <string name="config_defaultCredentialProviderService" translatable="false"></string>
+    <string-array name="config_defaultCredentialProviderService" translatable="false">
+    </string-array>
 
     <!-- The package name for the system's smartspace service.
      This service returns smartspace results.

@@ -3747,7 +3747,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 216;
+            private static final int SETTINGS_VERSION = 217;
 
             private final int mUserId;
 
@@ -5710,7 +5710,7 @@ public class SettingsProvider extends ContentProvider {
                             .getSettingLocked(Settings.Secure.CREDENTIAL_SERVICE);
                     if (currentSetting.isNull()) {
                         final int resourceId =
-                            com.android.internal.R.string.config_defaultCredentialProviderService;
+                            com.android.internal.R.array.config_defaultCredentialProviderService;
                         final Resources resources = getContext().getResources();
                         // If the config has not be defined we might get an exception. We also get
                         // values from both the string array type and the single string in case the
@@ -5768,6 +5768,39 @@ public class SettingsProvider extends ContentProvider {
                                 null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 216;
+                }
+
+                if (currentVersion == 216) {
+                    // Version 216: Set a default value for Credential Manager service.
+                    // We are doing this migration again because of an incorrect setting.
+
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting currentSetting = secureSettings
+                            .getSettingLocked(Settings.Secure.CREDENTIAL_SERVICE);
+                    if (currentSetting.isNull()) {
+                        final int resourceId =
+                            com.android.internal.R.array.config_defaultCredentialProviderService;
+                        final Resources resources = getContext().getResources();
+                        // If the config has not be defined we might get an exception.
+                        final List<String> providers = new ArrayList<>();
+                        try {
+                            providers.addAll(Arrays.asList(resources.getStringArray(resourceId)));
+                        } catch (Resources.NotFoundException e) {
+                            Slog.w(LOG_TAG,
+                                "Get default array Cred Provider not found: " + e.toString());
+                        }
+
+                        if (!providers.isEmpty()) {
+                            final String defaultValue = String.join(":", providers);
+                            Slog.d(LOG_TAG, "Setting [" + defaultValue + "] as CredMan Service "
+                                    + "for user " + userId);
+                            secureSettings.insertSettingOverrideableByRestoreLocked(
+                                    Settings.Secure.CREDENTIAL_SERVICE, defaultValue, null, true,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 217;
                 }
 
                 // vXXX: Add new settings above this point.
