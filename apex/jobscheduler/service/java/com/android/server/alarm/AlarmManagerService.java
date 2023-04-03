@@ -69,6 +69,7 @@ import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_R
 import android.Manifest;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.ElapsedRealtimeLong;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.Activity;
@@ -3000,11 +3001,10 @@ public class AlarmManagerService extends SystemService {
             return (uid > 0) ? hasScheduleExactAlarmInternal(packageName, uid) : false;
         }
 
+        @EnforcePermission(android.Manifest.permission.SET_TIME)
         @Override
         public boolean setTime(@CurrentTimeMillisLong long millis) {
-            getContext().enforceCallingOrSelfPermission(
-                    "android.permission.SET_TIME",
-                    "setTime");
+            setTime_enforcePermission();
 
             // The public API (and the shell command that also uses this method) have no concept
             // of confidence, but since the time should come either from apps working on behalf of
@@ -3013,11 +3013,10 @@ public class AlarmManagerService extends SystemService {
             return setTimeImpl(millis, timeConfidence, "AlarmManager.setTime() called");
         }
 
+        @EnforcePermission(android.Manifest.permission.SET_TIME_ZONE)
         @Override
         public void setTimeZone(String tz) {
-            getContext().enforceCallingOrSelfPermission(
-                    "android.permission.SET_TIME_ZONE",
-                    "setTimeZone");
+            setTimeZone_enforcePermission();
 
             final long oldId = Binder.clearCallingIdentity();
             try {
@@ -3075,10 +3074,10 @@ public class AlarmManagerService extends SystemService {
             return getNextAlarmClockImpl(userId);
         }
 
+        @EnforcePermission(android.Manifest.permission.DUMP)
         @Override
         public int getConfigVersion() {
-            getContext().enforceCallingOrSelfPermission(Manifest.permission.DUMP,
-                    "getConfigVersion");
+            getConfigVersion_enforcePermission();
             return mConstants.getVersion();
         }
 
