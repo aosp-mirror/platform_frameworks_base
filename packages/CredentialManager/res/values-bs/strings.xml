@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Poboljšana sigurnost računa"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Svaki ključ je isključivo povezan s aplikacijom ili web lokacijom za koju je kreiran, tako da se nikada ne možete greškom prijaviti u prevarantsku aplikaciju ili na prevarantsku web lokaciju. Osim toga, hakiranje je puno teže zahvaljujući serverima koji čuvaju samo javne ključeve."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Neometani prijelaz"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Kako se krećemo prema budućnosti bez lozinki, lozinke će i dalje biti dostupne uz pristupne ključeve"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Kako se krećemo prema budućnosti bez lozinki, lozinke će i dalje biti dostupne uz pristupne ključeve."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Odaberite gdje će se pohranjivati <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Odaberite upravitelja lozinki da sačuvate svoje informacije i brže se prijavite sljedeći put"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Kreirati pristupni ključ za aplikaciju <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,7 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Koristiti sačuvani pristupni ključ za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Koristiti sačuvanu prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Odaberite sačuvanu prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Želite li odabrati opciju za <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
     <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Prijavite se na drugi način"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Prikaži opcije"</string>

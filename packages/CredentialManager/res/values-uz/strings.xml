@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Hisob xavfsizligi yaxshilandi"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Har bir kalit faqat ular uchun yaratilgan ilova yoki veb-sayt bilan ulangan, shuning uchun siz hech qachon xatolik bilan soxta ilova yoki veb-saytga kira olmaysiz. Shuningdek, serverlar bilan faqat ochiq kalitlarni saqlagan holda, buzib kirish ancha qiyinroq boʻladi."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Uzluksiz oʻtish"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Parolsiz kelajak sari borayotganimizda, parollar kodlar bilan birga ishlatilishda davom etadi"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Parolsiz kelajak sari borayotganimizda, parollar kodlar bilan birga ishlatilishda davom etadi."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Bu <xliff:g id="CREATETYPES">%1$s</xliff:g> qayerga saqlanishini tanlang"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Maʼlumotlaringizni saqlash va keyingi safar tez kirish uchun parollar menejerini tanlang"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> uchun kod yaratilsinmi?"</string>
@@ -54,6 +54,8 @@
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> hisob maʼlumotlarini tanlang"</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
     <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Boshqa usul orqali kirish"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Variantlarni ochish"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Davom etish"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Hisob maʼlumotlarini boshqarish"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Boshqa qurilmada"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Boshqa qurilmadan foydalanish"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Soʻrovni <xliff:g id="APP_NAME">%1$s</xliff:g> bekor qilgan"</string>
 </resources>

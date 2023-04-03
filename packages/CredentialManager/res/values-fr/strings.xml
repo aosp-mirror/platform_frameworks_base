@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Des comptes plus sécurisés"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Chaque clé est liée exclusivement à l\'appli ou au site Web pour lequel elle a été créée, pour que vous ne puissiez jamais vous connecter par erreur à une appli ou un site Web frauduleux. De plus, le piratage est bien plus difficile, car les serveurs ne conservent que les clés publiques."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Une transition fluide"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Nous nous dirigeons vers un futur sans mots de passe, mais ceux-ci resteront disponibles en plus des clés d\'accès"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Nous nous dirigeons vers un futur sans mots de passe, mais ceux-ci resteront disponibles en plus des clés d\'accès."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Choisissez où enregistrer vos <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Sélectionnez un gestionnaire de mots de passe pour enregistrer vos informations et vous connecter plus rapidement la prochaine fois"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Créer une clé d\'accès pour <xliff:g id="APPNAME">%1$s</xliff:g> ?"</string>
@@ -54,6 +54,8 @@
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Choisir des informations de connexion enregistrées pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
     <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Se connecter d\'une autre manière"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Voir les options"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Continuer"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Gérer les connexions"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Depuis un autre appareil"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Utiliser un autre appareil"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Requête annulée par <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
 </resources>

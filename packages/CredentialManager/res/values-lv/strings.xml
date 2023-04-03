@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Uzlabota kontu drošība"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Katra atslēga ir saistīta tikai ar to lietotni vai vietni, kurai tā tika izveidota, tādēļ jūs nevarēsiet nejauši pierakstīties krāpnieciskā lietotnē vai vietnē. Turklāt uzlaušanu ievērojami sarežģī tas, ka serveros tiek glabātas tikai publiskās atslēgas."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Ērta pāreja"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Kamēr notiek pāreja uz darbu bez parolēm, tās joprojām būs pieejamas līdztekus piekļuves atslēgām."</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Lai arī pamazām notiek pāreja uz darbu bez parolēm, tās joprojām būs pieejamas līdzās piekļuves atslēgām."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Izvēlieties, kur saglabāt savas <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Lai saglabātu informāciju un nākamreiz varētu pierakstīties ātrāk, atlasiet paroļu pārvaldnieku."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vai izveidot piekļuves atslēgu lietotnei <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -54,6 +54,8 @@
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Saglabātas pierakstīšanās informācijas izvēle lietotnei <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
     <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Pierakstīties citā veidā"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Skatīt opcijas"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Turpināt"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Pierakstīšanās informācijas pārvaldība"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"No citas ierīces"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Izmantot citu ierīci"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> atcēla pieprasījumu"</string>
 </resources>

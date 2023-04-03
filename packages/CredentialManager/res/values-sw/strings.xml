@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Ulinzi wa akaunti ulioboreshwa"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Kila ufunguo umeunganishwa kwa upekee na programu au tovuti husika, kwa hivyo kamwe huwezi kuingia katika akaunti ya programu au tovuti ya kilaghai kwa bahati mbaya. Pia, kwa kuwa seva huhifadhi tu funguo za umma, udukuzi si rahisi."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Mabadiliko rahisi"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Tunavyoelekea katika enzi isiyo ya manenosiri, manenosiri yataendelea kupatikana pamoja na funguo za siri"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Tunavyoelekea katika enzi isiyo ya manenosiri, manenosiri yataendelea kupatikana pamoja na funguo za siri."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Chagua ambako unahifadhi <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Chagua kidhibiti cha manenosiri ili uhifadhi taarifa zako na uingie kwenye akaunti kwa urahisi wakati mwingine"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Ungependa kuunda ufunguo wa siri kwa ajili ya <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,7 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Ungependa kutumia ufunguo wa siri uliohifadhiwa wa <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Ungependa kutumia kitambulisho kilichohifadhiwa cha kuingia katika akaunti ya <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Chagua vitambulisho vilivyohifadhiwa kwa ajili ya kuingia katika akaunti ya <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Ungependa kuteua chaguo la <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
     <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Ingia katika akaunti kwa kutumia njia nyingine"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Angalia chaguo"</string>
@@ -66,6 +67,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Dhibiti michakato ya kuingia katika akaunti"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Kutoka kwenye kifaa kingine"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Tumia kifaa tofauti"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Ombi lilighairiwa na <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
 </resources>

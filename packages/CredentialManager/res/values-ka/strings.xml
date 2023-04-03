@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"ანგარიშის გაუმჯობესებული უსაფრთხოება"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"თითოეული გასაღები დაკავშირებულია მხოლოდ აპთან ან ვებსაიტთან, რომელთათვისაც ის შეიქმნა, ამიტომაც შემთხვევით ვერასდროს შეხვალთ თაღლითურ აპში თუ ვებსაიტზე. ამასთანავე, სერვერები ინახავს მხოლოდ საჯარო გასაღებებს, რაც ართულებს გატეხვის ალბათობას."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"დაუბრკოლებელი გადასვლა"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"უპაროლო მომავალში გადასვლის პროცესის პარალელურად პაროლები კვლავ ხელმისაწვდომი იქნება, წვდომის გასაღებებთან ერთად"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"უპაროლო მომავალში პაროლები კვლავ ხელმისაწვდომი იქნება, წვდომის გასაღებებთან ერთად."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"აირჩიეთ სად შეინახოთ თქვენი <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"აირჩიეთ პაროლების მმართველი თქვენი ინფორმაციის შესანახად, რომ მომავალში უფრო სწრაფად შეხვიდეთ."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"შექმნით წვდომის გასაღებს <xliff:g id="APPNAME">%1$s</xliff:g> აპისთვის?"</string>
@@ -53,6 +53,8 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"გსურთ თქვენი დამახსოვრებული სისტემაში შესვლის მონაცემების გამოყენება აპისთვის: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"აირჩიეთ სისტემაში შესვლის ინფორმაცია აპისთვის: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
     <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"სხვა ხერხით შესვლა"</string>
     <string name="snackbar_action" msgid="37373514216505085">"პარამეტრების ნახვა"</string>
