@@ -20,14 +20,19 @@ import android.annotation.NonNull;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.providers.settings.BackingStoreProto;
+import android.providers.settings.CacheEntryProto;
+import android.providers.settings.GenerationRegistryProto;
 import android.util.ArrayMap;
 import android.util.MemoryIntArray;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * This class tracks changes for config/global/secure/system tables
@@ -291,5 +296,95 @@ final class GenerationRegistry {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     int getMaxNumBackingStores() {
         return mMaxNumBackingStore;
+    }
+
+    public void dumpProto(ProtoOutputStream proto) {
+        synchronized (mLock) {
+            final int numBackingStores = mKeyToBackingStoreMap.size();
+            proto.write(GenerationRegistryProto.NUM_BACKING_STORES, numBackingStores);
+            proto.write(GenerationRegistryProto.NUM_MAX_BACKING_STORES, getMaxNumBackingStores());
+
+            for (int i = 0; i < numBackingStores; i++) {
+                final long token = proto.start(GenerationRegistryProto.BACKING_STORES);
+                final int key = mKeyToBackingStoreMap.keyAt(i);
+                proto.write(BackingStoreProto.KEY, key);
+                try {
+                    proto.write(BackingStoreProto.BACKING_STORE_SIZE,
+                            mKeyToBackingStoreMap.valueAt(i).size());
+                } catch (IOException ignore) {
+                }
+                proto.write(BackingStoreProto.NUM_CACHED_ENTRIES,
+                        mKeyToIndexMapMap.get(key).size());
+                final ArrayMap<String, Integer> indexMap = mKeyToIndexMapMap.get(key);
+                final MemoryIntArray backingStore = getBackingStoreLocked(key,
+                        /* createIfNotExist= */ false);
+                if (indexMap == null || backingStore == null) {
+                    continue;
+                }
+                for (String setting : indexMap.keySet()) {
+                    try {
+                        final int index = getKeyIndexLocked(key, setting, mKeyToIndexMapMap,
+                                backingStore, /* createIfNotExist= */ false);
+                        if (index < 0) {
+                            continue;
+                        }
+                        final long cacheEntryToken = proto.start(
+                                BackingStoreProto.CACHE_ENTRIES);
+                        final int generation = backingStore.get(index);
+                        proto.write(CacheEntryProto.NAME,
+                                setting.equals(DEFAULT_MAP_KEY_FOR_UNSET_SETTINGS)
+                                        ? "UNSET" : setting);
+                        proto.write(CacheEntryProto.GENERATION, generation);
+                        proto.end(cacheEntryToken);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                proto.end(token);
+            }
+
+        }
+    }
+
+    public void dump(PrintWriter pw) {
+        pw.println("GENERATION REGISTRY");
+        pw.println("Maximum number of backing stores:" + getMaxNumBackingStores());
+        synchronized (mLock) {
+            final int numBackingStores = mKeyToBackingStoreMap.size();
+            pw.println("Number of backing stores:" + numBackingStores);
+            for (int i = 0; i < numBackingStores; i++) {
+                final int key = mKeyToBackingStoreMap.keyAt(i);
+                pw.print("_Backing store for type:"); pw.print(SettingsState.settingTypeToString(
+                        SettingsState.getTypeFromKey(key)));
+                pw.print(" user:"); pw.print(SettingsState.getUserIdFromKey(key));
+                try {
+                    pw.print(" size:" + mKeyToBackingStoreMap.valueAt(i).size());
+                } catch (IOException ignore) {
+                }
+                pw.println(" cachedEntries:" + mKeyToIndexMapMap.get(key).size());
+                final ArrayMap<String, Integer> indexMap = mKeyToIndexMapMap.get(key);
+                final MemoryIntArray backingStore = getBackingStoreLocked(key,
+                        /* createIfNotExist= */ false);
+                if (indexMap == null || backingStore == null) {
+                    continue;
+                }
+                for (String setting : indexMap.keySet()) {
+                    try {
+                        final int index = getKeyIndexLocked(key, setting, mKeyToIndexMapMap,
+                                backingStore, /* createIfNotExist= */ false);
+                        if (index < 0) {
+                            continue;
+                        }
+                        final int generation = backingStore.get(index);
+                        pw.print("  setting: "); pw.print(
+                                setting.equals(DEFAULT_MAP_KEY_FOR_UNSET_SETTINGS)
+                                        ? "UNSET" : setting);
+                        pw.println(" generation:" + generation);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
     }
 }
