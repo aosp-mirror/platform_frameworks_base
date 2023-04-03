@@ -40,8 +40,8 @@ import android.app.GameModeInfo;
 import android.app.GameState;
 import android.app.IGameManagerService;
 import android.app.IGameModeListener;
-import android.app.IUidObserver;
 import android.app.StatsManager;
+import android.app.UidObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -169,7 +169,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private final Object mUidObserverLock = new Object();
     @VisibleForTesting
     @Nullable
-    final UidObserver mUidObserver;
+    final MyUidObserver mUidObserver;
     @GuardedBy("mUidObserverLock")
     private final Set<Integer> mForegroundGameUids = new HashSet<>();
 
@@ -209,7 +209,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         } else {
             mGameServiceController = null;
         }
-        mUidObserver = new UidObserver();
+        mUidObserver = new MyUidObserver();
         try {
             ActivityManager.getService().registerUidObserver(mUidObserver,
                     ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_GONE,
@@ -2143,19 +2143,13 @@ public final class GameManagerService extends IGameManagerService.Stub {
      */
     private static native void nativeSetOverrideFrameRate(int uid, float frameRate);
 
-    final class UidObserver extends IUidObserver.Stub {
-        @Override
-        public void onUidIdle(int uid, boolean disabled) {}
-
+    final class MyUidObserver extends UidObserver {
         @Override
         public void onUidGone(int uid, boolean disabled) {
             synchronized (mUidObserverLock) {
                 disableGameMode(uid);
             }
         }
-
-        @Override
-        public void onUidActive(int uid) {}
 
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
@@ -2197,11 +2191,5 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 mPowerManagerInternal.setPowerMode(Mode.GAME, false);
             }
         }
-
-        @Override
-        public void onUidCachedChanged(int uid, boolean cached) {}
-
-        @Override
-        public void onUidProcAdjChanged(int uid) {}
     }
 }

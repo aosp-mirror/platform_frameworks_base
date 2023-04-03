@@ -2371,10 +2371,10 @@ HSPLcom/android/server/am/UserController;->unsafeConvertIncomingUser(I)I
 HSPLcom/android/server/am/UserController;->updateStartedUserArrayLU()V
 HSPLcom/android/server/am/UserState;-><init>(Landroid/os/UserHandle;)V
 HSPLcom/android/server/app/GameManagerService$LocalService;->getResolutionScalingFactor(Ljava/lang/String;I)F
-HSPLcom/android/server/app/GameManagerService$UidObserver$$ExternalSyntheticLambda0;-><init>(Lcom/android/server/app/GameManagerService$UidObserver;I)V
-HSPLcom/android/server/app/GameManagerService$UidObserver$$ExternalSyntheticLambda0;->test(Ljava/lang/Object;)Z
-HSPLcom/android/server/app/GameManagerService$UidObserver;->disableGameMode(I)V+]Ljava/util/Set;Ljava/util/HashSet;]Landroid/os/PowerManagerInternal;Lcom/android/server/power/PowerManagerService$LocalService;
-HSPLcom/android/server/app/GameManagerService$UidObserver;->onUidStateChanged(IIJI)V+]Lcom/android/server/app/GameManagerService$UidObserver;Lcom/android/server/app/GameManagerService$UidObserver;]Ljava/util/stream/Stream;Ljava/util/stream/ReferencePipeline$Head;]Landroid/content/Context;Landroid/app/ContextImpl;]Landroid/content/pm/PackageManager;Landroid/app/ApplicationPackageManager;]Landroid/os/PowerManagerInternal;Lcom/android/server/power/PowerManagerService$LocalService;]Ljava/util/Set;Ljava/util/HashSet;
+HSPLcom/android/server/app/GameManagerService$MyUidObserver$$ExternalSyntheticLambda0;-><init>(Lcom/android/server/app/GameManagerService$MyUidObserver;I)V
+HSPLcom/android/server/app/GameManagerService$MyUidObserver$$ExternalSyntheticLambda0;->test(Ljava/lang/Object;)Z
+HSPLcom/android/server/app/GameManagerService$MyUidObserver;->disableGameMode(I)V+]Ljava/util/Set;Ljava/util/HashSet;]Landroid/os/PowerManagerInternal;Lcom/android/server/power/PowerManagerService$LocalService;
+HSPLcom/android/server/app/GameManagerService$MyUidObserver;->onUidStateChanged(IIJI)V+]Lcom/android/server/app/GameManagerService$MyUidObserver;Lcom/android/server/app/GameManagerService$MyUidObserver;]Ljava/util/stream/Stream;Ljava/util/stream/ReferencePipeline$Head;]Landroid/content/Context;Landroid/app/ContextImpl;]Landroid/content/pm/PackageManager;Landroid/app/ApplicationPackageManager;]Landroid/os/PowerManagerInternal;Lcom/android/server/power/PowerManagerService$LocalService;]Ljava/util/Set;Ljava/util/HashSet;
 HSPLcom/android/server/app/GameManagerService;->-$$Nest$fgetmContext(Lcom/android/server/app/GameManagerService;)Landroid/content/Context;
 HSPLcom/android/server/app/GameManagerService;->-$$Nest$fgetmForegroundGameUids(Lcom/android/server/app/GameManagerService;)Ljava/util/Set;
 HSPLcom/android/server/app/GameManagerService;->-$$Nest$fgetmUidObserverLock(Lcom/android/server/app/GameManagerService;)Ljava/lang/Object;
