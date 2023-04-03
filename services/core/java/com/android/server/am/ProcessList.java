@@ -70,7 +70,7 @@ import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
 import android.app.IProcessObserver;
-import android.app.IUidObserver;
+import android.app.UidObserver;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
@@ -5281,7 +5281,7 @@ public final class ProcessList {
         return new Pair<>(numForegroundServices, procs);
     }
 
-    private final class ImperceptibleKillRunner extends IUidObserver.Stub {
+    private final class ImperceptibleKillRunner extends UidObserver {
         private static final String EXTRA_PID = "pid";
         private static final String EXTRA_UID = "uid";
         private static final String EXTRA_TIMESTAMP = "timestamp";
@@ -5537,24 +5537,8 @@ public final class ProcessList {
         }
 
         @Override
-        public void onUidActive(int uid) {
-        }
-
-        @Override
-        public void onUidIdle(int uid, boolean disabled) {
-        }
-
-        @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             mHandler.obtainMessage(H.MSG_UID_STATE_CHANGED, uid, procState).sendToTarget();
-        }
-
-        @Override
-        public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override
-        public void onUidProcAdjChanged(int uid) {
         }
     };
 }
