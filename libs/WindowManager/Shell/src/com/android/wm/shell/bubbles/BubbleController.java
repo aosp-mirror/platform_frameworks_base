@@ -89,7 +89,6 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.launcher3.icons.BubbleBadgeIconFactory;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -209,7 +208,6 @@ public class BubbleController implements ConfigurationChangeListener,
     @Nullable private BubbleStackView mStackView;
     @Nullable private BubbleBarLayerView mLayerView;
     private BubbleIconFactory mBubbleIconFactory;
-    private BubbleBadgeIconFactory mBubbleBadgeIconFactory;
     private BubblePositioner mBubblePositioner;
     private Bubbles.SysuiProxy mSysuiProxy;
 
@@ -321,8 +319,7 @@ public class BubbleController implements ConfigurationChangeListener,
         mBubbleData = data;
         mSavedUserBubbleData = new SparseArray<>();
         mBubbleIconFactory = new BubbleIconFactory(context,
-                context.getResources().getDimensionPixelSize(R.dimen.bubble_size));
-        mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(context,
+                context.getResources().getDimensionPixelSize(R.dimen.bubble_size),
                 context.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
                 context.getResources().getColor(R.color.important_conversation),
                 context.getResources().getDimensionPixelSize(
@@ -700,6 +697,10 @@ public class BubbleController implements ConfigurationChangeListener,
         return mBubblePositioner;
     }
 
+    BubbleIconFactory getIconFactory() {
+        return mBubbleIconFactory;
+    }
+
     public Bubbles.SysuiProxy getSysuiProxy() {
         return mSysuiProxy;
     }
@@ -936,8 +937,7 @@ public class BubbleController implements ConfigurationChangeListener,
             mStackView.onThemeChanged();
         }
         mBubbleIconFactory = new BubbleIconFactory(mContext,
-                mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size));
-        mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext,
+                mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size),
                 mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
                 mContext.getResources().getColor(R.color.important_conversation),
                 mContext.getResources().getDimensionPixelSize(
@@ -951,7 +951,6 @@ public class BubbleController implements ConfigurationChangeListener,
                     mStackView,
                     mLayerView,
                     mBubbleIconFactory,
-                    mBubbleBadgeIconFactory,
                     false /* skipInflation */);
         }
         for (Bubble b : mBubbleData.getOverflowBubbles()) {
@@ -961,7 +960,6 @@ public class BubbleController implements ConfigurationChangeListener,
                     mStackView,
                     mLayerView,
                     mBubbleIconFactory,
-                    mBubbleBadgeIconFactory,
                     false /* skipInflation */);
         }
     }
@@ -978,8 +976,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 mScreenBounds.set(newConfig.windowConfiguration.getBounds());
                 mBubbleData.onMaxBubblesChanged();
                 mBubbleIconFactory = new BubbleIconFactory(mContext,
-                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size));
-                mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext,
+                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size),
                         mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
                         mContext.getResources().getColor(R.color.important_conversation),
                         mContext.getResources().getDimensionPixelSize(
@@ -1255,7 +1252,6 @@ public class BubbleController implements ConfigurationChangeListener,
                         mStackView,
                         mLayerView,
                         mBubbleIconFactory,
-                        mBubbleBadgeIconFactory,
                         true /* skipInflation */);
             });
             return null;
@@ -1331,7 +1327,7 @@ public class BubbleController implements ConfigurationChangeListener,
         bubble.setInflateSynchronously(mInflateSynchronously);
         bubble.inflate(b -> mBubbleData.notificationEntryUpdated(b, suppressFlyout, showInShade),
                 mContext, this, mStackView,  mLayerView,
-                mBubbleIconFactory, mBubbleBadgeIconFactory,
+                mBubbleIconFactory,
                 false /* skipInflation */);
     }
 
