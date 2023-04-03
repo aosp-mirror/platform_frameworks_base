@@ -92,7 +92,7 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
             }
         }
 
-        setImage(gainmapImages.indexOf("cave.jpg"))
+        setImage(0)
 
         imageView.apply {
             isClickable = true
