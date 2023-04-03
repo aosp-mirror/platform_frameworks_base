@@ -862,7 +862,7 @@ public class SatelliteManager {
      *
      * @param token The token to be used as a unique identifier for provisioning with satellite
      *              gateway.
-     * @param regionId The region ID for the device's current location.
+     * @param provisionData Data from the provisioning app that can be used by provisioning server
      * @param cancellationSignal The optional signal used by the caller to cancel the provision
      *                           request. Even when the cancellation is signaled, Telephony will
      *                           still trigger the callback to return the result of this request.
@@ -874,13 +874,14 @@ public class SatelliteManager {
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @UnsupportedAppUsage
-    public void provisionSatelliteService(@NonNull String token, @NonNull String regionId,
+    public void provisionSatelliteService(@NonNull String token, @NonNull byte[] provisionData,
             @Nullable CancellationSignal cancellationSignal,
             @NonNull @CallbackExecutor Executor executor,
             @SatelliteError @NonNull Consumer<Integer> resultListener) {
         Objects.requireNonNull(token);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(resultListener);
+        Objects.requireNonNull(provisionData);
 
         ICancellationSignal cancelRemote = null;
         try {
@@ -893,7 +894,7 @@ public class SatelliteManager {
                                 () -> resultListener.accept(result)));
                     }
                 };
-                cancelRemote = telephony.provisionSatelliteService(mSubId, token, regionId,
+                cancelRemote = telephony.provisionSatelliteService(mSubId, token, provisionData,
                         errorCallback);
             } else {
                 throw new IllegalStateException("telephony service is null.");

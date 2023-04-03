@@ -2823,15 +2823,15 @@ interface ITelephony {
      * @param subId The subId of the subscription to be provisioned.
      * @param token The token to be used as a unique identifier for provisioning with satellite
      *              gateway.
-     * @param regionId The region ID for the device's current location.
+     * @provisionData Data from the provisioning app that can be used by provisioning server
      * @param callback The callback to get the result of the request.
      *
      * @return The signal transport used by callers to cancel the provision request.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    ICancellationSignal provisionSatelliteService(int subId, in String token, in String regionId,
-            in IIntegerConsumer callback);
+    ICancellationSignal provisionSatelliteService(int subId, in String token,
+            in byte[] provisionData, in IIntegerConsumer callback);
 
     /**
      * Unregister the subscription with the satellite provider.
