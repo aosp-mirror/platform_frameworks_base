@@ -65,6 +65,7 @@ import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PermissionEnforcer;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
@@ -199,6 +200,8 @@ final class UiModeManagerService extends SystemService {
     private final LocalService mLocalService = new LocalService();
     private PowerManagerInternal mLocalPowerManager;
 
+    private final IUiModeManager.Stub mService;
+
     @GuardedBy("mLock")
     private final SparseArray<RemoteCallbackList<IUiModeManagerCallback>> mUiModeManagerCallbacks =
             new SparseArray<>();
@@ -221,6 +224,7 @@ final class UiModeManagerService extends SystemService {
     protected UiModeManagerService(Context context, boolean setupWizardComplete,
             TwilightManager tm, Injector injector) {
         super(context);
+        mService = new Stub(context);
         mConfiguration.setToDefaults();
         mSetupWizardComplete = setupWizardComplete;
         mTwilightManager = tm;
@@ -663,7 +667,11 @@ final class UiModeManagerService extends SystemService {
         }
     }
 
-    private final IUiModeManager.Stub mService = new IUiModeManager.Stub() {
+    private final class Stub extends IUiModeManager.Stub {
+        Stub(Context context) {
+            super(PermissionEnforcer.fromContext(context));
+        }
+
         @Override
         public void addCallback(IUiModeManagerCallback callback) {
             int userId = getCallingUserId();
@@ -851,25 +859,17 @@ final class UiModeManagerService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
         @Override
         public void setNightModeCustomType(@NightModeCustomType int nightModeCustomType) {
-            if (getContext().checkCallingOrSelfPermission(
-                    android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(
-                        "setNightModeCustomType requires MODIFY_DAY_NIGHT_MODE permission");
-            }
+            setNightModeCustomType_enforcePermission();
             setNightModeInternal(MODE_NIGHT_CUSTOM, nightModeCustomType);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
         @Override
         public  @NightModeCustomReturnType int getNightModeCustomType() {
-            if (getContext().checkCallingOrSelfPermission(
-                    android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(
-                        "getNightModeCustomType requires MODIFY_DAY_NIGHT_MODE permission");
-            }
+            getNightModeCustomType_enforcePermission();
             synchronized (mLock) {
                 return mNightModeCustomType;
             }
@@ -1098,10 +1098,10 @@ final class UiModeManagerService extends SystemService {
             return releaseProjectionUnchecked(projectionType, callingPackage);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.READ_PROJECTION_STATE)
         @Override
         public @UiModeManager.ProjectionType int getActiveProjectionTypes() {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PROJECTION_STATE, "getActiveProjectionTypes");
+            getActiveProjectionTypes_enforcePermission();
             @UiModeManager.ProjectionType int projectionTypeFlag = PROJECTION_TYPE_NONE;
             synchronized (mLock) {
                 if (mProjectionHolders != null) {
@@ -1115,11 +1115,11 @@ final class UiModeManagerService extends SystemService {
             return projectionTypeFlag;
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.READ_PROJECTION_STATE)
         @Override
         public List<String> getProjectingPackages(
                 @UiModeManager.ProjectionType int projectionType) {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PROJECTION_STATE, "getProjectionState");
+            getProjectingPackages_enforcePermission();
             synchronized (mLock) {
                 List<String> packageNames = new ArrayList<>();
                 populateWithRelevantActivePackageNames(projectionType, packageNames);
@@ -1127,11 +1127,10 @@ final class UiModeManagerService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.READ_PROJECTION_STATE)
         public void addOnProjectionStateChangedListener(IOnProjectionStateChangedListener listener,
                 @UiModeManager.ProjectionType int projectionType) {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PROJECTION_STATE,
-                    "addOnProjectionStateChangedListener");
+            addOnProjectionStateChangedListener_enforcePermission();
             if (projectionType == PROJECTION_TYPE_NONE) {
                 return;
             }
@@ -1161,11 +1160,10 @@ final class UiModeManagerService extends SystemService {
         }
 
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.READ_PROJECTION_STATE)
         public void removeOnProjectionStateChangedListener(
                 IOnProjectionStateChangedListener listener) {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.READ_PROJECTION_STATE,
-                    "removeOnProjectionStateChangedListener");
+            removeOnProjectionStateChangedListener_enforcePermission();
             synchronized (mLock) {
                 if (mProjectionListeners != null) {
                     for (int i = 0; i < mProjectionListeners.size(); ++i) {

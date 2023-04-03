@@ -27,14 +27,10 @@ import static android.app.UiModeManager.MODE_NIGHT_YES;
 import static android.app.UiModeManager.PROJECTION_TYPE_ALL;
 import static android.app.UiModeManager.PROJECTION_TYPE_AUTOMOTIVE;
 import static android.app.UiModeManager.PROJECTION_TYPE_NONE;
-
 import static com.android.server.UiModeManagerService.SUPPORTED_NIGHT_MODE_CUSTOM_TYPES;
-
 import static com.google.common.truth.Truth.assertThat;
-
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
-
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertEquals;
@@ -77,12 +73,14 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PermissionEnforcer;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.test.FakePermissionEnforcer;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.testing.AndroidTestingRunner;
@@ -151,11 +149,16 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     private AlarmManager.OnAlarmListener mCustomListener;
     private Consumer<PowerSaveState> mPowerSaveConsumer;
     private TwilightListener mTwilightListener;
+    private FakePermissionEnforcer mPermissionEnforcer;
 
     @Before
     public void setUp() {
-        when(mContext.checkCallingOrSelfPermission(anyString()))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        // The AIDL stub will use PermissionEnforcer to check permission from the caller.
+        mPermissionEnforcer = new FakePermissionEnforcer();
+        mPermissionEnforcer.grant(Manifest.permission.MODIFY_DAY_NIGHT_MODE);
+        mPermissionEnforcer.grant(Manifest.permission.READ_PROJECTION_STATE);
+        doReturn(mPermissionEnforcer).when(mContext).getSystemService(
+                eq(PermissionEnforcer.class));
         doAnswer(inv -> {
             mTwilightListener = (TwilightListener) inv.getArgument(0);
             return null;
@@ -312,8 +315,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void setNightModeCustomType_noPermission_shouldThrow() throws RemoteException {
-        when(mContext.checkCallingOrSelfPermission(eq(MODIFY_DAY_NIGHT_MODE)))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        mPermissionEnforcer.revoke(MODIFY_DAY_NIGHT_MODE);
 
         assertThrows(SecurityException.class,
                 () -> mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME));
@@ -753,8 +755,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void getNightModeCustomType_permissionNotGranted_shouldThrow()
             throws RemoteException {
-        when(mContext.checkCallingOrSelfPermission(eq(MODIFY_DAY_NIGHT_MODE)))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        mPermissionEnforcer.revoke(MODIFY_DAY_NIGHT_MODE);
 
         assertThrows(SecurityException.class, () -> mService.getNightModeCustomType());
     }
@@ -1116,8 +1117,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void addOnProjectionStateChangedListener_enforcesReadProjStatePermission() {
-        doThrow(new SecurityException()).when(mContext).enforceCallingOrSelfPermission(
-                eq(android.Manifest.permission.READ_PROJECTION_STATE), any());
+        mPermissionEnforcer.revoke(android.Manifest.permission.READ_PROJECTION_STATE);
         IOnProjectionStateChangedListener listener = mock(IOnProjectionStateChangedListener.class);
 
         assertThrows(SecurityException.class, () -> mService.addOnProjectionStateChangedListener(
@@ -1141,8 +1141,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void removeOnProjectionStateChangedListener_enforcesReadProjStatePermission() {
-        doThrow(new SecurityException()).when(mContext).enforceCallingOrSelfPermission(
-                eq(android.Manifest.permission.READ_PROJECTION_STATE), any());
+        mPermissionEnforcer.revoke(android.Manifest.permission.READ_PROJECTION_STATE);
         IOnProjectionStateChangedListener listener = mock(IOnProjectionStateChangedListener.class);
 
         assertThrows(SecurityException.class, () -> mService.removeOnProjectionStateChangedListener(
