@@ -1301,6 +1301,9 @@ public class WindowManagerShellCommand extends ShellCommand {
             case "stop":
                 mInternal.mTransitionTracer.stopTrace(pw);
                 break;
+            case "save-for-bugreport":
+                mInternal.mTransitionTracer.saveForBugreport(pw);
+                break;
             default:
                 getErrPrintWriter()
                         .println("Error: expected 'start' or 'stop', but got '" + arg + "'");
