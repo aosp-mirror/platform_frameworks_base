@@ -101,6 +101,7 @@ import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.UidObserver;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
 import android.app.usage.AppStandbyInfo;
@@ -1439,7 +1440,7 @@ public final class AppRestrictionController {
             };
 
     private final IUidObserver mUidObserver =
-            new IUidObserver.Stub() {
+            new UidObserver() {
                 @Override
                 public void onUidStateChanged(int uid, int procState, long procStateSeq,
                         int capability) {
@@ -1462,14 +1463,6 @@ public final class AppRestrictionController {
                 @Override
                 public void onUidActive(int uid) {
                     mBgHandler.obtainMessage(BgHandler.MSG_UID_ACTIVE, uid, 0).sendToTarget();
-                }
-
-                @Override
-                public void onUidCachedChanged(int uid, boolean cached) {
-                }
-
-                @Override
-                public void onUidProcAdjChanged(int uid) {
                 }
             };
 
