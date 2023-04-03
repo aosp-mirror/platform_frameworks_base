@@ -79,6 +79,15 @@ public class SatelliteImplBase extends SatelliteService {
         }
 
         @Override
+        public void enableCellularModemWhileSatelliteModeIsOn(boolean enabled,
+                IIntegerConsumer errorCallback) throws RemoteException {
+            executeMethodAsync(
+                    () -> SatelliteImplBase.this
+                            .enableCellularModemWhileSatelliteModeIsOn(enabled, errorCallback),
+                    "enableCellularModemWhileSatelliteModeIsOn");
+        }
+
+        @Override
         public void requestSatelliteEnabled(boolean enableSatellite, boolean enableDemoMode,
                 IIntegerConsumer errorCallback) throws RemoteException {
             executeMethodAsync(
@@ -256,6 +265,17 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteError:NO_RESOURCES
      */
     public void requestSatelliteListeningEnabled(boolean enable, int timeout,
+            @NonNull IIntegerConsumer errorCallback) {
+        // stub implementation
+    }
+
+    /**
+     * Allow cellular modem scanning while satellite mode is on.
+     * @param enabled  {@code true} to enable cellular modem while satellite mode is on
+     * and {@code false} to disable
+     * @param errorCallback The callback to receive the error code result of the operation.
+     */
+    public void enableCellularModemWhileSatelliteModeIsOn(boolean enabled,
             @NonNull IIntegerConsumer errorCallback) {
         // stub implementation
     }
