@@ -141,11 +141,11 @@ public class SatelliteImplBase extends SatelliteService {
         }
 
         @Override
-        public void provisionSatelliteService(String token, String regionId,
+        public void provisionSatelliteService(String token, byte[] provisionData,
                 IIntegerConsumer errorCallback) throws RemoteException {
             executeMethodAsync(
                     () -> SatelliteImplBase.this
-                            .provisionSatelliteService(token, regionId, errorCallback),
+                            .provisionSatelliteService(token, provisionData, errorCallback),
                     "provisionSatelliteService");
         }
 
@@ -421,7 +421,8 @@ public class SatelliteImplBase extends SatelliteService {
      *
      * @param token The token to be used as a unique identifier for provisioning with satellite
      *              gateway.
-     * @param regionId The region ID for the device's current location.
+     * @param provisionData Data from the provisioning app that can be used by provisioning 
+     *                      server
      * @param errorCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
@@ -437,7 +438,7 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteError:REQUEST_ABORTED
      *   SatelliteError:NETWORK_TIMEOUT
      */
-    public void provisionSatelliteService(@NonNull String token, @NonNull String regionId,
+    public void provisionSatelliteService(@NonNull String token, @NonNull byte[] provisionData,
             @NonNull IIntegerConsumer errorCallback) {
         // stub implementation
     }
