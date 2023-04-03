@@ -732,6 +732,7 @@ class ProcessErrorStateRecord {
             .append("\n");
         memoryHeaders.append("RssKb: ").append(snapshot.rssInKilobytes).append("\n");
         memoryHeaders.append("RssAnonKb: ").append(snapshot.anonRssInKilobytes).append("\n");
+        memoryHeaders.append("RssShmemKb: ").append(snapshot.rssShmemKilobytes).append("\n");
         memoryHeaders.append("VmSwapKb: ").append(snapshot.swapInKilobytes).append("\n");
         return memoryHeaders.toString();
     }
