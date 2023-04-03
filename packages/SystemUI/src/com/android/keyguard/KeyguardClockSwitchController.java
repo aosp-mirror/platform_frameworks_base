@@ -40,7 +40,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.log.dagger.KeyguardClockLog;
-import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.plugins.log.LogBuffer;
 import com.android.systemui.plugins.log.LogLevel;
@@ -469,7 +468,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     @Nullable
-    private ClockController getClock() {
+    public ClockController getClock() {
         return mClockEventController.getClock();
     }
 
@@ -535,13 +534,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
 
         return ((mCurrentClockSize == LARGE) ? clock.getLargeClock() : clock.getSmallClock())
-                .getEvents().getHasCustomWeatherDataDisplay();
-    }
-
-    /** Gets the animations for the current clock. */
-    @Nullable
-    public ClockAnimations getClockAnimations() {
-        ClockController clock = getClock();
-        return clock == null ? null : clock.getAnimations();
+                .getConfig().getHasCustomWeatherDataDisplay();
     }
 }

@@ -315,8 +315,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetClockAnimationsForwardsToClock() {
-        assertEquals(mClockAnimations, mController.getClockAnimations());
+    public void testGetClock_ForwardsToClock() {
+        assertEquals(mClockController, mController.getClock());
     }
 
     @Test
@@ -367,9 +367,9 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetClockAnimations_nullClock_returnsNull() {
+    public void testGetClock_nullClock_returnsNull() {
         when(mClockEventController.getClock()).thenReturn(null);
-        assertNull(mController.getClockAnimations());
+        assertNull(mController.getClock());
     }
 
     private void verifyAttachment(VerificationMode times) {

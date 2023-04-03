@@ -160,7 +160,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
-import com.android.systemui.plugins.ClockAnimations;
+import com.android.systemui.plugins.ClockController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.FalsingManager.FalsingTapListener;
 import com.android.systemui.plugins.qs.QS;
@@ -1611,9 +1611,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 transition.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
                 transition.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
 
-                ClockAnimations clockAnims = mKeyguardStatusViewController.getClockAnimations();
-                boolean customClockAnimation = clockAnims != null
-                        && clockAnims.getHasCustomPositionUpdatedAnimation();
+                ClockController clock = mKeyguardStatusViewController.getClockController();
+                boolean customClockAnimation = clock != null
+                        && clock.getConfig().getHasCustomPositionUpdatedAnimation();
 
                 if (mFeatureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION) && customClockAnimation) {
                     // Find the clock, so we can exclude it from this transition.
@@ -5139,12 +5139,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             Rect to = (Rect) endValues.values.get(PROP_BOUNDS);
 
             anim.addUpdateListener(animation -> {
-                ClockAnimations clockAnims = mController.getClockAnimations();
-                if (clockAnims == null) {
+                ClockController clock = mController.getClockController();
+                if (clock == null) {
                     return;
                 }
 
-                clockAnims.onPositionUpdated(from, to, animation.getAnimatedFraction());
+                clock.getAnimations().onPositionUpdated(from, to, animation.getAnimatedFraction());
             });
 
             return anim;
