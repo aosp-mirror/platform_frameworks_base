@@ -188,7 +188,7 @@ class BroadcastProcessQueue {
     private @Reason int mRunnableAtReason = REASON_EMPTY;
     private boolean mRunnableAtInvalidated;
 
-    private boolean mProcessCached;
+    private boolean mUidCached;
     private boolean mProcessInstrumented;
     private boolean mProcessPersistent;
 
@@ -382,14 +382,14 @@ class BroadcastProcessQueue {
     /**
      * Update the actively running "warm" process for this process.
      */
-    public void setProcess(@Nullable ProcessRecord app) {
+    public void setProcessAndUidCached(@Nullable ProcessRecord app, boolean uidCached) {
         this.app = app;
         if (app != null) {
-            setProcessCached(app.isCached());
+            setUidCached(uidCached);
             setProcessInstrumented(app.getActiveInstrumentation() != null);
             setProcessPersistent(app.isPersistent());
         } else {
-            setProcessCached(false);
+            setUidCached(uidCached);
             setProcessInstrumented(false);
             setProcessPersistent(false);
         }
@@ -403,10 +403,9 @@ class BroadcastProcessQueue {
      * Update if this process is in the "cached" state, typically signaling that
      * broadcast dispatch should be paused or delayed.
      */
-    @VisibleForTesting
-    void setProcessCached(boolean cached) {
-        if (mProcessCached != cached) {
-            mProcessCached = cached;
+    private void setUidCached(boolean uidCached) {
+        if (mUidCached != uidCached) {
+            mUidCached = uidCached;
             invalidateRunnableAt();
         }
     }
@@ -416,7 +415,7 @@ class BroadcastProcessQueue {
      * signaling that broadcast dispatch should bypass all pauses or delays, to
      * avoid holding up test suites.
      */
-    public void setProcessInstrumented(boolean instrumented) {
+    private void setProcessInstrumented(boolean instrumented) {
         if (mProcessInstrumented != instrumented) {
             mProcessInstrumented = instrumented;
             invalidateRunnableAt();
@@ -427,7 +426,7 @@ class BroadcastProcessQueue {
      * Update if this process is in the "persistent" state, which signals broadcast dispatch should
      * bypass all pauses or delays to prevent the system from becoming out of sync with itself.
      */
-    public void setProcessPersistent(boolean persistent) {
+    private void setProcessPersistent(boolean persistent) {
         if (mProcessPersistent != persistent) {
             mProcessPersistent = persistent;
             invalidateRunnableAt();
@@ -986,7 +985,7 @@ class BroadcastProcessQueue {
             } else if (mProcessPersistent) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_PERSISTENT;
-            } else if (mProcessCached) {
+            } else if (mUidCached) {
                 if (r.deferUntilActive) {
                     // All enqueued broadcasts are deferrable, defer
                     if (mCountDeferred == mCountEnqueued) {
@@ -1195,7 +1194,7 @@ class BroadcastProcessQueue {
     @NeverCompile
     private void dumpProcessState(@NonNull IndentingPrintWriter pw) {
         final StringBuilder sb = new StringBuilder();
-        if (mProcessCached) {
+        if (mUidCached) {
             sb.append("CACHED");
         }
         if (mProcessInstrumented) {
