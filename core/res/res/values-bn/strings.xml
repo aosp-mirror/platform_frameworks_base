@@ -1703,7 +1703,7 @@
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"বন্ধ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> অ্যাপটিকে আপনার ডিভাইসে সম্পূর্ণ নিয়ন্ত্রণের অনুমতি দিতে চান?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"যে অ্যাপগুলি আপনাকে অ্যাক্সেসিবিলিটির প্রয়োজন মেটাতে সাহায্য করে সেই অ্যাপগুলির জন্য সম্পূর্ণ নিয়ন্ত্রণের বিষয়টি উপযুক্ত, কিন্তু তা বলে সমস্ত অ্যাপের জন্য নয়।"</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"স্ক্রিন দেখে নিয়ন্ত্রণ করা"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"স্ক্রিন দেখা ও নিয়ন্ত্রণ করা"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"এটি স্ক্রিনের সমস্ত কন্টেন্ট পড়তে এবং অন্য অ্যাপেও কন্টেন্ট ডিসপ্লে করতে পারে।"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"দেখুন এবং কাজটি করুন"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"এটি কোনও একটি অ্যাপের সাথে অথবা হার্ডওয়্যার সেন্সরের সাথে আপনার ইন্টার‍্যাকশন ট্র্যাক করতে এবং আপনার হয়ে বিভিন্ন অ্যাপের সাথে ইন্টার‍্যাক্ট করতে পারে।"</string>

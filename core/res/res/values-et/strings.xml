@@ -800,10 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Võimaldab omanikul alustada rakenduse funktsioonide teabe vaatamist."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"juurdepääs anduri andmetele kõrgel diskreetimissagedusel"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Võimaldab rakendusel anduri andmeid diskreetida sagedusel, mis on suurem kui 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"rakenduse värskendamine ilma kasutaja toiminguta"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Võimaldab hoidjal värskendada varem installitud rakendust ilma kasutaja toiminguta"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Parooli reeglite määramine"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Juhitakse ekraaniluku paroolide ja PIN-koodide pikkusi ning lubatud tähemärkide seadeid."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekraani avamiskatsete jälgimine"</string>

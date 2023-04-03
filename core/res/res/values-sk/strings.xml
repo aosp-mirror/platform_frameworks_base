@@ -802,10 +802,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Umožňuje držiteľovi zobraziť informácie o funkciách aplikácie."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"prístup k dátam senzorom s vysokou vzorkovacou frekvenciou"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Umožňuje aplikácii vzorkovať dáta senzorov s frekvenciou vyššou ako 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"aktualizovať aplikáciu bez akcie používateľa"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Povolí vlastníkovi aktualizovať aplikáciu, ktorá bola nainštalovaná bez akcie používateľa"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Nastaviť pravidlá pre heslo"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Nastavte dĺžku hesiel na odomknutie obrazovky aj kódov PIN a v nich používané znaky."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Sledovanie pokusov o odomknutie obrazovky"</string>
@@ -2140,7 +2138,7 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Upozornenia"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Rýchle nastavenia"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Dialógové okno napájania"</string>
-    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Uzamknúť obrazovku"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Zamknúť obrazovku"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Snímka obrazovky"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Hák na slúchadlá s mikrofónom"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Skratka dostupnosti na obrazovke"</string>

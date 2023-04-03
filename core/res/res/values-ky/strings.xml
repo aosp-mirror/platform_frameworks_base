@@ -800,10 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Колдонуучуга функциялары тууралуу маалыматты көрүп баштоо мүмкүнчүлүгүн берет."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"үлгүнү жаздыруу ылдамдыгы жогору болгон сенсор дайындарынын үлгүсүнө мүмкүнчүлүк алуу"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Колдонмолорго сенсор дайындарынын үлгүсү 200 Герцтен жогору болгон үлгүлөрдү алууга уруксат берет"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"колдонмону автоматтык түрдө жаңыртуу"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Буга чейин орнотулган колдонмону автоматтык түрдө жаңыртууга мүмкүндүк берет"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Сырсөз эрежелерин коюу"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Экран кулпусунун сырсөздөрү менен PIN\'дерине уруксат берилген узундук менен белгилерди көзөмөлдөө."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Экран кулпусун ачуу аракеттерин көзөмөлдөө"</string>
@@ -2136,7 +2134,7 @@
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Артка"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Акыркы колдонмолор"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Билдирмелер"</string>
-    <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Ыкчам жөндөөлөр"</string>
+    <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Ыкчам параметрлер"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Кубат диалогу"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Кулпуланган экран"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Скриншот"</string>
