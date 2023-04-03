@@ -153,6 +153,7 @@ public class LockPatternView extends View {
     @UnsupportedAppUsage
     private float mSquareHeight;
     private float mDotHitRadius;
+    private float mDotHitMaxRadius;
     private final LinearGradient mFadeOutGradientShader;
 
     private final Path mCurrentPath = new Path();
@@ -704,7 +705,8 @@ public class LockPatternView extends View {
         final int height = h - mPaddingTop - mPaddingBottom;
         mSquareHeight = height / 3.0f;
         mExploreByTouchHelper.invalidateRoot();
-        mDotHitRadius = Math.min(mSquareHeight / 2, mSquareWidth / 2) * mDotHitFactor;
+        mDotHitMaxRadius = Math.min(mSquareHeight / 2, mSquareWidth / 2);
+        mDotHitRadius = mDotHitMaxRadius * mDotHitFactor;
 
         if (mUseLockPatternDrawable) {
             mNotSelectedDrawable.setBounds(mPaddingLeft, mPaddingTop, width, height);
@@ -951,11 +953,16 @@ public class LockPatternView extends View {
     /** Helper method to find which cell a point maps to. */
     @Nullable
     private Cell detectCellHit(float x, float y) {
-        final float hitRadiusSquared = mDotHitRadius * mDotHitRadius;
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 3; column++) {
                 float centerY = getCenterYForRow(row);
                 float centerX = getCenterXForColumn(column);
+
+                // Maximize vertax dots' hit radius for the small(watch) screen.
+                // This eases users to draw more patterns with diagnal lines, while keeps drawing
+                // patterns with vertax dots easy.
+                float hitRadiusSquared = isVertex(row, column) ? (mDotHitMaxRadius
+                        * mDotHitMaxRadius) : (mDotHitRadius * mDotHitRadius);
                 if ((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY)
                         < hitRadiusSquared) {
                     return Cell.of(row, column);
@@ -963,6 +970,10 @@ public class LockPatternView extends View {
             }
         }
         return null;
+    }
+
+    private boolean isVertex(int row, int column) {
+        return (row != 1 && column != 1);
     }
 
     @Override
