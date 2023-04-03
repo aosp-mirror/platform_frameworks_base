@@ -32,6 +32,12 @@ import com.android.systemui.plugins.ClockSettings
 import com.android.systemui.plugins.PluginLifecycleManager
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.plugins.PluginManager
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.plugins.log.LogMessage
+import com.android.systemui.plugins.log.LogMessageImpl
+import com.android.systemui.plugins.log.MessageInitializer
+import com.android.systemui.plugins.log.MessagePrinter
 import com.android.systemui.util.Assert
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
@@ -39,7 +45,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-private const val DEBUG = true
 private val KEY_TIMESTAMP = "appliedTimestamp"
 
 private fun <TKey, TVal> ConcurrentHashMap<TKey, TVal>.concurrentGetOrPut(
@@ -54,6 +59,32 @@ private fun <TKey, TVal> ConcurrentHashMap<TKey, TVal>.concurrentGetOrPut(
     return result ?: value
 }
 
+private val TMP_MESSAGE: LogMessage by lazy { LogMessageImpl.Factory.create() }
+
+private inline fun LogBuffer?.tryLog(
+    tag: String,
+    level: LogLevel,
+    messageInitializer: MessageInitializer,
+    noinline messagePrinter: MessagePrinter,
+    ex: Throwable? = null,
+) {
+    if (this != null) {
+        // Wrap messagePrinter to convert it from crossinline to noinline
+        this.log(tag, level, messageInitializer, messagePrinter, ex)
+    } else {
+        messageInitializer(TMP_MESSAGE)
+        val msg = messagePrinter(TMP_MESSAGE)
+        when (level) {
+            LogLevel.VERBOSE -> Log.v(tag, msg, ex)
+            LogLevel.DEBUG -> Log.d(tag, msg, ex)
+            LogLevel.INFO -> Log.i(tag, msg, ex)
+            LogLevel.WARNING -> Log.w(tag, msg, ex)
+            LogLevel.ERROR -> Log.e(tag, msg, ex)
+            LogLevel.WTF -> Log.wtf(tag, msg, ex)
+        }
+    }
+}
+
 /** ClockRegistry aggregates providers and plugins */
 open class ClockRegistry(
     val context: Context,
@@ -65,8 +96,9 @@ open class ClockRegistry(
     val handleAllUsers: Boolean,
     defaultClockProvider: ClockProvider,
     val fallbackClockId: ClockId = DEFAULT_CLOCK_ID,
+    val logBuffer: LogBuffer? = null,
     val keepAllLoaded: Boolean,
-    val subTag: String,
+    subTag: String,
 ) {
     private val TAG = "${ClockRegistry::class.simpleName} ($subTag)"
     interface ClockChangeListener {
@@ -112,9 +144,11 @@ open class ClockRegistry(
                         }
 
                     if (manager != info.manager) {
-                        Log.e(
+                        logBuffer.tryLog(
                             TAG,
-                            "Clock Id conflict on load: $id is registered to another provider"
+                            LogLevel.ERROR,
+                            { str1 = id },
+                            { "Clock Id conflict on load: $str1 is double registered" }
                         )
                         continue
                     }
@@ -137,9 +171,11 @@ open class ClockRegistry(
                     val id = clock.clockId
                     val info = availableClocks[id]
                     if (info?.manager != manager) {
-                        Log.e(
+                        logBuffer.tryLog(
                             TAG,
-                            "Clock Id conflict on unload: $id is registered to another provider"
+                            LogLevel.ERROR,
+                            { str1 = id },
+                            { "Clock Id conflict on unload: $str1 is double registered" }
                         )
                         continue
                     }
@@ -210,7 +246,7 @@ open class ClockRegistry(
 
                 ClockSettings.deserialize(json)
             } catch (ex: Exception) {
-                Log.e(TAG, "Failed to parse clock settings", ex)
+                logBuffer.tryLog(TAG, LogLevel.ERROR, {}, { "Failed to parse clock settings" }, ex)
                 null
             }
         settings = result
@@ -239,7 +275,7 @@ open class ClockRegistry(
                 )
             }
         } catch (ex: Exception) {
-            Log.e(TAG, "Failed to set clock settings", ex)
+            logBuffer.tryLog(TAG, LogLevel.ERROR, {}, { "Failed to set clock settings" }, ex)
         }
         settings = value
     }
@@ -399,46 +435,55 @@ open class ClockRegistry(
     }
 
     private fun onConnected(clockId: ClockId) {
-        if (DEBUG) {
-            Log.i(TAG, "Connected $clockId")
-        }
-
+        logBuffer.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Connected $str1" })
         if (currentClockId == clockId) {
-            if (DEBUG) {
-                Log.i(TAG, "Current clock ($clockId) was connected")
-            }
+            logBuffer.tryLog(
+                TAG,
+                LogLevel.INFO,
+                { str1 = clockId },
+                { "Current clock ($str1) was connected" }
+            )
         }
     }
 
     private fun onLoaded(clockId: ClockId) {
-        if (DEBUG) {
-            Log.i(TAG, "Loaded $clockId")
-        }
+        logBuffer.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Loaded $str1" })
 
         if (currentClockId == clockId) {
-            Log.i(TAG, "Current clock ($clockId) was loaded")
+            logBuffer.tryLog(
+                TAG,
+                LogLevel.INFO,
+                { str1 = clockId },
+                { "Current clock ($str1) was loaded" }
+            )
             triggerOnCurrentClockChanged()
         }
     }
 
     private fun onUnloaded(clockId: ClockId) {
-        if (DEBUG) {
-            Log.i(TAG, "Unloaded $clockId")
-        }
+        logBuffer.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Unloaded $str1" })
 
         if (currentClockId == clockId) {
-            Log.w(TAG, "Current clock ($clockId) was unloaded")
+            logBuffer.tryLog(
+                TAG,
+                LogLevel.WARNING,
+                { str1 = clockId },
+                { "Current clock ($str1) was unloaded" }
+            )
             triggerOnCurrentClockChanged()
         }
     }
 
     private fun onDisconnected(clockId: ClockId) {
-        if (DEBUG) {
-            Log.i(TAG, "Disconnected $clockId")
-        }
+        logBuffer.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Disconnected $str1" })
 
         if (currentClockId == clockId) {
-            Log.w(TAG, "Current clock ($clockId) was disconnected")
+            logBuffer.tryLog(
+                TAG,
+                LogLevel.WARNING,
+                { str1 = clockId },
+                { "Current clock ($str1) was disconnected" }
+            )
         }
     }
 
@@ -465,12 +510,27 @@ open class ClockRegistry(
         if (isEnabled && clockId.isNotEmpty()) {
             val clock = createClock(clockId)
             if (clock != null) {
-                if (DEBUG) {
-                    Log.i(TAG, "Rendering clock $clockId")
-                }
+                logBuffer.tryLog(
+                    TAG,
+                    LogLevel.INFO,
+                    { str1 = clockId },
+                    { "Rendering clock $str1" }
+                )
                 return clock
+            } else if (availableClocks.containsKey(clockId)) {
+                logBuffer.tryLog(
+                    TAG,
+                    LogLevel.WARNING,
+                    { str1 = clockId },
+                    { "Clock $str1 not loaded; using default" }
+                )
             } else {
-                Log.e(TAG, "Clock $clockId not found; using default")
+                logBuffer.tryLog(
+                    TAG,
+                    LogLevel.ERROR,
+                    { str1 = clockId },
+                    { "Clock $str1 not found; using default" }
+                )
             }
         }
 
