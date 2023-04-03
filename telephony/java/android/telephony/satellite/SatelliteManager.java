@@ -37,7 +37,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
 
 import com.android.internal.telephony.IIntegerConsumer;
-import com.android.internal.telephony.ILongConsumer;
+import com.android.internal.telephony.IVoidConsumer;
 import com.android.internal.telephony.ITelephony;
 import com.android.telephony.Rlog;
 
@@ -1187,10 +1187,22 @@ public class SatelliteManager {
                             @Override
                             public void onSatelliteDatagramReceived(long datagramId,
                                     @NonNull SatelliteDatagram datagram, int pendingCount,
-                                    @NonNull ILongConsumer ack) {
+                                    @NonNull IVoidConsumer internalAck) {
+                                Consumer<Void> externalAck = new Consumer<Void>() {
+                                    @Override
+                                    public void accept(Void result) {
+                                        try {
+                                            internalAck.accept();
+                                        }  catch (RemoteException e) {
+                                              logd("onSatelliteDatagramReceived "
+                                                      + "RemoteException: " + e);
+                                        }
+                                    }
+                                };
+
                                 executor.execute(() -> Binder.withCleanCallingIdentity(
                                         () -> callback.onSatelliteDatagramReceived(
-                                                datagramId, datagram, pendingCount, ack)));
+                                                datagramId, datagram, pendingCount, externalAck)));
                             }
                         };
                 sSatelliteDatagramCallbackMap.put(callback, internalCallback);
@@ -1245,7 +1257,7 @@ public class SatelliteManager {
      * This method requests modem to check if there are any pending datagrams to be received over
      * satellite. If there are any incoming datagrams, they will be received via
      * {@link SatelliteDatagramCallback#onSatelliteDatagramReceived(long, SatelliteDatagram, int,
-     *        ILongConsumer)}
+     * Consumer)} )}
      *
      * @param executor The executor on which the result listener will be called.
      * @param resultListener Listener for the {@link SatelliteError} result of the operation.
