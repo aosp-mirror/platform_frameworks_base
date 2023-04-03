@@ -25,6 +25,9 @@ import static android.accessibilityservice.AccessibilityTrace.FLAGS_PACKAGE_BROA
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_USER_BROADCAST_RECEIVER;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MAGNIFICATION_CONNECTION;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
+import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED;
+import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
+import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.provider.Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
@@ -189,7 +192,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         AccessibilityUserState.ServiceInfoChangeListener,
         AccessibilityWindowManager.AccessibilityEventSender,
         AccessibilitySecurityPolicy.AccessibilityUserManager,
-        SystemActionPerformer.SystemActionsChangedListener {
+        SystemActionPerformer.SystemActionsChangedListener, ProxyManager.SystemSupport{
 
     private static final boolean DEBUG = false;
 
@@ -471,7 +474,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 new MagnificationScaleProvider(mContext));
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
         mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
-        mProxyManager = new ProxyManager(mLock, mA11yWindowManager, mContext);
+        mProxyManager = new ProxyManager(mLock, mA11yWindowManager, mContext, mMainHandler,
+                mUiAutomationManager, this);
         mFlashNotificationsController = new FlashNotificationsController(mContext);
         init();
     }
@@ -876,6 +880,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         };
         mContext.registerReceiverAsUser(receiver, UserHandle.ALL, filter, null, mMainHandler,
                 Context.RECEIVER_EXPORTED);
+
+        final BroadcastReceiver virtualDeviceReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final int deviceId = intent.getIntExtra(
+                        EXTRA_VIRTUAL_DEVICE_ID, DEVICE_ID_DEFAULT);
+                mProxyManager.clearConnections(deviceId);
+            }
+        };
+
+        final IntentFilter virtualDeviceFilter = new IntentFilter(ACTION_VIRTUAL_DEVICE_REMOVED);
+        mContext.registerReceiver(virtualDeviceReceiver, virtualDeviceFilter,
+                Context.RECEIVER_NOT_EXPORTED);
     }
 
     /**
@@ -954,21 +971,42 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final int resolvedUserId = mSecurityPolicy
                     .resolveCallingUserIdEnforcingPermissionsLocked(userId);
 
+            AccessibilityUserState userState = getUserStateLocked(resolvedUserId);
+            // Support a process moving from the default device to a single virtual
+            // device.
+            final int deviceId = mProxyManager.getFirstDeviceIdForUidLocked(
+                    Binder.getCallingUid());
+            Client client = new Client(callback, Binder.getCallingUid(), userState, deviceId);
             // If the client is from a process that runs across users such as
             // the system UI or the system we add it to the global state that
             // is shared across users.
-            AccessibilityUserState userState = getUserStateLocked(resolvedUserId);
-            Client client = new Client(callback, Binder.getCallingUid(), userState);
             if (mSecurityPolicy.isCallerInteractingAcrossUsers(userId)) {
+                if (mProxyManager.isProxyedDeviceId(deviceId)) {
+                    if (DEBUG) {
+                        Slog.v(LOG_TAG, "Added global client for proxy-ed pid: "
+                                + Binder.getCallingPid() + " for device id " + deviceId
+                                + " with package names " + Arrays.toString(client.mPackageNames));
+                    }
+                    return IntPair.of(mProxyManager.getStateLocked(deviceId,
+                                    mUiAutomationManager.isUiAutomationRunningLocked()),
+                            client.mLastSentRelevantEventTypes);
+                }
                 mGlobalClients.register(callback, client);
                 if (DEBUG) {
                     Slog.i(LOG_TAG, "Added global client for pid:" + Binder.getCallingPid());
                 }
-                return IntPair.of(
-                        combineUserStateAndProxyState(getClientStateLocked(userState),
-                                mProxyManager.getStateLocked()),
-                        client.mLastSentRelevantEventTypes);
             } else {
+                // If the display belongs to a proxy connections
+                if (mProxyManager.isProxyedDeviceId(deviceId)) {
+                    if (DEBUG) {
+                        Slog.v(LOG_TAG, "Added user client for proxy-ed pid: "
+                                + Binder.getCallingPid() + " for device id " + deviceId
+                                + " with package names " + Arrays.toString(client.mPackageNames));
+                    }
+                    return IntPair.of(mProxyManager.getStateLocked(deviceId,
+                                    mUiAutomationManager.isUiAutomationRunningLocked()),
+                            client.mLastSentRelevantEventTypes);
+                }
                 userState.mUserClients.register(callback, client);
                 // If this client is not for the current user we do not
                 // return a state since it is not for the foreground user.
@@ -977,12 +1015,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     Slog.i(LOG_TAG, "Added user client for pid:" + Binder.getCallingPid()
                             + " and userId:" + mCurrentUserId);
                 }
-                return IntPair.of(
-                        (resolvedUserId == mCurrentUserId) ? combineUserStateAndProxyState(
-                                getClientStateLocked(userState), mProxyManager.getStateLocked())
-                                : 0,
-                        client.mLastSentRelevantEventTypes);
             }
+            return IntPair.of(
+                    (resolvedUserId == mCurrentUserId) ? getClientStateLocked(userState) : 0,
+                    client.mLastSentRelevantEventTypes);
         }
     }
 
@@ -1108,7 +1144,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void dispatchAccessibilityEventLocked(AccessibilityEvent event) {
-        if (mProxyManager.isProxyed(event.getDisplayId())) {
+        if (mProxyManager.isProxyedDisplay(event.getDisplayId())) {
             mProxyManager.sendAccessibilityEventLocked(event);
         } else {
             notifyAccessibilityServicesDelayedLocked(event, false);
@@ -1174,6 +1210,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         final int resolvedUserId;
         final List<AccessibilityServiceInfo> serviceInfos;
         synchronized (mLock) {
+            final int deviceId = mProxyManager.getFirstDeviceIdForUidLocked(
+                    Binder.getCallingUid());
+            if (mProxyManager.isProxyedDeviceId(deviceId)) {
+                return mProxyManager.getInstalledAndEnabledServiceInfosLocked(
+                        AccessibilityServiceInfo.FEEDBACK_ALL_MASK, deviceId);
+            }
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
             // performs the current profile parent resolution.
@@ -1209,6 +1251,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         synchronized (mLock) {
+            final int deviceId = mProxyManager.getFirstDeviceIdForUidLocked(
+                    Binder.getCallingUid());
+            if (mProxyManager.isProxyedDeviceId(deviceId)) {
+                return mProxyManager.getInstalledAndEnabledServiceInfosLocked(feedbackType,
+                        deviceId);
+            }
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
             // performs the current profile parent resolution.
@@ -1253,19 +1301,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (resolvedUserId != mCurrentUserId) {
                 return;
             }
-            List<AccessibilityServiceConnection> services =
-                    getUserStateLocked(resolvedUserId).mBoundServices;
-            int numServices = services.size() + mProxyManager.getNumProxysLocked();
-            interfacesToInterrupt = new ArrayList<>(numServices);
-            for (int i = 0; i < services.size(); i++) {
-                AccessibilityServiceConnection service = services.get(i);
-                IBinder a11yServiceBinder = service.mService;
-                IAccessibilityServiceClient a11yServiceInterface = service.mServiceInterface;
-                if ((a11yServiceBinder != null) && (a11yServiceInterface != null)) {
-                    interfacesToInterrupt.add(a11yServiceInterface);
+
+            final int deviceId = mProxyManager.getFirstDeviceIdForUidLocked(
+                    Binder.getCallingUid());
+            if (mProxyManager.isProxyedDeviceId(deviceId)) {
+                interfacesToInterrupt = new ArrayList<>();
+                mProxyManager.addServiceInterfacesLocked(interfacesToInterrupt, deviceId);
+            } else {
+                List<AccessibilityServiceConnection> services =
+                        getUserStateLocked(resolvedUserId).mBoundServices;
+                interfacesToInterrupt = new ArrayList<>(services.size());
+                for (int i = 0; i < services.size(); i++) {
+                    AccessibilityServiceConnection service = services.get(i);
+                    IBinder a11yServiceBinder = service.mService;
+                    IAccessibilityServiceClient a11yServiceInterface = service.mServiceInterface;
+                    if ((a11yServiceBinder != null) && (a11yServiceInterface != null)) {
+                        interfacesToInterrupt.add(a11yServiceInterface);
+                    }
                 }
             }
-            mProxyManager.addServiceInterfacesLocked(interfacesToInterrupt);
         }
         for (int i = 0, count = interfacesToInterrupt.size(); i < count; i++) {
             try {
@@ -1841,7 +1895,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return result;
     }
 
-    private void notifyClearAccessibilityCacheLocked() {
+    @Override
+    public void notifyClearAccessibilityCacheLocked() {
         AccessibilityUserState state = getCurrentUserStateLocked();
         for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
             AccessibilityServiceConnection service = state.mBoundServices.get(i);
@@ -2045,17 +2100,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mMainHandler.post(() -> {
             broadcastToClients(userState, ignoreRemoteException(client -> {
                 int relevantEventTypes;
-                boolean changed = false;
                 synchronized (mLock) {
                     relevantEventTypes = computeRelevantEventTypesLocked(userState, client);
-
-                    if (client.mLastSentRelevantEventTypes != relevantEventTypes) {
-                        client.mLastSentRelevantEventTypes = relevantEventTypes;
-                        changed = true;
+                    if (!mProxyManager.isProxyedDeviceId(client.mDeviceId)) {
+                        if (client.mLastSentRelevantEventTypes != relevantEventTypes) {
+                            client.mLastSentRelevantEventTypes = relevantEventTypes;
+                            client.mCallback.setRelevantEventTypes(relevantEventTypes);
+                        }
                     }
-                }
-                if (changed) {
-                    client.mCallback.setRelevantEventTypes(relevantEventTypes);
                 }
             }));
         });
@@ -2076,7 +2128,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mUiAutomationManager.getServiceInfo(), client)
                 ? mUiAutomationManager.getRelevantEventTypes()
                 : 0;
-        relevantEventTypes |= mProxyManager.getRelevantEventTypesLocked();
         return relevantEventTypes;
     }
 
@@ -2130,7 +2181,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    private static boolean isClientInPackageAllowlist(
+    static boolean isClientInPackageAllowlist(
             @Nullable AccessibilityServiceInfo serviceInfo, Client client) {
         if (serviceInfo == null) return false;
 
@@ -2323,24 +2374,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         updateAccessibilityEnabledSettingLocked(userState);
     }
 
-    private int combineUserStateAndProxyState(int userState, int proxyState) {
-        return userState | proxyState;
+    void scheduleUpdateClientsIfNeededLocked(AccessibilityUserState userState) {
+        scheduleUpdateClientsIfNeededLocked(userState, false);
     }
 
-    void scheduleUpdateClientsIfNeededLocked(AccessibilityUserState userState) {
+    void scheduleUpdateClientsIfNeededLocked(AccessibilityUserState userState,
+            boolean forceUpdate) {
         final int clientState = getClientStateLocked(userState);
-        final int proxyState = mProxyManager.getStateLocked();
-        if ((userState.getLastSentClientStateLocked() != clientState
-                || mProxyManager.getLastSentStateLocked() != proxyState)
+        if (((userState.getLastSentClientStateLocked() != clientState || forceUpdate))
                 && (mGlobalClients.getRegisteredCallbackCount() > 0
                 || userState.mUserClients.getRegisteredCallbackCount() > 0)) {
             userState.setLastSentClientStateLocked(clientState);
-            mProxyManager.setLastStateLocked(proxyState);
-            // Send both the user and proxy state to the app for now.
-            // TODO(b/250929565): Send proxy state to proxy clients
             mMainHandler.sendMessage(obtainMessage(
                     AccessibilityManagerService::sendStateToAllClients,
-                    this, combineUserStateAndProxyState(clientState, proxyState),
+                    this, clientState,
                     userState.mUserId));
         }
     }
@@ -2360,8 +2407,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mTraceManager.logTrace(LOG_TAG + ".sendStateToClients",
                     FLAGS_ACCESSIBILITY_MANAGER_CLIENT, "clientState=" + clientState);
         }
-        clients.broadcast(ignoreRemoteException(
-                client -> client.setState(clientState)));
+        clients.broadcastForEachCookie(ignoreRemoteException(
+                client -> {
+                    Client managerClient = ((Client) client);
+                    if (!mProxyManager.isProxyedDeviceId(managerClient.mDeviceId)) {
+                        managerClient.mCallback.setState(clientState);
+                    }
+                }));
     }
 
     private void scheduleNotifyClientsOfServicesStateChangeLocked(
@@ -2384,8 +2436,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mTraceManager.logTrace(LOG_TAG + ".notifyClientsOfServicesStateChange",
                     FLAGS_ACCESSIBILITY_MANAGER_CLIENT, "uiTimeout=" + uiTimeout);
         }
-        clients.broadcast(ignoreRemoteException(
-                client -> client.notifyServicesStateChanged(uiTimeout)));
+
+        clients.broadcastForEachCookie(ignoreRemoteException(
+                client -> {
+                    Client managerClient = ((Client) client);
+                    if (!mProxyManager.isProxyedDeviceId(managerClient.mDeviceId)) {
+                        managerClient.mCallback.notifyServicesStateChanged(uiTimeout);
+                    }
+                }));
     }
 
     private void scheduleUpdateInputFilter(AccessibilityUserState userState) {
@@ -2458,7 +2516,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                     inputFilter = mInputFilter;
                     setInputFilter = true;
-                    mProxyManager.setAccessibilityInputFilter(mInputFilter);
                 }
                 mInputFilter.setUserAndEnabledFeatures(userState.mUserId, flags);
                 mInputFilter.setCombinedGenericMotionEventSources(
@@ -2491,6 +2548,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         "inputFilter=" + inputFilter);
             }
             mWindowManagerService.setInputFilter(inputFilter);
+            mProxyManager.setAccessibilityInputFilter(inputFilter);
         }
     }
 
@@ -2555,6 +2613,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @param userState the new user state
      */
     private void onUserStateChangedLocked(AccessibilityUserState userState) {
+        onUserStateChangedLocked(userState, false);
+    }
+
+    /**
+     * Called when any property of the user state has changed.
+     *
+     * @param userState the new user state
+     * @param forceUpdate whether to force an update of the app Clients.
+     */
+    private void onUserStateChangedLocked(AccessibilityUserState userState, boolean forceUpdate) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "onUserStateChangedLocked for user " + userState.mUserId + " with "
+                    + "forceUpdate: " + forceUpdate);
+        }
         // TODO: Remove this hack
         mInitialized = true;
         updateLegacyCapabilitiesLocked(userState);
@@ -2567,7 +2639,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         scheduleUpdateFingerprintGestureHandling(userState);
         scheduleUpdateInputFilter(userState);
         updateRelevantEventsLocked(userState);
-        scheduleUpdateClientsIfNeededLocked(userState);
+        scheduleUpdateClientsIfNeededLocked(userState, forceUpdate);
         updateAccessibilityShortcutKeyTargetsLocked(userState);
         updateAccessibilityButtonTargetsLocked(userState);
         // Update the capabilities before the mode because we will check the current mode is
@@ -2614,7 +2686,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (display != null) {
                 if (observingWindows) {
                     mA11yWindowManager.startTrackingWindows(display.getDisplayId(),
-                            mProxyManager.isProxyed(display.getDisplayId()));
+                            mProxyManager.isProxyedDisplay(display.getDisplayId()));
                 } else {
                     mA11yWindowManager.stopTrackingWindows(display.getDisplayId());
                 }
@@ -2881,6 +2953,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS, 0,
                 userState.mUserId);
+
+        mProxyManager.updateTimeoutsIfNeeded(nonInteractiveUiTimeout, interactiveUiTimeout);
         if (nonInteractiveUiTimeout != userState.getUserNonInteractiveUiTimeoutLocked()
                 || interactiveUiTimeout != userState.getUserInteractiveUiTimeoutLocked()) {
             userState.setUserNonInteractiveUiTimeoutLocked(nonInteractiveUiTimeout);
@@ -3646,8 +3720,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         synchronized(mLock) {
-            final AccessibilityUserState userState = getCurrentUserStateLocked();
-            return getRecommendedTimeoutMillisLocked(userState);
+            final int deviceId = mProxyManager.getFirstDeviceIdForUidLocked(
+                    Binder.getCallingUid());
+            if (mProxyManager.isProxyedDeviceId(deviceId)) {
+                return mProxyManager.getRecommendedTimeoutMillisLocked(deviceId);
+            } else {
+                final AccessibilityUserState userState = getCurrentUserStateLocked();
+                return getRecommendedTimeoutMillisLocked(userState);
+            }
         }
     }
 
@@ -3726,6 +3806,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mTraceManager.logTrace(LOG_TAG + ".getFocusStrokeWidth", FLAGS_ACCESSIBILITY_MANAGER);
         }
         synchronized (mLock) {
+            final int deviceId = mProxyManager.getFirstDeviceIdForUidLocked(
+                    Binder.getCallingUid());
+            if (mProxyManager.isProxyedDeviceId(deviceId)) {
+                return mProxyManager.getFocusStrokeWidthLocked(deviceId);
+            }
             final AccessibilityUserState userState = getCurrentUserStateLocked();
 
             return userState.getFocusStrokeWidthLocked();
@@ -3742,6 +3827,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mTraceManager.logTrace(LOG_TAG + ".getFocusColor", FLAGS_ACCESSIBILITY_MANAGER);
         }
         synchronized (mLock) {
+            final int deviceId = mProxyManager.getFirstDeviceIdForUidLocked(
+                    Binder.getCallingUid());
+            if (mProxyManager.isProxyedDeviceId(deviceId)) {
+                return mProxyManager.getFocusColorLocked(deviceId);
+            }
             final AccessibilityUserState userState = getCurrentUserStateLocked();
 
             return userState.getFocusColorLocked();
@@ -3828,9 +3918,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             throw new IllegalArgumentException("The display " + displayId + " does not exist or is"
                     + " not tracked by accessibility.");
         }
-        if (mProxyManager.isProxyed(displayId)) {
+        if (mProxyManager.isProxyedDisplay(displayId)) {
             throw new IllegalArgumentException("The display " + displayId + " is already being"
-                    + "proxy-ed");
+                    + " proxy-ed");
         }
 
         final long identity = Binder.clearCallingIdentity();
@@ -3861,7 +3951,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     boolean isDisplayProxyed(int displayId) {
-        return mProxyManager.isProxyed(displayId);
+        return mProxyManager.isProxyedDisplay(displayId);
     }
 
     @Override
@@ -4009,11 +4099,69 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public void onClientChangeLocked(boolean serviceInfoChanged) {
+        onClientChangeLocked(serviceInfoChanged, false);
+    }
+
+    /**
+     * Called when the state of a service or proxy has changed
+     * @param serviceInfoChanged if the service info has changed
+     * @param forceUpdate whether to force an update of state for app clients
+     */
+    public void onClientChangeLocked(boolean serviceInfoChanged, boolean forceUpdate) {
         AccessibilityUserState userState = getUserStateLocked(mCurrentUserId);
-        onUserStateChangedLocked(userState);
+        onUserStateChangedLocked(userState, forceUpdate);
         if (serviceInfoChanged) {
             scheduleNotifyClientsOfServicesStateChangeLocked(userState);
         }
+    }
+
+
+    @Override
+    public void onProxyChanged(int deviceId) {
+        mProxyManager.onProxyChanged(deviceId);
+    }
+
+    /**
+     * Removes the device from tracking. This will reset any AccessibilityManagerClients to be
+     * associated with the default user id.
+     */
+    @Override
+    public void removeDeviceIdLocked(int deviceId) {
+        resetClientsLocked(deviceId, getCurrentUserStateLocked().mUserClients);
+        resetClientsLocked(deviceId, mGlobalClients);
+        // Force an update of A11yManagers if the state was previously a proxy state and needs to be
+        // returned to the default device state.
+        onClientChangeLocked(true, true);
+    }
+
+    private void resetClientsLocked(int deviceId,
+            RemoteCallbackList<IAccessibilityManagerClient> clients) {
+        if (clients == null || clients.getRegisteredCallbackCount() == 0) {
+            return;
+        }
+        synchronized (mLock) {
+            for (int i = 0; i < clients.getRegisteredCallbackCount(); i++) {
+                final Client appClient = ((Client) clients.getRegisteredCallbackCookie(i));
+                if (appClient.mDeviceId == deviceId) {
+                    appClient.mDeviceId = DEVICE_ID_DEFAULT;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void updateWindowsForAccessibilityCallbackLocked() {
+        updateWindowsForAccessibilityCallbackLocked(getUserStateLocked(mCurrentUserId));
+    }
+
+    @Override
+    public RemoteCallbackList<IAccessibilityManagerClient> getGlobalClientsLocked() {
+        return mGlobalClients;
+    }
+
+    @Override
+    public RemoteCallbackList<IAccessibilityManagerClient> getCurrentUserClientsLocked() {
+        return getCurrentUserState().mUserClients;
     }
 
     @Override
@@ -4327,13 +4475,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         final IAccessibilityManagerClient mCallback;
         final String[] mPackageNames;
         int mLastSentRelevantEventTypes;
+        int mUid;
+        int mDeviceId = DEVICE_ID_DEFAULT;
 
         private Client(IAccessibilityManagerClient callback, int clientUid,
-                AccessibilityUserState userState) {
+                AccessibilityUserState userState, int deviceId) {
             mCallback = callback;
             mPackageNames = mPackageManager.getPackagesForUid(clientUid);
+            mUid = clientUid;
+            mDeviceId = deviceId;
             synchronized (mLock) {
-                mLastSentRelevantEventTypes = computeRelevantEventTypesLocked(userState, this);
+                if (mProxyManager.isProxyedDeviceId(deviceId)) {
+                    mLastSentRelevantEventTypes =
+                            mProxyManager.computeRelevantEventTypesLocked(this);
+                } else {
+                    mLastSentRelevantEventTypes = computeRelevantEventTypesLocked(userState, this);
+                }
             }
         }
     }
@@ -4819,8 +4976,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         mMainHandler.post(() -> {
             broadcastToClients(userState, ignoreRemoteException(client -> {
-                client.mCallback.setFocusAppearance(userState.getFocusStrokeWidthLocked(),
-                        userState.getFocusColorLocked());
+                if (!mProxyManager.isProxyedDeviceId(client.mDeviceId)) {
+                    client.mCallback.setFocusAppearance(userState.getFocusStrokeWidthLocked(),
+                            userState.getFocusColorLocked());
+                }
             }));
         });
 
@@ -5054,12 +5213,5 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         transaction.reparent(sc, parent);
         transaction.apply();
         transaction.close();
-    }
-
-    @Override
-    public void setCurrentUserFocusAppearance(int strokeWidth, int color) {
-        synchronized (mLock) {
-            getCurrentUserStateLocked().setFocusAppearanceLocked(strokeWidth, color);
-        }
     }
 }
