@@ -15,7 +15,6 @@
 
 package com.android.server.lights;
 
-import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -29,6 +28,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PermissionEnforcer;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Trace;
@@ -68,6 +68,9 @@ public class LightsService extends SystemService {
     private Handler mH;
 
     private final class LightsManagerBinderService extends ILightsManager.Stub {
+        LightsManagerBinderService() {
+            super(PermissionEnforcer.fromContext(getContext()));
+        }
 
         private final class Session implements Comparable<Session> {
             final IBinder mToken;
@@ -101,10 +104,10 @@ public class LightsService extends SystemService {
          * Returns the lights available for apps to control on the device. Only lights that aren't
          * reserved for system use are available to apps.
          */
+        @android.annotation.EnforcePermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS)
         @Override
         public List<Light> getLights() {
-            getContext().enforceCallingOrSelfPermission(Manifest.permission.CONTROL_DEVICE_LIGHTS,
-                    "getLights requires CONTROL_DEVICE_LIGHTS_PERMISSION");
+            getLights_enforcePermission();
 
             synchronized (LightsService.this) {
                 final List<Light> lights = new ArrayList<Light>();
@@ -125,10 +128,10 @@ public class LightsService extends SystemService {
          * <p>Null values mean that the request should be removed, and the light turned off if it
          * is not being used by anything else.
          */
+        @android.annotation.EnforcePermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS)
         @Override
         public void setLightStates(IBinder token, int[] lightIds, LightState[] lightStates) {
-            getContext().enforceCallingOrSelfPermission(Manifest.permission.CONTROL_DEVICE_LIGHTS,
-                    "setLightStates requires CONTROL_DEVICE_LIGHTS permission");
+            setLightStates_enforcePermission();
             Preconditions.checkState(lightIds.length == lightStates.length);
 
             synchronized (LightsService.this) {
@@ -144,10 +147,10 @@ public class LightsService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS)
         @Override
         public @Nullable LightState getLightState(int lightId) {
-            getContext().enforceCallingOrSelfPermission(Manifest.permission.CONTROL_DEVICE_LIGHTS,
-                    "getLightState(@TestApi) requires CONTROL_DEVICE_LIGHTS permission");
+            getLightState_enforcePermission();
 
             synchronized (LightsService.this) {
                 final LightImpl light = mLightsById.get(lightId);
@@ -158,10 +161,10 @@ public class LightsService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS)
         @Override
         public void openSession(IBinder token, int priority) {
-            getContext().enforceCallingOrSelfPermission(Manifest.permission.CONTROL_DEVICE_LIGHTS,
-                    "openSession requires CONTROL_DEVICE_LIGHTS permission");
+            openSession_enforcePermission();
             Preconditions.checkNotNull(token);
 
             synchronized (LightsService.this) {
@@ -177,10 +180,10 @@ public class LightsService extends SystemService {
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS)
         @Override
         public void closeSession(IBinder token) {
-            getContext().enforceCallingOrSelfPermission(Manifest.permission.CONTROL_DEVICE_LIGHTS,
-                    "closeSession requires CONTROL_DEVICE_LIGHTS permission");
+            closeSession_enforcePermission();
             Preconditions.checkNotNull(token);
             closeSessionInternal(token);
         }
