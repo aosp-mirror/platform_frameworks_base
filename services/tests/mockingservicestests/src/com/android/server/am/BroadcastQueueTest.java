@@ -1661,8 +1661,8 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverYellowApp = makeActiveProcessRecord(PACKAGE_YELLOW);
         final ProcessRecord receiverOrangeApp = makeActiveProcessRecord(PACKAGE_ORANGE);
 
-        receiverGreenApp.setCached(true);
-        receiverBlueApp.setCached(true);
+        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_GREEN), true);
+        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_BLUE), true);
 
         final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
         final BroadcastOptions opts = BroadcastOptions.makeBasic()
@@ -1706,13 +1706,11 @@ public class BroadcastQueueTest {
                 eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
 
         // Shift blue to be active and confirm that deferred broadcast is delivered
-        receiverBlueApp.setCached(false);
         mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_BLUE), false);
         waitForIdle();
         verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, timeTick);
 
         // Shift green to be active and confirm that deferred broadcast is delivered
-        receiverGreenApp.setCached(false);
         mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_GREEN), false);
         waitForIdle();
         verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, timeTick);
@@ -2046,9 +2044,9 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
         final ProcessRecord receiverYellowApp = makeActiveProcessRecord(PACKAGE_YELLOW);
 
-        receiverGreenApp.setCached(true);
-        receiverBlueApp.setCached(true);
-        receiverYellowApp.setCached(false);
+        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_GREEN), true);
+        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_BLUE), true);
+        mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_YELLOW), false);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final BroadcastOptions opts = BroadcastOptions.makeBasic()
@@ -2071,7 +2069,6 @@ public class BroadcastQueueTest {
         verifyScheduleRegisteredReceiver(times(1), receiverYellowApp, airplane);
 
         // Shift green to be active and confirm that deferred broadcast is delivered
-        receiverGreenApp.setCached(false);
         mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_GREEN), false);
         waitForIdle();
         verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, airplane);
