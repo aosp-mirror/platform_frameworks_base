@@ -75,7 +75,9 @@ import org.mockito.MockitoAnnotations
 internal class NoteTaskControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var context: Context
+    @Mock private lateinit var workProfileContext: Context
     @Mock private lateinit var packageManager: PackageManager
+    @Mock private lateinit var workProfilePackageManager: PackageManager
     @Mock private lateinit var resolver: NoteTaskInfoResolver
     @Mock private lateinit var bubbles: Bubbles
     @Mock private lateinit var keyguardManager: KeyguardManager
@@ -373,17 +375,17 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     @Test
     fun showNoteTask_keyboardShortcut_shouldStartActivity() {
         val expectedInfo =
-                NOTE_TASK_INFO.copy(
-                        entryPoint = NoteTaskEntryPoint.KEYBOARD_SHORTCUT,
-                        isKeyguardLocked = true,
-                )
+            NOTE_TASK_INFO.copy(
+                entryPoint = NoteTaskEntryPoint.KEYBOARD_SHORTCUT,
+                isKeyguardLocked = true,
+            )
         whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
         whenever(resolver.resolveInfo(any(), any())).thenReturn(expectedInfo)
 
         createNoteTaskController()
-                .showNoteTask(
-                        entryPoint = expectedInfo.entryPoint!!,
-                )
+            .showNoteTask(
+                entryPoint = expectedInfo.entryPoint!!,
+            )
 
         val intentCaptor = argumentCaptor<Intent>()
         val userCaptor = argumentCaptor<UserHandle>()
@@ -393,9 +395,9 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             assertThat(intent.`package`).isEqualTo(NOTE_TASK_PACKAGE_NAME)
             assertThat(intent.flags and FLAG_ACTIVITY_NEW_TASK).isEqualTo(FLAG_ACTIVITY_NEW_TASK)
             assertThat(intent.flags and FLAG_ACTIVITY_MULTIPLE_TASK)
-                    .isEqualTo(FLAG_ACTIVITY_MULTIPLE_TASK)
+                .isEqualTo(FLAG_ACTIVITY_MULTIPLE_TASK)
             assertThat(intent.flags and FLAG_ACTIVITY_NEW_DOCUMENT)
-                    .isEqualTo(FLAG_ACTIVITY_NEW_DOCUMENT)
+                .isEqualTo(FLAG_ACTIVITY_NEW_DOCUMENT)
             assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, true)).isFalse()
         }
         assertThat(userCaptor.value).isEqualTo(userTracker.userHandle)
@@ -407,7 +409,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     // region setNoteTaskShortcutEnabled
     @Test
     fun setNoteTaskShortcutEnabled_setTrue() {
-        createNoteTaskController().setNoteTaskShortcutEnabled(value = true)
+        createNoteTaskController().setNoteTaskShortcutEnabled(value = true, userTracker.userHandle)
 
         val argument = argumentCaptor<ComponentName>()
         verify(context.packageManager)
@@ -422,10 +424,51 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
     @Test
     fun setNoteTaskShortcutEnabled_setFalse() {
-        createNoteTaskController().setNoteTaskShortcutEnabled(value = false)
+        createNoteTaskController().setNoteTaskShortcutEnabled(value = false, userTracker.userHandle)
 
         val argument = argumentCaptor<ComponentName>()
         verify(context.packageManager)
+            .setComponentEnabledSetting(
+                argument.capture(),
+                eq(COMPONENT_ENABLED_STATE_DISABLED),
+                eq(PackageManager.DONT_KILL_APP),
+            )
+        assertThat(argument.value.className)
+            .isEqualTo(CreateNoteTaskShortcutActivity::class.java.name)
+    }
+
+    @Test
+    fun setNoteTaskShortcutEnabled_workProfileUser_setTrue() {
+        whenever(context.createContextAsUser(eq(workUserInfo.userHandle), any()))
+            .thenReturn(workProfileContext)
+        whenever(workProfileContext.packageManager).thenReturn(workProfilePackageManager)
+        userTracker.set(mainAndWorkProfileUsers, mainAndWorkProfileUsers.indexOf(mainUserInfo))
+
+        createNoteTaskController().setNoteTaskShortcutEnabled(value = true, workUserInfo.userHandle)
+
+        val argument = argumentCaptor<ComponentName>()
+        verify(workProfilePackageManager)
+            .setComponentEnabledSetting(
+                argument.capture(),
+                eq(COMPONENT_ENABLED_STATE_ENABLED),
+                eq(PackageManager.DONT_KILL_APP),
+            )
+        assertThat(argument.value.className)
+            .isEqualTo(CreateNoteTaskShortcutActivity::class.java.name)
+    }
+
+    @Test
+    fun setNoteTaskShortcutEnabled_workProfileUser_setFalse() {
+        whenever(context.createContextAsUser(eq(workUserInfo.userHandle), any()))
+            .thenReturn(workProfileContext)
+        whenever(workProfileContext.packageManager).thenReturn(workProfilePackageManager)
+        userTracker.set(mainAndWorkProfileUsers, mainAndWorkProfileUsers.indexOf(mainUserInfo))
+
+        createNoteTaskController()
+            .setNoteTaskShortcutEnabled(value = false, workUserInfo.userHandle)
+
+        val argument = argumentCaptor<ComponentName>()
+        verify(workProfilePackageManager)
             .setComponentEnabledSetting(
                 argument.capture(),
                 eq(COMPONENT_ENABLED_STATE_DISABLED),
