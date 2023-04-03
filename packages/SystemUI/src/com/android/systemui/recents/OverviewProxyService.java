@@ -786,7 +786,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private void disconnectFromLauncherService(String disconnectReason) {
         Log.d(TAG_OPS, "disconnectFromLauncherService bound?: " + mBound +
-                " currentProxy: " + mOverviewProxy + " disconnectReason: " + disconnectReason);
+                " currentProxy: " + mOverviewProxy + " disconnectReason: " + disconnectReason,
+                new Throwable());
         if (mBound) {
             // Always unbind the service (ie. if called through onNullBinding or onBindingDied)
             mContext.unbindService(mOverviewServiceConnection);
