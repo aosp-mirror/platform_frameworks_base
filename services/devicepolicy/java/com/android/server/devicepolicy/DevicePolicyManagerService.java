@@ -2315,7 +2315,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Creates a new {@link CallerIdentity} object to represent the caller's identity.
      */
     private CallerIdentity getCallerIdentity(@Nullable String callerPackage) {
-
         return getCallerIdentity(null, callerPackage);
     }
 
@@ -5305,11 +5304,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkArgument(allowedModes.contains(passwordComplexity),
                 "Provided complexity is not one of the allowed values.");
 
-        CallerIdentity caller;
-        if (isPermissionCheckFlagEnabled()) {
-            caller = getCallerIdentity(callerPackageName);
-        } else {
-            caller = getCallerIdentity();
+        CallerIdentity caller = getCallerIdentity(callerPackageName);
+        if (!isPermissionCheckFlagEnabled()) {
             Preconditions.checkCallAuthorization(
                     isDefaultDeviceOwner(caller) || isProfileOwner(caller));
             Preconditions.checkArgument(!calledOnParent || isProfileOwner(caller));
