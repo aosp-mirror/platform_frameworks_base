@@ -427,6 +427,8 @@ a similar way.
 
     <!-- Theme for the dialog shown when an app crashes or ANRs. Override to make it dark. -->
     <style name="Theme.DeviceDefault.Dialog.AppError" parent="Theme.DeviceDefault.Dialog.Alert">
+        <item name="alertDialogStyle">@style/BaseErrorDialog.DeviceDefault</item>
+        <item name="dialogPreferredPadding">@dimen/base_error_dialog_padding</item>
         <item name="windowContentTransitions">false</item>
         <item name="windowActivityTransitions">false</item>
         <item name="windowCloseOnTouchOutside">false</item>

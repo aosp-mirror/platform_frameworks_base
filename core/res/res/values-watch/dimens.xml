@@ -20,4 +20,9 @@
     <dimen name="alert_dialog_button_bar_height">0dp</dimen>
 
     <dimen name="toast_y_offset">0dip</dimen>
+
+    <!-- AppErrorDialog's list item height -->
+    <dimen name="aerr_list_item_height">52dp</dimen>
+    <!-- Padding for contents in a view of BaseErrorDialog such as a title and buttons -->
+    <dimen name="base_error_dialog_contents_padding">14dp</dimen>
 </resources>
