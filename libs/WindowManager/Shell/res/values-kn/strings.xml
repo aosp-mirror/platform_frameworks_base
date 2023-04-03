@@ -91,7 +91,8 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"ರದ್ದುಮಾಡಿ"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"ಮರುಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"ಮತ್ತೊಮ್ಮೆ ತೋರಿಸಬೇಡಿ"</string>
-    <string name="letterbox_reachability_reposition_text" msgid="4507890186297500893">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಸರಿಸಲು ಡಬಲ್-ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <!-- no translation found for letterbox_reachability_reposition_text (3522042240665748268) -->
+    <skip />
     <string name="maximize_button_text" msgid="1650859196290301963">"ಹಿಗ್ಗಿಸಿ"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"ಕುಗ್ಗಿಸಿ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"ಮುಚ್ಚಿರಿ"</string>
