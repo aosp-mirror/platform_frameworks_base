@@ -85,4 +85,17 @@ public class TvPipTaskOrganizer extends PipTaskOrganizer {
             mPipParamsChangedForwarder.notifySubtitleChanged(params.getSubtitle());
         }
     }
+
+    /**
+     * Override for TV since the menu bounds affect the PiP location. Additionally, we want to
+     * ensure that menu is shown immediately since it should always be visible on TV as it creates
+     * a border with rounded corners around the PiP.
+     */
+    protected boolean shouldAttachMenuEarly() {
+        return true;
+    }
+
+    protected boolean shouldAlwaysFadeIn() {
+        return true;
+    }
 }
