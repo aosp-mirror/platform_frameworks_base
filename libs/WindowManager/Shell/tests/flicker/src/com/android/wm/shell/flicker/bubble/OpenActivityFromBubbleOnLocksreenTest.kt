@@ -18,6 +18,7 @@ package com.android.wm.shell.flicker.bubble
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
+import android.tools.common.datatypes.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -29,6 +30,7 @@ import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.navBarLayerIsVisibleAtEnd
 import com.android.server.wm.flicker.navBarLayerPositionAtEnd
 import org.junit.Assume
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -136,5 +138,24 @@ class OpenActivityFromBubbleOnLocksreenTest(flicker: FlickerTest) : BaseBubbleSc
     override fun navBarWindowIsAlwaysVisible() {
         Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
         super.navBarWindowIsAlwaysVisible()
+    }
+
+    /** {@inheritDoc} */
+    @Test
+    @Ignore("Not applicable to this CUJ. Taskbar is not shown on lock screen")
+    override fun taskBarLayerIsVisibleAtStartAndEnd() {}
+
+    @Test
+    @Ignore("Not applicable to this CUJ. Taskbar is not shown on lock screen")
+    override fun taskBarWindowIsAlwaysVisible() {}
+
+    /**
+     * Checks that the [ComponentNameMatcher.TASK_BAR] is visible at the end of the transition
+     */
+    @Postsubmit
+    @Test
+    fun taskBarLayerIsVisibleAtEnd() {
+        Assume.assumeTrue(flicker.scenario.isTablet)
+        flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.TASK_BAR) }
     }
 }
