@@ -3522,7 +3522,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             final boolean endTask = task.getTopNonFinishingActivity() == null
                     && !task.isClearingToReuseTask();
-            mTransitionController.requestCloseTransitionIfNeeded(endTask ? task : this);
+            final Transition newTransition =
+                    mTransitionController.requestCloseTransitionIfNeeded(endTask ? task : this);
             if (isState(RESUMED)) {
                 if (endTask) {
                     mAtmService.getTaskChangeNotificationController().notifyTaskRemovalStarted(
@@ -3576,7 +3577,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else if (!isState(PAUSING)) {
                 if (mVisibleRequested) {
                     // Prepare and execute close transition.
-                    prepareActivityHideTransitionAnimation();
+                    if (mTransitionController.isShellTransitionsEnabled()) {
+                        setVisibility(false);
+                        if (newTransition != null) {
+                            // This is a transition specifically for this close operation, so set
+                            // ready now.
+                            newTransition.setReady(mDisplayContent, true);
+                        }
+                    } else {
+                        prepareActivityHideTransitionAnimation();
+                    }
                 }
 
                 final boolean removedActivity = completeFinishing("finishIfPossible") == null;
