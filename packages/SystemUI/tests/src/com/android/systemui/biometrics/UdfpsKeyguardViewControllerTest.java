@@ -19,6 +19,7 @@ package com.android.systemui.biometrics;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
@@ -154,6 +155,22 @@ public class UdfpsKeyguardViewControllerTest extends UdfpsKeyguardViewController
         sendStatusBarStateChanged(StatusBarState.KEYGUARD);
 
         assertFalse(mController.shouldPauseAuth());
+    }
+
+    @Test
+    public void onBiometricAuthenticated_pauseAuth() {
+        // GIVEN view is attached and we're on the keyguard (see testShouldNotPauseAuthOnKeyguard)
+        mController.onViewAttached();
+        captureStatusBarStateListeners();
+        sendStatusBarStateChanged(StatusBarState.KEYGUARD);
+
+        // WHEN biometric is authenticated
+        captureKeyguardStateControllerCallback();
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(true);
+        mKeyguardStateControllerCallback.onUnlockedChanged();
+
+        // THEN pause auth
+        assertTrue(mController.shouldPauseAuth());
     }
 
     @Test
