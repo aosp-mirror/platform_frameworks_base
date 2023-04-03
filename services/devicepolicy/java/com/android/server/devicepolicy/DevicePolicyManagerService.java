@@ -12574,9 +12574,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             case UserManager.RESTRICTION_NOT_SET:
                 return false;
             case UserManager.RESTRICTION_SOURCE_DEVICE_OWNER:
-                return !isDeviceOwner(admin, userId);
             case UserManager.RESTRICTION_SOURCE_PROFILE_OWNER:
-                return !isProfileOwner(admin, userId);
+                return !(isDeviceOwner(admin, userId) || isProfileOwner(admin, userId));
             default:
                 return true;
         }
