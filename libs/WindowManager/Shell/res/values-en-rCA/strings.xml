@@ -110,4 +110,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Screenshot"</string>
     <string name="close_text" msgid="4986518933445178928">"Close"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Close Menu"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"Open Menu"</string>
 </resources>
