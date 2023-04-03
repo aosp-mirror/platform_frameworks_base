@@ -211,7 +211,7 @@ android.app.ActivityManager$RunningTaskInfo$1
 android.app.ActivityManager$RunningTaskInfo
 android.app.ActivityManager$TaskDescription$1
 android.app.ActivityManager$TaskDescription
-android.app.ActivityManager$UidObserver
+android.app.ActivityManager$MyUidObserver
 android.app.ActivityManager
 android.app.ActivityManagerInternal
 android.app.ActivityOptions$1
