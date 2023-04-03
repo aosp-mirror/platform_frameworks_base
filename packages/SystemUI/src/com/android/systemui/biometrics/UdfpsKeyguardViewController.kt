@@ -167,6 +167,9 @@ constructor(
 
     private val keyguardStateControllerCallback: KeyguardStateController.Callback =
         object : KeyguardStateController.Callback {
+            override fun onUnlockedChanged() {
+                updatePauseAuth()
+            }
             override fun onLaunchTransitionFadingAwayChanged() {
                 launchTransitionFadingAway = keyguardStateController.isLaunchTransitionFadingAway
                 updatePauseAuth()
@@ -401,6 +404,15 @@ constructor(
             return true
         }
         if (isBouncerExpansionGreaterThan(.5f)) {
+            return true
+        }
+        if (
+            keyguardUpdateMonitor.getUserUnlockedWithBiometric(
+                KeyguardUpdateMonitor.getCurrentUser()
+            )
+        ) {
+            // If the device was unlocked by a biometric, immediately hide the UDFPS icon to avoid
+            // overlap with the LockIconView. Shortly afterwards, UDFPS will stop running.
             return true
         }
         return view.unpausedAlpha < 255 * .1
