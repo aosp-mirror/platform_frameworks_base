@@ -16,11 +16,11 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
-import android.tools.device.flicker.isShellTransitionsEnabled
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -88,18 +88,16 @@ class EnterSplitScreenByDragFromTaskbar(flicker: FlickerTest) : SplitScreenBase(
             appExistAtStart = false
         )
 
-    @Presubmit
+    @FlakyTest(bugId = 245472831)
     @Test
     fun splitScreenDividerBecomesVisible() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
         flicker.splitScreenDividerBecomesVisible()
     }
 
     // TODO(b/245472831): Back to splitScreenDividerBecomesVisible after shell transition ready.
     @Presubmit
     @Test
-    fun splitScreenDividerIsVisibleAtEnd_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
+    fun splitScreenDividerIsVisibleAtEnd() {
         flicker.assertLayersEnd { this.isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT) }
     }
 
@@ -108,23 +106,6 @@ class EnterSplitScreenByDragFromTaskbar(flicker: FlickerTest) : SplitScreenBase(
     @Presubmit
     @Test
     fun secondaryAppLayerBecomesVisible() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        flicker.assertLayers {
-            this.isInvisible(secondaryApp)
-                .then()
-                .isVisible(secondaryApp)
-                .then()
-                .isInvisible(secondaryApp)
-                .then()
-                .isVisible(secondaryApp)
-        }
-    }
-
-    // TODO(b/245472831): Align to legacy transition after shell transition ready.
-    @Presubmit
-    @Test
-    fun secondaryAppLayerBecomesVisible_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
         flicker.layerBecomesVisible(secondaryApp)
     }
 
