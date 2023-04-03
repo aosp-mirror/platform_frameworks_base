@@ -157,14 +157,21 @@ public abstract class TvPipModule {
     @WMSingleton
     @Provides
     static PipTransitionController provideTvPipTransition(
+            Context context,
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             Transitions transitions,
-            PipAnimationController pipAnimationController,
+            TvPipBoundsState tvPipBoundsState,
+            PipDisplayLayoutState pipDisplayLayoutState,
+            PipTransitionState pipTransitionState,
+            TvPipMenuController pipMenuController,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
-            TvPipBoundsState tvPipBoundsState, TvPipMenuController pipMenuController) {
-        return new TvPipTransition(shellInit, shellTaskOrganizer, transitions, tvPipBoundsState,
-                pipMenuController, tvPipBoundsAlgorithm, pipAnimationController);
+            PipAnimationController pipAnimationController,
+            PipSurfaceTransactionHelper pipSurfaceTransactionHelper) {
+        return new TvPipTransition(context, shellInit, shellTaskOrganizer, transitions,
+                tvPipBoundsState, pipDisplayLayoutState, pipTransitionState, pipMenuController,
+                tvPipBoundsAlgorithm, pipAnimationController, pipSurfaceTransactionHelper,
+                Optional.empty());
     }
 
     @WMSingleton
