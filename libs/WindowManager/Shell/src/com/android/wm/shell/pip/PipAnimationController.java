@@ -188,6 +188,11 @@ public class PipAnimationController {
         return mCurrentAnimator;
     }
 
+    /** Reset animator state to prevent it from being used after its lifetime. */
+    public void resetAnimatorState() {
+        mCurrentAnimator = null;
+    }
+
     private PipTransitionAnimator setupPipTransitionAnimator(PipTransitionAnimator animator) {
         animator.setSurfaceTransactionHelper(mSurfaceTransactionHelper);
         animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);

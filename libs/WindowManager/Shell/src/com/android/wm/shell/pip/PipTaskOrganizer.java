@@ -1854,6 +1854,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                         animator::clearContentOverlay);
             }
             PipAnimationController.quietCancel(animator);
+            mPipAnimationController.resetAnimatorState();
         }
     }
 
