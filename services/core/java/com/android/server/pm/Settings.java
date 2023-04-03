@@ -4280,10 +4280,23 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
                 // Non-Apex system apps, that are not included in the allowlist in
                 // initialNonStoppedSystemPackages, should be marked as stopped by default.
-                final boolean shouldBeStopped = service.mShouldStopSystemPackagesByDefault
+                boolean shouldBeStopped = service.mShouldStopSystemPackagesByDefault
                         && ps.isSystem()
                         && !ps.isApex()
                         && !service.mInitialNonStoppedSystemPackages.contains(ps.getPackageName());
+                if (shouldBeStopped) {
+                    final Intent launcherIntent = new Intent(Intent.ACTION_MAIN);
+                    launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+                    launcherIntent.setPackage(ps.getPackageName());
+                    final List<ResolveInfo> launcherActivities =
+                            service.snapshotComputer().queryIntentActivitiesInternal(launcherIntent,
+                                    null,
+                                    PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, 0);
+                    if (launcherActivities.isEmpty()) {
+                        shouldBeStopped = false;
+                    }
+                }
                 ps.setStopped(shouldBeStopped, userHandle);
 
                 // If userTypeInstallablePackages is the *only* reason why we're not installing,

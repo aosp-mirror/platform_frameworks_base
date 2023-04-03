@@ -117,6 +117,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
+import android.content.pm.ResolveInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
@@ -3946,6 +3947,24 @@ final class InstallPackageHelper {
                 mPm.mSettings.disableSystemPackageLPw(parsedPackage.getPackageName(), true);
             }
         }
+
+        // If this is a system app we hadn't seen before, and this is a first boot or OTA,
+        // we need to unstop it if it doesn't have a launcher entry.
+        if (mPm.mShouldStopSystemPackagesByDefault && scanResult.mRequest.mPkgSetting == null
+                && ((scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0)
+                && ((scanFlags & SCAN_AS_SYSTEM) != 0)) {
+            final Intent launcherIntent = new Intent(Intent.ACTION_MAIN);
+            launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            launcherIntent.setPackage(parsedPackage.getPackageName());
+            final List<ResolveInfo> launcherActivities =
+                    mPm.snapshotComputer().queryIntentActivitiesInternal(launcherIntent, null,
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, 0);
+            if (launcherActivities.isEmpty()) {
+                scanResult.mPkgSetting.setStopped(false, 0);
+            }
+        }
+
         if (mIncrementalManager != null && isIncrementalPath(parsedPackage.getPath())) {
             if (scanResult.mPkgSetting != null && scanResult.mPkgSetting.isLoading()) {
                 // Continue monitoring loading progress of active incremental packages
