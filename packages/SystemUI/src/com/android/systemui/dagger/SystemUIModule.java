@@ -42,6 +42,7 @@ import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule;
 import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.demomode.dagger.DemoModeModule;
 import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.dreams.dagger.DreamModule;
@@ -60,6 +61,7 @@ import com.android.systemui.people.PeopleModule;
 import com.android.systemui.plugins.BcSmartspaceConfigPlugin;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.privacy.PrivacyModule;
+import com.android.systemui.process.condition.SystemProcessCondition;
 import com.android.systemui.qrcodescanner.dagger.QRCodeScannerModule;
 import com.android.systemui.qs.FgsManagerController;
 import com.android.systemui.qs.FgsManagerControllerImpl;
@@ -74,6 +76,7 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeModule;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolatorImpl;
+import com.android.systemui.shared.condition.Monitor;
 import com.android.systemui.smartspace.dagger.SmartspaceModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -126,6 +129,7 @@ import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
@@ -230,6 +234,17 @@ public abstract class SystemUIModule {
         final SysUiState state = new SysUiState(displayTracker);
         dumpManager.registerDumpable(state);
         return state;
+    }
+
+    /**
+     * Provides the monitor for SystemUI that requires the process running as the system user.
+     */
+    @SysUISingleton
+    @Provides
+    @SystemUser
+    static Monitor provideSystemUserMonitor(@Main Executor executor,
+            SystemProcessCondition systemProcessCondition) {
+        return new Monitor(executor, Collections.singleton(systemProcessCondition));
     }
 
     @BindsOptionalOf

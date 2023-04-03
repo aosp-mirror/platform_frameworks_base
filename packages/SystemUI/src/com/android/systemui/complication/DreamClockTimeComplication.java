@@ -18,11 +18,11 @@ package com.android.systemui.complication;
 
 import static com.android.systemui.complication.dagger.DreamClockTimeComplicationModule.DREAM_CLOCK_TIME_COMPLICATION_VIEW;
 import static com.android.systemui.complication.dagger.RegisteredComplicationsModule.DREAM_CLOCK_TIME_COMPLICATION_LAYOUT_PARAMS;
-import static com.android.systemui.dreams.dagger.DreamModule.DREAM_PRETEXT_MONITOR;
 
 import android.view.View;
 
 import com.android.systemui.CoreStartable;
+import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.shared.condition.Monitor;
 import com.android.systemui.util.condition.ConditionalCoreStartable;
@@ -74,7 +74,7 @@ public class DreamClockTimeComplication implements Complication {
         public Registrant(
                 DreamOverlayStateController dreamOverlayStateController,
                 DreamClockTimeComplication dreamClockTimeComplication,
-                @Named(DREAM_PRETEXT_MONITOR) Monitor monitor) {
+                @SystemUser Monitor monitor) {
             super(monitor);
             mDreamOverlayStateController = dreamOverlayStateController;
             mComplication = dreamClockTimeComplication;
