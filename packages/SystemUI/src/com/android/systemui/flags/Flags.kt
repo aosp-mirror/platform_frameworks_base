@@ -110,7 +110,7 @@ object Flags {
 
     @JvmField
     val ANIMATED_NOTIFICATION_SHADE_INSETS =
-        unreleasedFlag(270682168, "animated_notification_shade_insets", teamfood = true)
+        releasedFlag(270682168, "animated_notification_shade_insets")
 
     // TODO(b/268005230): Tracking Bug
     @JvmField val SENSITIVE_REVEAL_ANIM = unreleasedFlag(268005230, "sensitive_reveal_anim")
