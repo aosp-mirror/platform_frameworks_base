@@ -69,14 +69,6 @@ public abstract class BroadcastQueue {
         Slog.v(TAG, msg);
     }
 
-    static void logv(@NonNull String msg, @Nullable PrintWriter pw) {
-        logv(msg);
-        if (pw != null) {
-            pw.println(msg);
-            pw.flush();
-        }
-    }
-
     static void checkState(boolean expression, @NonNull String msg) {
         if (!expression) {
             throw new IllegalStateException(msg);
@@ -219,7 +211,7 @@ public abstract class BroadcastQueue {
      * since running apps can continue sending new broadcasts in perpetuity;
      * consider using {@link #waitForBarrier} instead.
      */
-    public abstract void waitForIdle(@Nullable PrintWriter pw);
+    public abstract void waitForIdle(@NonNull PrintWriter pw);
 
     /**
      * Wait until any currently waiting broadcasts have been dispatched.
@@ -230,7 +222,7 @@ public abstract class BroadcastQueue {
      * Callers are advised that this method will <em>not</em> wait for any
      * future broadcasts that are newly enqueued after being invoked.
      */
-    public abstract void waitForBarrier(@Nullable PrintWriter pw);
+    public abstract void waitForBarrier(@NonNull PrintWriter pw);
 
     /**
      * Delays delivering broadcasts to the specified package.
