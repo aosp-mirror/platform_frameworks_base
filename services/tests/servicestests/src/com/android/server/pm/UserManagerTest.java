@@ -178,6 +178,8 @@ public final class UserManagerTest {
                 UserHandle.of(userInfo.id));
         assertThat(userContext.getSystemService(
                 UserManager.class).isMediaSharedWithParent()).isTrue();
+        assertThat(Settings.Secure.getInt(userContext.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, 0)).isEqualTo(1);
 
         List<UserInfo> list = mUserManager.getUsers();
         List<UserInfo> cloneUsers = list.stream().filter(
