@@ -198,46 +198,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNoSuppressHeadsUp_FSI_occludedKeygaurd() {
-        when(mNotifPipelineFlags.fullScreenIntentRequiresKeyguard()).thenReturn(false);
-        Notification n = new Notification.Builder(getContext(), "a")
-                .setFullScreenIntent(mock(PendingIntent.class), true)
-                .build();
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setPkg("a")
-                .setOpPkg("a")
-                .setTag("a")
-                .setNotification(n)
-                .build();
-
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mKeyguardStateController.isOccluded()).thenReturn(true);
-        when(mCentralSurfaces.isOccluded()).thenReturn(true);
-        assertFalse(mInterruptSuppressor.suppressAwakeHeadsUp(entry));
-    }
-
-    @Test
-    public void testSuppressHeadsUp_FSI_nonOccludedKeygaurd() {
-        when(mNotifPipelineFlags.fullScreenIntentRequiresKeyguard()).thenReturn(false);
-        Notification n = new Notification.Builder(getContext(), "a")
-                .setFullScreenIntent(mock(PendingIntent.class), true)
-                .build();
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setPkg("a")
-                .setOpPkg("a")
-                .setTag("a")
-                .setNotification(n)
-                .build();
-
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
-        when(mCentralSurfaces.isOccluded()).thenReturn(false);
-        assertTrue(mInterruptSuppressor.suppressAwakeHeadsUp(entry));
-    }
-
-    @Test
-    public void testNoSuppressHeadsUp_FSI_nonOccludedKeygaurd_withNewFlag() {
-        when(mNotifPipelineFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
+    public void testNoSuppressHeadsUp_FSI_nonOccludedKeyguard() {
         Notification n = new Notification.Builder(getContext(), "a")
                 .setFullScreenIntent(mock(PendingIntent.class), true)
                 .build();

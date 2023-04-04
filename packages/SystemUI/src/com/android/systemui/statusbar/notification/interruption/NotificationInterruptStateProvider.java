@@ -98,10 +98,6 @@ public interface NotificationInterruptStateProvider {
          */
         NO_FSI_NO_HUN_OR_KEYGUARD(false),
         /**
-         * No conditions blocking FSI launch.
-         */
-        FSI_EXPECTED_NOT_TO_HUN(true),
-        /**
          * The notification is coming from a suspended packages, so FSI is suppressed.
          */
         NO_FSI_SUSPENDED(false);

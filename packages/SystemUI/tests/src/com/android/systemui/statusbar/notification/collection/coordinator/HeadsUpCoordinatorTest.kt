@@ -258,7 +258,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testOnEntryAdded_shouldFullScreen() {
-        setShouldFullScreen(entry, FullScreenIntentDecision.FSI_EXPECTED_NOT_TO_HUN)
+        setShouldFullScreen(entry, FullScreenIntentDecision.FSI_KEYGUARD_SHOWING)
         collectionListener.onEntryAdded(entry)
         verify(launchFullScreenIntentProvider).launchFullScreenIntent(entry)
     }
@@ -1046,7 +1046,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         coordinator.addForFSIReconsideration(entry, systemClock.currentTimeMillis() - 10000)
 
         // and it is updated to full screen later
-        setShouldFullScreen(entry, FullScreenIntentDecision.FSI_EXPECTED_NOT_TO_HUN)
+        setShouldFullScreen(entry, FullScreenIntentDecision.FSI_KEYGUARD_SHOWING)
         collectionListener.onRankingApplied()
 
         // THEN it should still not full screen because it's too old

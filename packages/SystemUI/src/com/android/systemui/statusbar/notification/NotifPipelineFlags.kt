@@ -31,9 +31,6 @@ class NotifPipelineFlags @Inject constructor(
     fun isDevLoggingEnabled(): Boolean =
         featureFlags.isEnabled(Flags.NOTIFICATION_PIPELINE_DEVELOPER_LOGGING)
 
-    fun fullScreenIntentRequiresKeyguard(): Boolean =
-        featureFlags.isEnabled(Flags.FSI_REQUIRES_KEYGUARD)
-
     fun fsiOnDNDUpdate(): Boolean = featureFlags.isEnabled(Flags.FSI_ON_DND_UPDATE)
 
     fun forceDemoteFsi(): Boolean =

@@ -58,9 +58,6 @@ object Flags {
             "notification_drag_to_contents"
         )
 
-    // TODO(b/254512517): Tracking Bug
-    val FSI_REQUIRES_KEYGUARD = releasedFlag(110, "fsi_requires_keyguard")
-
     // TODO(b/259130119): Tracking Bug
     val FSI_ON_DND_UPDATE = releasedFlag(259130119, "fsi_on_dnd_update")
 
