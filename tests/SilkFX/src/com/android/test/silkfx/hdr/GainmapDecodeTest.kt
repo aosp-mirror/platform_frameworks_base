@@ -38,7 +38,7 @@ class GainmapDecodeTest(context: Context, attrs: AttributeSet?) : LinearLayout(c
 
     private fun decode(mode: DecodeMode) {
         val source = ImageDecoder.createSource(resources.assets,
-            "gainmaps/cave.jpg")
+                "gainmaps/${context.assets.list("gainmaps")!![0]}")
 
         val sourceInfo = findViewById<TextView>(R.id.source_info)!!
 
