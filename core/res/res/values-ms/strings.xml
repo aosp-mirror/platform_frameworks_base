@@ -1685,7 +1685,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengawal skrin"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ciri ini boleh membaca semua kandungan pada skrin dan memaparkan kandungan di atas apl lain."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Lihat dan laksanakan tindakan"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ciri ini boleh menjejak interaksi anda dengan apl atau penderia perkakasan dan berinteraksi dengan apl bagi pihak anda."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ciri ini boleh menjejaki interaksi anda dengan apl atau penderia perkakasan dan berinteraksi dengan apl bagi pihak anda."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Benarkan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketik ciri untuk mula menggunakan ciri itu:"</string>
@@ -2002,7 +2002,7 @@
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Kemas kini <xliff:g id="TYPE_0">%1$s</xliff:g> dan <xliff:g id="TYPE_1">%2$s</xliff:g> dalam "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Kemas kini item ini dalam "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> dan <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Simpan"</string>
-    <string name="autofill_save_no" msgid="9212826374207023544">"Tidak, terima kasih"</string>
+    <string name="autofill_save_no" msgid="9212826374207023544">"Tidak perlu"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Bukan sekarang"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"Jangan"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Kemas kini"</string>
