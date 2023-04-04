@@ -32,17 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Змінити розмір"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Сховати"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Показати"</string>
-    <!-- no translation found for dock_forced_resizable (7429086980048964687) -->
-    <skip />
-    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (2733543750291266047) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"Додаток може не працювати в режимі розділення екрана"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Додаток не підтримує розділення екрана"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Цей додаток можна відкрити лише в одному вікні."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Додаток може не працювати на додатковому екрані."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Додаток не підтримує запуск на додаткових екранах."</string>
-    <!-- no translation found for accessibility_divider (6407584574218956849) -->
-    <skip />
-    <!-- no translation found for divider_title (1963391955593749442) -->
-    <skip />
+    <string name="accessibility_divider" msgid="6407584574218956849">"Розділювач екрана"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Розділювач екрана"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Ліве вікно на весь екран"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Ліве вікно на 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Ліве вікно на 50%"</string>
@@ -89,8 +85,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Проблему не вирішено?\nНатисніть, щоб скасувати зміни"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Немає проблем із камерою? Торкніться, щоб закрити."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Більше простору та можливостей"</string>
-    <!-- no translation found for letterbox_education_split_screen_text (449233070804658627) -->
-    <skip />
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Щоб перейти в режим розділення екрана, перетягніть сюди інший додаток"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Щоб перемістити додаток, двічі торкніться області поза ним"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ОK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Розгорніть, щоб дізнатися більше."</string>
@@ -99,8 +94,7 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Скасувати"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Перезапустити"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Більше не показувати"</string>
-    <!-- no translation found for letterbox_reachability_reposition_text (4507890186297500893) -->
-    <skip />
+    <string name="letterbox_reachability_reposition_text" msgid="4507890186297500893">"Двічі торкніться, щоб перемістити цей додаток"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Збільшити"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Згорнути"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Закрити"</string>
@@ -116,4 +110,6 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Знімок екрана"</string>
     <string name="close_text" msgid="4986518933445178928">"Закрити"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Закрити меню"</string>
+    <!-- no translation found for expand_menu_text (3847736164494181168) -->
+    <skip />
 </resources>
