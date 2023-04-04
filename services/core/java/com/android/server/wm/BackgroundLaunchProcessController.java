@@ -254,11 +254,12 @@ class BackgroundLaunchProcessController {
      *
      * If {@code entity} is already added, this method will update its {@code originatingToken}.
      */
-    void addOrUpdateAllowBackgroundStartPrivileges(
-            Binder entity, BackgroundStartPrivileges backgroundStartPrivileges) {
+    void addOrUpdateAllowBackgroundStartPrivileges(@NonNull Binder entity,
+            @NonNull BackgroundStartPrivileges backgroundStartPrivileges) {
         requireNonNull(entity, "entity");
         requireNonNull(backgroundStartPrivileges, "backgroundStartPrivileges");
-        checkArgument(backgroundStartPrivileges.allowsAny());
+        checkArgument(backgroundStartPrivileges.allowsAny(),
+                "backgroundStartPrivileges does not allow anything");
         synchronized (this) {
             if (mBackgroundStartPrivileges == null) {
                 mBackgroundStartPrivileges = new ArrayMap<>();
@@ -271,7 +272,7 @@ class BackgroundLaunchProcessController {
      * Removes token {@code entity} that allowed background activity starts added via {@link
      * #addOrUpdateAllowBackgroundStartPrivileges(Binder, BackgroundStartPrivileges)}.
      */
-    void removeAllowBackgroundStartPrivileges(Binder entity) {
+    void removeAllowBackgroundStartPrivileges(@NonNull Binder entity) {
         requireNonNull(entity, "entity");
         synchronized (this) {
             if (mBackgroundStartPrivileges != null) {
