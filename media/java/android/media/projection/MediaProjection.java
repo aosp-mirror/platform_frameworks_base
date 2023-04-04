@@ -164,12 +164,21 @@ public final class MediaProjection {
      * @param handler  The {@link android.os.Handler} on which the callback should be invoked, or
      *                 null if the callback should be invoked on the calling thread's main
      *                 {@link android.os.Looper}.
-     * @throws IllegalStateException If the target SDK is
-     *                               {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U} and
-     *                               up and no {@link Callback}
-     *                               is registered. If the target SDK is less than
+     * @throws IllegalStateException In the following scenarios, if the target SDK is {@link
+     *                               android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U} and up:
+     *                               <ol>
+     *                                 <li>If no {@link Callback} is registered.</li>
+     *                                 <li>If {@link MediaProjectionManager#getMediaProjection}
+     *                                 was invoked more than once to get this
+     *                                 {@code MediaProjection} instance.
+     *                                 <li>If this instance has already taken a recording through
+     *                                 {@code #createVirtualDisplay}.
+     *                               </ol>
+     *                               However, if the target SDK is less than
      *                               {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U}, no
-     *                               exception is thrown.
+     *                               exception is thrown. In case 1, recording begins even without
+     *                               the callback. In case 2 & 3, recording doesn't begin
+     *                               until the user re-grants consent in the dialog.
      * @throws SecurityException If attempting to create a new virtual display associated with this
      *                           MediaProjection instance after it has been stopped by invoking
      *                           {@link #stop()}.
@@ -216,8 +225,13 @@ public final class MediaProjection {
         // Pass in the current session details, so they are guaranteed to only be set in
         // WindowManagerService AFTER a VirtualDisplay is constructed (assuming there are no
         // errors during set-up).
+        // Do not introduce a separate aidl call here to prevent a race
+        // condition between setting up the VirtualDisplay and checking token validity.
         virtualDisplayConfig.setWindowManagerMirroringEnabled(true);
         // Do not declare a display id to mirror; default to the default display.
+        // DisplayManagerService will ask MediaProjectionManagerService to check if the app
+        // is re-using consent. Always return the projection instance to keep this call
+        // non-blocking; no content is sent to the app until the user re-grants consent.
         final VirtualDisplay virtualDisplay = mDisplayManager.createVirtualDisplay(this,
                 virtualDisplayConfig.build(), callback, handler);
         if (virtualDisplay == null) {
@@ -339,6 +353,7 @@ public final class MediaProjection {
     private final class MediaProjectionCallback extends IMediaProjectionCallback.Stub {
         @Override
         public void onStop() {
+            Slog.v(TAG, "Dispatch stop to " + mCallbacks.size() + " callbacks.");
             for (CallbackRecord cbr : mCallbacks.values()) {
                 cbr.onStop();
             }
