@@ -122,16 +122,6 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         addWindowLayoutInfoListener(activity, extConsumer);
     }
 
-    @Override
-    public void addWindowLayoutInfoListener(@NonNull @UiContext Context context,
-            @NonNull java.util.function.Consumer<WindowLayoutInfo> consumer) {
-        final Consumer<WindowLayoutInfo> extConsumer = consumer::accept;
-        synchronized (mLock) {
-            mJavaToExtConsumers.put(consumer, extConsumer);
-        }
-        addWindowLayoutInfoListener(context, extConsumer);
-    }
-
     /**
      * Similar to {@link #addWindowLayoutInfoListener(Activity, java.util.function.Consumer)}, but
      * takes a UI Context as a parameter.
