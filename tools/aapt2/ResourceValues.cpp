@@ -22,12 +22,12 @@
 #include <set>
 #include <sstream>
 
-#include "android-base/stringprintf.h"
-#include "androidfw/ResourceTypes.h"
-
 #include "Resource.h"
 #include "ResourceUtils.h"
 #include "ValueVisitor.h"
+#include "android-base/stringprintf.h"
+#include "androidfw/ResourceTypes.h"
+#include "io/StringStream.h"
 #include "util/Util.h"
 
 using ::aapt::text::Printer;
@@ -485,6 +485,15 @@ void BinaryPrimitive::PrettyPrint(Printer* printer) const {
       printer->Print(StringPrintf("(unknown 0x%02x) 0x%08x", value.dataType, value.data));
       break;
   }
+}
+
+std::string BinaryPrimitive::toPrettyString() const {
+  std::string str;
+  io::StringOutputStream out(&str);
+  text::Printer printer(&out);
+  this->PrettyPrint(&printer);
+  out.Flush();
+  return str;
 }
 
 Attribute::Attribute(uint32_t t)
