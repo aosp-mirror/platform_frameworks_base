@@ -37,6 +37,7 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -272,6 +273,9 @@ final class HandwritingModeController {
                     "Handwriting surface should not be already intercepting.");
         }
         mHandwritingSurface.startIntercepting(imePid, imeUid);
+
+        // Unset the pointer icon for the stylus in case the app had set it.
+        InputManagerGlobal.getInstance().setPointerIconType(PointerIcon.TYPE_NOT_SPECIFIED);
 
         return new HandwritingSession(mCurrentRequestId, mHandwritingSurface.getInputChannel(),
                 mHandwritingBuffer);
