@@ -16,7 +16,10 @@
 
 package com.android.wm.shell.back;
 
+import android.annotation.FloatRange;
 import android.os.SystemProperties;
+import android.util.MathUtils;
+import android.view.MotionEvent;
 import android.view.RemoteAnimationTarget;
 import android.window.BackEvent;
 import android.window.BackMotionEvent;
@@ -99,26 +102,40 @@ class TouchTracker {
     }
 
     BackMotionEvent createProgressEvent() {
-        float progressThreshold = PROGRESS_THRESHOLD >= 0
-                ? PROGRESS_THRESHOLD : mProgressThreshold;
-        progressThreshold = progressThreshold == 0 ? 1 : progressThreshold;
         float progress = 0;
         // Progress is always 0 when back is cancelled and not restarted.
         if (!mCancelled) {
-            // If back is committed, progress is the distance between the last and first touch
-            // point, divided by the max drag distance. Otherwise, it's the distance between
-            // the last touch point and the starting threshold, divided by max drag distance.
-            // The starting threshold is initially the first touch location, and updated to
-            // the location everytime back is restarted after being cancelled.
-            float startX = mTriggerBack ? mInitTouchX : mStartThresholdX;
-            float deltaX = Math.max(
-                    mSwipeEdge == BackEvent.EDGE_LEFT
-                            ? mLatestTouchX - startX
-                            : startX - mLatestTouchX,
-                    0);
-            progress = Math.min(Math.max(deltaX / progressThreshold, 0), 1);
+            progress = getProgress(mLatestTouchX);
         }
         return createProgressEvent(progress);
+    }
+
+    /**
+     * Progress value computed from the touch position.
+     *
+     * @param touchX the X touch position of the {@link MotionEvent}.
+     * @return progress value
+     */
+    @FloatRange(from = 0.0, to = 1.0)
+    float getProgress(float touchX) {
+        // If back is committed, progress is the distance between the last and first touch
+        // point, divided by the max drag distance. Otherwise, it's the distance between
+        // the last touch point and the starting threshold, divided by max drag distance.
+        // The starting threshold is initially the first touch location, and updated to
+        // the location everytime back is restarted after being cancelled.
+        float startX = mTriggerBack ? mInitTouchX : mStartThresholdX;
+        float deltaX = Math.abs(startX - touchX);
+        float maxX = getMaxX();
+        maxX = maxX == 0 ? 1 : maxX;
+        return MathUtils.constrain(deltaX / maxX, 0, 1);
+    }
+
+    /**
+     * Maximum X value (in pixels).
+     * Progress is considered to be completed (1f) when this limit is exceeded.
+     */
+    float getMaxX() {
+        return PROGRESS_THRESHOLD >= 0 ? PROGRESS_THRESHOLD : mProgressThreshold;
     }
 
     BackMotionEvent createProgressEvent(float progress) {
