@@ -800,10 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"允許擁有者開始查看應用程式的功能資料。"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"以高取樣率存取感應器資料"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"允許應用程式以大於 200 Hz 的頻率對感應器資料進行取樣"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"更新應用程式，無需使用者操作"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"允許擁有者更新先前安裝的應用程式，無需使用者操作"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"控制螢幕鎖定密碼和 PIN 所允許的長度和字元。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"監控螢幕解鎖嘗試次數"</string>
@@ -1701,7 +1699,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"不要開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"關閉"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"允許 <xliff:g id="SERVICE">%1$s</xliff:g> 完全控制您的裝置？"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要授予「<xliff:g id="SERVICE">%1$s</xliff:g>」裝置的完整控制權？"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"對於為您提供無障礙功能的應用程式，您可授予完整控制權，但大部分應用程式都不應獲授予此權限。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看和控制螢幕"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"這項功能可以讀出螢幕上的所有內容，並透過其他應用程式顯示內容。"</string>

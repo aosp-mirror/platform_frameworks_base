@@ -801,10 +801,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Consente all\'app che ha questa autorizzazione di iniziare a visualizzare le informazioni relative alle funzionalità di un\'app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"Accesso ai dati dei sensori a una frequenza di campionamento elevata"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Consente all\'app di campionare i dati dei sensori a una frequenza maggiore di 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"Aggiornamento dell\'app senza l\'intervento dell\'utente"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Consente al titolare di questa autorizzazione di aggiornare l\'app installata in precedenza senza l\'intervento dell\'utente"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Impostare regole per le password"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Controlla la lunghezza e i caratteri ammessi nelle password e nei PIN del blocco schermo."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitorare tentativi di sblocco dello schermo"</string>
