@@ -16,17 +16,15 @@
 
 package com.android.keyguard;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.ClockController;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -45,26 +43,21 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 public class KeyguardStatusViewControllerTest extends SysuiTestCase {
 
-    @Mock
-    private KeyguardStatusView mKeyguardStatusView;
-    @Mock
-    private KeyguardSliceViewController mKeyguardSliceViewController;
-    @Mock
-    private KeyguardClockSwitchController mKeyguardClockSwitchController;
-    @Mock
-    private KeyguardStateController mKeyguardStateController;
-    @Mock
-    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock
-    ConfigurationController mConfigurationController;
-    @Mock
-    DozeParameters mDozeParameters;
-    @Mock
-    ScreenOffAnimationController mScreenOffAnimationController;
+    @Mock private KeyguardStatusView mKeyguardStatusView;
+    @Mock private KeyguardSliceViewController mKeyguardSliceViewController;
+    @Mock private KeyguardClockSwitchController mKeyguardClockSwitchController;
+    @Mock private KeyguardStateController mKeyguardStateController;
+    @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock private ConfigurationController mConfigurationController;
+    @Mock private DozeParameters mDozeParameters;
+    @Mock private ScreenOffAnimationController mScreenOffAnimationController;
+    @Mock private KeyguardLogger mKeyguardLogger;
+    @Mock private KeyguardStatusViewController mControllerMock;
+    @Mock private FeatureFlags mFeatureFlags;
+    @Mock private InteractionJankMonitor mInteractionJankMonitor;
+
     @Captor
     private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallbackCaptor;
-    @Mock
-    KeyguardLogger mKeyguardLogger;
 
     private KeyguardStatusViewController mController;
 
@@ -81,7 +74,9 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
                 mConfigurationController,
                 mDozeParameters,
                 mScreenOffAnimationController,
-                mKeyguardLogger);
+                mKeyguardLogger,
+                mFeatureFlags,
+                mInteractionJankMonitor);
     }
 
     @Test
@@ -115,13 +110,5 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
 
         configurationListenerArgumentCaptor.getValue().onLocaleListChanged();
         verify(mKeyguardClockSwitchController).onLocaleListChanged();
-    }
-
-    @Test
-    public void getClock_forwardsToClockSwitch() {
-        ClockController mockClock = mock(ClockController.class);
-        when(mKeyguardClockSwitchController.getClock()).thenReturn(mockClock);
-
-        assertEquals(mockClock, mController.getClockController());
     }
 }
