@@ -105,6 +105,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManagerInternal;
 import android.system.Os;
+import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -2328,9 +2329,15 @@ public final class ProcessList {
 
             if (!regularZygote) {
                 // webview and app zygote don't have the permission to create the nodes
-                if (Process.createProcessGroup(uid, startResult.pid) < 0) {
-                    throw new AssertionError("Unable to create process group for " + app.processName
-                            + " (" + startResult.pid + ")");
+                final int res = Process.createProcessGroup(uid, startResult.pid);
+                if (res < 0) {
+                    if (res == -OsConstants.ESRCH) {
+                        Slog.e(ActivityManagerService.TAG, "Unable to create process group for "
+                            + app.processName + " (" + startResult.pid + ")");
+                    } else {
+                        throw new AssertionError("Unable to create process group for "
+                            + app.processName + " (" + startResult.pid + ")");
+                    }
                 }
             }
 
