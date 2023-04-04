@@ -458,6 +458,10 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"адключыць"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Гук і вібрацыя"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Налады"</string>
+    <!-- no translation found for csd_lowered_title (1786173629015030856) -->
+    <skip />
+    <!-- no translation found for csd_system_lowered_text (2001603282316829500) -->
+    <skip />
     <string name="screen_pinning_title" msgid="9058007390337841305">"Праграма замацавана"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Будзе паказвацца, пакуль не адмацуеце. Каб адмацаваць, краніце і ўтрымлівайце кнопкі \"Назад\" і \"Агляд\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Будзе паказвацца, пакуль не адмацуеце. Каб адмацаваць, націсніце і ўтрымлівайце кнопкі \"Назад\" і \"Галоўны экран\"."</string>
@@ -848,8 +852,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Сярэдні"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Дробны"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Вялікі"</string>
-    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
-    <skip />
+    <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"Поўнаэкранны рэжым"</string>
     <string name="accessibility_magnification_done" msgid="263349129937348512">"Гатова"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Змяніць"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Налады акна лупы"</string>
@@ -885,6 +888,12 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Усе элементы кіравання выдалены"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Змяненні не захаваны"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Паказаць іншыя праграмы"</string>
+    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
+    <skip />
+    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
+    <skip />
+    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Не ўдалося загрузіць элементы кіравання. Праверце, ці не змяніліся налады праграмы \"<xliff:g id="APP">%s</xliff:g>\"."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Сумяшчальныя элементы кіравання недаступныя"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Іншае"</string>
