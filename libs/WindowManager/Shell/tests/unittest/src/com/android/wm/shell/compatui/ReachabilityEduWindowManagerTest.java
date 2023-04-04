@@ -80,9 +80,8 @@ public class ReachabilityEduWindowManagerTest extends ShellTestCase {
     }
 
     private ReachabilityEduWindowManager createReachabilityEduWindowManager(TaskInfo taskInfo) {
-        return new ReachabilityEduWindowManager(mContext, taskInfo,
-                mSyncTransactionQueue, mCallback, mTaskListener, mDisplayLayout,
-                mCompatUIConfiguration, mExecutor);
+        return new ReachabilityEduWindowManager(mContext, taskInfo, mSyncTransactionQueue,
+                mTaskListener, mDisplayLayout, mCompatUIConfiguration, mExecutor);
     }
 
     private static TaskInfo createTaskInfo(int userId, boolean isLetterboxDoubleTapEnabled) {

@@ -16,14 +16,16 @@
 
 package com.android.wm.shell.compatui;
 
+import static android.app.TaskInfo.PROPERTY_VALUE_UNSET;
+
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.TaskInfo;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.FrameLayout;
 
 import com.android.wm.shell.R;
@@ -40,27 +42,23 @@ public class ReachabilityEduLayout extends FrameLayout {
 
     private static final float ALPHA_FULL_OPAQUE = 1f;
 
-    private static final long VISIBILITY_SHOW_ANIMATION_DURATION_MS = 167;
-
-    private static final long VISIBILITY_SHOW_ANIMATION_DELAY_MS = 250;
-
-    private static final long VISIBILITY_SHOW_DOUBLE_TAP_ANIMATION_DELAY_MS = 80;
+    private static final long VISIBILITY_ANIMATION_DURATION_MS = 400;
 
     private static final long MARGINS_ANIMATION_DURATION_MS = 250;
 
+    private static final String ALPHA_PROPERTY_NAME = "alpha";
+
     private ReachabilityEduWindowManager mWindowManager;
 
-    private ReachabilityEduHandLayout mMoveLeftButton;
-    private ReachabilityEduHandLayout mMoveRightButton;
-    private ReachabilityEduHandLayout mMoveUpButton;
-    private ReachabilityEduHandLayout mMoveDownButton;
+    private View mMoveLeftButton;
+    private View mMoveRightButton;
+    private View mMoveUpButton;
+    private View mMoveDownButton;
 
-    private int mLastLeftMargin = TaskInfo.PROPERTY_VALUE_UNSET;
-    private int mLastRightMargin = TaskInfo.PROPERTY_VALUE_UNSET;
-    private int mLastTopMargin = TaskInfo.PROPERTY_VALUE_UNSET;
-    private int mLastBottomMargin = TaskInfo.PROPERTY_VALUE_UNSET;
-
-    private boolean mIsLayoutActive;
+    private int mLastLeftMargin = PROPERTY_VALUE_UNSET;
+    private int mLastRightMargin = PROPERTY_VALUE_UNSET;
+    private int mLastTopMargin = PROPERTY_VALUE_UNSET;
+    private int mLastBottomMargin = PROPERTY_VALUE_UNSET;
 
     public ReachabilityEduLayout(Context context) {
         this(context, null);
@@ -83,36 +81,29 @@ public class ReachabilityEduLayout extends FrameLayout {
         mWindowManager = windowManager;
     }
 
-    void handleVisibility(boolean isActivityLetterboxed, int letterboxVerticalPosition,
+    void handleVisibility(boolean horizontalEnabled, boolean verticalEnabled,
+            int letterboxVerticalPosition,
             int letterboxHorizontalPosition, int availableWidth, int availableHeight,
-            boolean isDoubleTap) {
-        // If the app is not letterboxed we hide all the buttons.
-        if (!mIsLayoutActive || !isActivityLetterboxed || (
-                letterboxHorizontalPosition == TaskInfo.PROPERTY_VALUE_UNSET
-                        && letterboxVerticalPosition == TaskInfo.PROPERTY_VALUE_UNSET)) {
-            hideAllImmediately();
-        } else if (letterboxHorizontalPosition != TaskInfo.PROPERTY_VALUE_UNSET) {
-            handleLetterboxHorizontalPosition(availableWidth, letterboxHorizontalPosition,
-                    isDoubleTap);
-        } else {
-            handleLetterboxVerticalPosition(availableHeight, letterboxVerticalPosition,
-                    isDoubleTap);
+            CompatUIConfiguration compatUIConfiguration, TaskInfo taskInfo) {
+        hideAllImmediately();
+        if (horizontalEnabled && letterboxHorizontalPosition != PROPERTY_VALUE_UNSET) {
+            handleLetterboxHorizontalPosition(availableWidth, letterboxHorizontalPosition);
+            compatUIConfiguration.setUserHasSeenHorizontalReachabilityEducation(taskInfo);
+        } else if (verticalEnabled && letterboxVerticalPosition != PROPERTY_VALUE_UNSET) {
+            handleLetterboxVerticalPosition(availableHeight, letterboxVerticalPosition);
+            compatUIConfiguration.setUserHasSeenVerticalReachabilityEducation(taskInfo);
         }
     }
 
     void hideAllImmediately() {
-        mMoveLeftButton.hide();
-        mMoveRightButton.hide();
-        mMoveUpButton.hide();
-        mMoveDownButton.hide();
-        mLastLeftMargin = TaskInfo.PROPERTY_VALUE_UNSET;
-        mLastRightMargin = TaskInfo.PROPERTY_VALUE_UNSET;
-        mLastTopMargin = TaskInfo.PROPERTY_VALUE_UNSET;
-        mLastBottomMargin = TaskInfo.PROPERTY_VALUE_UNSET;
-    }
-
-    void setIsLayoutActive(boolean isLayoutActive) {
-        this.mIsLayoutActive = isLayoutActive;
+        hideImmediately(mMoveLeftButton);
+        hideImmediately(mMoveRightButton);
+        hideImmediately(mMoveUpButton);
+        hideImmediately(mMoveDownButton);
+        mLastLeftMargin = PROPERTY_VALUE_UNSET;
+        mLastRightMargin = PROPERTY_VALUE_UNSET;
+        mLastTopMargin = PROPERTY_VALUE_UNSET;
+        mLastBottomMargin = PROPERTY_VALUE_UNSET;
     }
 
     @Override
@@ -128,6 +119,11 @@ public class ReachabilityEduLayout extends FrameLayout {
         mMoveDownButton.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
     }
 
+    private void hideImmediately(View view) {
+        view.setAlpha(0);
+        view.setVisibility(View.INVISIBLE);
+    }
+
     private Animator marginAnimator(View view, Function<LayoutParams, Integer> marginSupplier,
             BiConsumer<LayoutParams, Integer> marginConsumer, int from, int to) {
         final LayoutParams layoutParams = ((LayoutParams) view.getLayoutParams());
@@ -141,11 +137,11 @@ public class ReachabilityEduLayout extends FrameLayout {
     }
 
     private void handleLetterboxHorizontalPosition(int availableWidth,
-            int letterboxHorizontalPosition, boolean isDoubleTap) {
-        mMoveUpButton.hide();
-        mMoveDownButton.hide();
-        mLastTopMargin = TaskInfo.PROPERTY_VALUE_UNSET;
-        mLastBottomMargin = TaskInfo.PROPERTY_VALUE_UNSET;
+            int letterboxHorizontalPosition) {
+        hideItem(mMoveUpButton);
+        hideItem(mMoveDownButton);
+        mLastTopMargin = PROPERTY_VALUE_UNSET;
+        mLastBottomMargin = PROPERTY_VALUE_UNSET;
         // We calculate the available space on the left and right
         final int horizontalGap = availableWidth / 2;
         final int leftAvailableSpace = letterboxHorizontalPosition * horizontalGap;
@@ -153,7 +149,7 @@ public class ReachabilityEduLayout extends FrameLayout {
         // We show the button if we have enough space
         if (leftAvailableSpace >= mMoveLeftButton.getMeasuredWidth()) {
             int newLeftMargin = (horizontalGap - mMoveLeftButton.getMeasuredWidth()) / 2;
-            if (mLastLeftMargin == TaskInfo.PROPERTY_VALUE_UNSET) {
+            if (mLastLeftMargin == PROPERTY_VALUE_UNSET) {
                 mLastLeftMargin = newLeftMargin;
             }
             if (mLastLeftMargin != newLeftMargin) {
@@ -165,14 +161,14 @@ public class ReachabilityEduLayout extends FrameLayout {
                 leftParams.leftMargin = mLastLeftMargin;
                 mMoveLeftButton.setLayoutParams(leftParams);
             }
-            showItem(mMoveLeftButton, isDoubleTap);
+            showItem(mMoveLeftButton);
         } else {
-            mMoveLeftButton.hide();
-            mLastLeftMargin = TaskInfo.PROPERTY_VALUE_UNSET;
+            hideItem(mMoveLeftButton);
+            mLastLeftMargin = PROPERTY_VALUE_UNSET;
         }
         if (rightAvailableSpace >= mMoveRightButton.getMeasuredWidth()) {
             int newRightMargin = (horizontalGap - mMoveRightButton.getMeasuredWidth()) / 2;
-            if (mLastRightMargin == TaskInfo.PROPERTY_VALUE_UNSET) {
+            if (mLastRightMargin == PROPERTY_VALUE_UNSET) {
                 mLastRightMargin = newRightMargin;
             }
             if (mLastRightMargin != newRightMargin) {
@@ -185,26 +181,26 @@ public class ReachabilityEduLayout extends FrameLayout {
                 rightParams.rightMargin = mLastRightMargin;
                 mMoveRightButton.setLayoutParams(rightParams);
             }
-            showItem(mMoveRightButton, isDoubleTap);
+            showItem(mMoveRightButton);
         } else {
-            mMoveRightButton.hide();
-            mLastRightMargin = TaskInfo.PROPERTY_VALUE_UNSET;
+            hideItem(mMoveRightButton);
+            mLastRightMargin = PROPERTY_VALUE_UNSET;
         }
     }
 
     private void handleLetterboxVerticalPosition(int availableHeight,
-            int letterboxVerticalPosition, boolean isDoubleTap) {
-        mMoveLeftButton.hide();
-        mMoveRightButton.hide();
-        mLastLeftMargin = TaskInfo.PROPERTY_VALUE_UNSET;
-        mLastRightMargin = TaskInfo.PROPERTY_VALUE_UNSET;
+            int letterboxVerticalPosition) {
+        hideItem(mMoveLeftButton);
+        hideItem(mMoveRightButton);
+        mLastLeftMargin = PROPERTY_VALUE_UNSET;
+        mLastRightMargin = PROPERTY_VALUE_UNSET;
         // We calculate the available space on the left and right
         final int verticalGap = availableHeight / 2;
         final int topAvailableSpace = letterboxVerticalPosition * verticalGap;
         final int bottomAvailableSpace = availableHeight - topAvailableSpace;
         if (topAvailableSpace >= mMoveUpButton.getMeasuredHeight()) {
             int newTopMargin = (verticalGap - mMoveUpButton.getMeasuredHeight()) / 2;
-            if (mLastTopMargin == TaskInfo.PROPERTY_VALUE_UNSET) {
+            if (mLastTopMargin == PROPERTY_VALUE_UNSET) {
                 mLastTopMargin = newTopMargin;
             }
             if (mLastTopMargin != newTopMargin) {
@@ -216,14 +212,14 @@ public class ReachabilityEduLayout extends FrameLayout {
                 topParams.topMargin = mLastTopMargin;
                 mMoveUpButton.setLayoutParams(topParams);
             }
-            showItem(mMoveUpButton, isDoubleTap);
+            showItem(mMoveUpButton);
         } else {
-            mMoveUpButton.hide();
-            mLastTopMargin = TaskInfo.PROPERTY_VALUE_UNSET;
+            hideItem(mMoveUpButton);
+            mLastTopMargin = PROPERTY_VALUE_UNSET;
         }
         if (bottomAvailableSpace >= mMoveDownButton.getMeasuredHeight()) {
             int newBottomMargin = (verticalGap - mMoveDownButton.getMeasuredHeight()) / 2;
-            if (mLastBottomMargin == TaskInfo.PROPERTY_VALUE_UNSET) {
+            if (mLastBottomMargin == PROPERTY_VALUE_UNSET) {
                 mLastBottomMargin = newBottomMargin;
             }
             if (mLastBottomMargin != newBottomMargin) {
@@ -236,43 +232,38 @@ public class ReachabilityEduLayout extends FrameLayout {
                 bottomParams.bottomMargin = mLastBottomMargin;
                 mMoveDownButton.setLayoutParams(bottomParams);
             }
-            showItem(mMoveDownButton, isDoubleTap);
+            showItem(mMoveDownButton);
         } else {
-            mMoveDownButton.hide();
-            mLastBottomMargin = TaskInfo.PROPERTY_VALUE_UNSET;
+            hideItem(mMoveDownButton);
+            mLastBottomMargin = PROPERTY_VALUE_UNSET;
         }
     }
 
-    private void showItem(ReachabilityEduHandLayout view, boolean fromDoubleTap) {
-        if (view.getVisibility() == View.VISIBLE) {
-            // Already visible we just start animation
-            view.startAnimation();
-            return;
-        }
+    private void showItem(View view) {
         view.setVisibility(View.VISIBLE);
-        final long delay = fromDoubleTap ? VISIBILITY_SHOW_DOUBLE_TAP_ANIMATION_DELAY_MS
-                : VISIBILITY_SHOW_ANIMATION_DELAY_MS;
-        AlphaAnimation alphaAnimation = new AlphaAnimation(ALPHA_FULL_TRANSPARENT,
-                ALPHA_FULL_OPAQUE);
-        alphaAnimation.setDuration(VISIBILITY_SHOW_ANIMATION_DURATION_MS);
-        alphaAnimation.setStartOffset(delay);
-        alphaAnimation.setFillAfter(true);
-        alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
+        ObjectAnimator fadeIn = ObjectAnimator.ofFloat(view, ALPHA_PROPERTY_NAME,
+                ALPHA_FULL_TRANSPARENT, ALPHA_FULL_OPAQUE);
+        fadeIn.setDuration(VISIBILITY_ANIMATION_DURATION_MS);
+        fadeIn.addListener(new AnimatorListenerAdapter() {
             @Override
-            public void onAnimationStart(Animation animation) {
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                // We trigger the hand animation
-                view.setAlpha(ALPHA_FULL_OPAQUE);
-                view.startAnimation();
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
+            public void onAnimationEnd(Animator animation) {
+                view.setVisibility(View.VISIBLE);
             }
         });
-        view.startAnimation(alphaAnimation);
+        fadeIn.start();
     }
+
+    private void hideItem(View view) {
+        ObjectAnimator fadeOut = ObjectAnimator.ofFloat(view, ALPHA_PROPERTY_NAME,
+                ALPHA_FULL_OPAQUE, ALPHA_FULL_TRANSPARENT);
+        fadeOut.setDuration(VISIBILITY_ANIMATION_DURATION_MS);
+        fadeOut.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                view.setVisibility(View.INVISIBLE);
+            }
+        });
+        fadeOut.start();
+    }
+
 }
