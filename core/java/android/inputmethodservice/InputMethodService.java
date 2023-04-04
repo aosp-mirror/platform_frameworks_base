@@ -2563,7 +2563,7 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public void onStylusHandwritingMotionEvent(@NonNull MotionEvent motionEvent) {
         if (mInkWindow != null && mInkWindow.isInkViewVisible()) {
-            mInkWindow.getDecorView().dispatchTouchEvent(motionEvent);
+            mInkWindow.dispatchHandwritingEvent(motionEvent);
         } else {
             if (mPendingEvents == null) {
                 mPendingEvents = new RingBuffer(MotionEvent.class, MAX_EVENTS_BUFFER);
@@ -2576,7 +2576,7 @@ public class InputMethodService extends AbstractInputMethodService {
                             if (mInkWindow == null) {
                                 break;
                             }
-                            mInkWindow.getDecorView().dispatchTouchEvent(event);
+                            mInkWindow.dispatchHandwritingEvent(event);
                         }
                         mPendingEvents.clear();
                     }
