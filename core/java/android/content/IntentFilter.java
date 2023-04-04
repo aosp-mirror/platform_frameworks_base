@@ -531,8 +531,9 @@ public class IntentFilter implements Parcelable {
         mInstantAppVisibility = o.mInstantAppVisibility;
     }
 
-    /** {@inheritDoc} */
-    public String toString() {
+    /** @hide */
+    public String toLongString() {
+        // Not implemented directly as toString() due to potential memory regression
         final StringBuilder sb = new StringBuilder();
         sb.append("IntentFilter {");
         sb.append(" pri=");

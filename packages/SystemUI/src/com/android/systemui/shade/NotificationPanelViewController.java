@@ -18,6 +18,7 @@ package com.android.systemui.shade;
 
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE;
+import static android.view.MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
@@ -310,7 +311,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
      */
 
     public final boolean mAnimateBack;
-    private final boolean mTrackpadGestureBack;
+    private final boolean mTrackpadGestureFeaturesEnabled;
     /**
      * The minimum scale to "squish" the Shade and associated elements down to, for Back gesture
      */
@@ -859,7 +860,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mLayoutInflater = layoutInflater;
         mFeatureFlags = featureFlags;
         mAnimateBack = mFeatureFlags.isEnabled(Flags.WM_SHADE_ANIMATE_BACK_GESTURE);
-        mTrackpadGestureBack = mFeatureFlags.isEnabled(Flags.TRACKPAD_GESTURE_FEATURES);
+        mTrackpadGestureFeaturesEnabled = mFeatureFlags.isEnabled(Flags.TRACKPAD_GESTURE_FEATURES);
         mFalsingCollector = falsingCollector;
         mPowerManager = powerManager;
         mWakeUpCoordinator = coordinator;
@@ -4937,7 +4938,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             }
 
             // On expanding, single mouse click expands the panel instead of dragging.
-            if (isFullyCollapsed() && event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+            if (isFullyCollapsed() && (event.isFromSource(InputDevice.SOURCE_MOUSE)
+                    && !isTrackpadMotionEvent(event))) {
                 if (event.getAction() == MotionEvent.ACTION_UP) {
                     expand(true /* animate */);
                 }
@@ -5092,8 +5094,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
 
         private boolean isTrackpadMotionEvent(MotionEvent ev) {
-            return mTrackpadGestureBack
-                    && ev.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE;
+            return mTrackpadGestureFeaturesEnabled && (
+                    ev.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE
+                            || ev.getClassification() == CLASSIFICATION_TWO_FINGER_SWIPE);
         }
     }
 

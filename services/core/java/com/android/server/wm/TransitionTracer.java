@@ -365,6 +365,24 @@ public class TransitionTracer {
         Trace.endSection();
     }
 
+    /**
+     * Being called while taking a bugreport so that tracing files can be included in the bugreport.
+     *
+     * @param pw Print writer
+     */
+    public void saveForBugreport(@Nullable PrintWriter pw) {
+        if (IS_USER) {
+            LogAndPrintln.e(pw, "Tracing is not supported on user builds.");
+            return;
+        }
+        Trace.beginSection("TransitionTracer#saveForBugreport");
+        synchronized (mEnabledLock) {
+            final File outputFile = new File(TRACE_FILE);
+            writeTraceToFileLocked(pw, outputFile);
+        }
+        Trace.endSection();
+    }
+
     boolean isActiveTracingEnabled() {
         return mActiveTracingEnabled;
     }

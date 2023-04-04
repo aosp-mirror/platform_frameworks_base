@@ -203,11 +203,11 @@ public class BroadcastConstants {
 
     /**
      * For {@link BroadcastQueueModernImpl}: Delay to apply to broadcasts
-     * targeting frozen applications.
+     * targeting cached applications.
      */
-    public long DELAY_FROZEN_MILLIS = DEFAULT_DELAY_FROZEN_MILLIS;
-    private static final String KEY_DELAY_FROZEN_MILLIS = "bcast_delay_frozen_millis";
-    private static final long DEFAULT_DELAY_FROZEN_MILLIS = +120_000;
+    public long DELAY_CACHED_MILLIS = DEFAULT_DELAY_CACHED_MILLIS;
+    private static final String KEY_DELAY_CACHED_MILLIS = "bcast_delay_cached_millis";
+    private static final long DEFAULT_DELAY_CACHED_MILLIS = +120_000;
 
     /**
      * For {@link BroadcastQueueModernImpl}: Delay to apply to urgent
@@ -373,8 +373,8 @@ public class BroadcastConstants {
                     DEFAULT_MAX_PENDING_BROADCASTS);
             DELAY_NORMAL_MILLIS = getDeviceConfigLong(KEY_DELAY_NORMAL_MILLIS,
                     DEFAULT_DELAY_NORMAL_MILLIS);
-            DELAY_FROZEN_MILLIS = getDeviceConfigLong(KEY_DELAY_FROZEN_MILLIS,
-                    DEFAULT_DELAY_FROZEN_MILLIS);
+            DELAY_CACHED_MILLIS = getDeviceConfigLong(KEY_DELAY_CACHED_MILLIS,
+                    DEFAULT_DELAY_CACHED_MILLIS);
             DELAY_URGENT_MILLIS = getDeviceConfigLong(KEY_DELAY_URGENT_MILLIS,
                     DEFAULT_DELAY_URGENT_MILLIS);
             MAX_HISTORY_COMPLETE_SIZE = getDeviceConfigInt(KEY_MAX_HISTORY_COMPLETE_SIZE,
@@ -421,8 +421,8 @@ public class BroadcastConstants {
             pw.print(KEY_MAX_PENDING_BROADCASTS, MAX_PENDING_BROADCASTS).println();
             pw.print(KEY_DELAY_NORMAL_MILLIS,
                     TimeUtils.formatDuration(DELAY_NORMAL_MILLIS)).println();
-            pw.print(KEY_DELAY_FROZEN_MILLIS,
-                    TimeUtils.formatDuration(DELAY_FROZEN_MILLIS)).println();
+            pw.print(KEY_DELAY_CACHED_MILLIS,
+                    TimeUtils.formatDuration(DELAY_CACHED_MILLIS)).println();
             pw.print(KEY_DELAY_URGENT_MILLIS,
                     TimeUtils.formatDuration(DELAY_URGENT_MILLIS)).println();
             pw.print(KEY_MAX_HISTORY_COMPLETE_SIZE, MAX_HISTORY_COMPLETE_SIZE).println();

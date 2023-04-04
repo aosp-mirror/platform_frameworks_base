@@ -434,6 +434,26 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     /**
+     * Override if the PiP should always use a fade-in animation during PiP entry.
+     *
+     * @return true if the mOneShotAnimationType should always be
+     * {@link PipAnimationController#ANIM_TYPE_ALPHA}.
+     */
+    protected boolean shouldAlwaysFadeIn() {
+        return false;
+    }
+
+    /**
+     * Whether the menu should get attached as early as possible when entering PiP.
+     *
+     * @return whether the menu should be attached before
+     * {@link PipBoundsAlgorithm#getEntryDestinationBounds()} is called.
+     */
+    protected boolean shouldAttachMenuEarly() {
+        return false;
+    }
+
+    /**
      * Callback when Launcher starts swipe-pip-to-home operation.
      * @return {@link Rect} for destination bounds.
      */
@@ -727,17 +747,26 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
 
+        if (shouldAlwaysFadeIn()) {
+            mOneShotAnimationType = ANIM_TYPE_ALPHA;
+        }
+
         if (mWaitForFixedRotation) {
             onTaskAppearedWithFixedRotation();
             return;
         }
 
+        if (shouldAttachMenuEarly()) {
+            mPipMenuController.attach(mLeash);
+        }
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
 
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
-            mPipMenuController.attach(mLeash);
+            if (!shouldAttachMenuEarly()) {
+                mPipMenuController.attach(mLeash);
+            }
             final Rect sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
                     info.pictureInPictureParams, currentBounds);
             scheduleAnimateResizePip(currentBounds, destinationBounds, 0 /* startingAngle */,
@@ -852,7 +881,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             @Nullable SurfaceControl.Transaction boundsChangeTransaction) {
         // PiP menu is attached late in the process here to avoid any artifacts on the leash
         // caused by addShellRoot when in gesture navigation mode.
-        mPipMenuController.attach(mLeash);
+        if (!shouldAttachMenuEarly()) {
+            mPipMenuController.attach(mLeash);
+        }
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
         wct.setBounds(mToken, destinationBounds);
@@ -1823,6 +1854,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                         animator::clearContentOverlay);
             }
             PipAnimationController.quietCancel(animator);
+            mPipAnimationController.resetAnimatorState();
         }
     }
 
