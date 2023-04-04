@@ -142,9 +142,6 @@ public class WallpaperManager {
     private static final @NonNull RectF LOCAL_COLOR_BOUNDS =
             new RectF(0, 0, 1, 1);
 
-    /** Temporary feature flag for project b/197814683 */
-    private final boolean mLockscreenLiveWallpaper;
-
     /** {@hide} */
     private static final String PROP_WALLPAPER = "ro.config.wallpaper";
     /** {@hide} */
@@ -306,6 +303,7 @@ public class WallpaperManager {
     private final Context mContext;
     private final boolean mWcgEnabled;
     private final ColorManagementProxy mCmProxy;
+    private Boolean mIsLockscreenLiveWallpaperEnabled = null;
 
     /**
      * Special drawable that draws a wallpaper as fast as possible.  Assumes
@@ -794,8 +792,6 @@ public class WallpaperManager {
         mWcgEnabled = context.getResources().getConfiguration().isScreenWideColorGamut()
                 && context.getResources().getBoolean(R.bool.config_enableWcgMode);
         mCmProxy = new ColorManagementProxy(context);
-        mLockscreenLiveWallpaper = context.getResources()
-                .getBoolean(R.bool.config_independentLockscreenLiveWallpaper);
     }
 
     // no-op constructor called just by DisabledWallpaperManager
@@ -803,7 +799,6 @@ public class WallpaperManager {
         mContext = null;
         mCmProxy = null;
         mWcgEnabled = false;
-        mLockscreenLiveWallpaper = false;
     }
 
     /**
@@ -827,7 +822,19 @@ public class WallpaperManager {
      */
     @TestApi
     public boolean isLockscreenLiveWallpaperEnabled() {
-        return mLockscreenLiveWallpaper;
+        if (sGlobals == null) {
+            mIsLockscreenLiveWallpaperEnabled = SystemProperties.getBoolean(
+                    "persist.wm.debug.lockscreen_live_wallpaper", false);
+        }
+        if (mIsLockscreenLiveWallpaperEnabled == null) {
+            try {
+                mIsLockscreenLiveWallpaperEnabled =
+                        sGlobals.mService.isLockscreenLiveWallpaperEnabled();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return mIsLockscreenLiveWallpaperEnabled;
     }
 
     /**
