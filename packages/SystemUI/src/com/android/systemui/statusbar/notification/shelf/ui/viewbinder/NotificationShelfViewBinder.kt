@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.shelf.view
+package com.android.systemui.statusbar.notification.shelf.ui.viewbinder
 
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import android.view.accessibility.AccessibilityManager
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl
 import com.android.systemui.statusbar.NotificationShelf
@@ -31,20 +34,15 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController
 import com.android.systemui.statusbar.notification.row.ExpandableOutlineViewController
 import com.android.systemui.statusbar.notification.row.ExpandableViewController
+import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.phone.NotificationTapHelper
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
-import dagger.Binds
-import dagger.Module
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
-
-/** Binds a [NotificationShelf] to its backend. */
-interface NotificationShelfViewBinder {
-    fun bind(shelf: NotificationShelf)
-}
 
 /**
  * Controller class for [NotificationShelf]. This implementation serves as a temporary wrapper
@@ -57,8 +55,7 @@ class NotificationShelfViewBinderWrapperControllerImpl
 @Inject
 constructor(
     private val shelf: NotificationShelf,
-    private val viewBinder: NotificationShelfViewBinder,
-    private val keyguardBypassController: KeyguardBypassController,
+    private val viewModel: NotificationShelfViewModel,
     featureFlags: FeatureFlags,
     private val notifTapHelperFactory: NotificationTapHelper.Factory,
     private val a11yManager: AccessibilityManager,
@@ -67,20 +64,19 @@ constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
 ) : NotificationShelfController {
 
-    private var ambientState: AmbientState? = null
-
     override val view: NotificationShelf
         get() = shelf
 
     init {
         shelf.apply {
+            setRefactorFlagEnabled(featureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR))
             useRoundnessSourceTypes(featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES))
             setSensitiveRevealAnimEndabled(featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM))
         }
     }
 
     fun init() {
-        viewBinder.bind(shelf)
+        NotificationShelfViewBinder.bind(viewModel, shelf)
 
         ActivatableNotificationViewController(
                 shelf,
@@ -91,7 +87,6 @@ constructor(
                 falsingCollector,
             )
             .init()
-        shelf.setController(this)
         val onAttachStateListener =
             object : OnAttachStateChangeListener {
                 override fun onViewAttachedToWindow(v: View) {
@@ -117,10 +112,7 @@ constructor(
     override val shelfIcons: NotificationIconContainer
         get() = shelf.shelfIcons
 
-    override fun canModifyColorOfNotifications(): Boolean {
-        return (ambientState?.isShadeExpanded == true &&
-            !(ambientState?.isOnKeyguard == true && keyguardBypassController.bypassEnabled))
-    }
+    override fun canModifyColorOfNotifications(): Boolean = unsupported
 
     override fun setOnActivatedListener(listener: ActivatableNotificationView.OnActivatedListener) {
         shelf.setOnActivatedListener(listener)
@@ -128,25 +120,28 @@ constructor(
 
     override fun bind(
         ambientState: AmbientState,
-        notificationStackScrollLayoutController: NotificationStackScrollLayoutController
+        notificationStackScrollLayoutController: NotificationStackScrollLayoutController,
     ) {
         shelf.bind(ambientState, notificationStackScrollLayoutController)
-        this.ambientState = ambientState
     }
 
     override fun setOnClickListener(listener: View.OnClickListener) {
         shelf.setOnClickListener(listener)
     }
+
+    private val unsupported: Nothing
+        get() = error("Code path not supported when Flags.NOTIFICATION_SHELF_REFACTOR is enabled")
 }
 
-@Module(includes = [PrivateShelfViewBinderModule::class]) object NotificationShelfViewBinderModule
-
-@Module
-private interface PrivateShelfViewBinderModule {
-    @Binds fun bindImpl(impl: NotificationShelfViewBinderImpl): NotificationShelfViewBinder
-}
-
-@CentralSurfacesScope
-private class NotificationShelfViewBinderImpl @Inject constructor() : NotificationShelfViewBinder {
-    override fun bind(shelf: NotificationShelf) {}
+/** Binds a [NotificationShelf] to its backend. */
+object NotificationShelfViewBinder {
+    fun bind(viewModel: NotificationShelfViewModel, shelf: NotificationShelf) {
+        shelf.repeatWhenAttached {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.canModifyColorOfNotifications
+                    .onEach(shelf::setCanModifyColorOfNotifications)
+                    .launchIn(this)
+            }
+        }
+    }
 }
