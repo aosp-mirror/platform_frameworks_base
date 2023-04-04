@@ -232,11 +232,36 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
         IOnBackInvokedCallback callback = createOnBackInvokedCallback();
         window.setOnBackInvokedCallbackInfo(
-                new OnBackInvokedCallbackInfo(callback, OnBackInvokedDispatcher.PRIORITY_DEFAULT));
+                new OnBackInvokedCallbackInfo(
+                        callback,
+                        OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                        /* isAnimationCallback = */ false));
 
         BackNavigationInfo backNavigationInfo = startBackNavigation();
         assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
         assertThat(backNavigationInfo.getType()).isEqualTo(BackNavigationInfo.TYPE_CALLBACK);
+        assertThat(backNavigationInfo.isAnimationCallback()).isEqualTo(false);
+        assertThat(backNavigationInfo.getOnBackInvokedCallback()).isEqualTo(callback);
+    }
+
+    @Test
+    public void backInfoWithAnimationCallback() {
+        WindowState window = createWindow(null, WindowManager.LayoutParams.TYPE_WALLPAPER,
+                "Wallpaper");
+        addToWindowMap(window, true);
+        makeWindowVisibleAndDrawn(window);
+
+        IOnBackInvokedCallback callback = createOnBackInvokedCallback();
+        window.setOnBackInvokedCallbackInfo(
+                new OnBackInvokedCallbackInfo(
+                        callback,
+                        OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                        /* isAnimationCallback = */ true));
+
+        BackNavigationInfo backNavigationInfo = startBackNavigation();
+        assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
+        assertThat(backNavigationInfo.getType()).isEqualTo(BackNavigationInfo.TYPE_CALLBACK);
+        assertThat(backNavigationInfo.isAnimationCallback()).isEqualTo(true);
         assertThat(backNavigationInfo.getOnBackInvokedCallback()).isEqualTo(callback);
     }
 
@@ -364,7 +389,10 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
         IOnBackInvokedCallback callback = createOnBackInvokedCallback();
         window.setOnBackInvokedCallbackInfo(
-                new OnBackInvokedCallbackInfo(callback, OnBackInvokedDispatcher.PRIORITY_DEFAULT));
+                new OnBackInvokedCallbackInfo(
+                        callback,
+                        OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                        /* isAnimationCallback = */ false));
 
         BackNavigationInfo backNavigationInfo = startBackNavigation();
         assertThat(backNavigationInfo).isNull();
@@ -450,14 +478,20 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     private IOnBackInvokedCallback withSystemCallback(Task task) {
         IOnBackInvokedCallback callback = createOnBackInvokedCallback();
         task.getTopMostActivity().getTopChild().setOnBackInvokedCallbackInfo(
-                new OnBackInvokedCallbackInfo(callback, OnBackInvokedDispatcher.PRIORITY_SYSTEM));
+                new OnBackInvokedCallbackInfo(
+                        callback,
+                        OnBackInvokedDispatcher.PRIORITY_SYSTEM,
+                        /* isAnimationCallback = */ false));
         return callback;
     }
 
     private IOnBackInvokedCallback withAppCallback(Task task) {
         IOnBackInvokedCallback callback = createOnBackInvokedCallback();
         task.getTopMostActivity().getTopChild().setOnBackInvokedCallbackInfo(
-                new OnBackInvokedCallbackInfo(callback, OnBackInvokedDispatcher.PRIORITY_DEFAULT));
+                new OnBackInvokedCallbackInfo(
+                        callback,
+                        OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                        /* isAnimationCallback = */ false));
         return callback;
     }
 

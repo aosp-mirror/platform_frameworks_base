@@ -28,15 +28,20 @@ public final class OnBackInvokedCallbackInfo implements Parcelable {
     @NonNull
     private final IOnBackInvokedCallback mCallback;
     private @OnBackInvokedDispatcher.Priority int mPriority;
+    private final boolean mIsAnimationCallback;
 
-    public OnBackInvokedCallbackInfo(@NonNull IOnBackInvokedCallback callback, int priority) {
+    public OnBackInvokedCallbackInfo(@NonNull IOnBackInvokedCallback callback,
+            int priority,
+            boolean isAnimationCallback) {
         mCallback = callback;
         mPriority = priority;
+        mIsAnimationCallback = isAnimationCallback;
     }
 
     private OnBackInvokedCallbackInfo(@NonNull Parcel in) {
         mCallback = IOnBackInvokedCallback.Stub.asInterface(in.readStrongBinder());
         mPriority = in.readInt();
+        mIsAnimationCallback = in.readBoolean();
     }
 
     @Override
@@ -48,6 +53,7 @@ public final class OnBackInvokedCallbackInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStrongInterface(mCallback);
         dest.writeInt(mPriority);
+        dest.writeBoolean(mIsAnimationCallback);
     }
 
     public static final Creator<OnBackInvokedCallbackInfo> CREATOR =
@@ -77,9 +83,16 @@ public final class OnBackInvokedCallbackInfo implements Parcelable {
         return mPriority;
     }
 
+    public boolean isAnimationCallback() {
+        return mIsAnimationCallback;
+    }
+
     @Override
     public String toString() {
         return "OnBackInvokedCallbackInfo{"
-                + "mCallback=" + mCallback + ", mPriority=" + mPriority + '}';
+                + "mCallback=" + mCallback
+                + ", mPriority=" + mPriority
+                + ", mIsAnimationCallback=" + mIsAnimationCallback
+                + '}';
     }
 }
