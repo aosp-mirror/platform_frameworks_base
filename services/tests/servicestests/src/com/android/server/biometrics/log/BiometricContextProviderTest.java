@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.StatusBarManager;
 import android.content.Intent;
+import android.hardware.biometrics.AuthenticateOptions;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricContextListener.FoldState;
 import android.hardware.biometrics.common.OperationContext;
@@ -59,6 +60,7 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 @Presubmit
@@ -102,22 +104,52 @@ public class BiometricContextProviderTest {
 
     @Test
     public void testIsAod() throws RemoteException {
-        mListener.onDozeChanged(true /* isAod */, false /* isAwake */);
-        assertThat(mProvider.isAod()).isTrue();
-        mListener.onDozeChanged(false /* isAod */, false /* isAwake */);
-        assertThat(mProvider.isAod()).isFalse();
+        final Map<Integer, Boolean> expectedAod = Map.of(
+                AuthenticateOptions.DISPLAY_STATE_UNKNOWN, false,
+                AuthenticateOptions.DISPLAY_STATE_AOD, true,
+                AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN, false,
+                AuthenticateOptions.DISPLAY_STATE_NO_UI, false,
+                AuthenticateOptions.DISPLAY_STATE_SCREENSAVER, false
+        );
+
+        for (Map.Entry<Integer, Boolean> entry : expectedAod.entrySet()) {
+            mListener.onDisplayStateChanged(entry.getKey());
+
+            assertThat(mProvider.isAod()).isEqualTo(entry.getValue());
+        }
     }
 
     @Test
     public void testIsAwake() throws RemoteException {
-        mListener.onDozeChanged(false /* isAod */, true /* isAwake */);
-        assertThat(mProvider.isAwake()).isTrue();
-        mListener.onDozeChanged(false /* isAod */, false /* isAwake */);
-        assertThat(mProvider.isAwake()).isFalse();
-        mListener.onDozeChanged(true /* isAod */, true /* isAwake */);
-        assertThat(mProvider.isAwake()).isTrue();
-        mListener.onDozeChanged(true /* isAod */, false /* isAwake */);
-        assertThat(mProvider.isAwake()).isFalse();
+        final Map<Integer, Boolean> expectedAwake = Map.of(
+                AuthenticateOptions.DISPLAY_STATE_UNKNOWN, true,
+                AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN, true,
+                AuthenticateOptions.DISPLAY_STATE_SCREENSAVER, true,
+                AuthenticateOptions.DISPLAY_STATE_NO_UI, false,
+                AuthenticateOptions.DISPLAY_STATE_AOD, false
+        );
+
+        for (Map.Entry<Integer, Boolean> entry : expectedAwake.entrySet()) {
+            mListener.onDisplayStateChanged(entry.getKey());
+
+            assertThat(mProvider.isAwake()).isEqualTo(entry.getValue());
+        }
+    }
+
+    @Test
+    public void testGetDisplayState() throws RemoteException {
+        final List<Integer> states = List.of(
+                AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN,
+                AuthenticateOptions.DISPLAY_STATE_SCREENSAVER,
+                AuthenticateOptions.DISPLAY_STATE_NO_UI,
+                AuthenticateOptions.DISPLAY_STATE_AOD,
+                AuthenticateOptions.DISPLAY_STATE_UNKNOWN);
+
+        for (int state : states) {
+            mListener.onDisplayStateChanged(state);
+
+            assertThat(mProvider.getDisplayState()).isEqualTo(state);
+        }
     }
 
     @Test
@@ -147,21 +179,54 @@ public class BiometricContextProviderTest {
     }
 
     @Test
+    public void testSubscribesToDisplayState() throws RemoteException {
+        final List<Integer> actual = new ArrayList<>();
+        final List<Integer> expected = List.of(AuthenticateOptions.DISPLAY_STATE_AOD,
+                AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN,
+                AuthenticateOptions.DISPLAY_STATE_AOD,
+                AuthenticateOptions.DISPLAY_STATE_AOD,
+                AuthenticateOptions.DISPLAY_STATE_NO_UI,
+                AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN);
+
+        mProvider.subscribe(mOpContext, ctx -> {
+            assertThat(ctx).isSameInstanceAs(mOpContext.toAidlContext());
+            assertThat(mProvider.getDisplayState()).isEqualTo(ctx.displayState);
+            actual.add(ctx.displayState);
+        });
+
+        for (int v : expected) {
+            mListener.onDisplayStateChanged(v);
+        }
+
+        assertThat(actual).containsExactly(
+                AuthenticateOptions.DISPLAY_STATE_AOD,
+                AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN,
+                AuthenticateOptions.DISPLAY_STATE_AOD,
+                AuthenticateOptions.DISPLAY_STATE_NO_UI,
+                AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN).inOrder();
+    }
+
+    @Test
     public void testSubscribesToAod() throws RemoteException {
         final List<Boolean> actual = new ArrayList<>();
 
         mProvider.subscribe(mOpContext, ctx -> {
             assertThat(ctx).isSameInstanceAs(mOpContext.toAidlContext());
             assertThat(mProvider.isAod()).isEqualTo(ctx.isAod);
-            assertThat(mProvider.isAwake()).isFalse();
             actual.add(ctx.isAod);
         });
 
-        for (boolean v : List.of(true, false, true, true, false, false)) {
-            mListener.onDozeChanged(v /* isDozing */, false /* isAwake */);
+        for (int v : List.of(
+                AuthenticateOptions.DISPLAY_STATE_AOD,
+                AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN,
+                AuthenticateOptions.DISPLAY_STATE_AOD,
+                AuthenticateOptions.DISPLAY_STATE_AOD,
+                AuthenticateOptions.DISPLAY_STATE_NO_UI,
+                AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN)) {
+            mListener.onDisplayStateChanged(v);
         }
 
-        assertThat(actual).containsExactly(true, false, true, false).inOrder();
+        assertThat(actual).containsExactly(true, false, true, false, false).inOrder();
     }
 
     @Test
@@ -170,16 +235,20 @@ public class BiometricContextProviderTest {
 
         mProvider.subscribe(mOpContext, ctx -> {
             assertThat(ctx).isSameInstanceAs(mOpContext.toAidlContext());
-            assertThat(ctx.isAod).isFalse();
-            assertThat(mProvider.isAod()).isFalse();
             actual.add(mProvider.isAwake());
         });
 
-        for (boolean v : List.of(true, false, true, true, false, false)) {
-            mListener.onDozeChanged(false /* isDozing */, v /* isAwake */);
+        for (int v : List.of(
+                AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN,
+                AuthenticateOptions.DISPLAY_STATE_NO_UI,
+                AuthenticateOptions.DISPLAY_STATE_SCREENSAVER,
+                AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN,
+                AuthenticateOptions.DISPLAY_STATE_AOD,
+                AuthenticateOptions.DISPLAY_STATE_NO_UI)) {
+            mListener.onDisplayStateChanged(v);
         }
 
-        assertThat(actual).containsExactly(true, false, true, false).inOrder();
+        assertThat(actual).containsExactly(true, false, true, true, false, false).inOrder();
     }
 
     @Test
@@ -188,13 +257,13 @@ public class BiometricContextProviderTest {
         mProvider.subscribe(mOpContext, emptyConsumer);
         mProvider.unsubscribe(mOpContext);
 
-        mListener.onDozeChanged(true /* isDozing */, false /* isAwake */);
+        mListener.onDisplayStateChanged(AuthenticateOptions.DISPLAY_STATE_AOD);
 
         final Consumer<OperationContext> nonEmptyConsumer = mock(Consumer.class);
         mProvider.subscribe(mOpContext, nonEmptyConsumer);
-        mListener.onDozeChanged(false /* isDozing */, false /* isAwake */);
+        mListener.onDisplayStateChanged(AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN);
         mProvider.unsubscribe(mOpContext);
-        mListener.onDozeChanged(true /* isDozing */, false /* isAwake */);
+        mListener.onDisplayStateChanged(AuthenticateOptions.DISPLAY_STATE_NO_UI);
 
         verify(emptyConsumer, never()).accept(any());
         verify(nonEmptyConsumer).accept(same(mOpContext.toAidlContext()));
@@ -235,7 +304,7 @@ public class BiometricContextProviderTest {
 
     @Test
     public void testUpdate() throws RemoteException {
-        mListener.onDozeChanged(false /* isDozing */, false /* isAwake */);
+        mListener.onDisplayStateChanged(AuthenticateOptions.DISPLAY_STATE_NO_UI);
 
         OperationContextExt context = mProvider.updateContext(mOpContext, false /* crypto */);
         OperationContext aidlContext = context.toAidlContext();
@@ -252,7 +321,8 @@ public class BiometricContextProviderTest {
             final int id = 40 + type;
             final boolean aod = (type & 1) == 0;
 
-            mListener.onDozeChanged(aod /* isDozing */, false /* isAwake */);
+            mListener.onDisplayStateChanged(aod ? AuthenticateOptions.DISPLAY_STATE_AOD
+                    : AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN);
             mSessionListener.onSessionStarted(type, InstanceId.fakeInstanceId(id));
             context = mProvider.updateContext(mOpContext, false /* crypto */);
             aidlContext = context.toAidlContext();

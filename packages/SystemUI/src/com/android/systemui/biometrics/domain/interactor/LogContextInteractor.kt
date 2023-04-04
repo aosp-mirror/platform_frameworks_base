@@ -38,7 +38,6 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -147,11 +146,6 @@ constructor(
 
     override fun addBiometricContextListener(listener: IBiometricContextListener): Job {
         return applicationScope.launch {
-            combine(isAod, isAwake) { doze, awake -> doze to awake }
-                .onEach { (aod, awake) -> listener.onDozeChanged(aod, awake) }
-                .catch { t -> Log.w(TAG, "failed to notify new doze state", t) }
-                .launchIn(this)
-
             foldState
                 .onEach { state -> listener.onFoldChanged(state) }
                 .catch { t -> Log.w(TAG, "failed to notify new fold state", t) }
