@@ -309,7 +309,7 @@ public class ScreenCapture {
 
         /** Release any layers if set using {@link Builder#setExcludeLayers(SurfaceControl[])}. */
         public void release() {
-            if (mExcludeLayers.length == 0) {
+            if (mExcludeLayers == null || mExcludeLayers.length == 0) {
                 return;
             }
 
