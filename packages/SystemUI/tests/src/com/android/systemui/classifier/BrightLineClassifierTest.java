@@ -120,7 +120,6 @@ public class BrightLineClassifierTest extends SysuiTestCase {
                 gestureCompleteListenerCaptor.capture());
 
         mGestureFinalizedListener = gestureCompleteListenerCaptor.getValue();
-        mFakeFeatureFlags.set(Flags.FALSING_FOR_LONG_TAPS, true);
         mFakeFeatureFlags.set(Flags.MEDIA_FALSING_PENALTY, true);
         mFakeFeatureFlags.set(Flags.FALSING_OFF_FOR_UNFOLDED, true);
     }
@@ -257,13 +256,6 @@ public class BrightLineClassifierTest extends SysuiTestCase {
 
         mBrightLineFalsingManager.isFalseLongTap(0);
         verify(mLongTapClassifier).isTap(mMotionEventList, 0);
-    }
-
-    @Test
-    public void testIsFalseLongTap_FalseLongTap_NotFlagged() {
-        mFakeFeatureFlags.set(Flags.FALSING_FOR_LONG_TAPS, false);
-        when(mLongTapClassifier.isTap(mMotionEventList, 0)).thenReturn(mFalsedResult);
-        assertThat(mBrightLineFalsingManager.isFalseLongTap(NO_PENALTY)).isFalse();
     }
 
     @Test
