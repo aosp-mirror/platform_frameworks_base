@@ -33,4 +33,6 @@
     <string name="disconnect" msgid="971412338304200056">"Prekini vezu"</string>
     <string name="open_app" msgid="3717639178595958667">"Otvori aplikaciju"</string>
     <string name="dismiss" msgid="6192859333764711227">"Odbaci"</string>
+    <string name="sanitized_vpn_label_with_ellipsis" msgid="7014327474633422235">"<xliff:g id="SANITIZED_VPN_LABEL_WITH_ELLIPSIS_0">%1$s</xliff:g>… (<xliff:g id="SANITIZED_VPN_LABEL_WITH_ELLIPSIS_1">%2$s</xliff:g>)"</string>
+    <string name="sanitized_vpn_label" msgid="1877415015009794766">"<xliff:g id="SANITIZED_VPN_LABEL_0">%1$s</xliff:g> (<xliff:g id="SANITIZED_VPN_LABEL_1">%2$s</xliff:g>)"</string>
 </resources>
