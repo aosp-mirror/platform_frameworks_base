@@ -272,6 +272,8 @@ public class ScreenCapture {
         public final long mUid;
         public final boolean mGrayscale;
 
+        final SurfaceControl[] mExcludeLayers;
+
         private CaptureArgs(CaptureArgs.Builder<? extends CaptureArgs.Builder<?>> builder) {
             mPixelFormat = builder.mPixelFormat;
             mSourceCrop.set(builder.mSourceCrop);
@@ -281,6 +283,7 @@ public class ScreenCapture {
             mAllowProtected = builder.mAllowProtected;
             mUid = builder.mUid;
             mGrayscale = builder.mGrayscale;
+            mExcludeLayers = builder.mExcludeLayers;
         }
 
         private CaptureArgs(Parcel in) {
@@ -292,6 +295,46 @@ public class ScreenCapture {
             mAllowProtected = in.readBoolean();
             mUid = in.readLong();
             mGrayscale = in.readBoolean();
+
+            int excludeLayersLength = in.readInt();
+            if (excludeLayersLength > 0) {
+                mExcludeLayers = new SurfaceControl[excludeLayersLength];
+                for (int index = 0; index < excludeLayersLength; index++) {
+                    mExcludeLayers[index] = SurfaceControl.CREATOR.createFromParcel(in);
+                }
+            } else {
+                mExcludeLayers = null;
+            }
+        }
+
+        /** Release any layers if set using {@link Builder#setExcludeLayers(SurfaceControl[])}. */
+        public void release() {
+            if (mExcludeLayers.length == 0) {
+                return;
+            }
+
+            for (SurfaceControl surfaceControl : mExcludeLayers) {
+                if (surfaceControl != null) {
+                    surfaceControl.release();
+                }
+            }
+        }
+
+        /**
+         * Returns an array of {@link SurfaceControl#mNativeObject} corresponding to
+         * {@link #mExcludeLayers}. Used only in native code.
+         */
+        private long[] getNativeExcludeLayers() {
+            if (mExcludeLayers == null || mExcludeLayers.length == 0) {
+                return new long[0];
+            }
+
+            long[] nativeExcludeLayers = new long[mExcludeLayers.length];
+            for (int index = 0; index < mExcludeLayers.length; index++) {
+                nativeExcludeLayers[index] = mExcludeLayers[index].mNativeObject;
+            }
+
+            return nativeExcludeLayers;
         }
 
         /**
@@ -308,6 +351,7 @@ public class ScreenCapture {
             private boolean mAllowProtected;
             private long mUid = -1;
             private boolean mGrayscale;
+            private SurfaceControl[] mExcludeLayers;
 
             /**
              * Construct a new {@link CaptureArgs} with the set parameters. The builder remains
@@ -397,6 +441,14 @@ public class ScreenCapture {
             }
 
             /**
+             * An array of {@link SurfaceControl} layer handles to exclude.
+             */
+            public T setExcludeLayers(@Nullable SurfaceControl[] excludeLayers) {
+                mExcludeLayers = excludeLayers;
+                return getThis();
+            }
+
+            /**
              * Each sub class should return itself to allow the builder to chain properly
              */
             T getThis() {
@@ -419,6 +471,15 @@ public class ScreenCapture {
             dest.writeBoolean(mAllowProtected);
             dest.writeLong(mUid);
             dest.writeBoolean(mGrayscale);
+
+            if (mExcludeLayers != null) {
+                dest.writeInt(mExcludeLayers.length);
+                for (SurfaceControl excludeLayer : mExcludeLayers) {
+                    excludeLayer.writeToParcel(dest, flags);
+                }
+            } else {
+                dest.writeInt(0);
+            }
         }
 
         public static final Parcelable.Creator<CaptureArgs> CREATOR =
@@ -529,21 +590,12 @@ public class ScreenCapture {
      */
     public static class LayerCaptureArgs extends CaptureArgs {
         private final long mNativeLayer;
-        private final long[] mNativeExcludeLayers;
         private final boolean mChildrenOnly;
 
         private LayerCaptureArgs(Builder builder) {
             super(builder);
             mChildrenOnly = builder.mChildrenOnly;
             mNativeLayer = builder.mLayer.mNativeObject;
-            if (builder.mExcludeLayers != null) {
-                mNativeExcludeLayers = new long[builder.mExcludeLayers.length];
-                for (int i = 0; i < builder.mExcludeLayers.length; i++) {
-                    mNativeExcludeLayers[i] = builder.mExcludeLayers[i].mNativeObject;
-                }
-            } else {
-                mNativeExcludeLayers = null;
-            }
         }
 
         /**
@@ -551,7 +603,6 @@ public class ScreenCapture {
          */
         public static class Builder extends CaptureArgs.Builder<Builder> {
             private SurfaceControl mLayer;
-            private SurfaceControl[] mExcludeLayers;
             private boolean mChildrenOnly = true;
 
             /**
@@ -575,6 +626,7 @@ public class ScreenCapture {
                 setAllowProtected(args.mAllowProtected);
                 setUid(args.mUid);
                 setGrayscale(args.mGrayscale);
+                setExcludeLayers(args.mExcludeLayers);
             }
 
             public Builder(SurfaceControl layer) {
@@ -586,14 +638,6 @@ public class ScreenCapture {
              */
             public Builder setLayer(SurfaceControl layer) {
                 mLayer = layer;
-                return this;
-            }
-
-            /**
-             * An array of layer handles to exclude.
-             */
-            public Builder setExcludeLayers(@Nullable SurfaceControl[] excludeLayers) {
-                mExcludeLayers = excludeLayers;
                 return this;
             }
 
