@@ -58,11 +58,18 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
             "has_seen_letterbox_education";
 
     /**
-     * Key prefix for the {@link SharedPreferences} entries related to the reachability
+     * Key prefix for the {@link SharedPreferences} entries related to the horizontal
+     * reachability education.
+     */
+    private static final String HAS_SEEN_HORIZONTAL_REACHABILITY_EDUCATION_KEY_PREFIX =
+            "has_seen_horizontal_reachability_education";
+
+    /**
+     * Key prefix for the {@link SharedPreferences} entries related to the vertical reachability
      * education.
      */
-    private static final String HAS_SEEN_REACHABILITY_EDUCATION_KEY_PREFIX =
-            "has_seen_reachability_education";
+    private static final String HAS_SEEN_VERTICAL_REACHABILITY_EDUCATION_KEY_PREFIX =
+            "has_seen_vertical_reachability_education";
 
     /**
      * The {@link SharedPreferences} instance for the restart dialog and the reachability
@@ -129,14 +136,6 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
     }
 
     /**
-     * @return {@value true} if the reachability education is enabled.
-     */
-    boolean isReachabilityEducationEnabled() {
-        return mIsReachabilityEducationOverrideEnabled || (mIsReachabilityEducationEnabled
-                && mIsLetterboxReachabilityEducationAllowed);
-    }
-
-    /**
      * Enables/Disables the reachability education
      */
     void setIsReachabilityEducationOverrideEnabled(boolean enabled) {
@@ -145,33 +144,48 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
 
     void setDontShowRestartDialogAgain(TaskInfo taskInfo) {
         mCompatUISharedPreferences.edit().putBoolean(
-                getDontShowAgainRestartKey(taskInfo.userId, taskInfo.topActivity.getPackageName()),
+                dontShowAgainRestartKey(taskInfo.userId, taskInfo.topActivity.getPackageName()),
                 true).apply();
     }
 
     boolean shouldShowRestartDialogAgain(TaskInfo taskInfo) {
-        return !mCompatUISharedPreferences.getBoolean(getDontShowAgainRestartKey(taskInfo.userId,
+        return !mCompatUISharedPreferences.getBoolean(dontShowAgainRestartKey(taskInfo.userId,
                 taskInfo.topActivity.getPackageName()), /* default= */ false);
     }
 
-    void setDontShowReachabilityEducationAgain(TaskInfo taskInfo) {
+    void setUserHasSeenHorizontalReachabilityEducation(TaskInfo taskInfo) {
         mCompatUISharedPreferences.edit().putBoolean(
-                getDontShowAgainReachabilityEduKey(taskInfo.userId), true).apply();
+                hasSeenHorizontalReachabilityEduKey(taskInfo.userId), true).apply();
+    }
+
+    void setUserHasSeenVerticalReachabilityEducation(TaskInfo taskInfo) {
+        mCompatUISharedPreferences.edit().putBoolean(
+                hasSeenVerticalReachabilityEduKey(taskInfo.userId), true).apply();
+    }
+
+    boolean hasSeenHorizontalReachabilityEducation(@NonNull TaskInfo taskInfo) {
+        return mCompatUISharedPreferences.getBoolean(
+                hasSeenHorizontalReachabilityEduKey(taskInfo.userId), /* default= */false);
+    }
+
+    boolean hasSeenVerticalReachabilityEducation(@NonNull TaskInfo taskInfo) {
+        return mCompatUISharedPreferences.getBoolean(
+                hasSeenVerticalReachabilityEduKey(taskInfo.userId), /* default= */false);
     }
 
     boolean shouldShowReachabilityEducation(@NonNull TaskInfo taskInfo) {
-        return getHasSeenLetterboxEducation(taskInfo.userId)
-                && !mCompatUISharedPreferences.getBoolean(
-                getDontShowAgainReachabilityEduKey(taskInfo.userId), /* default= */false);
+        return isReachabilityEducationEnabled()
+                && (!hasSeenHorizontalReachabilityEducation(taskInfo)
+                    || !hasSeenVerticalReachabilityEducation(taskInfo));
     }
 
     boolean getHasSeenLetterboxEducation(int userId) {
         return mLetterboxEduSharedPreferences
-                .getBoolean(getDontShowLetterboxEduKey(userId), /* default= */ false);
+                .getBoolean(dontShowLetterboxEduKey(userId), /* default= */ false);
     }
 
     void setSeenLetterboxEducation(int userId) {
-        mLetterboxEduSharedPreferences.edit().putBoolean(getDontShowLetterboxEduKey(userId),
+        mLetterboxEduSharedPreferences.edit().putBoolean(dontShowLetterboxEduKey(userId),
                 true).apply();
     }
 
@@ -204,15 +218,24 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
         }
     }
 
-    private static String getDontShowAgainReachabilityEduKey(int userId) {
-        return HAS_SEEN_REACHABILITY_EDUCATION_KEY_PREFIX + "@" + userId;
+    private boolean isReachabilityEducationEnabled() {
+        return mIsReachabilityEducationOverrideEnabled || (mIsReachabilityEducationEnabled
+                && mIsLetterboxReachabilityEducationAllowed);
     }
 
-    private static String getDontShowLetterboxEduKey(int userId) {
+    private static String hasSeenHorizontalReachabilityEduKey(int userId) {
+        return HAS_SEEN_HORIZONTAL_REACHABILITY_EDUCATION_KEY_PREFIX + "@" + userId;
+    }
+
+    private static String hasSeenVerticalReachabilityEduKey(int userId) {
+        return HAS_SEEN_VERTICAL_REACHABILITY_EDUCATION_KEY_PREFIX + "@" + userId;
+    }
+
+    private static String dontShowLetterboxEduKey(int userId) {
         return String.valueOf(userId);
     }
 
-    private String getDontShowAgainRestartKey(int userId, String packageName) {
+    private String dontShowAgainRestartKey(int userId, String packageName) {
         return packageName + "@" + userId;
     }
 }
