@@ -20,7 +20,10 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ACTION_SHOWN;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_DISMISS_TAPPED;
+import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_EXPANDED_FROM_MINIMIZED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SHARE_TAPPED;
+import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SHOWN_EXPANDED;
+import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SHOWN_MINIMIZED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SWIPE_DISMISSED;
 import static com.android.systemui.flags.Flags.CLIPBOARD_MINIMIZED_LAYOUT;
 import static com.android.systemui.flags.Flags.CLIPBOARD_REMOTE_BEHAVIOR;
@@ -340,9 +343,10 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     @Test
     public void test_setClipData_textData() {
-        mOverlayController.setClipData(mSampleClipData, "");
+        mOverlayController.setClipData(mSampleClipData, "abc");
 
         verify(mClipboardOverlayView, times(1)).showTextPreview("Test Item", false);
+        verify(mUiEventLogger, times(1)).log(CLIPBOARD_OVERLAY_SHOWN_EXPANDED, 0, "abc");
         verify(mClipboardOverlayView, times(1)).showShareChip();
         verify(mClipboardOverlayView, times(1)).getEnterAnimation();
     }
@@ -440,6 +444,8 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
         verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_DISMISS_TAPPED, 0, "first.package");
         verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_DISMISS_TAPPED, 0, "second.package");
+        verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_SHOWN_EXPANDED, 0, "first.package");
+        verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_SHOWN_EXPANDED, 0, "second.package");
         verifyNoMoreInteractions(mUiEventLogger);
     }
 
@@ -465,6 +471,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
         mExecutor.runAllReady();
 
         verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_ACTION_SHOWN, 0, "actionShownSource");
+        verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_SHOWN_EXPANDED, 0, "actionShownSource");
         verifyNoMoreInteractions(mUiEventLogger);
     }
 
@@ -481,11 +488,12 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     public void test_insets_showsMinimized() {
         when(mClipboardOverlayWindow.getWindowInsets()).thenReturn(
                 getImeInsets(new Rect(0, 0, 0, 1)));
-        mOverlayController.setClipData(mSampleClipData, "");
+        mOverlayController.setClipData(mSampleClipData, "abc");
         Animator mockFadeoutAnimator = Mockito.mock(Animator.class);
         when(mClipboardOverlayView.getMinimizedFadeoutAnimation()).thenReturn(mockFadeoutAnimator);
 
         verify(mClipboardOverlayView).setMinimized(true);
+        verify(mUiEventLogger, times(1)).log(CLIPBOARD_OVERLAY_SHOWN_MINIMIZED, 0, "abc");
         verify(mClipboardOverlayView, never()).setMinimized(false);
         verify(mClipboardOverlayView, never()).showTextPreview(any(), anyBoolean());
 
@@ -495,6 +503,8 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
         verify(mClipboardOverlayView).setMinimized(false);
         verify(mClipboardOverlayView).showTextPreview("Test Item", false);
+        verify(mUiEventLogger, times(1)).log(CLIPBOARD_OVERLAY_EXPANDED_FROM_MINIMIZED, 0, "abc");
+        verify(mUiEventLogger, never()).log(CLIPBOARD_OVERLAY_SHOWN_EXPANDED, 0, "abc");
     }
 
     @Test
