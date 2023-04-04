@@ -62,12 +62,10 @@ public final class FakeIMediaProjection extends IMediaProjection.Stub {
 
     @Override
     public void registerCallback(IMediaProjectionCallback callback) throws RemoteException {
-
     }
 
     @Override
     public void unregisterCallback(IMediaProjectionCallback callback) throws RemoteException {
-
     }
 
     @Override
@@ -78,5 +76,15 @@ public final class FakeIMediaProjection extends IMediaProjection.Stub {
     @Override
     public void setLaunchCookie(IBinder launchCookie) throws RemoteException {
         mLaunchCookie = launchCookie;
+    }
+
+    @Override
+    public boolean isValid() throws RemoteException {
+        return true;
+    }
+
+
+    @Override
+    public void notifyVirtualDisplayCreated(int displayId) throws RemoteException {
     }
 }
