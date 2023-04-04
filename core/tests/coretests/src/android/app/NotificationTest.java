@@ -931,6 +931,27 @@ public class NotificationTest {
         // no crash, good
     }
 
+    @Test
+    public void testToBundle_getMessageFromBundle_returnsSameData() {
+        Notification.MessagingStyle.Message message =
+                new Notification.MessagingStyle.Message(
+                        "a", 100, new Person.Builder().setName("hi").build());
+        message.setData("text", Uri.parse("http://test/uri"));
+
+        Notification.MessagingStyle.Message convertedMessage =
+                Notification.MessagingStyle.Message.getMessageFromBundle(message.toBundle());
+
+        assertThat(convertedMessage).isNotNull();
+        assertThat(message.getText()).isEqualTo(convertedMessage.getText());
+        assertThat(message.getTimestamp()).isEqualTo(convertedMessage.getTimestamp());
+        assertThat(message.getExtras().size()).isEqualTo(convertedMessage.getExtras().size());
+        assertThat(message.getSender()).isEqualTo(convertedMessage.getSender());
+        assertThat(message.getSenderPerson()).isEqualTo(convertedMessage.getSenderPerson());
+        assertThat(message.getDataMimeType()).isEqualTo(convertedMessage.getDataMimeType());
+        assertThat(message.getDataUri()).isEqualTo(convertedMessage.getDataUri());
+        assertThat(message.isRemoteInputHistory())
+                .isEqualTo(convertedMessage.isRemoteInputHistory());
+    }
 
     @Test
     public void testDoesNotStripsExtenders() {

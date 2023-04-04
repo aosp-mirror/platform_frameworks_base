@@ -8723,9 +8723,11 @@ public class Notification implements Parcelable
             }
 
             /**
+             * Converts the message into a {@link Bundle}. To extract the message back,
+             * check {@link #getMessageFromBundle()}
              * @hide
              */
-            @VisibleForTesting
+            @NonNull
             public Bundle toBundle() {
                 Bundle bundle = new Bundle();
                 if (mText != null) {
