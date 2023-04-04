@@ -10370,8 +10370,8 @@ HPLcom/android/server/vibrator/Vibration$DebugInfo;-><init>(Lcom/android/server/
 HPLcom/android/server/vibrator/Vibration;-><init>(Landroid/os/IBinder;Lcom/android/server/vibrator/Vibration$CallerInfo;)V
 HPLcom/android/server/vibrator/VibrationEffectAdapters;->apply(Landroid/os/VibrationEffect;Ljava/util/List;Ljava/lang/Object;)Landroid/os/VibrationEffect;+]Ljava/util/List;Ljava/util/Arrays$ArrayList;]Lcom/android/server/vibrator/VibrationEffectAdapters$SegmentsAdapter;Lcom/android/server/vibrator/StepToRampAdapter;,Lcom/android/server/vibrator/RampDownAdapter;,Lcom/android/server/vibrator/RampToStepAdapter;,Lcom/android/server/vibrator/ClippingAmplitudeAndFrequencyAdapter;]Landroid/os/VibrationEffect$Composed;Landroid/os/VibrationEffect$Composed;
 HPLcom/android/server/vibrator/VibrationScaler;->scale(Landroid/os/VibrationEffect;I)Landroid/os/VibrationEffect;
-HPLcom/android/server/vibrator/VibrationSettings$UidObserver;->isUidForeground(I)Z
-HSPLcom/android/server/vibrator/VibrationSettings$UidObserver;->onUidStateChanged(IIJI)V+]Landroid/util/SparseArray;Landroid/util/SparseArray;
+HPLcom/android/server/vibrator/VibrationSettings$MyUidObserver;->isUidForeground(I)Z
+HSPLcom/android/server/vibrator/VibrationSettings$MyUidObserver;->onUidStateChanged(IIJI)V+]Landroid/util/SparseArray;Landroid/util/SparseArray;
 HPLcom/android/server/vibrator/VibrationSettings;->getCurrentIntensity(I)I
 HPLcom/android/server/vibrator/VibrationSettings;->shouldIgnoreVibration(Lcom/android/server/vibrator/Vibration$CallerInfo;)Lcom/android/server/vibrator/Vibration$Status;
 HPLcom/android/server/vibrator/VibrationStats$StatsInfo;-><init>(IIILcom/android/server/vibrator/Vibration$Status;Lcom/android/server/vibrator/VibrationStats;J)V
