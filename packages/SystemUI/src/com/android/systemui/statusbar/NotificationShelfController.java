@@ -25,7 +25,6 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowScope;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 
@@ -92,28 +91,10 @@ public class NotificationShelfController {
         return mView.getShelfIcons();
     }
 
-    public @View.Visibility int getVisibility() {
-        return mView.getVisibility();
-    }
-
-    public void setCollapsedIcons(NotificationIconContainer notificationIcons) {
-        mView.setCollapsedIcons(notificationIcons);
-    }
-
     public void bind(AmbientState ambientState,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController) {
         mView.bind(ambientState, notificationStackScrollLayoutController);
         mAmbientState = ambientState;
-    }
-
-    public int getHeight() {
-        return mView.getHeight();
-    }
-
-    public void updateState(StackScrollAlgorithm.StackScrollAlgorithmState algorithmState,
-            AmbientState ambientState) {
-        mAmbientState = ambientState;
-        mView.updateState(algorithmState, ambientState);
     }
 
     public int getIntrinsicHeight() {
@@ -128,7 +109,4 @@ public class NotificationShelfController {
         mView.setOnClickListener(onClickListener);
     }
 
-    public int getNotGoneIndex() {
-        return mView.getNotGoneIndex();
-    }
 }
