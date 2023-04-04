@@ -21,6 +21,7 @@ import android.os.Build
 import android.util.Log
 import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.andInv
 import com.android.server.permission.access.util.hasAnyBit
 import com.android.server.permission.access.util.hasBits
@@ -34,7 +35,7 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
      *
      * @see [com.android.server.permission.access.util.PackageVersionMigration.getVersion]
      */
-    fun MutateStateScope.upgradePermissions(
+    fun MutateStateScope.upgradePackageState(
         packageState: PackageState,
         userId: Int,
         version: Int
@@ -93,15 +94,18 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
         packageState: PackageState,
         userId: Int
     ) {
-        val androidPackage = packageState.androidPackage!!
-        if (Manifest.permission.ACCESS_BACKGROUND_LOCATION in androidPackage.requestedPermissions) {
-            val permissionFlags =
-                state.userStates[userId].appIdPermissionFlags[packageState.appId]
-            val fineLocationFlags = permissionFlags[Manifest.permission.ACCESS_FINE_LOCATION] ?: 0
-            val coarseLocationFlags =
-                permissionFlags[Manifest.permission.ACCESS_COARSE_LOCATION] ?: 0
-            val isForegroundLocationGranted = PermissionFlags.isAppOpGranted(fineLocationFlags) ||
-                PermissionFlags.isAppOpGranted(coarseLocationFlags)
+        if (Manifest.permission.ACCESS_BACKGROUND_LOCATION in
+            packageState.androidPackage!!.requestedPermissions) {
+            val appId = packageState.appId
+            val accessFineLocationFlags = with(policy) {
+                getPermissionFlags(appId, userId, Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+            val accessCoarseLocationFlags = with(policy) {
+                getPermissionFlags(appId, userId, Manifest.permission.ACCESS_COARSE_LOCATION)
+            }
+            val isForegroundLocationGranted =
+                PermissionFlags.isAppOpGranted(accessFineLocationFlags) ||
+                    PermissionFlags.isAppOpGranted(accessCoarseLocationFlags)
             if (isForegroundLocationGranted) {
                 grantRuntimePermission(
                     packageState, userId, Manifest.permission.ACCESS_BACKGROUND_LOCATION
@@ -114,10 +118,13 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
         packageState: PackageState,
         userId: Int
     ) {
-        val androidPackage = packageState.androidPackage!!
-        if (Manifest.permission.ACCESS_MEDIA_LOCATION in androidPackage.requestedPermissions) {
-            val permissionFlags = state.userStates[userId].appIdPermissionFlags[packageState.appId]
-            val flags = permissionFlags[Manifest.permission.READ_EXTERNAL_STORAGE] ?: 0
+        if (Manifest.permission.ACCESS_MEDIA_LOCATION in
+            packageState.androidPackage!!.requestedPermissions) {
+            val flags = with(policy) {
+                getPermissionFlags(
+                    packageState.appId, userId, Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+            }
             if (PermissionFlags.isAppOpGranted(flags)) {
                 grantRuntimePermission(
                     packageState, userId, Manifest.permission.ACCESS_MEDIA_LOCATION
@@ -134,17 +141,19 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
         if (androidPackage.targetSdkVersion < Build.VERSION_CODES.TIRAMISU) {
             return
         }
-
         val requestedPermissionNames = androidPackage.requestedPermissions
-        val permissionFlags = state.userStates[userId].appIdPermissionFlags[packageState.appId]
-        val isStorageUserGranted = requestedPermissionNames.anyIndexed { _, permissionName ->
-            val flags = permissionFlags[permissionName] ?: 0
-            permissionName in STORAGE_PERMISSIONS && PermissionFlags.isAppOpGranted(flags) &&
-                flags.hasBits(PermissionFlags.USER_SET)
+        val isStorageUserGranted = STORAGE_PERMISSIONS.anyIndexed { _, permissionName ->
+            if (permissionName !in requestedPermissionNames) {
+                return@anyIndexed false
+            }
+            val flags = with(policy) {
+                getPermissionFlags(packageState.appId, userId, permissionName)
+            }
+            PermissionFlags.isAppOpGranted(flags) && flags.hasBits(PermissionFlags.USER_SET)
         }
         if (isStorageUserGranted) {
-            requestedPermissionNames.forEachIndexed { _, permissionName ->
-                if (permissionName in AURAL_VISUAL_MEDIA_PERMISSIONS) {
+            AURAL_VISUAL_MEDIA_PERMISSIONS.forEachIndexed { _, permissionName ->
+                if (permissionName in requestedPermissionNames) {
                     grantRuntimePermission(packageState, userId, permissionName)
                 }
             }
@@ -160,14 +169,13 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
             LOG_TAG, "Granting runtime permission for package: ${packageState.packageName}, " +
                 "permission: $permissionName, userId: $userId"
         )
-        val permission = state.systemState.permissions[permissionName]!!
+        val permission = newState.systemState.permissions[permissionName]!!
         if (packageState.getUserStateOrDefault(userId).isInstantApp && !permission.isInstant) {
             return
         }
 
         val appId = packageState.appId
-        val permissionFlags = state.userStates[userId].appIdPermissionFlags[appId]
-        var flags = permissionFlags[permission.name] ?: 0
+        var flags = with(policy) { getPermissionFlags(appId, userId, permissionName) }
         if (flags.hasAnyBit(MASK_ANY_FIXED)) {
             Log.v(
                 LOG_TAG,
@@ -184,9 +192,7 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
             PermissionFlags.HIBERNATION or
             PermissionFlags.ONE_TIME
         )
-        with(policy) {
-            setPermissionFlags(appId, userId, permissionName, flags)
-        }
+        with(policy) { setPermissionFlags(appId, userId, permissionName, flags) }
     }
 
     companion object {

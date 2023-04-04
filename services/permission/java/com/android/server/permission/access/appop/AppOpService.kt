@@ -19,6 +19,9 @@ package com.android.server.permission.access.appop
 import android.app.AppOpsManager
 import android.os.Handler
 import android.os.UserHandle
+import android.util.ArrayMap
+import android.util.SparseArray
+import android.util.SparseBooleanArray
 import android.util.SparseIntArray
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.util.ArrayUtils
@@ -27,10 +30,7 @@ import com.android.server.permission.access.AccessCheckingService
 import com.android.server.permission.access.AppOpUri
 import com.android.server.permission.access.PackageUri
 import com.android.server.permission.access.UidUri
-import com.android.server.permission.access.collection.IndexedMap
-import com.android.server.permission.access.collection.IntBooleanMap
-import com.android.server.permission.access.collection.IntMap
-import com.android.server.permission.access.collection.forEachIndexed
+import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 
 class AppOpService(
     private val service: AccessCheckingService
@@ -43,7 +43,7 @@ class AppOpService(
     private val context = service.context
     private lateinit var handler: Handler
     private lateinit var lock: Any
-    private lateinit var switchedOps: IntMap<IntArray>
+    private lateinit var switchedOps: SparseArray<IntArray>
 
     fun initialize() {
         // TODO(b/252883039): Wrong handler. Inject main thread handler here.
@@ -51,7 +51,7 @@ class AppOpService(
         // TODO(b/252883039): Wrong lock object. Inject AppOpsService here.
         lock = Any()
 
-        switchedOps = IntMap()
+        switchedOps = SparseArray()
         for (switchedCode in 0 until AppOpsManager._NUM_OP) {
             val switchCode = AppOpsManager.opToSwitch(switchedCode)
             switchedOps.put(switchCode,
@@ -78,11 +78,11 @@ class AppOpService(
     }
 
     override fun getNonDefaultUidModes(uid: Int): SparseIntArray {
-        return opNameMapToOpIntMap(getUidModes(uid))
+        return opNameMapToOpSparseArray(getUidModes(uid))
     }
 
     override fun getNonDefaultPackageModes(packageName: String, userId: Int): SparseIntArray {
-        return opNameMapToOpIntMap(getPackageModes(packageName, userId))
+        return opNameMapToOpSparseArray(getPackageModes(packageName, userId))
     }
 
     override fun getUidMode(uid: Int, op: Int): Int {
@@ -94,12 +94,12 @@ class AppOpService(
         }
     }
 
-    private fun getUidModes(uid: Int): IndexedMap<String, Int>? {
+    private fun getUidModes(uid: Int): ArrayMap<String, Int>? {
         val appId = UserHandle.getAppId(uid)
         val userId = UserHandle.getUserId(uid)
         return service.getState {
             with(uidPolicy) { getAppOpModes(appId, userId) }
-        }
+        }?.map
     }
 
     override fun setUidMode(uid: Int, op: Int, mode: Int): Boolean {
@@ -123,8 +123,8 @@ class AppOpService(
     private fun getPackageModes(
         packageName: String,
         userId: Int
-    ): IndexedMap<String, Int>? =
-        service.getState { with(packagePolicy) { getAppOpModes(packageName, userId) } }
+    ): ArrayMap<String, Int>? =
+        service.getState { with(packagePolicy) { getAppOpModes(packageName, userId) } }?.map
 
     override fun setPackageMode(packageName: String, op: Int, mode: Int, userId: Int) {
         val opName = AppOpsManager.opToPublicName(op)
@@ -149,15 +149,15 @@ class AppOpService(
         return wasChanged
     }
 
-    private fun opNameMapToOpIntMap(modes: IndexedMap<String, Int>?): SparseIntArray =
+    private fun opNameMapToOpSparseArray(modes: ArrayMap<String, Int>?): SparseIntArray =
         if (modes == null) {
             SparseIntArray()
         } else {
-            val opIntMap = SparseIntArray(modes.size)
+            val opSparseArray = SparseIntArray(modes.size)
             modes.forEachIndexed { _, opName, opMode ->
-                opIntMap.put(AppOpsManager.strOpToOp(opName), opMode)
+                opSparseArray.put(AppOpsManager.strOpToOp(opName), opMode)
             }
-            opIntMap
+            opSparseArray
         }
 
     override fun areUidModesDefault(uid: Int): Boolean {
@@ -175,21 +175,21 @@ class AppOpService(
         // and we have our own persistence.
     }
 
-    override fun getForegroundOps(uid: Int): IntBooleanMap {
-        return IntBooleanMap().apply {
-            getUidModes(uid)?.forEachIndexed { _, code, mode ->
+    override fun getForegroundOps(uid: Int): SparseBooleanArray {
+        return SparseBooleanArray().apply {
+            getUidModes(uid)?.forEachIndexed { _, op, mode ->
                 if (mode == AppOpsManager.MODE_FOREGROUND) {
-                    put(AppOpsManager.strOpToOp(code), true)
+                    this[AppOpsManager.strOpToOp(op)] = true
                 }
             }
         }
     }
 
-    override fun getForegroundOps(packageName: String, userId: Int): IntBooleanMap {
-        return IntBooleanMap().apply {
-            getPackageModes(packageName, userId)?.forEachIndexed { _, code, mode ->
+    override fun getForegroundOps(packageName: String, userId: Int): SparseBooleanArray {
+        return SparseBooleanArray().apply {
+            getPackageModes(packageName, userId)?.forEachIndexed { _, op, mode ->
                 if (mode == AppOpsManager.MODE_FOREGROUND) {
-                    put(AppOpsManager.strOpToOp(code), true)
+                    this[AppOpsManager.strOpToOp(op)] = true
                 }
             }
         }

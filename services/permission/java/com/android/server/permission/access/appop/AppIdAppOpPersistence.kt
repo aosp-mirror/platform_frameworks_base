@@ -16,12 +16,17 @@
 
 package com.android.server.permission.access.appop
 
+import android.os.Process
 import android.util.Log
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.permission.access.AccessState
-import com.android.server.permission.access.UserState
+import com.android.server.permission.access.AppIdAppOpModes
+import com.android.server.permission.access.MutableAccessState
+import com.android.server.permission.access.MutableAppIdAppOpModes
+import com.android.server.permission.access.WriteMode
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.attributeInt
 import com.android.server.permission.access.util.forEachTag
 import com.android.server.permission.access.util.getAttributeIntOrThrow
@@ -29,44 +34,46 @@ import com.android.server.permission.access.util.tag
 import com.android.server.permission.access.util.tagName
 
 class AppIdAppOpPersistence : BaseAppOpPersistence() {
-    override fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int) {
+    override fun BinaryXmlPullParser.parseUserState(state: MutableAccessState, userId: Int) {
         when (tagName) {
             TAG_APP_ID_APP_OPS -> parseAppIdAppOps(state, userId)
             else -> {}
         }
     }
 
-    private fun BinaryXmlPullParser.parseAppIdAppOps(state: AccessState, userId: Int) {
-        val userState = state.userStates[userId]
+    private fun BinaryXmlPullParser.parseAppIdAppOps(state: MutableAccessState, userId: Int) {
+        val userState = state.mutateUserState(userId, WriteMode.NONE)!!
+        val appIdAppOpModes = userState.mutateAppIdAppOpModes()
         forEachTag {
             when (tagName) {
-                TAG_APP_ID -> parseAppId(userState)
+                TAG_APP_ID -> parseAppId(appIdAppOpModes)
                 else -> Log.w(LOG_TAG, "Ignoring unknown tag $name when parsing app-op state")
             }
         }
-        userState.appIdAppOpModes.retainAllIndexed { _, appId, _ ->
-            val hasAppId = appId in state.systemState.appIds
-            if (!hasAppId) {
+        userState.appIdAppOpModes.forEachReversedIndexed { appIdIndex, appId, _ ->
+            // Non-application UIDs may not have an Android package but may still have app op state.
+            if (appId !in state.systemState.appIds && appId >= Process.FIRST_APPLICATION_UID) {
                 Log.w(LOG_TAG, "Dropping unknown app ID $appId when parsing app-op state")
+                appIdAppOpModes.removeAt(appIdIndex)
+                userState.requestWriteMode(WriteMode.ASYNCHRONOUS)
             }
-            hasAppId
         }
     }
 
-    private fun BinaryXmlPullParser.parseAppId(userState: UserState) {
+    private fun BinaryXmlPullParser.parseAppId(appIdAppOpModes: MutableAppIdAppOpModes) {
         val appId = getAttributeIntOrThrow(ATTR_ID)
-        val appOpModes = IndexedMap<String, Int>()
-        userState.appIdAppOpModes[appId] = appOpModes
+        val appOpModes = MutableIndexedMap<String, Int>()
+        appIdAppOpModes[appId] = appOpModes
         parseAppOps(appOpModes)
     }
 
     override fun BinaryXmlSerializer.serializeUserState(state: AccessState, userId: Int) {
-        serializeAppIdAppOps(state.userStates[userId])
+        serializeAppIdAppOps(state.userStates[userId]!!.appIdAppOpModes)
     }
 
-    private fun BinaryXmlSerializer.serializeAppIdAppOps(userState: UserState) {
+    private fun BinaryXmlSerializer.serializeAppIdAppOps(appIdAppOpModes: AppIdAppOpModes) {
         tag(TAG_APP_ID_APP_OPS) {
-            userState.appIdAppOpModes.forEachIndexed { _, appId, appOpModes ->
+            appIdAppOpModes.forEachIndexed { _, appId, appOpModes ->
                 serializeAppId(appId, appOpModes)
             }
         }

@@ -16,24 +16,39 @@
 
 package com.android.server.permission.access.appop
 
+import android.util.Log
 import com.android.server.LocalServices
 import com.android.server.appop.AppOpMigrationHelper
-import com.android.server.permission.access.AccessState
+import com.android.server.permission.access.MutableAccessState
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.PackageVersionMigration
 
 class PackageAppOpMigration {
-    fun migrateUserState(state: AccessState, userId: Int) {
+    fun migrateUserState(state: MutableAccessState, userId: Int) {
         val legacyAppOpsManager = LocalServices.getService(AppOpMigrationHelper::class.java)!!
         val legacyPackageAppOpModes = legacyAppOpsManager.getLegacyPackageAppOpModes(userId)
-        val packageAppOpModes = state.userStates[userId].packageAppOpModes
         val version = PackageVersionMigration.getVersion(userId)
+
+        val userState = state.mutateUserState(userId)!!
+        val packageAppOpModes = userState.mutatePackageAppOpModes()
         legacyPackageAppOpModes.forEach { (packageName, legacyAppOpModes) ->
-            val appOpModes = packageAppOpModes.getOrPut(packageName) { IndexedMap() }
+            if (packageName !in state.systemState.packageStates) {
+                Log.w(LOG_TAG, "Dropping unknown package $packageName when migrating app op state")
+                return@forEach
+            }
+
+            val appOpModes = MutableIndexedMap<String, Int>()
+            packageAppOpModes[packageName] = appOpModes
             legacyAppOpModes.forEach { (appOpName, appOpMode) ->
                 appOpModes[appOpName] = appOpMode
             }
-            state.userStates[userId].packageVersions[packageName] = version
+
+            userState.mutatePackageVersions()[packageName] = version
         }
+    }
+
+    companion object {
+        private val LOG_TAG = PackageAppOpMigration::class.java.simpleName
     }
 }

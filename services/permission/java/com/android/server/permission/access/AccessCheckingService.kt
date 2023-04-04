@@ -29,6 +29,7 @@ import com.android.server.SystemService
 import com.android.server.appop.AppOpsCheckingServiceInterface
 import com.android.server.permission.access.appop.AppOpService
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.permission.PermissionService
 import com.android.server.pm.KnownPackages
 import com.android.server.pm.PackageManagerLocal
@@ -72,7 +73,7 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         userManagerService = UserManagerService.getInstance()
         systemConfig = SystemConfig.getInstance()
 
-        val userIds = IntSet(userManagerService.userIdsIncludingPreCreated)
+        val userIds = MutableIntSet(userManagerService.userIdsIncludingPreCreated)
         val (packageStates, disabledSystemPackageStates) = packageManagerLocal.allPackageStates
         val knownPackages = packageManagerInternal.knownPackages
         val isLeanback = systemConfig.isLeanback
@@ -82,7 +83,7 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         val permissionAllowlist = systemConfig.permissionAllowlist
         val implicitToSourcePermissions = systemConfig.implicitToSourcePermissions
 
-        val state = AccessState()
+        val state = MutableAccessState()
         policy.initialize(
             state, userIds, packageStates, disabledSystemPackageStates, knownPackages, isLeanback,
             configPermissions, privilegedPermissionAllowlistPackages, permissionAllowlist,
@@ -104,7 +105,7 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         get() = PackageManager.FEATURE_LEANBACK in availableFeatures
 
     private val SystemConfig.privilegedPermissionAllowlistPackages: IndexedListSet<String>
-        get() = IndexedListSet<String>().apply {
+        get() = MutableIndexedListSet<String>().apply {
             this += "android"
             if (PackageManager.FEATURE_AUTOMOTIVE in availableFeatures) {
                 // Note that SystemProperties.get(String, String) forces returning an empty string
@@ -117,14 +118,16 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         }
 
     private val SystemConfig.implicitToSourcePermissions: IndexedMap<String, IndexedListSet<String>>
-        get() = IndexedMap<String, IndexedListSet<String>>().apply {
+        @Suppress("UNCHECKED_CAST")
+        get() = MutableIndexedMap<String, MutableIndexedListSet<String>>().apply {
             splitPermissions.forEach { splitPermissionInfo ->
                 val sourcePermissionName = splitPermissionInfo.splitPermission
                 splitPermissionInfo.newPermissions.forEach { implicitPermissionName ->
-                    getOrPut(implicitPermissionName) { IndexedListSet() } += sourcePermissionName
+                    getOrPut(implicitPermissionName) { MutableIndexedListSet() } +=
+                        sourcePermissionName
                 }
             }
-        }
+        } as IndexedMap<String, IndexedListSet<String>>
 
     fun getDecision(subject: AccessUri, `object`: AccessUri): Int =
         getState {
@@ -222,7 +225,7 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         get() = withUnfilteredSnapshot().use { it.packageStates to it.disabledSystemPackageStates }
 
     private val PackageManagerInternal.knownPackages: IntMap<Array<String>>
-        get() = IntMap<Array<String>>().apply {
+        get() = MutableIntMap<Array<String>>().apply {
             this[KnownPackages.PACKAGE_INSTALLER] = getKnownPackageNames(
                 KnownPackages.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM
             )
@@ -269,7 +272,7 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         contract { callsInPlace(action, InvocationKind.EXACTLY_ONCE) }
         synchronized(stateLock) {
             val oldState = state
-            val newState = oldState.copy()
+            val newState = oldState.toMutable()
             MutateStateScope(oldState, newState).action()
             persistence.write(newState)
             state = newState

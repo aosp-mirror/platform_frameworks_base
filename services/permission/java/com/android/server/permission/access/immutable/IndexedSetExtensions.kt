@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.permission.access.collection
+package com.android.server.permission.access.immutable
 
 import android.util.ArraySet
+import com.android.server.permission.access.collection.forEachIndexed
 
-typealias IndexedSet<T> = ArraySet<T>
+fun <T> indexedSetOf(vararg elements: T): IndexedSet<T> =
+    MutableIndexedSet(ArraySet(elements.asList()))
 
 inline fun <T> IndexedSet<T>.allIndexed(predicate: (Int, T) -> Boolean): Boolean {
     forEachIndexed { index, element ->
@@ -38,14 +40,8 @@ inline fun <T> IndexedSet<T>.anyIndexed(predicate: (Int, T) -> Boolean): Boolean
     return false
 }
 
-@Suppress("NOTHING_TO_INLINE")
-inline fun <T> IndexedSet<T>.copy(): IndexedSet<T> = IndexedSet(this)
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun <T> IndexedSet<T>.elementAt(index: Int): T = valueAt(index)
-
 inline fun <T> IndexedSet<T>.forEachIndexed(action: (Int, T) -> Unit) {
-    for (index in indices) {
+    for (index in 0 until size) {
         action(index, elementAt(index))
     }
 }
@@ -59,14 +55,8 @@ inline fun <T> IndexedSet<T>.forEachReversedIndexed(action: (Int, T) -> Unit) {
 inline val <T> IndexedSet<T>.lastIndex: Int
     get() = size - 1
 
-@Suppress("NOTHING_TO_INLINE")
-inline operator fun <T> IndexedSet<T>.minus(element: T): IndexedSet<T> =
-    copy().apply { this -= element }
-
-@Suppress("NOTHING_TO_INLINE")
-inline operator fun <T> IndexedSet<T>.minusAssign(element: T) {
-    remove(element)
-}
+operator fun <T> IndexedSet<T>.minus(element: T): MutableIndexedSet<T> =
+    toMutable().apply { this -= element }
 
 inline fun <T> IndexedSet<T>.noneIndexed(predicate: (Int, T) -> Boolean): Boolean {
     forEachIndexed { index, element ->
@@ -77,36 +67,19 @@ inline fun <T> IndexedSet<T>.noneIndexed(predicate: (Int, T) -> Boolean): Boolea
     return true
 }
 
-@Suppress("NOTHING_TO_INLINE")
-inline operator fun <T> IndexedSet<T>.plus(element: T): IndexedSet<T> =
-    copy().apply { this += element }
+operator fun <T> IndexedSet<T>.plus(element: T): MutableIndexedSet<T> =
+    toMutable().apply { this += element }
 
 @Suppress("NOTHING_TO_INLINE")
-inline operator fun <T> IndexedSet<T>.plusAssign(element: T) {
+inline operator fun <T> MutableIndexedSet<T>.minusAssign(element: T) {
+    remove(element)
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline operator fun <T> MutableIndexedSet<T>.plusAssign(element: T) {
     add(element)
 }
 
-inline fun <T> IndexedSet<T>.removeAllIndexed(predicate: (Int, T) -> Boolean): Boolean {
-    var isChanged = false
-    forEachReversedIndexed { index, element ->
-        if (predicate(index, element)) {
-            removeAt(index)
-            isChanged = true
-        }
-    }
-    return isChanged
+operator fun <T> MutableIndexedSet<T>.plusAssign(list: List<T>) {
+    list.forEachIndexed { _, it -> this += it }
 }
-
-inline fun <T> IndexedSet<T>.retainAllIndexed(predicate: (Int, T) -> Boolean): Boolean {
-    var isChanged = false
-    forEachReversedIndexed { index, element ->
-        if (!predicate(index, element)) {
-            removeAt(index)
-            isChanged = true
-        }
-    }
-    return isChanged
-}
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun <T> indexedSetOf(vararg elements: T): IndexedSet<T> = IndexedSet(elements.asList())

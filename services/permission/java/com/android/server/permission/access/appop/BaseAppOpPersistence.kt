@@ -20,7 +20,9 @@ import android.util.Log
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.permission.access.AccessState
+import com.android.server.permission.access.MutableAccessState
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.attributeInt
 import com.android.server.permission.access.util.attributeInterned
 import com.android.server.permission.access.util.forEachTag
@@ -30,11 +32,11 @@ import com.android.server.permission.access.util.tag
 import com.android.server.permission.access.util.tagName
 
 abstract class BaseAppOpPersistence {
-    abstract fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int)
+    abstract fun BinaryXmlPullParser.parseUserState(state: MutableAccessState, userId: Int)
 
     abstract fun BinaryXmlSerializer.serializeUserState(state: AccessState, userId: Int)
 
-    protected fun BinaryXmlPullParser.parseAppOps(appOpModes: IndexedMap<String, Int>) {
+    protected fun BinaryXmlPullParser.parseAppOps(appOpModes: MutableIndexedMap<String, Int>) {
         forEachTag {
             when (tagName) {
                 TAG_APP_OP -> parseAppOp(appOpModes)
@@ -43,7 +45,7 @@ abstract class BaseAppOpPersistence {
         }
     }
 
-    private fun BinaryXmlPullParser.parseAppOp(appOpModes: IndexedMap<String, Int>) {
+    private fun BinaryXmlPullParser.parseAppOp(appOpModes: MutableIndexedMap<String, Int>) {
         val name = getAttributeValueOrThrow(ATTR_NAME).intern()
         val mode = getAttributeIntOrThrow(ATTR_MODE)
         appOpModes[name] = mode

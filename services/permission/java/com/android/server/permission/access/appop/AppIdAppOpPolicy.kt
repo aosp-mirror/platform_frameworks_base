@@ -17,13 +17,14 @@
 package com.android.server.permission.access.appop
 
 import android.app.AppOpsManager
-import com.android.server.permission.access.AccessState
 import com.android.server.permission.access.AccessUri
 import com.android.server.permission.access.AppOpUri
 import com.android.server.permission.access.GetStateScope
+import com.android.server.permission.access.MutableAccessState
 import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.UidUri
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.pm.pkg.PackageState
 
 class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
@@ -32,7 +33,8 @@ class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
     private val upgrade = AppIdAppOpUpgrade(this)
 
     @Volatile
-    private var onAppOpModeChangedListeners = IndexedListSet<OnAppOpModeChangedListener>()
+    private var onAppOpModeChangedListeners: IndexedListSet<OnAppOpModeChangedListener> =
+        MutableIndexedListSet()
     private val onAppOpModeChangedListenersLock = Any()
 
     override val subjectScheme: String
@@ -59,27 +61,30 @@ class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
     }
 
     override fun MutateStateScope.onAppIdRemoved(appId: Int) {
-        newState.userStates.forEachIndexed { _, _, userState ->
-            userState.appIdAppOpModes -= appId
-            userState.requestWrite()
-            // Skip notifying the change listeners since the app ID no longer exists.
+        newState.userStates.forEachIndexed { userStateIndex, _, userState ->
+            val appIdIndex = userState.appIdAppOpModes.indexOfKey(appId)
+            if (appIdIndex >= 0) {
+                newState.mutateUserStateAt(userStateIndex).mutateAppIdAppOpModes()
+                    .removeAt(appIdIndex)
+                // Skip notifying the change listeners since the app ID no longer exists.
+            }
         }
     }
 
     fun GetStateScope.getAppOpModes(appId: Int, userId: Int): IndexedMap<String, Int>? =
-        state.userStates[userId].appIdAppOpModes[appId]
+        state.userStates[userId]!!.appIdAppOpModes[appId]
 
     fun MutateStateScope.removeAppOpModes(appId: Int, userId: Int): Boolean {
-        val userState = newState.userStates[userId]
-        val isChanged = userState.appIdAppOpModes.removeReturnOld(appId) != null
-        if (isChanged) {
-            userState.requestWrite()
+        val appIdIndex = newState.userStates[userId]!!.appIdAppOpModes.indexOfKey(appId)
+        if (appIdIndex < 0) {
+            return false
         }
-        return isChanged
+        newState.mutateUserState(userId)!!.mutateAppIdAppOpModes().removeAt(appIdIndex)
+        return true
     }
 
     fun GetStateScope.getAppOpMode(appId: Int, userId: Int, appOpName: String): Int =
-        state.userStates[userId].appIdAppOpModes[appId]
+        state.userStates[userId]!!.appIdAppOpModes[appId]
             .getWithDefault(appOpName, AppOpsManager.opToDefaultMode(appOpName))
 
     fun MutateStateScope.setAppOpMode(
@@ -88,23 +93,18 @@ class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
         appOpName: String,
         mode: Int
     ): Boolean {
-        val userState = newState.userStates[userId]
-        val appIdAppOpModes = userState.appIdAppOpModes
-        var appOpModes = appIdAppOpModes[appId]
         val defaultMode = AppOpsManager.opToDefaultMode(appOpName)
-        val oldMode = appOpModes.getWithDefault(appOpName, defaultMode)
+        val oldMode = newState.userStates[userId]!!.appIdAppOpModes[appId]
+            .getWithDefault(appOpName, defaultMode)
         if (oldMode == mode) {
             return false
         }
-        if (appOpModes == null) {
-            appOpModes = IndexedMap()
-            appIdAppOpModes[appId] = appOpModes
-        }
+        val appIdAppOpModes = newState.mutateUserState(userId)!!.mutateAppIdAppOpModes()
+        val appOpModes = appIdAppOpModes.mutateOrPut(appId) { MutableIndexedMap() }
         appOpModes.putWithDefault(appOpName, mode, defaultMode)
         if (appOpModes.isEmpty()) {
             appIdAppOpModes -= appId
         }
-        userState.requestWrite()
         onAppOpModeChangedListeners.forEachIndexed { _, it ->
             it.onAppOpModeChanged(appId, userId, appOpName, oldMode, mode)
         }
@@ -123,7 +123,7 @@ class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
         }
     }
 
-    override fun migrateUserState(state: AccessState, userId: Int) {
+    override fun migrateUserState(state: MutableAccessState, userId: Int) {
         with(migration) { migrateUserState(state, userId) }
     }
 
