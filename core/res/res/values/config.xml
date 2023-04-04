@@ -684,6 +684,20 @@
      rotation. -->
     <bool name="config_windowManagerHalfFoldAutoRotateOverride">false</bool>
 
+    <!-- Indicates whether the window manager pauses autorotation when folding or unfolding
+     a foldable device based on hinge angle sensor events and physical display switch events. -->
+    <bool name="config_windowManagerPauseRotationWhenUnfolding">false</bool>
+
+    <!-- Amount of time during which autorotation will be disabled since last hinge angle event -->
+    <integer name="config_pauseRotationWhenUnfolding_maxHingeAngle">0</integer>
+
+    <!-- Maximum hinge angle event to be considered to disable autorotation when folding or
+     unfolding -->
+    <integer name="config_pauseRotationWhenUnfolding_hingeEventTimeout">0</integer>
+
+    <!-- Amount of time during which autorotation will be disabled since last display switch -->
+    <integer name="config_pauseRotationWhenUnfolding_displaySwitchTimeout">0</integer>
+
     <!-- When a device enters any of these states, it should be woken up. States are defined in
          device_state_configuration.xml. -->
     <integer-array name="config_deviceStatesOnWhichToWakeUp">
