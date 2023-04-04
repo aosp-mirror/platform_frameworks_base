@@ -428,8 +428,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mGivenInsetsPending;
 
     /**
-     * These are the content insets that were given during layout for
-     * this window, to be applied to windows behind it.
+     * These are the content insets that were given during layout for this window, to be applied to
+     * windows behind it.
+     * This is only applied to IME windows when corresponding process in DisplayPolicy executed.
      */
     final Rect mGivenContentInsets = new Rect();
 
