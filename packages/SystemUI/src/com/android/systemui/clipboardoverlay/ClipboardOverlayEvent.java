@@ -44,6 +44,12 @@ public enum ClipboardOverlayEvent implements UiEventLogger.UiEventEnum {
     CLIPBOARD_OVERLAY_TAP_OUTSIDE(1077),
     @UiEvent(doc = "clipboard overlay dismissed, miscellaneous reason")
     CLIPBOARD_OVERLAY_DISMISSED_OTHER(1078),
+    @UiEvent(doc = "clipboard overlay shown in expanded form")
+    CLIPBOARD_OVERLAY_SHOWN_EXPANDED(1356),
+    @UiEvent(doc = "clipboard overlay shown in minimized form")
+    CLIPBOARD_OVERLAY_SHOWN_MINIMIZED(1357),
+    @UiEvent(doc = "clipboard overlay expanded")
+    CLIPBOARD_OVERLAY_EXPANDED_FROM_MINIMIZED(1358),
     @UiEvent(doc = "clipboard toast shown")
     CLIPBOARD_TOAST_SHOWN(1270);
 
