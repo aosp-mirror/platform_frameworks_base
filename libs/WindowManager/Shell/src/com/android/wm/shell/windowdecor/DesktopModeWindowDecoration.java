@@ -91,6 +91,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private Drawable mAppIcon;
     private CharSequence mAppName;
 
+    private int mMenuWidth;
+    private int mMarginMenuTop;
+    private int mMarginMenuStart;
+    private int mMarginMenuSpacing;
+    private int mAppInfoPillHeight;
+    private int mWindowingPillHeight;
+    private int mMoreActionsPillHeight;
+    private int mShadowRadius;
+    private int mCornerRadius;
+
     DesktopModeWindowDecoration(
             Context context,
             DisplayController displayController,
@@ -107,6 +117,29 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mSyncQueue = syncQueue;
 
         loadAppInfo();
+        loadHandleMenuDimensions();
+    }
+
+    private void loadHandleMenuDimensions() {
+        final Resources resources = mDecorWindowContext.getResources();
+        mMenuWidth = loadDimensionPixelSize(resources,
+                R.dimen.desktop_mode_handle_menu_width);
+        mMarginMenuTop = loadDimensionPixelSize(resources,
+                R.dimen.desktop_mode_handle_menu_margin_top);
+        mMarginMenuStart = loadDimensionPixelSize(resources,
+                R.dimen.desktop_mode_handle_menu_margin_start);
+        mMarginMenuSpacing = loadDimensionPixelSize(resources,
+                R.dimen.desktop_mode_handle_menu_pill_spacing_margin);
+        mAppInfoPillHeight = loadDimensionPixelSize(resources,
+                R.dimen.desktop_mode_handle_menu_app_info_pill_height);
+        mWindowingPillHeight = loadDimensionPixelSize(resources,
+                R.dimen.desktop_mode_handle_menu_windowing_pill_height);
+        mShadowRadius = loadDimensionPixelSize(resources,
+                R.dimen.desktop_mode_handle_menu_shadow_radius);
+        mCornerRadius = loadDimensionPixelSize(resources,
+                R.dimen.desktop_mode_handle_menu_corner_radius);
+        mMoreActionsPillHeight = loadDimensionPixelSize(resources,
+                R.dimen.desktop_mode_handle_menu_more_actions_pill_height);
     }
 
     @Override
@@ -154,6 +187,22 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final boolean isFreeform =
                 taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
         final boolean isDragResizeable = isFreeform && taskInfo.isResizeable;
+
+        if (mHandleMenuAppInfoPill != null) {
+            updateHandleMenuPillPositions();
+            startT.setPosition(mHandleMenuAppInfoPill.mWindowSurface,
+                    mHandleMenuAppInfoPillPosition.x, mHandleMenuAppInfoPillPosition.y);
+
+            // Only show windowing buttons in proto2. Proto1 uses a system-level mode only.
+            final boolean shouldShowWindowingPill = DesktopModeStatus.isProto2Enabled();
+            if (shouldShowWindowingPill) {
+                startT.setPosition(mHandleMenuWindowingPill.mWindowSurface,
+                        mHandleMenuWindowingPillPosition.x, mHandleMenuWindowingPillPosition.y);
+            }
+
+            startT.setPosition(mHandleMenuMoreActionsPill.mWindowSurface,
+                    mHandleMenuMoreActionsPillPosition.x, mHandleMenuMoreActionsPillPosition.y);
+        }
 
         final WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
@@ -271,64 +320,17 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     void createHandleMenu() {
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        final Resources resources = mDecorWindowContext.getResources();
-        final int captionWidth = mTaskInfo.getConfiguration()
-                .windowConfiguration.getBounds().width();
-        final int menuWidth = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_width);
-        final int shadowRadius = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_shadow_radius);
-        final int cornerRadius = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_corner_radius);
-        final int marginMenuTop = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_margin_top);
-        final int marginMenuStart = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_margin_start);
-        final int marginMenuSpacing = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_pill_spacing_margin);
-        final int appInfoPillHeight = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_app_info_pill_height);
-        final int windowingPillHeight = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_windowing_pill_height);
-        final int moreActionsPillHeight = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_more_actions_pill_height);
+        updateHandleMenuPillPositions();
 
-        final int menuX, menuY;
-        if (mRelayoutParams.mLayoutResId
-                == R.layout.desktop_mode_app_controls_window_decor) {
-            // Align the handle menu to the left of the caption.
-            menuX = mRelayoutParams.mCaptionX - mResult.mDecorContainerOffsetX + marginMenuStart;
-            menuY = mRelayoutParams.mCaptionY - mResult.mDecorContainerOffsetY + marginMenuTop;
-        } else {
-            // Position the handle menu at the center of the caption.
-            menuX = mRelayoutParams.mCaptionX + (captionWidth / 2) - (menuWidth / 2)
-                    - mResult.mDecorContainerOffsetX;
-            menuY = mRelayoutParams.mCaptionY - mResult.mDecorContainerOffsetY + marginMenuStart;
-        }
-
-        final int appInfoPillY = menuY;
-        createAppInfoPill(t, menuX, appInfoPillY, menuWidth, appInfoPillHeight, shadowRadius,
-                cornerRadius);
+        createAppInfoPill(t);
 
         // Only show windowing buttons in proto2. Proto1 uses a system-level mode only.
         final boolean shouldShowWindowingPill = DesktopModeStatus.isProto2Enabled();
-        final int windowingPillY = appInfoPillY + appInfoPillHeight + marginMenuSpacing;
         if (shouldShowWindowingPill) {
-            createWindowingPill(t, menuX, windowingPillY, menuWidth, windowingPillHeight,
-                    shadowRadius,
-                    cornerRadius);
+            createWindowingPill(t);
         }
 
-        final int moreActionsPillY;
-        if (shouldShowWindowingPill) {
-            // Take into account the windowing pill height and margins.
-            moreActionsPillY = windowingPillY + windowingPillHeight + marginMenuSpacing;
-        } else {
-            // Just start after the end of the app info pill + margins.
-            moreActionsPillY = appInfoPillY + appInfoPillHeight + marginMenuSpacing;
-        }
-        createMoreActionsPill(t, menuX, moreActionsPillY, menuWidth, moreActionsPillHeight,
-                shadowRadius, cornerRadius);
+        createMoreActionsPill(t);
 
         mSyncQueue.runInSync(transaction -> {
             transaction.merge(t);
@@ -337,31 +339,31 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         setupHandleMenu(shouldShowWindowingPill);
     }
 
-    private void createAppInfoPill(SurfaceControl.Transaction t, int x, int y, int width,
-            int height, int shadowRadius, int cornerRadius) {
-        mHandleMenuAppInfoPillPosition.set(x, y);
+    private void createAppInfoPill(SurfaceControl.Transaction t) {
+        final int x = (int) mHandleMenuAppInfoPillPosition.x;
+        final int y = (int) mHandleMenuAppInfoPillPosition.y;
         mHandleMenuAppInfoPill = addWindow(
                 R.layout.desktop_mode_window_decor_handle_menu_app_info_pill,
                 "Menu's app info pill",
-                t, x, y, width, height, shadowRadius, cornerRadius);
+                t, x, y, mMenuWidth, mAppInfoPillHeight, mShadowRadius, mCornerRadius);
     }
 
-    private void createWindowingPill(SurfaceControl.Transaction t, int x, int y, int width,
-            int height, int shadowRadius, int cornerRadius) {
-        mHandleMenuWindowingPillPosition.set(x, y);
+    private void createWindowingPill(SurfaceControl.Transaction t) {
+        final int x = (int) mHandleMenuWindowingPillPosition.x;
+        final int y = (int) mHandleMenuWindowingPillPosition.y;
         mHandleMenuWindowingPill = addWindow(
                 R.layout.desktop_mode_window_decor_handle_menu_windowing_pill,
                 "Menu's windowing pill",
-                t, x, y, width, height, shadowRadius, cornerRadius);
+                t, x, y, mMenuWidth, mWindowingPillHeight, mShadowRadius, mCornerRadius);
     }
 
-    private void createMoreActionsPill(SurfaceControl.Transaction t, int x, int y, int width,
-            int height, int shadowRadius, int cornerRadius) {
-        mHandleMenuMoreActionsPillPosition.set(x, y);
+    private void createMoreActionsPill(SurfaceControl.Transaction t) {
+        final int x = (int) mHandleMenuMoreActionsPillPosition.x;
+        final int y = (int) mHandleMenuMoreActionsPillPosition.y;
         mHandleMenuMoreActionsPill = addWindow(
                 R.layout.desktop_mode_window_decor_handle_menu_more_actions_pill,
                 "Menu's more actions pill",
-                t, x, y, width, height, shadowRadius, cornerRadius);
+                t, x, y, mMenuWidth, mMoreActionsPillHeight, mShadowRadius, mCornerRadius);
     }
 
     private void setupHandleMenu(boolean windowingPillShown) {
@@ -410,6 +412,45 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final View moreActionsPillView = mHandleMenuMoreActionsPill.mWindowViewHost.getView();
         final Button closeBtn = moreActionsPillView.findViewById(R.id.close_button);
         closeBtn.setOnClickListener(mOnCaptionButtonClickListener);
+    }
+
+    /**
+     * Updates the handle menu pills' position variables to reflect their next positions
+     */
+    private void updateHandleMenuPillPositions() {
+        final int menuX, menuY;
+        final int captionWidth = mTaskInfo.getConfiguration()
+                .windowConfiguration.getBounds().width();
+        if (mRelayoutParams.mLayoutResId
+                == R.layout.desktop_mode_app_controls_window_decor) {
+            // Align the handle menu to the left of the caption.
+            menuX = mRelayoutParams.mCaptionX - mResult.mDecorContainerOffsetX + mMarginMenuStart;
+            menuY = mRelayoutParams.mCaptionY - mResult.mDecorContainerOffsetY + mMarginMenuTop;
+        } else {
+            // Position the handle menu at the center of the caption.
+            menuX = mRelayoutParams.mCaptionX + (captionWidth / 2) - (mMenuWidth / 2)
+                    - mResult.mDecorContainerOffsetX;
+            menuY = mRelayoutParams.mCaptionY - mResult.mDecorContainerOffsetY + mMarginMenuStart;
+        }
+
+        // App Info pill setup.
+        final int appInfoPillY = menuY;
+        mHandleMenuAppInfoPillPosition.set(menuX, appInfoPillY);
+
+        // Only show windowing buttons in proto2. Proto1 uses a system-level mode only.
+        final boolean shouldShowWindowingPill = DesktopModeStatus.isProto2Enabled();
+
+        final int windowingPillY, moreActionsPillY;
+        if (shouldShowWindowingPill) {
+            windowingPillY = appInfoPillY + mAppInfoPillHeight + mMarginMenuSpacing;
+            mHandleMenuWindowingPillPosition.set(menuX, windowingPillY);
+            moreActionsPillY = windowingPillY + mWindowingPillHeight + mMarginMenuSpacing;
+            mHandleMenuMoreActionsPillPosition.set(menuX, moreActionsPillY);
+        } else {
+            // Just start after the end of the app info pill + margins.
+            moreActionsPillY = appInfoPillY + mAppInfoPillHeight + mMarginMenuSpacing;
+            mHandleMenuMoreActionsPillPosition.set(menuX, moreActionsPillY);
+        }
     }
 
     /**
