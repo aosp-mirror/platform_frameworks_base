@@ -1110,6 +1110,7 @@
     <!-- Chipbar -->
     <!-- (Used for media tap-to-transfer chip for sender device and active unlock) -->
     <dimen name="chipbar_outer_padding">16dp</dimen>
+    <dimen name="chipbar_outer_padding_half">8dp</dimen>
     <dimen name="chipbar_text_size">16sp</dimen>
     <dimen name="chipbar_start_icon_size">24dp</dimen>
     <dimen name="chipbar_end_icon_size">20dp</dimen>

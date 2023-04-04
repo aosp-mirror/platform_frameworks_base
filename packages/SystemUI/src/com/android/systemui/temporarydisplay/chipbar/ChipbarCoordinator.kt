@@ -31,6 +31,7 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.DimenRes
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import com.android.internal.widget.CachingIconView
@@ -180,8 +181,9 @@ constructor(
 
         // Button
         val buttonView = currentView.requireViewById<TextView>(R.id.end_button)
-        if (newInfo.endItem is ChipbarEndItem.Button) {
-            TextViewBinder.bind(buttonView, newInfo.endItem.text)
+        val hasButton = newInfo.endItem is ChipbarEndItem.Button
+        if (hasButton) {
+            TextViewBinder.bind(buttonView, (newInfo.endItem as ChipbarEndItem.Button).text)
 
             val onClickListener =
                 View.OnClickListener { clickedView ->
@@ -195,6 +197,12 @@ constructor(
         } else {
             buttonView.visibility = View.GONE
         }
+
+        currentView
+            .getInnerView()
+            .setEndPadding(
+                if (hasButton) R.dimen.chipbar_outer_padding_half else R.dimen.chipbar_outer_padding
+            )
 
         // ---- Overall accessibility ----
         val iconDesc = newInfo.startIcon.icon.contentDescription
@@ -307,6 +315,15 @@ constructor(
 
     override fun getTouchableRegion(view: View, outRect: Rect) {
         viewUtil.setRectToViewWindowLocation(view, outRect)
+    }
+
+    private fun View.setEndPadding(@DimenRes endPaddingDimen: Int) {
+        this.setPaddingRelative(
+            this.paddingStart,
+            this.paddingTop,
+            context.resources.getDimensionPixelSize(endPaddingDimen),
+            this.paddingBottom,
+        )
     }
 
     private fun Boolean.visibleIfTrue(): Int {
