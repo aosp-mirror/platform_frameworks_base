@@ -518,6 +518,8 @@ applications that come with the platform
         <permission name="android.permission.LOG_FOREGROUND_RESOURCE_USE"/>
         <!-- Permission required for CTS test - CtsVoiceInteractionTestCases -->
         <permission name="android.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER"/>
+        <!-- Permission required for CTS test - SatelliteManagerTest -->
+        <permission name="android.permission.SATELLITE_COMMUNICATION"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
