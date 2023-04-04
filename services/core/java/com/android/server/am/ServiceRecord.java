@@ -850,10 +850,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             mAppForAllowingBgActivityStartsByStart =
                     mBackgroundStartPrivilegesByStartMerged.allowsAny()
                     ? proc : null;
-            if (mBackgroundStartPrivilegesByStartMerged.allowsAny()
-                    || mIsAllowedBgActivityStartsByBinding) {
+            BackgroundStartPrivileges backgroundStartPrivileges =
+                    getBackgroundStartPrivilegesWithExclusiveToken();
+            if (backgroundStartPrivileges.allowsAny()) {
                 proc.addOrUpdateBackgroundStartPrivileges(this,
-                        getBackgroundStartPrivilegesWithExclusiveToken());
+                        backgroundStartPrivileges);
             } else {
                 proc.removeBackgroundStartPrivileges(this);
             }
