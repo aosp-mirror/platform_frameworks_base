@@ -403,8 +403,10 @@ class KeyguardController {
             return;
         }
 
-        mWindowManager.mPolicy.onKeyguardOccludedChangedLw(isDisplayOccluded(DEFAULT_DISPLAY));
-        if (isKeyguardLocked(displayId)) {
+        final boolean waitAppTransition = isKeyguardLocked(displayId);
+        mWindowManager.mPolicy.onKeyguardOccludedChangedLw(isDisplayOccluded(DEFAULT_DISPLAY),
+                waitAppTransition);
+        if (waitAppTransition) {
             mService.deferWindowLayout();
             try {
                 mRootWindowContainer.getDefaultDisplay()
