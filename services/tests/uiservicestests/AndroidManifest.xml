@@ -33,7 +33,8 @@
     <uses-permission android:name="android.permission.OBSERVE_ROLE_HOLDERS" />
     <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT"/>
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
-    <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG" />
+    <uses-permission android:name="android.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG" />
+    <uses-permission android:name="android.permission.READ_WRITE_SYNC_DISABLED_MODE_CONFIG" />
     <uses-permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE" />
 
     <application android:debuggable="true">
