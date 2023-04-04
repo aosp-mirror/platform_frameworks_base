@@ -291,6 +291,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 mProgressAnimator.reset();
                 final OnBackInvokedCallback callback = mCallback.get();
                 if (callback == null) {
+                    Log.d(TAG, "Trying to call onBackInvoked() on a null callback reference.");
                     return;
                 }
                 callback.onBackInvoked();
