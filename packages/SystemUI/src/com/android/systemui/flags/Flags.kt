@@ -575,9 +575,6 @@ object Flags {
     // TODO(b/251205791): Tracking Bug
     @JvmField val SCREENSHOT_APP_CLIPS = releasedFlag(1304, "screenshot_app_clips")
 
-    // TODO(b/268484562): Tracking bug
-    @JvmField val SCREENSHOT_METADATA_REFACTOR = releasedFlag(1305, "screenshot_metadata_refactor")
-
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
     val QUICK_TAP_IN_PCC = releasedFlag(1400, "quick_tap_in_pcc")
