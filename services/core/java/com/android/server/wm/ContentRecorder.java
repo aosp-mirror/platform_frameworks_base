@@ -296,6 +296,9 @@ final class ContentRecorder implements WindowContainerListener {
                         + "state %d",
                 mDisplayContent.getDisplayId(), mDisplayContent.getDisplayInfo().state);
 
+        // TODO(b/274790702): Do not start recording if waiting for consent - for now,
+        //  go ahead.
+
         // Create a mirrored hierarchy for the SurfaceControl of the DisplayArea to capture.
         mRecordedSurface = SurfaceControl.mirrorSurface(
                 mRecordedWindowContainer.getSurfaceControl());
