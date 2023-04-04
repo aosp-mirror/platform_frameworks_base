@@ -153,6 +153,7 @@ import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.UidObserver;
 import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -1117,7 +1118,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    final private IUidObserver mUidObserver = new IUidObserver.Stub() {
+    final private IUidObserver mUidObserver = new UidObserver() {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
                 @ProcessCapability int capability) {
             synchronized (mUidStateCallbackInfos) {
@@ -1138,18 +1139,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         @Override public void onUidGone(int uid, boolean disabled) {
             mUidEventHandler.obtainMessage(UID_MSG_GONE, uid, 0).sendToTarget();
-        }
-
-        @Override public void onUidActive(int uid) {
-        }
-
-        @Override public void onUidIdle(int uid, boolean disabled) {
-        }
-
-        @Override public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override public void onUidProcAdjChanged(int uid) {
         }
     };
 
