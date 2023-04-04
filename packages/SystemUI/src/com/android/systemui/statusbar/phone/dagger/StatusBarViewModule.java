@@ -44,6 +44,7 @@ import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationsQuickSettingsContainer;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.OperatorNameViewController;
@@ -135,7 +136,7 @@ public abstract class StatusBarViewModule {
         NotificationShelfComponent component = notificationShelfComponentBuilder
                 .notificationShelf(notificationShelf)
                 .build();
-        NotificationShelfController notificationShelfController =
+        LegacyNotificationShelfControllerImpl notificationShelfController =
                 component.getNotificationShelfController();
         notificationShelfController.init();
 
