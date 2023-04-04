@@ -194,7 +194,6 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         ArrayList<ProviderData> providerDataList = getProviderDataForUi();
         if (!providerDataList.isEmpty()) {
             Log.i(TAG, "provider list not empty about to initiate ui");
-            mRequestSessionMetric.logCandidatePhaseMetrics(mProviders);
             launchUiWithProviderData(providerDataList);
         }
     }
@@ -204,9 +203,9 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         Log.i(TAG, "In getProviderDataAndInitiateUi");
         Log.i(TAG, "In getProviderDataAndInitiateUi providers size: " + mProviders.size());
         ArrayList<ProviderData> providerDataList = new ArrayList<>();
+        mRequestSessionMetric.logCandidatePhaseMetrics(mProviders);
 
         if (isSessionCancelled()) {
-            mRequestSessionMetric.logCandidatePhaseMetrics(mProviders);
             finishSession(/*propagateCancellation=*/true);
             return providerDataList;
         }
