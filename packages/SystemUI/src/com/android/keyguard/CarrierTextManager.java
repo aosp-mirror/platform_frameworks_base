@@ -21,7 +21,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.net.wifi.WifiManager;
+import android.os.Trace;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener;
@@ -37,6 +37,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository;
 import com.android.systemui.telephony.TelephonyListenerManager;
 
 import java.util.List;
@@ -50,7 +51,10 @@ import javax.inject.Inject;
  * Controller that generates text including the carrier names and/or the status of all the SIM
  * interfaces in the device. Through a callback, the updates can be retrieved either as a list or
  * separated by a given separator {@link CharSequence}.
+ *
+ * @deprecated use {@link com.android.systemui.statusbar.pipeline.wifi} instead
  */
+@Deprecated
 public class CarrierTextManager {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "CarrierTextController";
@@ -64,7 +68,7 @@ public class CarrierTextManager {
     private final AtomicBoolean mNetworkSupported = new AtomicBoolean();
     @VisibleForTesting
     protected KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final WifiManager mWifiManager;
+    private final WifiRepository mWifiRepository;
     private final boolean[] mSimErrorState;
     private final int mSimSlotsNumber;
     @Nullable // Check for nullability before dispatching
@@ -165,7 +169,7 @@ public class CarrierTextManager {
             CharSequence separator,
             boolean showAirplaneMode,
             boolean showMissingSim,
-            @Nullable WifiManager wifiManager,
+            WifiRepository wifiRepository,
             TelephonyManager telephonyManager,
             TelephonyListenerManager telephonyListenerManager,
             WakefulnessLifecycle wakefulnessLifecycle,
@@ -177,8 +181,7 @@ public class CarrierTextManager {
 
         mShowAirplaneMode = showAirplaneMode;
         mShowMissingSim = showMissingSim;
-
-        mWifiManager = wifiManager;
+        mWifiRepository = wifiRepository;
         mTelephonyManager = telephonyManager;
         mSeparator = separator;
         mTelephonyListenerManager = telephonyListenerManager;
@@ -297,6 +300,7 @@ public class CarrierTextManager {
     }
 
     protected void updateCarrierText() {
+        Trace.beginSection("CarrierTextManager#updateCarrierText");
         boolean allSimsMissing = true;
         boolean anySimReadyAndInService = false;
         CharSequence displayText = null;
@@ -329,20 +333,20 @@ public class CarrierTextManager {
                 carrierNames[i] = carrierTextForSimState;
             }
             if (simState == TelephonyManager.SIM_STATE_READY) {
+                Trace.beginSection("WFC check");
                 ServiceState ss = mKeyguardUpdateMonitor.mServiceStates.get(subId);
                 if (ss != null && ss.getDataRegistrationState() == ServiceState.STATE_IN_SERVICE) {
                     // hack for WFC (IWLAN) not turning off immediately once
                     // Wi-Fi is disassociated or disabled
                     if (ss.getRilDataRadioTechnology() != ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN
-                            || (mWifiManager != null && mWifiManager.isWifiEnabled()
-                            && mWifiManager.getConnectionInfo() != null
-                            && mWifiManager.getConnectionInfo().getBSSID() != null)) {
+                            || mWifiRepository.isWifiConnectedWithValidSsid()) {
                         if (DEBUG) {
                             Log.d(TAG, "SIM ready and in service: subId=" + subId + ", ss=" + ss);
                         }
                         anySimReadyAndInService = true;
                     }
                 }
+                Trace.endSection();
             }
         }
         // Only create "No SIM card" if no cards with CarrierName && no wifi when some sim is READY
@@ -406,6 +410,7 @@ public class CarrierTextManager {
                 subsIds,
                 airplaneMode);
         postToCallback(info);
+        Trace.endSection();
     }
 
     @VisibleForTesting
@@ -633,7 +638,7 @@ public class CarrierTextManager {
     public static class Builder {
         private final Context mContext;
         private final String mSeparator;
-        private final WifiManager mWifiManager;
+        private final WifiRepository mWifiRepository;
         private final TelephonyManager mTelephonyManager;
         private final TelephonyListenerManager mTelephonyListenerManager;
         private final WakefulnessLifecycle mWakefulnessLifecycle;
@@ -647,7 +652,7 @@ public class CarrierTextManager {
         public Builder(
                 Context context,
                 @Main Resources resources,
-                @Nullable WifiManager wifiManager,
+                @Nullable WifiRepository wifiRepository,
                 TelephonyManager telephonyManager,
                 TelephonyListenerManager telephonyListenerManager,
                 WakefulnessLifecycle wakefulnessLifecycle,
@@ -657,7 +662,7 @@ public class CarrierTextManager {
             mContext = context;
             mSeparator = resources.getString(
                     com.android.internal.R.string.kg_text_message_separator);
-            mWifiManager = wifiManager;
+            mWifiRepository = wifiRepository;
             mTelephonyManager = telephonyManager;
             mTelephonyListenerManager = telephonyListenerManager;
             mWakefulnessLifecycle = wakefulnessLifecycle;
@@ -681,7 +686,7 @@ public class CarrierTextManager {
         /** Create a CarrierTextManager. */
         public CarrierTextManager build() {
             return new CarrierTextManager(
-                    mContext, mSeparator, mShowAirplaneMode, mShowMissingSim, mWifiManager,
+                    mContext, mSeparator, mShowAirplaneMode, mShowMissingSim, mWifiRepository,
                     mTelephonyManager, mTelephonyListenerManager, mWakefulnessLifecycle,
                     mMainExecutor, mBgExecutor, mKeyguardUpdateMonitor);
         }
