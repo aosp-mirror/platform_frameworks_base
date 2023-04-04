@@ -46,6 +46,7 @@ import android.app.ActivityManager.ProcessState;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
 import android.app.PendingIntent;
+import android.app.UidObserver;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.AppLaunchEstimateInfo;
 import android.app.usage.AppStandbyInfo;
@@ -592,32 +593,16 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
-    private final IUidObserver mUidObserver = new IUidObserver.Stub() {
+    private final IUidObserver mUidObserver = new UidObserver() {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             mHandler.obtainMessage(MSG_UID_STATE_CHANGED, uid, procState).sendToTarget();
         }
 
         @Override
-        public void onUidIdle(int uid, boolean disabled) {
-            // Ignored
-        }
-
-        @Override
         public void onUidGone(int uid, boolean disabled) {
             onUidStateChanged(uid, ActivityManager.PROCESS_STATE_NONEXISTENT, 0,
                     ActivityManager.PROCESS_CAPABILITY_NONE);
-        }
-
-        @Override
-        public void onUidActive(int uid) {
-            // Ignored
-        }
-
-        @Override public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override public void onUidProcAdjChanged(int uid) {
         }
     };
 
