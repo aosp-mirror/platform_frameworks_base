@@ -1942,8 +1942,7 @@ public class NotificationStackScrollLayoutController {
         public void setNotifStats(@NonNull NotifStats notifStats) {
             mNotifStats = notifStats;
             mView.setHasFilteredOutSeenNotifications(
-                    mNotifPipelineFlags.getShouldFilterUnseenNotifsOnKeyguard()
-                            && mSeenNotificationsProvider.getHasFilteredOutSeenNotifications());
+                    mSeenNotificationsProvider.getHasFilteredOutSeenNotifications());
             updateFooter();
             updateShowEmptyShadeView();
         }

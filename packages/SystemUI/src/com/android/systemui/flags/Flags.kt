@@ -93,9 +93,6 @@ object Flags {
     val NOTIFICATION_INLINE_REPLY_ANIMATION =
         releasedFlag(174148361, "notification_inline_reply_animation")
 
-    val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
-        releasedFlag(254647461, "filter_unseen_notifs_on_keyguard")
-
     // TODO(b/277338665): Tracking Bug
     @JvmField
     val NOTIFICATION_SHELF_REFACTOR =
