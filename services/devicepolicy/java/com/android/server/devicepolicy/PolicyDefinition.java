@@ -246,6 +246,14 @@ final class PolicyDefinition<V> {
             (Long value, Context context, Integer userId, PolicyKey policyKey) -> true,
             new LongPolicySerializer());
 
+    static PolicyDefinition<Integer> KEYGUARD_DISABLED_FEATURES = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.KEYGUARD_DISABLED_FEATURES_POLICY),
+            new FlagUnion(),
+            POLICY_FLAG_LOCAL_ONLY_POLICY,
+            // Nothing is enforced for keyguard features, we just need to store it
+            (Integer value, Context context, Integer userId, PolicyKey policyKey) -> true,
+            new IntegerPolicySerializer());
+
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
 

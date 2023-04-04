@@ -30,20 +30,24 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.R
 import com.android.credentialmanager.common.material.Scrim
 import com.android.credentialmanager.ui.theme.Shapes
+import kotlinx.coroutines.delay
 
 @Composable
 fun Snackbar(
     contentText: String,
     action: (@Composable () -> Unit)? = null,
     onDismiss: () -> Unit,
+    dismissOnTimeout: Boolean = false,
 ) {
     BoxWithConstraints {
         Box(Modifier.fillMaxSize()) {
@@ -87,6 +91,22 @@ fun Snackbar(
                     }
                 }
             }
+        }
+    }
+    val accessibilityManager = LocalAccessibilityManager.current
+    LaunchedEffect(true) {
+        if (dismissOnTimeout) {
+            // Same as SnackbarDuration.Short
+            val originalDuration = 4000L
+            val duration = if (accessibilityManager == null) originalDuration else
+                accessibilityManager.calculateRecommendedTimeoutMillis(
+                    originalDuration,
+                    containsIcons = true,
+                    containsText = true,
+                    containsControls = action != null,
+                )
+            delay(duration)
+            onDismiss()
         }
     }
 }

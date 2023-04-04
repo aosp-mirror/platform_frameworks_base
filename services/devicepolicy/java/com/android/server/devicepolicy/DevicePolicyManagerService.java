@@ -9193,34 +9193,53 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Objects.requireNonNull(who, "ComponentName is null");
         }
 
-
         final int userHandle = caller.getUserId();
         int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
         synchronized (getLockObject()) {
-            ActiveAdmin ap;
-            if (isPermissionCheckFlagEnabled()) {
+            if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
                 // SUPPORT USES_POLICY_DISABLE_KEYGUARD_FEATURES
-                ap = enforcePermissionAndGetEnforcingAdmin(
+                EnforcingAdmin admin = enforcePermissionAndGetEnforcingAdmin(
                         who, MANAGE_DEVICE_POLICY_KEYGUARD, caller.getPackageName(),
-                        affectedUserId).getActiveAdmin();
-            } else {
-                ap = getActiveAdminForCallerLocked(
-                        who, DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES, parent);
-            }
-            if (isManagedProfile(userHandle)) {
-                if (parent) {
-                    if (isProfileOwnerOfOrganizationOwnedDevice(caller)) {
-                        which = which & PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
-                    } else {
-                        which = which & NON_ORG_OWNED_PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
-                    }
+                        affectedUserId);
+                if (which == 0) {
+                    mDevicePolicyEngine.removeLocalPolicy(
+                            PolicyDefinition.KEYGUARD_DISABLED_FEATURES, admin, affectedUserId);
                 } else {
-                    which = which & PROFILE_KEYGUARD_FEATURES;
+                    // TODO(b/273723433): revisit silent masking of features
+                    if (isManagedProfile(userHandle)) {
+                        if (parent) {
+                            if (isProfileOwnerOfOrganizationOwnedDevice(caller)) {
+                                which = which & PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+                            } else {
+                                which = which
+                                        & NON_ORG_OWNED_PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+                            }
+                        } else {
+                            which = which & PROFILE_KEYGUARD_FEATURES;
+                        }
+                    }
+                    mDevicePolicyEngine.setLocalPolicy(PolicyDefinition.KEYGUARD_DISABLED_FEATURES,
+                            admin, new IntegerPolicyValue(which), affectedUserId);
                 }
-            }
-            if (ap.disabledKeyguardFeatures != which) {
-                ap.disabledKeyguardFeatures = which;
-                saveSettingsLocked(userHandle);
+                invalidateBinderCaches();
+            } else {
+                ActiveAdmin ap = getActiveAdminForCallerLocked(
+                        who, DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES, parent);
+                if (isManagedProfile(userHandle)) {
+                    if (parent) {
+                        if (isProfileOwnerOfOrganizationOwnedDevice(caller)) {
+                            which = which & PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+                        } else {
+                            which = which & NON_ORG_OWNED_PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+                        }
+                    } else {
+                        which = which & PROFILE_KEYGUARD_FEATURES;
+                    }
+                }
+                if (ap.disabledKeyguardFeatures != which) {
+                    ap.disabledKeyguardFeatures = which;
+                    saveSettingsLocked(userHandle);
+                }
             }
         }
         if (SecurityLog.isLoggingEnabled()) {
@@ -9252,15 +9271,51 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkCallAuthorization(
                 who == null || isCallingFromPackage(who.getPackageName(), caller.getUid())
                         || isSystemUid(caller));
+        int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
 
-        final long ident = mInjector.binderClearCallingIdentity();
-        try {
-            synchronized (getLockObject()) {
-                if (who != null) {
+        synchronized (getLockObject()) {
+            if (who != null) {
+                if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
+                    EnforcingAdmin admin = getEnforcingAdminForCaller(
+                            who, who.getPackageName());
+                    Integer features = mDevicePolicyEngine.getLocalPolicySetByAdmin(
+                            PolicyDefinition.KEYGUARD_DISABLED_FEATURES,
+                            admin,
+                            affectedUserId);
+                    return features == null ? 0 : features;
+                } else {
                     ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
                     return (admin != null) ? admin.disabledKeyguardFeatures : 0;
                 }
+            }
 
+            if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
+                Integer features = mDevicePolicyEngine.getResolvedPolicy(
+                        PolicyDefinition.KEYGUARD_DISABLED_FEATURES,
+                        affectedUserId);
+
+                return Binder.withCleanCallingIdentity(() -> {
+                    int combinedFeatures = features == null ? 0 : features;
+                    List<UserInfo> profiles = mUserManager.getProfiles(affectedUserId);
+                    for (UserInfo profile : profiles) {
+                        int profileId = profile.id;
+                        if (profileId == affectedUserId) {
+                            continue;
+                        }
+                        Integer profileFeatures = mDevicePolicyEngine.getResolvedPolicy(
+                                PolicyDefinition.KEYGUARD_DISABLED_FEATURES,
+                                profileId);
+                        if (profileFeatures != null) {
+                            combinedFeatures |= (profileFeatures
+                                    & PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER);
+                        }
+                    }
+                    return combinedFeatures;
+                });
+            }
+
+            final long ident = mInjector.binderClearCallingIdentity();
+            try {
                 final List<ActiveAdmin> admins;
                 if (!parent && isManagedProfile(userHandle)) {
                     // If we are being asked about a managed profile, just return keyguard features
@@ -9290,9 +9345,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                 }
                 return which;
+            } finally {
+                mInjector.binderRestoreCallingIdentity(ident);
             }
-        } finally {
-            mInjector.binderRestoreCallingIdentity(ident);
         }
     }
 
@@ -12519,9 +12574,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             case UserManager.RESTRICTION_NOT_SET:
                 return false;
             case UserManager.RESTRICTION_SOURCE_DEVICE_OWNER:
-                return !isDeviceOwner(admin, userId);
             case UserManager.RESTRICTION_SOURCE_PROFILE_OWNER:
-                return !isProfileOwner(admin, userId);
+                return !(isDeviceOwner(admin, userId) || isProfileOwner(admin, userId));
             default:
                 return true;
         }

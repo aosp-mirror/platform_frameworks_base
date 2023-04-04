@@ -13649,8 +13649,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 || action.startsWith("android.intent.action.UID_")
                                 || action.startsWith("android.intent.action.EXTERNAL_")) {
                             if (DEBUG_BROADCAST) {
-                                Slog.wtf(TAG, "System internals registering for " + filter
-                                        + " with app priority; this will race with apps!",
+                                Slog.wtf(TAG,
+                                        "System internals registering for " + filter.toLongString()
+                                                + " with app priority; this will race with apps!",
                                         new Throwable());
                             }
 
@@ -18763,7 +18764,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         // too quickly in parallel below
         pingCount.incrementAndGet();
 
-        synchronized (this) {
         synchronized (mProcLock) {
             final ArrayMap<String, SparseArray<ProcessRecord>> pmap =
                     mProcessList.getProcessNamesLOSP().getMap();
@@ -18787,7 +18787,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             }
-        }
         }
 
         // Now that we've dispatched all "ping" events above, we can send our

@@ -16,16 +16,11 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Presubmit
-import android.tools.device.flicker.isShellTransitionsEnabled
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import androidx.test.filters.RequiresDevice
-import org.junit.Assume
 import org.junit.FixMethodOrder
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
@@ -73,19 +68,4 @@ open class ExitPipToAppViaExpandButtonTest(flicker: FlickerTest) : ExitPipToAppT
                 wmHelper.StateSyncBuilder().withWindowSurfaceDisappeared(testApp).waitForAndVerify()
             }
         }
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 197726610)
-    @Test
-    override fun pipLayerExpands() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        super.pipLayerExpands()
-    }
-
-    @Presubmit
-    @Test
-    fun pipLayerExpands_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-        super.pipLayerExpands()
-    }
 }
