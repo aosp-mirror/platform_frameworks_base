@@ -16,8 +16,8 @@
     <string name="screenshot_utterance" msgid="1430760563401895074">"Направи слика од екранот"</string>
     <string name="volume_up_label" msgid="8592766918780362870">"Зголеми звук"</string>
     <string name="volume_down_label" msgid="8574981863656447346">"Намали звук"</string>
-    <string name="brightness_up_label" msgid="8010753822854544846">"Осветлете"</string>
-    <string name="brightness_down_label" msgid="7115662941913272072">"Затемнете"</string>
+    <string name="brightness_up_label" msgid="8010753822854544846">"Осветли"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"Затемни"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"Оди на претходниот екран"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Оди на следниот екран"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"„Менито за пристапност“ ви овозможува да го контролирате уредот преку големо мени на екранот. Може да го заклучите уредот, да ги контролирате јачината на звукот и осветленоста, да правите слики од екранот и друго."</string>

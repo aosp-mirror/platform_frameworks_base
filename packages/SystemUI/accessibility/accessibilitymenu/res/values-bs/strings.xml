@@ -16,8 +16,8 @@
     <string name="screenshot_utterance" msgid="1430760563401895074">"Napravi snimak ekrana"</string>
     <string name="volume_up_label" msgid="8592766918780362870">"Pojačaj zvuk"</string>
     <string name="volume_down_label" msgid="8574981863656447346">"Utišaj zvuk"</string>
-    <string name="brightness_up_label" msgid="8010753822854544846">"Jače osvjetljenje"</string>
-    <string name="brightness_down_label" msgid="7115662941913272072">"Slabije osvjetljenje"</string>
+    <string name="brightness_up_label" msgid="8010753822854544846">"Posvijetli"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"Zatamni"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"Idi na prethodni ekran"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Idi na sljedeći ekran"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"Meni za pristupačnost pruža veliki meni na ekranu za upravljanje uređajem. Možete zaključati uređaj, kontrolirati jačinu zvuka i osvjetljenje, praviti snimke ekrana i drugo."</string>
@@ -27,5 +27,5 @@
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Povećajte dugmad menija za pristupačnost"</string>
     <string name="pref_help_title" msgid="6871558837025010641">"Pomoć"</string>
     <string name="brightness_percentage_label" msgid="7391554573977867369">"Osvjetljenje: <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
-    <string name="music_volume_percentage_label" msgid="398635599662604706">"Jačina zvuka muzike: <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+    <string name="music_volume_percentage_label" msgid="398635599662604706">"Jačina muzike: <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
 </resources>
