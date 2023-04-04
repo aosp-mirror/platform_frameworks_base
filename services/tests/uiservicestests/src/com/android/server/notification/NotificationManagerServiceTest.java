@@ -197,7 +197,6 @@ import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestablePermissions;
@@ -254,7 +253,6 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -6909,6 +6907,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testTextToastsCallStatusBar_visibleBgUsers_nonUiContext_defaultDisplay()
             throws Exception {
         mockIsVisibleBackgroundUsersSupported(true);
+        mockIsUserVisible(SECONDARY_DISPLAY_ID, true);
         mockDisplayAssignedToUser(SECONDARY_DISPLAY_ID);
         allowTestPackageToToast();
 

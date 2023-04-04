@@ -3296,8 +3296,8 @@ public class NotificationManagerService extends SystemService {
                 @Nullable ITransientNotification callback, int duration, boolean isUiContext,
                 int displayId, @Nullable ITransientNotificationCallback textCallback) {
             if (DBG) {
-                Slog.i(TAG, "enqueueToast pkg=" + pkg + " token=" + token
-                        + " duration=" + duration + " displayId=" + displayId);
+                Slog.i(TAG, "enqueueToast pkg=" + pkg + " token=" + token + " duration=" + duration
+                        + " isUiContext=" + isUiContext + " displayId=" + displayId);
             }
 
             if (pkg == null || (text == null && callback == null)
@@ -3308,15 +3308,6 @@ public class NotificationManagerService extends SystemService {
             }
 
             final int callingUid = Binder.getCallingUid();
-            checkCallerIsSameApp(pkg);
-            final boolean isSystemToast = isCallerSystemOrPhone()
-                    || PackageManagerService.PLATFORM_PACKAGE_NAME.equals(pkg);
-            boolean isAppRenderedToast = (callback != null);
-            if (!checkCanEnqueueToast(pkg, callingUid, displayId, isAppRenderedToast,
-                    isSystemToast)) {
-                return;
-            }
-
             if (!isUiContext && displayId == Display.DEFAULT_DISPLAY
                     && mUm.isVisibleBackgroundUsersSupported()) {
                 // When the caller is a visible background user using a non-UI context (like the
@@ -3331,6 +3322,15 @@ public class NotificationManagerService extends SystemService {
                     }
                     displayId = userDisplayId;
                 }
+            }
+
+            checkCallerIsSameApp(pkg);
+            final boolean isSystemToast = isCallerSystemOrPhone()
+                    || PackageManagerService.PLATFORM_PACKAGE_NAME.equals(pkg);
+            boolean isAppRenderedToast = (callback != null);
+            if (!checkCanEnqueueToast(pkg, callingUid, displayId, isAppRenderedToast,
+                    isSystemToast)) {
+                return;
             }
 
             synchronized (mToastQueue) {
