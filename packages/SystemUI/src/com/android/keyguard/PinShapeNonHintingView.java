@@ -30,7 +30,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -50,7 +49,7 @@ public class PinShapeNonHintingView extends LinearLayout implements PinShapeInpu
             android.R.attr.textColorPrimary).getDefaultColor();
     private int mPosition = 0;
     private final PinShapeAdapter mPinShapeAdapter;
-    private Animation mCurrentPlayingAnimation;
+    private ValueAnimator mValueAnimator = ValueAnimator.ofFloat(1f, 0f);
     public PinShapeNonHintingView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mPinShapeAdapter = new PinShapeAdapter(context);
@@ -80,15 +79,17 @@ public class PinShapeNonHintingView extends LinearLayout implements PinShapeInpu
             Log.e(getClass().getName(), "Trying to delete a non-existent char");
             return;
         }
+        if (mValueAnimator.isRunning()) {
+            mValueAnimator.end();
+        }
         mPosition--;
         ImageView pinDot = (ImageView) getChildAt(mPosition);
-        ValueAnimator animator = ValueAnimator.ofFloat(1f, 0f);
-        animator.addUpdateListener(valueAnimator -> {
+        mValueAnimator.addUpdateListener(valueAnimator -> {
             float value = (float) valueAnimator.getAnimatedValue();
             pinDot.setScaleX(value);
             pinDot.setScaleY(value);
         });
-        animator.addListener(new AnimatorListenerAdapter() {
+        mValueAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
@@ -96,11 +97,10 @@ public class PinShapeNonHintingView extends LinearLayout implements PinShapeInpu
                         PinShapeNonHintingView.this,
                         new PinShapeViewTransition());
                 removeView(pinDot);
-                mCurrentPlayingAnimation = null;
             }
         });
-        animator.setDuration(PasswordTextView.DISAPPEAR_DURATION);
-        animator.start();
+        mValueAnimator.setDuration(PasswordTextView.DISAPPEAR_DURATION);
+        mValueAnimator.start();
     }
 
     @Override
