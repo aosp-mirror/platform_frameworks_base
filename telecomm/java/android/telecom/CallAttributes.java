@@ -58,6 +58,9 @@ public final class CallAttributes implements Parcelable {
     /** @hide **/
     public static final String CALL_CAPABILITIES_KEY = "TelecomCapabilities";
 
+    /** @hide **/
+    public static final String CALLER_PID = "CallerPid";
+
     private CallAttributes(@NonNull PhoneAccountHandle phoneAccountHandle,
             @NonNull CharSequence displayName,
             @NonNull Uri address,
