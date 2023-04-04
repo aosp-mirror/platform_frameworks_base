@@ -418,12 +418,15 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
         });
     }
 
+    @Dispatching(cancellable = false)
     @Override
     public void cancelCancellationSignal(IBinder token) {
         if (mBeamer == null) {
             return;
         }
-        mBeamer.cancel(token);
+        dispatch(() -> {
+            mBeamer.cancel(token);
+        });
     }
 
     @Override
