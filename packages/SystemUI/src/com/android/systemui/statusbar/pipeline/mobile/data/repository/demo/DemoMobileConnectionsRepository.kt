@@ -160,6 +160,9 @@ constructor(
     override val mobileIsDefault: StateFlow<Boolean> = MutableStateFlow(true)
 
     // TODO(b/261029387): not yet supported
+    override val hasCarrierMergedConnection = MutableStateFlow(false)
+
+    // TODO(b/261029387): not yet supported
     override val defaultConnectionIsValidated: StateFlow<Boolean> = MutableStateFlow(true)
 
     override fun getRepoForSubId(subId: Int): DemoMobileConnectionRepository {

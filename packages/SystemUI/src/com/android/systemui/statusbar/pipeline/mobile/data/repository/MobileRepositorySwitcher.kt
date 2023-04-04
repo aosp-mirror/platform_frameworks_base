@@ -159,6 +159,15 @@ constructor(
             .flatMapLatest { it.mobileIsDefault }
             .stateIn(scope, SharingStarted.WhileSubscribed(), realRepository.mobileIsDefault.value)
 
+    override val hasCarrierMergedConnection: StateFlow<Boolean> =
+        activeRepo
+            .flatMapLatest { it.hasCarrierMergedConnection }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                realRepository.hasCarrierMergedConnection.value,
+            )
+
     override val defaultConnectionIsValidated: StateFlow<Boolean> =
         activeRepo
             .flatMapLatest { it.defaultConnectionIsValidated }
