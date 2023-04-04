@@ -18,6 +18,8 @@ package com.android.wm.shell.desktopmode;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -145,6 +147,13 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
                 t.setPosition(sc, startPos.x * (1 - fraction), startPos.y * (1 - fraction));
                 t.setScale(sc, currentScaleX, currentScaleY);
                 t.apply();
+            });
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mTransitions.getMainExecutor().execute(
+                            () -> finishCallback.onTransitionFinished(null, null));
+                }
             });
             animator.start();
             return true;
