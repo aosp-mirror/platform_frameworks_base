@@ -306,7 +306,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
                 lp.width = mSensorBounds.width();
                 lp.height = mSensorBounds.height();
                 RectF relativeToView = getBoundsRelativeToView(new RectF(mSensorBounds));
-                lp.setMargins(
+                lp.setMarginsRelative(
                         (int) relativeToView.left,
                         (int) relativeToView.top,
                         (int) relativeToView.right,
