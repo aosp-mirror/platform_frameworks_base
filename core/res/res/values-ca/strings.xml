@@ -1684,8 +1684,8 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vols permetre que <xliff:g id="SERVICE">%1$s</xliff:g> controli el teu dispositiu per complet?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"El control total és adequat per a les aplicacions que t\'ajuden amb l\'accessibilitat, però no per a la majoria de les aplicacions."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Veure i controlar la pantalla"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pot llegir tot el contingut de la pantalla i mostrar contingut sobre altres aplicacions."</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Mostrar i dur a terme accions"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pot llegir tot el contingut de la pantalla i mostrar contingut per sobre d\'altres aplicacions."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Veure i dur a terme accions"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Pot fer un seguiment de les teves interaccions amb una aplicació o un sensor de maquinari, i interaccionar amb aplicacions en nom teu."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permet"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Denega"</string>
