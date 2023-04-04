@@ -746,6 +746,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     DisplayWindowPolicyControllerHelper mDwpcHelper;
 
+    private final DisplayRotationReversionController mRotationReversionController;
+
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final ActivityRecord activity = w.mActivityRecord;
@@ -1170,6 +1172,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
                             /* checkDeviceConfig */ false)
                         ? new DisplayRotationCompatPolicy(this) : null;
+        mRotationReversionController = new DisplayRotationReversionController(this);
 
         mInputMonitor = new InputMonitor(mWmService, this);
         mInsetsPolicy = new InsetsPolicy(mInsetsStateController, this);
@@ -1281,6 +1284,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 .show(mSurfaceControl)
                 .setLayer(mOverlayLayer, Integer.MAX_VALUE)
                 .show(mOverlayLayer);
+    }
+
+    DisplayRotationReversionController getRotationReversionController() {
+        return mRotationReversionController;
     }
 
     boolean isReady() {
@@ -1665,9 +1672,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     private boolean updateOrientation(boolean forceUpdate) {
+        final WindowContainer prevOrientationSource = mLastOrientationSource;
         final int orientation = getOrientation();
         // The last orientation source is valid only after getOrientation.
         final WindowContainer orientationSource = getLastOrientationSource();
+        if (orientationSource != prevOrientationSource
+                && mRotationReversionController.isRotationReversionEnabled()) {
+            mRotationReversionController.updateForNoSensorOverride();
+        }
         final ActivityRecord r =
                 orientationSource != null ? orientationSource.asActivityRecord() : null;
         if (r != null) {
