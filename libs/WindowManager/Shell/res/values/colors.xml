@@ -45,9 +45,6 @@
     <!-- Letterbox Dialog -->
     <color name="letterbox_dialog_background">@android:color/system_neutral1_900</color>
 
-    <!-- Reachability Education color for hand icon and text-->
-    <color name="letterbox_reachability_education_item_color">#BFC8CC</color>
-
     <!-- GM2 colors -->
     <color name="GM2_grey_200">#E8EAED</color>
     <color name="GM2_grey_700">#5F6368</color>
