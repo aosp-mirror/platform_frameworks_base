@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="2809080280462257271">"Комуникации со давателот на услугата"</string>
+    <string name="app_name" msgid="2809080280462257271">"Известувања од операторот"</string>
     <string name="android_system_label" msgid="2797790869522345065">"Мобилен оператор"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"Мобилниот интернет е искористен"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"Мобилниот интернет ви е деактивиран"</string>
