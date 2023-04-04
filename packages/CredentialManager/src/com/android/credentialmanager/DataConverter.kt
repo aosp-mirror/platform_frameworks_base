@@ -188,11 +188,11 @@ class GetFlowUtils {
         }
 
         fun toRequestDisplayInfo(
-            requestInfo: RequestInfo,
+            requestInfo: RequestInfo?,
             context: Context,
             originName: String?,
         ): com.android.credentialmanager.getflow.RequestDisplayInfo? {
-            val getCredentialRequest = requestInfo.getCredentialRequest ?: return null
+            val getCredentialRequest = requestInfo?.getCredentialRequest ?: return null
             val preferImmediatelyAvailableCredentials = getCredentialRequest.credentialOptions.any {
                 val credentialOptionJetpack = CredentialOption.createFrom(
                     it.type,
@@ -450,10 +450,13 @@ class CreateFlowUtils {
         }
 
         fun toRequestDisplayInfo(
-            requestInfo: RequestInfo,
+            requestInfo: RequestInfo?,
             context: Context,
             originName: String?,
         ): RequestDisplayInfo? {
+            if (requestInfo == null) {
+                return null
+            }
             val appLabel = originName
                 ?: getAppLabel(context.packageManager, requestInfo.appPackageName)
                 ?: return null
