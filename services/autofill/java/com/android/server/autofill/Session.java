@@ -41,16 +41,14 @@ import static android.view.autofill.AutofillManager.FLAG_SMART_SUGGESTION_SYSTEM
 import static android.view.autofill.AutofillManager.getSmartSuggestionModeToString;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
-import static com.android.server.autofill.FillRequestEventLogger.AUGMENTED_AUTOFILL_REQUEST_ID;
 import static com.android.server.autofill.FillRequestEventLogger.TRIGGER_REASON_NORMAL_TRIGGER;
 import static com.android.server.autofill.FillRequestEventLogger.TRIGGER_REASON_PRE_TRIGGER;
 import static com.android.server.autofill.FillRequestEventLogger.TRIGGER_REASON_SERVED_FROM_CACHED_RESPONSE;
 import static com.android.server.autofill.FillResponseEventLogger.AVAILABLE_COUNT_WHEN_FILL_REQUEST_FAILED_OR_TIMEOUT;
 import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATUS_FAILURE;
-import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATUS_SUCCESS;
-import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATUS_FAILURE;
-import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATUS_TIMEOUT;
 import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATUS_SESSION_DESTROYED;
+import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATUS_SUCCESS;
+import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATUS_TIMEOUT;
 import static com.android.server.autofill.Helper.containsCharsInOrder;
 import static com.android.server.autofill.Helper.createSanitizers;
 import static com.android.server.autofill.Helper.getNumericValue;
@@ -158,6 +156,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -1576,30 +1575,53 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         synchronized (mLock) {
             response = getEffectiveFillResponse(response);
+            if (isEmptyResponse(response)) {
+                // Treat it as a null response.
+                processNullResponseLocked(requestId, requestFlags);
+            }
             processResponseLocked(response, null, requestFlags);
+        }
+    }
+
+    private boolean isEmptyResponse(FillResponse response) {
+        if (response == null) return true;
+        SaveInfo saveInfo = response.getSaveInfo();
+        synchronized (mLock) {
+            return ((response.getDatasets() == null || response.getDatasets().isEmpty())
+                    && response.getAuthentication() == null
+                    && (saveInfo == null
+                        || (ArrayUtils.isEmpty(saveInfo.getOptionalIds())
+                            && ArrayUtils.isEmpty(saveInfo.getRequiredIds())
+                            && ((saveInfo.getFlags() & SaveInfo.FLAG_DELAY_SAVE) == 0)))
+                    && (ArrayUtils.isEmpty(response.getFieldClassificationIds())
+                        || (!mSessionFlags.mClientSuggestionsEnabled
+                        && !mService.isFieldClassificationEnabledLocked())));
         }
     }
 
     private FillResponse getEffectiveFillResponse(FillResponse response) {
         // TODO(b/266379948): label dataset source
-        if (!mService.getMaster().isPccClassificationEnabled()) return response;
+
+        DatasetComputationContainer autofillProviderContainer = new DatasetComputationContainer();
+        computeDatasetsForProviderAndUpdateContainer(response, autofillProviderContainer);
+
+        if (!mService.getMaster().isPccClassificationEnabled())  {
+            return createShallowCopy(response, autofillProviderContainer);
+        }
         synchronized (mLock) {
             if (mClassificationState.mState != ClassificationState.STATE_RESPONSE
                     || mClassificationState.mLastFieldClassificationResponse == null) {
-                return response;
+                return createShallowCopy(response, autofillProviderContainer);
             }
             if (!mClassificationState.processResponse()) return response;
         }
         boolean preferAutofillProvider = mService.getMaster().preferProviderOverPcc();
         boolean shouldUseFallback = mService.getMaster().shouldUsePccFallback();
         if (preferAutofillProvider && !shouldUseFallback) {
-            return response;
+            return createShallowCopy(response, autofillProviderContainer);
         }
 
-        DatasetComputationContainer autofillProviderContainer = new DatasetComputationContainer();
         DatasetComputationContainer detectionPccContainer = new DatasetComputationContainer();
-
-        computeDatasetsForProviderAndUpdateContainer(response, autofillProviderContainer);
         computeDatasetsForPccAndUpdateContainer(response, detectionPccContainer);
 
         DatasetComputationContainer resultContainer;
@@ -1621,6 +1643,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return FillResponse.shallowCopy(response, new ArrayList<>(resultContainer.mDatasets));
     }
 
+    private static FillResponse createShallowCopy(
+            FillResponse response, DatasetComputationContainer container) {
+        return FillResponse.shallowCopy(response, new ArrayList<>(container.mDatasets));
+    }
+
     /**
      * A private class to hold & compute datasets to be shown
      */
@@ -1629,7 +1656,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         Set<AutofillId> mAutofillIds = new ArraySet<>();
         // Set of datasets. Kept separately, to be able to be used directly for composing
         // FillResponse.
-        Set<Dataset> mDatasets = new ArraySet<>();
+        Set<Dataset> mDatasets = new LinkedHashSet<>();
         ArrayMap<AutofillId, Set<Dataset>> mAutofillIdToDatasetMap = new ArrayMap<>();
     }
 
@@ -1675,7 +1702,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         List<Dataset> datasets = response.getDatasets();
         if (datasets == null) return;
         ArrayMap<AutofillId, Set<Dataset>> autofillIdToDatasetMap = new ArrayMap<>();
-        Set<Dataset> eligibleDatasets = new ArraySet<>();
+        Set<Dataset> eligibleDatasets = new LinkedHashSet<>();
         Set<AutofillId> eligibleAutofillIds = new ArraySet<>();
         for (Dataset dataset : response.getDatasets()) {
             if (dataset.getFieldIds() == null || dataset.getFieldIds().isEmpty()) continue;
@@ -1696,6 +1723,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         newSize--;
                     }
                 }
+
+                // If the dataset doesn't have any non-null autofill id's, pass over.
+                if (newSize == 0) continue;
 
                 if (conversionRequired) {
                     ArrayList<AutofillId> fieldIds = new ArrayList<>(newSize);
@@ -1772,7 +1802,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
             ArrayMap<AutofillId, Set<Dataset>> map = new ArrayMap<>();
 
-            Set<Dataset> eligibleDatasets = new ArraySet<>();
+            Set<Dataset> eligibleDatasets = new LinkedHashSet<>();
             Set<AutofillId> eligibleAutofillIds = new ArraySet<>();
 
             for (int i = 0; i < datasets.size(); i++) {
@@ -4762,7 +4792,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private void setViewStatesLocked(FillResponse response, int state, boolean clearResponse) {
         final List<Dataset> datasets = response.getDatasets();
-        if (datasets != null) {
+        if (datasets != null && !datasets.isEmpty()) {
             for (int i = 0; i < datasets.size(); i++) {
                 final Dataset dataset = datasets.get(i);
                 if (dataset == null) {
