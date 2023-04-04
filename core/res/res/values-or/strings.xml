@@ -249,7 +249,7 @@
     <string name="global_action_emergency" msgid="1387617624177105088">"ଜରୁରୀକାଳୀନ"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"ବଗ୍‌ ରିପୋର୍ଟ"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"ସେସନ୍‍ ଶେଷ କରନ୍ତୁ"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"ସ୍କ୍ରିନସଟ୍‌"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"ସ୍କ୍ରିନସଟ"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"ବଗ୍‌ ରିପୋର୍ଟ"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"ଇ-ମେଲ୍ ମେସେଜ୍‍ ଭାବରେ ପଠାଇବାକୁ, ଆପଣଙ୍କ ବର୍ତ୍ତମାନର ଡିଭାଇସ୍‌ ବିଷୟରେ ଏହା ସୂଚନା ସଂଗ୍ରହ କରିବ। ବଗ୍ ରିପୋର୍ଟ ଆରମ୍ଭ ହେବାପରଠାରୁ ଏହାକୁ ପଠାଇବା ପାଇଁ କିଛି ସମୟ ଲାଗିବ, ଦୟାକରି ଧୈର୍ଯ୍ୟ ରଖନ୍ତୁ।"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ଇଣ୍ଟରାକ୍ଟିଭ୍‍ ରିପୋର୍ଟ"</string>

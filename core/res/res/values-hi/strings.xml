@@ -800,10 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ऐप्लिकेशन को, किसी ऐप्लिकेशन की सुविधाओं की जानकारी देखने की अनुमति देता है."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"सेंसर डेटा को, नमूने लेने की तेज़ दर पर ऐक्सेस करें"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"यह अनुमति मिलने पर ऐप्लिकेशन, 200 हर्ट्ज़ से ज़्यादा की दर पर सेंसर डेटा का नमूना ले पाएगा"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ऐप्लिकेशन अपने-आप अपडेट होने की अनुमति दें"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"इससे होल्डर उस ऐप्लिकेशन को अपने-आप अपडेट कर पाएगा जो उसने पहले इंस्टॉल किया था"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियम सेट करना"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्‍क्रीन लॉक पासवर्ड और पिन की लंबाई और उनमें स्वीकृत वर्णों को नियंत्रित करना."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"स्‍क्रीन अनलॉक करने के की कोशिशों पर नज़र रखना"</string>

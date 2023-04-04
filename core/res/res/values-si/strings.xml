@@ -800,10 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"යෙදුමක් සඳහා විශේෂාංග තොරතුරු බැලීම ආරම්භ කිරීමට දරන්නාට ඉඩ දෙන්න."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ඉහළ නියැදි කිරීමේ වේගයකින් සංවේදක දත්ත වෙත පිවිසෙන්න"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz ට වඩා වැඩි වේගයකින් සංවේදක දත්ත නියැදි කිරීමට යෙදුමට ඉඩ දෙයි"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"යෙදුම පරිශීලක ක්‍රියාවෙන් තොරව යාවත්කාලීන කරන්න"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"පරිශීලක ක්‍රියාවෙන් තොරව කලින් ස්ථාපිත යෙදුම යාවත්කාලීන කිරීමට දරන්නාට ඉඩ දෙයි"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"මුරපද නීති සකස් කිරීම"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"තිර අගුලු මුරපද සහ PIN තුළ ඉඩ දෙන දිග සහ අනුලකුණු පාලනය කිරීම."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>

@@ -800,10 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ધારકને ઍપ માટેની સુવિધાઓની માહિતી જોવાનું શરૂ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ઉચ્ચ સેમ્પ્લિંગ રેટ પર સેન્સરનો ડેટા ઍક્સેસ કરો"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"ઍપને 200 Hzથી વધુના દરે સેન્સરના ડેટાના નમૂનાની મંજૂરી આપે છે"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"વપરાશકર્તા દ્વારા કરવામાં આવતી ક્રિયા વિના ઍપને અપડેટ કરો"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"હોલ્ડરને વપરાશકર્તા દ્વારા કરવામાં આવતી ક્રિયા વિના, અગાઉ ઇન્સ્ટૉલ કરેલી ઍપને અપડેટ કરવાની મંજૂરી આપે છે"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"પાસવર્ડ નિયમો સેટ કરો"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"સ્ક્રીન લૉક પાસવર્ડ અને પિનમાં મંજૂર લંબાઈ અને અક્ષરોને નિયંત્રિત કરો."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"સ્ક્રીનને અનલૉક કરવાના પ્રયત્નોનું નિયમન કરો"</string>
