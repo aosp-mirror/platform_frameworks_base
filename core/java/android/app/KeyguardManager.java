@@ -146,15 +146,6 @@ public class KeyguardManager {
     public static final String EXTRA_CHECKBOX_LABEL = "android.app.extra.CHECKBOX_LABEL";
 
     /**
-     * A {@link StartLockscreenValidationRequest} extra to be sent along with
-     * {@link #ACTION_CONFIRM_REMOTE_DEVICE_CREDENTIAL} containing the data needed to prompt for
-     * a remote device's lock screen.
-     * @hide
-     */
-    public static final String EXTRA_START_LOCKSCREEN_VALIDATION_REQUEST =
-            "android.app.extra.START_LOCKSCREEN_VALIDATION_REQUEST";
-
-    /**
      * A {@link RemoteLockscreenValidationSession} extra to be sent along with
      * {@link #ACTION_CONFIRM_REMOTE_DEVICE_CREDENTIAL} containing the data needed to prompt for
      * a remote device's lock screen.
