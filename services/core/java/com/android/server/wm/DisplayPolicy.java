@@ -1122,7 +1122,6 @@ public class DisplayPolicy {
                     inOutFrame.set(windowContainer.getBounds());
                     break;
                 case SOURCE_FRAME:
-                    inOutFrame.inset(win.mGivenContentInsets);
                     extendByCutout =
                             (lp.privateFlags & PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT) != 0;
                     break;

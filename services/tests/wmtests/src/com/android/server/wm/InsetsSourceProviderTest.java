@@ -76,25 +76,6 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
     }
 
     @Test
-    public void testPostLayout_givenInsets() {
-        final WindowState ime = createWindow(null, TYPE_APPLICATION, "ime");
-        ime.getFrame().set(0, 0, 500, 100);
-        ime.mGivenContentInsets.set(0, 0, 0, 60);
-        ime.mGivenVisibleInsets.set(0, 0, 0, 75);
-        ime.mHasSurface = true;
-        mProvider.setWindowContainer(ime, null, null);
-        mProvider.updateSourceFrame(ime.getFrame());
-        mProvider.onPostLayout();
-        assertEquals(new Rect(0, 0, 500, 40), mProvider.getSource().getFrame());
-        assertEquals(new Rect(0, 0, 500, 25), mProvider.getSource().getVisibleFrame());
-        assertEquals(Insets.of(0, 40, 0, 0),
-                mProvider.getSource().calculateInsets(new Rect(0, 0, 500, 500),
-                        false /* ignoreVisibility */));
-        assertEquals(Insets.of(0, 25, 0, 0),
-                mProvider.getSource().calculateVisibleInsets(new Rect(0, 0, 500, 500)));
-    }
-
-    @Test
     public void testPostLayout_invisible() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         statusBar.getFrame().set(0, 0, 500, 100);

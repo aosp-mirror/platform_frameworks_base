@@ -218,8 +218,6 @@ class InsetsSourceProvider {
         if (mFrameProvider != null) {
             mFrameProvider.accept(mWindowContainer.getDisplayContent().mDisplayFrames,
                     mWindowContainer, mSourceFrame);
-        } else {
-            mSourceFrame.inset(win.mGivenContentInsets);
         }
         updateSourceFrameForServerVisibility();
 
