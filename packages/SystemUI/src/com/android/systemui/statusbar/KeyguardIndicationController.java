@@ -869,12 +869,9 @@ public class KeyguardIndicationController {
         // Walk down a precedence-ordered list of what indication
         // should be shown based on device state
         if (mDozing) {
+            boolean useMisalignmentColor = false;
             mLockScreenIndicationView.setVisibility(View.GONE);
             mTopIndicationView.setVisibility(VISIBLE);
-            // When dozing we ignore any text color and use white instead, because
-            // colors can be hard to read in low brightness.
-            mTopIndicationView.setTextColor(Color.WHITE);
-
             CharSequence newIndication;
             if (!TextUtils.isEmpty(mBiometricMessage)) {
                 newIndication = mBiometricMessage; // note: doesn't show mBiometricMessageFollowUp
@@ -885,8 +882,8 @@ public class KeyguardIndicationController {
                 mIndicationArea.setVisibility(GONE);
                 return;
             } else if (!TextUtils.isEmpty(mAlignmentIndication)) {
+                useMisalignmentColor = true;
                 newIndication = mAlignmentIndication;
-                mTopIndicationView.setTextColor(mContext.getColor(R.color.misalignment_text_color));
             } else if (mPowerPluggedIn || mEnableBatteryDefender) {
                 newIndication = computePowerIndication();
             } else {
@@ -896,7 +893,14 @@ public class KeyguardIndicationController {
 
             if (!TextUtils.equals(mTopIndicationView.getText(), newIndication)) {
                 mWakeLock.setAcquired(true);
-                mTopIndicationView.switchIndication(newIndication, null,
+                mTopIndicationView.switchIndication(newIndication,
+                        new KeyguardIndication.Builder()
+                                .setMessage(newIndication)
+                                .setTextColor(ColorStateList.valueOf(
+                                        useMisalignmentColor
+                                                ? mContext.getColor(R.color.misalignment_text_color)
+                                                : Color.WHITE))
+                                .build(),
                         true, () -> mWakeLock.setAcquired(false));
             }
             return;

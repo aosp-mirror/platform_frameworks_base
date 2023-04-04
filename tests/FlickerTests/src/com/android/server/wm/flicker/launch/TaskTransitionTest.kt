@@ -22,12 +22,10 @@ import android.content.res.Resources
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.datatypes.component.ComponentNameMatcher
-import android.tools.common.datatypes.component.ComponentNameMatcher.Companion.DEFAULT_TASK_DISPLAY_AREA
 import android.tools.common.datatypes.component.ComponentNameMatcher.Companion.SPLASH_SCREEN
 import android.tools.common.datatypes.component.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
 import android.tools.common.datatypes.component.ComponentSplashScreenMatcher
 import android.tools.common.datatypes.component.IComponentMatcher
-import android.tools.device.flicker.isShellTransitionsEnabled
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -38,7 +36,6 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.NewTasksAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -123,22 +120,8 @@ class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
     /** Checks that a color background is visible while the task transition is occurring. */
     @Presubmit
     @Test
-    fun transitionHasColorBackground_legacy() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        transitionHasColorBackground(DEFAULT_TASK_DISPLAY_AREA)
-    }
-
-    /** Checks that a color background is visible while the task transition is occurring. */
-    @Presubmit
-    @Test
-    fun transitionHasColorBackground_shellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-        transitionHasColorBackground(ComponentNameMatcher("", "Animation Background"))
-    }
-
-    private fun transitionHasColorBackground(backgroundColorLayer: IComponentMatcher) {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-
+    fun transitionHasColorBackground() {
+        val backgroundColorLayer = ComponentNameMatcher("", "Animation Background")
         val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
         flicker.assertLayers {
             this.invoke("LAUNCH_NEW_TASK_ACTIVITY coversExactly displayBounds") {

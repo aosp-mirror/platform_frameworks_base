@@ -48,7 +48,6 @@ import com.android.server.utils.Slogf;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -324,16 +323,7 @@ public final class HintManagerService extends SystemService {
     private boolean checkTidValid(int uid, int tgid, int [] tids) {
         // Make sure all tids belongs to the same UID (including isolated UID),
         // tids can belong to different application processes.
-        List<Integer> eligiblePids = null;
-        // To avoid deadlock, do not call into AMS if the call is from system.
-        if (uid != Process.SYSTEM_UID) {
-            eligiblePids = mAmInternal.getIsolatedProcesses(uid);
-        }
-        if (eligiblePids == null) {
-            eligiblePids = new ArrayList<>();
-        }
-        eligiblePids.add(tgid);
-
+        List<Integer> isolatedPids = null;
         for (int threadId : tids) {
             final String[] procStatusKeys = new String[] {
                     "Uid:",
@@ -345,7 +335,21 @@ public final class HintManagerService extends SystemService {
             int pidOfThreadId = (int) output[1];
 
             // use PID check for isolated processes, use UID check for non-isolated processes.
-            if (eligiblePids.contains(pidOfThreadId) || uidOfThreadId == uid) {
+            if (pidOfThreadId == tgid || uidOfThreadId == uid) {
+                continue;
+            }
+            // Only call into AM if the tid is either isolated or invalid
+            if (isolatedPids == null) {
+                // To avoid deadlock, do not call into AMS if the call is from system.
+                if (uid == Process.SYSTEM_UID) {
+                    return false;
+                }
+                isolatedPids = mAmInternal.getIsolatedProcesses(uid);
+                if (isolatedPids == null) {
+                    return false;
+                }
+            }
+            if (isolatedPids.contains(pidOfThreadId)) {
                 continue;
             }
             return false;

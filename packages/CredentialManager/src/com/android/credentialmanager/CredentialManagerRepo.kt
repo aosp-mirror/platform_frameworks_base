@@ -110,6 +110,11 @@ class CredentialManagerRepo(
             ResultReceiver::class.java
         )
 
+        val cancellationRequest = getCancelUiRequest(intent)
+        val cancelUiRequestState = cancellationRequest?.let {
+            CancelUiRequestState(getAppLabel(context.getPackageManager(), it.appPackageName))
+        }
+
         initialUiState = when (requestInfo.type) {
             RequestInfo.TYPE_CREATE -> {
                 val defaultProviderId = userConfigRepo.getDefaultProviderId()
@@ -128,6 +133,7 @@ class CredentialManagerRepo(
                         isPasskeyFirstUse
                     )!!,
                     getCredentialUiState = null,
+                    cancelRequestState = cancelUiRequestState
                 )
             }
             RequestInfo.TYPE_GET -> {
@@ -142,6 +148,7 @@ class CredentialManagerRepo(
                     if (autoSelectEntry == null) ProviderActivityState.NOT_APPLICABLE
                     else ProviderActivityState.READY_TO_LAUNCH,
                     isAutoSelectFlow = autoSelectEntry != null,
+                    cancelRequestState = cancelUiRequestState
                 )
             }
             else -> throw IllegalStateException("Unrecognized request type: ${requestInfo.type}")
@@ -238,12 +245,12 @@ class CredentialManagerRepo(
             }
         }
 
-        /** Return the request token whose UI should be cancelled, or null otherwise. */
-        fun getCancelUiRequestToken(intent: Intent): IBinder? {
+        /** Return the cancellation request if present. */
+        fun getCancelUiRequest(intent: Intent): CancelUiRequest? {
             return intent.extras?.getParcelable(
                 CancelUiRequest.EXTRA_CANCEL_UI_REQUEST,
                 CancelUiRequest::class.java
-            )?.token
+            )
         }
     }
 

@@ -19,7 +19,6 @@ package com.android.wm.shell.flicker.pip
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
 import android.tools.common.datatypes.component.ComponentNameMatcher.Companion.LAUNCHER
-import android.tools.device.flicker.isShellTransitionsEnabled
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
@@ -43,25 +42,17 @@ abstract class ClosePipTransition(flicker: FlickerTest) : PipTransition(flicker)
     @Presubmit
     @Test
     open fun pipWindowBecomesInvisible() {
-        if (isShellTransitionsEnabled) {
-            // When Shell transition is enabled, we change the windowing mode at start, but
-            // update the visibility after the transition is finished, so we can't check isNotPinned
-            // and isAppWindowInvisible in the same assertion block.
-            flicker.assertWm {
-                this.invoke("hasPipWindow") {
-                        it.isPinned(pipApp).isAppWindowVisible(pipApp).isAppWindowOnTop(pipApp)
-                    }
-                    .then()
-                    .invoke("!hasPipWindow") { it.isNotPinned(pipApp).isAppWindowNotOnTop(pipApp) }
-            }
-            flicker.assertWmEnd { isAppWindowInvisible(pipApp) }
-        } else {
-            flicker.assertWm {
-                this.invoke("hasPipWindow") { it.isPinned(pipApp).isAppWindowVisible(pipApp) }
-                    .then()
-                    .invoke("!hasPipWindow") { it.isNotPinned(pipApp).isAppWindowInvisible(pipApp) }
-            }
+        // When Shell transition is enabled, we change the windowing mode at start, but
+        // update the visibility after the transition is finished, so we can't check isNotPinned
+        // and isAppWindowInvisible in the same assertion block.
+        flicker.assertWm {
+            this.invoke("hasPipWindow") {
+                    it.isPinned(pipApp).isAppWindowVisible(pipApp).isAppWindowOnTop(pipApp)
+                }
+                .then()
+                .invoke("!hasPipWindow") { it.isNotPinned(pipApp).isAppWindowNotOnTop(pipApp) }
         }
+        flicker.assertWmEnd { isAppWindowInvisible(pipApp) }
     }
 
     /**

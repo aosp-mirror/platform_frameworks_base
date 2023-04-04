@@ -16,10 +16,8 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import android.tools.device.flicker.isShellTransitionsEnabled
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -29,7 +27,6 @@ import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.snapshotStartingWindowLayerCoversExactlyOnApp
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -74,17 +71,9 @@ open class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: Fl
 
     @Presubmit @Test fun imeLayerBecomesVisible() = flicker.imeLayerBecomesVisible()
 
-    @FlakyTest(bugId = 240918620)
-    @Test
-    fun snapshotStartingWindowLayerCoversExactlyOnApp() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        flicker.snapshotStartingWindowLayerCoversExactlyOnApp(imeTestApp)
-    }
-
     @Presubmit
     @Test
-    fun snapshotStartingWindowLayerCoversExactlyOnApp_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
+    fun snapshotStartingWindowLayerCoversExactlyOnApp() {
         flicker.snapshotStartingWindowLayerCoversExactlyOnApp(imeTestApp)
     }
 
