@@ -29,6 +29,7 @@ import static com.android.server.wallpaper.WallpaperUtils.makeWallpaperIdLocked;
 
 import android.annotation.Nullable;
 import android.app.WallpaperColors;
+import android.app.WallpaperManager;
 import android.app.WallpaperManager.SetWallpaperFlags;
 import android.app.backup.WallpaperBackupHelper;
 import android.content.ComponentName;
@@ -75,17 +76,17 @@ class WallpaperDataParser {
     private final WallpaperCropper mWallpaperCropper;
     private final Context mContext;
 
-    // Temporary feature flag. TODO(b/197814683) remove
-    private final boolean mEnableSeparateLockScreenEngine;
+    private final boolean mIsLockscreenLiveWallpaperEnabled;
 
     WallpaperDataParser(Context context, WallpaperDisplayHelper wallpaperDisplayHelper,
-            WallpaperCropper wallpaperCropper, boolean enableSeparateLockScreenEngine) {
+            WallpaperCropper wallpaperCropper) {
         mContext = context;
         mWallpaperDisplayHelper = wallpaperDisplayHelper;
         mWallpaperCropper = wallpaperCropper;
         mImageWallpaper = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.image_wallpaper_component));
-        mEnableSeparateLockScreenEngine = enableSeparateLockScreenEngine;
+        mIsLockscreenLiveWallpaperEnabled = context.getSystemService(WallpaperManager.class)
+                .isLockscreenLiveWallpaperEnabled();
     }
 
     private JournaledFile makeJournaledFile(int userId) {
@@ -135,8 +136,9 @@ class WallpaperDataParser {
      *                      If null, a new object will be created.
      * @param lockWallpaper the lock wallpaper object to reuse to do the modifications.
      *                      If null, a new object will be created.
-     * @param which The wallpaper(s) to load. If {@link #mEnableSeparateLockScreenEngine} is false,
-     *                      this flag has no effect and both wallpapers will always be loaded.
+     * @param which The wallpaper(s) to load. Only has effect if
+     *                      {@link WallpaperManager#isLockscreenLiveWallpaperEnabled} is true,
+     *                      otherwise both wallpaper will always be loaded.
      * @return a {@link WallpaperLoadingResult} object containing the wallpaper data.
      *                      This object will contain the {@code wallpaper} and
      *                      {@code lockWallpaper} provided as parameters, if they are not null.
@@ -148,11 +150,13 @@ class WallpaperDataParser {
         File file = journal.chooseForRead();
 
         boolean migrateFromOld = wallpaper == null;
-        boolean loadSystem = !mEnableSeparateLockScreenEngine || (which & FLAG_SYSTEM) != 0;
-        boolean loadLock = !mEnableSeparateLockScreenEngine || (which & FLAG_LOCK) != 0;
+
+        boolean separateLockscreenEngine = mIsLockscreenLiveWallpaperEnabled;
+        boolean loadSystem = !separateLockscreenEngine || (which & FLAG_SYSTEM) != 0;
+        boolean loadLock = !separateLockscreenEngine || (which & FLAG_LOCK) != 0;
 
         // don't reuse the wallpaper objects in the new version
-        if (mEnableSeparateLockScreenEngine) {
+        if (separateLockscreenEngine) {
             wallpaper = null;
             lockWallpaper = null;
         }
@@ -184,7 +188,8 @@ class WallpaperDataParser {
                 if (type == XmlPullParser.START_TAG) {
                     String tag = parser.getName();
                     if (("wp".equals(tag) && loadSystem)
-                            || ("kwp".equals(tag) && mEnableSeparateLockScreenEngine && loadLock)) {
+                            || ("kwp".equals(tag) && mIsLockscreenLiveWallpaperEnabled
+                                && loadLock)) {
 
                         if ("kwp".equals(tag) && lockWallpaper == null) {
                             lockWallpaper = new WallpaperData(userId, FLAG_LOCK);
@@ -213,7 +218,7 @@ class WallpaperDataParser {
                             Slog.v(TAG, "mNextWallpaperComponent:"
                                     + wallpaper.nextWallpaperComponent);
                         }
-                    } else if ("kwp".equals(tag) && !mEnableSeparateLockScreenEngine) {
+                    } else if ("kwp".equals(tag) && !mIsLockscreenLiveWallpaperEnabled) {
                         // keyguard-specific wallpaper for this user (legacy code)
                         if (lockWallpaper == null) {
                             lockWallpaper = new WallpaperData(userId, FLAG_LOCK);
