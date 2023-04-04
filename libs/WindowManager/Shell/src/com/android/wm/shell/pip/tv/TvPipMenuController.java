@@ -276,14 +276,13 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             Rect pipBounds) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: resizePipMenu: %s", TAG, pipBounds.toShortString());
+
         if (pipBounds.isEmpty()) {
             return;
         }
-
-        if (!isMenuReadyToMove()) {
+        if (!isMenuAttached()) {
             return;
         }
-
 
         final SurfaceControl frontSurface = getSurfaceControl(mPipMenuView);
         final SurfaceControl backSurface = getSurfaceControl(mPipBackgroundView);
@@ -321,7 +320,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             }
             return;
         }
-        if (!isMenuReadyToMove()) {
+        if (!isMenuAttached()) {
             return;
         }
 
@@ -344,12 +343,12 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         syncGroup.markSyncReady();
     }
 
-    private boolean isMenuReadyToMove() {
+    private boolean isMenuAttached() {
         final boolean ready = mPipMenuView != null && mPipMenuView.getViewRootImpl() != null
                 && mPipBackgroundView != null && mPipBackgroundView.getViewRootImpl() != null;
         if (!ready) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: Not going to move PiP, either menu or its parent is not created.", TAG);
+                    "%s: the menu surfaces are not attached.", TAG);
         }
         return ready;
     }
@@ -368,6 +367,9 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     @Override
     public void updateMenuBounds(Rect pipBounds) {
+        if (!isMenuAttached()) {
+            return;
+        }
         final Rect menuBounds = calculateMenuSurfaceBounds(pipBounds);
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: updateMenuBounds: %s", TAG, menuBounds.toShortString());
