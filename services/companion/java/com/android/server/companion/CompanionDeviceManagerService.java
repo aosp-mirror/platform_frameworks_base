@@ -17,7 +17,6 @@
 
 package com.android.server.companion;
 
-import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -688,11 +687,11 @@ public class CompanionDeviceManagerService extends SystemService {
             return nm.isNotificationListenerAccessGranted(component);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
         @Override
         public boolean isDeviceAssociatedForWifiConnection(String packageName, String macAddress,
                 int userId) {
-            getContext().enforceCallingOrSelfPermission(
-                    MANAGE_COMPANION_DEVICES, "isDeviceAssociated");
+            isDeviceAssociatedForWifiConnection_enforcePermission();
 
             boolean bypassMacPermission = getContext().getPackageManager().checkPermission(
                     android.Manifest.permission.COMPANION_APPROVE_WIFI_CONNECTIONS, packageName)

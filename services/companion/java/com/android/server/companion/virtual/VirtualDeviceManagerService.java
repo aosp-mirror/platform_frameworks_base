@@ -233,6 +233,7 @@ public class VirtualDeviceManagerService extends SystemService {
                     }
                 };
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @Override // Binder call
         public IVirtualDevice createVirtualDevice(
                 IBinder token,
@@ -241,9 +242,7 @@ public class VirtualDeviceManagerService extends SystemService {
                 @NonNull VirtualDeviceParams params,
                 @NonNull IVirtualDeviceActivityListener activityListener,
                 @NonNull IVirtualDeviceSoundEffectListener soundEffectListener) {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                    "createVirtualDevice");
+            createVirtualDevice_enforcePermission();
             final int callingUid = getCallingUid();
             if (!PermissionUtils.validateCallingPackageName(getContext(), packageName)) {
                 throw new SecurityException(
