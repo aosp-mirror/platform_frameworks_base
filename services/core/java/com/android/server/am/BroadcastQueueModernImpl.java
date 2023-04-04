@@ -72,6 +72,7 @@ import android.util.MathUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -208,6 +209,16 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @GuardedBy("mService")
     private final AtomicReference<ArraySet<BroadcastRecord>> mReplacedBroadcastsCache =
             new AtomicReference<>();
+
+    /**
+     * Map from UID to its last known "cached" state.
+     * <p>
+     * We manually maintain this data structure since the lifecycle of
+     * {@link ProcessRecord} and {@link BroadcastProcessQueue} can be
+     * mismatched.
+     */
+    @GuardedBy("mService")
+    private final SparseBooleanArray mUidCached = new SparseBooleanArray();
 
     private final BroadcastConstants mConstants;
     private final BroadcastConstants mFgConstants;
@@ -485,7 +496,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // relevant per-process queue
         final BroadcastProcessQueue queue = getProcessQueue(app);
         if (queue != null) {
-            queue.setProcess(app);
+            setQueueProcess(queue, app);
         }
 
         boolean didSomething = false;
@@ -526,7 +537,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // relevant per-process queue
         final BroadcastProcessQueue queue = getProcessQueue(app);
         if (queue != null) {
-            queue.setProcess(null);
+            setQueueProcess(queue, null);
         }
 
         if ((mRunningColdStart != null) && (mRunningColdStart == queue)) {
@@ -1332,11 +1343,17 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             @Override
             public void onUidCachedChanged(int uid, boolean cached) {
                 synchronized (mService) {
+                    if (cached) {
+                        mUidCached.put(uid, true);
+                    } else {
+                        mUidCached.delete(uid);
+                    }
+
                     BroadcastProcessQueue leaf = mProcessQueues.get(uid);
                     while (leaf != null) {
                         // Update internal state by refreshing values previously
                         // read from any known running process
-                        leaf.setProcess(leaf.app);
+                        setQueueProcess(leaf, leaf.app);
                         updateQueueDeferred(leaf);
                         updateRunnableList(leaf);
                         leaf = leaf.processNameNext;
@@ -1500,8 +1517,17 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     private void updateWarmProcess(@NonNull BroadcastProcessQueue queue) {
         if (!queue.isProcessWarm()) {
-            queue.setProcess(mService.getProcessRecordLocked(queue.processName, queue.uid));
+            setQueueProcess(queue, mService.getProcessRecordLocked(queue.processName, queue.uid));
         }
+    }
+
+    /**
+     * Update the {@link ProcessRecord} associated with the given
+     * {@link BroadcastProcessQueue}.
+     */
+    private void setQueueProcess(@NonNull BroadcastProcessQueue queue,
+            @Nullable ProcessRecord app) {
+        queue.setProcessAndUidCached(app, mUidCached.get(queue.uid, false));
     }
 
     /**
@@ -1694,7 +1720,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
 
         BroadcastProcessQueue created = new BroadcastProcessQueue(mConstants, processName, uid);
-        created.setProcess(mService.getProcessRecordLocked(processName, uid));
+        setQueueProcess(created, mService.getProcessRecordLocked(processName, uid));
 
         if (leaf == null) {
             mProcessQueues.put(uid, created);
@@ -1817,9 +1843,15 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         ipw.decreaseIndent();
         ipw.println();
 
-        ipw.println(" Broadcasts with ignored delivery group policies:");
+        ipw.println("Broadcasts with ignored delivery group policies:");
         ipw.increaseIndent();
         mService.dumpDeliveryGroupPolicyIgnoredActions(ipw);
+        ipw.decreaseIndent();
+        ipw.println();
+
+        ipw.println("Cached UIDs:");
+        ipw.increaseIndent();
+        ipw.println(mUidCached.toString());
         ipw.decreaseIndent();
         ipw.println();
 
