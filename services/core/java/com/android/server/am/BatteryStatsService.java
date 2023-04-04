@@ -37,6 +37,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.hardware.power.stats.PowerEntity;
 import android.hardware.power.stats.State;
 import android.hardware.power.stats.StateResidency;
@@ -149,7 +151,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     private final PowerProfile mPowerProfile;
     final BatteryStatsImpl mStats;
-    @GuardedBy("mWakeupStats")
     final CpuWakeupStats mCpuWakeupStats;
     private final BatteryUsageStatsStore mBatteryUsageStatsStore;
     private final BatteryStatsImpl.UserInfoProvider mUserManagerUserInfoProvider;
@@ -1260,6 +1261,26 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
         FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SENSOR_STATE_CHANGED, uid,
                 null, sensor, FrameworkStatsLog.SENSOR_STATE_CHANGED__STATE__ON);
+    }
+
+    @Override
+    public void noteWakeupSensorEvent(long elapsedNanos, int uid, int sensorHandle) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException("Calling uid " + callingUid + " is not system uid");
+        }
+
+        final SensorManager sm = mContext.getSystemService(SensorManager.class);
+        final Sensor sensor = sm.getSensorByHandle(sensorHandle);
+        if (sensor == null) {
+            Slog.w(TAG, "Unknown sensor handle " + sensorHandle
+                    + " received in noteWakeupSensorEvent");
+            return;
+        }
+        Slog.i(TAG, "Sensor " + sensor + " wakeup event at " + elapsedNanos + " sent to uid "
+                + uid);
+        // TODO (b/275436924): Remove log and pipe to CpuWakeupStats for wakeup attribution
+        // This method should return as quickly as possible. Use mHandler#post to do longer work.
     }
 
     @Override
