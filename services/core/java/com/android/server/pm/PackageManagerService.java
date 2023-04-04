@@ -997,7 +997,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final DistractingPackageHelper mDistractingPackageHelper;
     private final StorageEventHelper mStorageEventHelper;
 
-    private static final boolean ENABLE_BOOST = true;
+    private static final boolean ENABLE_BOOST = false;
 
     private static ThreadPriorityBooster sThreadPriorityBooster = new ThreadPriorityBooster(
             Process.THREAD_PRIORITY_FOREGROUND, LockGuard.INDEX_PACKAGES);
