@@ -45,6 +45,8 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_N
 import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
 import static com.android.server.wm.WindowManagerService.MY_PID;
 
+import static java.util.Objects.requireNonNull;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -559,14 +561,19 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      * @see BackgroundLaunchProcessController#addOrUpdateAllowBackgroundStartPrivileges(Binder,
      * BackgroundStartPrivileges)
      */
-    public void addOrUpdateBackgroundStartPrivileges(Binder entity,
-            BackgroundStartPrivileges backgroundStartPrivileges) {
+    public void addOrUpdateBackgroundStartPrivileges(@NonNull Binder entity,
+            @NonNull BackgroundStartPrivileges backgroundStartPrivileges) {
+        requireNonNull(entity, "entity");
+        requireNonNull(backgroundStartPrivileges, "backgroundStartPrivileges");
+        checkArgument(backgroundStartPrivileges.allowsAny(),
+                "backgroundStartPrivileges does not allow anything");
         mBgLaunchController.addOrUpdateAllowBackgroundStartPrivileges(entity,
                 backgroundStartPrivileges);
     }
 
     /** @see BackgroundLaunchProcessController#removeAllowBackgroundStartPrivileges(Binder) */
-    public void removeBackgroundStartPrivileges(Binder entity) {
+    public void removeBackgroundStartPrivileges(@NonNull Binder entity) {
+        requireNonNull(entity, "entity");
         mBgLaunchController.removeAllowBackgroundStartPrivileges(entity);
     }
 
