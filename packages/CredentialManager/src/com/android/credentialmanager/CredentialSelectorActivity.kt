@@ -111,7 +111,7 @@ class CredentialSelectorActivity : ComponentActivity() {
             ?: return Triple(false, false, null)
         if (viewModel != null && !viewModel.shouldCancelCurrentUi(cancelUiRequest.token)) {
             // Cancellation was for a different request, don't cancel the current UI.
-            return Triple(false, false, null)
+            return Triple(true, false, null)
         }
         val shouldShowCancellationUi = cancelUiRequest.shouldShowCancellationUi()
         Log.d(
