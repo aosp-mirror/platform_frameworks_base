@@ -707,6 +707,9 @@ public final class AutofillManager {
     // An allowed activity set read from device config
     private Set<String> mAllowedActivitySet = new ArraySet<>();
 
+    // Whether to enable multi-line check when checking whether view is autofillable
+    private boolean mShouldEnableMultilineFilter;
+
     // Indicate whether should include all view with autofill type not none in assist structure
     private boolean mShouldIncludeAllViewsWithAutofillTypeNotNoneInAssistStructure;
 
@@ -889,6 +892,9 @@ public final class AutofillManager {
         mNonAutofillableImeActionIdSet =
             AutofillFeatureFlags.getNonAutofillableImeActionIdSetFromFlag();
 
+        mShouldEnableMultilineFilter =
+            AutofillFeatureFlags.shouldEnableMultilineFilter();
+
         final String denyListString = AutofillFeatureFlags.getDenylistStringFromFlag();
         final String allowlistString = AutofillFeatureFlags.getAllowlistStringFromFlag();
 
@@ -948,12 +954,26 @@ public final class AutofillManager {
     /**
      * Whether view passes the imeAction check
      *
-     * @hide
      */
-    public boolean isPassingImeActionCheck(EditText editText) {
+    private boolean isPassingImeActionCheck(EditText editText) {
         final int actionId = editText.getImeOptions();
         if (mNonAutofillableImeActionIdSet.contains(String.valueOf(actionId))) {
             Log.d(TAG, "view not autofillable - not passing ime action check");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks whether the view passed in is not multiline text
+     *
+     * @param editText the view that passed to this check
+     * @return true if the view input is not multiline, false otherwise
+     */
+    private boolean isPassingMultilineCheck(EditText editText) {
+        // check if min line is set to be greater than 1
+        if (editText.getMinLines() > 1) {
+            Log.d(TAG, "view not autofillable - has multiline input type");
             return false;
         }
         return true;
@@ -1103,6 +1123,9 @@ public final class AutofillManager {
         }
 
         if (view instanceof EditText) {
+            if (mShouldEnableMultilineFilter && !isPassingMultilineCheck((EditText) view)) {
+                return false;
+            }
             return isPassingImeActionCheck((EditText) view);
         }
 
