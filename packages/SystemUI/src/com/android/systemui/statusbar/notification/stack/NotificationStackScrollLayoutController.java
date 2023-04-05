@@ -180,7 +180,6 @@ public class NotificationStackScrollLayoutController {
     private final SeenNotificationsProvider mSeenNotificationsProvider;
 
     private NotificationStackScrollLayout mView;
-    private boolean mFadeNotificationsOnDismiss;
     private NotificationSwipeHelper mSwipeHelper;
     @Nullable
     private Boolean mHistoryEnabled;
@@ -548,7 +547,7 @@ public class NotificationStackScrollLayoutController {
                 public boolean updateSwipeProgress(View animView, boolean dismissable,
                                                    float swipeProgress) {
                     // Returning true prevents alpha fading.
-                    return !mFadeNotificationsOnDismiss;
+                    return false;
                 }
 
                 @Override
@@ -773,7 +772,6 @@ public class NotificationStackScrollLayoutController {
 
         mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
 
-        mFadeNotificationsOnDismiss = mFeatureFlags.isEnabled(Flags.NOTIFICATION_DISMISSAL_FADE);
         if (!mUseRoundnessSourceTypes) {
             mNotificationRoundnessManager.setOnRoundingChangedCallback(mView::invalidate);
             mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
