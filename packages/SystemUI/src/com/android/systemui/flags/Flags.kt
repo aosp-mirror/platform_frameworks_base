@@ -77,11 +77,6 @@ object Flags {
     // TODO(b/257315550): Tracking Bug
     val NO_HUN_FOR_OLD_WHEN = releasedFlag(118, "no_hun_for_old_when")
 
-    // TODO(b/260335638): Tracking Bug
-    @JvmField
-    val NOTIFICATION_INLINE_REPLY_ANIMATION =
-        releasedFlag(174148361, "notification_inline_reply_animation")
-
     // TODO(b/277338665): Tracking Bug
     @JvmField
     val NOTIFICATION_SHELF_REFACTOR =

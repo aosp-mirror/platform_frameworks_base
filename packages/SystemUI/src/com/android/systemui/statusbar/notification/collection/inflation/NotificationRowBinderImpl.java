@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection.inflation;
 
-import static com.android.systemui.flags.Flags.NOTIFICATION_INLINE_REPLY_ANIMATION;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
@@ -31,7 +30,6 @@ import android.view.ViewGroup;
 
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -73,7 +71,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private NotificationListContainer mListContainer;
     private BindRowCallback mBindRowCallback;
     private NotificationClicker mNotificationClicker;
-    private FeatureFlags mFeatureFlags;
 
     @Inject
     public NotificationRowBinderImpl(
@@ -85,8 +82,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             RowContentBindStage rowContentBindStage,
             Provider<RowInflaterTask> rowInflaterTaskProvider,
             ExpandableNotificationRowComponent.Builder expandableNotificationRowComponentBuilder,
-            IconManager iconManager,
-            FeatureFlags featureFlags) {
+            IconManager iconManager) {
         mContext = context;
         mNotifBindPipeline = notifBindPipeline;
         mRowContentBindStage = rowContentBindStage;
@@ -96,7 +92,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mRowInflaterTaskProvider = rowInflaterTaskProvider;
         mExpandableNotificationRowComponentBuilder = expandableNotificationRowComponentBuilder;
         mIconManager = iconManager;
-        mFeatureFlags = featureFlags;
     }
 
     /**
@@ -181,8 +176,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         entry.setRow(row);
         mNotifBindPipeline.manageRow(entry, row);
         mBindRowCallback.onBindRow(row);
-        row.setInlineReplyAnimationFlagEnabled(
-                mFeatureFlags.isEnabled(NOTIFICATION_INLINE_REPLY_ANIMATION));
     }
 
     /**
