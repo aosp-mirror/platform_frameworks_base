@@ -63,6 +63,10 @@ constructor(
                 override fun onStateChanged(newState: Int) {
                     refreshMediaPosition()
                 }
+
+                override fun onDozingChanged(isDozing: Boolean) {
+                    refreshMediaPosition()
+                }
             }
         )
         configurationController.addCallback(
@@ -198,12 +202,26 @@ constructor(
             mediaHost.visible &&
                 !bypassController.bypassEnabled &&
                 keyguardOrUserSwitcher &&
-                allowMediaPlayerOnLockScreen
+                allowMediaPlayerOnLockScreen &&
+                shouldBeVisibleForSplitShade()
         if (visible) {
             showMediaPlayer()
         } else {
             hideMediaPlayer()
         }
+    }
+
+    private fun shouldBeVisibleForSplitShade(): Boolean {
+        if (!useSplitShade) {
+            return true
+        }
+        // We have to explicitly hide media for split shade when on AOD, as it is a child view of
+        // keyguard status view, and nothing hides keyguard status view on AOD.
+        // When using the double-line clock, it is not an issue, as media gets implicitly hidden
+        // by the clock. This is not the case for single-line clock though.
+        // For single shade, we don't need to do it, because media is a child of NSSL, which already
+        // gets hidden on AOD.
+        return !statusBarStateController.isDozing
     }
 
     private fun showMediaPlayer() {
