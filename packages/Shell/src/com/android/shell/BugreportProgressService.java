@@ -455,7 +455,8 @@ public class BugreportProgressService extends Service {
         intent.putExtra(DevicePolicyManager.EXTRA_REMOTE_BUGREPORT_HASH, bugreportHash);
         intent.putExtra(DevicePolicyManager.EXTRA_REMOTE_BUGREPORT_NONCE, nonce);
         intent.putExtra(EXTRA_BUGREPORT, bugreportFileName);
-        context.sendBroadcast(intent, android.Manifest.permission.DUMP);
+        context.sendBroadcastAsUser(intent, UserHandle.SYSTEM,
+                android.Manifest.permission.DUMP);
     }
 
     /**
