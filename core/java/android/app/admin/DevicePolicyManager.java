@@ -13646,8 +13646,8 @@ public class DevicePolicyManager {
      * privacy-sensitive events happening outside the managed profile would have been redacted
      * already.
      *
-     * @param admin Which device admin this request is associated with. Null if the caller is not
-     *              a device admin
+     * @param admin Which device admin this request is associated with, or {@code null}
+     *              if called by a delegated app.
      * @param enabled whether security logging should be enabled or not.
      * @throws SecurityException if the caller is not permitted to control security logging.
      * @see #setAffiliationIds
@@ -13699,8 +13699,8 @@ public class DevicePolicyManager {
      * it must be affiliated with the device. Otherwise a {@link SecurityException} will be thrown.
      * See {@link #isAffiliatedUser}.
      *
-     * @param admin Which device admin this request is associated with. Null if the caller is not
-     *              a device admin.
+     * @param admin Which device admin this request is associated with, or {@code null}
+     *              if called by a delegated app.
      * @return the new batch of security logs which is a list of {@link SecurityEvent},
      * or {@code null} if rate limitation is exceeded or if logging is currently disabled.
      * @throws SecurityException if the caller is not allowed to access security logging,
@@ -13857,8 +13857,8 @@ public class DevicePolicyManager {
      * it must be affiliated with the device. Otherwise a {@link SecurityException} will be thrown.
      * See {@link #isAffiliatedUser}.
      *
-     * @param admin Which device admin this request is associated with. Null if the caller is not
-     *              a device admin.
+     * @param admin Which device admin this request is associated with, or {@code null}
+     *             if called by a delegated app.
      * @return Device logs from before the latest reboot of the system, or {@code null} if this API
      *         is not supported on the device.
      * @throws SecurityException if the caller is not allowed to access security logging, or
