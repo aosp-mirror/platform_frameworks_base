@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_FROZEN;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
 
@@ -48,7 +47,7 @@ import android.app.ActivityManager;
 import android.app.ApplicationExitInfo;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
-import android.app.IUidFrozenStateChangedCallback;
+import android.app.UidObserver;
 import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -211,14 +210,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             new AtomicReference<>();
 
     /**
-     * Map from UID to its last known "frozen" state.
+     * Map from UID to its last known "cached" state.
      * <p>
      * We manually maintain this data structure since the lifecycle of
      * {@link ProcessRecord} and {@link BroadcastProcessQueue} can be
      * mismatched.
      */
     @GuardedBy("mService")
-    private final SparseBooleanArray mUidFrozen = new SparseBooleanArray();
+    private final SparseBooleanArray mUidCached = new SparseBooleanArray();
 
     private final BroadcastConstants mConstants;
     private final BroadcastConstants mFgConstants;
@@ -360,6 +359,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // If app isn't running, and there's nothing in the queue, clean up
         if (queue.isEmpty() && !queue.isActive() && !queue.isProcessWarm()) {
             removeProcessQueue(queue.processName, queue.uid);
+        } else {
+            updateQueueDeferred(queue);
         }
     }
 
@@ -562,7 +563,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 return (r.receivers.get(i) instanceof BroadcastFilter);
             }, mBroadcastConsumerSkip, true);
             if (didSomething || queue.isEmpty()) {
-                updateQueueDeferred(queue);
                 updateRunnableList(queue);
                 enqueueUpdateRunningList();
             }
@@ -628,7 +628,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 setDeliveryState(queue, null, r, i, receiver, BroadcastRecord.DELIVERY_DEFERRED,
                         "deferred at enqueue time");
             }
-            updateQueueDeferred(queue);
             updateRunnableList(queue);
             enqueueUpdateRunningList();
         }
@@ -1077,7 +1076,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
             final int queueIndex = getRunningIndexOf(queue);
             mRunning[queueIndex] = null;
-            updateQueueDeferred(queue);
             updateRunnableList(queue);
             enqueueUpdateRunningList();
 
@@ -1160,7 +1158,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                                 getReceiverUid(otherReceiver));
                         if (otherQueue != null) {
                             otherQueue.invalidateRunnableAt();
-                            updateQueueDeferred(otherQueue);
                             updateRunnableList(otherQueue);
                         }
                     }
@@ -1291,7 +1288,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 if (queuePredicate.test(leaf)) {
                     if (leaf.forEachMatchingBroadcast(broadcastPredicate,
                             broadcastConsumer, andRemove)) {
-                        updateQueueDeferred(leaf);
                         updateRunnableList(leaf);
                         didSomething = true;
                     }
@@ -1305,40 +1301,29 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return didSomething;
     }
 
-    private boolean forEachMatchingQueue(
+    private void forEachMatchingQueue(
             @NonNull Predicate<BroadcastProcessQueue> queuePredicate,
             @NonNull Consumer<BroadcastProcessQueue> queueConsumer) {
-        boolean didSomething = false;
         for (int i = mProcessQueues.size() - 1; i >= 0; i--) {
             BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
             while (leaf != null) {
                 if (queuePredicate.test(leaf)) {
                     queueConsumer.accept(leaf);
-                    updateQueueDeferred(leaf);
                     updateRunnableList(leaf);
-                    didSomething = true;
                 }
                 leaf = leaf.processNameNext;
             }
         }
-        if (didSomething) {
-            enqueueUpdateRunningList();
-        }
-        return didSomething;
     }
 
-    @SuppressWarnings("CheckResult")
-    private void updateQueueDeferred(@NonNull BroadcastProcessQueue leaf) {
+    private void updateQueueDeferred(
+            @NonNull BroadcastProcessQueue leaf) {
         if (leaf.isDeferredUntilActive()) {
-            // We ignore the returned value here since callers are invoking us
-            // just before updateRunnableList()
             leaf.forEachMatchingBroadcast((r, i) -> {
                 return r.deferUntilActive && (r.getDeliveryState(i)
                         == BroadcastRecord.DELIVERY_PENDING);
             }, mBroadcastConsumerDefer, false);
         } else if (leaf.hasDeferredBroadcasts()) {
-            // We ignore the returned value here since callers are invoking us
-            // just before updateRunnableList()
             leaf.forEachMatchingBroadcast((r, i) -> {
                 return r.deferUntilActive && (r.getDeliveryState(i)
                         == BroadcastRecord.DELIVERY_DEFERRED);
@@ -1351,31 +1336,29 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         mFgConstants.startObserving(mHandler, resolver);
         mBgConstants.startObserving(mHandler, resolver);
 
-        mService.registerUidFrozenStateChangedCallback(new IUidFrozenStateChangedCallback.Stub() {
+        mService.registerUidObserver(new UidObserver() {
             @Override
-            public void onUidFrozenStateChanged(int[] uids, int[] frozenStates) {
+            public void onUidCachedChanged(int uid, boolean cached) {
                 synchronized (mService) {
-                    for (int i = 0; i < uids.length; i++) {
-                        final int uid = uids[i];
-                        final boolean frozen = frozenStates[i] == UID_FROZEN_STATE_FROZEN;
-                        if (frozen) {
-                            mUidFrozen.put(uid, true);
-                        } else {
-                            mUidFrozen.delete(uid);
-                        }
-
-                        BroadcastProcessQueue leaf = mProcessQueues.get(uid);
-                        while (leaf != null) {
-                            // Update internal state by refreshing values previously
-                            // read from any known running process
-                            setQueueProcess(leaf, leaf.app);
-                            leaf = leaf.processNameNext;
-                        }
-                        enqueueUpdateRunningList();
+                    if (cached) {
+                        mUidCached.put(uid, true);
+                    } else {
+                        mUidCached.delete(uid);
                     }
+
+                    BroadcastProcessQueue leaf = mProcessQueues.get(uid);
+                    while (leaf != null) {
+                        // Update internal state by refreshing values previously
+                        // read from any known running process
+                        setQueueProcess(leaf, leaf.app);
+                        updateQueueDeferred(leaf);
+                        updateRunnableList(leaf);
+                        leaf = leaf.processNameNext;
+                    }
+                    enqueueUpdateRunningList();
                 }
             }
-        });
+        }, ActivityManager.UID_OBSERVER_CACHED, 0, "android");
 
         // Kick off periodic health checks
         mLocalHandler.sendEmptyMessage(MSG_CHECK_HEALTH);
@@ -1535,15 +1518,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     /**
      * Update the {@link ProcessRecord} associated with the given
-     * {@link BroadcastProcessQueue}. Also updates any runnable status that
-     * might have changed as a side-effect.
+     * {@link BroadcastProcessQueue}.
      */
     private void setQueueProcess(@NonNull BroadcastProcessQueue queue,
             @Nullable ProcessRecord app) {
-        if (queue.setProcessAndUidFrozen(app, mUidFrozen.get(queue.uid, false))) {
-            updateQueueDeferred(queue);
-            updateRunnableList(queue);
-        }
+        queue.setProcessAndUidCached(app, mUidCached.get(queue.uid, false));
     }
 
     /**
@@ -1865,9 +1844,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         ipw.decreaseIndent();
         ipw.println();
 
-        ipw.println("Frozen UIDs:");
+        ipw.println("Cached UIDs:");
         ipw.increaseIndent();
-        ipw.println(mUidFrozen.toString());
+        ipw.println(mUidCached.toString());
         ipw.decreaseIndent();
         ipw.println();
 
