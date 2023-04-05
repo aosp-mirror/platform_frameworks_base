@@ -278,7 +278,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -372,7 +371,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -465,7 +463,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -560,7 +557,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -654,7 +650,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -756,7 +751,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -849,7 +843,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -941,7 +934,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -1034,7 +1026,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -1143,7 +1134,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -1237,7 +1227,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -1329,7 +1318,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -1423,7 +1411,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -1516,7 +1503,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -1609,7 +1595,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -1702,7 +1687,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -1795,7 +1779,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -1888,7 +1871,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -1986,7 +1968,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -2077,7 +2058,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -2306,7 +2286,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -2399,7 +2378,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -2491,7 +2469,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -2584,7 +2561,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -2679,7 +2655,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -2773,7 +2748,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -2873,7 +2847,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -2969,7 +2942,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -3064,7 +3036,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -3160,7 +3131,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -3237,7 +3207,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -3314,7 +3283,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -3410,7 +3378,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -3507,7 +3474,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -3602,7 +3568,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -3696,7 +3661,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -3789,7 +3753,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -3882,7 +3845,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -3973,7 +3935,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -4059,6 +4020,7 @@ easier.
         <item name="materialColorPrimaryContainer">@color/system_primary_container_light</item>
         <item name="materialColorOnBackground">@color/system_on_background_light</item>
         <item name="materialColorPrimaryFixed">@color/system_primary_fixed</item>
+
         <item name="materialColorOnSecondary">@color/system_on_secondary_light</item>
         <item name="materialColorOnTertiary">@color/system_on_tertiary_light</item>
         <item name="materialColorSurfaceDim">@color/system_surface_dim_light</item>
@@ -4139,6 +4101,7 @@ easier.
         <item name="materialColorPrimaryContainer">@color/system_primary_container_light</item>
         <item name="materialColorOnBackground">@color/system_on_background_light</item>
         <item name="materialColorPrimaryFixed">@color/system_primary_fixed</item>
+
         <item name="materialColorOnSecondary">@color/system_on_secondary_light</item>
         <item name="materialColorOnTertiary">@color/system_on_tertiary_light</item>
         <item name="materialColorSurfaceDim">@color/system_surface_dim_light</item>
@@ -4211,6 +4174,7 @@ easier.
         <item name="materialColorPrimaryContainer">@color/system_primary_container_light</item>
         <item name="materialColorOnBackground">@color/system_on_background_light</item>
         <item name="materialColorPrimaryFixed">@color/system_primary_fixed</item>
+
         <item name="materialColorOnSecondary">@color/system_on_secondary_light</item>
         <item name="materialColorOnTertiary">@color/system_on_tertiary_light</item>
         <item name="materialColorSurfaceDim">@color/system_surface_dim_light</item>
@@ -4317,7 +4281,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -4512,7 +4475,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -4607,7 +4569,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -4728,7 +4689,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -4780,7 +4740,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -4835,7 +4794,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
@@ -4886,7 +4844,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_light</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_light</item>
         <item name="materialColorOutline">@color/system_outline_light</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_light</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_light</item>
         <item name="materialColorOnSurface">@color/system_on_surface_light</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_light</item>
@@ -4948,7 +4905,6 @@ easier.
         <item name="materialColorSurfaceContainerHighest">@color/system_surface_container_highest_dark</item>
         <item name="materialColorOnSurfaceVariant">@color/system_on_surface_variant_dark</item>
         <item name="materialColorOutline">@color/system_outline_dark</item>
-        <item name="materialColorOutlineVariant">@color/system_outline_variant_dark</item>
         <item name="materialColorOnPrimary">@color/system_on_primary_dark</item>
         <item name="materialColorOnSurface">@color/system_on_surface_dark</item>
         <item name="materialColorSurfaceContainer">@color/system_surface_container_dark</item>
