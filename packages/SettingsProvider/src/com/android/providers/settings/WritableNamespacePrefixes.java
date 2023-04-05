@@ -170,6 +170,7 @@ final class WritableNamespacePrefixes {
                 "widget",
                 "wifi",
                 "window_manager",
-                "window_manager_native_boot"
+                "window_manager_native_boot",
+                "wrong"
             ));
 }
