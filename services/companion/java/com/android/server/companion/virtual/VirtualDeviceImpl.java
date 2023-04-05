@@ -348,6 +348,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @Override // Binder call
     public void launchPendingIntent(int displayId, PendingIntent pendingIntent,
             ResultReceiver resultReceiver) {
+        Objects.requireNonNull(pendingIntent);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(displayId)) {
                 throw new SecurityException("Display ID " + displayId
@@ -498,6 +499,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void createVirtualDpad(VirtualDpadConfig config, @NonNull IBinder deviceToken) {
         super.createVirtualDpad_enforcePermission();
+        Objects.requireNonNull(config);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -518,6 +520,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void createVirtualKeyboard(VirtualKeyboardConfig config, @NonNull IBinder deviceToken) {
         super.createVirtualKeyboard_enforcePermission();
+        Objects.requireNonNull(config);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -540,6 +543,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void createVirtualMouse(VirtualMouseConfig config, @NonNull IBinder deviceToken) {
         super.createVirtualMouse_enforcePermission();
+        Objects.requireNonNull(config);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -561,6 +565,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public void createVirtualTouchscreen(VirtualTouchscreenConfig config,
             @NonNull IBinder deviceToken) {
         super.createVirtualTouchscreen_enforcePermission();
+        Objects.requireNonNull(config);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -591,6 +596,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public void createVirtualNavigationTouchpad(VirtualNavigationTouchpadConfig config,
             @NonNull IBinder deviceToken) {
         super.createVirtualNavigationTouchpad_enforcePermission();
+        Objects.requireNonNull(config);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
