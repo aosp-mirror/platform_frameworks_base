@@ -2862,14 +2862,14 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         + " wasShowing=" + wasShowing);
             }
 
+            mKeyguardUnlockAnimationControllerLazy.get()
+                    .notifyFinishedKeyguardExitAnimation(cancelled);
             finishSurfaceBehindRemoteAnimation(cancelled);
 
             // Dispatch the callback on animation finishes.
             mUpdateMonitor.dispatchKeyguardDismissAnimationFinished();
         });
 
-        mKeyguardUnlockAnimationControllerLazy.get().notifyFinishedKeyguardExitAnimation(
-                cancelled);
     }
 
     /**
