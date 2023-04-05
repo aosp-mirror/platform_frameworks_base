@@ -22,7 +22,6 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.logcatLogBuffer
-import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
@@ -171,9 +170,6 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         // Set the default FSI decision
         setShouldFullScreen(any(), FullScreenIntentDecision.NO_FULL_SCREEN_INTENT)
-
-        // Run tests with default feature flag state
-        whenever(flags.fsiOnDNDUpdate()).thenReturn(Flags.FSI_ON_DND_UPDATE.default)
     }
 
     @Test
@@ -854,38 +850,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnRankingApplied_noFSIOnUpdateWhenFlagOff() {
-        // Ensure the feature flag is off
-        whenever(flags.fsiOnDNDUpdate()).thenReturn(false)
-
-        // GIVEN that mEntry was previously suppressed from full-screen only by DND
-        setShouldFullScreen(entry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
-        collectionListener.onEntryAdded(entry)
-
-        // Verify that this causes a log
-        verifyLoggedFullScreenIntentDecision(
-            entry,
-            FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND
-        )
-        clearInterruptionProviderInvocations()
-
-        // and it is then updated to allow full screen
-        setShouldFullScreen(entry, FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE)
-        whenever(notifPipeline.allNotifs).thenReturn(listOf(entry))
-        collectionListener.onRankingApplied()
-
-        // THEN it should not full screen because the feature is off
-        verify(launchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
-
-        // VERIFY that no additional logging happens either
-        verifyNoFullScreenIntentDecisionLogged()
-    }
-
-    @Test
     fun testOnRankingApplied_updateToFullScreen() {
-        // Turn on the feature
-        whenever(flags.fsiOnDNDUpdate()).thenReturn(true)
-
         // GIVEN that mEntry was previously suppressed from full-screen only by DND
         setShouldFullScreen(entry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
         collectionListener.onEntryAdded(entry)
@@ -929,9 +894,6 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testOnRankingApplied_withOnlyDndSuppressionAllowsFsiLater() {
-        // Turn on the feature
-        whenever(flags.fsiOnDNDUpdate()).thenReturn(true)
-
         // GIVEN that mEntry was previously suppressed from full-screen only by DND
         setShouldFullScreen(entry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
         collectionListener.onEntryAdded(entry)
@@ -980,9 +942,6 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testOnRankingApplied_newNonFullScreenAnswerInvalidatesCandidate() {
-        // Turn on the feature
-        whenever(flags.fsiOnDNDUpdate()).thenReturn(true)
-
         // GIVEN that mEntry was previously suppressed from full-screen only by DND
         whenever(notifPipeline.allNotifs).thenReturn(listOf(entry))
         setShouldFullScreen(entry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
@@ -1018,9 +977,6 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testOnRankingApplied_noFSIWhenAlsoSuppressedForOtherReasons() {
-        // Feature on
-        whenever(flags.fsiOnDNDUpdate()).thenReturn(true)
-
         // GIVEN that mEntry is suppressed by DND (functionally), but not *only* DND
         setShouldFullScreen(entry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_BY_DND)
         collectionListener.onEntryAdded(entry)
@@ -1035,9 +991,6 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testOnRankingApplied_noFSIWhenTooOld() {
-        // Feature on
-        whenever(flags.fsiOnDNDUpdate()).thenReturn(true)
-
         // GIVEN that mEntry is suppressed only by DND
         setShouldFullScreen(entry, FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)
         collectionListener.onEntryAdded(entry)

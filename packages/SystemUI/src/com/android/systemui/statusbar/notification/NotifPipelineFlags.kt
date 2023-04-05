@@ -31,8 +31,6 @@ class NotifPipelineFlags @Inject constructor(
     fun isDevLoggingEnabled(): Boolean =
         featureFlags.isEnabled(Flags.NOTIFICATION_PIPELINE_DEVELOPER_LOGGING)
 
-    fun fsiOnDNDUpdate(): Boolean = featureFlags.isEnabled(Flags.FSI_ON_DND_UPDATE)
-
     fun allowDismissOngoing(): Boolean =
             sysPropFlags.isEnabled(NotificationFlags.ALLOW_DISMISS_ONGOING)
 
