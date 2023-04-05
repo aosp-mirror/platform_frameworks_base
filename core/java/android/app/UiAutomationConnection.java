@@ -103,6 +103,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public UiAutomationConnection() {
+        Log.d(TAG, "Created on user " + Process.myUserHandle());
     }
 
     @Override
