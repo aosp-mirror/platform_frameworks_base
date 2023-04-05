@@ -237,7 +237,9 @@ final class LetterboxUiController {
     @Nullable
     private final Boolean mBooleanPropertyFakeFocus;
 
-    private boolean mIsRelauchingAfterRequestedOrientationChanged;
+    private boolean mIsRelaunchingAfterRequestedOrientationChanged;
+
+    private boolean mLastShouldShowLetterboxUi;
 
     private boolean mDoubleTapEvent;
 
@@ -387,7 +389,7 @@ final class LetterboxUiController {
                         ::isPolicyForIgnoringRequestedOrientationEnabled,
                 mIsOverrideEnableCompatIgnoreRequestedOrientationEnabled,
                 mBooleanPropertyIgnoreRequestedOrientation)) {
-            if (mIsRelauchingAfterRequestedOrientationChanged) {
+            if (mIsRelaunchingAfterRequestedOrientationChanged) {
                 Slog.w(TAG, "Ignoring orientation update to "
                         + screenOrientationToString(requestedOrientation)
                         + " due to relaunching after setRequestedOrientation for "
@@ -476,8 +478,8 @@ final class LetterboxUiController {
      * Sets whether an activity is relaunching after the app has called {@link
      * android.app.Activity#setRequestedOrientation}.
      */
-    void setRelauchingAfterRequestedOrientationChanged(boolean isRelaunching) {
-        mIsRelauchingAfterRequestedOrientationChanged = isRelaunching;
+    void setRelaunchingAfterRequestedOrientationChanged(boolean isRelaunching) {
+        mIsRelaunchingAfterRequestedOrientationChanged = isRelaunching;
     }
 
     /**
@@ -1154,12 +1156,28 @@ final class LetterboxUiController {
 
     @VisibleForTesting
     boolean shouldShowLetterboxUi(WindowState mainWindow) {
-        return (mActivityRecord.isInLetterboxAnimation() || isSurfaceVisible(mainWindow))
+        if (mIsRelaunchingAfterRequestedOrientationChanged || !isSurfaceReadyToShow(mainWindow)) {
+            return mLastShouldShowLetterboxUi;
+        }
+
+        final boolean shouldShowLetterboxUi =
+                (mActivityRecord.isInLetterboxAnimation() || isSurfaceVisible(mainWindow))
                 && mainWindow.areAppWindowBoundsLetterboxed()
                 // Check for FLAG_SHOW_WALLPAPER explicitly instead of using
                 // WindowContainer#showWallpaper because the later will return true when this
                 // activity is using blurred wallpaper for letterbox background.
                 && (mainWindow.getAttrs().flags & FLAG_SHOW_WALLPAPER) == 0;
+
+        mLastShouldShowLetterboxUi = shouldShowLetterboxUi;
+
+        return shouldShowLetterboxUi;
+    }
+
+    @VisibleForTesting
+    boolean isSurfaceReadyToShow(WindowState mainWindow) {
+        return mainWindow.isDrawn() // Regular case
+                // Waiting for relayoutWindow to call preserveSurface
+                || mainWindow.isDragResizeChanged();
     }
 
     @VisibleForTesting
@@ -1295,6 +1313,10 @@ final class LetterboxUiController {
             }
         }
         return null;
+    }
+
+    boolean getIsRelaunchingAfterRequestedOrientationChanged() {
+        return mIsRelaunchingAfterRequestedOrientationChanged;
     }
 
     private void adjustBoundsForTaskbar(final WindowState mainWindow, final Rect bounds) {

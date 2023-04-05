@@ -146,7 +146,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mActivity = setUpActivityWithComponent();
         mController = new LetterboxUiController(mWm, mActivity);
         prepareActivityThatShouldIgnoreRequestedOrientationDuringRelaunch();
-        mController.setRelauchingAfterRequestedOrientationChanged(false);
+        mController.setRelaunchingAfterRequestedOrientationChanged(false);
 
         spyOn(mDisplayContent.mDisplayRotationCompatPolicy);
         doReturn(true).when(mDisplayContent.mDisplayRotationCompatPolicy)
@@ -870,7 +870,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     private void prepareActivityThatShouldIgnoreRequestedOrientationDuringRelaunch() {
         doReturn(true).when(mLetterboxConfiguration)
                 .isPolicyForIgnoringRequestedOrientationEnabled();
-        mController.setRelauchingAfterRequestedOrientationChanged(true);
+        mController.setRelaunchingAfterRequestedOrientationChanged(true);
     }
 
     private ActivityRecord setUpActivityWithComponent() {
