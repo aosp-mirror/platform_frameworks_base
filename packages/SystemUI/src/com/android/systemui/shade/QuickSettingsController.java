@@ -17,6 +17,8 @@
 
 package com.android.systemui.shade;
 
+import static android.view.WindowInsets.Type.ime;
+
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.shade.NotificationPanelViewController.COUNTER_PANEL_OPEN_QS;
@@ -450,9 +452,17 @@ public class QuickSettingsController {
         return (mQs != null ? mQs.getHeader().getHeight() : 0) + mPeekHeight;
     }
 
+    private boolean isRemoteInputActiveWithKeyboardUp() {
+        //TODO(b/227115380) remove the isVisible(ime()) check once isRemoteInputActive is fixed.
+        // The check for keyboard visibility is a temporary workaround that allows QS to expand
+        // even when isRemoteInputActive is mistakenly returning true.
+        return mRemoteInputManager.isRemoteInputActive()
+                && mPanelView.getRootWindowInsets().isVisible(ime());
+    }
+
     public boolean isExpansionEnabled() {
         return mExpansionEnabledPolicy && mExpansionEnabledAmbient
-                && !mRemoteInputManager.isRemoteInputActive();
+            && !isRemoteInputActiveWithKeyboardUp();
     }
 
     public float getTransitioningToFullShadeProgress() {
