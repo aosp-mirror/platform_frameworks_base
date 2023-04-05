@@ -760,7 +760,6 @@ void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
 
 void NativeInputManager::notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) {
     ATRACE_CALL();
-    mInputManager->getBlocker().notifyInputDevicesChanged(inputDevices);
     JNIEnv* env = jniEnv();
 
     size_t count = inputDevices.size();
