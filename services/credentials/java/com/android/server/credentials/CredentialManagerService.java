@@ -796,7 +796,7 @@ public final class CredentialManagerService
                 return DeviceConfig.getBoolean(
                         DeviceConfig.NAMESPACE_CREDENTIAL,
                         DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER,
-                        false);
+                        true);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
