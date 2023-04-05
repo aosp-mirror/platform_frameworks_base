@@ -50,6 +50,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @SmallTest
@@ -186,50 +187,72 @@ public final class DisplayDeviceConfigTest {
         assertArrayEquals(new int[]{-1, 10, 20, 30, 40},
                 mDisplayDeviceConfig.getScreenOffBrightnessSensorValueToLux());
 
-        List<DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel> throttlingLevels =
-                new ArrayList();
-        throttlingLevels.add(new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
+        List<DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel>
+                defaultThrottlingLevels = new ArrayList<>();
+        defaultThrottlingLevels.add(
+                new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
                 DisplayDeviceConfig.convertThermalStatus(ThermalStatus.light), 0.4f
         ));
-        throttlingLevels.add(new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
+        defaultThrottlingLevels.add(
+                new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
                 DisplayDeviceConfig.convertThermalStatus(ThermalStatus.moderate), 0.3f
         ));
-        throttlingLevels.add(new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
+        defaultThrottlingLevels.add(
+                new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
                 DisplayDeviceConfig.convertThermalStatus(ThermalStatus.severe), 0.2f
         ));
-        throttlingLevels.add(new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
+        defaultThrottlingLevels.add(
+                new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
                 DisplayDeviceConfig.convertThermalStatus(ThermalStatus.critical), 0.1f
         ));
-        throttlingLevels.add(new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
+        defaultThrottlingLevels.add(
+                new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
                 DisplayDeviceConfig.convertThermalStatus(ThermalStatus.emergency), 0.05f
         ));
-        throttlingLevels.add(new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
+        defaultThrottlingLevels.add(
+                new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
                 DisplayDeviceConfig.convertThermalStatus(ThermalStatus.shutdown), 0.025f
         ));
-        assertEquals(new DisplayDeviceConfig.BrightnessThrottlingData(throttlingLevels),
-                mDisplayDeviceConfig.getBrightnessThrottlingData("default"));
 
-        throttlingLevels.clear();
-        throttlingLevels.add(new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
+        DisplayDeviceConfig.BrightnessThrottlingData defaultThrottlingData =
+                new DisplayDeviceConfig.BrightnessThrottlingData(defaultThrottlingLevels);
+
+        List<DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel>
+                concurrentThrottlingLevels = new ArrayList<>();
+        concurrentThrottlingLevels.add(
+                new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
                 DisplayDeviceConfig.convertThermalStatus(ThermalStatus.light), 0.2f
         ));
-        throttlingLevels.add(new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
+        concurrentThrottlingLevels.add(
+                new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
                 DisplayDeviceConfig.convertThermalStatus(ThermalStatus.moderate), 0.15f
         ));
-        throttlingLevels.add(new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
+        concurrentThrottlingLevels.add(
+                new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
                 DisplayDeviceConfig.convertThermalStatus(ThermalStatus.severe), 0.1f
         ));
-        throttlingLevels.add(new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
+        concurrentThrottlingLevels.add(
+                new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
                 DisplayDeviceConfig.convertThermalStatus(ThermalStatus.critical), 0.05f
         ));
-        throttlingLevels.add(new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
+        concurrentThrottlingLevels.add(
+                new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
                 DisplayDeviceConfig.convertThermalStatus(ThermalStatus.emergency), 0.025f
         ));
-        throttlingLevels.add(new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
+        concurrentThrottlingLevels.add(
+                new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
                 DisplayDeviceConfig.convertThermalStatus(ThermalStatus.shutdown), 0.0125f
         ));
-        assertEquals(new DisplayDeviceConfig.BrightnessThrottlingData(throttlingLevels),
-                mDisplayDeviceConfig.getBrightnessThrottlingData("concurrent"));
+        DisplayDeviceConfig.BrightnessThrottlingData concurrentThrottlingData =
+                new DisplayDeviceConfig.BrightnessThrottlingData(concurrentThrottlingLevels);
+
+        HashMap<String, DisplayDeviceConfig.BrightnessThrottlingData> throttlingDataMap =
+                new HashMap<>(2);
+        throttlingDataMap.put("default", defaultThrottlingData);
+        throttlingDataMap.put("concurrent", concurrentThrottlingData);
+
+        assertEquals(throttlingDataMap,
+                mDisplayDeviceConfig.getBrightnessThrottlingDataMapByThrottlingId());
 
         assertNotNull(mDisplayDeviceConfig.getHostUsiVersion());
         assertEquals(mDisplayDeviceConfig.getHostUsiVersion().getMajorVersion(), 2);
@@ -246,8 +269,7 @@ public final class DisplayDeviceConfigTest {
                 mDisplayDeviceConfig.getHdrBrightnessFromSdr(0.62f, 1.25f),
                 SMALL_DELTA);
 
-
-        // Todo: Add asserts for BrightnessThrottlingData, DensityMapping,
+        // Todo: Add asserts for DensityMapping,
         // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
     }
 

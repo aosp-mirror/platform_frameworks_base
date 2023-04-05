@@ -143,17 +143,17 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *            <brightness>0.01</brightness>
  *          </brightnessThrottlingPoint>
  *        </brightnessThrottlingMap>
- *        <concurrentDisplaysBrightnessThrottlingMap>
- *          <brightnessThrottlingPoint>
- *            <thermalStatus>severe</thermalStatus>
- *            <brightness>0.07</brightness>
- *          </brightnessThrottlingPoint>
- *          <brightnessThrottlingPoint>
- *            <thermalStatus>critical</thermalStatus>
- *            <brightness>0.005</brightness>
- *          </brightnessThrottlingPoint>
- *        </concurrentDisplaysBrightnessThrottlingMap>
- *        <refreshRateThrottlingMap>
+ *        <brightnessThrottlingMap id="id_2"> // optional attribute, leave blank for default
+ *             <brightnessThrottlingPoint>
+ *                 <thermalStatus>moderate</thermalStatus>
+ *                 <brightness>0.2</brightness>
+ *             </brightnessThrottlingPoint>
+ *             <brightnessThrottlingPoint>
+ *                 <thermalStatus>severe</thermalStatus>
+ *                 <brightness>0.1</brightness>
+ *            </brightnessThrottlingPoint>
+ *        </brightnessThrottlingMap>
+         <refreshRateThrottlingMap>
  *            <refreshRateThrottlingPoint>
  *                <thermalStatus>critical</thermalStatus>
  *                <refreshRateRange>
@@ -687,8 +687,8 @@ public class DisplayDeviceConfig {
     private int[] mHighDisplayBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
     private int[] mHighAmbientBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
 
-    private final Map<String, BrightnessThrottlingData> mBrightnessThrottlingDataMap =
-            new HashMap<>();
+    private final HashMap<String, BrightnessThrottlingData>
+            mBrightnessThrottlingDataMapByThrottlingId = new HashMap<>();
 
     private final Map<String, SparseArray<SurfaceControl.RefreshRateRange>>
             mRefreshRateThrottlingMap = new HashMap<>();
@@ -1346,11 +1346,11 @@ public class DisplayDeviceConfig {
     }
 
     /**
-     * @param id The ID of the throttling data
-     * @return brightness throttling configuration data for the display.
+     * @return brightness throttling configuration data for this display, for each throttling id.
      */
-    public BrightnessThrottlingData getBrightnessThrottlingData(String id) {
-        return BrightnessThrottlingData.create(mBrightnessThrottlingDataMap.get(id));
+    public HashMap<String, BrightnessThrottlingData>
+            getBrightnessThrottlingDataMapByThrottlingId() {
+        return mBrightnessThrottlingDataMapByThrottlingId;
     }
 
     /**
@@ -1525,7 +1525,8 @@ public class DisplayDeviceConfig {
                 + ", isHbmEnabled=" + mIsHighBrightnessModeEnabled
                 + ", mHbmData=" + mHbmData
                 + ", mSdrToHdrRatioSpline=" + mSdrToHdrRatioSpline
-                + ", mBrightnessThrottlingData=" + mBrightnessThrottlingDataMap
+                + ", mBrightnessThrottlingDataMapByThrottlingId="
+                + mBrightnessThrottlingDataMapByThrottlingId
                 + "\n"
                 + ", mBrightnessRampFastDecrease=" + mBrightnessRampFastDecrease
                 + ", mBrightnessRampFastIncrease=" + mBrightnessRampFastIncrease
@@ -1918,11 +1919,11 @@ public class DisplayDeviceConfig {
             if (!badConfig) {
                 String id = map.getId() == null ? DEFAULT_ID
                         : map.getId();
-                if (mBrightnessThrottlingDataMap.containsKey(id)) {
+                if (mBrightnessThrottlingDataMapByThrottlingId.containsKey(id)) {
                     throw new RuntimeException("Brightness throttling data with ID " + id
                             + " already exists");
                 }
-                mBrightnessThrottlingDataMap.put(id,
+                mBrightnessThrottlingDataMapByThrottlingId.put(id,
                         BrightnessThrottlingData.create(throttlingLevels));
             }
         }
@@ -1971,8 +1972,8 @@ public class DisplayDeviceConfig {
                 ));
             }
             if (refreshRates.size() == 0) {
-                Slog.w(TAG, "RefreshRateThrottling: no valid throttling points fond for map, mapId="
-                        + id);
+                Slog.w(TAG, "RefreshRateThrottling: no valid throttling points found for map, "
+                        + "mapId=" + id);
                 continue;
             }
             mRefreshRateThrottlingMap.put(id, refreshRates);
@@ -3077,7 +3078,7 @@ public class DisplayDeviceConfig {
 
 
         /**
-         * Creates multiple teperature based throttling levels of brightness
+         * Creates multiple temperature based throttling levels of brightness
          */
         public static BrightnessThrottlingData create(List<ThrottlingLevel> throttlingLevels) {
             if (throttlingLevels == null || throttlingLevels.size() == 0) {
@@ -3119,15 +3120,6 @@ public class DisplayDeviceConfig {
 
             return new BrightnessThrottlingData(throttlingLevels);
         }
-
-        static public BrightnessThrottlingData create(BrightnessThrottlingData other) {
-            if (other == null) {
-                return null;
-            }
-
-            return BrightnessThrottlingData.create(other.throttlingLevels);
-        }
-
 
         @Override
         public String toString() {
