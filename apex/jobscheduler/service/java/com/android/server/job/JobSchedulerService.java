@@ -33,6 +33,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
+import android.app.UidObserver;
 import android.app.compat.CompatChanges;
 import android.app.job.IJobScheduler;
 import android.app.job.IUserVisibleJobObserver;
@@ -1250,7 +1251,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         return pkg;
     }
 
-    final private IUidObserver mUidObserver = new IUidObserver.Stub() {
+    final private IUidObserver mUidObserver = new UidObserver() {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
                 int capability) {
             final SomeArgs args = SomeArgs.obtain();
@@ -1264,18 +1265,12 @@ public class JobSchedulerService extends com.android.server.SystemService
             mHandler.obtainMessage(MSG_UID_GONE, uid, disabled ? 1 : 0).sendToTarget();
         }
 
-        @Override public void onUidActive(int uid) throws RemoteException {
+        @Override public void onUidActive(int uid) {
             mHandler.obtainMessage(MSG_UID_ACTIVE, uid, 0).sendToTarget();
         }
 
         @Override public void onUidIdle(int uid, boolean disabled) {
             mHandler.obtainMessage(MSG_UID_IDLE, uid, disabled ? 1 : 0).sendToTarget();
-        }
-
-        @Override public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override public void onUidProcAdjChanged(int uid) {
         }
     };
 
