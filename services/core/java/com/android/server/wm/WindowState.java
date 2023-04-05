@@ -5596,8 +5596,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (surfaceInsetsChanged) {
                 mLastSurfaceInsets.set(mAttrs.surfaceInsets);
             }
-            if (surfaceSizeChanged && mWinAnimator.getShown() && !canPlayMoveAnimation()
-                    && okToDisplay() && mSyncState == SYNC_STATE_NONE) {
+            final boolean surfaceResizedWithoutMoveAnimation = surfaceSizeChanged
+                    && mWinAnimator.getShown() && !canPlayMoveAnimation() && okToDisplay()
+                    && mSyncState == SYNC_STATE_NONE;
+            final ActivityRecord activityRecord = getActivityRecord();
+            // If this window belongs to an activity that is relaunching due to an orientation
+            // change then delay the position update until it has redrawn to avoid any flickers.
+            final boolean isLetterboxedAndRelaunching = activityRecord != null
+                    && activityRecord.areBoundsLetterboxed()
+                    && activityRecord.mLetterboxUiController
+                        .getIsRelaunchingAfterRequestedOrientationChanged();
+            if (surfaceResizedWithoutMoveAnimation || isLetterboxedAndRelaunching) {
                 applyWithNextDraw(mSetSurfacePositionConsumer);
             } else {
                 mSetSurfacePositionConsumer.accept(t);
