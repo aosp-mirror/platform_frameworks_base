@@ -338,7 +338,9 @@ public class Layout {
         }
 
         /**
-         * @return The ID of the brightness throttling map that this display should use.
+         * Gets the id of the brightness throttling map that should be used.
+         * @return The ID of the brightness throttling map that this display should use, null if
+         *         unspecified, will fall back to default.
          */
         public String getBrightnessThrottlingMapId() {
             return mBrightnessThrottlingMapId;
