@@ -464,7 +464,7 @@ public class BroadcastQueueTest {
 
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting scheduleReceiver() for "
-                    + Arrays.toString(invocation.getArguments()));
+                    + Arrays.toString(invocation.getArguments()) + " package " + ai.packageName);
             assertHealth();
             final Intent intent = invocation.getArgument(0);
             final Bundle extras = invocation.getArgument(5);
@@ -486,7 +486,7 @@ public class BroadcastQueueTest {
 
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting scheduleRegisteredReceiver() for "
-                    + Arrays.toString(invocation.getArguments()));
+                    + Arrays.toString(invocation.getArguments()) + " package " + ai.packageName);
             assertHealth();
             final Intent intent = invocation.getArgument(1);
             final Bundle extras = invocation.getArgument(4);
