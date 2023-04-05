@@ -178,7 +178,7 @@ public final class MediaRouter2 {
      *
      * <ul>
      *   <li>{@link #getControllers()}
-     *   <li>{@link #getController(String)}}
+     *   <li>{@link #getController(String)}
      *   <li>{@link TransferCallback#onTransfer(RoutingController, RoutingController)}
      *   <li>{@link TransferCallback#onStop(RoutingController)}
      *   <li>{@link ControllerCallback#onControllerUpdated(RoutingController)}
@@ -191,7 +191,8 @@ public final class MediaRouter2 {
      * <p>Finally, it will have no effect to call {@link #setOnGetControllerHintsListener}.
      *
      * @param clientPackageName the package name of the app to control
-     * @throws SecurityException if the caller doesn't have MODIFY_AUDIO_ROUTING permission.
+     * @throws SecurityException if the caller doesn't have {@link
+     *     Manifest.permission#MEDIA_CONTENT_CONTROL MEDIA_CONTENT_CONTROL} permission.
      * @hide
      */
     @SystemApi
