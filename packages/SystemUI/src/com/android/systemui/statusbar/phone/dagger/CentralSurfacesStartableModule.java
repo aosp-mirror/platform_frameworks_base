@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
-import com.android.systemui.statusbar.phone.LetterboxAppearanceCalculator;
 import com.android.systemui.statusbar.phone.SystemBarAttributesListener;
 
 import dagger.Binds;
@@ -30,11 +29,6 @@ import java.util.Set;
 interface CentralSurfacesStartableModule {
     @Multibinds
     Set<CentralSurfacesComponent.Startable> multibindStartables();
-
-    @Binds
-    @IntoSet
-    CentralSurfacesComponent.Startable letterboxAppearanceCalculator(
-            LetterboxAppearanceCalculator letterboxAppearanceCalculator);
 
     @Binds
     @IntoSet
