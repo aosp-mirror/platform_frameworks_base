@@ -246,21 +246,15 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private final Handler.Callback mLocalCallback = (msg) -> {
         switch (msg.what) {
             case MSG_UPDATE_RUNNING_LIST: {
-                synchronized (mService) {
-                    updateRunningListLocked();
-                }
+                updateRunningList();
                 return true;
             }
             case MSG_DELIVERY_TIMEOUT_SOFT: {
-                synchronized (mService) {
-                    deliveryTimeoutSoftLocked((BroadcastProcessQueue) msg.obj, msg.arg1);
-                }
+                deliveryTimeoutSoft((BroadcastProcessQueue) msg.obj, msg.arg1);
                 return true;
             }
             case MSG_DELIVERY_TIMEOUT_HARD: {
-                synchronized (mService) {
-                    deliveryTimeoutHardLocked((BroadcastProcessQueue) msg.obj);
-                }
+                deliveryTimeoutHard((BroadcastProcessQueue) msg.obj);
                 return true;
             }
             case MSG_BG_ACTIVITY_START_TIMEOUT: {
@@ -274,9 +268,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 return true;
             }
             case MSG_CHECK_HEALTH: {
-                synchronized (mService) {
-                    checkHealthLocked();
-                }
+                checkHealth();
                 return true;
             }
         }
@@ -362,6 +354,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             removeProcessQueue(queue.processName, queue.uid);
         } else {
             updateQueueDeferred(queue);
+        }
+    }
+
+    private void updateRunningList() {
+        synchronized (mService) {
+            updateRunningListLocked();
         }
     }
 
@@ -965,6 +963,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         r.resultTo = null;
     }
 
+    private void deliveryTimeoutSoft(@NonNull BroadcastProcessQueue queue,
+            int softTimeoutMillis) {
+        synchronized (mService) {
+            deliveryTimeoutSoftLocked(queue, softTimeoutMillis);
+        }
+    }
+
     private void deliveryTimeoutSoftLocked(@NonNull BroadcastProcessQueue queue,
             int softTimeoutMillis) {
         if (queue.app != null) {
@@ -977,6 +982,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT_HARD, queue),
                     hardTimeoutMillis);
         } else {
+            deliveryTimeoutHardLocked(queue);
+        }
+    }
+
+    private void deliveryTimeoutHard(@NonNull BroadcastProcessQueue queue) {
+        synchronized (mService) {
             deliveryTimeoutHardLocked(queue);
         }
     }
@@ -1460,58 +1471,69 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // services, so ignore.
     }
 
-    /**
-     * Check overall health, confirming things are in a reasonable state and
-     * that we're not wedged. If we determine we're in an unhealthy state, dump
-     * current state once and stop future health checks to avoid spamming.
-     */
-    @VisibleForTesting
-    void checkHealthLocked() {
+    private void checkHealth() {
+        synchronized (mService) {
+            checkHealthLocked();
+        }
+    }
+
+    private void checkHealthLocked() {
         try {
-            // Verify all runnable queues are sorted
-            BroadcastProcessQueue prev = null;
-            BroadcastProcessQueue next = mRunnableHead;
-            while (next != null) {
-                checkState(next.runnableAtPrev == prev, "runnableAtPrev");
-                checkState(next.isRunnable(), "isRunnable " + next);
-                if (prev != null) {
-                    checkState(next.getRunnableAt() >= prev.getRunnableAt(),
-                            "getRunnableAt " + next + " vs " + prev);
-                }
-                prev = next;
-                next = next.runnableAtNext;
-            }
-
-            // Verify all running queues are active
-            for (BroadcastProcessQueue queue : mRunning) {
-                if (queue != null) {
-                    checkState(queue.isActive(), "isActive " + queue);
-                }
-            }
-
-            // Verify that pending cold start hasn't been orphaned
-            if (mRunningColdStart != null) {
-                checkState(getRunningIndexOf(mRunningColdStart) >= 0,
-                        "isOrphaned " + mRunningColdStart);
-            }
-
-            // Verify health of all known process queues
-            for (int i = 0; i < mProcessQueues.size(); i++) {
-                BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
-                while (leaf != null) {
-                    leaf.checkHealthLocked();
-                    leaf = leaf.processNameNext;
-                }
-            }
+            assertHealthLocked();
 
             // If no health issues found above, check again in the future
-            mLocalHandler.sendEmptyMessageDelayed(MSG_CHECK_HEALTH, DateUtils.MINUTE_IN_MILLIS);
+            mLocalHandler.sendEmptyMessageDelayed(MSG_CHECK_HEALTH,
+                    DateUtils.MINUTE_IN_MILLIS);
 
         } catch (Exception e) {
             // Throw up a message to indicate that something went wrong, and
             // dump current state for later inspection
             Slog.wtf(TAG, e);
             dumpToDropBoxLocked(e.toString());
+        }
+    }
+
+    /**
+     * Check overall health, confirming things are in a reasonable state and
+     * that we're not wedged. If we determine we're in an unhealthy state, dump
+     * current state once and stop future health checks to avoid spamming.
+     */
+    @VisibleForTesting
+    void assertHealthLocked() {
+        // Verify all runnable queues are sorted
+        BroadcastProcessQueue prev = null;
+        BroadcastProcessQueue next = mRunnableHead;
+        while (next != null) {
+            checkState(next.runnableAtPrev == prev, "runnableAtPrev");
+            checkState(next.isRunnable(), "isRunnable " + next);
+            if (prev != null) {
+                checkState(next.getRunnableAt() >= prev.getRunnableAt(),
+                        "getRunnableAt " + next + " vs " + prev);
+            }
+            prev = next;
+            next = next.runnableAtNext;
+        }
+
+        // Verify all running queues are active
+        for (BroadcastProcessQueue queue : mRunning) {
+            if (queue != null) {
+                checkState(queue.isActive(), "isActive " + queue);
+            }
+        }
+
+        // Verify that pending cold start hasn't been orphaned
+        if (mRunningColdStart != null) {
+            checkState(getRunningIndexOf(mRunningColdStart) >= 0,
+                    "isOrphaned " + mRunningColdStart);
+        }
+
+        // Verify health of all known process queues
+        for (int i = 0; i < mProcessQueues.size(); i++) {
+            BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
+            while (leaf != null) {
+                leaf.assertHealthLocked();
+                leaf = leaf.processNameNext;
+            }
         }
     }
 

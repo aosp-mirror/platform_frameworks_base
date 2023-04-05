@@ -91,8 +91,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -596,7 +596,7 @@ public final class BroadcastQueueModernImplTest {
         // about the actual output, just that we don't crash
         queue.getActive().setDeliveryState(0, BroadcastRecord.DELIVERY_SCHEDULED, "Test-driven");
         queue.dumpLocked(SystemClock.uptimeMillis(),
-                new IndentingPrintWriter(new PrintWriter(new ByteArrayOutputStream())));
+                new IndentingPrintWriter(new PrintWriter(Writer.nullWriter())));
 
         queue.makeActiveNextPending();
         assertEquals(Intent.ACTION_LOCALE_CHANGED, queue.getActive().intent.getAction());
@@ -1166,6 +1166,11 @@ public final class BroadcastQueueModernImplTest {
             List<Intent> intents) {
         for (int i = 0; i < intents.size(); i++) {
             queue.makeActiveNextPending();
+
+            // While we're here, give our health check some test coverage
+            queue.assertHealthLocked();
+            queue.dumpLocked(0L, new IndentingPrintWriter(Writer.nullWriter()));
+
             final Intent actualIntent = queue.getActive().intent;
             final Intent expectedIntent = intents.get(i);
             final String errMsg = "actual=" + actualIntent + ", expected=" + expectedIntent
