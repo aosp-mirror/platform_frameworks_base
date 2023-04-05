@@ -1287,7 +1287,7 @@
     <string name="volume_unknown" msgid="4041914008166576293">"Громкость"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Громкость Bluetooth-устройства"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Громкость рингтона"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Громкости мелодии вызова"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"Громкость разговора"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Громкость мультимедиа"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Громкость уведомлений"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Мелодия по умолчанию"</string>

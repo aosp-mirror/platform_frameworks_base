@@ -1287,7 +1287,7 @@
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Коңгуроо үнүнүн деңгээли"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Чалуунун үн деңгээли"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Мультимедианын катуулугу"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"Эскертме үнүнүн деңгээли"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"Билдирменин үнүнүн катуулугу"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Демейки шыңгыр"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Демейки шыңгыр (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"Эч бир"</string>
