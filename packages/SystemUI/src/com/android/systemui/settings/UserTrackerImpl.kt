@@ -162,7 +162,7 @@ open class UserTrackerImpl internal constructor(
     private fun registerUserSwitchObserver() {
         iActivityManager.registerUserSwitchObserver(object : UserSwitchObserver() {
             override fun onBeforeUserSwitching(newUserId: Int) {
-                setUserIdInternal(newUserId)
+                handleBeforeUserSwitching(newUserId)
             }
 
             override fun onUserSwitching(newUserId: Int, reply: IRemoteCallback?) {
@@ -178,6 +178,10 @@ open class UserTrackerImpl internal constructor(
                 }
             }
         }, TAG)
+    }
+
+    protected open fun handleBeforeUserSwitching(newUserId: Int) {
+        setUserIdInternal(newUserId)
     }
 
     @WorkerThread
