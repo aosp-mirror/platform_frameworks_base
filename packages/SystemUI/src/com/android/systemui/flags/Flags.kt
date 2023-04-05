@@ -417,7 +417,7 @@ object Flags {
 
     // TODO(b/273509374): Tracking Bug
     @JvmField
-    val ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS = unreleasedFlag(1006,
+    val ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS = releasedFlag(1006,
         "always_show_home_controls_on_dreams")
 
     // 1100 - windowing
