@@ -1253,7 +1253,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         // TODO: Deal with the ugliness that comes from having some of the status bar broken out
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
-        mNotificationIconAreaController.setupShelf(mNotificationShelfController);
+        if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
+            mNotificationIconAreaController.setupShelf(mNotificationShelfController);
+        }
         mShadeExpansionStateManager.addExpansionListener(mWakeUpCoordinator);
 
         // Allow plugins to reference DarkIconDispatcher and StatusBarStateController

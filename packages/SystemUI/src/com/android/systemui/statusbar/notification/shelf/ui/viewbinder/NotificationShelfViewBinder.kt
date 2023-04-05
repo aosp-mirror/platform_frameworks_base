@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableViewController
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.util.kotlin.getValue
@@ -58,6 +59,7 @@ constructor(
     private val a11yManager: AccessibilityManager,
     private val falsingManager: FalsingManager,
     hostControllerLazy: Lazy<NotificationStackScrollLayoutController>,
+    private val notificationIconAreaController: NotificationIconAreaController,
 ) : NotificationShelfController {
 
     private val hostController: NotificationStackScrollLayoutController by hostControllerLazy
@@ -87,13 +89,14 @@ constructor(
         hostController.setOnNotificationRemovedListener { child, _ ->
             view.requestRoundnessResetFor(child)
         }
+        notificationIconAreaController.setShelfIcons(shelf.shelfIcons)
     }
 
     override val intrinsicHeight: Int
         get() = shelf.intrinsicHeight
 
     override val shelfIcons: NotificationIconContainer
-        get() = shelf.shelfIcons
+        get() = unsupported
 
     override fun canModifyColorOfNotifications(): Boolean = unsupported
 
