@@ -869,6 +869,42 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION";
 
     /**
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * for an app to inform the system that the app can be opted-out from the compatibility
+     * treatment that avoids {@link android.app.Activity#setRequestedOrientation} loops. The loop
+     * can be trigerred by ignoreRequestedOrientation display setting enabled on the device or
+     * by the landscape natural orientation of the device.
+     *
+     * <p>The system could ignore {@link android.app.Activity#setRequestedOrientation}
+     * call from an app if both of the following conditions are true:
+     * <ul>
+     *     <li>Activity has requested orientation more than 2 times within 1-second timer
+     *     <li>Activity is not letterboxed for fixed orientation
+     * </ul>
+     *
+     * <p>Setting this property to {@code false} informs the system that the app must be
+     * opted-out from the compatibility treatment even if the device manufacturer has opted the app
+     * into the treatment.
+     *
+     * <p>Not setting this property at all, or setting this property to {@code true} has no effect.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name=
+     *       "android.window.PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED"
+     *     android:value="false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     *
+     * @hide
+     */
+    // TODO(b/274924641): Make this public API.
+    String PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED =
+            "android.window.PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED";
+
+    /**
      * Application level {@link android.content.pm.PackageManager.Property PackageManager
      * .Property} for an app to inform the system that it needs to be opted-out from the
      * compatibility treatment that sandboxes {@link android.view.View} API.
