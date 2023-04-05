@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.app.ActivityOptions.KEY_SPLASH_SCREEN_THEME;
 import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
 import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
@@ -25,6 +26,8 @@ import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
+import static android.content.PermissionChecker.PERMISSION_GRANTED;
+import static android.content.PermissionChecker.checkCallingOrSelfPermissionForPreflight;
 import static android.content.pm.LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS;
 import static android.content.pm.LauncherApps.FLAG_CACHE_NOTIFICATION_SHORTCUTS;
 import static android.content.pm.LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS;
@@ -32,6 +35,7 @@ import static android.content.pm.LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS;
 import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -90,6 +94,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
+import android.window.IDumpCallback;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -104,6 +109,15 @@ import com.android.server.SystemService;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -111,6 +125,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -118,6 +133,15 @@ import java.util.concurrent.ExecutionException;
  * managed profiles.
  */
 public class LauncherAppsService extends SystemService {
+    private static final String WM_TRACE_DIR = "/data/misc/wmtrace/";
+    private static final String VC_FILE_SUFFIX = ".vc";
+
+    private static final Set<PosixFilePermission> WM_TRACE_FILE_PERMISSIONS = Set.of(
+            PosixFilePermission.OWNER_WRITE,
+            PosixFilePermission.GROUP_READ,
+            PosixFilePermission.OTHERS_READ,
+            PosixFilePermission.OWNER_READ
+    );
 
     private final LauncherAppsImpl mLauncherAppsImpl;
 
@@ -190,6 +214,8 @@ public class LauncherAppsService extends SystemService {
         private PackageInstallerService mPackageInstallerService;
 
         final LauncherAppsServiceInternal mInternal;
+
+        private RemoteCallbackList<IDumpCallback> mDumpCallbacks = new RemoteCallbackList<>();
 
         public LauncherAppsImpl(Context context) {
             mContext = context;
@@ -1429,6 +1455,66 @@ public class LauncherAppsService extends SystemService {
             mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
                     callingFeatureId, intent, /* resultTo= */ null, Intent.FLAG_ACTIVITY_NEW_TASK,
                     getActivityOptionsForLauncher(opts), user.getIdentifier());
+        }
+
+
+        /**
+         * Using a pipe, outputs view capture data to the wmtrace dir
+         */
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            super.dump(fd, pw, args);
+
+            // Before the wmtrace directory is picked up by dumpstate service, some processes need
+            // to write their data to that location. They can do that via these dumpCallbacks.
+            int i = mDumpCallbacks.beginBroadcast();
+            while (i > 0) {
+                i--;
+                dumpDataToWmTrace((String) mDumpCallbacks.getBroadcastCookie(i) + "_" + i,
+                        mDumpCallbacks.getBroadcastItem(i));
+            }
+            mDumpCallbacks.finishBroadcast();
+        }
+
+        private void dumpDataToWmTrace(String name, IDumpCallback cb) {
+            ParcelFileDescriptor[] pipe;
+            try {
+                pipe = ParcelFileDescriptor.createPipe();
+                cb.onDump(pipe[1]);
+            } catch (IOException | RemoteException e) {
+                Log.d(TAG, "failed to pipe view capture data", e);
+                return;
+            }
+
+            Path path = Paths.get(WM_TRACE_DIR + Paths.get(name + VC_FILE_SUFFIX).getFileName());
+            try (InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(pipe[0])) {
+                Files.copy(is, path, StandardCopyOption.REPLACE_EXISTING);
+                Files.setPosixFilePermissions(path, WM_TRACE_FILE_PERMISSIONS);
+            } catch (IOException e) {
+                Log.d(TAG, "failed to write data to file in wmtrace dir", e);
+            }
+        }
+
+        @RequiresPermission(READ_FRAME_BUFFER)
+        @Override
+        public void registerDumpCallback(IDumpCallback cb) {
+            int status = checkCallingOrSelfPermissionForPreflight(mContext, READ_FRAME_BUFFER);
+            if (PERMISSION_GRANTED == status) {
+                String name = mContext.getPackageManager().getNameForUid(Binder.getCallingUid());
+                mDumpCallbacks.register(cb, name);
+            } else {
+                Log.w(TAG, "caller lacks permissions to registerDumpCallback");
+            }
+        }
+
+        @RequiresPermission(READ_FRAME_BUFFER)
+        @Override
+        public void unRegisterDumpCallback(IDumpCallback cb) {
+            int status = checkCallingOrSelfPermissionForPreflight(mContext, READ_FRAME_BUFFER);
+            if (PERMISSION_GRANTED == status) {
+                mDumpCallbacks.unregister(cb);
+            } else {
+                Log.w(TAG, "caller lacks permissions to unRegisterDumpCallback");
+            }
         }
 
         /** Checks if user is a profile of or same as listeningUser.
