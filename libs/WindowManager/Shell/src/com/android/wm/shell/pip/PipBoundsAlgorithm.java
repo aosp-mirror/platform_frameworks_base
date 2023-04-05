@@ -198,7 +198,7 @@ public class PipBoundsAlgorithm {
     /**
      * @return whether the given {@param aspectRatio} is valid.
      */
-    private boolean isValidPictureInPictureAspectRatio(float aspectRatio) {
+    public boolean isValidPictureInPictureAspectRatio(float aspectRatio) {
         return Float.compare(mMinAspectRatio, aspectRatio) <= 0
                 && Float.compare(aspectRatio, mMaxAspectRatio) <= 0;
     }
