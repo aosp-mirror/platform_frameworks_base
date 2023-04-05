@@ -50,6 +50,7 @@ import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_V
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
+import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__BOTTOM;
@@ -240,6 +241,9 @@ final class LetterboxUiController {
     private final Boolean mBooleanPropertyIgnoreRequestedOrientation;
 
     @Nullable
+    private final Boolean mBooleanPropertyIgnoreOrientationRequestWhenLoopDetected;
+
+    @Nullable
     private final Boolean mBooleanPropertyFakeFocus;
 
     private boolean mIsRelaunchingAfterRequestedOrientationChanged;
@@ -260,6 +264,10 @@ final class LetterboxUiController {
                 readComponentProperty(packageManager, mActivityRecord.packageName,
                         mLetterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled,
                         PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION);
+        mBooleanPropertyIgnoreOrientationRequestWhenLoopDetected =
+                readComponentProperty(packageManager, mActivityRecord.packageName,
+                        mLetterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled,
+                        PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED);
         mBooleanPropertyFakeFocus =
                 readComponentProperty(packageManager, mActivityRecord.packageName,
                         mLetterboxConfiguration::isCompatFakeFocusEnabled,
@@ -432,6 +440,8 @@ final class LetterboxUiController {
      *
      * <p>This treatment is enabled when the following conditions are met:
      * <ul>
+     *     <li>Flag gating the treatment is enabled
+     *     <li>Opt-out component property isn't enabled
      *     <li>Per-app override is enabled
      *     <li>App has requested orientation more than 2 times within 1-second
      *     timer and activity is not letterboxed for fixed orientation
@@ -439,7 +449,11 @@ final class LetterboxUiController {
      */
     @VisibleForTesting
     boolean shouldIgnoreOrientationRequestLoop() {
-        if (!mIsOverrideEnableCompatIgnoreOrientationRequestWhenLoopDetectedEnabled) {
+        if (!shouldEnableWithOptInOverrideAndOptOutProperty(
+                /* gatingCondition */ mLetterboxConfiguration
+                    ::isPolicyForIgnoringRequestedOrientationEnabled,
+                mIsOverrideEnableCompatIgnoreOrientationRequestWhenLoopDetectedEnabled,
+                mBooleanPropertyIgnoreOrientationRequestWhenLoopDetected)) {
             return false;
         }
 
