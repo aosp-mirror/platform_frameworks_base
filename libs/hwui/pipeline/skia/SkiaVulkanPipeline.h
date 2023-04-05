@@ -64,6 +64,8 @@ public:
 protected:
     void onContextDestroyed() override;
 
+    bool shouldForceDither() const override;
+
 private:
     renderthread::VulkanManager& vulkanManager();
     renderthread::VulkanSurface* mVkSurface = nullptr;

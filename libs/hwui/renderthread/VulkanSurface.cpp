@@ -545,6 +545,16 @@ void VulkanSurface::setColorSpace(sk_sp<SkColorSpace> colorSpace) {
     }
 }
 
+bool VulkanSurface::isBeyond8Bit() const {
+    switch (mWindowInfo.bufferFormat) {
+        case AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM:
+        case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
+            return true;
+        default:
+            return false;
+    }
+}
+
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */
