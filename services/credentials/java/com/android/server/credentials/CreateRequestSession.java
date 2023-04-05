@@ -49,13 +49,15 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         implements ProviderSession.ProviderInternalCallback<CreateCredentialResponse> {
     private static final String TAG = "CreateRequestSession";
 
-    CreateRequestSession(@NonNull Context context, int userId, int callingUid,
+    CreateRequestSession(@NonNull Context context, RequestSession.SessionLifetime sessionCallback,
+            Object lock, int userId, int callingUid,
             CreateCredentialRequest request,
             ICreateCredentialCallback callback,
             CallingAppInfo callingAppInfo,
             CancellationSignal cancellationSignal,
             long startedTimestamp) {
-        super(context, userId, callingUid, request, callback, RequestInfo.TYPE_CREATE,
+        super(context, sessionCallback, lock, userId, callingUid, request, callback,
+                RequestInfo.TYPE_CREATE,
                 callingAppInfo, cancellationSignal, startedTimestamp);
     }
 
@@ -83,6 +85,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
     @Override
     protected void launchUiWithProviderData(ArrayList<ProviderData> providerDataList) {
         mRequestSessionMetric.collectUiCallStartTime(System.nanoTime());
+        mCredentialManagerUi.setStatus(CredentialManagerUi.UiStatus.USER_INTERACTION);
         try {
             mClientCallback.onPendingIntent(mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newCreateRequestInfo(
@@ -93,6 +96,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
                     providerDataList));
         } catch (RemoteException e) {
             mRequestSessionMetric.collectUiReturnedFinalPhase(/*uiReturned=*/ false);
+            mCredentialManagerUi.setStatus(CredentialManagerUi.UiStatus.TERMINATED);
             respondToClientWithErrorAndFinish(
                     CreateCredentialException.TYPE_UNKNOWN,
                     "Unable to invoke selector");

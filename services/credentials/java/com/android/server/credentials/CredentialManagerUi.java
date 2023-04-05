@@ -30,6 +30,7 @@ import android.credentials.ui.RequestInfo;
 import android.credentials.ui.UserSelectionDialogResult;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.service.credentials.CredentialProviderInfoFactory;
@@ -50,6 +51,20 @@ public class CredentialManagerUi {
     @NonNull private final Context mContext;
     // TODO : Use for starting the activity for this user
     private final int mUserId;
+
+    private UiStatus mStatus;
+
+    /** Creates intent that is ot be invoked to cancel an in-progress UI session. */
+    public Intent createCancelIntent(IBinder requestId, String packageName) {
+        return IntentFactory.createCancelUiIntent(requestId, /*shouldShowCancellationUi=*/ true,
+                packageName);
+    }
+
+    enum UiStatus {
+        IN_PROGRESS,
+        USER_INTERACTION,
+        NOT_STARTED, TERMINATED
+    }
     @NonNull private final ResultReceiver mResultReceiver = new ResultReceiver(
             new Handler(Looper.getMainLooper())) {
         @Override
@@ -61,6 +76,7 @@ public class CredentialManagerUi {
     private void handleUiResult(int resultCode, Bundle resultData) {
         switch (resultCode) {
             case UserSelectionDialogResult.RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION:
+                mStatus = UiStatus.IN_PROGRESS;
                 UserSelectionDialogResult selection = UserSelectionDialogResult
                         .fromResultData(resultData);
                 if (selection != null) {
@@ -70,16 +86,20 @@ public class CredentialManagerUi {
                 }
                 break;
             case UserSelectionDialogResult.RESULT_CODE_DIALOG_USER_CANCELED:
+                mStatus = UiStatus.TERMINATED;
                 mCallbacks.onUiCancellation(/* isUserCancellation= */ true);
                 break;
             case UserSelectionDialogResult.RESULT_CODE_CANCELED_AND_LAUNCHED_SETTINGS:
+                mStatus = UiStatus.TERMINATED;
                 mCallbacks.onUiCancellation(/* isUserCancellation= */ false);
                 break;
             case UserSelectionDialogResult.RESULT_CODE_DATA_PARSING_FAILURE:
+                mStatus = UiStatus.TERMINATED;
                 mCallbacks.onUiSelectorInvocationFailure();
                 break;
             default:
                 Slog.i(TAG, "Unknown error code returned from the UI");
+                mStatus = UiStatus.IN_PROGRESS;
                 mCallbacks.onUiSelectorInvocationFailure();
                 break;
         }
@@ -103,6 +123,17 @@ public class CredentialManagerUi {
         mContext = context;
         mUserId = userId;
         mCallbacks = callbacks;
+        mStatus = UiStatus.IN_PROGRESS;
+    }
+
+    /** Set status for credential manager UI */
+    public void setStatus(UiStatus status) {
+        mStatus = status;
+    }
+
+    /** Returns status for credential manager UI */
+    public UiStatus getStatus() {
+        return mStatus;
     }
 
     /**
