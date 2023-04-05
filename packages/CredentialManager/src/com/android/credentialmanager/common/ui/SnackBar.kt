@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.android.compose.rememberSystemUiController
 import com.android.credentialmanager.R
 import com.android.credentialmanager.common.material.Scrim
 import com.android.credentialmanager.ui.theme.Shapes
@@ -49,6 +50,8 @@ fun Snackbar(
     onDismiss: () -> Unit,
     dismissOnTimeout: Boolean = false,
 ) {
+    val sysUiController = rememberSystemUiController()
+    setTransparentSystemBarsColor(sysUiController)
     BoxWithConstraints {
         Box(Modifier.fillMaxSize()) {
             Scrim(

@@ -41,7 +41,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
-import com.android.compose.rememberSystemUiController
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
 import com.android.credentialmanager.common.BaseEntry
@@ -62,8 +61,6 @@ import com.android.credentialmanager.common.ui.CredentialListSectionHeader
 import com.android.credentialmanager.common.ui.HeadlineIcon
 import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.Snackbar
-import com.android.credentialmanager.common.ui.setTransparentSystemBarsColor
-import com.android.credentialmanager.common.ui.setBottomSheetSystemBarsColor
 import com.android.credentialmanager.logging.GetCredentialEvent
 import com.android.internal.logging.UiEventLogger.UiEventEnum
 
@@ -73,9 +70,7 @@ fun GetCredentialScreen(
     getCredentialUiState: GetCredentialUiState,
     providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
 ) {
-    val sysUiController = rememberSystemUiController()
     if (getCredentialUiState.currentScreenState == GetScreenState.REMOTE_ONLY) {
-        setTransparentSystemBarsColor(sysUiController)
         RemoteCredentialSnackBarScreen(
             onClick = viewModel::getFlowOnMoreOptionOnSnackBarSelected,
             onCancel = viewModel::onUserCancel,
@@ -84,7 +79,6 @@ fun GetCredentialScreen(
         viewModel.uiMetrics.log(GetCredentialEvent.CREDMAN_GET_CRED_SCREEN_REMOTE_ONLY)
     } else if (getCredentialUiState.currentScreenState
         == GetScreenState.UNLOCKED_AUTH_ENTRIES_ONLY) {
-        setTransparentSystemBarsColor(sysUiController)
         EmptyAuthEntrySnackBarScreen(
             authenticationEntryList =
             getCredentialUiState.providerDisplayInfo.authenticationEntryList,
@@ -95,7 +89,6 @@ fun GetCredentialScreen(
         viewModel.uiMetrics.log(GetCredentialEvent
                 .CREDMAN_GET_CRED_SCREEN_UNLOCKED_AUTH_ENTRIES_ONLY)
     } else {
-        setBottomSheetSystemBarsColor(sysUiController)
         ModalBottomSheet(
             sheetContent = {
                 // Hide the sheet content as opposed to the whole bottom sheet to maintain the scrim
