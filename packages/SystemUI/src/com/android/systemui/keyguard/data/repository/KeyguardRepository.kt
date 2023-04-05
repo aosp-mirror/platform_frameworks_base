@@ -471,7 +471,7 @@ constructor(
         }
 
         val callback =
-            object : BiometricUnlockController.BiometricModeListener {
+            object : BiometricUnlockController.BiometricUnlockEventsListener {
                 override fun onModeChanged(@WakeAndUnlockMode mode: Int) {
                     dispatchUpdate()
                 }
@@ -481,10 +481,10 @@ constructor(
                 }
             }
 
-        biometricUnlockController.addBiometricModeListener(callback)
+        biometricUnlockController.addListener(callback)
         dispatchUpdate()
 
-        awaitClose { biometricUnlockController.removeBiometricModeListener(callback) }
+        awaitClose { biometricUnlockController.removeListener(callback) }
     }
 
     override val wakefulness: Flow<WakefulnessModel> = conflatedCallbackFlow {
