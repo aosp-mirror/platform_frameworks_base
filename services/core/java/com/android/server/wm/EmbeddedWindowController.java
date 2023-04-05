@@ -292,7 +292,9 @@ class EmbeddedWindowController {
         private void handleTap(boolean grantFocus) {
             if (mInputChannel != null) {
                 if (mHostWindowState != null) {
-                    mWmService.grantEmbeddedWindowFocus(mSession, mHostWindowState.mClient,
+                    // Use null session since this is being granted by system server and doesn't
+                    // require the host session to be passed in
+                    mWmService.grantEmbeddedWindowFocus(null, mHostWindowState.mClient,
                             mFocusGrantToken, grantFocus);
                     if (grantFocus) {
                         // If granting focus to the embedded when tapped, we need to ensure the host
