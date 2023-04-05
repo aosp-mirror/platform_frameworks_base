@@ -39,6 +39,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -106,10 +107,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -231,6 +232,7 @@ public class BroadcastQueueTest {
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting startProcessLocked() for "
                     + Arrays.toString(invocation.getArguments()));
+            assertHealth();
             final ProcessStartBehavior behavior = mNextProcessStartBehavior
                     .getAndSet(ProcessStartBehavior.SUCCESS);
             if (behavior == ProcessStartBehavior.FAIL_NULL) {
@@ -462,6 +464,7 @@ public class BroadcastQueueTest {
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting scheduleReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
+            assertHealth();
             final Intent intent = invocation.getArgument(0);
             final Bundle extras = invocation.getArgument(5);
             mScheduledBroadcasts.add(makeScheduledBroadcast(r, intent));
@@ -483,6 +486,7 @@ public class BroadcastQueueTest {
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting scheduleRegisteredReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
+            assertHealth();
             final Intent intent = invocation.getArgument(1);
             final Bundle extras = invocation.getArgument(4);
             final boolean ordered = invocation.getArgument(5);
@@ -598,6 +602,13 @@ public class BroadcastQueueTest {
                 AppOpsManager.OP_NONE, options, receivers, callerApp, resultTo,
                 Activity.RESULT_OK, null, resultExtras, ordered, false, false, userId,
                 BackgroundStartPrivileges.NONE, false, null);
+    }
+
+    private void assertHealth() {
+        if (mImpl == Impl.MODERN) {
+            // If this fails, it'll throw a clear reason message
+            ((BroadcastQueueModernImpl) mQueue).assertHealthLocked();
+        }
     }
 
     private static Map<String, Object> asMap(Bundle bundle) {
@@ -769,7 +780,7 @@ public class BroadcastQueueTest {
         // about the actual output, just that we don't crash
         mQueue.dumpDebug(new ProtoOutputStream(),
                 ActivityManagerServiceDumpBroadcastsProto.BROADCAST_QUEUE);
-        mQueue.dumpLocked(FileDescriptor.err, new PrintWriter(new ByteArrayOutputStream()),
+        mQueue.dumpLocked(FileDescriptor.err, new PrintWriter(Writer.nullWriter()),
                 null, 0, true, true, true, null, false);
         mQueue.dumpToDropBoxLocked(TAG);
 
@@ -1166,7 +1177,7 @@ public class BroadcastQueueTest {
             // about the actual output, just that we don't crash
             mQueue.dumpDebug(new ProtoOutputStream(),
                     ActivityManagerServiceDumpBroadcastsProto.BROADCAST_QUEUE);
-            mQueue.dumpLocked(FileDescriptor.err, new PrintWriter(new ByteArrayOutputStream()),
+            mQueue.dumpLocked(FileDescriptor.err, new PrintWriter(Writer.nullWriter()),
                     null, 0, true, true, true, null, false);
         }
 

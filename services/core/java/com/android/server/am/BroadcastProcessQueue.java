@@ -1050,13 +1050,13 @@ class BroadcastProcessQueue {
      * Check overall health, confirming things are in a reasonable state and
      * that we're not wedged.
      */
-    public void checkHealthLocked() {
-        checkHealthLocked(mPending);
-        checkHealthLocked(mPendingUrgent);
-        checkHealthLocked(mPendingOffload);
+    public void assertHealthLocked() {
+        assertHealthLocked(mPending);
+        assertHealthLocked(mPendingUrgent);
+        assertHealthLocked(mPendingOffload);
     }
 
-    private void checkHealthLocked(@NonNull ArrayDeque<SomeArgs> queue) {
+    private void assertHealthLocked(@NonNull ArrayDeque<SomeArgs> queue) {
         if (queue.isEmpty()) return;
 
         final Iterator<SomeArgs> it = queue.descendingIterator();
