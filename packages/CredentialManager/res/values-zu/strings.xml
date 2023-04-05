@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Ukuvikeleka kwe-akhawunti okuthuthukisiwe"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Ukhiye ngamunye olinkwe ngokukhethekile ne-app noma iwebhusayithi usungulelwe yona, ngakho awukwazi ukungena ngemvume ku-app noma kuwebhusayithi yomgunyathi ngephutha. Futhi, ngamaseva agcina okhiye basesidlangalaleni kuphela, ukugebengu be-inthanethi bunzima kakhulu."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Ushintsho olulula"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Njengoba siya ekusaseni elingenaphasiwedi, amagama ayimfihlo asazotholakala eceleni kokhiye bokudlula."</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Njengoba sibhekela kwikusasa elingenaphasiwedi, amagama ayimfihlo asazotholakala eceleni kokhiye bokudlula."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Khetha lapho ongagcina khona i-<xliff:g id="CREATETYPES">%1$s</xliff:g> yakho"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Khetha isiphathi sephasiwedi ukuze ulondoloze ulwazi lwakho futhi ungene ngemvume ngokushesha ngesikhathi esizayo."</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Sungula ukhiye wokudlula we-<xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,7 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Sebenzisa ukhiye wakho wokungena olondoloziwe <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Sebenzisa ukungena kwakho ngemvume okulondoloziwe <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Khetha ukungena ngemvume okulondoloziwe kwakho <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Khetha ongakhetha kukho kwe-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
     <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Ngena ngemvume ngenye indlela"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Buka okungakhethwa kukho"</string>
@@ -66,6 +67,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Phatha ukungena ngemvume"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Kusukela kwenye idivayisi"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Sebenzisa idivayisi ehlukile"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Isicelo sikhanselwe yi-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
 </resources>

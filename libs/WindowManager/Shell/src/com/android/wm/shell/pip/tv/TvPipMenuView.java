@@ -92,7 +92,6 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
     private @TvPipMenuController.TvPipMenuMode int mCurrentMenuMode = MODE_NO_MENU;
     private final Rect mCurrentPipBounds = new Rect();
     private int mCurrentPipGravity;
-    private boolean mSwitchingOrientation;
 
     private final AccessibilityManager mA11yManager;
     private final Handler mMainHandler;
@@ -176,17 +175,12 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         }
 
         if (mCurrentMenuMode == MODE_ALL_ACTIONS_MENU) {
-            mSwitchingOrientation = true;
+            // Fade out while orientation change is ongoing and fade back in once transition is
+            // finished.
             mActionButtonsRecyclerView.animate()
                     .alpha(0)
                     .setInterpolator(TvPipInterpolators.EXIT)
-                    .setDuration(mResizeAnimationDuration / 2)
-                    .withEndAction(() -> {
-                        mButtonLayoutManager.setOrientation(vertical
-                                ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL);
-                        // Only make buttons visible again in onPipTransitionFinished to keep in
-                        // sync with PiP content alpha animation.
-                    });
+                    .setDuration(mResizeAnimationDuration / 2);
         } else {
             mButtonLayoutManager.setOrientation(vertical
                     ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL);
@@ -208,13 +202,16 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
             mEduTextDrawer.init();
         }
 
-        if (mSwitchingOrientation) {
+        mButtonLayoutManager.setOrientation(
+                    mCurrentPipBounds.height() > mCurrentPipBounds.width()
+                            ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL);
+        if (mCurrentMenuMode == MODE_ALL_ACTIONS_MENU
+                && mActionButtonsRecyclerView.getAlpha() != 1f) {
             mActionButtonsRecyclerView.animate()
                     .alpha(1)
                     .setInterpolator(TvPipInterpolators.ENTER)
                     .setDuration(mResizeAnimationDuration / 2);
         }
-        mSwitchingOrientation = false;
     }
 
     /**

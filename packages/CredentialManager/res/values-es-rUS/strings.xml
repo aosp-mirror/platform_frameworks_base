@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Mayor seguridad para las cuentas"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Cada llave está vinculada exclusivamente con el sitio web o la app para la que fue creada, por lo que nunca podrás acceder por error a una app o sitio web fraudulentos. Además, como los servidores solo guardan claves públicas, hackearlas es mucho más difícil."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Transición fluida"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"A medida que avanzamos hacia un futuro sin contraseñas, estas seguirán estando disponibles junto a las llaves de acceso"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"A medida que avanzamos hacia un futuro sin contraseñas, estas seguirán estando disponibles junto a las llaves de acceso."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Elige dónde guardar tus <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecciona un administrador de contraseñas para guardar tu información y acceder más rápido la próxima vez"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"¿Quieres crear una llave de acceso para <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -53,6 +53,8 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"¿Quieres usar tu acceso guardado para <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Elige un acceso guardado para <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
     <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Acceder de otra forma"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Ver opciones"</string>

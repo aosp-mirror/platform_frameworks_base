@@ -141,7 +141,7 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi chaqiruv"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWi-Fi"</string>
     <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wi-Fi chaqiruv"</string>
-    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Yoqilmagan"</string>
+    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Oʻchiq"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Wi-Fi orqali chaqiruv"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Mobil tarmoq orqali chaqiruv"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Faqat Wi-Fi"</string>
@@ -1493,7 +1493,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Siz ushbu ilovadan ishchi profilingizda foydalanmoqdasiz"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Kiritish uslubi"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Sinx"</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"Maxsus imkoniyatlar"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"Qulayliklar"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Fon rasmi"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Fon rasmini almashtirish"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Bildirishnoma tinglovchisi"</string>
@@ -1691,12 +1691,12 @@
     <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Uzoq vaqt davomida bunday balandlikda media fayllarni tinglash eshitish qobiliyatingiz buzilishiga olib kelishi mumkin.\n\nUzoq vaqt davomida bu darajada ijroni davom ettirish eshitishingizga zarar yetkazishi mumkin."</string>
     <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Ogohlantirish\nHozir xavfli darajada baland ovozli kontentni tinglayapsiz.\n\nBu baland tovushda tinglashda davom etsangiz, eshitish qobiliyatingiz butunlay buziladi."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Tezkor ishga tushirishdan foydalanilsinmi?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Maxsus imkoniyatlar funksiyasidan foydalanish uchun u yoniqligida ikkala tovush tugmasini 3 soniya bosib turing."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Maxsus imkoniyatlar uchun tezkor tugma yoqilsinmi?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Maxsus imkoniyatlarni yoqish uchun ikkala tovush tugmalarini bir necha soniya bosib turing. Qurilmangiz ishlashida oʻzgarish yuz berishi mumkin.\n\nJoriy funksiyalar:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nTanlangan funksiyalarni Sozlamalar ichidagi Maxsus imkoniyatlar ustiga bosib oʻzgartirishingiz mumkin."</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Qulayliklar funksiyasidan foydalanish uchun u yoniqligida ikkala tovush tugmasini 3 soniya bosib turing."</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Qulayliklar uchun tezkor tugma yoqilsinmi?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Qulayliklarni yoqish uchun ikkala tovush tugmalarini bir necha soniya bosib turing. Qurilmangiz ishlashida oʻzgarish yuz berishi mumkin.\n\nJoriy funksiyalar:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nTanlangan funksiyalarni Sozlamalar ichidagi Qulayliklar ustiga bosib oʻzgartirishingiz mumkin."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> tezkor tugmasi yoqilsinmi?"</string>
-    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"<xliff:g id="SERVICE">%1$s</xliff:g> funksiyasini yoqish uchun ikkala tovush tugmalarini bir necha soniya bosib turing. Qurilmangiz ishlashida oʻzgarish yuz berishi mumkin.\n\nBu tezkor tugmalarni boshqa funksiyaga Sozlamalar ichidagi Maxsus imkoniyatlar orqali tayinlash mumkin."</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"<xliff:g id="SERVICE">%1$s</xliff:g> funksiyasini yoqish uchun ikkala tovush tugmalarini bir necha soniya bosib turing. Qurilmangiz ishlashida oʻzgarish yuz berishi mumkin.\n\nBu tezkor tugmalarni boshqa funksiyaga Sozlamalar ichidagi Qulayliklar orqali tayinlash mumkin."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Yoqilsin"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Yoqilmasin"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"YONIQ"</string>
@@ -1710,7 +1710,7 @@
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Ruxsat"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Rad etish"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Kerakli funksiyani tanlang"</string>
-    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Maxsus imkoniyatlar tugmasi bilan foydalanish uchun funksiyalarni tanlang"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Qulayliklar tugmasi bilan foydalanish uchun funksiyalarni tanlang"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Tovush tugmasi bilan ishga tushiriladigan funksiyalarni tanlang"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> faolsizlantirildi"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Tezkor tugmalarni tahrirlash"</string>
@@ -1725,9 +1725,9 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tovush tugmalari bosib turildi. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> yoqildi."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tovush tugmalari bosib turildi. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> faolsizlantirildi."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Tovush tugmalarini qoʻyib yuboring. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> xizmatini yoqish uchun ikkala tovush tugmasini 3 soniya bosib turing."</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Maxsus imkoniyatlar tugmasi bosilganda ishga tushadigan funksiyani tanlang:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Maxsus imkoniyatlar ishorasi bilan ishga tushadigan funksiyani tanlang (ikkita barmoq bilan ekranning pastidan tepaga surib tortilganda):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Maxsus imkoniyatlar ishorasi bilan ishga tushadigan funksiyani tanlang (uchta barmoq bilan ekranning pastidan tepaga surib tortilganda):"</string>
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Qulayliklar tugmasi bosilganda ishga tushadigan funksiyani tanlang:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Qulayliklar ishorasi bilan ishga tushadigan funksiyani tanlang (ikkita barmoq bilan ekranning pastidan tepaga surib tortilganda):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Qulayliklar ishorasi bilan ishga tushadigan funksiyani tanlang (uchta barmoq bilan ekranning pastidan tepaga surib tortilganda):"</string>
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Funksiyalarni almashtirish uchun maxsus imkoniyatlar tugmasini bosib turing."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Funksiyalarni almashtirish uchun ikkita barmoq bilan tepaga suring va ushlab turing."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Funksiyalarni almashtirish uchun uchta barmoq bilan tepaga suring va ushlab turing."</string>
@@ -2009,7 +2009,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Yangiliklar va jurnallar"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Xaritalar va navigatsiya"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Ish va unumdorlik"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"Maxsus imkoniyatlar"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Qulayliklar"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Qurilma xotirasi"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB orqali nosozliklarni aniqlash"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"soat"</string>
@@ -2134,7 +2134,7 @@
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Bu ilovaga yozib olish ruxsati berilmagan, lekin shu USB orqali ovozlarni yozib olishi mumkin."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Bosh sahifa"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Orqaga"</string>
-    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Yaqinda ishlatilgan ilovalar"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Oxirgi ilovalar"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Bildirishnomalar"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Tezkor sozlamalar"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Quvvat muloqot oynasi"</string>

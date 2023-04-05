@@ -20,12 +20,16 @@ import android.content.Context
 import android.view.MotionEvent
 import android.view.ViewConfiguration
 import com.android.systemui.classifier.Classifier
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.multishade.shared.math.isZero
 import com.android.systemui.multishade.shared.model.ProxiedInputModel
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.shade.ShadeController
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
@@ -33,6 +37,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * Encapsulates business logic to handle [MotionEvent]-based user input.
@@ -40,15 +45,31 @@ import kotlinx.coroutines.flow.stateIn
  * This class is meant purely for the legacy `View`-based system to be able to pass `MotionEvent`s
  * into the newer multi-shade framework for processing.
  */
+@SysUISingleton
 class MultiShadeMotionEventInteractor
 @Inject
 constructor(
     @Application private val applicationContext: Context,
     @Application private val applicationScope: CoroutineScope,
     private val multiShadeInteractor: MultiShadeInteractor,
+    featureFlags: FeatureFlags,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val falsingManager: FalsingManager,
+    private val shadeController: ShadeController,
 ) {
+    init {
+        if (featureFlags.isEnabled(Flags.DUAL_SHADE)) {
+            applicationScope.launch {
+                multiShadeInteractor.isAnyShadeExpanded.collect {
+                    if (!it && !shadeController.isKeyguard) {
+                        shadeController.makeExpandedInvisible()
+                    } else {
+                        shadeController.makeExpandedVisible(false)
+                    }
+                }
+            }
+        }
+    }
 
     private val isAnyShadeExpanded: StateFlow<Boolean> =
         multiShadeInteractor.isAnyShadeExpanded.stateIn(
@@ -56,6 +77,7 @@ constructor(
             started = SharingStarted.Eagerly,
             initialValue = false,
         )
+
     private val isBouncerShowing: StateFlow<Boolean> =
         keyguardTransitionInteractor
             .transitionValue(state = KeyguardState.PRIMARY_BOUNCER)
@@ -102,23 +124,7 @@ constructor(
                 false
             }
             MotionEvent.ACTION_MOVE -> {
-                interactionState?.let {
-                    val pointerIndex = event.findPointerIndex(it.pointerId)
-                    val currentX = event.getX(pointerIndex)
-                    val currentY = event.getY(pointerIndex)
-                    if (!it.isDraggingHorizontally && !it.isDraggingShade) {
-                        val xDistanceTravelled = currentX - it.initialX
-                        val yDistanceTravelled = currentY - it.initialY
-                        val touchSlop = ViewConfiguration.get(applicationContext).scaledTouchSlop
-                        interactionState =
-                            when {
-                                yDistanceTravelled > touchSlop -> it.copy(isDraggingShade = true)
-                                abs(xDistanceTravelled) > touchSlop ->
-                                    it.copy(isDraggingHorizontally = true)
-                                else -> interactionState
-                            }
-                    }
-                }
+                onMove(event)
 
                 // We want to intercept the rest of the gesture if we're dragging the shade.
                 isDraggingShade()
@@ -162,7 +168,8 @@ constructor(
                         }
                         true
                     } else {
-                        false
+                        onMove(event)
+                        isDraggingShade()
                     }
                 }
                     ?: false
@@ -222,6 +229,32 @@ constructor(
                 true
             }
             else -> false
+        }
+    }
+
+    /**
+     * Handles [MotionEvent.ACTION_MOVE] and sets whether or not we are dragging shade in our
+     * current interaction
+     *
+     * @param event The [MotionEvent] to handle.
+     */
+    private fun onMove(event: MotionEvent) {
+        interactionState?.let {
+            val pointerIndex = event.findPointerIndex(it.pointerId)
+            val currentX = event.getX(pointerIndex)
+            val currentY = event.getY(pointerIndex)
+            if (!it.isDraggingHorizontally && !it.isDraggingShade) {
+                val xDistanceTravelled = currentX - it.initialX
+                val yDistanceTravelled = currentY - it.initialY
+                val touchSlop = ViewConfiguration.get(applicationContext).scaledTouchSlop
+                interactionState =
+                    when {
+                        yDistanceTravelled > touchSlop -> it.copy(isDraggingShade = true)
+                        abs(xDistanceTravelled) > touchSlop ->
+                            it.copy(isDraggingHorizontally = true)
+                        else -> interactionState
+                    }
+            }
         }
     }
 

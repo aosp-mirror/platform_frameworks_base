@@ -801,10 +801,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Permite que o titular comece a ver as informações das funcionalidades de uma app."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"aceder aos dados de sensores a uma taxa de amostragem elevada"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Permite que a app obtenha uma amostra dos dados de sensores a uma taxa superior a 200 Hz."</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"atualizar a app sem a ação do utilizador"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Permite que o proprietário atualize a app que instalou anteriormente sem a ação do utilizador"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Definir regras de palavra-passe"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Controlar o comprimento e os carateres permitidos nos PINs e nas palavras-passe do bloqueio de ecrã."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitorizar tentativas de desbloqueio do ecrã"</string>

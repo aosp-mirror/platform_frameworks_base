@@ -69,7 +69,7 @@ class CredentialSelectorViewModel(
 
     init{
         uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INIT,
-                credManRepo.requestInfo.appPackageName)
+                credManRepo.requestInfo?.appPackageName)
     }
 
     /**************************************************************************/
@@ -97,10 +97,10 @@ class CredentialSelectorViewModel(
         this.credManRepo = credManRepo
         uiState = credManRepo.initState()
 
-        if (this.credManRepo.requestInfo.token != credManRepo.requestInfo.token) {
+        if (this.credManRepo.requestInfo?.token != credManRepo.requestInfo?.token) {
             this.uiMetrics.resetInstanceId()
             this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_NEW_REQUEST,
-                    credManRepo.requestInfo.appPackageName)
+                    credManRepo.requestInfo?.appPackageName)
         }
     }
 
@@ -174,14 +174,14 @@ class CredentialSelectorViewModel(
     private fun onInternalError() {
         Log.w(Constants.LOG_TAG, "UI closed due to illegal internal state")
         this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INTERNAL_ERROR,
-                credManRepo.requestInfo.appPackageName)
+                credManRepo.requestInfo?.appPackageName)
         credManRepo.onParsingFailureCancel()
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
     }
 
     /** Return true if the current UI's request token matches the UI cancellation request token. */
     fun shouldCancelCurrentUi(cancelRequestToken: IBinder): Boolean {
-        return credManRepo.requestInfo.token.equals(cancelRequestToken)
+        return credManRepo.requestInfo?.token?.equals(cancelRequestToken) ?: false
     }
 
     /**************************************************************************/
@@ -405,6 +405,6 @@ class CredentialSelectorViewModel(
 
     @Composable
     fun logUiEvent(uiEventEnum: UiEventEnum) {
-        this.uiMetrics.log(uiEventEnum, credManRepo.requestInfo.appPackageName)
+        this.uiMetrics.log(uiEventEnum, credManRepo.requestInfo?.appPackageName)
     }
 }

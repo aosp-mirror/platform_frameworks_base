@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"অ্যাকাউন্টের জন্য উন্নত সুরক্ষা"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"প্রতিটি \'কী\' যে অ্যাপ বা ওয়েবসাইটের জন্য তৈরি করা হয়েছে, সেগুলির সাথে এই \'কী\' বিশেষভাবে লিঙ্ক করা থাকে। তাই কখনই আপনি ভুলবশত কোনও ভুয়ো অ্যাপ বা ওয়েবসাইটে সাইন-ইন করতে পারবেন না। পাশাপাশি, যেসব সার্ভারে শুধু সর্বজনীন \'কী\' রয়েছে, তা হ্যাক করা খুবই কঠিন।"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"নির্বিঘ্ন ট্রানজিশন"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"আমরা পাসওয়ার্ডবিহীন ভবিষ্যতের দিকে এগিয়ে গেলেও, এখনও \'পাসকী\'-এর পাশাপাশি পাসওয়ার্ড ব্যবহার করা যাবে"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"আমরা পাসওয়ার্ডবিহীন ভবিষ্যতের দিকে এগিয়ে গেলেও, এখনও \'পাসকী\'-এর পাশাপাশি পাসওয়ার্ড ব্যবহার করা যাবে।"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"আপনার <xliff:g id="CREATETYPES">%1$s</xliff:g> কোথায় সেভ করবেন তা বেছে নিন"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"আপনার তথ্য সেভ করতে একটি Password Manager বেছে নিন এবং পরের বার আরও দ্রুত সাইন-ইন করুন"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g>-এর জন্য \'পাসকী\' তৈরি করবেন?"</string>
@@ -54,6 +54,8 @@
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g>-এর জন্য সাইন-ইন করা সম্পর্কিত ক্রেডেনশিয়াল বেছে নিন"</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
     <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"অন্যভাবে সাইন-ইন করুন"</string>
     <string name="snackbar_action" msgid="37373514216505085">"বিকল্প দেখুন"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"চালিয়ে যান"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"সাইন-ইন করার ক্রেডেনশিয়াল ম্যানেজ করুন"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"অন্য ডিভাইস থেকে"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"আলাদা ডিভাইস ব্যবহার করুন"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> দ্বারা অনুরোধ বাতিল করা হয়েছে"</string>
 </resources>

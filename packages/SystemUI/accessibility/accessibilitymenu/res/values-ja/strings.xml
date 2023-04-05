@@ -2,7 +2,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"ユーザー補助機能メニュー"</string>
-    <string name="accessibility_menu_intro" msgid="3164193281544042394">"ユーザー補助メニューは、デバイスを操作するための画面上の大きなメニューです。デバイスのロック、音量や明るさの調節、スクリーンショットの撮影などを行えます。"</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"ユーザー補助メニューは、デバイスを操作するために画面上に大きく表示されるメニューです。デバイスのロック、音量や明るさの調節、スクリーンショットの撮影などを行えます。"</string>
     <string name="assistant_label" msgid="6796392082252272356">"アシスタント"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"アシスタント"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"ユーザー補助機能の設定"</string>
@@ -20,8 +20,8 @@
     <string name="brightness_down_label" msgid="7115662941913272072">"明るさを下げる"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"前の画面に移動"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"次の画面に移動"</string>
-    <string name="accessibility_menu_description" msgid="4458354794093858297">"ユーザー補助メニューは、デバイスを操作するための画面上の大きなメニューです。デバイスのロック、音量や明るさの調節、スクリーンショットの撮影などを行えます。"</string>
-    <string name="accessibility_menu_summary" msgid="340071398148208130">"大きなメニューでデバイスを操作します"</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"ユーザー補助メニューは、デバイスを操作するために画面上に大きく表示されるメニューです。デバイスのロック、音量や明るさの調節、スクリーンショットの撮影などを行えます。"</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"大きく表示されるメニューでデバイスを操作します"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"ユーザー補助機能メニューの設定"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"大きいボタン"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"ユーザー補助機能メニューのボタンを大きくする"</string>

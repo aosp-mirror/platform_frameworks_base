@@ -25,6 +25,7 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.doze.DozeHost
 import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
@@ -43,12 +44,14 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController.WakeAndUnl
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 
 /** Defines interface for classes that encapsulate application state for the keyguard. */
 interface KeyguardRepository {
@@ -195,6 +198,7 @@ constructor(
     private val dozeParameters: DozeParameters,
     private val authController: AuthController,
     private val dreamOverlayCallbackController: DreamOverlayCallbackController,
+    @Main private val mainDispatcher: CoroutineDispatcher
 ) : KeyguardRepository {
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions =
@@ -387,6 +391,7 @@ constructor(
 
                 awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
             }
+            .flowOn(mainDispatcher)
             .distinctUntilChanged()
 
     override val linearDozeAmount: Flow<Float> = conflatedCallbackFlow {

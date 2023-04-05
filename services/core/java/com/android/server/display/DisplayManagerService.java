@@ -1418,19 +1418,32 @@ public final class DisplayManagerService extends SystemService {
             flags |= VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP;
         }
 
-        if (projection != null) {
-            final long firstToken = Binder.clearCallingIdentity();
-            try {
+        // Check if the host app is attempting to reuse the token or capture again on the same
+        // MediaProjection instance. Don't start recording if so; MediaProjectionManagerService
+        // decides how to respond based on the target SDK.
+        boolean waitForPermissionConsent = false;
+        final long firstToken = Binder.clearCallingIdentity();
+        try {
+            if (projection != null) {
                 if (!getProjectionService().isCurrentProjection(projection)) {
                     throw new SecurityException("Cannot create VirtualDisplay with "
                             + "non-current MediaProjection");
                 }
+                if (!projection.isValid()) {
+                    // Just log; MediaProjectionManagerService throws an exception.
+                    Slog.w(TAG, "Reusing token: create virtual display for app reusing token");
+                    // If the exception wasn't thrown, we continue and re-show the permission dialog
+                    getProjectionService().requestConsentForInvalidProjection(projection);
+                    // Declare that mirroring shouldn't begin until user reviews the permission
+                    // dialog.
+                    waitForPermissionConsent = true;
+                }
                 flags = projection.applyVirtualDisplayFlags(flags);
-            } catch (RemoteException e) {
-                throw new SecurityException("unable to validate media projection or flags");
-            } finally {
-                Binder.restoreCallingIdentity(firstToken);
             }
+        } catch (RemoteException e) {
+            throw new SecurityException("Unable to validate media projection or flags", e);
+        } finally {
+            Binder.restoreCallingIdentity(firstToken);
         }
 
         if (callingUid != Process.SYSTEM_UID
@@ -1548,22 +1561,28 @@ public final class DisplayManagerService extends SystemService {
                 // Only attempt to set content recording session if there are details to set and a
                 // VirtualDisplay has been successfully constructed.
                 session.setVirtualDisplayId(displayId);
+                // Don't start mirroring until user re-grants consent.
+                session.setWaitingToRecord(waitForPermissionConsent);
 
                 // We set the content recording session here on the server side instead of using
                 // a second AIDL call in MediaProjection. By ensuring that a virtual display has
                 // been constructed before calling setContentRecordingSession, we avoid a race
                 // condition between the DisplayManagerService & WindowManagerService which could
                 // lead to the MediaProjection being pre-emptively torn down.
-                if (!mWindowManagerInternal.setContentRecordingSession(session)) {
-                    // Unable to start mirroring, so tear down projection & release VirtualDisplay.
-                    try {
-                        getProjectionService().stopActiveProjection();
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Unable to tell MediaProjectionManagerService to stop the "
-                                + "active projection", e);
+                try {
+                    if (!getProjectionService().setContentRecordingSession(session, projection)) {
+                        // Unable to start mirroring, so release VirtualDisplay. Projection service
+                        // handles stopping the projection.
+                        releaseVirtualDisplayInternal(callback.asBinder());
+                        return Display.INVALID_DISPLAY;
+                    } else if (projection != null) {
+                        // Indicate that this projection has been used to record, and can't be used
+                        // again.
+                        projection.notifyVirtualDisplayCreated(displayId);
                     }
-                    releaseVirtualDisplayInternal(callback.asBinder());
-                    return Display.INVALID_DISPLAY;
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to tell MediaProjectionManagerService to set the "
+                            + "content recording session", e);
                 }
             }
 

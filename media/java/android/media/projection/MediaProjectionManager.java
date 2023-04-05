@@ -231,6 +231,8 @@ public final class MediaProjectionManager {
         if (projection == null) {
             return null;
         }
+        // Don't do anything here if app is re-using the token; we check how often
+        // IMediaProjection#start is invoked. Fail to the app when they start recording.
         return new MediaProjection(mContext, IMediaProjection.Stub.asInterface(projection));
     }
 

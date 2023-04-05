@@ -122,10 +122,11 @@ public final class FillResponse implements Parcelable {
     *
     * @hide
     */
-    public static FillResponse shallowCopy(FillResponse r, List<Dataset> datasets) {
+    public static FillResponse shallowCopy(
+            FillResponse r, List<Dataset> datasets, SaveInfo saveInfo) {
         return new FillResponse(
                 (datasets != null) ? new ParceledListSlice<>(datasets) : null,
-                r.mSaveInfo,
+                saveInfo,
                 r.mClientState,
                 r.mPresentation,
                 r.mInlinePresentation,

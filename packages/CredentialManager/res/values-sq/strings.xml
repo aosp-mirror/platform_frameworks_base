@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Siguri e përmirësuar e llogarisë"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Secili çelës është i lidhur ekskluzivisht me aplikacionin ose sajtin e uebit për të cilin është krijuar, kështu që nuk do të identifikohesh asnjëherë gabimisht në një aplikacion ose sajt uebi mashtrues. Gjithashtu, me serverët që mbajnë vetëm çelësa publikë, pirateria informatike është shumë më e vështirë."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Kalim i thjeshtuar"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Teksa shkojmë drejt një të ardhmeje pa fjalëkalime, këto të fundit do të ofrohen ende së bashku me çelësat e kalimit"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Teksa shkojmë drejt një të ardhmeje pa fjalëkalime, këto të fundit do të ofrohen ende së bashku me çelësat e kalimit."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Zgjidh se ku t\'i ruash <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Zgjidh një menaxher fjalëkalimesh për të ruajtur informacionet e tua dhe për t\'u identifikuar më shpejt herën tjetër"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Të krijohet çelësi i kalimit për <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,7 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Të përdoret fjalëkalimi yt i ruajtur për <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Të përdoret identifikimi yt i ruajtur për <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Zgjidh një identifikim të ruajtur për <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Të zgjidhet një opsion për <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
     <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Identifikohu me një mënyrë tjetër"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Shiko opsionet"</string>

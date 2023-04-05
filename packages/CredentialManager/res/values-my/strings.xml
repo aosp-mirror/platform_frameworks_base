@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"ပိုကောင်းသော အကောင့်လုံခြုံရေး"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"ကီးတစ်ခုစီကို ၎င်းအတွက် ပြုလုပ်ထားသော အက်ပ် (သို့) ဝဘ်ဆိုက်နှင့် သီးသန့်လင့်ခ်ချိတ်ထားသဖြင့် လိမ်လည်သော အက်ပ် (သို့) ဝဘ်ဆိုက်သို့ မည်သည့်အခါတွင်မှ မှားယွင်း၍ လက်မှတ်ထိုးဝင်နိုင်မည်မဟုတ်ပါ။ ထို့အပြင် ဆာဗာသီးသန့် သိမ်းထားသော အများသုံးကီးများကို ဟက်လုပ်ရန် ပိုခက်ခဲသည်။"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"အလိုအလျောက် ကူးပြောင်းခြင်း"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"စကားဝှက်မသုံးသော အနာဂတ်ဆီသို့ ရှေ့ဆက်ရာတွင် လျှို့ဝှက်ကီးများနှင့်အတူ စကားဝှက်များကို ဆက်လက်သုံးနိုင်မည်"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"စကားဝှက်မသုံးခြင်း အနာဂတ်ဆီသို့ ရှေ့ဆက်ရာတွင် လျှို့ဝှက်ကီးများနှင့်အတူ စကားဝှက်များကို ဆက်လက်အသုံးပြုနိုင်ပါမည်။"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"သင်၏ <xliff:g id="CREATETYPES">%1$s</xliff:g> သိမ်းရန်နေရာ ရွေးခြင်း"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"သင့်အချက်အလက်သိမ်းပြီး နောက်တစ်ကြိမ်၌ ပိုမိုမြန်ဆန်စွာ လက်မှတ်ထိုးဝင်ရန် စကားဝှက်မန်နေဂျာကို ရွေးပါ"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> အတွက် လျှို့ဝှက်ကီးပြုလုပ်မလား။"</string>
@@ -54,6 +54,8 @@
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် သိမ်းထားသော လက်မှတ်ထိုးဝင်မှုကို ရွေးပါ"</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
     <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"နောက်တစ်နည်းဖြင့် လက်မှတ်ထိုးဝင်ရန်"</string>
     <string name="snackbar_action" msgid="37373514216505085">"ရွေးစရာများကို ကြည့်ရန်"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ရှေ့ဆက်ရန်"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"လက်မှတ်ထိုးဝင်မှုများ စီမံခြင်း"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"စက်နောက်တစ်ခုမှ"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"အခြားစက်သုံးရန်"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"တောင်းဆိုချက်ကို <xliff:g id="APP_NAME">%1$s</xliff:g> က ပယ်ဖျက်လိုက်သည်"</string>
 </resources>

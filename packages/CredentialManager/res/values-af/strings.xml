@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Verbeterde rekeningsekuriteit"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Elke sleutel is uitsluitlik gekoppel aan die app of webwerf waarvoor dit geskep is, en daarom kan jy nooit per ongeluk by ’n bedrieglike app of webwerf aanmeld nie. En omdat bedieners net publieke sleutels hou, is kuberkrakery baie moeiliker."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Moeitevrye oorgang"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Wagwoorde sal steeds saam met wagwoordsleutels beskikbaar wees soos ons na ’n wagwoordlose toekoms beweeg."</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Wagwoorde sal steeds saam met wagwoordsleutels beskikbaar wees terwyl ons na ’n wagwoordlose toekoms beweeg."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Kies waar om jou <xliff:g id="CREATETYPES">%1$s</xliff:g> te stoor"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Kies ’n wagwoordbestuurder om jou inligting te stoor en volgende keer vinniger aan te meld"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Skep wagwoordsleutel vir <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -52,7 +52,8 @@
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Gebruik jou gestoorde wagwoordsleutel vir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Gebruik jou gestoorde aanmelding vir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Kies ’n gestoorde aanmelding vir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Kies ’n opsie vir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
     <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Meld op ’n ander manier aan"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Bekyk opsies"</string>
@@ -66,6 +67,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Bestuur aanmeldings"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Van ’n ander toestel af"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Gebruik ’n ander toestel"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Versoek is deur <xliff:g id="APP_NAME">%1$s</xliff:g> gekanselleer"</string>
 </resources>

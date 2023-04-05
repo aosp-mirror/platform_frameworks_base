@@ -22,6 +22,7 @@ import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
+import android.app.UidObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -168,7 +169,7 @@ public class OneTimePermissionUserManager {
 
         private final Object mInnerLock = new Object();
         private final Object mToken = new Object();
-        private final IUidObserver.Stub mObserver = new IUidObserver.Stub() {
+        private final IUidObserver mObserver = new UidObserver() {
             @Override
             public void onUidGone(int uid, boolean disabled) {
                 if (uid == mUid) {
@@ -187,15 +188,6 @@ public class OneTimePermissionUserManager {
                         PackageInactivityListener.this.updateUidState(STATE_ACTIVE);
                     }
                 }
-            }
-
-            public void onUidActive(int uid) {
-            }
-            public void onUidIdle(int uid, boolean disabled) {
-            }
-            public void onUidProcAdjChanged(int uid) {
-            }
-            public void onUidCachedChanged(int uid, boolean cached) {
             }
         };
 
