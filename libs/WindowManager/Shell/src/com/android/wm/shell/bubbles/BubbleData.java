@@ -334,6 +334,35 @@ public class BubbleData {
         dispatchPendingChanges();
     }
 
+    /**
+     * Sets the selected bubble and expands it, but doesn't dispatch changes
+     * to {@link BubbleData.Listener}. This is used for updates coming from launcher whose views
+     * will already be updated so we don't need to notify them again, but BubbleData should be
+     * updated to have the correct state.
+     */
+    public void setSelectedBubbleFromLauncher(BubbleViewProvider bubble) {
+        if (DEBUG_BUBBLE_DATA) {
+            Log.d(TAG, "setSelectedBubbleFromLauncher: " + bubble);
+        }
+        mExpanded = true;
+        if (Objects.equals(bubble, mSelectedBubble)) {
+            return;
+        }
+        boolean isOverflow = bubble != null && BubbleOverflow.KEY.equals(bubble.getKey());
+        if (bubble != null
+                && !mBubbles.contains(bubble)
+                && !mOverflowBubbles.contains(bubble)
+                && !isOverflow) {
+            Log.e(TAG, "Cannot select bubble which doesn't exist!"
+                    + " (" + bubble + ") bubbles=" + mBubbles);
+            return;
+        }
+        if (bubble != null && !isOverflow) {
+            ((Bubble) bubble).markAsAccessedAt(mTimeSource.currentTimeMillis());
+        }
+        mSelectedBubble = bubble;
+    }
+
     public void setSelectedBubble(BubbleViewProvider bubble) {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "setSelectedBubble: " + bubble);
