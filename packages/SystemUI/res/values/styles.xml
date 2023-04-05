@@ -377,6 +377,10 @@
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
+    <style name="Theme.SystemUI.ContrastDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
     <style name="Theme.SystemUI.QuickSettings.Dialog" parent="@android:style/Theme.DeviceDefault.Dialog">
         <item name="android:dialogCornerRadius">@dimen/notification_corner_radius</item>
     </style>
