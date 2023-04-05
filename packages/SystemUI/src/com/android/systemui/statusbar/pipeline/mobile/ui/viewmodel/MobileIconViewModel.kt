@@ -170,7 +170,10 @@ constructor(
                     if (networkTypeIconGroup.dataContentDescription != 0)
                         ContentDescription.Resource(networkTypeIconGroup.dataContentDescription)
                     else null
-                val icon = Icon.Resource(networkTypeIconGroup.dataType, desc)
+                val icon =
+                    if (networkTypeIconGroup.dataType != 0)
+                        Icon.Resource(networkTypeIconGroup.dataType, desc)
+                    else null
                 return@combine when {
                     !shouldShow -> null
                     else -> icon

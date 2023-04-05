@@ -20,6 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH_NONE
 import com.android.settingslib.mobile.TelephonyIcons.THREE_G
+import com.android.settingslib.mobile.TelephonyIcons.UNKNOWN
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -343,7 +344,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
     fun networkType_alwaysShow_shownEvenWhenDisabled() =
         testScope.runTest {
             interactor.setIconGroup(THREE_G)
-            interactor.setIsDataEnabled(true)
+            interactor.setIsDataEnabled(false)
             interactor.alwaysShowDataRatIcon.value = true
 
             var latest: Icon? = null
@@ -395,6 +396,21 @@ class MobileIconViewModelTest : SysuiTestCase() {
                     ContentDescription.Resource(THREE_G.dataContentDescription)
                 )
             assertThat(latest).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun networkType_alwaysShow_notShownWhenInvalidDataTypeIcon() =
+        testScope.runTest {
+            // The UNKNOWN icon group doesn't have a valid data type icon ID
+            interactor.setIconGroup(UNKNOWN)
+            interactor.alwaysShowDataRatIcon.value = true
+
+            var latest: Icon? = null
+            val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isNull()
 
             job.cancel()
         }
