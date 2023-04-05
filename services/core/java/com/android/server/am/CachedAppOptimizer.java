@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_FROZEN;
 import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_UNFROZEN;
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_COMPACTION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FREEZER;
@@ -27,12 +28,14 @@ import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ApplicationExitInfo;
+import android.app.IApplicationThread;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManagerInternal;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.provider.DeviceConfig;
@@ -1231,6 +1234,17 @@ public final class CachedAppOptimizer {
             return;
         }
 
+        if (mAm.mConstants.USE_MODERN_TRIM
+                && app.mState.getSetAdj() >= ProcessList.CACHED_APP_MIN_ADJ) {
+            final IApplicationThread thread = app.getThread();
+            if (thread != null) {
+                try {
+                    thread.scheduleTrimMemory(TRIM_MEMORY_BACKGROUND);
+                } catch (RemoteException e) {
+                    // do nothing
+                }
+            }
+        }
         mFreezeHandler.sendMessageDelayed(
                 mFreezeHandler.obtainMessage(
                     SET_FROZEN_PROCESS_MSG, DO_FREEZE, 0, app),
