@@ -198,6 +198,11 @@ public class MessagingImageMessage extends ImageView implements MessagingMessage
 
     @Override
     public int getMeasuredType() {
+        if (mDrawable == null) {
+            Log.e(TAG, "getMeasuredType() after recycle()!");
+            return MEASURED_NORMAL;
+        }
+
         int measuredHeight = getMeasuredHeight();
         int minImageHeight;
         if (mIsIsolated) {
