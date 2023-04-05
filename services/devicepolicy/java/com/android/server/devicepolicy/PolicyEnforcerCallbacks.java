@@ -73,7 +73,7 @@ final class PolicyEnforcerCallbacks {
         return Boolean.TRUE.equals(Binder.withCleanCallingIdentity(() -> {
             if (!(policyKey instanceof PackagePermissionPolicyKey)) {
                 throw new IllegalArgumentException("policyKey is not of type "
-                        + "PermissionGrantStatePolicyKey");
+                        + "PermissionGrantStatePolicyKey, passed in policyKey is: " + policyKey);
             }
             PackagePermissionPolicyKey parsedKey = (PackagePermissionPolicyKey) policyKey;
             Objects.requireNonNull(parsedKey.getPermissionName());
@@ -165,7 +165,7 @@ final class PolicyEnforcerCallbacks {
             try {
                 if (!(policyKey instanceof IntentFilterPolicyKey)) {
                     throw new IllegalArgumentException("policyKey is not of type "
-                            + "IntentFilterPolicyKey");
+                            + "IntentFilterPolicyKey, passed in policyKey is: " + policyKey);
                 }
                 IntentFilterPolicyKey parsedKey =
                         (IntentFilterPolicyKey) policyKey;
@@ -193,7 +193,7 @@ final class PolicyEnforcerCallbacks {
         return Boolean.TRUE.equals(Binder.withCleanCallingIdentity(() -> {
             if (!(policyKey instanceof PackagePolicyKey)) {
                 throw new IllegalArgumentException("policyKey is not of type "
-                        + "PackagePolicyKey");
+                        + "PackagePolicyKey, passed in policyKey is: " + policyKey);
             }
             PackagePolicyKey parsedKey = (PackagePolicyKey) policyKey;
             String packageName = Objects.requireNonNull(parsedKey.getPackageName());
@@ -211,7 +211,7 @@ final class PolicyEnforcerCallbacks {
         return Boolean.TRUE.equals(Binder.withCleanCallingIdentity(() -> {
             if (!(policyKey instanceof UserRestrictionPolicyKey)) {
                 throw new IllegalArgumentException("policyKey is not of type "
-                        + "UserRestrictionPolicyKey");
+                        + "UserRestrictionPolicyKey, passed in policyKey is: " + policyKey);
             }
             UserRestrictionPolicyKey parsedKey =
                     (UserRestrictionPolicyKey) policyKey;
@@ -219,6 +219,22 @@ final class PolicyEnforcerCallbacks {
             userManager.setUserRestriction(
                     userId, parsedKey.getRestriction(), enabled != null && enabled);
             return true;
+        }));
+    }
+
+    static boolean setApplicationHidden(
+            @Nullable Boolean hide, @NonNull Context context, int userId,
+            @NonNull PolicyKey policyKey) {
+        return Boolean.TRUE.equals(Binder.withCleanCallingIdentity(() -> {
+            if (!(policyKey instanceof PackagePolicyKey)) {
+                throw new IllegalArgumentException("policyKey is not of type "
+                        + "PackagePolicyKey, passed in policyKey is: " + policyKey);
+            }
+            PackagePolicyKey parsedKey = (PackagePolicyKey) policyKey;
+            String packageName = Objects.requireNonNull(parsedKey.getPackageName());
+            IPackageManager packageManager = AppGlobals.getPackageManager();
+            return packageManager.setApplicationHiddenSettingAsUser(
+                    packageName, hide != null && hide, userId);
         }));
     }
 }

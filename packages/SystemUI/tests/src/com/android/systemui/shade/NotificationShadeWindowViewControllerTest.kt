@@ -86,6 +86,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var notificationShadeDepthController: NotificationShadeDepthController
     @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
     @Mock private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
+    @Mock private lateinit var shadeController: ShadeController
     @Mock private lateinit var ambientState: AmbientState
     @Mock private lateinit var keyguardBouncerViewModel: KeyguardBouncerViewModel
     @Mock private lateinit var stackScrollLayoutController: NotificationStackScrollLayoutController
@@ -173,11 +174,13 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                         applicationContext = context,
                         applicationScope = testScope.backgroundScope,
                         multiShadeInteractor = multiShadeInteractor,
+                        featureFlags = featureFlags,
                         keyguardTransitionInteractor =
                             KeyguardTransitionInteractor(
                                 repository = FakeKeyguardTransitionRepository(),
                             ),
                         falsingManager = FalsingManagerFake(),
+                        shadeController = shadeController,
                     )
                 },
             )

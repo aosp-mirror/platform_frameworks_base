@@ -103,6 +103,7 @@ import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
@@ -286,6 +287,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected GoneToDreamingTransitionViewModel mGoneToDreamingTransitionViewModel;
 
     @Mock protected KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    @Mock protected MultiShadeInteractor mMultiShadeInteractor;
     @Mock protected KeyguardLongPressViewModel mKeyuardLongPressViewModel;
     @Mock protected AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock protected MotionEvent mDownMotionEvent;
@@ -570,6 +572,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mLockscreenToOccludedTransitionViewModel,
                 mMainDispatcher,
                 mKeyguardTransitionInteractor,
+                () -> mMultiShadeInteractor,
                 mDumpManager,
                 mKeyuardLongPressViewModel,
                 mKeyguardInteractor);

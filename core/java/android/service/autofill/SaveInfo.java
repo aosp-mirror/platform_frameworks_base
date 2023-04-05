@@ -334,6 +334,39 @@ public final class SaveInfo implements Parcelable {
     private final AutofillId[][] mSanitizerValues;
     private final AutofillId mTriggerId;
 
+    /**
+     * Creates a copy of the provided SaveInfo.
+     *
+     * @hide
+     */
+    public static SaveInfo copy(SaveInfo s, AutofillId[] optionalIds) {
+        return new SaveInfo(s.mType, s.mNegativeButtonStyle, s.mPositiveButtonStyle,
+                s.mNegativeActionListener, s.mRequiredIds, assertValid(optionalIds), s.mDescription,
+                s.mFlags, s.mCustomDescription, s.mValidator, s.mSanitizerKeys, s.mSanitizerValues,
+                s.mTriggerId);
+    }
+
+    private SaveInfo(@SaveDataType int type, @NegativeButtonStyle int negativeButtonStyle,
+            @PositiveButtonStyle int positiveButtonStyle, IntentSender negativeActionListener,
+            AutofillId[] requiredIds, AutofillId[] optionalIds, CharSequence description, int flags,
+            CustomDescription customDescription, InternalValidator validator,
+            InternalSanitizer[] sanitizerKeys, AutofillId[][] sanitizerValues,
+            AutofillId triggerId) {
+        mType = type;
+        mNegativeButtonStyle = negativeButtonStyle;
+        mNegativeActionListener = negativeActionListener;
+        mPositiveButtonStyle = positiveButtonStyle;
+        mRequiredIds = requiredIds;
+        mOptionalIds = optionalIds;
+        mDescription = description;
+        mFlags = flags;
+        mCustomDescription = customDescription;
+        mValidator = validator;
+        mSanitizerKeys = sanitizerKeys;
+        mSanitizerValues = sanitizerValues;
+        mTriggerId = triggerId;
+    }
+
     private SaveInfo(Builder builder) {
         mType = builder.mType;
         mNegativeButtonStyle = builder.mNegativeButtonStyle;

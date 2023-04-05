@@ -32,17 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ප්‍රතිප්‍රමාණ කරන්න"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"සඟවා තබන්න"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"සඟවා තැබීම ඉවත් කරන්න"</string>
-    <!-- no translation found for dock_forced_resizable (7429086980048964687) -->
-    <skip />
-    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (2733543750291266047) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"යෙදුම බෙදීම් තිරය සමග ක්‍රියා නොකළ හැක"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"යෙදුම බෙදුම් තිරයට සහාය නොදක්වයි"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"මෙම යෙදුම විවෘත කළ හැක්කේ 1 කවුළුවක පමණයි."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"යෙදුම ද්විතියික සංදර්ශකයක ක්‍රියා නොකළ හැකිය."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"යෙදුම ද්විතීයික සංදර්ශක මත දියත් කිරීම සඳහා සහාය නොදක්වයි."</string>
-    <!-- no translation found for accessibility_divider (6407584574218956849) -->
-    <skip />
-    <!-- no translation found for divider_title (1963391955593749442) -->
-    <skip />
+    <string name="accessibility_divider" msgid="6407584574218956849">"බෙදුම් තිර වෙන්කරණය"</string>
+    <string name="divider_title" msgid="1963391955593749442">"බෙදුම් තිර වෙන්කරණය"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"වම් පූර්ණ තිරය"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"වම් 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"වම් 50%"</string>
@@ -89,8 +85,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"එය විසඳුවේ නැතිද?\nප්‍රතිවර්තනය කිරීමට තට්ටු කරන්න"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"කැමරා ගැටලු නොමැතිද? ඉවත දැමීමට තට්ටු කරන්න"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"බලන්න සහ තවත් දේ කරන්න"</string>
-    <!-- no translation found for letterbox_education_split_screen_text (449233070804658627) -->
-    <skip />
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"බෙදුම් තිරය සඳහා වෙනත් යෙදුමකට අදින්න"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"යෙදුමක් නැවත ස්ථානගත කිරීමට පිටතින් දෙවරක් තට්ටු කරන්න"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"තේරුණා"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"වැඩිදුර තොරතුරු සඳහා දිග හරින්න"</string>
@@ -99,8 +94,7 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"අවලංගු කරන්න"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"යළි අරඹන්න"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"නැවත නොපෙන්වන්න"</string>
-    <!-- no translation found for letterbox_reachability_reposition_text (4507890186297500893) -->
-    <skip />
+    <string name="letterbox_reachability_reposition_text" msgid="4507890186297500893">"මෙම යෙදුම ගෙන යාමට දෙවරක් තට්ටු කරන්න"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"විහිදන්න"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"කුඩා කරන්න"</string>
     <string name="close_button_text" msgid="2913281996024033299">"වසන්න"</string>
@@ -116,4 +110,6 @@
     <string name="screenshot_text" msgid="1477704010087786671">"තිර රුව"</string>
     <string name="close_text" msgid="4986518933445178928">"වසන්න"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"මෙනුව වසන්න"</string>
+    <!-- no translation found for expand_menu_text (3847736164494181168) -->
+    <skip />
 </resources>

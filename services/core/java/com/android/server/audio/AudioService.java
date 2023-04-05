@@ -51,6 +51,7 @@ import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.IUidObserver;
 import android.app.NotificationManager;
+import android.app.UidObserver;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
 import android.bluetooth.BluetoothAdapter;
@@ -959,27 +960,14 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    final private IUidObserver mUidObserver = new IUidObserver.Stub() {
-        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
-            int capability) {
-        }
-
+    final private IUidObserver mUidObserver = new UidObserver() {
         @Override public void onUidGone(int uid, boolean disabled) {
             // Once the uid is no longer running, no need to keep trying to disable its audio.
             disableAudioForUid(false, uid);
         }
 
-        @Override public void onUidActive(int uid) throws RemoteException {
-        }
-
-        @Override public void onUidIdle(int uid, boolean disabled) {
-        }
-
         @Override public void onUidCachedChanged(int uid, boolean cached) {
             disableAudioForUid(cached, uid);
-        }
-
-        @Override public void onUidProcAdjChanged(int uid) {
         }
 
         private void disableAudioForUid(boolean disable, int uid) {
@@ -7545,6 +7533,7 @@ public class AudioService extends IAudioService.Stub
         DEVICE_MEDIA_UNMUTED_ON_PLUG_SET.add(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
         DEVICE_MEDIA_UNMUTED_ON_PLUG_SET.add(AudioSystem.DEVICE_OUT_LINE);
         DEVICE_MEDIA_UNMUTED_ON_PLUG_SET.addAll(AudioSystem.DEVICE_OUT_ALL_A2DP_SET);
+        DEVICE_MEDIA_UNMUTED_ON_PLUG_SET.addAll(AudioSystem.DEVICE_OUT_ALL_BLE_SET);
         DEVICE_MEDIA_UNMUTED_ON_PLUG_SET.addAll(AudioSystem.DEVICE_OUT_ALL_USB_SET);
         DEVICE_MEDIA_UNMUTED_ON_PLUG_SET.add(AudioSystem.DEVICE_OUT_HDMI);
     }

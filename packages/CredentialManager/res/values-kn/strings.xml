@@ -20,8 +20,8 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"ಸುಧಾರಿತ ಖಾತೆಯ ಭದ್ರತೆ"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"ಪ್ರತಿಯೊಂದು ಕೀಯನ್ನು ಯಾವ ಆ್ಯಪ್ ಅಥವಾ ವೆಬ್‌ಸೈಟ್‌ಗಾಗಿ ರಚಿಸಲಾಗಿದೆಯೋ ಅದರೊಂದಿಗೆ ಮಾತ್ರ ಲಿಂಕ್ ಮಾಡಲಾಗುತ್ತದೆ. ಆದ್ದರಿಂದ ನೀವು ಎಂದಿಗೂ ತಪ್ಪಾಗಿ ವಂಚನೆಯ ಆ್ಯಪ್ ಅಥವಾ ವೆಬ್‌ಸೈಟ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಜೊತೆಗೆ, ಸರ್ವರ್‌ಗಳು ಸಾರ್ವಜನಿಕ ಕೀಗಳನ್ನು ಮಾತ್ರ ಇಟ್ಟುಕೊಳ್ಳುವುದರಿಂದ, ಹ್ಯಾಕಿಂಗ್ ಮಾಡುವುದು ತುಂಬಾ ಕಷ್ಟಕರವಾಗಿದೆ."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"ಅಡಚಣೆರಹಿತ ಪರಿವರ್ತನೆ"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"ನಾವು ಪಾಸ್‌ವರ್ಡ್ ರಹಿತ ಭವಿಷ್ಯದತ್ತ ಸಾಗುತ್ತಿರುವಾಗ, ಪಾಸ್‌ಕೀಗಳ ಜೊತೆಗೆ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಇನ್ನೂ ಲಭ್ಯವಿರುತ್ತವೆ"</string>
-    <string name="choose_provider_title" msgid="8870795677024868108">"ನಿಮ್ಮ <xliff:g id="CREATETYPES">%1$s</xliff:g> ಅನ್ನು ಎಲ್ಲಿ ಉಳಿಸಬೇಕು ಎಂದು ಆರಿಸಿ"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"ನಾವು ಪಾಸ್‌ವರ್ಡ್ ರಹಿತ ತಂತ್ರಜ್ಞಾನದ ಕಡೆಗೆ ಸಾಗುತ್ತಿರುವಾಗ, ಪಾಸ್‌ಕೀಗಳ ಜೊತೆಗೆ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಇನ್ನೂ ಲಭ್ಯವಿರುತ್ತವೆ."</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"ನಿಮ್ಮ <xliff:g id="CREATETYPES">%1$s</xliff:g> ಎಲ್ಲಿ ಸೇವ್‌ ಆಗಬೇಕು ಎಂಬುದನ್ನು ಆರಿಸಿ"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ನಿಮ್ಮ ಮಾಹಿತಿಯನ್ನು ಉಳಿಸಲು ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕವನ್ನು ಆಯ್ಕೆಮಾಡಿ ಹಾಗೂ ಮುಂದಿನ ಬಾರಿ ವೇಗವಾಗಿ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> ಗಾಗಿ ಪಾಸ್‌ಕೀ ಅನ್ನು ರಚಿಸುವುದೇ?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> ಗಾಗಿ ಪಾಸ್‌ವರ್ಡ್‌ ಉಳಿಸುವುದೇ?"</string>
@@ -54,6 +54,8 @@
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ಸೈನ್-ಇನ್ ಮಾಹಿತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
     <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ಬೇರೆ ವಿಧಾನದಲ್ಲಿ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
     <string name="snackbar_action" msgid="37373514216505085">"ಆಯ್ಕೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ಮುಂದುವರಿಸಿ"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"ಸೈನ್-ಇನ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"ಮತ್ತೊಂದು ಸಾಧನದಿಂದ"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"ಬೇರೆ ಸಾಧನವನ್ನು ಬಳಸಿ"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನಿಂದ ವಿನಂತಿಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ"</string>
 </resources>

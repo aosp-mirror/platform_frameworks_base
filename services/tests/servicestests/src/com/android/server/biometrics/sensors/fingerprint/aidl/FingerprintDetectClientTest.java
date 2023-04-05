@@ -55,6 +55,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.function.Consumer;
+
 @Presubmit
 @SmallTest
 public class FingerprintDetectClientTest {
@@ -83,6 +85,8 @@ public class FingerprintDetectClientTest {
     private Sensor.HalSessionCallback mHalSessionCallback;
     @Captor
     private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
+    @Captor
+    private ArgumentCaptor<Consumer<OperationContext>> mContextInjector;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -119,6 +123,32 @@ public class FingerprintDetectClientTest {
                 .isEqualTo(AuthenticateReason.Fingerprint.UNKNOWN);
 
         verify(mHal, never()).detectInteraction();
+    }
+
+    @Test
+    public void notifyHalWhenContextChanges() throws RemoteException {
+        final FingerprintDetectClient client = createClient();
+        client.start(mCallback);
+
+        final ArgumentCaptor<OperationContext> captor =
+                ArgumentCaptor.forClass(OperationContext.class);
+        verify(mHal).detectInteractionWithContext(captor.capture());
+        OperationContext opContext = captor.getValue();
+
+        // fake an update to the context
+        verify(mBiometricContext).subscribe(
+                mOperationContextCaptor.capture(), mContextInjector.capture());
+        assertThat(opContext).isSameInstanceAs(
+                mOperationContextCaptor.getValue().toAidlContext());
+        mContextInjector.getValue().accept(opContext);
+        verify(mHal).onContextChanged(same(opContext));
+
+        client.stopHalOperation();
+        verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
+    }
+
+    private FingerprintDetectClient createClient() throws RemoteException {
+        return createClient(200 /* version */);
     }
 
     private FingerprintDetectClient createClient(int version) throws RemoteException {

@@ -2,7 +2,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"Menú de accesibilidade"</string>
-    <string name="accessibility_menu_intro" msgid="3164193281544042394">"O menú de accesibilidade é un panel grande que aparece na pantalla co que podes controlar o dispositivo. Permíteche realizar varias accións, entre elas, bloquear o dispositivo, controlar o volume, axustar o brillo e facer capturas de pantalla."</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"O menú de accesibilidade é un panel grande que aparece na pantalla co que podes controlar o dispositivo. Permíteche realizar varias accións, como bloquear o dispositivo, controlar o volume, axustar o brillo e facer capturas de pantalla."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Asistente"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Asistente"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"Accesibilidade (configuración)"</string>
@@ -22,7 +22,7 @@
     <string name="next_button_content_description" msgid="6810058269847364406">"Ir á seguinte pantalla"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"O menú de accesibilidade é un panel grande que aparece na pantalla e permite controlar o dispositivo. Permíteche realizar varias accións, como bloquear o dispositivo, controlar o volume, axustar o brillo e facer capturas de pantalla."</string>
     <string name="accessibility_menu_summary" msgid="340071398148208130">"Controla o dispositivo a través dun menú grande"</string>
-    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Configuración do menú de accesibilidade"</string>
+    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Axustes do menú de accesibilidade"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Botóns grandes"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Aumenta o tamaño dos botóns do menú de accesibilidade"</string>
     <string name="pref_help_title" msgid="6871558837025010641">"Axuda"</string>

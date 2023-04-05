@@ -5,14 +5,14 @@
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"Хандалтын цэс нь танд төхөөрөмжөө том дэлгэцийн цэсээр хянах боломжийг олгоно. Та төхөөрөмжөө түгжих, дууны түвшин болон гэрэлтүүлгийг хянах, дэлгэцийн агшин авах болон бусад үйлдлийг хийж болно."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Туслах"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Туслах"</string>
-    <string name="a11y_settings_label" msgid="3977714687248445050">"Хүртээмжийн тохиргоо"</string>
+    <string name="a11y_settings_label" msgid="3977714687248445050">"Хандалтын тохиргоо"</string>
     <string name="power_label" msgid="7699720321491287839">"Асаах/унтраах"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Асаах/унтраах сонголт"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Саяхны апп"</string>
     <string name="lockscreen_label" msgid="648347953557887087">"Түгжигдсэн дэлгэц"</string>
     <string name="quick_settings_label" msgid="2999117381487601865">"Шуурхай тохиргоо"</string>
     <string name="notifications_label" msgid="6829741046963013567">"Мэдэгдэл"</string>
-    <string name="screenshot_label" msgid="863978141223970162">"Дэлгэцний зургийг дарах"</string>
+    <string name="screenshot_label" msgid="863978141223970162">"Дэлгэцийн агшин"</string>
     <string name="screenshot_utterance" msgid="1430760563401895074">"Дэлгэцний зургийг дарах"</string>
     <string name="volume_up_label" msgid="8592766918780362870">"Дууны түвшнийг нэмэх"</string>
     <string name="volume_down_label" msgid="8574981863656447346">"Дууны түвшнийг багасгах"</string>

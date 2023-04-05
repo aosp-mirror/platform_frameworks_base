@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Seguretat dels comptes millorada"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Cada clau està exclusivament enllaçada a l\'aplicació o al lloc web per als quals s\'ha creat. D\'aquesta manera, mai iniciaràs la sessió en una aplicació o un lloc web fraudulents per error. A més, com que els servidors només conserven les claus públiques, el hacking és molt més difícil."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Transició fluida"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Tot i que avancem cap a un futur sense contrasenyes, continuaran estant disponibles juntament amb les claus d\'accés."</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Tot i que avancem cap a un futur sense contrasenyes, continuaran estant disponibles juntament amb les claus d\'accés."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Tria on vols desar les <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecciona un gestor de contrasenyes per desar la teva informació i iniciar la sessió més ràpidament la pròxima vegada"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vols crear la clau d\'accés per a <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -54,6 +54,8 @@
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Tria un inici de sessió desat per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
     <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Inicia la sessió d\'una altra manera"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Mostra les opcions"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Continua"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Gestiona els inicis de sessió"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Des d\'un altre dispositiu"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Utilitza un dispositiu diferent"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> ha cancel·lat la sol·licitud"</string>
 </resources>

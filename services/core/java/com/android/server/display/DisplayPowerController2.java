@@ -1206,14 +1206,15 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // actual state instead of the desired one.
         animateScreenStateChange(state, mDisplayStateController.shouldPerformScreenOffTransition());
         state = mPowerState.getScreenState();
+        final boolean userSetBrightnessChanged = mDisplayBrightnessController
+                .updateUserSetScreenBrightness();
 
         DisplayBrightnessState displayBrightnessState = mDisplayBrightnessController
                 .updateBrightness(mPowerRequest, state);
         float brightnessState = displayBrightnessState.getBrightness();
         float rawBrightnessState = displayBrightnessState.getBrightness();
         mBrightnessReasonTemp.set(displayBrightnessState.getBrightnessReason());
-        final boolean userSetBrightnessChanged = mDisplayBrightnessController
-                .updateUserSetScreenBrightness();
+
         // Take note if the short term model was already active before applying the current
         // request changes.
         final boolean wasShortTermModelActive =

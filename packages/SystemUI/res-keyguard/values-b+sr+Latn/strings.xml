@@ -21,8 +21,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Unesite PIN"</string>
+    <!-- no translation found for keyguard_enter_pin (8114529922480276834) -->
+    <skip />
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Unesite šablon"</string>
+    <!-- no translation found for keyguard_enter_pattern (7616595160901084119) -->
+    <skip />
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Unesite lozinku"</string>
+    <!-- no translation found for keyguard_enter_password (6483623792371009758) -->
+    <skip />
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Nevažeća kartica."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Napunjena je"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bežično punjenje"</string>
@@ -52,8 +58,68 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"eSIM ne može da se onemogući zbog greške."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Enter"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Pogrešan šablon"</string>
+    <!-- no translation found for kg_wrong_pattern_try_again (3603524940234151881) -->
+    <skip />
     <string name="kg_wrong_password" msgid="4143127991071670512">"Pogrešna lozinka"</string>
+    <!-- no translation found for kg_wrong_password_try_again (6602878676125765920) -->
+    <skip />
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Pogrešan PIN"</string>
+    <!-- no translation found for kg_wrong_pin_try_again (3129729383303430190) -->
+    <skip />
+    <!-- no translation found for kg_wrong_input_try_fp_suggestion (3143861542242024833) -->
+    <skip />
+    <!-- no translation found for kg_fp_not_recognized (5183108260932029241) -->
+    <skip />
+    <!-- no translation found for bouncer_face_not_recognized (1666128054475597485) -->
+    <skip />
+    <!-- no translation found for kg_bio_try_again_or_pin (4752168242723808390) -->
+    <skip />
+    <!-- no translation found for kg_bio_try_again_or_password (1473132729225398039) -->
+    <skip />
+    <!-- no translation found for kg_bio_try_again_or_pattern (4867893307468801501) -->
+    <skip />
+    <!-- no translation found for kg_bio_too_many_attempts_pin (5850845723433047605) -->
+    <skip />
+    <!-- no translation found for kg_bio_too_many_attempts_password (5551690347827728042) -->
+    <skip />
+    <!-- no translation found for kg_bio_too_many_attempts_pattern (736884689355181602) -->
+    <skip />
+    <!-- no translation found for kg_unlock_with_pin_or_fp (5635161174698729890) -->
+    <skip />
+    <!-- no translation found for kg_unlock_with_password_or_fp (2251295907826814237) -->
+    <skip />
+    <!-- no translation found for kg_unlock_with_pattern_or_fp (2391870539909135046) -->
+    <skip />
+    <!-- no translation found for kg_prompt_after_dpm_lock (6002804765868345917) -->
+    <skip />
+    <!-- no translation found for kg_prompt_after_user_lockdown_pin (5374732179740050373) -->
+    <skip />
+    <!-- no translation found for kg_prompt_after_user_lockdown_password (9097968458291129795) -->
+    <skip />
+    <!-- no translation found for kg_prompt_after_user_lockdown_pattern (215072203613597906) -->
+    <skip />
+    <!-- no translation found for kg_prompt_unattended_update (8223448855578632202) -->
+    <skip />
+    <!-- no translation found for kg_prompt_pin_auth_timeout (5868644725126275245) -->
+    <skip />
+    <!-- no translation found for kg_prompt_password_auth_timeout (5809110458491920871) -->
+    <skip />
+    <!-- no translation found for kg_prompt_pattern_auth_timeout (1860605401869262178) -->
+    <skip />
+    <!-- no translation found for kg_prompt_auth_timeout (6620679830980315048) -->
+    <skip />
+    <!-- no translation found for kg_face_locked_out (2751559491287575) -->
+    <skip />
+    <!-- no translation found for kg_fp_locked_out (6228277682396768830) -->
+    <skip />
+    <!-- no translation found for kg_trust_agent_disabled (5400691179958727891) -->
+    <skip />
+    <!-- no translation found for kg_primary_auth_locked_out_pin (5492230176361601475) -->
+    <skip />
+    <!-- no translation found for kg_primary_auth_locked_out_pattern (8266214607346180952) -->
+    <skip />
+    <!-- no translation found for kg_primary_auth_locked_out_password (6170245108400198659) -->
+    <skip />
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Probajte ponovo za # sekundu.}one{Probajte ponovo za # sekundu.}few{Probajte ponovo za # sekunde.}other{Probajte ponovo za # sekundi.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Unesite PIN za SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Unesite PIN za SIM „<xliff:g id="CARRIER">%1$s</xliff:g>“."</string>
@@ -76,9 +142,12 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Radnja sa PUK kodom za SIM nije uspela!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Promeni metod unosa"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Režim rada u avionu"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Treba da unesete šablon kada se uređaj ponovo pokrene"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Treba da unesete PIN kada se uređaj ponovo pokrene"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Treba da unesete lozinku kada se uređaj ponovo pokrene"</string>
+    <!-- no translation found for kg_prompt_reason_restart_pattern (3321211830602827742) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_restart_pin (2672166323886110512) -->
+    <skip />
+    <!-- no translation found for kg_prompt_reason_restart_password (3967993994418885887) -->
+    <skip />
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Za dodatnu bezbednost koristite šablon"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Za dodatnu bezbednost koristite PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Za dodatnu bezbednost koristite lozinku"</string>

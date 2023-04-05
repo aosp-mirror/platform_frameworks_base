@@ -800,10 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Membenarkan pemegang mula melihat maklumat ciri untuk apl."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"akses data penderia pada data pensampelan yang tinggi"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Membenarkan apl mengambil sampel data penderia pada kadar yang lebih besar daripada 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"kemas kinikan apl tanpa tindakan pengguna"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Benarkan pemegang untuk mengemaskinikan apl yang telah dipasang sebelumnya tanpa tindakan pengguna"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Tetapkan peraturan kata laluan"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Mengawal panjang dan aksara yang dibenarkan dalam kata laluan  dan PIN kunci skrin."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Pantau percubaan buka kunci skrin"</string>
@@ -1706,7 +1704,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengawal skrin"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ciri ini boleh membaca semua kandungan pada skrin dan memaparkan kandungan di atas apl lain."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Lihat dan laksanakan tindakan"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ciri ini boleh menjejak interaksi anda dengan apl atau penderia perkakasan dan berinteraksi dengan apl bagi pihak anda."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ciri ini boleh menjejaki interaksi anda dengan apl atau penderia perkakasan dan berinteraksi dengan apl bagi pihak anda."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Benarkan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketik ciri untuk mula menggunakan ciri itu:"</string>

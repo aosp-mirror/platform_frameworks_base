@@ -19,8 +19,8 @@ package com.android.server.power.hint;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.IUidObserver;
 import android.app.StatsManager;
+import android.app.UidObserver;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -69,7 +69,7 @@ public final class HintManagerService extends SystemService {
     /** Lock to protect HAL handles and listen list. */
     private final Object mLock = new Object();
 
-    @VisibleForTesting final UidObserver mUidObserver;
+    @VisibleForTesting final MyUidObserver mUidObserver;
 
     private final NativeWrapper mNativeWrapper;
 
@@ -94,7 +94,7 @@ public final class HintManagerService extends SystemService {
         mNativeWrapper = injector.createNativeWrapper();
         mNativeWrapper.halInit();
         mHintSessionPreferredRate = mNativeWrapper.halGetHintSessionPreferredRate();
-        mUidObserver = new UidObserver();
+        mUidObserver = new MyUidObserver();
         mAmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityManagerInternal.class));
     }
@@ -246,7 +246,7 @@ public final class HintManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    final class UidObserver extends IUidObserver.Stub {
+    final class MyUidObserver extends UidObserver {
         private final SparseArray<Integer> mProcStatesCache = new SparseArray<>();
 
         public boolean isUidForeground(int uid) {
@@ -276,14 +276,6 @@ public final class HintManagerService extends SystemService {
             });
         }
 
-        @Override
-        public void onUidActive(int uid) {
-        }
-
-        @Override
-        public void onUidIdle(int uid, boolean disabled) {
-        }
-
         /**
          * The IUidObserver callback is called from the system_server, so it'll be a direct function
          * call from ActivityManagerService. Do not do heavy logic here.
@@ -304,14 +296,6 @@ public final class HintManagerService extends SystemService {
                     }
                 }
             });
-        }
-
-        @Override
-        public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override
-        public void onUidProcAdjChanged(int uid) {
         }
     }
 

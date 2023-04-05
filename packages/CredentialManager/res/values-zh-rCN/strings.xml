@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"提升了帐号安全性"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"每个密钥都是专为特定应用或网站创建的，且仅与各自对应的网站或应用关联，因此您绝不会错误地登录任何欺诈性应用或网站。另外，由于服务器只保留公钥，黑客入侵的难度会大大增加。"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"无缝转换"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"我们正在迈向一个无密码的未来，但在此过程中，密码仍会与通行密钥并存"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"在我们向无密码未来迈进的过程中，密码仍会与通行密钥并行使用。"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"选择保存<xliff:g id="CREATETYPES">%1$s</xliff:g>的位置"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"请选择一款密码管理工具来保存您的信息，以便下次更快地登录"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"要为“<xliff:g id="APPNAME">%1$s</xliff:g>”创建通行密钥吗？"</string>
@@ -54,6 +54,8 @@
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"为<xliff:g id="APP_NAME">%1$s</xliff:g>选择已保存的登录信息"</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
     <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"使用其他登录方式"</string>
     <string name="snackbar_action" msgid="37373514216505085">"查看选项"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"继续"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"管理登录信息"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"通过另一台设备"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"使用其他设备"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g>已取消请求"</string>
 </resources>

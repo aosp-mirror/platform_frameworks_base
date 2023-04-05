@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"ਬਿਹਤਰ ਖਾਤਾ ਸੁਰੱਖਿਆ"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"ਹਰੇਕ ਕੁੰਜੀ ਖਾਸ ਤੌਰ \'ਤੇ ਉਸ ਐਪ ਜਾਂ ਵੈੱਬਸਾਈਟ ਨਾਲ ਲਿੰਕ ਹੁੰਦੀ ਹੈ ਜਿਸ ਲਈ ਉਹ ਬਣਾਈ ਗਈ ਸੀ, ਇਸ ਲਈ ਤੁਸੀਂ ਕਦੇ ਵੀ ਗਲਤੀ ਨਾਲ ਕਿਸੇ ਧੋਖਾਧੜੀ ਵਾਲੀ ਐਪ ਜਾਂ ਵੈੱਬਸਾਈਟ \'ਤੇ ਸਾਈਨ-ਇਨ ਨਹੀਂ ਕਰ ਸਕਦੇ। ਇਸ ਤੋਂ ਇਲਾਵਾ, ਸਿਰਫ਼ ਜਨਤਕ ਕੁੰਜੀਆਂ ਵਾਲੇ ਸਰਵਰਾਂ \'ਤੇ, ਹੈਕਿੰਗ ਕਰਨਾ ਬਹੁਤ ਔਖਾ ਹੁੰਦਾ ਹੈ।"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"ਸਹਿਜ ਪਰਿਵਰਤਨ"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"ਜਿਵੇਂ ਕਿ ਅਸੀਂ ਪਾਸਵਰਡ-ਰਹਿਤ ਭਵਿੱਖ ਵੱਲ ਵਧ ਰਹੇ ਹਾਂ, ਪਰ ਪਾਸਕੀਆਂ ਦੇ ਨਾਲ ਪਾਸਵਰਡ ਹਾਲੇ ਵੀ ਉਪਲਬਧ ਹੋਣਗੇ"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"ਹਾਲਾਂਕਿ, ਅਸੀਂ ਪਾਸਵਰਡ ਰਹਿਤ ਭਵਿੱਖ ਵੱਲ ਵਧ ਰਹੇ ਹਾਂ, ਪਰ ਪਾਸਕੀਆਂ ਦੇ ਨਾਲ ਪਾਸਵਰਡ ਹਾਲੇ ਵੀ ਉਪਲਬਧ ਹੋਣਗੇ।"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"ਚੁਣੋ ਕਿ ਆਪਣੀਆਂ <xliff:g id="CREATETYPES">%1$s</xliff:g> ਨੂੰ ਕਿੱਥੇ ਰੱਖਿਅਤ ਕਰਨਾ ਹੈ"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ਆਪਣੀ ਜਾਣਕਾਰੀ ਨੂੰ ਰੱਖਿਅਤ ਕਰਨ ਅਤੇ ਅਗਲੀ ਵਾਰ ਤੇਜ਼ੀ ਨਾਲ ਸਾਈਨ-ਇਨ ਕਰਨ ਲਈ ਪਾਸਵਰਡ ਪ੍ਰਬੰਧਕ ਚੁਣੋ"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"ਕੀ <xliff:g id="APPNAME">%1$s</xliff:g> ਲਈ ਪਾਸਕੀ ਬਣਾਉਣੀ ਹੈ?"</string>
@@ -54,6 +54,8 @@
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਰੱਖਿਅਤ ਕੀਤੀ ਸਾਈਨ-ਇਨ ਜਾਣਕਾਰੀ ਚੁਣੋ"</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
     <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ਕਿਸੇ ਹੋਰ ਤਰੀਕੇ ਨਾਲ ਸਾਈਨ-ਇਨ ਕਰੋ"</string>
     <string name="snackbar_action" msgid="37373514216505085">"ਵਿਕਲਪ ਦੇਖੋ"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ਜਾਰੀ ਰੱਖੋ"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"ਸਾਈਨ-ਇਨਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"ਹੋਰ ਡੀਵਾਈਸ ਤੋਂ"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"ਵੱਖਰੇ ਡੀਵਾਈਸ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਵੱਲੋਂ ਬੇਨਤੀ ਰੱਦ ਕੀਤੀ ਗਈ"</string>
 </resources>
