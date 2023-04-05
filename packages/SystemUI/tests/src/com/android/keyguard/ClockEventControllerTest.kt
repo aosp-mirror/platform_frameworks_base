@@ -32,6 +32,7 @@ import com.android.systemui.plugins.ClockAnimations
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockEvents
 import com.android.systemui.plugins.ClockFaceController
+import com.android.systemui.plugins.ClockFaceConfig
 import com.android.systemui.plugins.ClockFaceEvents
 import com.android.systemui.plugins.ClockTickRate
 import com.android.systemui.plugins.log.LogBuffer
@@ -101,8 +102,10 @@ class ClockEventControllerTest : SysuiTestCase() {
         whenever(largeClockController.events).thenReturn(largeClockEvents)
         whenever(clock.events).thenReturn(events)
         whenever(clock.animations).thenReturn(animations)
-        whenever(smallClockEvents.tickRate).thenReturn(ClockTickRate.PER_MINUTE)
-        whenever(largeClockEvents.tickRate).thenReturn(ClockTickRate.PER_MINUTE)
+        whenever(smallClockController.config)
+            .thenReturn(ClockFaceConfig(tickRate = ClockTickRate.PER_MINUTE))
+        whenever(largeClockController.config)
+            .thenReturn(ClockFaceConfig(tickRate = ClockTickRate.PER_MINUTE))
 
         repository = FakeKeyguardRepository()
         bouncerRepository = FakeKeyguardBouncerRepository()
