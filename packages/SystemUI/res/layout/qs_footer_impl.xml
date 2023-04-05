@@ -53,6 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
+                android:tint="?attr/shadeActive"
                 android:visibility="gone" />
 
             <FrameLayout
@@ -70,7 +71,7 @@
                     android:focusable="true"
                     android:padding="@dimen/qs_footer_icon_padding"
                     android:src="@*android:drawable/ic_mode_edit"
-                    android:tint="?android:attr/textColorPrimary" />
+                    android:tint="?attr/onSurfaceVariant" />
             </FrameLayout>
 
         </LinearLayout>
