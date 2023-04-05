@@ -951,11 +951,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mBubblesOptional.ifPresent(this::initBubbles);
 
-        // Do not restart System UI when the bugreport flag changes.
-        mFeatureFlags.addListener(Flags.LEAVE_SHADE_OPEN_FOR_BUGREPORT, event -> {
-            event.requestNoRestart();
-        });
-
         mStatusBarSignalPolicy.init();
         mKeyguardIndicationController.init();
 
@@ -3499,13 +3494,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
         if (mPanelExpanded && mState == StatusBarState.SHADE) {
             mShadeController.animateCollapseShade();
-        }
-    }
-
-    @Override
-    public void collapseShadeForBugreport() {
-        if (!mFeatureFlags.isEnabled(Flags.LEAVE_SHADE_OPEN_FOR_BUGREPORT)) {
-            collapseShade();
         }
     }
 

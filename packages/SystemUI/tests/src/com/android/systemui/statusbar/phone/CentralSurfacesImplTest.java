@@ -1206,34 +1206,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void collapseShadeForBugReport_callsanimateCollapseShade_whenFlagDisabled() {
-        // GIVEN the shade is expanded & flag enabled
-        mCentralSurfaces.onShadeExpansionFullyChanged(true);
-        mCentralSurfaces.setBarStateForTest(SHADE);
-        mFeatureFlags.set(Flags.LEAVE_SHADE_OPEN_FOR_BUGREPORT, false);
-
-        // WHEN collapseShadeForBugreport is called
-        mCentralSurfaces.collapseShadeForBugreport();
-
-        // VERIFY that animateCollapseShade is called
-        verify(mShadeController).animateCollapseShade();
-    }
-
-    @Test
-    public void collapseShadeForBugReport_doesNotCallanimateCollapseShade_whenFlagEnabled() {
-        // GIVEN the shade is expanded & flag enabled
-        mCentralSurfaces.onShadeExpansionFullyChanged(true);
-        mCentralSurfaces.setBarStateForTest(SHADE);
-        mFeatureFlags.set(Flags.LEAVE_SHADE_OPEN_FOR_BUGREPORT, true);
-
-        // WHEN collapseShadeForBugreport is called
-        mCentralSurfaces.collapseShadeForBugreport();
-
-        // VERIFY that animateCollapseShade is called
-        verify(mShadeController, never()).animateCollapseShade();
-    }
-
-    @Test
     public void deviceStateChange_unfolded_shadeOpen_setsLeaveOpenOnKeyguardHide() {
         setFoldedStates(FOLD_STATE_FOLDED);
         setGoToSleepStates(FOLD_STATE_FOLDED);
