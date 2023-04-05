@@ -338,7 +338,8 @@ class RecentTasks {
         synchronized (mService.mGlobalLock) {
             final Task focusedStack = mService.getTopDisplayFocusedRootTask();
             final Task topTask = focusedStack != null ? focusedStack.getTopMostTask() : null;
-            resetFreezeTaskListReordering(topTask);
+            final Task reorderToEndTask = topTask != null && topTask.hasChild() ? topTask : null;
+            resetFreezeTaskListReordering(reorderToEndTask);
         }
     }
 
