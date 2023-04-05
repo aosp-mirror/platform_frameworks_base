@@ -55,6 +55,10 @@ cc_defaults {
         // GCC false-positives on this warning, and since we -Werror that's
         // a problem
         "-Wno-free-nonheap-object",
+
+        // Do not de-optimise cold code paths in AFDO.
+        // Some code paths might be infrequently executed but critical to latency.
+        "-fno-profile-sample-accurate",
     ],
 
     include_dirs: [
