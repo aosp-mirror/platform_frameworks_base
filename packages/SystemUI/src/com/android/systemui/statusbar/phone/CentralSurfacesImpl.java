@@ -1590,12 +1590,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      * Ask the display to wake up if currently dozing, else do nothing
      *
      * @param time when to wake up
-     * @param where the view requesting the wakeup
      * @param why the reason for the wake up
      */
     @Override
-    public void wakeUpIfDozing(long time, View where, String why,
-            @PowerManager.WakeReason int wakeReason) {
+    public void wakeUpIfDozing(long time, String why, @PowerManager.WakeReason int wakeReason) {
         if (mDozing && mScreenOffAnimationController.allowWakeUpIfDozing()) {
             mPowerManager.wakeUp(
                     time, wakeReason, "com.android.systemui:" + why);
@@ -3449,7 +3447,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStatusBarHideIconsForBouncerManager.setBouncerShowingAndTriggerUpdate(bouncerShowing);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
         if (mBouncerShowing) {
-            wakeUpIfDozing(SystemClock.uptimeMillis(), null, "BOUNCER_VISIBLE",
+            wakeUpIfDozing(SystemClock.uptimeMillis(), "BOUNCER_VISIBLE",
                     PowerManager.WAKE_REASON_GESTURE);
         }
         updateScrimController();

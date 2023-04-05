@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.Cent
 import com.android.systemui.util.kotlin.getValue
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -112,9 +113,7 @@ constructor(
         notificationStackScrollLayoutController: NotificationStackScrollLayoutController,
     ) = unsupported
 
-    override fun setOnClickListener(listener: View.OnClickListener) {
-        shelf.setOnClickListener(listener)
-    }
+    override fun setOnClickListener(listener: View.OnClickListener) = unsupported
 
     private val unsupported: Nothing
         get() = NotificationShelfController.throwIllegalFlagStateError(expected = true)
@@ -129,7 +128,20 @@ object NotificationShelfViewBinder {
                     .onEach(shelf::setCanModifyColorOfNotifications)
                     .launchIn(this)
                 viewModel.isClickable.onEach(shelf::setCanInteract).launchIn(this)
+                registerViewListenersWhileAttached(shelf, viewModel)
             }
+        }
+    }
+
+    private suspend fun registerViewListenersWhileAttached(
+        shelf: NotificationShelf,
+        viewModel: NotificationShelfViewModel,
+    ) {
+        try {
+            shelf.setOnClickListener { viewModel.onShelfClicked() }
+            awaitCancellation()
+        } finally {
+            shelf.setOnClickListener(null)
         }
     }
 }

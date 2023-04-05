@@ -1326,7 +1326,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         // WHEN wakeup is requested
         final int wakeReason = PowerManager.WAKE_REASON_TAP;
-        mCentralSurfaces.wakeUpIfDozing(0, null, "", wakeReason);
+        mCentralSurfaces.wakeUpIfDozing(0, "", wakeReason);
 
         // THEN power manager receives wakeup
         verify(mPowerManagerService).wakeUp(eq(0L), eq(wakeReason), anyString(), anyString());
@@ -1340,7 +1340,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         // WHEN wakeup is requested
         final int wakeReason = PowerManager.WAKE_REASON_TAP;
-        mCentralSurfaces.wakeUpIfDozing(0, null, "", wakeReason);
+        mCentralSurfaces.wakeUpIfDozing(0, "", wakeReason);
 
         // THEN power manager receives wakeup
         verify(mPowerManagerService, never()).wakeUp(anyLong(), anyInt(), anyString(), anyString());

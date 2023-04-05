@@ -276,7 +276,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
             boolean nowExpanded) {
         mHeadsUpManager.setExpanded(clickedEntry, nowExpanded);
         mCentralSurfaces.wakeUpIfDozing(
-                SystemClock.uptimeMillis(), clickedView, "NOTIFICATION_CLICK",
+                SystemClock.uptimeMillis(), "NOTIFICATION_CLICK",
                 PowerManager.WAKE_REASON_GESTURE);
         if (nowExpanded) {
             if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {

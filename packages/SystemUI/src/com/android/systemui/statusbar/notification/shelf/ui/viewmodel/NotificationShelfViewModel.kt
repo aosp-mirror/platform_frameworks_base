@@ -37,4 +37,9 @@ constructor(
     /** Is the shelf allowed to modify the color of notifications in the host layout? */
     val canModifyColorOfNotifications: Flow<Boolean>
         get() = interactor.isShelfStatic.map { static -> !static }
+
+    /** Notifies that the user has clicked the shelf. */
+    fun onShelfClicked() {
+        interactor.goToLockedShadeFromShelf()
+    }
 }
