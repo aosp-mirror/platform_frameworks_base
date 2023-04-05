@@ -49,6 +49,8 @@ public class VibrationConfig {
     private final int mRampStepDurationMs;
     private final int mRampDownDurationMs;
 
+    private final boolean mIgnoreVibrationsOnWirelessCharger;
+
     @VibrationIntensity
     private final int mDefaultAlarmVibrationIntensity;
     @VibrationIntensity
@@ -68,6 +70,9 @@ public class VibrationConfig {
                 com.android.internal.R.integer.config_vibrationWaveformRampDownDuration, 0);
         mRampStepDurationMs = loadInteger(resources,
                 com.android.internal.R.integer.config_vibrationWaveformRampStepDuration, 0);
+
+        mIgnoreVibrationsOnWirelessCharger = loadBoolean(resources,
+                com.android.internal.R.bool.config_ignoreVibrationsOnWirelessCharger, false);
 
         mDefaultAlarmVibrationIntensity = loadDefaultIntensity(resources,
                 com.android.internal.R.integer.config_defaultAlarmVibrationIntensity);
@@ -97,6 +102,10 @@ public class VibrationConfig {
 
     private static int loadInteger(@Nullable Resources res, int resId, int defaultValue) {
         return res != null ? res.getInteger(resId) : defaultValue;
+    }
+
+    private static boolean loadBoolean(@Nullable Resources res, int resId, boolean defaultValue) {
+        return res != null ? res.getBoolean(resId) : defaultValue;
     }
 
     /**
@@ -133,6 +142,16 @@ public class VibrationConfig {
             return 0;
         }
         return mRampStepDurationMs;
+    }
+
+    /**
+     * Whether or not vibrations are ignored if the device is on a wireless charger.
+     *
+     * <p>This may be the case if vibration during wireless charging causes unwanted results, like
+     * moving the device out of alignment with the charging pad.
+     */
+    public boolean ignoreVibrationsOnWirelessCharger() {
+        return mIgnoreVibrationsOnWirelessCharger;
     }
 
     /** Get the default vibration intensity for given usage. */

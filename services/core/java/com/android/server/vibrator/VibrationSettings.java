@@ -40,6 +40,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
@@ -186,6 +187,8 @@ final class VibrationSettings {
     private boolean mVibrateOn;
     @GuardedBy("mLock")
     private int mRingerMode;
+    @GuardedBy("mLock")
+    private boolean mOnWirelessCharger;
 
     VibrationSettings(Context context, Handler handler) {
         this(context, handler, new VibrationConfig(context.getResources()));
@@ -290,6 +293,25 @@ final class VibrationSettings {
                 Settings.System.getUriFor(Settings.System.NOTIFICATION_VIBRATION_INTENSITY));
         registerSettingsObserver(
                 Settings.System.getUriFor(Settings.System.RING_VIBRATION_INTENSITY));
+
+        if (mVibrationConfig.ignoreVibrationsOnWirelessCharger()) {
+            Intent batteryStatus = mContext.registerReceiver(
+                    new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            updateBatteryInfo(intent);
+                        }
+                    },
+                    new IntentFilter(Intent.ACTION_BATTERY_CHANGED),
+                    Context.RECEIVER_NOT_EXPORTED);
+            // After registering the receiver for battery status, process the sticky broadcast that
+            // may have been returned upon registration of the receiver. This helps to capture the
+            // current charging state, and subsequent charging states can be listened to via the
+            // receiver registered.
+            if (batteryStatus != null) {
+                updateBatteryInfo(batteryStatus);
+            }
+        }
 
         // Update with newly loaded services.
         update();
@@ -408,6 +430,10 @@ final class VibrationSettings {
                 if (!shouldVibrateForRingerModeLocked(usage)) {
                     return Vibration.Status.IGNORED_FOR_RINGER_MODE;
                 }
+            }
+
+            if (mVibrationConfig.ignoreVibrationsOnWirelessCharger() && mOnWirelessCharger) {
+                return Vibration.Status.IGNORED_ON_WIRELESS_CHARGER;
             }
         }
         return null;
@@ -541,6 +567,13 @@ final class VibrationSettings {
             mRingerMode = (mAudioManager == null)
                     ? AudioManager.RINGER_MODE_SILENT
                     : mAudioManager.getRingerModeInternal();
+        }
+    }
+
+    private void updateBatteryInfo(Intent intent) {
+        int pluggedInfo = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
+        synchronized (mLock) {
+            mOnWirelessCharger = pluggedInfo == BatteryManager.BATTERY_PLUGGED_WIRELESS;
         }
     }
 
