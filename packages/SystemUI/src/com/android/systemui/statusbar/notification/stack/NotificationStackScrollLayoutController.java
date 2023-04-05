@@ -73,6 +73,7 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -1382,6 +1383,7 @@ public class NotificationStackScrollLayoutController {
     }
 
     public void setShelfController(NotificationShelfController notificationShelfController) {
+        NotificationShelfController.assertRefactorFlagDisabled(mFeatureFlags);
         mView.setShelfController(notificationShelfController);
     }
 
@@ -1591,6 +1593,11 @@ public class NotificationStackScrollLayoutController {
     public void setOnNotificationRemovedListener(
             NotificationStackScrollLayout.OnNotificationRemovedListener listener) {
         mView.setOnNotificationRemovedListener(listener);
+    }
+
+    public void setShelf(NotificationShelf shelf) {
+        if (!NotificationShelfController.checkRefactorFlagEnabled(mFeatureFlags)) return;
+        mView.setShelf(shelf);
     }
 
     /**

@@ -38,6 +38,8 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.phone.NotificationTapHelper
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
+import com.android.systemui.util.kotlin.getValue
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -59,10 +61,13 @@ constructor(
     private val a11yManager: AccessibilityManager,
     private val falsingManager: FalsingManager,
     private val falsingCollector: FalsingCollector,
+    hostControllerLazy: Lazy<NotificationStackScrollLayoutController>,
 ) : NotificationShelfController {
 
+    private val hostController: NotificationStackScrollLayoutController by hostControllerLazy
+
     override val view: NotificationShelf
-        get() = shelf
+        get() = unsupported
 
     init {
         shelf.apply {
@@ -84,6 +89,10 @@ constructor(
                 falsingCollector,
             )
             .init()
+        hostController.setShelf(shelf)
+        hostController.setOnNotificationRemovedListener { child, _ ->
+            view.requestRoundnessResetFor(child)
+        }
     }
 
     override val intrinsicHeight: Int
@@ -101,16 +110,14 @@ constructor(
     override fun bind(
         ambientState: AmbientState,
         notificationStackScrollLayoutController: NotificationStackScrollLayoutController,
-    ) {
-        shelf.bind(ambientState, notificationStackScrollLayoutController)
-    }
+    ) = unsupported
 
     override fun setOnClickListener(listener: View.OnClickListener) {
         shelf.setOnClickListener(listener)
     }
 
     private val unsupported: Nothing
-        get() = error("Code path not supported when Flags.NOTIFICATION_SHELF_REFACTOR is enabled")
+        get() = NotificationShelfController.throwIllegalFlagStateError(expected = true)
 }
 
 /** Binds a [NotificationShelf] to its backend. */
