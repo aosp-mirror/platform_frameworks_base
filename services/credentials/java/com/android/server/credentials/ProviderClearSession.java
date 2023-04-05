@@ -23,6 +23,7 @@ import android.credentials.ClearCredentialStateException;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
+import android.os.ICancellationSignal;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.ClearCredentialStateRequest;
 import android.util.Log;
@@ -109,6 +110,11 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
         }
     }
 
+    @Override
+    public void onProviderCancellable(ICancellationSignal cancellation) {
+        mProviderCancellationSignal = cancellation;
+    }
+
     @Nullable
     @Override
     protected ProviderData prepareUiData() {
@@ -126,8 +132,7 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
             startCandidateMetrics();
-            mProviderCancellationSignal =
-                    mRemoteCredentialService.onClearCredentialState(mProviderRequest, this);
+            mRemoteCredentialService.onClearCredentialState(mProviderRequest, this);
         }
     }
 }
