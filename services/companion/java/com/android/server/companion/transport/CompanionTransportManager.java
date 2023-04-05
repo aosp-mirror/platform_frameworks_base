@@ -301,25 +301,31 @@ public class CompanionTransportManager {
 
         int sdk = Build.VERSION.SDK_INT;
         String release = Build.VERSION.RELEASE;
-        if (Build.isDebuggable()) {
-            // Debug builds cannot pass attestation verification. Use hardcoded key instead.
+
+        if (sdk < SECURE_CHANNEL_AVAILABLE_SDK || remoteSdk < SECURE_CHANNEL_AVAILABLE_SDK) {
+            // If either device is Android T or below, use raw channel
+            // TODO: depending on the release version, either
+            //       1) using a RawTransport for old T versions
+            //       2) or an Ukey2 handshaked transport for UKey2 backported T versions
+            Slog.d(TAG, "Secure channel is not supported. Using raw transport");
+            transport = new RawTransport(transport.getAssociationId(), transport.getFd(), mContext);
+        } else if (Build.isDebuggable()) {
+            // If device is debug build, use hardcoded test key for authentication
             Slog.d(TAG, "Creating an unauthenticated secure channel");
             final byte[] testKey = "CDM".getBytes(StandardCharsets.UTF_8);
             transport = new SecureTransport(transport.getAssociationId(), transport.getFd(),
                     mContext, testKey, null);
-        } else if (remoteSdk == NON_ANDROID) {
+        } else if (sdk == NON_ANDROID || remoteSdk == NON_ANDROID) {
+            // If either device is not Android, then use app-specific pre-shared key
             // TODO: pass in a real preSharedKey
+            Slog.d(TAG, "Creating a PSK-authenticated secure channel");
             transport = new SecureTransport(transport.getAssociationId(), transport.getFd(),
                     mContext, new byte[0], null);
-        } else if (sdk >= SECURE_CHANNEL_AVAILABLE_SDK
-                && remoteSdk >= SECURE_CHANNEL_AVAILABLE_SDK) {
-            Slog.i(TAG, "Creating a secure channel");
+        } else {
+            // If none of the above applies, then use secure channel with attestation verification
+            Slog.d(TAG, "Creating a secure channel");
             transport = new SecureTransport(transport.getAssociationId(), transport.getFd(),
                     mContext);
-        } else {
-            // TODO: depending on the release version, either
-            //       1) using a RawTransport for old T versions
-            //       2) or an Ukey2 handshaked transport for UKey2 backported T versions
         }
         addMessageListenersToTransport(transport);
         transport.start();
