@@ -3057,13 +3057,17 @@
     <string name="call_from_work_profile_close">Close</string>
 
     <!--
-    Label for a menu item in a menu that is shown when the user wishes to configure the lock screen.
+    Label for a menu item in a menu that is shown when the user wishes to customize the lock screen.
     Clicking on this menu item takes the user to a screen where they can modify the settings of the
     lock screen.
 
+    It is critical that this text is as short as possible. If needed, translators should feel free
+    to drop "lock screen" from their translation and keep just "Customize" or "Customization", in
+    cases when that verb is not available in their target language.
+
     [CHAR LIMIT=32]
     -->
-    <string name="lock_screen_settings">Lock screen settings</string>
+    <string name="lock_screen_settings">Customize lock screen</string>
 
     <!-- Content description for Wi-Fi not available icon on dream [CHAR LIMIT=NONE]-->
     <string name="wifi_unavailable_dream_overlay_content_description">Wi-Fi not available</string>

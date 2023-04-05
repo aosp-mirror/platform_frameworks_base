@@ -1774,13 +1774,6 @@
     <dimen name="rear_display_title_top_padding">24dp</dimen>
     <dimen name="rear_display_title_bottom_padding">16dp</dimen>
 
-    <!--
-    Vertical distance between the pointer and the popup menu that shows up on the lock screen when
-    it is long-pressed.
-    -->
-    <dimen name="keyguard_long_press_settings_popup_vertical_offset">96dp</dimen>
-
-
     <!-- Bouncer user switcher margins -->
     <dimen name="bouncer_user_switcher_view_mode_user_switcher_bottom_margin">0dp</dimen>
     <dimen name="bouncer_user_switcher_view_mode_view_flipper_bottom_margin">0dp</dimen>

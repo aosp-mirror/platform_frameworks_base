@@ -1399,4 +1399,9 @@
     <style name="ShortcutItemBackground">
         <item name="android:background">@color/ksh_key_item_new_background</item>
     </style>
+
+    <style name="LongPressLockScreenAnimation">
+        <item name="android:windowEnterAnimation">@anim/long_press_lock_screen_popup_enter</item>
+        <item name="android:windowExitAnimation">@anim/long_press_lock_screen_popup_exit</item>
+    </style>
 </resources>

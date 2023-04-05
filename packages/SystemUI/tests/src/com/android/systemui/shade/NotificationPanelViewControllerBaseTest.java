@@ -106,6 +106,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFragment;
@@ -295,6 +296,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Captor
     protected ArgumentCaptor<NotificationStackScrollLayout.OnEmptySpaceClickListener>
             mEmptySpaceClickListenerCaptor;
+    @Mock protected ActivityStarter mActivityStarter;
 
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
     protected KeyguardInteractor mKeyguardInteractor;
@@ -575,7 +577,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 () -> mMultiShadeInteractor,
                 mDumpManager,
                 mKeyuardLongPressViewModel,
-                mKeyguardInteractor);
+                mKeyguardInteractor,
+                mActivityStarter);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 null,
