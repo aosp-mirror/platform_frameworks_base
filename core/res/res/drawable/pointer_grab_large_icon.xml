@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pointer-icon xmlns:android="http://schemas.android.com/apk/res/android"
     android:bitmap="@drawable/pointer_grab_large"
-    android:hotSpotX="33.75dp"
-    android:hotSpotY="33.75dp" />
+    android:hotSpotX="23.75dp"
+    android:hotSpotY="11.25dp" />
