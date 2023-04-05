@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.android.compose.rememberSystemUiController
 import com.android.credentialmanager.common.material.ModalBottomSheetLayout
 import com.android.credentialmanager.common.material.ModalBottomSheetValue
 import com.android.credentialmanager.common.material.rememberModalBottomSheetState
@@ -38,6 +39,12 @@ fun ModalBottomSheet(
         initialValue = ModalBottomSheetValue.Expanded,
         skipHalfExpanded = true
     )
+    val sysUiController = rememberSystemUiController()
+    if (state.targetValue == ModalBottomSheetValue.Hidden) {
+        setTransparentSystemBarsColor(sysUiController)
+    } else {
+        setBottomSheetSystemBarsColor(sysUiController)
+    }
     ModalBottomSheetLayout(
         sheetBackgroundColor = LocalAndroidColorScheme.current.colorSurfaceBright,
         modifier = Modifier.background(Color.Transparent),
