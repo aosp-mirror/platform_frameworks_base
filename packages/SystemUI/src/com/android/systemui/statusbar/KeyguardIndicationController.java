@@ -1127,13 +1127,7 @@ public class KeyguardIndicationController {
             final boolean faceAuthUnavailable = biometricSourceType == FACE
                     && msgId == BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
 
-            // TODO(b/141025588): refactor to reduce repetition of code/comments
-            // Only checking if unlocking with Biometric is allowed (no matter strong or non-strong
-            // as long as primary auth, i.e. PIN/pattern/password, is not required), so it's ok to
-            // pass true for isStrongBiometric to isUnlockingWithBiometricAllowed() to bypass the
-            // check of whether non-strong biometric is allowed
-            if (!mKeyguardUpdateMonitor
-                    .isUnlockingWithBiometricAllowed(true /* isStrongBiometric */)
+            if (isPrimaryAuthRequired()
                     && !faceAuthUnavailable) {
                 return;
             }
@@ -1234,7 +1228,7 @@ public class KeyguardIndicationController {
         private void onFaceAuthError(int msgId, String errString) {
             CharSequence deferredFaceMessage = mFaceAcquiredMessageDeferral.getDeferredMessage();
             mFaceAcquiredMessageDeferral.reset();
-            if (shouldSuppressFaceError(msgId, mKeyguardUpdateMonitor)) {
+            if (shouldSuppressFaceError(msgId)) {
                 mKeyguardLogger.logBiometricMessage("suppressingFaceError", msgId, errString);
                 return;
             }
@@ -1248,7 +1242,7 @@ public class KeyguardIndicationController {
         }
 
         private void onFingerprintAuthError(int msgId, String errString) {
-            if (shouldSuppressFingerprintError(msgId, mKeyguardUpdateMonitor)) {
+            if (shouldSuppressFingerprintError(msgId)) {
                 mKeyguardLogger.logBiometricMessage("suppressingFingerprintError",
                         msgId,
                         errString);
@@ -1257,30 +1251,18 @@ public class KeyguardIndicationController {
             }
         }
 
-        private boolean shouldSuppressFingerprintError(int msgId,
-                KeyguardUpdateMonitor updateMonitor) {
-            // Only checking if unlocking with Biometric is allowed (no matter strong or non-strong
-            // as long as primary auth, i.e. PIN/pattern/password, is not required), so it's ok to
-            // pass true for isStrongBiometric to isUnlockingWithBiometricAllowed() to bypass the
-            // check of whether non-strong biometric is allowed
-            return ((!updateMonitor.isUnlockingWithBiometricAllowed(true /* isStrongBiometric */)
-                    && !isLockoutError(msgId))
+        private boolean shouldSuppressFingerprintError(int msgId) {
+            return ((isPrimaryAuthRequired() && !isLockoutError(msgId))
                     || msgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED
                     || msgId == FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED
                     || msgId == FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED);
         }
 
-        private boolean shouldSuppressFaceError(int msgId, KeyguardUpdateMonitor updateMonitor) {
-            // Only checking if unlocking with Biometric is allowed (no matter strong or non-strong
-            // as long as primary auth, i.e. PIN/pattern/password, is not required), so it's ok to
-            // pass true for isStrongBiometric to isUnlockingWithBiometricAllowed() to bypass the
-            // check of whether non-strong biometric is allowed
-            return ((!updateMonitor.isUnlockingWithBiometricAllowed(true /* isStrongBiometric */)
-                    && msgId != FaceManager.FACE_ERROR_LOCKOUT_PERMANENT)
+        private boolean shouldSuppressFaceError(int msgId) {
+            return ((isPrimaryAuthRequired() && msgId != FaceManager.FACE_ERROR_LOCKOUT_PERMANENT)
                     || msgId == FaceManager.FACE_ERROR_CANCELED
                     || msgId == FaceManager.FACE_ERROR_UNABLE_TO_PROCESS);
         }
-
 
         @Override
         public void onTrustChanged(int userId) {
@@ -1353,6 +1335,16 @@ public class KeyguardIndicationController {
             showTransientIndication(mContext.getString(R.string.require_unlock_for_nfc));
             hideTransientIndicationDelayed(DEFAULT_HIDE_DELAY_MS);
         }
+    }
+
+    private boolean isPrimaryAuthRequired() {
+        // Only checking if unlocking with Biometric is allowed (no matter strong or non-strong
+        // as long as primary auth, i.e. PIN/pattern/password, is required), so it's ok to
+        // pass true for isStrongBiometric to isUnlockingWithBiometricAllowed() to bypass the
+        // check of whether non-strong biometric is allowed since strong biometrics can still be
+        // used.
+        return !mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                true /* isStrongBiometric */);
     }
 
     protected boolean isPluggedInAndCharging() {
