@@ -146,11 +146,10 @@ constructor(
         combine(
                 iconInteractor.isDataConnected,
                 iconInteractor.isDataEnabled,
-                iconInteractor.isDefaultConnectionFailed,
                 iconInteractor.alwaysShowDataRatIcon,
                 iconInteractor.mobileIsDefault,
-            ) { dataConnected, dataEnabled, failedConnection, alwaysShow, mobileIsDefault ->
-                alwaysShow || (dataConnected && dataEnabled && !failedConnection && mobileIsDefault)
+            ) { dataConnected, dataEnabled, alwaysShow, mobileIsDefault ->
+                alwaysShow || (dataEnabled && dataConnected && mobileIsDefault)
             }
             .distinctUntilChanged()
             .logDiffsForTable(
@@ -167,12 +166,12 @@ constructor(
                 showNetworkTypeIcon,
             ) { networkTypeIconGroup, shouldShow ->
                 val desc =
-                    if (networkTypeIconGroup.dataContentDescription != 0)
-                        ContentDescription.Resource(networkTypeIconGroup.dataContentDescription)
+                    if (networkTypeIconGroup.contentDescription != 0)
+                        ContentDescription.Resource(networkTypeIconGroup.contentDescription)
                     else null
                 val icon =
-                    if (networkTypeIconGroup.dataType != 0)
-                        Icon.Resource(networkTypeIconGroup.dataType, desc)
+                    if (networkTypeIconGroup.iconId != 0)
+                        Icon.Resource(networkTypeIconGroup.iconId, desc)
                     else null
                 return@combine when {
                     !shouldShow -> null
