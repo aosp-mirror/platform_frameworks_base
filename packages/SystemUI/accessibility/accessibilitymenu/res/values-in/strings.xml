@@ -16,8 +16,8 @@
     <string name="screenshot_utterance" msgid="1430760563401895074">"Ambil screenshot"</string>
     <string name="volume_up_label" msgid="8592766918780362870">"Naikkan volume"</string>
     <string name="volume_down_label" msgid="8574981863656447346">"Turunkan volume"</string>
-    <string name="brightness_up_label" msgid="8010753822854544846">"Tingkatkan kecerahan"</string>
-    <string name="brightness_down_label" msgid="7115662941913272072">"Kurangi kecerahan"</string>
+    <string name="brightness_up_label" msgid="8010753822854544846">"Naikkan kecerahan"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"Turunkan kecerahan"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"Buka layar sebelumnya"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Buka layar berikutnya"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"Menu Aksesibilitas menyediakan menu di layar dengan ukuran besar untuk mengontrol perangkat Anda. Anda dapat mengunci perangkat, mengontrol volume dan kecerahan, mengambil screenshot, dan banyak lagi."</string>
@@ -26,6 +26,6 @@
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Tombol besar"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Perbesar ukuran Tombol Menu Aksesibilitas"</string>
     <string name="pref_help_title" msgid="6871558837025010641">"Bantuan"</string>
-    <string name="brightness_percentage_label" msgid="7391554573977867369">"Kecerahan <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
-    <string name="music_volume_percentage_label" msgid="398635599662604706">"Volume musik <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+    <string name="brightness_percentage_label" msgid="7391554573977867369">"Kecerahan <xliff:g id="PERCENTAGE">%1$s</xliff:g>%%"</string>
+    <string name="music_volume_percentage_label" msgid="398635599662604706">"Volume musik <xliff:g id="PERCENTAGE">%1$s</xliff:g>%%"</string>
 </resources>

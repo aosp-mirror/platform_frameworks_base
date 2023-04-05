@@ -20,7 +20,7 @@
     <string name="brightness_down_label" msgid="7115662941913272072">"調低亮度"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"返回上一個畫面"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"前往下一個畫面"</string>
-    <string name="accessibility_menu_description" msgid="4458354794093858297">"無障礙工具選單是螢幕上的大型選單，可用來操控裝置，方便你鎖定裝置、控制音量和亮度、擷取螢幕畫面，以及執行其他功能。"</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"無障礙選單是一種顯示在螢幕上的大型選單，可用來操控裝置的各項功能，方便你鎖定裝置、調整音量和亮度、擷取螢幕畫面，以及執行其他功能。"</string>
     <string name="accessibility_menu_summary" msgid="340071398148208130">"透過大型選單操控裝置"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"無障礙選單設定"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"大型按鈕"</string>

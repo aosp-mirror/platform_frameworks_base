@@ -142,22 +142,18 @@ constructor(
             (isBouncerShowing() || repository.primaryBouncerShowingSoon.value) &&
                 needsFullscreenBouncer()
 
-        if (!resumeBouncer && isBouncerShowing()) {
-            // If bouncer is visible, the bouncer is already showing.
-            return
-        }
-
         Trace.beginSection("KeyguardBouncer#show")
         repository.setPrimaryScrimmed(isScrimmed)
         if (isScrimmed) {
             setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
         }
 
+        // In this special case, we want to hide the bouncer and show it again. We want to emit
+        // show(true) again so that we can reinflate the new view.
         if (resumeBouncer) {
-            primaryBouncerView.delegate?.resume()
-            // Bouncer is showing the next security screen and we just need to prompt a resume.
-            return
+            repository.setPrimaryShow(false)
         }
+
         if (primaryBouncerView.delegate?.showNextSecurityScreenOrFinish() == true) {
             // Keyguard is done.
             return

@@ -32,17 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"आकार बदलें"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"छिपाएं"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"दिखाएं"</string>
-    <!-- no translation found for dock_forced_resizable (7429086980048964687) -->
-    <skip />
-    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (2733543750291266047) -->
-    <skip />
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"मुमकिन है कि ऐप्लिकेशन, स्प्लिट स्क्रीन मोड में काम न करे"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"यह ऐप्लिकेशन, स्प्लिट स्क्रीन मोड पर काम नहीं करता"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"इस ऐप्लिकेशन को सिर्फ़ एक विंडो में खोला जा सकता है."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"हो सकता है कि ऐप प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर काम न करे."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर ऐप लॉन्च नहीं किया जा सकता."</string>
-    <!-- no translation found for accessibility_divider (6407584574218956849) -->
-    <skip />
-    <!-- no translation found for divider_title (1963391955593749442) -->
-    <skip />
+    <string name="accessibility_divider" msgid="6407584574218956849">"स्प्लिट स्क्रीन डिवाइडर मोड"</string>
+    <string name="divider_title" msgid="1963391955593749442">"स्प्लिट स्क्रीन डिवाइडर मोड"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"बाईं स्क्रीन को फ़ुल स्क्रीन बनाएं"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"बाईं स्क्रीन को 70% बनाएं"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"बाईं स्क्रीन को 50% बनाएं"</string>
@@ -89,8 +85,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"क्या समस्या ठीक नहीं हुई?\nपहले जैसा करने के लिए टैप करें"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"क्या कैमरे से जुड़ी कोई समस्या नहीं है? खारिज करने के लिए टैप करें."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"पूरी जानकारी लेकर, बेहतर तरीके से काम करें"</string>
-    <!-- no translation found for letterbox_education_split_screen_text (449233070804658627) -->
-    <skip />
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"स्प्लिट स्क्रीन का इस्तेमाल करने के लिए, किसी अन्य ऐप्लिकेशन को खींचें और छोड़ें"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"किसी ऐप्लिकेशन की जगह बदलने के लिए, उसके बाहर दो बार टैप करें"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ठीक है"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ज़्यादा जानकारी के लिए बड़ा करें."</string>
@@ -99,8 +94,7 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"रद्द करें"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"रीस्टार्ट करें"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"फिर से न दिखाएं"</string>
-    <!-- no translation found for letterbox_reachability_reposition_text (4507890186297500893) -->
-    <skip />
+    <string name="letterbox_reachability_reposition_text" msgid="4507890186297500893">"ऐप्लिकेशन की जगह बदलने के लिए दो बार टैप करें"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"बड़ा करें"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"विंडो छोटी करें"</string>
     <string name="close_button_text" msgid="2913281996024033299">"बंद करें"</string>
@@ -116,4 +110,6 @@
     <string name="screenshot_text" msgid="1477704010087786671">"स्क्रीनशॉट"</string>
     <string name="close_text" msgid="4986518933445178928">"बंद करें"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"मेन्यू बंद करें"</string>
+    <!-- no translation found for expand_menu_text (3847736164494181168) -->
+    <skip />
 </resources>

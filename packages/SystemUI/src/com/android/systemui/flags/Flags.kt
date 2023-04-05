@@ -219,12 +219,12 @@ object Flags {
     /** Whether to inflate the bouncer view on a background thread. */
     // TODO(b/272091103): Tracking Bug
     @JvmField
-    val ASYNC_INFLATE_BOUNCER = unreleasedFlag(229, "async_inflate_bouncer", teamfood = true)
+    val ASYNC_INFLATE_BOUNCER = releasedFlag(229, "async_inflate_bouncer")
 
     /** Whether to inflate the bouncer view on a background thread. */
     // TODO(b/273341787): Tracking Bug
     @JvmField
-    val PREVENT_BYPASS_KEYGUARD = unreleasedFlag(230, "prevent_bypass_keyguard", teamfood = true)
+    val PREVENT_BYPASS_KEYGUARD = releasedFlag(230, "prevent_bypass_keyguard")
 
     /** Whether to use a new data source for intents to run on keyguard dismissal. */
     @JvmField
@@ -513,6 +513,11 @@ object Flags {
         sysPropBooleanFlag(
             1116, "persist.wm.debug.enable_move_floating_window_in_tabletop", default = true)
 
+    // TODO(b/273443374): Tracking Bug
+    @Keep
+    @JvmField val LOCKSCREEN_LIVE_WALLPAPER =
+        sysPropBooleanFlag(1117, "persist.wm.debug.lockscreen_live_wallpaper", default = false)
+
     // 1200 - predictive back
     @Keep
     @JvmField
@@ -574,9 +579,6 @@ object Flags {
 
     // TODO(b/251205791): Tracking Bug
     @JvmField val SCREENSHOT_APP_CLIPS = releasedFlag(1304, "screenshot_app_clips")
-
-    // TODO(b/268484562): Tracking bug
-    @JvmField val SCREENSHOT_METADATA_REFACTOR = releasedFlag(1305, "screenshot_metadata_refactor")
 
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug

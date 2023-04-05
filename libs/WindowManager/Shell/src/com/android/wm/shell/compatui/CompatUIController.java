@@ -201,7 +201,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
         createOrUpdateCompatLayout(taskInfo, taskListener);
         createOrUpdateLetterboxEduLayout(taskInfo, taskListener);
         createOrUpdateRestartDialogLayout(taskInfo, taskListener);
-        createOrUpdateReachabilityEduLayout(taskInfo, taskListener, false);
+        if (mCompatUIConfiguration.getHasSeenLetterboxEducation(taskInfo.userId)) {
+            createOrUpdateReachabilityEduLayout(taskInfo, taskListener);
+        }
     }
 
     @Override
@@ -370,7 +372,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
             Pair<TaskInfo, ShellTaskOrganizer.TaskListener> stateInfo) {
         mActiveLetterboxEduLayout = null;
         // We need to update the UI
-        createOrUpdateReachabilityEduLayout(stateInfo.first, stateInfo.second, true);
+        createOrUpdateReachabilityEduLayout(stateInfo.first, stateInfo.second);
     }
 
     private void createOrUpdateRestartDialogLayout(TaskInfo taskInfo,
@@ -429,9 +431,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
     }
 
     private void createOrUpdateReachabilityEduLayout(TaskInfo taskInfo,
-            ShellTaskOrganizer.TaskListener taskListener, boolean forceUpdate) {
+            ShellTaskOrganizer.TaskListener taskListener) {
         if (mActiveReachabilityEduLayout != null) {
-            mActiveReachabilityEduLayout.forceUpdate(forceUpdate);
             // UI already exists, update the UI layout.
             if (!mActiveReachabilityEduLayout.updateCompatInfo(taskInfo, taskListener,
                     showOnDisplay(mActiveReachabilityEduLayout.getDisplayId()))) {
@@ -463,7 +464,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
     ReachabilityEduWindowManager createReachabilityEduWindowManager(Context context,
             TaskInfo taskInfo,
             ShellTaskOrganizer.TaskListener taskListener) {
-        return new ReachabilityEduWindowManager(context, taskInfo, mSyncQueue, mCallback,
+        return new ReachabilityEduWindowManager(context, taskInfo, mSyncQueue,
                 taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
                 mCompatUIConfiguration, mMainExecutor);
     }

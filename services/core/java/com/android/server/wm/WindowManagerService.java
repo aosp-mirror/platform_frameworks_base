@@ -9315,7 +9315,14 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
 
-        ScreenCapture.captureLayers(getCaptureArgs(displayId, captureArgs), listener);
+        ScreenCapture.LayerCaptureArgs layerCaptureArgs = getCaptureArgs(displayId, captureArgs);
+        ScreenCapture.captureLayers(layerCaptureArgs, listener);
+
+        if (Binder.getCallingUid() != SYSTEM_UID) {
+            // Release the SurfaceControl objects only if the caller is not in system server as no
+            // parcelling occurs in this case.
+            layerCaptureArgs.release();
+        }
     }
 
     @VisibleForTesting

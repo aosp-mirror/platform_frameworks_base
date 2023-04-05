@@ -17,7 +17,7 @@
     <string name="volume_up_label" msgid="8592766918780362870">"Ongeza sauti"</string>
     <string name="volume_down_label" msgid="8574981863656447346">"Punguza sauti"</string>
     <string name="brightness_up_label" msgid="8010753822854544846">"Ongeza ung\'aavu"</string>
-    <string name="brightness_down_label" msgid="7115662941913272072">"Punguza ung`aavu"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"Punguza ung\'aavu"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"Nenda kwenye skrini iliyotangulia"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Nenda kwenye skrini inayofuata"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"Menyu ya Ufikivu huonyesha menyu pana iliyo kwenye skrini ili udhibiti kifaa chako. Unaweza kufunga kifaa chako, kudhibiti sauti na ung\'avu, kupiga picha ya skrini na zaidi."</string>

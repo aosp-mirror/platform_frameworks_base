@@ -1302,6 +1302,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 com.android.internal.R.integer.config_customizedMaxCachedProcesses);
         CUR_MAX_CACHED_PROCESSES = mCustomizedMaxCachedProcesses;
         CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
+
+        final int rawMaxEmptyProcesses = computeEmptyProcessLimit(
+                Integer.min(CUR_MAX_CACHED_PROCESSES, MAX_CACHED_PROCESSES));
+        CUR_TRIM_EMPTY_PROCESSES = rawMaxEmptyProcesses / 2;
+        CUR_TRIM_CACHED_PROCESSES = (Integer.min(CUR_MAX_CACHED_PROCESSES, MAX_CACHED_PROCESSES)
+                    - rawMaxEmptyProcesses) / 3;
+
     }
 
     public void start(ContentResolver resolver) {
@@ -1867,12 +1874,11 @@ final class ActivityManagerConstants extends ContentObserver {
         }
         CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);
 
-        // Note the trim levels do NOT depend on the override process limit, we want
-        // to consider the same level the point where we do trimming regardless of any
-        // additional enforced limit.
-        final int rawMaxEmptyProcesses = computeEmptyProcessLimit(MAX_CACHED_PROCESSES);
-        CUR_TRIM_EMPTY_PROCESSES = rawMaxEmptyProcesses/2;
-        CUR_TRIM_CACHED_PROCESSES = (MAX_CACHED_PROCESSES-rawMaxEmptyProcesses)/3;
+        final int rawMaxEmptyProcesses = computeEmptyProcessLimit(
+                Integer.min(CUR_MAX_CACHED_PROCESSES, MAX_CACHED_PROCESSES));
+        CUR_TRIM_EMPTY_PROCESSES = rawMaxEmptyProcesses / 2;
+        CUR_TRIM_CACHED_PROCESSES = (Integer.min(CUR_MAX_CACHED_PROCESSES, MAX_CACHED_PROCESSES)
+                    - rawMaxEmptyProcesses) / 3;
     }
 
     private void updateProactiveKillsEnabled() {

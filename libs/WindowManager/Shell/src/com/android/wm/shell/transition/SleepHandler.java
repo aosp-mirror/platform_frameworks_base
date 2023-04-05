@@ -41,9 +41,9 @@ class SleepHandler implements Transitions.TransitionHandler {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        mSleepTransitions.remove(transition);
         startTransaction.apply();
         finishCallback.onTransitionFinished(null, null);
-        mSleepTransitions.remove(transition);
         return true;
     }
 

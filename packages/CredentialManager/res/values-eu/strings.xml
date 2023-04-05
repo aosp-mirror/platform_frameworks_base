@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Kontuaren segurtasun areagotua"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Gako bakoitza harekin batera erabili behar den aplikazioarekin edo webgunearekin soilik lotzen da. Hala, ezingo duzu inoiz hasi saioa nahi gabe iruzurrezko aplikazio edo webgune batean. Gainera, zerbitzarietan gako publikoak soilik gordetzen direnez, askoz zailagoa da sarbide-gakoak hackeatzea."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Etenik gabeko trantsizioa"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Pasahitzik gabeko etorkizun baterantz goazen arren, pasahitzek sarbide-gakoen bizikide izaten jarraituko dute"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Pasahitzik gabeko etorkizun baterantz goazen arren, pasahitzek sarbide-gakoen bizikide izaten jarraituko dute."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Aukeratu non gorde <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Hautatu informazioa gordetzeko pasahitz-kudeatzaile bat eta hasi saioa bizkorrago hurrengoan"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> atzitzeko sarbide-gako bat sortu nahi duzu?"</string>
@@ -53,6 +53,8 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gorde dituzun kredentzialak erabili nahi dituzu?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Aukeratu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziorako gorde dituzun kredentzialak"</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
+    <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
     <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Hasi saioa beste modu batean"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Ikusi aukerak"</string>

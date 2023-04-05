@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Improved account security"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Each key is exclusively linked with the app or website they were created for, so you can never sign in to a fraudulent app or website by mistake. Plus, with servers only keeping public keys, hacking is a lot harder."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Seamless transition"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"As we move towards a passwordless future, passwords will still be available alongside passkeys"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"As we move towards a passwordless future, passwords will still be available alongside passkeys."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Choose where to save your <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Select a password manager to save your info and sign in faster next time"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Create passkey for <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -53,6 +53,7 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Use your saved sign-in for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Choose a saved sign-in for <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Choose an option for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Use this info on <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Sign in another way"</string>
     <string name="snackbar_action" msgid="37373514216505085">"View options"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Continue"</string>

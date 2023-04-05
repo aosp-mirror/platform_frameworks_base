@@ -20,7 +20,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Подобрена сигурност на профила"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Всеки ключ е свързан само с приложението или уебсайта, за които е създаден. Затова не е възможно да влезете в измамно приложение или уебсайт по погрешка. Освен това сървърите съхраняват само публичните ключове, което значително затруднява опитите за хакерство."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Безпроблемен преход"</string>
-    <string name="seamless_transition_detail" msgid="3440478759491650823">"Паролите ще продължат да са налице заедно с кодовете за достъп по пътя ни към бъдеще без пароли"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Паролите ще продължат да са налице заедно с кодовете за достъп по пътя ни към бъдеще без пароли."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Изберете къде да запазите своите <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Изберете мениджър на пароли, в който да се запазят данните ви, така че следващия път да влезете по-бързо в профила си"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Да се създаде ли код за достъп за <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -54,6 +54,8 @@
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Изберете запазени данни за вход за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <!-- no translation found for get_dialog_title_choose_option_for (4976380044745029107) -->
     <skip />
+    <!-- no translation found for get_dialog_title_use_info_on (8863708099535435146) -->
+    <skip />
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Влизане в профила по друг начин"</string>
     <string name="snackbar_action" msgid="37373514216505085">"Преглед на опциите"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Напред"</string>
@@ -66,6 +68,5 @@
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Управление на данните за вход"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"От друго устройство"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Използване на друго устройство"</string>
-    <!-- no translation found for request_cancelled_by (3735222326886267820) -->
-    <skip />
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Заявката е анулирана от <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
 </resources>

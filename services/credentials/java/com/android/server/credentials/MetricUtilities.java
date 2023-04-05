@@ -108,7 +108,7 @@ public class MetricUtilities {
                 browsedProviderUid[index] = metric.getProviderUid();
                 index++;
             }
-            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_PHASE,
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_PHASE_REPORTED,
                     /* session_id */ finalPhaseMetric.getSessionId(),
                     /* sequence_num */ emitSequenceId,
                     /* ui_returned_final_start */ finalPhaseMetric.isUiReturned(),
@@ -204,7 +204,7 @@ public class MetricUtilities {
                 candidateRemoteEntryCountList[index] = metric.getRemoteEntryCount();
                 index++;
             }
-            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_CANDIDATE_PHASE,
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_CANDIDATE_PHASE_REPORTED,
                     /* session_id */ sessionId,
                     /* sequence_num */ emitSequenceId,
                     /* query_returned */ queryReturned,
@@ -277,7 +277,7 @@ public class MetricUtilities {
             if (!LOG_FLAG) {
                 return;
             }
-            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_INIT_PHASE,
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_INIT_PHASE_REPORTED,
                     /* api_name */ initialPhaseMetric.getApiName(),
                     /* caller_uid */ initialPhaseMetric.getCallerUid(),
                     /* session_id */ initialPhaseMetric.getSessionId(),
