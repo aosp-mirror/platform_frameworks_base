@@ -136,6 +136,7 @@ public final class UserTypeFactory {
                         com.android.internal.R.color.system_neutral2_900)
                 .setDefaultRestrictions(null)
                 .setDefaultCrossProfileIntentFilters(getDefaultCloneCrossProfileIntentFilter())
+                .setDefaultSecureSettings(getDefaultNonManagedProfileSecureSettings())
                 .setDefaultUserProperties(new UserProperties.Builder()
                         .setStartWithParent(true)
                         .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_WITH_PARENT)
@@ -216,7 +217,8 @@ public final class UserTypeFactory {
                         com.android.internal.R.color.profile_badge_1_dark,
                         com.android.internal.R.color.profile_badge_2_dark,
                         com.android.internal.R.color.profile_badge_3_dark)
-                .setDefaultRestrictions(restrictions);
+                .setDefaultRestrictions(restrictions)
+                .setDefaultSecureSettings(getDefaultNonManagedProfileSecureSettings());
     }
 
     /**
@@ -335,6 +337,15 @@ public final class UserTypeFactory {
 
     private static List<DefaultCrossProfileIntentFilter> getDefaultCloneCrossProfileIntentFilter() {
         return DefaultCrossProfileIntentFiltersUtils.getDefaultCloneProfileFilters();
+    }
+
+    /** Gets a default bundle, keyed by Settings.Secure String names, for non-managed profiles. */
+    private static Bundle getDefaultNonManagedProfileSecureSettings() {
+        final Bundle settings = new Bundle();
+        // Non-managed profiles go through neither SetupWizard nor DPC flows, so we automatically
+        // mark them as setup.
+        settings.putString(android.provider.Settings.Secure.USER_SETUP_COMPLETE, "1");
+        return settings;
     }
 
     /**
