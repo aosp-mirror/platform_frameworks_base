@@ -40,11 +40,13 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
         implements ProviderSession.ProviderInternalCallback<Void> {
     private static final String TAG = "GetRequestSession";
 
-    public ClearRequestSession(Context context, int userId, int callingUid,
+    public ClearRequestSession(Context context, RequestSession.SessionLifetime sessionCallback,
+            Object lock, int userId, int callingUid,
             IClearCredentialStateCallback callback, ClearCredentialStateRequest request,
             CallingAppInfo callingAppInfo, CancellationSignal cancellationSignal,
             long startedTimestamp) {
-        super(context, userId, callingUid, request, callback, RequestInfo.TYPE_UNDEFINED,
+        super(context, sessionCallback, lock, userId, callingUid, request, callback,
+                RequestInfo.TYPE_UNDEFINED,
                 callingAppInfo, cancellationSignal, startedTimestamp);
     }
 

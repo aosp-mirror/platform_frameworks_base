@@ -45,12 +45,13 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
         IGetCredentialCallback, GetCredentialResponse>
         implements ProviderSession.ProviderInternalCallback<GetCredentialResponse> {
     private static final String TAG = "GetRequestSession";
-    public GetRequestSession(Context context, int userId, int callingUid,
+    public GetRequestSession(Context context, RequestSession.SessionLifetime sessionCallback,
+            Object lock, int userId, int callingUid,
             IGetCredentialCallback callback, GetCredentialRequest request,
             CallingAppInfo callingAppInfo, CancellationSignal cancellationSignal,
             long startedTimestamp) {
-        super(context, userId, callingUid, request, callback, RequestInfo.TYPE_GET,
-                callingAppInfo, cancellationSignal, startedTimestamp);
+        super(context, sessionCallback, lock, userId, callingUid, request, callback,
+                RequestInfo.TYPE_GET, callingAppInfo, cancellationSignal, startedTimestamp);
         int numTypes = (request.getCredentialOptions().stream()
                 .map(CredentialOption::getType).collect(
                 Collectors.toSet())).size(); // Dedupe type strings
@@ -81,6 +82,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     @Override
     protected void launchUiWithProviderData(ArrayList<ProviderData> providerDataList) {
         mRequestSessionMetric.collectUiCallStartTime(System.nanoTime());
+        mCredentialManagerUi.setStatus(CredentialManagerUi.UiStatus.USER_INTERACTION);
         try {
             mClientCallback.onPendingIntent(mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newGetRequestInfo(
@@ -88,6 +90,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
                     providerDataList));
         } catch (RemoteException e) {
             mRequestSessionMetric.collectUiReturnedFinalPhase(/*uiReturned=*/ false);
+            mCredentialManagerUi.setStatus(CredentialManagerUi.UiStatus.TERMINATED);
             respondToClientWithErrorAndFinish(
                     GetCredentialException.TYPE_UNKNOWN, "Unable to instantiate selector");
         }

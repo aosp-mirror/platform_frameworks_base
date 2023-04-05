@@ -302,7 +302,9 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
             startCandidateMetrics();
-            mRemoteCredentialService.onBeginGetCredential(mProviderRequest, this);
+            mProviderCancellationSignal =
+                    mRemoteCredentialService.onBeginGetCredential(mProviderRequest, this);
+            boolean foundSig = mProviderCancellationSignal == null;
         }
     }
 
