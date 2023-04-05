@@ -46,10 +46,10 @@ import com.android.systemui.log.dagger.KeyguardSmallClockLog
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockTickRate
+import com.android.systemui.plugins.WeatherData
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel.DEBUG
 import com.android.systemui.shared.regionsampling.RegionSampler
-import com.android.systemui.plugins.WeatherData
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -144,8 +144,10 @@ constructor(
                 val currentViewRect = Rect(left, top, right, bottom)
                 val oldViewRect = Rect(oldLeft, oldTop, oldRight, oldBottom)
 
-                if (currentViewRect.width() != oldViewRect.width() ||
-                    currentViewRect.height() != oldViewRect.height()) {
+                if (
+                    currentViewRect.width() != oldViewRect.width() ||
+                        currentViewRect.height() != oldViewRect.height()
+                ) {
                     updateRegionSampler(view)
                 }
             }
@@ -425,7 +427,7 @@ constructor(
             }
 
             isRunning = true
-            when (clockFace.events.tickRate) {
+            when (clockFace.config.tickRate) {
                 ClockTickRate.PER_MINUTE -> {
                     /* Handled by KeyguardClockSwitchController */
                 }

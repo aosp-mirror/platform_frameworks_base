@@ -16,12 +16,13 @@
 
 package com.android.keyguard;
 
+import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.util.Slog;
 
 import com.android.keyguard.KeyguardClockSwitch.ClockSize;
 import com.android.keyguard.logging.KeyguardLogger;
-import com.android.systemui.plugins.ClockAnimations;
+import com.android.systemui.plugins.ClockController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
@@ -241,8 +242,9 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         }
     }
 
-    /** Gets the animations for the current clock. */
-    public ClockAnimations getClockAnimations() {
-        return mKeyguardClockSwitchController.getClockAnimations();
+    /** Gets the current clock controller. */
+    @Nullable
+    public ClockController getClockController() {
+        return mKeyguardClockSwitchController.getClock();
     }
 }
