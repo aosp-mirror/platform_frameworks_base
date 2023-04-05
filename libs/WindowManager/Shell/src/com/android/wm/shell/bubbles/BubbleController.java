@@ -1052,7 +1052,27 @@ public class BubbleController implements ConfigurationChangeListener,
      * Expands and selects the provided bubble as long as it already exists in the stack or the
      * overflow.
      *
-     * This is currently only used when opening a bubble via clicking on a conversation widget.
+     * This is used by external callers (launcher).
+     */
+    public void expandStackAndSelectBubbleFromLauncher(String key) {
+        Bubble b = mBubbleData.getAnyBubbleWithkey(key);
+        if (b == null) {
+            return;
+        }
+        if (mBubbleData.hasBubbleInStackWithKey(b.getKey())) {
+            // already in the stack
+            mBubbleData.setSelectedBubbleFromLauncher(b);
+            mLayerView.showExpandedView(b);
+        } else if (mBubbleData.hasOverflowBubbleWithKey(b.getKey())) {
+            // TODO: (b/271468319) handle overflow
+        } else {
+            Log.w(TAG, "didn't add bubble from launcher: " + key);
+        }
+    }
+
+    /**
+     * Expands and selects the provided bubble as long as it already exists in the stack or the
+     * overflow. This is currently used when opening a bubble via clicking on a conversation widget.
      */
     public void expandStackAndSelectBubble(Bubble b) {
         if (b == null) {
@@ -1703,6 +1723,14 @@ public class BubbleController implements ConfigurationChangeListener,
 
             // Update the cached state for queries from SysUI
             mImpl.mCachedState.update(update);
+
+            if (isShowingAsBubbleBar() && mBubbleStateListener != null) {
+                BubbleBarUpdate bubbleBarUpdate = update.toBubbleBarUpdate();
+                // Some updates aren't relevant to the bubble bar so check first.
+                if (bubbleBarUpdate.anythingChanged()) {
+                    mBubbleStateListener.onBubbleStateChange(bubbleBarUpdate);
+                }
+            }
         }
     };
 
@@ -1972,17 +2000,20 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public void showBubble(String key, boolean onLauncherHome) {
-            // TODO
+            mMainExecutor.execute(() -> {
+                mBubblePositioner.setShowingInBubbleBar(onLauncherHome);
+                mController.expandStackAndSelectBubbleFromLauncher(key);
+            });
         }
 
         @Override
         public void removeBubble(String key, int reason) {
-            // TODO
+            // TODO (b/271466616) allow removals from launcher
         }
 
         @Override
         public void collapseBubbles() {
-            // TODO
+            mMainExecutor.execute(() -> mController.collapseStack());
         }
 
         @Override
