@@ -70,11 +70,6 @@ object Flags {
 
     @JvmField val USE_ROUNDNESS_SOURCETYPES = releasedFlag(116, "use_roundness_sourcetype")
 
-    // TODO(b/259217907)
-    @JvmField
-    val NOTIFICATION_GROUP_DISMISSAL_ANIMATION =
-        releasedFlag(259217907, "notification_group_dismissal_animation")
-
     @JvmField
     val SIMPLIFIED_APPEAR_FRACTION =
         unreleasedFlag(259395680, "simplified_appear_fraction", teamfood = true)
