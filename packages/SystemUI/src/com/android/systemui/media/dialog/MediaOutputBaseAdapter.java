@@ -270,10 +270,10 @@ public abstract class MediaOutputBaseAdapter extends
             final Drawable backgroundDrawable;
             if (mController.isAdvancedLayoutSupported() && mController.isSubStatusSupported()) {
                 backgroundDrawable = mContext.getDrawable(
-                        showSeekBar ? R.drawable.media_output_item_background_active
+                        showSeekBar || isFakeActive ? R.drawable.media_output_item_background_active
                                 : R.drawable.media_output_item_background).mutate();
                 backgroundDrawable.setTint(
-                        showSeekBar ? mController.getColorConnectedItemBackground()
+                        showSeekBar || isFakeActive ? mController.getColorConnectedItemBackground()
                                 : mController.getColorItemBackground());
                 mIconAreaLayout.setBackgroundTintList(
                         ColorStateList.valueOf(showProgressBar || isFakeActive
