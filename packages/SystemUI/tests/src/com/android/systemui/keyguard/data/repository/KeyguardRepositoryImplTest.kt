@@ -461,8 +461,8 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             val job = underTest.biometricUnlockState.onEach(values::add).launchIn(this)
 
             runCurrent()
-            val captor = argumentCaptor<BiometricUnlockController.BiometricModeListener>()
-            verify(biometricUnlockController).addBiometricModeListener(captor.capture())
+            val captor = argumentCaptor<BiometricUnlockController.BiometricUnlockEventsListener>()
+            verify(biometricUnlockController).addListener(captor.capture())
 
             listOf(
                     BiometricUnlockController.MODE_NONE,
@@ -498,7 +498,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
             job.cancel()
             runCurrent()
-            verify(biometricUnlockController).removeBiometricModeListener(captor.value)
+            verify(biometricUnlockController).removeListener(captor.value)
         }
 
     @Test
