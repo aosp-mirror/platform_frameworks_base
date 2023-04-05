@@ -487,7 +487,7 @@ public class BackgroundActivityStartController {
                 // The verdict changed from allow (resultIfPiSenderAllowsBal) to block, PI sender
                 // default change is on (otherwise we would have fallen into if above) and we'd
                 // allow if it were off
-                Slog.wtf(TAG, "Without BAL hardening this activity start would NOT be allowed!"
+                Slog.wtf(TAG, "Without BAL hardening this activity start would be allowed!"
                         + stateDumpLog);
             }
         }
