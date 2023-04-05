@@ -127,7 +127,8 @@ public class ApkLiteParseUtils {
                             null /* isFeatureSplits */, null /* usesSplitNames */,
                             null /* configForSplit */, null /* splitApkPaths */,
                             null /* splitRevisionCodes */, baseApk.getTargetSdkVersion(),
-                            null /* requiredSplitTypes */, null /* splitTypes */));
+                            null /* requiredSplitTypes */, null, /* splitTypes */
+                            baseApk.isAllowUpdateOwnership()));
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -273,7 +274,8 @@ public class ApkLiteParseUtils {
         return input.success(
                 new PackageLite(codePath, baseCodePath, baseApk, splitNames, isFeatureSplits,
                         usesSplitNames, configForSplits, splitCodePaths, splitRevisionCodes,
-                        baseApk.getTargetSdkVersion(), requiredSplitTypes, splitTypes));
+                        baseApk.getTargetSdkVersion(), requiredSplitTypes, splitTypes,
+                        baseApk.isAllowUpdateOwnership()));
     }
 
     /**
@@ -400,6 +402,8 @@ public class ApkLiteParseUtils {
                 "isFeatureSplit", false);
         boolean isSplitRequired = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
                 "isSplitRequired", false);
+        boolean allowUpdateOwnership = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
+                "allowUpdateOwnership", true);
         String configForSplit = parser.getAttributeValue(null, "configForSplit");
 
         int targetSdkVersion = DEFAULT_TARGET_SDK_VERSION;
@@ -583,7 +587,7 @@ public class ApkLiteParseUtils {
                         overlayIsStatic, overlayPriority, requiredSystemPropertyName,
                         requiredSystemPropertyValue, minSdkVersion, targetSdkVersion,
                         rollbackDataPolicy, requiredSplitTypes.first, requiredSplitTypes.second,
-                        hasDeviceAdminReceiver, isSdkLibrary));
+                        hasDeviceAdminReceiver, isSdkLibrary, allowUpdateOwnership));
     }
 
     private static boolean isDeviceAdminReceiver(
