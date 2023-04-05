@@ -285,7 +285,6 @@ struct BinaryPrimitive : public TransformableItem<BinaryPrimitive, BaseItem<Bina
   bool Flatten(android::Res_value* out_value) const override;
   void Print(std::ostream* out) const override;
   void PrettyPrint(text::Printer* printer) const override;
-  std::string toPrettyString() const;
 };
 
 struct Attribute : public TransformableValue<Attribute, BaseValue<Attribute>> {
