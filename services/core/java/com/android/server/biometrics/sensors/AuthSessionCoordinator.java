@@ -16,21 +16,19 @@
 
 package com.android.server.biometrics.sensors;
 
-import static com.android.server.biometrics.sensors.AuthResultCoordinator.AUTHENTICATOR_LOCKED;
+import static com.android.server.biometrics.sensors.AuthResultCoordinator.AUTHENTICATOR_PERMANENT_LOCKED;
+import static com.android.server.biometrics.sensors.AuthResultCoordinator.AUTHENTICATOR_TIMED_LOCKED;
 import static com.android.server.biometrics.sensors.AuthResultCoordinator.AUTHENTICATOR_UNLOCKED;
 
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.os.SystemClock;
-import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,9 +43,7 @@ public class AuthSessionCoordinator implements AuthSessionListener {
 
     private final Set<Integer> mAuthOperations;
     private final MultiBiometricLockoutState mMultiBiometricLockoutState;
-    private final List<Pair<Integer, Long>> mTimedLockouts;
     private final RingBuffer mRingBuffer;
-    private final Clock mClock;
 
     private int mUserId;
     private boolean mIsAuthenticating;
@@ -63,8 +59,6 @@ public class AuthSessionCoordinator implements AuthSessionListener {
         mAuthResultCoordinator = new AuthResultCoordinator();
         mMultiBiometricLockoutState = new MultiBiometricLockoutState(clock);
         mRingBuffer = new RingBuffer(100);
-        mTimedLockouts = new ArrayList<>();
-        mClock = clock;
     }
 
     /**
@@ -74,8 +68,6 @@ public class AuthSessionCoordinator implements AuthSessionListener {
         mAuthOperations.clear();
         mUserId = userId;
         mIsAuthenticating = true;
-        mAuthOperations.clear();
-        mTimedLockouts.clear();
         mAuthResultCoordinator = new AuthResultCoordinator();
         mRingBuffer.addApiCall("internal : onAuthSessionStarted(" + userId + ")");
     }
@@ -85,39 +77,30 @@ public class AuthSessionCoordinator implements AuthSessionListener {
      *
      * This can happen two ways.
      * 1. Manually calling this API
-     * 2. If authStartedFor() was called, and all authentication attempts finish.
+     * 2. If authStartedFor() was called, and any authentication attempts finish.
      */
     void endAuthSession() {
-        if (mIsAuthenticating) {
-            final long currentTime = mClock.millis();
-            for (Pair<Integer, Long> timedLockouts : mTimedLockouts) {
-                mMultiBiometricLockoutState.increaseLockoutTime(mUserId, timedLockouts.first,
-                        timedLockouts.second + currentTime);
+        // User unlocks can also unlock timed lockout Authenticator.Types
+        final Map<Integer, Integer> result = mAuthResultCoordinator.getResult();
+        for (int authenticator : Arrays.asList(Authenticators.BIOMETRIC_CONVENIENCE,
+                Authenticators.BIOMETRIC_WEAK, Authenticators.BIOMETRIC_STRONG)) {
+            final Integer value = result.get(authenticator);
+            if ((value & AUTHENTICATOR_UNLOCKED) == AUTHENTICATOR_UNLOCKED) {
+                mMultiBiometricLockoutState.clearPermanentLockOut(mUserId, authenticator);
+                mMultiBiometricLockoutState.clearTimedLockout(mUserId, authenticator);
+            } else if ((value & AUTHENTICATOR_PERMANENT_LOCKED) == AUTHENTICATOR_PERMANENT_LOCKED) {
+                mMultiBiometricLockoutState.setPermanentLockOut(mUserId, authenticator);
+            } else if ((value & AUTHENTICATOR_TIMED_LOCKED) == AUTHENTICATOR_TIMED_LOCKED) {
+                mMultiBiometricLockoutState.setTimedLockout(mUserId, authenticator);
             }
-            // User unlocks can also unlock timed lockout Authenticator.Types
-            final Map<Integer, Integer> result = mAuthResultCoordinator.getResult();
-            for (int authenticator : Arrays.asList(Authenticators.BIOMETRIC_CONVENIENCE,
-                    Authenticators.BIOMETRIC_WEAK, Authenticators.BIOMETRIC_STRONG)) {
-                final Integer value = result.get(authenticator);
-                if ((value & AUTHENTICATOR_UNLOCKED) == AUTHENTICATOR_UNLOCKED) {
-                    mMultiBiometricLockoutState.setAuthenticatorTo(mUserId, authenticator,
-                            true /* canAuthenticate */);
-                    mMultiBiometricLockoutState.clearLockoutTime(mUserId, authenticator);
-                } else if ((value & AUTHENTICATOR_LOCKED) == AUTHENTICATOR_LOCKED) {
-                    mMultiBiometricLockoutState.setAuthenticatorTo(mUserId, authenticator,
-                            false /* canAuthenticate */);
-                }
-
-            }
-
-            mRingBuffer.addApiCall("internal : onAuthSessionEnded(" + mUserId + ")");
-            clearSession();
         }
+
+        mRingBuffer.addApiCall("internal : onAuthSessionEnded(" + mUserId + ")");
+        clearSession();
     }
 
     private void clearSession() {
         mIsAuthenticating = false;
-        mTimedLockouts.clear();
         mAuthOperations.clear();
     }
 
@@ -171,7 +154,7 @@ public class AuthSessionCoordinator implements AuthSessionListener {
                         + ", sensorId=" + sensorId + "time=" + time + ", requestId=" + requestId
                         + ")";
         mRingBuffer.addApiCall(lockedOutStr);
-        mTimedLockouts.add(new Pair<>(biometricStrength, time));
+        mAuthResultCoordinator.lockOutTimed(biometricStrength);
         attemptToFinish(userId, sensorId, lockedOutStr);
     }
 
@@ -202,9 +185,8 @@ public class AuthSessionCoordinator implements AuthSessionListener {
             // Lockouts cannot be reset by non-strong biometrics
             return;
         }
-        mMultiBiometricLockoutState.setAuthenticatorTo(userId, biometricStrength,
-                true /*canAuthenticate */);
-        mMultiBiometricLockoutState.clearLockoutTime(userId, biometricStrength);
+        mMultiBiometricLockoutState.clearPermanentLockOut(userId, biometricStrength);
+        mMultiBiometricLockoutState.clearTimedLockout(userId, biometricStrength);
     }
 
     private void attemptToFinish(int userId, int sensorId, String description) {

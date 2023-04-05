@@ -28,6 +28,7 @@ import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
@@ -92,10 +93,9 @@ class FingerprintResetLockoutClient extends HalClientMonitor<AidlSession> implem
 
     void onLockoutCleared() {
         resetLocalLockoutStateToNone(getSensorId(), getTargetUserId(), mLockoutCache,
-                mLockoutResetDispatcher);
+                mLockoutResetDispatcher, getBiometricContext().getAuthSessionCoordinator(),
+                mBiometricStrength, getRequestId());
         mCallback.onClientFinished(this, true /* success */);
-        getBiometricContext().getAuthSessionCoordinator()
-                .resetLockoutFor(getTargetUserId(), mBiometricStrength, getRequestId());
     }
 
     /**
@@ -108,9 +108,12 @@ class FingerprintResetLockoutClient extends HalClientMonitor<AidlSession> implem
      */
     static void resetLocalLockoutStateToNone(int sensorId, int userId,
             @NonNull LockoutCache lockoutTracker,
-            @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull AuthSessionCoordinator authSessionCoordinator,
+            @Authenticators.Types int biometricStrength, long requestId) {
         lockoutTracker.setLockoutModeForUser(userId, LockoutTracker.LOCKOUT_NONE);
         lockoutResetDispatcher.notifyLockoutResetCallbacks(sensorId);
+        authSessionCoordinator.resetLockoutFor(userId, biometricStrength, requestId);
     }
 
     @Override
