@@ -96,6 +96,8 @@ public final class CredentialManagerService
     private static final String PERMISSION_DENIED_ERROR = "permission_denied";
     private static final String PERMISSION_DENIED_WRITE_SECURE_SETTINGS_ERROR =
             "Caller is missing WRITE_SECURE_SETTINGS permission";
+    private static final String DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER =
+            "enable_credential_manager";
 
     private final Context mContext;
 
@@ -790,7 +792,7 @@ public final class CredentialManagerService
             try {
                 return DeviceConfig.getBoolean(
                         DeviceConfig.NAMESPACE_CREDENTIAL,
-                        CredentialManager.DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER,
+                        DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER,
                         false);
             } finally {
                 Binder.restoreCallingIdentity(origId);
