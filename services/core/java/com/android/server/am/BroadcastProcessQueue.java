@@ -194,6 +194,7 @@ class BroadcastProcessQueue {
      */
     private boolean mLastDeferredStates;
 
+    private boolean mUidForeground;
     private boolean mUidCached;
     private boolean mProcessInstrumented;
     private boolean mProcessPersistent;
@@ -403,7 +404,8 @@ class BroadcastProcessQueue {
      *         {@link BroadcastQueueModernImpl#updateRunnableList}
      */
     @CheckResult
-    public boolean setProcessAndUidCached(@Nullable ProcessRecord app, boolean uidCached) {
+    public boolean setProcessAndUidState(@Nullable ProcessRecord app, boolean uidForeground,
+            boolean uidCached) {
         this.app = app;
 
         // Since we may have just changed our PID, invalidate cached strings
@@ -413,14 +415,32 @@ class BroadcastProcessQueue {
         boolean didSomething = false;
         if (app != null) {
             didSomething |= setUidCached(uidCached);
+            didSomething |= setUidForeground(uidForeground);
             didSomething |= setProcessInstrumented(app.getActiveInstrumentation() != null);
             didSomething |= setProcessPersistent(app.isPersistent());
         } else {
             didSomething |= setUidCached(uidCached);
+            didSomething |= setUidForeground(false);
             didSomething |= setProcessInstrumented(false);
             didSomething |= setProcessPersistent(false);
         }
         return didSomething;
+    }
+
+    /**
+     * Update if the UID this process is belongs to is in "foreground" state, which signals
+     * broadcast dispatch should prioritize delivering broadcasts to this process to minimize any
+     * delays in UI updates.
+     */
+    @CheckResult
+    private boolean setUidForeground(boolean uidForeground) {
+        if (mUidForeground != uidForeground) {
+            mUidForeground = uidForeground;
+            invalidateRunnableAt();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -917,7 +937,7 @@ class BroadcastProcessQueue {
     static final int REASON_CONTAINS_RESULT_TO = 15;
     static final int REASON_CONTAINS_INSTRUMENTED = 16;
     static final int REASON_CONTAINS_MANIFEST = 17;
-    static final int REASON_FOREGROUND_ACTIVITIES = 18;
+    static final int REASON_FOREGROUND = 18;
 
     @IntDef(flag = false, prefix = { "REASON_" }, value = {
             REASON_EMPTY,
@@ -937,7 +957,7 @@ class BroadcastProcessQueue {
             REASON_CONTAINS_RESULT_TO,
             REASON_CONTAINS_INSTRUMENTED,
             REASON_CONTAINS_MANIFEST,
-            REASON_FOREGROUND_ACTIVITIES,
+            REASON_FOREGROUND,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Reason {}
@@ -961,7 +981,7 @@ class BroadcastProcessQueue {
             case REASON_CONTAINS_RESULT_TO: return "CONTAINS_RESULT_TO";
             case REASON_CONTAINS_INSTRUMENTED: return "CONTAINS_INSTRUMENTED";
             case REASON_CONTAINS_MANIFEST: return "CONTAINS_MANIFEST";
-            case REASON_FOREGROUND_ACTIVITIES: return "FOREGROUND_ACTIVITIES";
+            case REASON_FOREGROUND: return "FOREGROUND";
             default: return Integer.toString(reason);
         }
     }
@@ -1000,11 +1020,9 @@ class BroadcastProcessQueue {
             } else if (mProcessInstrumented) {
                 mRunnableAt = runnableAt + constants.DELAY_URGENT_MILLIS;
                 mRunnableAtReason = REASON_INSTRUMENTED;
-            } else if (app != null && app.hasForegroundActivities()) {
-                // TODO: Listen for uid state changes to check when an uid goes in and out of
-                // the TOP state.
+            } else if (mUidForeground) {
                 mRunnableAt = runnableAt + constants.DELAY_URGENT_MILLIS;
-                mRunnableAtReason = REASON_FOREGROUND_ACTIVITIES;
+                mRunnableAtReason = REASON_FOREGROUND;
             } else if (mCountOrdered > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_ORDERED;
@@ -1274,7 +1292,11 @@ class BroadcastProcessQueue {
     @NeverCompile
     private void dumpProcessState(@NonNull IndentingPrintWriter pw) {
         final StringBuilder sb = new StringBuilder();
+        if (mUidForeground) {
+            sb.append("FG");
+        }
         if (mUidCached) {
+            if (sb.length() > 0) sb.append("|");
             sb.append("CACHED");
         }
         if (mProcessInstrumented) {
