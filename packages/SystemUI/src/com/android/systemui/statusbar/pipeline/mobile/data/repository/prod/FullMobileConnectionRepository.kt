@@ -109,6 +109,11 @@ class FullMobileConnectionRepository(
             .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
     }
 
+    override val carrierId =
+        activeRepo
+            .flatMapLatest { it.carrierId }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.carrierId.value)
+
     override val cdmaRoaming =
         activeRepo
             .flatMapLatest { it.cdmaRoaming }
@@ -321,13 +326,14 @@ class FullMobileConnectionRepository(
     }
 
     companion object {
-        const val COL_EMERGENCY = "emergencyOnly"
-        const val COL_ROAMING = "roaming"
-        const val COL_OPERATOR = "operatorName"
-        const val COL_IS_IN_SERVICE = "isInService"
-        const val COL_IS_GSM = "isGsm"
-        const val COL_CDMA_LEVEL = "cdmaLevel"
-        const val COL_PRIMARY_LEVEL = "primaryLevel"
+        const val COL_CARRIER_ID = "carrierId"
         const val COL_CARRIER_NETWORK_CHANGE = "carrierNetworkChangeActive"
+        const val COL_CDMA_LEVEL = "cdmaLevel"
+        const val COL_EMERGENCY = "emergencyOnly"
+        const val COL_IS_GSM = "isGsm"
+        const val COL_IS_IN_SERVICE = "isInService"
+        const val COL_OPERATOR = "operatorName"
+        const val COL_PRIMARY_LEVEL = "primaryLevel"
+        const val COL_ROAMING = "roaming"
     }
 }
