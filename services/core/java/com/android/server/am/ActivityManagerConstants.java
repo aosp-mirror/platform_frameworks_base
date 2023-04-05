@@ -1058,6 +1058,13 @@ final class ActivityManagerConstants extends ContentObserver {
     /** @see #KEY_USE_MODERN_TRIM */
     public boolean USE_MODERN_TRIM = DEFAULT_USE_MODERN_TRIM;
 
+    private static final String KEY_ENABLE_FGS_WHILE_IN_USE_FIX =
+            "key_enable_fgs_while_in_use_fix";
+
+    private static final boolean DEFAULT_ENABLE_FGS_WHILE_IN_USE_FIX = true;
+
+    public volatile boolean mEnableFgsWhileInUseFix = DEFAULT_ENABLE_FGS_WHILE_IN_USE_FIX;
+
     private final OnPropertiesChangedListener mOnDeviceConfigChangedListener =
             new OnPropertiesChangedListener() {
                 @Override
@@ -1225,6 +1232,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION:
                                 updateEnableWaitForFinishAttachApplication();
+                                break;
+                            case KEY_ENABLE_FGS_WHILE_IN_USE_FIX:
+                                updateEnableFgsWhileInUseFix();
                                 break;
                             case KEY_MAX_PREVIOUS_TIME:
                                 updateMaxPreviousTime();
@@ -1995,6 +2005,12 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION);
     }
 
+    private void updateEnableFgsWhileInUseFix() {
+        mEnableFgsWhileInUseFix = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_ENABLE_FGS_WHILE_IN_USE_FIX,
+                DEFAULT_ENABLE_FGS_WHILE_IN_USE_FIX);
+    }
     private void updateUseTieredCachedAdj() {
         USE_TIERED_CACHED_ADJ = DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -2194,6 +2210,9 @@ final class ActivityManagerConstants extends ContentObserver {
 
         pw.print("  "); pw.print(KEY_SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED);
         pw.print("="); pw.println(mFlagSystemExemptPowerRestrictionsEnabled);
+
+        pw.print("  "); pw.print(KEY_ENABLE_FGS_WHILE_IN_USE_FIX);
+        pw.print("="); pw.println(mEnableFgsWhileInUseFix);
 
         pw.print("  "); pw.print(KEY_SHORT_FGS_TIMEOUT_DURATION);
         pw.print("="); pw.println(mShortFgsTimeoutDuration);
