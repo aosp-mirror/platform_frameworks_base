@@ -23,8 +23,10 @@ import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SAVE_EVENT_RE
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SAVE_EVENT_REPORTED__SAVE_UI_NOT_SHOWN_REASON__NO_SAVE_REASON_NONE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SAVE_EVENT_REPORTED__SAVE_UI_NOT_SHOWN_REASON__NO_SAVE_REASON_NO_SAVE_INFO;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SAVE_EVENT_REPORTED__SAVE_UI_NOT_SHOWN_REASON__NO_SAVE_REASON_NO_VALUE_CHANGED;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SAVE_EVENT_REPORTED__SAVE_UI_NOT_SHOWN_REASON__NO_SAVE_REASON_SESSION_DESTROYED;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SAVE_EVENT_REPORTED__SAVE_UI_NOT_SHOWN_REASON__NO_SAVE_REASON_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SAVE_EVENT_REPORTED__SAVE_UI_NOT_SHOWN_REASON__NO_SAVE_REASON_WITH_DELAY_SAVE_FLAG;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SAVE_EVENT_REPORTED__SAVE_UI_NOT_SHOWN_REASON__NO_SAVE_REASON_WITH_DONT_SAVE_ON_FINISH_FLAG;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SAVE_EVENT_REPORTED__SAVE_UI_SHOWN_REASON__SAVE_UI_SHOWN_REASON_OPTIONAL_ID_CHANGE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SAVE_EVENT_REPORTED__SAVE_UI_SHOWN_REASON__SAVE_UI_SHOWN_REASON_REQUIRED_ID_CHANGE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SAVE_EVENT_REPORTED__SAVE_UI_SHOWN_REASON__SAVE_UI_SHOWN_REASON_TRIGGER_ID_SET;
@@ -32,11 +34,6 @@ import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SAVE_EVENT_RE
 import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.IntDef;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -74,10 +71,12 @@ public final class SaveEventLogger {
       NO_SAVE_REASON_NONE,
       NO_SAVE_REASON_NO_SAVE_INFO,
       NO_SAVE_REASON_WITH_DELAY_SAVE_FLAG,
+      NO_SAVE_REASON_WITH_DONT_SAVE_ON_FINISH_FLAG,
       NO_SAVE_REASON_HAS_EMPTY_REQUIRED,
       NO_SAVE_REASON_NO_VALUE_CHANGED,
       NO_SAVE_REASON_FIELD_VALIDATION_FAILED,
-      NO_SAVE_REASON_DATASET_MATCH
+      NO_SAVE_REASON_DATASET_MATCH,
+      NO_SAVE_REASON_SESSION_DESTROYED
   })
   @Retention(RetentionPolicy.SOURCE)
   public @interface SaveUiNotShownReason {
@@ -108,6 +107,10 @@ public final class SaveEventLogger {
       AUTOFILL_SAVE_EVENT_REPORTED__SAVE_UI_NOT_SHOWN_REASON__NO_SAVE_REASON_FIELD_VALIDATION_FAILED;
   public static final int NO_SAVE_REASON_DATASET_MATCH =
       AUTOFILL_SAVE_EVENT_REPORTED__SAVE_UI_NOT_SHOWN_REASON__NO_SAVE_REASON_DATASET_MATCH;
+  public static final int NO_SAVE_REASON_SESSION_DESTROYED =
+      AUTOFILL_SAVE_EVENT_REPORTED__SAVE_UI_NOT_SHOWN_REASON__NO_SAVE_REASON_SESSION_DESTROYED;
+  public static final int NO_SAVE_REASON_WITH_DONT_SAVE_ON_FINISH_FLAG =
+      AUTOFILL_SAVE_EVENT_REPORTED__SAVE_UI_NOT_SHOWN_REASON__NO_SAVE_REASON_WITH_DONT_SAVE_ON_FINISH_FLAG;
 
   private final int mSessionId;
   private Optional<SaveEventInternal> mEventInternal;
