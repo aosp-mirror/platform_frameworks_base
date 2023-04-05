@@ -1678,8 +1678,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStatusBarStateController.addCallback(mStateListener,
                 SysuiStatusBarStateController.RANK_STATUS_BAR);
         mBiometricUnlockController = mBiometricUnlockControllerLazy.get();
-        mBiometricUnlockController.addBiometricModeListener(
-                new BiometricUnlockController.BiometricModeListener() {
+        mBiometricUnlockController.addListener(
+                new BiometricUnlockController.BiometricUnlockEventsListener() {
                     @Override
                     public void onResetMode() {
                         setWakeAndUnlocking(false);
