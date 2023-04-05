@@ -976,6 +976,7 @@ public class AccessibilityRecord {
         append(builder, "AddedCount", mAddedCount);
         append(builder, "RemovedCount", mRemovedCount);
         append(builder, "ParcelableData", mParcelableData);
+        append(builder, "DisplayId", mSourceDisplayId);
         builder.append(" ]");
         return builder;
     }
