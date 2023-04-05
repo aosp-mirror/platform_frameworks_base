@@ -16,12 +16,16 @@
 
 package android.service.credentials;
 
+import android.os.ICancellationSignal;
+
+
 /**
  * Callback for onClearCredentialState request.
  *
  * @hide
  */
-interface IClearCredentialStateCallback {
-    oneway void onSuccess();
-    oneway void onFailure(String errorType, CharSequence message);
+oneway interface IClearCredentialStateCallback {
+    void onSuccess();
+    void onFailure(String errorType, CharSequence message);
+    void onCancellable(in ICancellationSignal cancellation);
 }
