@@ -1857,6 +1857,17 @@ public final class DevicePolicyResources {
             public static final String WORK_PROFILE_TELEPHONY_PAUSED_TURN_ON_BUTTON =
                     PREFIX + "TURN_ON_WORK_PROFILE_BUTTON_TEXT";
 
+            public static final String MINIRESOLVER_OPEN_IN_WORK =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_WORK";
+
+            public static final String MINIRESOLVER_OPEN_IN_PERSONAL =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_PERSONAL";
+
+            public static final String MINIRESOLVER_USE_WORK_BROWSER =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_PERSONAL";
+
+            public static final String MINIRESOLVER_USE_PERSONAL_BROWSER =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_PERSONAL";
         }
 
         /**
