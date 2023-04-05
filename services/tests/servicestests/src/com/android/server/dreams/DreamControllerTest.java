@@ -25,6 +25,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ServiceConnection;
@@ -54,6 +55,10 @@ public class DreamControllerTest {
     private DreamController.Listener mListener;
     @Mock
     private Context mContext;
+
+    @Mock
+    private ActivityTaskManager mActivityTaskManager;
+
     @Mock
     private IBinder mIBinder;
     @Mock
@@ -80,6 +85,10 @@ public class DreamControllerTest {
         when(mIDreamService.asBinder()).thenReturn(mIBinder);
         when(mIBinder.queryLocalInterface(anyString())).thenReturn(mIDreamService);
         when(mContext.bindServiceAsUser(any(), any(), anyInt(), any())).thenReturn(true);
+        when(mContext.getSystemService(Context.ACTIVITY_TASK_SERVICE))
+                .thenReturn(mActivityTaskManager);
+        when(mContext.getSystemServiceName(ActivityTaskManager.class))
+                .thenReturn(Context.ACTIVITY_TASK_SERVICE);
 
         mToken = new Binder();
         mDreamName = ComponentName.unflattenFromString("dream");
@@ -101,6 +110,37 @@ public class DreamControllerTest {
         // Verify that dream service is called to attach.
         verify(mIDreamService).attach(eq(mToken), eq(false) /*doze*/,
                 eq(false) /*preview*/, any());
+    }
+
+    @Test
+    public void startDream_dreamListenerNotified() {
+        // Call dream controller to start dreaming.
+        mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
+                0 /*userId*/, null /*wakeLock*/, mOverlayName, "test" /*reason*/);
+
+        // Mock service connected.
+        final ServiceConnection serviceConnection = captureServiceConnection();
+        serviceConnection.onServiceConnected(mDreamName, mIBinder);
+        mLooper.dispatchAll();
+
+        // Verify that dream service is called to attach.
+        verify(mListener).onDreamStarted(any());
+    }
+
+    @Test
+    public void stopDream_dreamListenerNotified() {
+        // Start dream.
+        mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
+                0 /*userId*/, null /*wakeLock*/, mOverlayName, "test" /*reason*/);
+        captureServiceConnection().onServiceConnected(mDreamName, mIBinder);
+        mLooper.dispatchAll();
+
+        // Stop dream.
+        mDreamController.stopDream(true /*immediate*/, "test stop dream" /*reason*/);
+        mLooper.dispatchAll();
+
+        // Verify that dream service is called to detach.
+        verify(mListener).onDreamStopped(any());
     }
 
     @Test
