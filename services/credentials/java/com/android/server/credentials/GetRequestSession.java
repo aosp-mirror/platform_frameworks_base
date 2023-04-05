@@ -35,6 +35,7 @@ import android.util.Log;
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -45,22 +46,26 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
         IGetCredentialCallback, GetCredentialResponse>
         implements ProviderSession.ProviderInternalCallback<GetCredentialResponse> {
     private static final String TAG = "GetRequestSession";
+
     public GetRequestSession(Context context, RequestSession.SessionLifetime sessionCallback,
             Object lock, int userId, int callingUid,
             IGetCredentialCallback callback, GetCredentialRequest request,
-            CallingAppInfo callingAppInfo, CancellationSignal cancellationSignal,
+            CallingAppInfo callingAppInfo, Set<ComponentName> enabledProviders,
+            CancellationSignal cancellationSignal,
             long startedTimestamp) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
-                RequestInfo.TYPE_GET, callingAppInfo, cancellationSignal, startedTimestamp);
+                RequestInfo.TYPE_GET, callingAppInfo, enabledProviders, cancellationSignal,
+                startedTimestamp);
         int numTypes = (request.getCredentialOptions().stream()
                 .map(CredentialOption::getType).collect(
-                Collectors.toSet())).size(); // Dedupe type strings
+                        Collectors.toSet())).size(); // Dedupe type strings
         mRequestSessionMetric.collectGetFlowInitialMetricInfo(numTypes);
     }
 
     /**
      * Creates a new provider session, and adds it list of providers that are contributing to
      * this session.
+     *
      * @return the provider session created within this request session, for the given provider
      * info.
      */
@@ -149,7 +154,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     @Override
     public void onUiSelectorInvocationFailure() {
         respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
-                    "No credentials available.");
+                "No credentials available.");
     }
 
     @Override

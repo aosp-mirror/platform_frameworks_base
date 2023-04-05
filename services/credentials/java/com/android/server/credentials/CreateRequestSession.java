@@ -38,6 +38,7 @@ import android.util.Log;
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Central session for a single {@link CredentialManager#createCredential} request.
@@ -54,11 +55,12 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
             CreateCredentialRequest request,
             ICreateCredentialCallback callback,
             CallingAppInfo callingAppInfo,
+            Set<ComponentName> enabledProviders,
             CancellationSignal cancellationSignal,
             long startedTimestamp) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
                 RequestInfo.TYPE_CREATE,
-                callingAppInfo, cancellationSignal, startedTimestamp);
+                callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp);
     }
 
     /**

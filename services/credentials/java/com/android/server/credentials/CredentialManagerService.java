@@ -458,6 +458,7 @@ public final class CredentialManagerService
                             callback,
                             request,
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
+                            getEnabledProviders(),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan);
             addSessionLocked(userId, session);
@@ -512,6 +513,7 @@ public final class CredentialManagerService
                             getCredentialCallback,
                             request,
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
+                            getEnabledProviders(),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan,
                             prepareGetCredentialCallback);
@@ -629,6 +631,7 @@ public final class CredentialManagerService
                             request,
                             callback,
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
+                            getEnabledProviders(),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan);
             addSessionLocked(userId, session);
@@ -846,6 +849,7 @@ public final class CredentialManagerService
                             callback,
                             request,
                             constructCallingAppInfo(callingPackage, userId, null),
+                            getEnabledProviders(),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan);
             addSessionLocked(userId, session);

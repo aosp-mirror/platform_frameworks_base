@@ -30,6 +30,7 @@ import android.service.credentials.CallingAppInfo;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Central session for a single clearCredentialState request. This class listens to the
@@ -43,11 +44,12 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     public ClearRequestSession(Context context, RequestSession.SessionLifetime sessionCallback,
             Object lock, int userId, int callingUid,
             IClearCredentialStateCallback callback, ClearCredentialStateRequest request,
-            CallingAppInfo callingAppInfo, CancellationSignal cancellationSignal,
+            CallingAppInfo callingAppInfo, Set<ComponentName> enabledProviders,
+            CancellationSignal cancellationSignal,
             long startedTimestamp) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
                 RequestInfo.TYPE_UNDEFINED,
-                callingAppInfo, cancellationSignal, startedTimestamp);
+                callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp);
     }
 
     /**

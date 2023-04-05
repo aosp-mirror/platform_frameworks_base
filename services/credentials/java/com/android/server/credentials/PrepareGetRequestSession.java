@@ -52,10 +52,11 @@ public class PrepareGetRequestSession extends GetRequestSession {
     public PrepareGetRequestSession(Context context,
             RequestSession.SessionLifetime sessionCallback, Object lock, int userId,
             int callingUid, IGetCredentialCallback getCredCallback, GetCredentialRequest request,
-            CallingAppInfo callingAppInfo, CancellationSignal cancellationSignal,
-            long startedTimestamp, IPrepareGetCredentialCallback prepareGetCredentialCallback) {
+            CallingAppInfo callingAppInfo, Set<ComponentName> enabledProviders,
+            CancellationSignal cancellationSignal, long startedTimestamp,
+            IPrepareGetCredentialCallback prepareGetCredentialCallback) {
         super(context, sessionCallback, lock, userId, callingUid, getCredCallback, request,
-                callingAppInfo, cancellationSignal, startedTimestamp);
+                callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp);
         int numTypes = (request.getCredentialOptions().stream()
                 .map(CredentialOption::getType).collect(
                         Collectors.toSet())).size(); // Dedupe type strings
