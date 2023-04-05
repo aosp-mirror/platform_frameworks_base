@@ -265,6 +265,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean DEBUG_KEEP_SCREEN_ON = false || LOCAL_LOGV;
     private static final boolean DEBUG_CONTENT_CAPTURE = false || LOCAL_LOGV;
     private static final boolean DEBUG_SCROLL_CAPTURE = false || LOCAL_LOGV;
+    private static final boolean DEBUG_TOUCH_NAVIGATION = false || LOCAL_LOGV;
     private static final boolean DEBUG_BLAST = false || LOCAL_LOGV;
     private static final int LOGTAG_INPUT_FOCUS = 62001;
 
@@ -7122,7 +7123,8 @@ public final class ViewRootImpl implements ViewParent,
                         mJoystick.cancel();
                     } else if ((source & InputDevice.SOURCE_TOUCH_NAVIGATION)
                             == InputDevice.SOURCE_TOUCH_NAVIGATION) {
-                        mTouchNavigation.cancel(event);
+                        // Touch navigation events cannot be cancelled since they are dispatched
+                        // immediately.
                     }
                 }
             }
@@ -7641,392 +7643,109 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
-     * Creates dpad events from unhandled touch navigation movements.
+     * Creates DPAD events from unhandled touch navigation movements.
      */
     final class SyntheticTouchNavigationHandler extends Handler {
         private static final String LOCAL_TAG = "SyntheticTouchNavigationHandler";
-        private static final boolean LOCAL_DEBUG = false;
 
-        // Assumed nominal width and height in millimeters of a touch navigation pad,
-        // if no resolution information is available from the input system.
-        private static final float DEFAULT_WIDTH_MILLIMETERS = 48;
-        private static final float DEFAULT_HEIGHT_MILLIMETERS = 48;
-
-        /* TODO: These constants should eventually be moved to ViewConfiguration. */
-
-        // The nominal distance traveled to move by one unit.
-        private static final int TICK_DISTANCE_MILLIMETERS = 12;
-
-        // Minimum and maximum fling velocity in ticks per second.
-        // The minimum velocity should be set such that we perform enough ticks per
-        // second that the fling appears to be fluid.  For example, if we set the minimum
-        // to 2 ticks per second, then there may be up to half a second delay between the next
-        // to last and last ticks which is noticeably discrete and jerky.  This value should
-        // probably not be set to anything less than about 4.
-        // If fling accuracy is a problem then consider tuning the tick distance instead.
-        private static final float MIN_FLING_VELOCITY_TICKS_PER_SECOND = 6f;
-        private static final float MAX_FLING_VELOCITY_TICKS_PER_SECOND = 20f;
-
-        // Fling velocity decay factor applied after each new key is emitted.
-        // This parameter controls the deceleration and overall duration of the fling.
-        // The fling stops automatically when its velocity drops below the minimum
-        // fling velocity defined above.
-        private static final float FLING_TICK_DECAY = 0.8f;
-
-        /* The input device that we are tracking. */
-
+        // The id of the input device that is being tracked.
         private int mCurrentDeviceId = -1;
         private int mCurrentSource;
-        private boolean mCurrentDeviceSupported;
 
-        /* Configuration for the current input device. */
-
-        // The scaled tick distance.  A movement of this amount should generally translate
-        // into a single dpad event in a given direction.
-        private float mConfigTickDistance;
-
-        // The minimum and maximum scaled fling velocity.
-        private float mConfigMinFlingVelocity;
-        private float mConfigMaxFlingVelocity;
-
-        /* Tracking state. */
-
-        // The velocity tracker for detecting flings.
-        private VelocityTracker mVelocityTracker;
-
-        // The active pointer id, or -1 if none.
-        private int mActivePointerId = -1;
-
-        // Location where tracking started.
-        private float mStartX;
-        private float mStartY;
-
-        // Most recently observed position.
-        private float mLastX;
-        private float mLastY;
-
-        // Accumulated movement delta since the last direction key was sent.
-        private float mAccumulatedX;
-        private float mAccumulatedY;
-
-        // Set to true if any movement was delivered to the app.
-        // Implies that tap slop was exceeded.
-        private boolean mConsumedMovement;
-
-        // The most recently sent key down event.
-        // The keycode remains set until the direction changes or a fling ends
-        // so that repeated key events may be generated as required.
-        private long mPendingKeyDownTime;
-        private int mPendingKeyCode = KeyEvent.KEYCODE_UNKNOWN;
-        private int mPendingKeyRepeatCount;
         private int mPendingKeyMetaState;
 
-        // The current fling velocity while a fling is in progress.
-        private boolean mFlinging;
-        private float mFlingVelocity;
+        private final GestureDetector mGestureDetector = new GestureDetector(mContext,
+                new GestureDetector.OnGestureListener() {
+                    @Override
+                    public boolean onDown(@NonNull MotionEvent e) {
+                        // This can be ignored since it's not clear what KeyEvent this will
+                        // belong to.
+                        return true;
+                    }
 
-        public SyntheticTouchNavigationHandler() {
+                    @Override
+                    public void onShowPress(@NonNull MotionEvent e) {
+
+                    }
+
+                    @Override
+                    public boolean onSingleTapUp(@NonNull MotionEvent e) {
+                        dispatchTap(e.getEventTime());
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2,
+                            float distanceX, float distanceY) {
+                        // Scroll doesn't translate to DPAD events so should be ignored.
+                        return true;
+                    }
+
+                    @Override
+                    public void onLongPress(@NonNull MotionEvent e) {
+                        // Long presses don't translate to DPAD events so should be ignored.
+                    }
+
+                    @Override
+                    public boolean onFling(@Nullable MotionEvent e1, @NonNull MotionEvent e2,
+                            float velocityX, float velocityY) {
+                        dispatchFling(velocityX, velocityY, e2.getEventTime());
+                        return true;
+                    }
+                });
+
+        SyntheticTouchNavigationHandler() {
             super(true);
         }
 
         public void process(MotionEvent event) {
+            if (event.getDevice() == null) {
+                // The current device is not supported.
+                if (DEBUG_TOUCH_NAVIGATION) {
+                    Log.d(LOCAL_TAG,
+                            "Current device not supported so motion event is not processed");
+                }
+                return;
+            }
+            mPendingKeyMetaState = event.getMetaState();
             // Update the current device information.
-            final long time = event.getEventTime();
             final int deviceId = event.getDeviceId();
             final int source = event.getSource();
             if (mCurrentDeviceId != deviceId || mCurrentSource != source) {
-                finishKeys(time);
-                finishTracking(time);
                 mCurrentDeviceId = deviceId;
                 mCurrentSource = source;
-                mCurrentDeviceSupported = false;
-                InputDevice device = event.getDevice();
-                if (device != null) {
-                    // In order to support an input device, we must know certain
-                    // characteristics about it, such as its size and resolution.
-                    InputDevice.MotionRange xRange = device.getMotionRange(MotionEvent.AXIS_X);
-                    InputDevice.MotionRange yRange = device.getMotionRange(MotionEvent.AXIS_Y);
-                    if (xRange != null && yRange != null) {
-                        mCurrentDeviceSupported = true;
-
-                        // Infer the resolution if it not actually known.
-                        float xRes = xRange.getResolution();
-                        if (xRes <= 0) {
-                            xRes = xRange.getRange() / DEFAULT_WIDTH_MILLIMETERS;
-                        }
-                        float yRes = yRange.getResolution();
-                        if (yRes <= 0) {
-                            yRes = yRange.getRange() / DEFAULT_HEIGHT_MILLIMETERS;
-                        }
-                        float nominalRes = (xRes + yRes) * 0.5f;
-
-                        // Precompute all of the configuration thresholds we will need.
-                        mConfigTickDistance = TICK_DISTANCE_MILLIMETERS * nominalRes;
-                        mConfigMinFlingVelocity =
-                                MIN_FLING_VELOCITY_TICKS_PER_SECOND * mConfigTickDistance;
-                        mConfigMaxFlingVelocity =
-                                MAX_FLING_VELOCITY_TICKS_PER_SECOND * mConfigTickDistance;
-
-                        if (LOCAL_DEBUG) {
-                            Log.d(LOCAL_TAG, "Configured device " + mCurrentDeviceId
-                                    + " (" + Integer.toHexString(mCurrentSource) + "): "
-                                    + ", mConfigTickDistance=" + mConfigTickDistance
-                                    + ", mConfigMinFlingVelocity=" + mConfigMinFlingVelocity
-                                    + ", mConfigMaxFlingVelocity=" + mConfigMaxFlingVelocity);
-                        }
-                    }
-                }
-            }
-            if (!mCurrentDeviceSupported) {
-                return;
             }
 
-            // Handle the event.
-            final int action = event.getActionMasked();
-            switch (action) {
-                case MotionEvent.ACTION_DOWN: {
-                    boolean caughtFling = mFlinging;
-                    finishKeys(time);
-                    finishTracking(time);
-                    mActivePointerId = event.getPointerId(0);
-                    mVelocityTracker = VelocityTracker.obtain();
-                    mVelocityTracker.addMovement(event);
-                    mStartX = event.getX();
-                    mStartY = event.getY();
-                    mLastX = mStartX;
-                    mLastY = mStartY;
-                    mAccumulatedX = 0;
-                    mAccumulatedY = 0;
-
-                    // If we caught a fling, then pretend that the tap slop has already
-                    // been exceeded to suppress taps whose only purpose is to stop the fling.
-                    mConsumedMovement = caughtFling;
-                    break;
-                }
-
-                case MotionEvent.ACTION_MOVE:
-                case MotionEvent.ACTION_UP: {
-                    if (mActivePointerId < 0) {
-                        break;
-                    }
-                    final int index = event.findPointerIndex(mActivePointerId);
-                    if (index < 0) {
-                        finishKeys(time);
-                        finishTracking(time);
-                        break;
-                    }
-
-                    mVelocityTracker.addMovement(event);
-                    final float x = event.getX(index);
-                    final float y = event.getY(index);
-                    mAccumulatedX += x - mLastX;
-                    mAccumulatedY += y - mLastY;
-                    mLastX = x;
-                    mLastY = y;
-
-                    // Consume any accumulated movement so far.
-                    final int metaState = event.getMetaState();
-                    consumeAccumulatedMovement(time, metaState);
-
-                    // Detect taps and flings.
-                    if (action == MotionEvent.ACTION_UP) {
-                        if (mConsumedMovement && mPendingKeyCode != KeyEvent.KEYCODE_UNKNOWN) {
-                            // It might be a fling.
-                            mVelocityTracker.computeCurrentVelocity(1000, mConfigMaxFlingVelocity);
-                            final float vx = mVelocityTracker.getXVelocity(mActivePointerId);
-                            final float vy = mVelocityTracker.getYVelocity(mActivePointerId);
-                            if (!startFling(time, vx, vy)) {
-                                finishKeys(time);
-                            }
-                        }
-                        finishTracking(time);
-                    }
-                    break;
-                }
-
-                case MotionEvent.ACTION_CANCEL: {
-                    finishKeys(time);
-                    finishTracking(time);
-                    break;
-                }
-            }
+            // Interpret the event.
+            mGestureDetector.onTouchEvent(event);
         }
 
-        public void cancel(MotionEvent event) {
-            if (mCurrentDeviceId == event.getDeviceId()
-                    && mCurrentSource == event.getSource()) {
-                final long time = event.getEventTime();
-                finishKeys(time);
-                finishTracking(time);
-            }
+        private void dispatchTap(long time) {
+            dispatchEvent(time, KeyEvent.KEYCODE_DPAD_CENTER);
         }
 
-        private void finishKeys(long time) {
-            cancelFling();
-            sendKeyUp(time);
-        }
-
-        private void finishTracking(long time) {
-            if (mActivePointerId >= 0) {
-                mActivePointerId = -1;
-                mVelocityTracker.recycle();
-                mVelocityTracker = null;
-            }
-        }
-
-        private void consumeAccumulatedMovement(long time, int metaState) {
-            final float absX = Math.abs(mAccumulatedX);
-            final float absY = Math.abs(mAccumulatedY);
-            if (absX >= absY) {
-                if (absX >= mConfigTickDistance) {
-                    mAccumulatedX = consumeAccumulatedMovement(time, metaState, mAccumulatedX,
-                            KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_RIGHT);
-                    mAccumulatedY = 0;
-                    mConsumedMovement = true;
-                }
+        private void dispatchFling(float x, float y, long time) {
+            if (Math.abs(x) > Math.abs(y)) {
+                dispatchEvent(time,
+                        x > 0 ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT);
             } else {
-                if (absY >= mConfigTickDistance) {
-                    mAccumulatedY = consumeAccumulatedMovement(time, metaState, mAccumulatedY,
-                            KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN);
-                    mAccumulatedX = 0;
-                    mConsumedMovement = true;
-                }
+                dispatchEvent(time, y > 0 ? KeyEvent.KEYCODE_DPAD_DOWN : KeyEvent.KEYCODE_DPAD_UP);
             }
         }
 
-        private float consumeAccumulatedMovement(long time, int metaState,
-                float accumulator, int negativeKeyCode, int positiveKeyCode) {
-            while (accumulator <= -mConfigTickDistance) {
-                sendKeyDownOrRepeat(time, negativeKeyCode, metaState);
-                accumulator += mConfigTickDistance;
+        private void dispatchEvent(long time, int keyCode) {
+            if (DEBUG_TOUCH_NAVIGATION) {
+                Log.d(LOCAL_TAG, "Dispatching DPAD events DOWN and UP with keycode " + keyCode);
             }
-            while (accumulator >= mConfigTickDistance) {
-                sendKeyDownOrRepeat(time, positiveKeyCode, metaState);
-                accumulator -= mConfigTickDistance;
-            }
-            return accumulator;
+            enqueueInputEvent(new KeyEvent(time, time,
+                    KeyEvent.ACTION_DOWN, keyCode, /* repeat= */ 0, mPendingKeyMetaState,
+                    mCurrentDeviceId, /* scancode= */ 0, KeyEvent.FLAG_FALLBACK,
+                    mCurrentSource));
+            enqueueInputEvent(new KeyEvent(time, time,
+                    KeyEvent.ACTION_UP, keyCode, /* repeat= */ 0, mPendingKeyMetaState,
+                    mCurrentDeviceId, /* scancode= */ 0, KeyEvent.FLAG_FALLBACK,
+                    mCurrentSource));
         }
-
-        private void sendKeyDownOrRepeat(long time, int keyCode, int metaState) {
-            if (mPendingKeyCode != keyCode) {
-                sendKeyUp(time);
-                mPendingKeyDownTime = time;
-                mPendingKeyCode = keyCode;
-                mPendingKeyRepeatCount = 0;
-            } else {
-                mPendingKeyRepeatCount += 1;
-            }
-            mPendingKeyMetaState = metaState;
-
-            // Note: Normally we would pass FLAG_LONG_PRESS when the repeat count is 1
-            // but it doesn't quite make sense when simulating the events in this way.
-            if (LOCAL_DEBUG) {
-                Log.d(LOCAL_TAG, "Sending key down: keyCode=" + mPendingKeyCode
-                        + ", repeatCount=" + mPendingKeyRepeatCount
-                        + ", metaState=" + Integer.toHexString(mPendingKeyMetaState));
-            }
-            enqueueInputEvent(new KeyEvent(mPendingKeyDownTime, time,
-                    KeyEvent.ACTION_DOWN, mPendingKeyCode, mPendingKeyRepeatCount,
-                    mPendingKeyMetaState, mCurrentDeviceId,
-                    KeyEvent.FLAG_FALLBACK, mCurrentSource));
-        }
-
-        private void sendKeyUp(long time) {
-            if (mPendingKeyCode != KeyEvent.KEYCODE_UNKNOWN) {
-                if (LOCAL_DEBUG) {
-                    Log.d(LOCAL_TAG, "Sending key up: keyCode=" + mPendingKeyCode
-                            + ", metaState=" + Integer.toHexString(mPendingKeyMetaState));
-                }
-                enqueueInputEvent(new KeyEvent(mPendingKeyDownTime, time,
-                        KeyEvent.ACTION_UP, mPendingKeyCode, 0, mPendingKeyMetaState,
-                        mCurrentDeviceId, 0, KeyEvent.FLAG_FALLBACK,
-                        mCurrentSource));
-                mPendingKeyCode = KeyEvent.KEYCODE_UNKNOWN;
-            }
-        }
-
-        private boolean startFling(long time, float vx, float vy) {
-            if (LOCAL_DEBUG) {
-                Log.d(LOCAL_TAG, "Considering fling: vx=" + vx + ", vy=" + vy
-                        + ", min=" + mConfigMinFlingVelocity);
-            }
-
-            // Flings must be oriented in the same direction as the preceding movements.
-            switch (mPendingKeyCode) {
-                case KeyEvent.KEYCODE_DPAD_LEFT:
-                    if (-vx >= mConfigMinFlingVelocity
-                            && Math.abs(vy) < mConfigMinFlingVelocity) {
-                        mFlingVelocity = -vx;
-                        break;
-                    }
-                    return false;
-
-                case KeyEvent.KEYCODE_DPAD_RIGHT:
-                    if (vx >= mConfigMinFlingVelocity
-                            && Math.abs(vy) < mConfigMinFlingVelocity) {
-                        mFlingVelocity = vx;
-                        break;
-                    }
-                    return false;
-
-                case KeyEvent.KEYCODE_DPAD_UP:
-                    if (-vy >= mConfigMinFlingVelocity
-                            && Math.abs(vx) < mConfigMinFlingVelocity) {
-                        mFlingVelocity = -vy;
-                        break;
-                    }
-                    return false;
-
-                case KeyEvent.KEYCODE_DPAD_DOWN:
-                    if (vy >= mConfigMinFlingVelocity
-                            && Math.abs(vx) < mConfigMinFlingVelocity) {
-                        mFlingVelocity = vy;
-                        break;
-                    }
-                    return false;
-            }
-
-            // Post the first fling event.
-            mFlinging = postFling(time);
-            return mFlinging;
-        }
-
-        private boolean postFling(long time) {
-            // The idea here is to estimate the time when the pointer would have
-            // traveled one tick distance unit given the current fling velocity.
-            // This effect creates continuity of motion.
-            if (mFlingVelocity >= mConfigMinFlingVelocity) {
-                long delay = (long)(mConfigTickDistance / mFlingVelocity * 1000);
-                postAtTime(mFlingRunnable, time + delay);
-                if (LOCAL_DEBUG) {
-                    Log.d(LOCAL_TAG, "Posted fling: velocity="
-                            + mFlingVelocity + ", delay=" + delay
-                            + ", keyCode=" + mPendingKeyCode);
-                }
-                return true;
-            }
-            return false;
-        }
-
-        private void cancelFling() {
-            if (mFlinging) {
-                removeCallbacks(mFlingRunnable);
-                mFlinging = false;
-            }
-        }
-
-        private final Runnable mFlingRunnable = new Runnable() {
-            @Override
-            public void run() {
-                final long time = SystemClock.uptimeMillis();
-                sendKeyDownOrRepeat(time, mPendingKeyCode, mPendingKeyMetaState);
-                mFlingVelocity *= FLING_TICK_DECAY;
-                if (!postFling(time)) {
-                    mFlinging = false;
-                    finishKeys(time);
-                }
-            }
-        };
     }
 
     final class SyntheticKeyboardHandler {
