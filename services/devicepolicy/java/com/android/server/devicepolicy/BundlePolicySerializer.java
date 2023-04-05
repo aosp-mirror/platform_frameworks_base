@@ -53,6 +53,10 @@ import java.util.Objects;
 //  rather than in its own files.
 final class BundlePolicySerializer extends PolicySerializer<Bundle> {
 
+    private static final String TAG = "BundlePolicySerializer";
+
+    private static final String ATTR_FILE_NAME = "file-name";
+
     private static final String RESTRICTIONS_FILE_PREFIX = "AppRestrictions_";
     private static final String XML_SUFFIX = ".xml";
 
@@ -72,7 +76,7 @@ final class BundlePolicySerializer extends PolicySerializer<Bundle> {
 
     @Override
     void saveToXml(@NonNull PolicyKey policyKey, TypedXmlSerializer serializer,
-            String attributeName, @NonNull Bundle value) throws IOException {
+            @NonNull Bundle value) throws IOException {
         Objects.requireNonNull(value);
         Objects.requireNonNull(policyKey);
         if (!(policyKey instanceof PackagePolicyKey)) {
@@ -82,13 +86,13 @@ final class BundlePolicySerializer extends PolicySerializer<Bundle> {
         String packageName = ((PackagePolicyKey) policyKey).getPackageName();
         String fileName = packageToRestrictionsFileName(packageName, value);
         writeApplicationRestrictionsLAr(fileName, value);
-        serializer.attribute(/* namespace= */ null, attributeName, fileName);
+        serializer.attribute(/* namespace= */ null, ATTR_FILE_NAME, fileName);
     }
 
     @Nullable
     @Override
-    BundlePolicyValue readFromXml(TypedXmlPullParser parser, String attributeName) {
-        String fileName = parser.getAttributeValue(/* namespace= */ null, attributeName);
+    BundlePolicyValue readFromXml(TypedXmlPullParser parser) {
+        String fileName = parser.getAttributeValue(/* namespace= */ null, ATTR_FILE_NAME);
 
         return new BundlePolicyValue(readApplicationRestrictions(fileName));
     }
@@ -119,7 +123,7 @@ final class BundlePolicySerializer extends PolicySerializer<Bundle> {
             final TypedXmlPullParser parser = Xml.resolvePullParser(fis);
             XmlUtils.nextElement(parser);
             if (parser.getEventType() != XmlPullParser.START_TAG) {
-                Slog.e(DevicePolicyEngine.TAG, "Unable to read restrictions file "
+                Slog.e(TAG, "Unable to read restrictions file "
                         + restrictionsFile.getBaseFile());
                 return restrictions;
             }
@@ -127,7 +131,7 @@ final class BundlePolicySerializer extends PolicySerializer<Bundle> {
                 readEntry(restrictions, values, parser);
             }
         } catch (IOException | XmlPullParserException e) {
-            Slog.w(DevicePolicyEngine.TAG, "Error parsing " + restrictionsFile.getBaseFile(), e);
+            Slog.w(TAG, "Error parsing " + restrictionsFile.getBaseFile(), e);
         } finally {
             IoUtils.closeQuietly(fis);
         }
@@ -209,7 +213,7 @@ final class BundlePolicySerializer extends PolicySerializer<Bundle> {
             restrictionsFile.finishWrite(fos);
         } catch (Exception e) {
             restrictionsFile.failWrite(fos);
-            Slog.e(DevicePolicyEngine.TAG, "Error writing application restrictions list", e);
+            Slog.e(TAG, "Error writing application restrictions list", e);
         }
     }
 
