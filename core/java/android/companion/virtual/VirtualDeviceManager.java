@@ -64,6 +64,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.IntConsumer;
 
@@ -171,6 +172,7 @@ public final class VirtualDeviceManager {
     public VirtualDevice createVirtualDevice(
             int associationId,
             @NonNull VirtualDeviceParams params) {
+        Objects.requireNonNull(params, "params must not be null");
         try {
             return new VirtualDevice(mService, mContext, associationId, params);
         } catch (RemoteException e) {
@@ -409,6 +411,9 @@ public final class VirtualDeviceManager {
                 @NonNull PendingIntent pendingIntent,
                 @NonNull Executor executor,
                 @NonNull IntConsumer listener) {
+            Objects.requireNonNull(pendingIntent, "pendingIntent must not be null");
+            Objects.requireNonNull(executor, "executor must not be null");
+            Objects.requireNonNull(listener, "listener must not be null");
             mVirtualDeviceInternal.launchPendingIntent(
                     displayId, pendingIntent, executor, listener);
         }
@@ -483,6 +488,7 @@ public final class VirtualDeviceManager {
                 @NonNull VirtualDisplayConfig config,
                 @Nullable @CallbackExecutor Executor executor,
                 @Nullable VirtualDisplay.Callback callback) {
+            Objects.requireNonNull(config, "config must not be null");
             return mVirtualDeviceInternal.createVirtualDisplay(config, executor, callback);
         }
 
@@ -503,6 +509,7 @@ public final class VirtualDeviceManager {
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         public VirtualDpad createVirtualDpad(@NonNull VirtualDpadConfig config) {
+            Objects.requireNonNull(config, "config must not be null");
             return mVirtualDeviceInternal.createVirtualDpad(config);
         }
 
@@ -514,6 +521,7 @@ public final class VirtualDeviceManager {
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         public VirtualKeyboard createVirtualKeyboard(@NonNull VirtualKeyboardConfig config) {
+            Objects.requireNonNull(config, "config must not be null");
             return mVirtualDeviceInternal.createVirtualKeyboard(config);
         }
 
@@ -550,6 +558,7 @@ public final class VirtualDeviceManager {
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         public VirtualMouse createVirtualMouse(@NonNull VirtualMouseConfig config) {
+            Objects.requireNonNull(config, "config must not be null");
             return mVirtualDeviceInternal.createVirtualMouse(config);
         }
 
@@ -587,6 +596,7 @@ public final class VirtualDeviceManager {
         @NonNull
         public VirtualTouchscreen createVirtualTouchscreen(
                 @NonNull VirtualTouchscreenConfig config) {
+            Objects.requireNonNull(config, "config must not be null");
             return mVirtualDeviceInternal.createVirtualTouchscreen(config);
         }
 
@@ -659,6 +669,7 @@ public final class VirtualDeviceManager {
                 @NonNull VirtualDisplay display,
                 @Nullable Executor executor,
                 @Nullable AudioConfigurationChangeCallback callback) {
+            Objects.requireNonNull(display, "display must not be null");
             return mVirtualDeviceInternal.createVirtualAudioDevice(display, executor, callback);
         }
 

@@ -68,6 +68,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -308,6 +309,9 @@ public class VirtualDeviceManagerService extends SystemService {
             if (associationInfo == null) {
                 throw new IllegalArgumentException("No association with ID " + associationId);
             }
+            Objects.requireNonNull(params);
+            Objects.requireNonNull(activityListener);
+            Objects.requireNonNull(soundEffectListener);
 
             synchronized (mVirtualDeviceManagerLock) {
                 if (mVirtualDevices.size() == 0) {
@@ -339,6 +343,7 @@ public class VirtualDeviceManagerService extends SystemService {
         public int createVirtualDisplay(VirtualDisplayConfig virtualDisplayConfig,
                 IVirtualDisplayCallback callback, IVirtualDevice virtualDevice, String packageName)
                 throws RemoteException {
+            Objects.requireNonNull(virtualDisplayConfig);
             final int callingUid = getCallingUid();
             if (!PermissionUtils.validateCallingPackageName(getContext(), packageName)) {
                 throw new SecurityException(
