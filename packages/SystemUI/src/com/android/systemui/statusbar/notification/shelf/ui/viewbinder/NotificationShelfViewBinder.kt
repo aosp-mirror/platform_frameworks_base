@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.shelf.ui.viewbinder
 
 import android.view.View
-import android.view.View.OnAttachStateChangeListener
 import android.view.accessibility.AccessibilityManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -29,7 +28,6 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.NotificationShelfController
-import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController
 import com.android.systemui.statusbar.notification.row.ExpandableOutlineViewController
@@ -40,9 +38,9 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.phone.NotificationTapHelper
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
+import javax.inject.Inject
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import javax.inject.Inject
 
 /**
  * Controller class for [NotificationShelf]. This implementation serves as a temporary wrapper
@@ -61,7 +59,6 @@ constructor(
     private val a11yManager: AccessibilityManager,
     private val falsingManager: FalsingManager,
     private val falsingCollector: FalsingCollector,
-    private val statusBarStateController: SysuiStatusBarStateController,
 ) : NotificationShelfController {
 
     override val view: NotificationShelf
@@ -87,23 +84,6 @@ constructor(
                 falsingCollector,
             )
             .init()
-        val onAttachStateListener =
-            object : OnAttachStateChangeListener {
-                override fun onViewAttachedToWindow(v: View) {
-                    statusBarStateController.addCallback(
-                        shelf,
-                        SysuiStatusBarStateController.RANK_SHELF,
-                    )
-                }
-
-                override fun onViewDetachedFromWindow(v: View) {
-                    statusBarStateController.removeCallback(shelf)
-                }
-            }
-        shelf.addOnAttachStateChangeListener(onAttachStateListener)
-        if (shelf.isAttachedToWindow) {
-            onAttachStateListener.onViewAttachedToWindow(shelf)
-        }
     }
 
     override val intrinsicHeight: Int
@@ -141,6 +121,7 @@ object NotificationShelfViewBinder {
                 viewModel.canModifyColorOfNotifications
                     .onEach(shelf::setCanModifyColorOfNotifications)
                     .launchIn(this)
+                viewModel.isClickable.onEach(shelf::setCanInteract).launchIn(this)
             }
         }
     }

@@ -99,6 +99,7 @@ public class NotificationShelf extends ActivatableNotificationView implements St
     private boolean mSensitiveRevealAnimEndabled;
     private boolean mShelfRefactorFlagEnabled;
     private boolean mCanModifyColorOfNotifications;
+    private boolean mCanInteract;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -922,16 +923,25 @@ public class NotificationShelf extends ActivatableNotificationView implements St
 
     @Override
     public void onStateChanged(int newState) {
+        assertRefactorFlagDisabled();
         mStatusBarState = newState;
         updateInteractiveness();
     }
 
     private void updateInteractiveness() {
-        mInteractive = mStatusBarState == StatusBarState.KEYGUARD && mHasItemsInStableShelf;
+        mInteractive = canInteract() && mHasItemsInStableShelf;
         setClickable(mInteractive);
         setFocusable(mInteractive);
         setImportantForAccessibility(mInteractive ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
                 : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+    }
+
+    private boolean canInteract() {
+        if (mShelfRefactorFlagEnabled) {
+            return mCanInteract;
+        } else {
+            return mStatusBarState == StatusBarState.KEYGUARD;
+        }
     }
 
     @Override
@@ -993,6 +1003,12 @@ public class NotificationShelf extends ActivatableNotificationView implements St
     public void setCanModifyColorOfNotifications(boolean canModifyColorOfNotifications) {
         if (!checkRefactorFlagEnabled()) return;
         mCanModifyColorOfNotifications = canModifyColorOfNotifications;
+    }
+
+    public void setCanInteract(boolean canInteract) {
+        if (!checkRefactorFlagEnabled()) return;
+        mCanInteract = canInteract;
+        updateInteractiveness();
     }
 
     public void setIndexOfFirstViewInShelf(ExpandableView firstViewInShelf) {

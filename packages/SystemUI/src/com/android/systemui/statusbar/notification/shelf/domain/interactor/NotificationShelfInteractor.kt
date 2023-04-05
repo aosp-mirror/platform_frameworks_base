@@ -32,6 +32,10 @@ constructor(
     private val keyguardRepository: KeyguardRepository,
     private val deviceEntryFaceAuthRepository: DeviceEntryFaceAuthRepository,
 ) {
+    /** Is the shelf showing on the keyguard? */
+    val isShowingOnKeyguard: Flow<Boolean>
+        get() = keyguardRepository.isKeyguardShowing
+
     /** Is the system in a state where the shelf is just a static display of notification icons? */
     val isShelfStatic: Flow<Boolean>
         get() =
