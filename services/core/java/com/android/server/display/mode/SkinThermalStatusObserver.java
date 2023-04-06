@@ -102,7 +102,7 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
     //region DisplayManager.DisplayListener
     @Override
     public void onDisplayAdded(int displayId) {
-        updateRefreshRateThermalThrottling(displayId);
+        updateThermalRefreshRateThrottling(displayId);
         if (mLoggingEnabled) {
             Slog.d(TAG, "Display added:" + displayId);
         }
@@ -122,7 +122,7 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
 
     @Override
     public void onDisplayChanged(int displayId) {
-        updateRefreshRateThermalThrottling(displayId);
+        updateThermalRefreshRateThrottling(displayId);
         if (mLoggingEnabled) {
             Slog.d(TAG, "Display changed:" + displayId);
         }
@@ -150,7 +150,7 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
         }
     }
 
-    private void updateRefreshRateThermalThrottling(int displayId) {
+    private void updateThermalRefreshRateThrottling(int displayId) {
         DisplayInfo displayInfo = new DisplayInfo();
         mInjector.getDisplayInfo(displayId, displayInfo);
         SparseArray<SurfaceControl.RefreshRateRange> throttlingMap =
