@@ -363,12 +363,8 @@ class BackPanel(
     }
 
     fun popOffEdge(startingVelocity: Float) {
-        val heightStretchAmount = startingVelocity * 50
-        val widthStretchAmount = startingVelocity * 150
-        val scaleStretchAmount = startingVelocity * 0.8f
-        backgroundHeight.stretchTo(stretchAmount = 0f, startingVelocity = -heightStretchAmount)
-        backgroundWidth.stretchTo(stretchAmount = 0f, startingVelocity = widthStretchAmount)
-        scale.stretchTo(stretchAmount = 0f, startingVelocity = -scaleStretchAmount)
+        scale.stretchTo(stretchAmount = 0f, startingVelocity = startingVelocity * -.8f)
+        horizontalTranslation.stretchTo(stretchAmount = 0f, startingVelocity * 200f)
     }
 
     fun popScale(startingVelocity: Float) {
@@ -410,7 +406,7 @@ class BackPanel(
         arrowAlpha.updateRestingPosition(restingParams.arrowDimens.alpha, animate)
         arrowLength.updateRestingPosition(restingParams.arrowDimens.length, animate)
         arrowHeight.updateRestingPosition(restingParams.arrowDimens.height, animate)
-        scalePivotX.updateRestingPosition(restingParams.backgroundDimens.width, animate)
+        scalePivotX.updateRestingPosition(restingParams.scalePivotX, animate)
         backgroundWidth.updateRestingPosition(restingParams.backgroundDimens.width, animate)
         backgroundHeight.updateRestingPosition(restingParams.backgroundDimens.height, animate)
         backgroundEdgeCornerRadius.updateRestingPosition(
