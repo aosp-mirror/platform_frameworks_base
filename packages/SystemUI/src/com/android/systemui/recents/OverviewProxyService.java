@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents;
 
+import static android.content.Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
@@ -392,6 +393,16 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final BroadcastReceiver mLauncherStateChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            StringBuilder extraComponentList = new StringBuilder(" components: ");
+            if (intent.hasExtra(EXTRA_CHANGED_COMPONENT_NAME_LIST)) {
+                String[] comps = intent.getStringArrayExtra(EXTRA_CHANGED_COMPONENT_NAME_LIST);
+                if (comps != null) {
+                    for (String c : comps) {
+                        extraComponentList.append(c).append(", ");
+                    }
+                }
+            }
+            Log.d(TAG_OPS, "launcherStateChanged intent: " + intent + extraComponentList);
             updateEnabledState();
 
             // Reconnect immediately, instead of waiting for resume to arrive.
@@ -402,9 +413,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final ServiceConnection mOverviewServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            if (SysUiState.DEBUG) {
-                Log.d(TAG_OPS, "Overview proxy service connected");
-            }
+            Log.d(TAG_OPS, "Overview proxy service connected");
             mConnectionBackoffAttempts = 0;
             mHandler.removeCallbacks(mDeferredConnectionCallback);
             try {
