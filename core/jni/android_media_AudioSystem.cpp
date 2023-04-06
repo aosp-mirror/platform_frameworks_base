@@ -2382,36 +2382,31 @@ static jint android_media_AudioSystem_getSurroundFormats(JNIEnv *env, jobject th
 
     if (jSurroundFormats == nullptr) {
         ALOGE("jSurroundFormats is NULL");
-        return (jint)AUDIO_JAVA_BAD_VALUE;
+        return static_cast<jint>(AUDIO_JAVA_BAD_VALUE);
     }
     if (!env->IsInstanceOf(jSurroundFormats, gMapClass)) {
         ALOGE("getSurroundFormats not a map");
-        return (jint)AUDIO_JAVA_BAD_VALUE;
+        return static_cast<jint>(AUDIO_JAVA_BAD_VALUE);
     }
 
     jint jStatus;
     unsigned int numSurroundFormats = 0;
-    audio_format_t *surroundFormats = nullptr;
-    bool *surroundFormatsEnabled = nullptr;
-    status_t status = AudioSystem::getSurroundFormats(&numSurroundFormats, surroundFormats,
-                                                      surroundFormatsEnabled);
+    status_t status = AudioSystem::getSurroundFormats(&numSurroundFormats, nullptr, nullptr);
     if (status != NO_ERROR) {
         ALOGE_IF(status != NO_ERROR, "AudioSystem::getSurroundFormats error %d", status);
-        jStatus = nativeToJavaStatus(status);
-        goto exit;
+        return nativeToJavaStatus(status);
     }
     if (numSurroundFormats == 0) {
-        jStatus = (jint)AUDIO_JAVA_SUCCESS;
-        goto exit;
+        return static_cast<jint>(AUDIO_JAVA_SUCCESS);
     }
-    surroundFormats = (audio_format_t *)calloc(numSurroundFormats, sizeof(audio_format_t));
-    surroundFormatsEnabled = (bool *)calloc(numSurroundFormats, sizeof(bool));
-    status = AudioSystem::getSurroundFormats(&numSurroundFormats, surroundFormats,
-                                             surroundFormatsEnabled);
+    auto surroundFormats = std::make_unique<audio_format_t[]>(numSurroundFormats);
+    auto surroundFormatsEnabled = std::make_unique<bool[]>(numSurroundFormats);
+    status = AudioSystem::getSurroundFormats(&numSurroundFormats, &surroundFormats[0],
+                                             &surroundFormatsEnabled[0]);
     jStatus = nativeToJavaStatus(status);
     if (status != NO_ERROR) {
         ALOGE_IF(status != NO_ERROR, "AudioSystem::getSurroundFormats error %d", status);
-        goto exit;
+        return jStatus;
     }
     for (size_t i = 0; i < numSurroundFormats; i++) {
         int audioFormat = audioFormatFromNative(surroundFormats[i]);
@@ -2427,9 +2422,6 @@ static jint android_media_AudioSystem_getSurroundFormats(JNIEnv *env, jobject th
         env->DeleteLocalRef(enabled);
     }
 
-exit:
-    free(surroundFormats);
-    free(surroundFormatsEnabled);
     return jStatus;
 }
 
@@ -2439,31 +2431,28 @@ static jint android_media_AudioSystem_getReportedSurroundFormats(JNIEnv *env, jo
 
     if (jSurroundFormats == nullptr) {
         ALOGE("jSurroundFormats is NULL");
-        return (jint)AUDIO_JAVA_BAD_VALUE;
+        return static_cast<jint>(AUDIO_JAVA_BAD_VALUE);
     }
     if (!env->IsInstanceOf(jSurroundFormats, gArrayListClass)) {
         ALOGE("jSurroundFormats not an arraylist");
-        return (jint)AUDIO_JAVA_BAD_VALUE;
+        return static_cast<jint>(AUDIO_JAVA_BAD_VALUE);
     }
     jint jStatus;
     unsigned int numSurroundFormats = 0;
-    audio_format_t *surroundFormats = nullptr;
-    status_t status = AudioSystem::getReportedSurroundFormats(&numSurroundFormats, surroundFormats);
+    status_t status = AudioSystem::getReportedSurroundFormats(&numSurroundFormats, nullptr);
     if (status != NO_ERROR) {
         ALOGE_IF(status != NO_ERROR, "AudioSystem::getReportedSurroundFormats error %d", status);
-        jStatus = nativeToJavaStatus(status);
-        goto exit;
+        return nativeToJavaStatus(status);
     }
     if (numSurroundFormats == 0) {
-        jStatus = (jint)AUDIO_JAVA_SUCCESS;
-        goto exit;
+        return static_cast<jint>(AUDIO_JAVA_SUCCESS);
     }
-    surroundFormats = (audio_format_t *)calloc(numSurroundFormats, sizeof(audio_format_t));
-    status = AudioSystem::getReportedSurroundFormats(&numSurroundFormats, surroundFormats);
+    auto surroundFormats = std::make_unique<audio_format_t[]>(numSurroundFormats);
+    status = AudioSystem::getReportedSurroundFormats(&numSurroundFormats, &surroundFormats[0]);
     jStatus = nativeToJavaStatus(status);
     if (status != NO_ERROR) {
         ALOGE_IF(status != NO_ERROR, "AudioSystem::getReportedSurroundFormats error %d", status);
-        goto exit;
+        return jStatus;
     }
     for (size_t i = 0; i < numSurroundFormats; i++) {
         int audioFormat = audioFormatFromNative(surroundFormats[i]);
@@ -2477,8 +2466,6 @@ static jint android_media_AudioSystem_getReportedSurroundFormats(JNIEnv *env, jo
         env->DeleteLocalRef(surroundFormat);
     }
 
-exit:
-    free(surroundFormats);
     return jStatus;
 }
 
