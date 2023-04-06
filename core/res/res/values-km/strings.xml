@@ -1685,7 +1685,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"មើល និង​គ្រប់គ្រងអេក្រង់"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"វា​អាចអានខ្លឹមសារទាំងអស់​នៅលើអេក្រង់ និងបង្ហាញខ្លឹមសារ​លើកម្មវិធីផ្សេងទៀត។"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"មើល និង​ធ្វើសកម្មភាព"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"វា​អាចតាមដានអន្តរកម្មរបស់អ្នកជាមួយនឹងកម្មវិធី ឬឧបករណ៍ចាប់​សញ្ញាហាតវែរ និងធ្វើអន្តរកម្ម​ជាមួយកម្មវិធីនានា​ជំនួសឱ្យអ្នក។"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"វា​អាចតាមដានអន្តរកម្មរបស់អ្នកជាមួយនឹងកម្មវិធី ឬសេនស័រហាតវែរ និងធ្វើអន្តរកម្ម​ជាមួយកម្មវិធីនានា​ជំនួសឱ្យអ្នក។"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"អនុញ្ញាត"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"បដិសេធ"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ចុចមុខងារណាមួយ ដើម្បចាប់ផ្ដើមប្រើ៖"</string>

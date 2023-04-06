@@ -1680,7 +1680,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"不要開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"關閉"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"允許 <xliff:g id="SERVICE">%1$s</xliff:g> 完全控制您的裝置？"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要授予「<xliff:g id="SERVICE">%1$s</xliff:g>」裝置的完整控制權？"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"對於為您提供無障礙功能的應用程式，您可授予完整控制權，但大部分應用程式都不應獲授予此權限。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看和控制螢幕"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"這項功能可以讀出螢幕上的所有內容，並透過其他應用程式顯示內容。"</string>
