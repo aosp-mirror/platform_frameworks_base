@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlo
 import com.android.systemui.statusbar.pipeline.shared.data.model.DefaultConnectionModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl.Companion.DEFAULT_HIDDEN_ICONS_RESOURCE
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl.Companion.HIDDEN_ICONS_TUNABLE_KEY
+import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl.Companion.getMainOrUnderlyingWifiInfo
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -491,6 +492,111 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun defaultConnections_nullUnderlyingInfo_noError() {
+        val mainCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(null)
+                whenever(it.underlyingNetworks).thenReturn(null)
+            }
+
+        getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, mainCapabilities)
+        // No assert, just verify no error
+    }
+
+    @Test
+    fun defaultConnections_underlyingInfoHasNullCapabilities_noError() {
+        val underlyingNetworkWithNull = mock<Network>()
+        whenever(connectivityManager.getNetworkCapabilities(underlyingNetworkWithNull))
+            .thenReturn(null)
+
+        val mainCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(null)
+                whenever(it.underlyingNetworks).thenReturn(listOf(underlyingNetworkWithNull))
+            }
+
+        getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, mainCapabilities)
+        // No assert, just verify no error
+    }
+
+    // This test verifies our internal API for completeness, but we don't expect this case to ever
+    // happen in practice.
+    @Test
+    fun defaultConnections_cellular_underlyingCarrierMergedViaWifi_allDefault() =
+        testScope.runTest {
+            var latest: DefaultConnectionModel? = null
+            val job = underTest.defaultConnections.onEach { latest = it }.launchIn(this)
+
+            // Underlying carrier merged network
+            val underlyingCarrierMergedNetwork = mock<Network>()
+            val carrierMergedInfo =
+                mock<WifiInfo>().apply { whenever(this.isCarrierMerged).thenReturn(true) }
+            val underlyingCapabilities =
+                mock<NetworkCapabilities>().also {
+                    whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                    whenever(it.transportInfo).thenReturn(carrierMergedInfo)
+                }
+            whenever(connectivityManager.getNetworkCapabilities(underlyingCarrierMergedNetwork))
+                .thenReturn(underlyingCapabilities)
+
+            // Main network with underlying network
+            val mainCapabilities =
+                mock<NetworkCapabilities>().also {
+                    whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                    whenever(it.transportInfo).thenReturn(null)
+                    whenever(it.underlyingNetworks)
+                        .thenReturn(listOf(underlyingCarrierMergedNetwork))
+                }
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, mainCapabilities)
+
+            assertThat(latest!!.mobile.isDefault).isTrue()
+            assertThat(latest!!.carrierMerged.isDefault).isTrue()
+            assertThat(latest!!.wifi.isDefault).isTrue()
+
+            job.cancel()
+        }
+
+    /** Test for b/225902574. */
+    @Test
+    fun defaultConnections_cellular_underlyingCarrierMergedViaMobileWithVcnTransport_allDefault() =
+        testScope.runTest {
+            var latest: DefaultConnectionModel? = null
+            val job = underTest.defaultConnections.onEach { latest = it }.launchIn(this)
+
+            // Underlying carrier merged network
+            val underlyingCarrierMergedNetwork = mock<Network>()
+            val carrierMergedInfo =
+                mock<WifiInfo>().apply { whenever(this.isCarrierMerged).thenReturn(true) }
+            val underlyingCapabilities =
+                mock<NetworkCapabilities>().also {
+                    whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                    whenever(it.transportInfo).thenReturn(VcnTransportInfo(carrierMergedInfo))
+                }
+            whenever(connectivityManager.getNetworkCapabilities(underlyingCarrierMergedNetwork))
+                .thenReturn(underlyingCapabilities)
+
+            // Main network with underlying network
+            val mainCapabilities =
+                mock<NetworkCapabilities>().also {
+                    whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                    whenever(it.transportInfo).thenReturn(null)
+                    whenever(it.underlyingNetworks)
+                        .thenReturn(listOf(underlyingCarrierMergedNetwork))
+                }
+
+            getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, mainCapabilities)
+
+            assertThat(latest!!.mobile.isDefault).isTrue()
+            assertThat(latest!!.carrierMerged.isDefault).isTrue()
+            assertThat(latest!!.wifi.isDefault).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
     fun defaultConnections_multipleTransports_multipleDefault() =
         testScope.runTest {
             var latest: DefaultConnectionModel? = null
@@ -547,6 +653,279 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
             assertThat(latest!!.isValidated).isFalse()
             job.cancel()
         }
+
+    @Test
+    fun getMainOrUnderlyingWifiInfo_wifi_hasInfo() {
+        val wifiInfo = mock<WifiInfo>()
+        val capabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(wifiInfo)
+            }
+
+        val result = capabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
+
+        assertThat(result).isEqualTo(wifiInfo)
+    }
+
+    @Test
+    fun getMainOrUnderlyingWifiInfo_vcnWithWifi_hasInfo() {
+        val wifiInfo = mock<WifiInfo>()
+        val vcnInfo = VcnTransportInfo(wifiInfo)
+        val capabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(vcnInfo)
+            }
+
+        val result = capabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
+
+        assertThat(result).isEqualTo(wifiInfo)
+    }
+
+    @Test
+    fun getMainOrUnderlyingWifiInfo_notCellularOrWifiTransport_noInfo() {
+        val capabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(false)
+                whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(false)
+                whenever(it.transportInfo).thenReturn(mock<WifiInfo>())
+            }
+
+        val result = capabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun getMainOrUnderlyingWifiInfo_cellular_underlyingWifi_hasInfo() {
+        val underlyingNetwork = mock<Network>()
+        val underlyingWifiInfo = mock<WifiInfo>()
+        val underlyingWifiCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(underlyingWifiInfo)
+            }
+        whenever(connectivityManager.getNetworkCapabilities(underlyingNetwork))
+            .thenReturn(underlyingWifiCapabilities)
+
+        // WHEN the main capabilities have an underlying wifi network
+        val mainCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(null)
+                whenever(it.underlyingNetworks).thenReturn(listOf(underlyingNetwork))
+            }
+
+        val result = mainCapabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
+
+        // THEN we fetch the underlying wifi info
+        assertThat(result).isEqualTo(underlyingWifiInfo)
+    }
+
+    @Test
+    fun getMainOrUnderlyingWifiInfo_notCellular_underlyingWifi_noInfo() {
+        val underlyingNetwork = mock<Network>()
+        val underlyingWifiInfo = mock<WifiInfo>()
+        val underlyingWifiCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(underlyingWifiInfo)
+            }
+        whenever(connectivityManager.getNetworkCapabilities(underlyingNetwork))
+            .thenReturn(underlyingWifiCapabilities)
+
+        // WHEN the main capabilities have an underlying wifi network but is *not* CELLULAR
+        val mainCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_ETHERNET)).thenReturn(true)
+                whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(false)
+                whenever(it.transportInfo).thenReturn(null)
+                whenever(it.underlyingNetworks).thenReturn(listOf(underlyingNetwork))
+            }
+
+        val result = mainCapabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
+
+        // THEN we DON'T fetch the underlying wifi info
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun getMainOrUnderlyingWifiInfo_cellular_underlyingVcnWithWifi_hasInfo() {
+        val wifiInfo = mock<WifiInfo>()
+        val underlyingNetwork = mock<Network>()
+        val underlyingVcnInfo = VcnTransportInfo(wifiInfo)
+        val underlyingWifiCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(underlyingVcnInfo)
+            }
+        whenever(connectivityManager.getNetworkCapabilities(underlyingNetwork))
+            .thenReturn(underlyingWifiCapabilities)
+
+        // WHEN the main capabilities have an underlying VCN network with wifi
+        val mainCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(null)
+                whenever(it.underlyingNetworks).thenReturn(listOf(underlyingNetwork))
+            }
+
+        val result = mainCapabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
+
+        // THEN we fetch the wifi info
+        assertThat(result).isEqualTo(wifiInfo)
+    }
+
+    @Test
+    fun getMainOrUnderlyingWifiInfo_notCellular_underlyingVcnWithWifi_noInfo() {
+        val underlyingNetwork = mock<Network>()
+        val underlyingVcnInfo = VcnTransportInfo(mock<WifiInfo>())
+        val underlyingWifiCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(underlyingVcnInfo)
+            }
+        whenever(connectivityManager.getNetworkCapabilities(underlyingNetwork))
+            .thenReturn(underlyingWifiCapabilities)
+
+        // WHEN the main capabilities have an underlying wifi network but it is *not* CELLULAR
+        val mainCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_ETHERNET)).thenReturn(true)
+                whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(false)
+                whenever(it.transportInfo).thenReturn(null)
+                whenever(it.underlyingNetworks).thenReturn(listOf(underlyingNetwork))
+            }
+
+        val result = mainCapabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
+
+        // THEN we DON'T fetch the underlying wifi info
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun getMainOrUnderlyingWifiInfo_cellular_underlyingCellularWithCarrierMerged_hasInfo() {
+        // Underlying carrier merged network
+        val underlyingCarrierMergedNetwork = mock<Network>()
+        val carrierMergedInfo =
+            mock<WifiInfo>().apply { whenever(this.isCarrierMerged).thenReturn(true) }
+        val underlyingCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(VcnTransportInfo(carrierMergedInfo))
+            }
+        whenever(connectivityManager.getNetworkCapabilities(underlyingCarrierMergedNetwork))
+            .thenReturn(underlyingCapabilities)
+
+        // Main network with underlying network
+        val mainCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(null)
+                whenever(it.underlyingNetworks).thenReturn(listOf(underlyingCarrierMergedNetwork))
+            }
+
+        val result = mainCapabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
+
+        assertThat(result).isEqualTo(carrierMergedInfo)
+        assertThat(result!!.isCarrierMerged).isTrue()
+    }
+
+    @Test
+    fun getMainOrUnderlyingWifiInfo_multipleUnderlying_usesFirstNonNull() {
+        // First underlying: Not wifi
+        val underlyingNotWifiNetwork = mock<Network>()
+        val underlyingNotWifiCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(false)
+                whenever(it.transportInfo).thenReturn(null)
+            }
+        whenever(connectivityManager.getNetworkCapabilities(underlyingNotWifiNetwork))
+            .thenReturn(underlyingNotWifiCapabilities)
+
+        // Second underlying: wifi
+        val underlyingWifiNetwork1 = mock<Network>()
+        val underlyingWifiInfo1 = mock<WifiInfo>()
+        val underlyingWifiCapabilities1 =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(underlyingWifiInfo1)
+            }
+        whenever(connectivityManager.getNetworkCapabilities(underlyingWifiNetwork1))
+            .thenReturn(underlyingWifiCapabilities1)
+
+        // Third underlying: also wifi
+        val underlyingWifiNetwork2 = mock<Network>()
+        val underlyingWifiInfo2 = mock<WifiInfo>()
+        val underlyingWifiCapabilities2 =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(underlyingWifiInfo2)
+            }
+        whenever(connectivityManager.getNetworkCapabilities(underlyingWifiNetwork2))
+            .thenReturn(underlyingWifiCapabilities2)
+
+        // WHEN the main capabilities has multiple underlying networks
+        val mainCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(null)
+                whenever(it.underlyingNetworks)
+                    .thenReturn(
+                        listOf(
+                            underlyingNotWifiNetwork,
+                            underlyingWifiNetwork1,
+                            underlyingWifiNetwork2,
+                        )
+                    )
+            }
+
+        val result = mainCapabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
+
+        // THEN the first wifi one is used
+        assertThat(result).isEqualTo(underlyingWifiInfo1)
+    }
+
+    @Test
+    fun getMainOrUnderlyingWifiInfo_nestedUnderlying_doesNotLookAtNested() {
+        // WHEN there are two layers of underlying networks...
+
+        // Nested network
+        val nestedUnderlyingNetwork = mock<Network>()
+        val nestedWifiInfo = mock<WifiInfo>()
+        val nestedCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(nestedWifiInfo)
+            }
+        whenever(connectivityManager.getNetworkCapabilities(nestedUnderlyingNetwork))
+            .thenReturn(nestedCapabilities)
+
+        // Underlying network containing the nested network
+        val underlyingNetwork = mock<Network>()
+        val underlyingCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(null)
+                whenever(it.underlyingNetworks).thenReturn(listOf(nestedUnderlyingNetwork))
+            }
+        whenever(connectivityManager.getNetworkCapabilities(underlyingNetwork))
+            .thenReturn(underlyingCapabilities)
+
+        // Main network containing the underlying network, which contains the nested network
+        val mainCapabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(null)
+                whenever(it.underlyingNetworks).thenReturn(listOf(underlyingNetwork))
+            }
+
+        val result = mainCapabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
+
+        // THEN only the first layer is checked, and the first layer has no wifi info
+        assertThat(result).isNull()
+    }
 
     private fun createAndSetRepo() {
         underTest =
