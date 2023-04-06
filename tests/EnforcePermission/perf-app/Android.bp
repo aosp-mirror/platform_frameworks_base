@@ -13,28 +13,33 @@
 // limitations under the License.
 
 package {
-    // See: http://go/android-license-faq
-    // A large-scale-change added 'default_applicable_licenses' to import
-    // all of the 'license_kinds' from "frameworks_base_license"
-    // to get the below license kinds:
-    //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-android_library {
-    name: "EnforcePermissionTestLib",
+android_test {
+    name: "EnforcePermissionPerfTests",
     srcs: [
         "src/**/*.java",
         ":frameworks-enforce-permission-test-aidl",
     ],
-}
-
-android_test_helper_app {
-    name: "EnforcePermissionTestHelper",
-    srcs: [
-        "src/**/*.java",
-        ":frameworks-enforce-permission-test-aidl",
+    static_libs: [
+        "EnforcePermissionTestLib",
+        "androidx.benchmark_benchmark-common",
+        "androidx.benchmark_benchmark-junit4",
+        "apct-perftests-utils",
+        "collector-device-lib",
+        "androidx.test.rules",
+    ],
+    libs: [
+        "android.test.base",
+        "android.test.runner",
+    ],
+    data: [
+        ":EnforcePermissionTestHelper",
+        ":perfetto_artifacts",
+        "perfetto.textproto",
     ],
     platform_apis: true,
     certificate: "platform",
+    test_suites: ["device-tests"],
 }

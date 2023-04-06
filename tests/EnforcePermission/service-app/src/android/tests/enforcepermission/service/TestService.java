@@ -17,6 +17,7 @@
 package android.tests.enforcepermission.service;
 
 import android.annotation.EnforcePermission;
+import android.annotation.RequiresNoPermission;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -171,6 +172,16 @@ public class TestService extends Service {
                 android.Manifest.permission.VIBRATE})
         public void ProtectedByInternetOrVibrate() {
             ProtectedByInternetOrVibrate_enforcePermission();
+        }
+
+        @Override
+        @RequiresNoPermission
+        public void NotProtected() {
+        }
+
+        @Override
+        public void ManuallyProtected() {
+            enforceCallingOrSelfPermission(android.Manifest.permission.INTERNET, "access denied");
         }
     }
 }
