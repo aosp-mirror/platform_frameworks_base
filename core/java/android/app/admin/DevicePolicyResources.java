@@ -1802,14 +1802,6 @@ public final class DevicePolicyResources {
                     PREFIX + "UNLAUNCHABLE_APP_WORK_PAUSED_TITLE";
 
             /**
-             * Text for dialog shown when user tries to open a work app when the work profile is
-             * turned off, confirming that the user wants to turn on access to their
-             * work apps.
-             */
-            public static final String UNLAUNCHABLE_APP_WORK_PAUSED_MESSAGE =
-                    PREFIX + "UNLAUNCHABLE_APP_WORK_PAUSED_MESSAGE";
-
-            /**
              * Notification title shown when work profile is credential encrypted and requires
              * the user to unlock before it's usable.
              */
