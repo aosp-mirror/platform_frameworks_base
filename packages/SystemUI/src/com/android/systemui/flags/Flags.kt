@@ -617,8 +617,6 @@ object Flags {
 
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
-    // TODO(b/267162944): Tracking bug
-    @JvmField val CLIPBOARD_MINIMIZED_LAYOUT = releasedFlag(1702, "clipboard_data_model")
 
     // 1800 - shade container
     @JvmField
