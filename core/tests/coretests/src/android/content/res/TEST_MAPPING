@@ -39,5 +39,18 @@
         }
       ]
     }
+  ],
+  "ironwood-postsubmit": [
+    {
+      "name": "FrameworksCoreTests",
+      "options":[
+        {
+            "include-annotation": "android.platform.test.annotations.IwTest"
+        },
+        {
+            "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    }
   ]
 }
