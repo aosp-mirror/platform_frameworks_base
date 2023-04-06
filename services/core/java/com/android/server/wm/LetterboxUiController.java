@@ -1597,11 +1597,10 @@ final class LetterboxUiController {
         inheritConfiguration(firstOpaqueActivityBeneath);
         mLetterboxConfigListener = WindowContainer.overrideConfigurationPropagation(
                 mActivityRecord, firstOpaqueActivityBeneath,
-                (opaqueConfig, transparentConfig) -> {
-                    final Configuration mutatedConfiguration =
-                            fromOriginalTranslucentConfig(transparentConfig);
+                (opaqueConfig, transparentOverrideConfig) -> {
+                    resetTranslucentOverrideConfig(transparentOverrideConfig);
                     final Rect parentBounds = parent.getWindowConfiguration().getBounds();
-                    final Rect bounds = mutatedConfiguration.windowConfiguration.getBounds();
+                    final Rect bounds = transparentOverrideConfig.windowConfiguration.getBounds();
                     final Rect letterboxBounds = opaqueConfig.windowConfiguration.getBounds();
                     // We cannot use letterboxBounds directly here because the position relies on
                     // letterboxing. Using letterboxBounds directly, would produce a double offset.
@@ -1610,9 +1609,9 @@ final class LetterboxUiController {
                             parentBounds.top + letterboxBounds.height());
                     // We need to initialize appBounds to avoid NPE. The actual value will
                     // be set ahead when resolving the Configuration for the activity.
-                    mutatedConfiguration.windowConfiguration.setAppBounds(new Rect());
+                    transparentOverrideConfig.windowConfiguration.setAppBounds(new Rect());
                     inheritConfiguration(firstOpaqueActivityBeneath);
-                    return mutatedConfiguration;
+                    return transparentOverrideConfig;
                 });
     }
 
@@ -1691,20 +1690,16 @@ final class LetterboxUiController {
                 true /* traverseTopToBottom */));
     }
 
-    // When overriding translucent activities configuration we need to keep some of the
-    // original properties
-    private Configuration fromOriginalTranslucentConfig(Configuration translucentConfig) {
-        final Configuration configuration = new Configuration(translucentConfig);
+    /** Resets the screen size related fields so they can be resolved by requested bounds later. */
+    private static void resetTranslucentOverrideConfig(Configuration config) {
         // The values for the following properties will be defined during the configuration
         // resolution in {@link ActivityRecord#resolveOverrideConfiguration} using the
         // properties inherited from the first not finishing opaque activity beneath.
-        configuration.orientation = ORIENTATION_UNDEFINED;
-        configuration.screenWidthDp = configuration.compatScreenWidthDp = SCREEN_WIDTH_DP_UNDEFINED;
-        configuration.screenHeightDp =
-                configuration.compatScreenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
-        configuration.smallestScreenWidthDp =
-                configuration.compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
-        return configuration;
+        config.orientation = ORIENTATION_UNDEFINED;
+        config.screenWidthDp = config.compatScreenWidthDp = SCREEN_WIDTH_DP_UNDEFINED;
+        config.screenHeightDp = config.compatScreenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
+        config.smallestScreenWidthDp = config.compatSmallestScreenWidthDp =
+                SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
     }
 
     private void inheritConfiguration(ActivityRecord firstOpaque) {

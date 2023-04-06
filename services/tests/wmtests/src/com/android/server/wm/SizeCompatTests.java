@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
@@ -428,20 +429,24 @@ public class SizeCompatTests extends WindowTestsBase {
                 .setLaunchedFromUid(mActivity.getUid())
                 .build();
         doReturn(false).when(translucentActivity).fillsParent();
-        WindowConfiguration translucentWinConf = translucentActivity.getWindowConfiguration();
-        translucentActivity.setActivityType(ACTIVITY_TYPE_STANDARD);
-        translucentActivity.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        translucentActivity.setDisplayWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        translucentActivity.setAlwaysOnTop(true);
+        final Configuration requestedConfig =
+                translucentActivity.getRequestedOverrideConfiguration();
+        final WindowConfiguration translucentWinConf = requestedConfig.windowConfiguration;
+        translucentWinConf.setActivityType(ACTIVITY_TYPE_STANDARD);
+        translucentWinConf.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        translucentWinConf.setDisplayWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        translucentWinConf.setAlwaysOnTop(true);
+        translucentActivity.onRequestedOverrideConfigurationChanged(requestedConfig);
 
         mTask.addChild(translucentActivity);
 
-        // We check the WIndowConfiguration properties
-        translucentWinConf = translucentActivity.getWindowConfiguration();
+        // The original override of WindowConfiguration should keep.
         assertEquals(ACTIVITY_TYPE_STANDARD, translucentActivity.getActivityType());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, translucentWinConf.getWindowingMode());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, translucentWinConf.getDisplayWindowingMode());
         assertTrue(translucentWinConf.isAlwaysOnTop());
+        // Unless display is going to be rotated, it should always inherit from parent.
+        assertEquals(ROTATION_UNDEFINED, translucentWinConf.getDisplayRotation());
     }
 
     @Test
