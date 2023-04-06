@@ -4013,7 +4013,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         updateMaximumTimeToLockLocked(userHandle);
         updateLockTaskPackagesLocked(policy.mLockTaskPackages, userHandle);
         updateLockTaskFeaturesLocked(policy.mLockTaskFeatures, userHandle);
-        updateUserControlDisabledPackagesLocked(policy.mUserControlDisabledPackages);
+        if (userHandle == UserHandle.USER_SYSTEM) {
+            updateUserControlDisabledPackagesLocked(policy.mUserControlDisabledPackages);
+        }
         if (policy.mStatusBarDisabled) {
             setStatusBarDisabledInternal(policy.mStatusBarDisabled, userHandle);
         }
@@ -4041,6 +4043,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void updateUserControlDisabledPackagesLocked(List<String> packages) {
         mInjector.getPackageManagerInternal().setDeviceOwnerProtectedPackages(packages);
+        mUsageStatsManagerInternal.setAdminProtectedPackages(
+                new ArraySet(packages), UserHandle.USER_ALL);
     }
 
     private void updateLockTaskFeaturesLocked(int flags, int userId) {

@@ -65,6 +65,7 @@ import android.widget.ImageView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.CachingIconView;
 import com.android.systemui.Dependency;
@@ -1612,7 +1613,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             OnAppOpsClickListener onAppOpsClickListener,
             FalsingManager falsingManager,
             StatusBarStateController statusBarStateController,
-            PeopleNotificationIdentifier peopleNotificationIdentifier) {
+            PeopleNotificationIdentifier peopleNotificationIdentifier,
+            IStatusBarService statusBarService) {
         mAppName = appName;
         if (mMenuRow == null) {
             mMenuRow = new NotificationMenuRow(mContext, peopleNotificationIdentifier);
