@@ -750,6 +750,8 @@ public class StatsPullAtomService extends SystemService {
                         return pullPendingIntentsPerPackage(atomTag, data);
                     case FrameworkStatsLog.HDR_CAPABILITIES:
                         return pullHdrCapabilities(atomTag, data);
+                    case FrameworkStatsLog.CACHED_APPS_HIGH_WATERMARK:
+                        return pullCachedAppsHighWatermark(atomTag, data);
                     default:
                         throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
                 }
@@ -950,6 +952,7 @@ public class StatsPullAtomService extends SystemService {
         registerPendingIntentsPerPackagePuller();
         registerPinnerServiceStats();
         registerHdrCapabilitiesPuller();
+        registerCachedAppsHighWatermarkPuller();
     }
 
     private void initAndRegisterNetworkStatsPullers() {
@@ -4728,6 +4731,12 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
+    private int pullCachedAppsHighWatermark(int atomTag, List<StatsEvent> pulledData) {
+        pulledData.add(LocalServices.getService(ActivityManagerInternal.class)
+                .getCachedAppsHighWatermarkStats(atomTag, true));
+        return StatsManager.PULL_SUCCESS;
+    }
+
     private boolean hasDolbyVisionIssue(Display display) {
         AtomicInteger modesSupportingDolbyVision = new AtomicInteger();
         Arrays.stream(display.getSupportedModes())
@@ -4765,6 +4774,16 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerHdrCapabilitiesPuller() {
         int tagId = FrameworkStatsLog.HDR_CAPABILITIES;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    private void registerCachedAppsHighWatermarkPuller() {
+        final int tagId = FrameworkStatsLog.CACHED_APPS_HIGH_WATERMARK;
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values

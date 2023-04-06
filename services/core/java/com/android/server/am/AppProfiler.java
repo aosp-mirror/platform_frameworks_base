@@ -82,17 +82,21 @@ import android.util.FeatureFlagUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
+import android.util.StatsEvent;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.os.BinderInternal;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
+import com.android.internal.util.QuickSelect;
 import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.utils.PriorityDump;
@@ -323,6 +327,8 @@ public class AppProfiler {
     private final ActivityManagerService mService;
     private final Handler mBgHandler;
 
+    final CachedAppsWatermarkData mCachedAppsWatermarkData = new CachedAppsWatermarkData();
+
     /**
      * The lock to guard some of the profiling data here and {@link ProcessProfileRecord}.
      *
@@ -388,6 +394,193 @@ public class AppProfiler {
 
         ProfilerInfo getProfilerInfo() {
             return mProfilerInfo;
+        }
+    }
+
+    /**
+     * A simple data class holding the information about the cached apps high watermark.
+     *
+     * Keep it sync with the frameworks/proto_logging/stats/atoms.proto
+     */
+    class CachedAppsWatermarkData {
+        /** The high water mark of the number of cached apps. */
+        @GuardedBy("mProcLock")
+        int mCachedAppHighWatermark;
+
+        /**
+         * The uptime (in seconds) at the high watermark.
+         * Note this is going to be pull metrics, so we'll need the timestamp here.
+         */
+        @GuardedBy("mProcLock")
+        int mUptimeInSeconds;
+
+        /** The number of binder proxy at that high water mark. */
+        @GuardedBy("mProcLock")
+        int mBinderProxySnapshot;
+
+        /** Free physical memory (in kb) on device. */
+        @GuardedBy("mProcLock")
+        int mFreeInKb;
+
+        /** Cched physical memory (in kb) on device. */
+        @GuardedBy("mProcLock")
+        int mCachedInKb;
+
+        /** zram (in kb) on device. */
+        @GuardedBy("mProcLock")
+        int mZramInKb;
+
+        /** Kernel memory (in kb) on device. */
+        @GuardedBy("mProcLock")
+        int mKernelInKb;
+
+        /** The number of apps in frozen state. */
+        @GuardedBy("mProcLock")
+        int mNumOfFrozenApps;
+
+        /** The longest frozen time (now - last_frozen) in current frozen apps. */
+        @GuardedBy("mProcLock")
+        int mLongestFrozenTimeInSeconds;
+
+        /** The shortest frozen time (now - last_frozen) in current frozen apps. */
+        @GuardedBy("mProcLock")
+        int mShortestFrozenTimeInSeconds;
+
+        /** The mean frozen time (now - last_frozen) in current frozen apps. */
+        @GuardedBy("mProcLock")
+        int mMeanFrozenTimeInSeconds;
+
+        /** The average frozen time (now - last_frozen) in current frozen apps. */
+        @GuardedBy("mProcLock")
+        int mAverageFrozenTimeInSeconds;
+
+        /**
+         * This is an array holding the frozen app durations temporarily
+         * while updating the cached app high watermark.
+         */
+        @GuardedBy("mProcLock")
+        private long[] mCachedAppFrozenDurations;
+
+        /**
+         * The earliest frozen timestamp within the frozen apps.
+         */
+        @GuardedBy("mProcLock")
+        private long mEarliestFrozenTimestamp;
+
+        /**
+         * The most recent frozen timestamp within the frozen apps.
+         */
+        @GuardedBy("mProcLock")
+        private long mLatestFrozenTimestamp;
+
+        /**
+         * The sum of total frozen durations of all frozen apps.
+         */
+        @GuardedBy("mProcLock")
+        private long mTotalFrozenDurations;
+
+        @GuardedBy("mProcLock")
+        void updateCachedAppsHighWatermarkIfNecessaryLocked(int numOfCachedApps, long now) {
+            if (numOfCachedApps > mCachedAppHighWatermark) {
+                mCachedAppHighWatermark = numOfCachedApps;
+                mUptimeInSeconds = (int) (now / 1000);
+
+                // The rest of the updates are pretty costly, do it in a separated handler.
+                mService.mHandler.removeMessages(
+                        ActivityManagerService.UPDATE_CACHED_APP_HIGH_WATERMARK);
+                mService.mHandler.obtainMessage(
+                        ActivityManagerService.UPDATE_CACHED_APP_HIGH_WATERMARK, Long.valueOf(now))
+                        .sendToTarget();
+            }
+        }
+
+        void updateCachedAppsSnapshot(long now) {
+            synchronized (mProcLock) {
+                mEarliestFrozenTimestamp = now;
+                mLatestFrozenTimestamp = 0L;
+                mTotalFrozenDurations = 0L;
+                mNumOfFrozenApps = 0;
+                if (mCachedAppFrozenDurations == null
+                        || mCachedAppFrozenDurations.length < mCachedAppHighWatermark) {
+                    mCachedAppFrozenDurations = new long[Math.max(
+                            mCachedAppHighWatermark, mService.mConstants.CUR_MAX_CACHED_PROCESSES)];
+                }
+                mService.mProcessList.forEachLruProcessesLOSP(true, app -> {
+                    if (app.mOptRecord.isFrozen()) {
+                        final long freezeTime = app.mOptRecord.getFreezeUnfreezeTime();
+                        if (freezeTime < mEarliestFrozenTimestamp) {
+                            mEarliestFrozenTimestamp = freezeTime;
+                        }
+                        if (freezeTime > mLatestFrozenTimestamp) {
+                            mLatestFrozenTimestamp = freezeTime;
+                        }
+                        final long duration = now - freezeTime;
+                        mTotalFrozenDurations += duration;
+                        mCachedAppFrozenDurations[mNumOfFrozenApps++] = duration;
+                    }
+                });
+                if (mNumOfFrozenApps > 0) {
+                    mLongestFrozenTimeInSeconds = (int) ((now - mEarliestFrozenTimestamp) / 1000);
+                    mShortestFrozenTimeInSeconds = (int) ((now - mLatestFrozenTimestamp) / 1000);
+                    mAverageFrozenTimeInSeconds =
+                            (int) ((mTotalFrozenDurations / mNumOfFrozenApps) / 1000);
+                    mMeanFrozenTimeInSeconds = (int) (QuickSelect.select(mCachedAppFrozenDurations,
+                            0, mNumOfFrozenApps, mNumOfFrozenApps / 2) / 1000);
+                }
+
+                mBinderProxySnapshot = 0;
+                final SparseIntArray counts = BinderInternal.nGetBinderProxyPerUidCounts();
+                if (counts != null) {
+                    for (int i = 0, size = counts.size(); i < size; i++) {
+                        final int uid = counts.keyAt(i);
+                        final UidRecord uidRec = mService.mProcessList.getUidRecordLOSP(uid);
+                        if (uidRec != null) {
+                            mBinderProxySnapshot += counts.valueAt(i);
+                        }
+                    }
+                }
+
+                final MemInfoReader memInfo = new MemInfoReader();
+                memInfo.readMemInfo();
+                mFreeInKb = (int) memInfo.getFreeSizeKb();
+                mCachedInKb = (int) memInfo.getCachedSizeKb();
+                mZramInKb = (int) memInfo.getZramTotalSizeKb();
+                mKernelInKb = (int) memInfo.getKernelUsedSizeKb();
+            }
+        }
+
+        @NonNull
+        StatsEvent getCachedAppsHighWatermarkStats(int atomTag, boolean resetAfterPull) {
+            synchronized (mProcLock) {
+                final StatsEvent event = FrameworkStatsLog.buildStatsEvent(atomTag,
+                        mCachedAppHighWatermark,
+                        mUptimeInSeconds,
+                        mBinderProxySnapshot,
+                        mFreeInKb,
+                        mCachedInKb,
+                        mZramInKb,
+                        mKernelInKb,
+                        mNumOfFrozenApps,
+                        mLongestFrozenTimeInSeconds,
+                        mShortestFrozenTimeInSeconds,
+                        mMeanFrozenTimeInSeconds,
+                        mAverageFrozenTimeInSeconds);
+                if (resetAfterPull) {
+                    mCachedAppHighWatermark = 0;
+                    mUptimeInSeconds = 0;
+                    mBinderProxySnapshot = 0;
+                    mFreeInKb = 0;
+                    mCachedInKb = 0;
+                    mZramInKb = 0;
+                    mKernelInKb = 0;
+                    mNumOfFrozenApps = 0;
+                    mLongestFrozenTimeInSeconds = 0;
+                    mShortestFrozenTimeInSeconds = 0;
+                    mMeanFrozenTimeInSeconds = 0;
+                    mAverageFrozenTimeInSeconds = 0;
+                }
+                return event;
+            }
         }
     }
 
@@ -954,7 +1147,7 @@ public class AppProfiler {
     }
 
     @GuardedBy({"mService", "mProcLock"})
-    boolean updateLowMemStateLSP(int numCached, int numEmpty, int numTrimming) {
+    boolean updateLowMemStateLSP(int numCached, int numEmpty, int numTrimming, long now) {
         int memFactor;
         if (mLowMemDetector != null && mLowMemDetector.isAvailable()) {
             memFactor = mLowMemDetector.getMemFactor();
@@ -1040,11 +1233,10 @@ public class AppProfiler {
         mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
         boolean allChanged;
         int trackerMemFactor;
-        final long now;
         synchronized (mService.mProcessStats.mLock) {
-            now = SystemClock.uptimeMillis();
             allChanged = mService.mProcessStats.setMemFactorLocked(memFactor,
-                    mService.mAtmInternal == null || !mService.mAtmInternal.isSleeping(), now);
+                    mService.mAtmInternal == null || !mService.mAtmInternal.isSleeping(),
+                    SystemClock.uptimeMillis() /* re-acquire the time within the lock */);
             trackerMemFactor = mService.mProcessStats.getMemFactorLocked();
         }
         if (memFactor != ADJ_MEM_FACTOR_NORMAL) {
@@ -1124,6 +1316,8 @@ public class AppProfiler {
                 profile.setTrimMemoryLevel(0);
             });
         }
+        mCachedAppsWatermarkData.updateCachedAppsHighWatermarkIfNecessaryLocked(
+                numCached + numEmpty, now);
         return allChanged;
     }
 

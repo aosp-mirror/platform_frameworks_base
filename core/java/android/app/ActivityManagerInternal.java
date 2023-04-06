@@ -45,6 +45,7 @@ import android.os.TransactionTooLargeException;
 import android.os.WorkSource;
 import android.util.ArraySet;
 import android.util.Pair;
+import android.util.StatsEvent;
 
 import com.android.internal.os.TimeoutRecord;
 
@@ -1054,4 +1055,10 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void notifyMediaProjectionEvent(int uid, @NonNull IBinder projectionToken,
             @MediaProjectionTokenEvent int event);
+
+    /**
+     * @return The stats event for the cached apps high watermark since last pull.
+     */
+    @NonNull
+    public abstract StatsEvent getCachedAppsHighWatermarkStats(int atomTag, boolean resetAfterPull);
 }
