@@ -767,7 +767,6 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
      */
     static class Dimmable extends DisplayArea<DisplayArea> {
         private final Dimmer mDimmer = new Dimmer(this);
-        private final Rect mTmpDimBoundsRect = new Rect();
 
         Dimmable(WindowManagerService wms, Type type, String name, int featureId) {
             super(wms, type, name, featureId);
@@ -780,11 +779,13 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
         @Override
         void prepareSurfaces() {
-            mDimmer.resetDimStates();
+            final Rect dimBounds = mDimmer.resetDimStates();
             super.prepareSurfaces();
-            // Bounds need to be relative, as the dim layer is a child.
-            getBounds(mTmpDimBoundsRect);
-            mTmpDimBoundsRect.offsetTo(0 /* newLeft */, 0 /* newTop */);
+            if (dimBounds != null) {
+                // Bounds need to be relative, as the dim layer is a child.
+                getBounds(dimBounds);
+                dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
+            }
 
             // If SystemUI is dragging for recents, we want to reset the dim state so any dim layer
             // on the display level fades out.
@@ -792,8 +793,10 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 mDimmer.resetDimStates();
             }
 
-            if (mDimmer.updateDims(getSyncTransaction(), mTmpDimBoundsRect)) {
-                scheduleAnimation();
+            if (dimBounds != null) {
+                if (mDimmer.updateDims(getSyncTransaction())) {
+                    scheduleAnimation();
+                }
             }
         }
     }
