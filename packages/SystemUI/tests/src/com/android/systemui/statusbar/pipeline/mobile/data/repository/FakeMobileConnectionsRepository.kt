@@ -67,6 +67,8 @@ class FakeMobileConnectionsRepository(
 
     override val mobileIsDefault = MutableStateFlow(false)
 
+    override val hasCarrierMergedConnection = MutableStateFlow(false)
+
     override val defaultConnectionIsValidated = MutableStateFlow(false)
 
     private val subIdRepos = mutableMapOf<Int, MobileConnectionRepository>()

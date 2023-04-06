@@ -59,6 +59,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -257,14 +258,28 @@ constructor(
 
     override val mobileIsDefault: StateFlow<Boolean> =
         connectivityRepository.defaultConnections
-            // Because carrier merged networks are displayed as mobile networks, they're
-            // part of the `isDefault` calculation. See b/272586234.
-            .map { it.mobile.isDefault || it.carrierMerged.isDefault }
+            .map { it.mobile.isDefault }
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogger,
-                columnPrefix = "",
+                columnPrefix = LOGGING_PREFIX,
                 columnName = "mobileIsDefault",
+                initialValue = false,
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val hasCarrierMergedConnection: StateFlow<Boolean> =
+        combine(
+                connectivityRepository.defaultConnections,
+                carrierMergedSubId,
+            ) { defaultConnections, carrierMergedSubId ->
+                defaultConnections.carrierMerged.isDefault || carrierMergedSubId != null
+            }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogger,
+                columnPrefix = LOGGING_PREFIX,
+                columnName = "hasCarrierMergedConnection",
                 initialValue = false,
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
