@@ -33,7 +33,6 @@ import android.content.pm.PackageManager;
 import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialRequest;
-import android.credentials.CredentialManager;
 import android.credentials.CredentialOption;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCredentialException;
@@ -50,6 +49,7 @@ import android.credentials.UnregisterCredentialDescriptionRequest;
 import android.credentials.ui.IntentFactory;
 import android.os.Binder;
 import android.os.CancellationSignal;
+import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -70,9 +70,11 @@ import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.SecureSettingsServiceNameResolver;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -94,6 +96,8 @@ public final class CredentialManagerService
     private static final String PERMISSION_DENIED_ERROR = "permission_denied";
     private static final String PERMISSION_DENIED_WRITE_SECURE_SETTINGS_ERROR =
             "Caller is missing WRITE_SECURE_SETTINGS permission";
+    private static final String DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER =
+            "enable_credential_manager";
 
     private final Context mContext;
 
@@ -101,6 +105,13 @@ public final class CredentialManagerService
     @GuardedBy("mLock")
     private final SparseArray<List<CredentialManagerServiceImpl>> mSystemServicesCacheList =
             new SparseArray<>();
+
+    /** Cache of all ongoing request sessions per user id. */
+    @GuardedBy("mLock")
+    private final SparseArray<Map<IBinder, RequestSession>> mRequestSessions =
+            new SparseArray<>();
+
+    private final SessionManager mSessionManager = new SessionManager();
 
     public CredentialManagerService(@NonNull Context context) {
         super(
@@ -331,7 +342,7 @@ public final class CredentialManagerService
 
     @NonNull
     private Set<Pair<CredentialOption, CredentialDescriptionRegistry.FilterResult>>
-            getFilteredResultFromRegistry(List<CredentialOption> options) {
+    getFilteredResultFromRegistry(List<CredentialOption> options) {
         // Session for active/provisioned credential descriptions;
         CredentialDescriptionRegistry registry =
                 CredentialDescriptionRegistry.forUser(UserHandle.getCallingUserId());
@@ -389,14 +400,6 @@ public final class CredentialManagerService
         return providerSessions;
     }
 
-    private List<CredentialProviderInfo> getServicesForCredentialDescription(int userId) {
-        return CredentialProviderInfoFactory.getCredentialProviderServices(
-                mContext,
-                userId,
-                CredentialManager.PROVIDER_FILTER_ALL_PROVIDERS,
-                new HashSet<>());
-    }
-
     @Override
     @GuardedBy("CredentialDescriptionRegistry.sLock")
     public void onUserStopped(@NonNull TargetUser user) {
@@ -448,6 +451,8 @@ public final class CredentialManagerService
             final GetRequestSession session =
                     new GetRequestSession(
                             getContext(),
+                            mSessionManager,
+                            mLock,
                             userId,
                             callingUid,
                             callback,
@@ -455,6 +460,7 @@ public final class CredentialManagerService
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan);
+            addSessionLocked(userId, session);
 
             List<ProviderSession> providerSessions =
                     prepareProviderSessions(request, session);
@@ -499,6 +505,8 @@ public final class CredentialManagerService
             final PrepareGetRequestSession session =
                     new PrepareGetRequestSession(
                             getContext(),
+                            mSessionManager,
+                            mLock,
                             userId,
                             callingUid,
                             getCredentialCallback,
@@ -515,8 +523,8 @@ public final class CredentialManagerService
                     // TODO: fix
                     prepareGetCredentialCallback.onResponse(
                             new PrepareGetCredentialResponseInternal(
-                            false, null,
-                            false, false, null));
+                                    false, null,
+                                    false, false, null));
                 } catch (RemoteException e) {
                     Log.i(
                             TAG,
@@ -540,10 +548,10 @@ public final class CredentialManagerService
                 List<CredentialOption> optionsThatRequireActiveCredentials =
                         request.getCredentialOptions().stream()
                                 .filter(credentialOption -> credentialOption
-                                                .getCredentialRetrievalData()
-                                                .getStringArrayList(
-                                                        CredentialOption
-                                                                .SUPPORTED_ELEMENT_KEYS) != null)
+                                        .getCredentialRetrievalData()
+                                        .getStringArrayList(
+                                                CredentialOption
+                                                        .SUPPORTED_ELEMENT_KEYS) != null)
                                 .toList();
 
                 List<CredentialOption> optionsThatDoNotRequireActiveCredentials =
@@ -614,6 +622,8 @@ public final class CredentialManagerService
             final CreateRequestSession session =
                     new CreateRequestSession(
                             getContext(),
+                            mSessionManager,
+                            mLock,
                             userId,
                             callingUid,
                             request,
@@ -621,6 +631,7 @@ public final class CredentialManagerService
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan);
+            addSessionLocked(userId, session);
 
             processCreateCredential(request, callback, session);
             return cancelTransport;
@@ -775,6 +786,19 @@ public final class CredentialManagerService
                     mContext, userId, providerFilter, getEnabledProviders());
         }
 
+        @Override
+        public boolean isServiceEnabled() {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                return DeviceConfig.getBoolean(
+                        DeviceConfig.NAMESPACE_CREDENTIAL,
+                        DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER,
+                        false);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+
         @SuppressWarnings("GuardedBy") // ErrorProne requires service.mLock which is the same
         // this.mLock
         private Set<ComponentName> getEnabledProviders() {
@@ -815,6 +839,8 @@ public final class CredentialManagerService
             final ClearRequestSession session =
                     new ClearRequestSession(
                             getContext(),
+                            mSessionManager,
+                            mLock,
                             userId,
                             callingUid,
                             callback,
@@ -822,6 +848,7 @@ public final class CredentialManagerService
                             constructCallingAppInfo(callingPackage, userId, null),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan);
+            addSessionLocked(userId, session);
 
             // Initiate all provider sessions
             // TODO: Determine if provider needs to have clear capability in their manifest
@@ -905,6 +932,13 @@ public final class CredentialManagerService
         }
     }
 
+    private void addSessionLocked(@UserIdInt int userId,
+            RequestSession requestSession) {
+        synchronized (mLock) {
+            mSessionManager.addSession(userId, requestSession.mRequestId, requestSession);
+        }
+    }
+
     private void enforceCallingPackage(String callingPackage, int callingUid) {
         int packageUid;
         PackageManager pm = mContext.createContextAsUser(
@@ -917,6 +951,25 @@ public final class CredentialManagerService
         }
         if (packageUid != callingUid) {
             throw new SecurityException(callingPackage + " does not belong to uid " + callingUid);
+        }
+    }
+
+    private class SessionManager implements RequestSession.SessionLifetime {
+        @Override
+        @GuardedBy("mLock")
+        public void onFinishRequestSession(@UserIdInt int userId, IBinder token) {
+            Log.i(TAG, "In onFinishRequestSession");
+            if (mRequestSessions.get(userId) != null) {
+                mRequestSessions.get(userId).remove(token);
+            }
+        }
+
+        @GuardedBy("mLock")
+        public void addSession(int userId, IBinder token, RequestSession requestSession) {
+            if (mRequestSessions.get(userId) == null) {
+                mRequestSessions.put(userId, new HashMap<>());
+            }
+            mRequestSessions.get(userId).put(token, requestSession);
         }
     }
 }

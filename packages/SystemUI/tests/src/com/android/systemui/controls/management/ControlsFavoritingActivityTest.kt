@@ -60,6 +60,12 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
             }
         val TEST_STRUCTURE: CharSequence = "TestStructure"
         val TEST_APP: CharSequence = "TestApp"
+
+        private fun View.waitForPost() {
+            val latch = CountDownLatch(1)
+            post(latch::countDown)
+            latch.await()
+        }
     }
 
     @Main private val executor: Executor = MoreExecutors.directExecutor()
@@ -140,7 +146,10 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
             val rearrangeButton = requireViewById<Button>(R.id.rearrange)
             assertThat(rearrangeButton.visibility).isEqualTo(View.VISIBLE)
             assertThat(rearrangeButton.isEnabled).isFalse()
-            assertThat(requireViewById<Button>(R.id.other_apps).visibility).isEqualTo(View.GONE)
+
+            val otherAppsButton = requireViewById<Button>(R.id.other_apps)
+            otherAppsButton.waitForPost()
+            assertThat(otherAppsButton.visibility).isEqualTo(View.GONE)
         }
     }
 
@@ -160,7 +169,10 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
             val rearrangeButton = requireViewById<Button>(R.id.rearrange)
             assertThat(rearrangeButton.visibility).isEqualTo(View.GONE)
             assertThat(rearrangeButton.isEnabled).isFalse()
-            assertThat(requireViewById<Button>(R.id.other_apps).visibility).isEqualTo(View.VISIBLE)
+
+            val otherAppsButton = requireViewById<Button>(R.id.other_apps)
+            otherAppsButton.waitForPost()
+            assertThat(otherAppsButton.visibility).isEqualTo(View.VISIBLE)
         }
     }
 

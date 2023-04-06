@@ -33,8 +33,6 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -166,6 +164,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     /** Only use for clean-up after binder death! */
     private SurfaceControl.Transaction mStartTransaction = null;
     private SurfaceControl.Transaction mFinishTransaction = null;
+
+    /** Used for failsafe clean-up to prevent leaks due to misbehaving player impls. */
+    private SurfaceControl.Transaction mCleanupTransaction = null;
 
     /**
      * Contains change infos for both participants and all remote-animatable ancestors. The
@@ -787,6 +788,24 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     }
 
     /**
+     * Build a transaction that cleans-up transition-only surfaces (transition root and snapshots).
+     * This will ALWAYS be applied on transition finish just in-case
+     */
+    private static void buildCleanupTransaction(SurfaceControl.Transaction t, TransitionInfo info) {
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change c = info.getChanges().get(i);
+            if (c.getSnapshot() != null) {
+                t.reparent(c.getSnapshot(), null);
+            }
+        }
+        for (int i = info.getRootCount() - 1; i >= 0; --i) {
+            final SurfaceControl leash = info.getRoot(i).getLeash();
+            if (leash == null) continue;
+            t.reparent(leash, null);
+        }
+    }
+
+    /**
      * Set whether this transition can start a pip-enter transition when finished. This is usually
      * true, but gets set to false when recents decides that it wants to finish its animation but
      * not actually finish its animation (yeah...).
@@ -863,6 +882,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (mStartTransaction != null) mStartTransaction.close();
         if (mFinishTransaction != null) mFinishTransaction.close();
         mStartTransaction = mFinishTransaction = null;
+        if (mCleanupTransaction != null) {
+            mCleanupTransaction.apply();
+            mCleanupTransaction = null;
+        }
         if (mState < STATE_PLAYING) {
             throw new IllegalStateException("Can't finish a non-playing transition " + mSyncId);
         }
@@ -1286,6 +1309,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
         }
         buildFinishTransaction(mFinishTransaction, info);
+        mCleanupTransaction = mController.mAtm.mWindowManager.mTransactionFactory.get();
+        buildCleanupTransaction(mCleanupTransaction, info);
         if (mController.getTransitionPlayer() != null && mIsPlayerEnabled) {
             mController.dispatchLegacyAppTransitionStarting(info, mStatusBarTransitionDelay);
             try {
@@ -1384,6 +1409,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (ci.mSnapshot != null) {
                 ci.mSnapshot.release();
             }
+        }
+        if (mCleanupTransaction != null) {
+            mCleanupTransaction.apply();
+            mCleanupTransaction = null;
         }
     }
 

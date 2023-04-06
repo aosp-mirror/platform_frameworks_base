@@ -16,17 +16,17 @@
 
 package com.android.keyguard;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.graphics.Rect;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.ClockAnimations;
+import com.android.systemui.plugins.ClockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -118,14 +118,10 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void getClockAnimations_forwardsToClockSwitch() {
-        ClockAnimations mockClockAnimations = mock(ClockAnimations.class);
-        when(mKeyguardClockSwitchController.getClockAnimations()).thenReturn(mockClockAnimations);
+    public void getClock_forwardsToClockSwitch() {
+        ClockController mockClock = mock(ClockController.class);
+        when(mKeyguardClockSwitchController.getClock()).thenReturn(mockClock);
 
-        Rect r1 = new Rect(1, 2, 3, 4);
-        Rect r2 = new Rect(5, 6, 7, 8);
-        mController.getClockAnimations().onPositionUpdated(r1, r2, 0.3f);
-
-        verify(mockClockAnimations).onPositionUpdated(r1, r2, 0.3f);
+        assertEquals(mockClock, mController.getClockController());
     }
 }

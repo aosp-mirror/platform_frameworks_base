@@ -2878,9 +2878,7 @@ public abstract class AccessibilityService extends Service {
 
         public IAccessibilityServiceClientWrapper(Context context, Looper looper,
                 Callbacks callback) {
-            mCallback = callback;
-            mContext = context;
-            mExecutor = new HandlerExecutor(new Handler(looper));
+            this(context, new HandlerExecutor(new Handler(looper)), callback);
         }
 
         public void init(IAccessibilityServiceConnection connection, int connectionId,

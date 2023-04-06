@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
+import android.content.Context
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
@@ -75,9 +76,6 @@ interface MobileIconsInteractor {
     /** True if the CDMA level should be preferred over the primary level. */
     val alwaysUseCdmaLevel: StateFlow<Boolean>
 
-    /** Tracks the subscriptionId set as the default for data connections */
-    val defaultDataSubId: StateFlow<Int>
-
     /** The icon mapping from network type to [MobileIconGroup] for the default subscription */
     val defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>
 
@@ -112,6 +110,7 @@ constructor(
     connectivityRepository: ConnectivityRepository,
     userSetupRepo: UserSetupRepository,
     @Application private val scope: CoroutineScope,
+    private val context: Context,
 ) : MobileIconsInteractor {
 
     override val mobileIsDefault = mobileConnectionsRepo.mobileIsDefault
@@ -183,8 +182,6 @@ constructor(
                 initialValue = listOf(),
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), listOf())
-
-    override val defaultDataSubId = mobileConnectionsRepo.defaultDataSubId
 
     /**
      * Copied from the old pipeline. We maintain a 2s period of time where we will keep the
@@ -282,10 +279,10 @@ constructor(
             mobileIsDefault,
             defaultMobileIconMapping,
             defaultMobileIconGroup,
-            defaultDataSubId,
             isDefaultConnectionFailed,
             isForceHidden,
             mobileConnectionsRepo.getRepoForSubId(subId),
+            context,
         )
 
     companion object {

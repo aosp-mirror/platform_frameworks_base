@@ -66,7 +66,10 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -85,6 +88,14 @@ public class VirtualDeviceManagerService extends SystemService {
 
     private static AtomicInteger sNextUniqueIndex = new AtomicInteger(
             Context.DEVICE_ID_DEFAULT + 1);
+
+    private final CompanionDeviceManager.OnAssociationsChangedListener mCdmAssociationListener =
+            new CompanionDeviceManager.OnAssociationsChangedListener() {
+                @Override
+                public void onAssociationsChanged(@NonNull List<AssociationInfo> associations) {
+                    syncVirtualDevicesToCdmAssociations(associations);
+                }
+            };
 
     /**
      * Mapping from device IDs to virtual devices.
@@ -204,9 +215,54 @@ public class VirtualDeviceManagerService extends SystemService {
         final long identity = Binder.clearCallingIdentity();
         try {
             getContext().sendBroadcastAsUser(i, UserHandle.ALL);
+
+            synchronized (mVirtualDeviceManagerLock) {
+                if (mVirtualDevices.size() == 0) {
+                    unregisterCdmAssociationListener();
+                }
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    private void syncVirtualDevicesToCdmAssociations(List<AssociationInfo> associations) {
+        Set<VirtualDeviceImpl> virtualDevicesToRemove = new HashSet<>();
+        synchronized (mVirtualDeviceManagerLock) {
+            if (mVirtualDevices.size() == 0) {
+                return;
+            }
+
+            Set<Integer> activeAssociationIds = new HashSet<>(associations.size());
+            for (AssociationInfo association : associations) {
+                activeAssociationIds.add(association.getId());
+            }
+
+            for (int i = 0; i < mVirtualDevices.size(); i++) {
+                VirtualDeviceImpl virtualDevice = mVirtualDevices.valueAt(i);
+                if (!activeAssociationIds.contains(virtualDevice.getAssociationId())) {
+                    virtualDevicesToRemove.add(virtualDevice);
+                }
+            }
+        }
+
+        for (VirtualDeviceImpl virtualDevice : virtualDevicesToRemove) {
+            virtualDevice.close();
+        }
+
+    }
+
+    private void registerCdmAssociationListener() {
+        final CompanionDeviceManager cdm = getContext().getSystemService(
+                CompanionDeviceManager.class);
+        cdm.addOnAssociationsChangedListener(getContext().getMainExecutor(),
+                mCdmAssociationListener);
+    }
+
+    private void unregisterCdmAssociationListener() {
+        final CompanionDeviceManager cdm = getContext().getSystemService(
+                CompanionDeviceManager.class);
+        cdm.removeOnAssociationsChangedListener(mCdmAssociationListener);
     }
 
     class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub {
@@ -254,7 +310,20 @@ public class VirtualDeviceManagerService extends SystemService {
             if (associationInfo == null) {
                 throw new IllegalArgumentException("No association with ID " + associationId);
             }
+            Objects.requireNonNull(params);
+            Objects.requireNonNull(activityListener);
+            Objects.requireNonNull(soundEffectListener);
+
             synchronized (mVirtualDeviceManagerLock) {
+                if (mVirtualDevices.size() == 0) {
+                    final long callindId = Binder.clearCallingIdentity();
+                    try {
+                        registerCdmAssociationListener();
+                    } finally {
+                        Binder.restoreCallingIdentity(callindId);
+                    }
+                }
+
                 final UserHandle userHandle = getCallingUserHandle();
                 final CameraAccessController cameraAccessController =
                         getCameraAccessController(userHandle);
@@ -275,6 +344,7 @@ public class VirtualDeviceManagerService extends SystemService {
         public int createVirtualDisplay(VirtualDisplayConfig virtualDisplayConfig,
                 IVirtualDisplayCallback callback, IVirtualDevice virtualDevice, String packageName)
                 throws RemoteException {
+            Objects.requireNonNull(virtualDisplayConfig);
             final int callingUid = getCallingUid();
             if (!PermissionUtils.validateCallingPackageName(getContext(), packageName)) {
                 throw new SecurityException(

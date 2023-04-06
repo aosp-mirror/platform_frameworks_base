@@ -30,6 +30,7 @@ import android.credentials.ui.ProviderPendingIntentResponse;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.server.credentials.metrics.ProviderSessionMetric;
 
@@ -189,7 +190,7 @@ public abstract class ProviderSession<T, R>
             }
             setStatus(Status.CANCELED);
         } catch (RemoteException e) {
-            Log.i(TAG, "Issue while cancelling provider session: " + e.getMessage());
+            Slog.e(TAG, "Issue while cancelling provider session: ", e);
         }
     }
 

@@ -7273,7 +7273,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         final long token = Binder.clearCallingIdentity();
         try {
             return DeviceConfig.getBoolean(NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                    PROPERTY_IS_UPDATE_OWNERSHIP_ENFORCEMENT_AVAILABLE, false /* defaultValue */);
+                    PROPERTY_IS_UPDATE_OWNERSHIP_ENFORCEMENT_AVAILABLE, true /* defaultValue */);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
