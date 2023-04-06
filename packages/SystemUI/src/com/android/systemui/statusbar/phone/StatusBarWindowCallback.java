@@ -16,6 +16,12 @@
 package com.android.systemui.statusbar.phone;
 
 public interface StatusBarWindowCallback {
-    void onStateChanged(boolean keyguardShowing, boolean keyguardOccluded, boolean bouncerShowing,
-            boolean isDozing, boolean panelExpanded, boolean isDreaming);
+    /**
+     * Invoked when the internal state of NotificationShadeWindowControllerImpl changes.
+     * Some of the flags passed as argument to the callback might have changed, but this is not
+     * guaranteed.
+     */
+    void onStateChanged(boolean keyguardShowing, boolean keyguardOccluded,
+            boolean keyguardGoingAway, boolean bouncerShowing, boolean isDozing,
+            boolean panelExpanded, boolean isDreaming);
 }

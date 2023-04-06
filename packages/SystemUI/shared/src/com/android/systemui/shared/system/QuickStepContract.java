@@ -123,6 +123,8 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_WAKEFULNESS_TRANSITION = 1 << 29;
     // The notification panel expansion fraction is > 0
     public static final int SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE = 1 << 30;
+    // When keyguard will be dismissed but didn't start animation yet
+    public static final int SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY = 1 << 31;
 
     // Mask for SystemUiStateFlags to isolate SYSUI_STATE_AWAKE and
     // SYSUI_STATE_WAKEFULNESS_TRANSITION, to match WAKEFULNESS_* constants
@@ -167,6 +169,7 @@ public class QuickStepContract {
             SYSUI_STATE_AWAKE,
             SYSUI_STATE_WAKEFULNESS_TRANSITION,
             SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE,
+            SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY,
     })
     public @interface SystemUiStateFlags {}
 
@@ -264,6 +267,9 @@ public class QuickStepContract {
         }
         if ((flags & SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE) != 0) {
             str.add("notif_visible");
+        }
+        if ((flags & SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY) != 0) {
+            str.add("keygrd_going_away");
         }
 
         return str.toString();
