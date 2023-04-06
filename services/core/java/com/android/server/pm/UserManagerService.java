@@ -2609,7 +2609,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         if (scheduleWriteUser) {
-            scheduleWriteUser(userData);
+            scheduleWriteUser(userId);
         }
     }
 
@@ -2919,7 +2919,7 @@ public class UserManagerService extends IUserManager.Stub {
                     != newBaseRestrictions);
 
             if (mBaseUserRestrictions.updateRestrictions(userId, newBaseRestrictions)) {
-                scheduleWriteUser(getUserDataNoChecks(userId));
+                scheduleWriteUser(userId);
             }
         }
 
@@ -2995,7 +2995,7 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mRestrictionsLock")
     private void applyUserRestrictionsLR(@UserIdInt int userId) {
         updateUserRestrictionsInternalLR(null, userId);
-        scheduleWriteUser(getUserDataNoChecks(userId));
+        scheduleWriteUser(userId);
     }
 
     @GuardedBy("mRestrictionsLock")
@@ -4146,14 +4146,14 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private void scheduleWriteUser(UserData userData) {
+    private void scheduleWriteUser(@UserIdInt int userId) {
         if (DBG) {
             debug("scheduleWriteUser");
         }
         // No need to wrap it within a lock -- worst case, we'll just post the same message
         // twice.
-        if (!mHandler.hasMessages(WRITE_USER_MSG, userData)) {
-            Message msg = mHandler.obtainMessage(WRITE_USER_MSG, userData);
+        if (!mHandler.hasMessages(WRITE_USER_MSG, userId)) {
+            Message msg = mHandler.obtainMessage(WRITE_USER_MSG, userId);
             mHandler.sendMessageDelayed(msg, WRITE_USER_DELAY);
         }
     }
@@ -4169,7 +4169,7 @@ public class UserManagerService extends IUserManager.Stub {
             // Something went wrong, schedule full rewrite.
             UserData userData = getUserDataNoChecks(userId);
             if (userData != null) {
-                scheduleWriteUser(userData);
+                scheduleWriteUser(userId);
             }
         });
     }
@@ -6348,7 +6348,7 @@ public class UserManagerService extends IUserManager.Stub {
             userData.info.lastLoggedInTime = now;
         }
         userData.info.lastLoggedInFingerprint = PackagePartitions.FINGERPRINT;
-        scheduleWriteUser(userData);
+        scheduleWriteUser(userId);
     }
 
     /**
@@ -6518,7 +6518,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     private void setLastEnteredForegroundTimeToNow(@NonNull UserData userData) {
         userData.mLastEnteredForegroundTimeMillis = System.currentTimeMillis();
-        scheduleWriteUser(userData);
+        scheduleWriteUser(userData.info.id);
     }
 
     @Override
@@ -6817,7 +6817,7 @@ public class UserManagerService extends IUserManager.Stub {
                 case WRITE_USER_MSG:
                     removeMessages(WRITE_USER_MSG, msg.obj);
                     synchronized (mPackagesLock) {
-                        int userId = ((UserData) msg.obj).info.id;
+                        int userId = (int) msg.obj;
                         UserData userData = getUserDataNoChecks(userId);
                         if (userData != null) {
                             writeUserLP(userData);
