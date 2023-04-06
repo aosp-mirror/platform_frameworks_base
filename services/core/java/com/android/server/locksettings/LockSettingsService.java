@@ -1516,11 +1516,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                 && !getSeparateProfileChallengeEnabledInternal(userId);
     }
 
-    private boolean isProfileWithSeparatedLock(int userId) {
-        return isCredentialSharableWithParent(userId)
-                && getSeparateProfileChallengeEnabledInternal(userId);
-    }
-
     /**
      * Send credentials for user {@code userId} to {@link RecoverableKeyStoreManager} during an
      * unlock operation.
@@ -2773,9 +2768,19 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         activateEscrowTokens(sp, userId);
 
-        if (isProfileWithSeparatedLock(userId)) {
-            setDeviceUnlockedForUser(userId);
+        if (isCredentialSharableWithParent(userId)) {
+            if (getSeparateProfileChallengeEnabledInternal(userId)) {
+                setDeviceUnlockedForUser(userId);
+            } else {
+                // Here only clear StrongAuthFlags for a profile that has a unified challenge.
+                // StrongAuth for a profile with a separate challenge is handled differently and
+                // is cleared after the user successfully confirms the separate challenge to enter
+                // the profile. StrongAuth for the full user (e.g. userId 0) is also handled
+                // separately by Keyguard.
+                mStrongAuth.reportUnlock(userId);
+            }
         }
+
         mStrongAuth.reportSuccessfulStrongAuthUnlock(userId);
 
         onSyntheticPasswordUnlocked(userId, sp);
