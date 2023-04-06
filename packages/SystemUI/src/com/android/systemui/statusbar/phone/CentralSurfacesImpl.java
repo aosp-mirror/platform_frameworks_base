@@ -191,6 +191,7 @@ import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeLogger;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.statusbar.AutoHideUiElement;
 import com.android.systemui.statusbar.BackDropView;
@@ -505,6 +506,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     /** Controller for the Shade. */
     @VisibleForTesting
     NotificationPanelViewController mNotificationPanelViewController;
+    private final ShadeLogger mShadeLogger;
 
     // settings
     private QSPanelController mQSPanelController;
@@ -738,6 +740,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             KeyguardViewMediator keyguardViewMediator,
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
+            ShadeLogger shadeLogger,
             @UiBackground Executor uiBgExecutor,
             NotificationMediaManager notificationMediaManager,
             NotificationLockscreenUserManager lockScreenUserManager,
@@ -830,6 +833,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mKeyguardViewMediator = keyguardViewMediator;
         mDisplayMetrics = displayMetrics;
         mMetricsLogger = metricsLogger;
+        mShadeLogger = shadeLogger;
         mUiBgExecutor = uiBgExecutor;
         mMediaManager = notificationMediaManager;
         mLockscreenUserManager = lockScreenUserManager;
@@ -3672,6 +3676,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         boolean disabled = (!mDeviceInteractive && !mDozeServiceHost.isPulsing())
                 || goingToSleepWithoutAnimation
                 || mDeviceProvisionedController.isFrpActive();
+        mShadeLogger.logUpdateNotificationPanelTouchState(disabled, isGoingToSleep(),
+                !mDozeParameters.shouldControlScreenOff(), !mDeviceInteractive,
+                !mDozeServiceHost.isPulsing(), mDeviceProvisionedController.isFrpActive());
+
         mNotificationPanelViewController.setTouchAndAnimationDisabled(disabled);
         mNotificationIconAreaController.setAnimationsEnabled(!disabled);
     }
