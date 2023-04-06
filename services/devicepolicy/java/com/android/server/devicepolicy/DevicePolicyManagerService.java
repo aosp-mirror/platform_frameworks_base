@@ -11391,7 +11391,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         for (PolicyKey key : keys) {
             if (!(key instanceof IntentFilterPolicyKey)) {
                 throw new IllegalStateException("PolicyKey for PERSISTENT_PREFERRED_ACTIVITY is not"
-                        + "of type PersistentPreferredActivityPolicyKey");
+                        + "of type IntentFilterPolicyKey");
             }
             IntentFilterPolicyKey parsedKey =
                     (IntentFilterPolicyKey) key;

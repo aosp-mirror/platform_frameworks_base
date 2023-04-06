@@ -36,21 +36,17 @@ final class StringSetPolicySerializer extends PolicySerializer<Set<String>> {
     private static final String ATTR_VALUES_SEPARATOR = ";";
 
     @Override
-    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer, String attributeNamePrefix,
+    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer,
             @NonNull Set<String> value) throws IOException {
         Objects.requireNonNull(value);
         serializer.attribute(
-                /* namespace= */ null,
-                attributeNamePrefix + ATTR_VALUES,
-                String.join(ATTR_VALUES_SEPARATOR, value));
+                /* namespace= */ null, ATTR_VALUES, String.join(ATTR_VALUES_SEPARATOR, value));
     }
 
     @Nullable
     @Override
-    PolicyValue<Set<String>> readFromXml(TypedXmlPullParser parser, String attributeNamePrefix) {
-        String valuesStr = parser.getAttributeValue(
-                /* namespace= */ null,
-                attributeNamePrefix + ATTR_VALUES);
+    PolicyValue<Set<String>> readFromXml(TypedXmlPullParser parser) {
+        String valuesStr = parser.getAttributeValue(/* namespace= */ null, ATTR_VALUES);
         if (valuesStr == null) {
             Log.e(DevicePolicyEngine.TAG, "Error parsing StringSet policy value.");
             return null;

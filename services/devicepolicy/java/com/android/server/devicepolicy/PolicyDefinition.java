@@ -531,7 +531,6 @@ final class PolicyDefinition<V> {
     }
 
     void saveToXml(TypedXmlSerializer serializer) throws IOException {
-        // TODO: here and elsewhere, add tags to ensure attributes aren't overridden by duplication.
         mPolicyKey.saveToXml(serializer);
     }
 
@@ -554,14 +553,14 @@ final class PolicyDefinition<V> {
         return genericPolicyDefinition.mPolicyKey.readFromXml(parser);
     }
 
-    void savePolicyValueToXml(TypedXmlSerializer serializer, String attributeName, V value)
+    void savePolicyValueToXml(TypedXmlSerializer serializer, V value)
             throws IOException {
-        mPolicySerializer.saveToXml(mPolicyKey, serializer, attributeName, value);
+        mPolicySerializer.saveToXml(mPolicyKey, serializer, value);
     }
 
     @Nullable
-    PolicyValue<V> readPolicyValueFromXml(TypedXmlPullParser parser, String attributeName) {
-        return mPolicySerializer.readFromXml(parser, attributeName);
+    PolicyValue<V> readPolicyValueFromXml(TypedXmlPullParser parser) {
+        return mPolicySerializer.readFromXml(parser);
     }
 
     @Override
