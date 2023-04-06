@@ -519,17 +519,24 @@ public class ContextHubService extends IContextHubService.Stub {
         BroadcastReceiver btReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())
-                        || BluetoothAdapter.ACTION_BLE_STATE_CHANGED.equals(
-                        intent.getAction())) {
+                if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())) {
                     sendBtSettingUpdate(/* forceUpdate= */ false);
                 }
             }
         };
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        filter.addAction(BluetoothAdapter.ACTION_BLE_STATE_CHANGED);
         mContext.registerReceiver(btReceiver, filter);
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE),
+                /* notifyForDescendants= */ false,
+                new ContentObserver(/* handler= */ null) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        sendBtSettingUpdate(/* forceUpdate= */ false);
+                    }
+                }, UserHandle.USER_ALL);
     }
 
     /**
