@@ -256,6 +256,12 @@ constructor(
             }
         }
 
+        override fun markScreenAsTurnedOn() {
+            if (!isFolded) {
+                isUnfoldHandled = true
+            }
+        }
+
         override fun onScreenTurningOn() {
             isScreenOn = true
             updateHingeAngleProviderState()
