@@ -924,6 +924,11 @@ public class RecentTasksTest extends WindowTestsBase {
 
     @Test
     public void testFreezeTaskListOrder_timeout() {
+        for (Task t : mTasks) {
+            // Make all the tasks non-empty
+            new ActivityBuilder(mAtm).setTask(t).build();
+        }
+
         // Add some tasks
         mRecentTasks.add(mTasks.get(0));
         mRecentTasks.add(mTasks.get(1));
