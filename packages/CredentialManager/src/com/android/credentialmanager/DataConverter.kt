@@ -210,7 +210,11 @@ class GetFlowUtils {
                 appName = originName
                     ?: getAppLabel(context.packageManager, requestInfo.appPackageName)
                     ?: return null,
-                preferImmediatelyAvailableCredentials = preferImmediatelyAvailableCredentials
+                preferImmediatelyAvailableCredentials = preferImmediatelyAvailableCredentials,
+                preferIdentityDocUi = getCredentialRequest.data.getBoolean(
+                    // TODO(b/276777444): replace with direct library constant reference once
+                    // exposed.
+                    "androidx.credentials.BUNDLE_KEY_PREFER_IDENTITY_DOC_UI"),
             )
         }
 
