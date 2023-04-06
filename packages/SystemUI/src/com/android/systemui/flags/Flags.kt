@@ -230,6 +230,12 @@ object Flags {
     @JvmField
     val REFACTOR_KEYGUARD_DISMISS_INTENT = unreleasedFlag(231, "refactor_keyguard_dismiss_intent")
 
+    /** Whether to allow long-press on the lock screen to directly open wallpaper picker. */
+    // TODO(b/277220285): Tracking bug.
+    @JvmField
+    val LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP =
+        unreleasedFlag(232, "lock_screen_long_press_directly_opens_wallpaper_picker")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
