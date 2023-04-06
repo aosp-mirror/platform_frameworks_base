@@ -305,8 +305,8 @@ class BLASTSyncEngine {
         if (mActiveSyncs.size() != 0) {
             // We currently only support one sync at a time, so start a new SyncGroup when there is
             // another may cause issue.
-            ProtoLog.w(WM_DEBUG_SYNC_ENGINE,
-                    "SyncGroup %d: Started when there is other active SyncGroup", s.mSyncId);
+            Slog.e(TAG, "SyncGroup " + s.mSyncId
+                    + ": Started when there is other active SyncGroup");
         }
         mActiveSyncs.put(s.mSyncId, s);
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Started for listener: %s",

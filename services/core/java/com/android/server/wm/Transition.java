@@ -520,10 +520,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             mChanges.put(wc, info);
         }
         mParticipants.add(wc);
-        if (wc.getDisplayContent() != null && !mTargetDisplays.contains(wc.getDisplayContent())) {
-            mTargetDisplays.add(wc.getDisplayContent());
-            addOnTopTasks(wc.getDisplayContent(), mOnTopTasksStart);
-        }
+        recordDisplay(wc.getDisplayContent());
         if (info.mShowWallpaper) {
             // Collect the wallpaper token (for isWallpaper(wc)) so it is part of the sync set.
             final WindowState wallpaper =
@@ -532,6 +529,20 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 collect(wallpaper.mToken);
             }
         }
+    }
+
+    private void recordDisplay(DisplayContent dc) {
+        if (dc == null || mTargetDisplays.contains(dc)) return;
+        mTargetDisplays.add(dc);
+        addOnTopTasks(dc, mOnTopTasksStart);
+    }
+
+    /**
+     * Records information about the initial task order. This does NOT collect anything. Call this
+     * before any ordering changes *could* occur, but it is not known yet if it will occur.
+     */
+    void recordTaskOrder(WindowContainer from) {
+        recordDisplay(from.getDisplayContent());
     }
 
     /** Adds the top non-alwaysOnTop tasks within `task` to `out`. */
