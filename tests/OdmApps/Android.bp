@@ -28,5 +28,6 @@ java_test_host {
     test_suites: ["device-tests"],
     data: [
         ":TestOdmApp",
+        ":TestOdmPrivApp",
     ],
 }
