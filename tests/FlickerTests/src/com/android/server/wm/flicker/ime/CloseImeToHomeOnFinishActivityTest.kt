@@ -73,7 +73,16 @@ open class CloseImeToHomeOnFinishActivityTest(flicker: FlickerTest) : BaseTest(f
     @Test
     @IwTest(focusArea = "ime")
     override fun cujCompleted() {
-        super.cujCompleted()
+        runAndIgnoreAssumptionViolation { entireScreenCovered() }
+        runAndIgnoreAssumptionViolation { statusBarLayerIsVisibleAtStartAndEnd() }
+        runAndIgnoreAssumptionViolation { statusBarLayerPositionAtStartAndEnd() }
+        runAndIgnoreAssumptionViolation { statusBarWindowIsAlwaysVisible() }
+        runAndIgnoreAssumptionViolation { visibleWindowsShownMoreThanOneConsecutiveEntry() }
+        runAndIgnoreAssumptionViolation { taskBarLayerIsVisibleAtStartAndEnd() }
+        runAndIgnoreAssumptionViolation { taskBarWindowIsAlwaysVisible() }
+        runAndIgnoreAssumptionViolation { navBarLayerIsVisibleAtStartAndEnd() }
+        runAndIgnoreAssumptionViolation { navBarWindowIsAlwaysVisible() }
+        runAndIgnoreAssumptionViolation { navBarWindowIsVisibleAtStartAndEnd() }
         imeLayerBecomesInvisible()
         imeWindowBecomesInvisible()
     }
