@@ -722,6 +722,15 @@ public class Notification implements Parcelable
      */
     public static final int FLAG_FSI_REQUESTED_BUT_DENIED = 0x00004000;
 
+    /**
+     * Bit to be bitwise-ored into the {@link #flags} field that should be
+     * set if this notification represents a currently running user-initiated job.
+     *
+     * This flag is for internal use only; applications cannot set this flag directly.
+     * @hide
+     */
+    public static final int FLAG_USER_INITIATED_JOB = 0x00008000;
+
     private static final List<Class<? extends Style>> PLATFORM_STYLE_CLASSES = Arrays.asList(
             BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
             DecoratedCustomViewStyle.class, DecoratedMediaCustomViewStyle.class,
@@ -731,7 +740,8 @@ public class Notification implements Parcelable
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {FLAG_SHOW_LIGHTS, FLAG_ONGOING_EVENT,
             FLAG_INSISTENT, FLAG_ONLY_ALERT_ONCE,
             FLAG_AUTO_CANCEL, FLAG_NO_CLEAR, FLAG_FOREGROUND_SERVICE, FLAG_HIGH_PRIORITY,
-            FLAG_LOCAL_ONLY, FLAG_GROUP_SUMMARY, FLAG_AUTOGROUP_SUMMARY, FLAG_BUBBLE})
+            FLAG_LOCAL_ONLY, FLAG_GROUP_SUMMARY, FLAG_AUTOGROUP_SUMMARY, FLAG_BUBBLE,
+            FLAG_USER_INITIATED_JOB})
     @Retention(RetentionPolicy.SOURCE)
     public @interface NotificationFlags{};
 
