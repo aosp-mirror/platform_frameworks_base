@@ -16,6 +16,9 @@
 
 package com.android.server.biometrics;
 
+import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
+import static android.hardware.biometrics.SensorProperties.STRENGTH_WEAK;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,9 +30,13 @@ import static org.mockito.Mockito.when;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
-import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IInvalidationCallback;
+import android.hardware.biometrics.SensorPropertiesInternal;
+import android.hardware.face.FaceSensorProperties;
+import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -42,6 +49,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Presubmit
 @SmallTest
@@ -59,26 +67,54 @@ public class InvalidationTrackerTest {
     public void testCallbackReceived_whenAllStrongSensorsInvalidated() throws Exception {
         final IBiometricAuthenticator authenticator1 = mock(IBiometricAuthenticator.class);
         when(authenticator1.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-        final TestSensor sensor1 = new TestSensor(mContext, 0 /* id */,
-                BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG,
+        final TestSensor sensor1 = new TestSensor(mContext,
+                BiometricAuthenticator.TYPE_FINGERPRINT,
+                new FingerprintSensorPropertiesInternal(0 /* id */,
+                        STRENGTH_STRONG,
+                        5 /* maxEnrollmentsPerUser */,
+                        List.of() /* componentInfo */,
+                        FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
+                        false /* resetLockoutRequiresHardwareAuthToken */),
                 authenticator1);
 
         final IBiometricAuthenticator authenticator2 = mock(IBiometricAuthenticator.class);
         when(authenticator2.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-        final TestSensor sensor2 = new TestSensor(mContext, 1 /* id */,
-                BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG,
+        final TestSensor sensor2 = new TestSensor(mContext,
+                BiometricAuthenticator.TYPE_FINGERPRINT,
+                new FingerprintSensorPropertiesInternal(1 /* id */,
+                        STRENGTH_STRONG,
+                        5 /* maxEnrollmentsPerUser */,
+                        List.of() /* componentInfo */,
+                        FingerprintSensorProperties.TYPE_REAR,
+                        false /* resetLockoutRequiresHardwareAuthToken */),
                 authenticator2);
 
         final IBiometricAuthenticator authenticator3 = mock(IBiometricAuthenticator.class);
         when(authenticator3.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-        final TestSensor sensor3 = new TestSensor(mContext, 2 /* id */,
-                BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG,
+        final TestSensor sensor3 = new TestSensor(mContext,
+                BiometricAuthenticator.TYPE_FACE,
+                new FaceSensorPropertiesInternal(2 /* id */,
+                        STRENGTH_STRONG,
+                        5 /* maxEnrollmentsPerUser */,
+                        List.of() /* componentInfo */,
+                        FaceSensorProperties.TYPE_RGB,
+                        true /* supportsFace Detection */,
+                        true /* supportsSelfIllumination */,
+                        false /* resetLockoutRequiresHardwareAuthToken */),
                 authenticator3);
 
         final IBiometricAuthenticator authenticator4 = mock(IBiometricAuthenticator.class);
         when(authenticator4.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-        final TestSensor sensor4 = new TestSensor(mContext, 3 /* id */,
-                BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_WEAK,
+        final TestSensor sensor4 = new TestSensor(mContext,
+                BiometricAuthenticator.TYPE_FACE,
+                new FaceSensorPropertiesInternal(3 /* id */,
+                        STRENGTH_WEAK,
+                        5 /* maxEnrollmentsPerUser */,
+                        List.of() /* componentInfo */,
+                        FaceSensorProperties.TYPE_IR,
+                        true /* supportsFace Detection */,
+                        true /* supportsSelfIllumination */,
+                        false /* resetLockoutRequiresHardwareAuthToken */),
                 authenticator4);
 
         final ArrayList<BiometricSensor> sensors = new ArrayList<>();
@@ -113,9 +149,9 @@ public class InvalidationTrackerTest {
 
     private static class TestSensor extends BiometricSensor {
 
-        TestSensor(@NonNull Context context, int id, int modality, int strength,
+        TestSensor(@NonNull Context context, int modality, @NonNull SensorPropertiesInternal props,
                 @NonNull IBiometricAuthenticator impl) {
-            super(context, id, modality, strength, impl);
+            super(context, modality, props, impl);
         }
 
         @Override
