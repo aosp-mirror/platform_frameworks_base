@@ -268,7 +268,7 @@ interface IAudioService {
     boolean isVolumeControlUsingVolumeGroups();
 
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
-    oneway void registerStreamAliasingDispatcher(IStreamAliasingDispatcher isad, boolean register);
+    void registerStreamAliasingDispatcher(IStreamAliasingDispatcher isad, boolean register);
 
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     void setNotifAliasRingForTest(boolean alias);

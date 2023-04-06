@@ -50,6 +50,7 @@ import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_V
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
+import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__BOTTOM;
@@ -235,9 +236,14 @@ final class LetterboxUiController {
     private final Boolean mBooleanPropertyIgnoreRequestedOrientation;
 
     @Nullable
+    private final Boolean mBooleanPropertyIgnoreOrientationRequestWhenLoopDetected;
+
+    @Nullable
     private final Boolean mBooleanPropertyFakeFocus;
 
-    private boolean mIsRelauchingAfterRequestedOrientationChanged;
+    private boolean mIsRelaunchingAfterRequestedOrientationChanged;
+
+    private boolean mLastShouldShowLetterboxUi;
 
     private boolean mDoubleTapEvent;
 
@@ -253,6 +259,10 @@ final class LetterboxUiController {
                 readComponentProperty(packageManager, mActivityRecord.packageName,
                         mLetterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled,
                         PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION);
+        mBooleanPropertyIgnoreOrientationRequestWhenLoopDetected =
+                readComponentProperty(packageManager, mActivityRecord.packageName,
+                        mLetterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled,
+                        PROPERTY_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED);
         mBooleanPropertyFakeFocus =
                 readComponentProperty(packageManager, mActivityRecord.packageName,
                         mLetterboxConfiguration::isCompatFakeFocusEnabled,
@@ -387,7 +397,7 @@ final class LetterboxUiController {
                         ::isPolicyForIgnoringRequestedOrientationEnabled,
                 mIsOverrideEnableCompatIgnoreRequestedOrientationEnabled,
                 mBooleanPropertyIgnoreRequestedOrientation)) {
-            if (mIsRelauchingAfterRequestedOrientationChanged) {
+            if (mIsRelaunchingAfterRequestedOrientationChanged) {
                 Slog.w(TAG, "Ignoring orientation update to "
                         + screenOrientationToString(requestedOrientation)
                         + " due to relaunching after setRequestedOrientation for "
@@ -422,6 +432,8 @@ final class LetterboxUiController {
      *
      * <p>This treatment is enabled when the following conditions are met:
      * <ul>
+     *     <li>Flag gating the treatment is enabled
+     *     <li>Opt-out component property isn't enabled
      *     <li>Per-app override is enabled
      *     <li>App has requested orientation more than 2 times within 1-second
      *     timer and activity is not letterboxed for fixed orientation
@@ -429,7 +441,11 @@ final class LetterboxUiController {
      */
     @VisibleForTesting
     boolean shouldIgnoreOrientationRequestLoop() {
-        if (!mIsOverrideEnableCompatIgnoreOrientationRequestWhenLoopDetectedEnabled) {
+        if (!shouldEnableWithOptInOverrideAndOptOutProperty(
+                /* gatingCondition */ mLetterboxConfiguration
+                    ::isPolicyForIgnoringRequestedOrientationEnabled,
+                mIsOverrideEnableCompatIgnoreOrientationRequestWhenLoopDetectedEnabled,
+                mBooleanPropertyIgnoreOrientationRequestWhenLoopDetected)) {
             return false;
         }
 
@@ -476,8 +492,8 @@ final class LetterboxUiController {
      * Sets whether an activity is relaunching after the app has called {@link
      * android.app.Activity#setRequestedOrientation}.
      */
-    void setRelauchingAfterRequestedOrientationChanged(boolean isRelaunching) {
-        mIsRelauchingAfterRequestedOrientationChanged = isRelaunching;
+    void setRelaunchingAfterRequestedOrientationChanged(boolean isRelaunching) {
+        mIsRelaunchingAfterRequestedOrientationChanged = isRelaunching;
     }
 
     /**
@@ -1154,12 +1170,28 @@ final class LetterboxUiController {
 
     @VisibleForTesting
     boolean shouldShowLetterboxUi(WindowState mainWindow) {
-        return (mActivityRecord.isInLetterboxAnimation() || isSurfaceVisible(mainWindow))
+        if (mIsRelaunchingAfterRequestedOrientationChanged || !isSurfaceReadyToShow(mainWindow)) {
+            return mLastShouldShowLetterboxUi;
+        }
+
+        final boolean shouldShowLetterboxUi =
+                (mActivityRecord.isInLetterboxAnimation() || isSurfaceVisible(mainWindow))
                 && mainWindow.areAppWindowBoundsLetterboxed()
                 // Check for FLAG_SHOW_WALLPAPER explicitly instead of using
                 // WindowContainer#showWallpaper because the later will return true when this
                 // activity is using blurred wallpaper for letterbox background.
                 && (mainWindow.getAttrs().flags & FLAG_SHOW_WALLPAPER) == 0;
+
+        mLastShouldShowLetterboxUi = shouldShowLetterboxUi;
+
+        return shouldShowLetterboxUi;
+    }
+
+    @VisibleForTesting
+    boolean isSurfaceReadyToShow(WindowState mainWindow) {
+        return mainWindow.isDrawn() // Regular case
+                // Waiting for relayoutWindow to call preserveSurface
+                || mainWindow.isDragResizeChanged();
     }
 
     @VisibleForTesting
@@ -1295,6 +1327,10 @@ final class LetterboxUiController {
             }
         }
         return null;
+    }
+
+    boolean getIsRelaunchingAfterRequestedOrientationChanged() {
+        return mIsRelaunchingAfterRequestedOrientationChanged;
     }
 
     private void adjustBoundsForTaskbar(final WindowState mainWindow, final Rect bounds) {

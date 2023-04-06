@@ -63,6 +63,9 @@ interface ClockController {
     /** A large version of the clock, appropriate when a bigger viewport is available */
     val largeClock: ClockFaceController
 
+    /** Determines the way the hosting app should behave when rendering either clock face */
+    val config: ClockConfig
+
     /** Events that clocks may need to respond to */
     val events: ClockEvents
 
@@ -91,6 +94,9 @@ interface ClockFaceController {
     /** View that renders the clock face */
     val view: View
 
+    /** Determines the way the hosting app should behave when rendering this clock face */
+    val config: ClockFaceConfig
+
     /** Events specific to this clock face */
     val events: ClockFaceEvents
 
@@ -108,9 +114,6 @@ interface ClockEvents {
 
     /** Call whenever the locale changes */
     fun onLocaleChanged(locale: Locale) {}
-
-    val isReactiveToTone
-        get() = true
 
     /** Call whenever the color palette should update */
     fun onColorPaletteChanged(resources: Resources) {}
@@ -144,28 +147,12 @@ interface ClockAnimations {
      * 0.0 -> clock is scaled down in the shade; previewRatio is previewSize / screenSize
      */
     fun onPickerCarouselSwiping(swipingFraction: Float, previewRatio: Float) {}
-
-    /**
-     * Whether this clock has a custom position update animation. If true, the keyguard will call
-     * `onPositionUpdated` to notify the clock of a position update animation. If false, a default
-     * animation will be used (e.g. a simple translation).
-     */
-    val hasCustomPositionUpdatedAnimation
-        get() = false
 }
 
 /** Events that have specific data about the related face */
 interface ClockFaceEvents {
     /** Call every time tick */
     fun onTimeTick() {}
-
-    /** Expected interval between calls to onTimeTick. Can always reduce to PER_MINUTE in AOD. */
-    val tickRate: ClockTickRate
-        get() = ClockTickRate.PER_MINUTE
-
-    /** Call to check whether the clock consumes weather data */
-    val hasCustomWeatherDataDisplay: Boolean
-        get() = false
 
     /**
      * Region Darkness specific to the clock face.
@@ -201,6 +188,28 @@ enum class ClockTickRate(val value: Int) {
 data class ClockMetadata(
     val clockId: ClockId,
     val name: String,
+)
+
+/** Render configuration for the full clock. Modifies the way systemUI behaves with this clock. */
+data class ClockConfig(
+    /**
+     * Whether this clock has a custom position update animation. If true, the keyguard will call
+     * `onPositionUpdated` to notify the clock of a position update animation. If false, a default
+     * animation will be used (e.g. a simple translation).
+     */
+    val hasCustomPositionUpdatedAnimation: Boolean = false,
+
+    /** True if the clock will react to tone changes in the seed color. */
+    val isReactiveToTone: Boolean = true,
+)
+
+/** Render configuration options for a clock face. Modifies the way SystemUI behaves. */
+data class ClockFaceConfig(
+    /** Expected interval between calls to onTimeTick. Can always reduce to PER_MINUTE in AOD. */
+    val tickRate: ClockTickRate = ClockTickRate.PER_MINUTE,
+
+    /** Call to check whether the clock consumes weather data */
+    val hasCustomWeatherDataDisplay: Boolean = false,
 )
 
 /** Structure for keeping clock-specific settings */

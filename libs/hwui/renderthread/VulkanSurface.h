@@ -48,6 +48,8 @@ public:
 
     void setColorSpace(sk_sp<SkColorSpace> colorSpace);
 
+    bool isBeyond8Bit() const;
+
 private:
     /*
      * All structs/methods in this private section are specifically for use by the VulkanManager

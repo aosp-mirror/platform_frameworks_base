@@ -176,6 +176,8 @@ struct JMediaCodec : public AHandler {
 
     const sp<ICrypto> &getCrypto() { return mCrypto; }
 
+    std::string getExceptionMessage(const char *msg) const;
+
 protected:
     virtual ~JMediaCodec();
 

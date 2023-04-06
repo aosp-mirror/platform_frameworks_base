@@ -2,4 +2,4 @@
 <pointer-icon xmlns:android="http://schemas.android.com/apk/res/android"
     android:bitmap="@drawable/pointer_hand_large"
     android:hotSpotX="23.75dp"
-    android:hotSpotY="3.75dp" />
+    android:hotSpotY="6.25dp" />

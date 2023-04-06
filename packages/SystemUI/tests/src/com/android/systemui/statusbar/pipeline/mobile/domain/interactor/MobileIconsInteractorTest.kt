@@ -88,6 +88,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 connectivityRepository,
                 userSetupRepository,
                 testScope.backgroundScope,
+                context,
             )
     }
 
