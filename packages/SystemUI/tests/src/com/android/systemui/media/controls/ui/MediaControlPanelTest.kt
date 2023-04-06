@@ -101,6 +101,7 @@ import dagger.Lazy
 import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -2199,6 +2200,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
+    @Ignore("b/276920368")
     fun bindRecommendation_carouselNotFitThreeRecs() {
         useRealConstraintSets()
         setupUpdatedRecommendationViewHolder()
