@@ -165,7 +165,7 @@ public class NotificationComparator
         if (isCallStyle(record)) {
             return true;
         }
-        if (!isOngoing(record)) {
+        if (!record.getNotification().isFgsOrUij()) {
             return false;
         }
         return isCallCategory(record) || isMediaNotification(record);
@@ -197,11 +197,6 @@ public class NotificationComparator
             return true;
         }
         return false;
-    }
-
-    private boolean isOngoing(NotificationRecord record) {
-        final int ongoingFlags = Notification.FLAG_FOREGROUND_SERVICE;
-        return (record.getNotification().flags & ongoingFlags) != 0;
     }
 
     private boolean isMediaNotification(NotificationRecord record) {
