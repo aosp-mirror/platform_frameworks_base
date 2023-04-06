@@ -25,8 +25,10 @@ import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.customization.R
 import com.android.systemui.plugins.ClockAnimations
+import com.android.systemui.plugins.ClockConfig
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockEvents
+import com.android.systemui.plugins.ClockFaceConfig
 import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceEvents
 import com.android.systemui.plugins.ClockSettings
@@ -62,6 +64,8 @@ class DefaultClockController(
     override val events: DefaultClockEvents
     override lateinit var animations: DefaultClockAnimations
         private set
+
+    override val config = ClockConfig(hasCustomPositionUpdatedAnimation = true)
 
     init {
         val parent = FrameLayout(ctx)
@@ -102,6 +106,8 @@ class DefaultClockController(
         private var currentColor = Color.MAGENTA
         private var isRegionDark = false
         protected var targetRegion: Rect? = null
+
+        override val config = ClockFaceConfig()
 
         override var logBuffer: LogBuffer?
             get() = view.logBuffer
@@ -254,9 +260,6 @@ class DefaultClockController(
         override fun onPositionUpdated(fromRect: Rect, toRect: Rect, fraction: Float) {
             largeClock.moveForSplitShade(fromRect, toRect, fraction)
         }
-
-        override val hasCustomPositionUpdatedAnimation: Boolean
-            get() = true
     }
 
     class AnimationState(

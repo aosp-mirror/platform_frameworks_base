@@ -54,6 +54,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @SmallTest
@@ -122,8 +123,6 @@ public class BrightnessThrottlerTest {
         BrightnessThrottlingData data;
         data = BrightnessThrottlingData.create((List<ThrottlingLevel>)null);
         assertEquals(data, null);
-        data = BrightnessThrottlingData.create((BrightnessThrottlingData)null);
-        assertEquals(data, null);
         data = BrightnessThrottlingData.create(new ArrayList<ThrottlingLevel>());
         assertEquals(data, null);
         data = BrightnessThrottlingData.create(unsortedThermalLevels);
@@ -146,7 +145,7 @@ public class BrightnessThrottlerTest {
     }
 
     @Test
-    public void testThrottlingUnsupported() throws Exception {
+    public void testThrottlingUnsupported() {
         final BrightnessThrottler throttler = createThrottlerUnsupported();
         assertFalse(throttler.deviceSupportsThrottling());
 
@@ -307,37 +306,18 @@ public class BrightnessThrottlerTest {
         verify(mThermalServiceMock).registerThermalEventListenerWithType(
                 mThermalEventListenerCaptor.capture(), eq(Temperature.TYPE_SKIN));
         final IThermalEventListener listener = mThermalEventListenerCaptor.getValue();
+        testThrottling(throttler, listener, PowerManager.BRIGHTNESS_MAX, 0.4f);
 
-        // Set status too low to trigger throttling
-        listener.notifyThrottling(getSkinTemp(level.thermalStatus - 1));
-        mTestLooper.dispatchAll();
-        assertEquals(PowerManager.BRIGHTNESS_MAX, throttler.getBrightnessCap(), 0f);
-        assertFalse(throttler.isThrottled());
-
-        // Set status high enough to trigger throttling
-        listener.notifyThrottling(getSkinTemp(level.thermalStatus));
-        mTestLooper.dispatchAll();
-        assertEquals(0.4f, throttler.getBrightnessCap(), 0f);
-        assertTrue(throttler.isThrottled());
-
-        // Update thresholds
-        // This data is equivalent to the string "123,1,critical,0.8", passed below
-        final ThrottlingLevel newLevel = new ThrottlingLevel(PowerManager.THERMAL_STATUS_CRITICAL,
-                0.8f);
         // Set new (valid) data from device config
         mDeviceConfigFake.setBrightnessThrottlingData("123,1,critical,0.8");
+        testThrottling(throttler, listener, PowerManager.BRIGHTNESS_MAX, 0.8f);
 
-        // Set status too low to trigger throttling
-        listener.notifyThrottling(getSkinTemp(newLevel.thermalStatus - 1));
-        mTestLooper.dispatchAll();
-        assertEquals(PowerManager.BRIGHTNESS_MAX, throttler.getBrightnessCap(), 0f);
-        assertFalse(throttler.isThrottled());
-
-        // Set status high enough to trigger throttling
-        listener.notifyThrottling(getSkinTemp(newLevel.thermalStatus));
-        mTestLooper.dispatchAll();
-        assertEquals(newLevel.brightness, throttler.getBrightnessCap(), 0f);
-        assertTrue(throttler.isThrottled());
+        mDeviceConfigFake.setBrightnessThrottlingData(
+                "123,1,critical,0.75;123,1,critical,0.99,id_2");
+        testThrottling(throttler, listener, PowerManager.BRIGHTNESS_MAX, 0.75f);
+        mDeviceConfigFake.setBrightnessThrottlingData(
+                "123,1,critical,0.8,default;123,1,critical,0.99,id_2");
+        testThrottling(throttler, listener, PowerManager.BRIGHTNESS_MAX, 0.8f);
     }
 
     @Test public void testInvalidThrottlingStrings() throws Exception {
@@ -369,6 +349,18 @@ public class BrightnessThrottlerTest {
         mDeviceConfigFake.setBrightnessThrottlingData("invalid string");      // Invalid format
         testThrottling(throttler, listener, PowerManager.BRIGHTNESS_MAX, 0.25f);
         mDeviceConfigFake.setBrightnessThrottlingData("");                    // Invalid format
+        testThrottling(throttler, listener, PowerManager.BRIGHTNESS_MAX, 0.25f);
+        // Invalid string format
+        mDeviceConfigFake.setBrightnessThrottlingData(
+                "123,default,1,critical,0.75,1,critical,0.99");
+        testThrottling(throttler, listener, PowerManager.BRIGHTNESS_MAX, 0.25f);
+        // Invalid level string and number string
+        mDeviceConfigFake.setBrightnessThrottlingData(
+                "123,1,1,critical,0.75,id_2,1,critical,0.99");
+        testThrottling(throttler, listener, PowerManager.BRIGHTNESS_MAX, 0.25f);
+        // Invalid format - (two default ids for same display)
+        mDeviceConfigFake.setBrightnessThrottlingData(
+                "123,1,critical,0.75,default;123,1,critical,0.99");
         testThrottling(throttler, listener, PowerManager.BRIGHTNESS_MAX, 0.25f);
     }
 
@@ -472,13 +464,17 @@ public class BrightnessThrottlerTest {
     }
 
     private BrightnessThrottler createThrottlerUnsupported() {
-        return new BrightnessThrottler(mInjectorMock, mHandler, mHandler, null, () -> {}, null);
+        return new BrightnessThrottler(mInjectorMock, mHandler, mHandler,
+                /* throttlingChangeCallback= */ () -> {}, /* uniqueDisplayId= */ null,
+                /* throttlingDataId= */ null, /* throttlingDataMap= */ new HashMap<>(1));
     }
 
     private BrightnessThrottler createThrottlerSupported(BrightnessThrottlingData data) {
         assertNotNull(data);
+        HashMap<String, BrightnessThrottlingData> throttlingDataMap = new HashMap<>(1);
+        throttlingDataMap.put("default", data);
         return new BrightnessThrottler(mInjectorMock, mHandler, BackgroundThread.getHandler(),
-                data, () -> {}, "123");
+                () -> {}, "123", "default", throttlingDataMap);
     }
 
     private Temperature getSkinTemp(@ThrottlingStatus int status) {

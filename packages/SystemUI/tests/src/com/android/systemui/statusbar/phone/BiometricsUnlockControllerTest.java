@@ -89,7 +89,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardViewMediator mKeyguardViewMediator;
     @Mock
-    private BiometricUnlockController.BiometricModeListener mBiometricModeListener;
+    private BiometricUnlockController.BiometricUnlockEventsListener mBiometricUnlockEventsListener;
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
@@ -145,7 +145,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mSystemClock
         );
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
-        mBiometricUnlockController.addBiometricModeListener(mBiometricModeListener);
+        mBiometricUnlockController.addListener(mBiometricUnlockEventsListener);
         when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(mStrongAuthTracker);
     }
 

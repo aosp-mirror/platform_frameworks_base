@@ -3754,7 +3754,7 @@
   <java-symbol type="string" name="config_defaultAppPredictionService" />
   <java-symbol type="string" name="config_defaultContentSuggestionsService" />
   <java-symbol type="string" name="config_defaultCredentialManagerHybridService" />
-  <java-symbol type="string" name="config_defaultCredentialProviderService" />
+  <java-symbol type="array" name="config_defaultCredentialProviderService" />
   <java-symbol type="string" name="config_defaultSearchUiService" />
   <java-symbol type="string" name="config_defaultSmartspaceService" />
   <java-symbol type="string" name="config_defaultWallpaperEffectsGenerationService" />

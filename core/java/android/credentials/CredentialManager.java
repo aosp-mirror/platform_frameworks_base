@@ -460,9 +460,17 @@ public final class CredentialManager {
         return false;
     }
 
+    /**
+     * Returns whether the service is enabled.
+     *
+     * @hide
+     */
     private boolean isServiceEnabled() {
-        return DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER, true);
+        try {
+            return mService.isServiceEnabled();
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 
     /**

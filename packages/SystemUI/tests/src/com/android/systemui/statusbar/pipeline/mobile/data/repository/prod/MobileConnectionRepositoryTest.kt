@@ -42,6 +42,7 @@ import android.telephony.TelephonyManager.DATA_SUSPENDED
 import android.telephony.TelephonyManager.DATA_UNKNOWN
 import android.telephony.TelephonyManager.ERI_OFF
 import android.telephony.TelephonyManager.ERI_ON
+import android.telephony.TelephonyManager.EXTRA_CARRIER_ID
 import android.telephony.TelephonyManager.EXTRA_PLMN
 import android.telephony.TelephonyManager.EXTRA_SHOW_PLMN
 import android.telephony.TelephonyManager.EXTRA_SHOW_SPN
@@ -116,7 +117,6 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
         underTest =
             MobileConnectionRepositoryImpl(
-                context,
                 SUB_1_ID,
                 DEFAULT_NAME,
                 SEP,
@@ -354,6 +354,36 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             callback.onDataActivity(DATA_ACTIVITY_INOUT)
 
             assertThat(latest).isEqualTo(DATA_ACTIVITY_INOUT.toMobileDataActivityModel())
+
+            job.cancel()
+        }
+
+    @Test
+    fun carrierId_initialValueCaptured() =
+        testScope.runTest {
+            whenever(telephonyManager.simCarrierId).thenReturn(1234)
+
+            var latest: Int? = null
+            val job = underTest.carrierId.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(1234)
+
+            job.cancel()
+        }
+
+    @Test
+    fun carrierId_updatesOnBroadcast() =
+        testScope.runTest {
+            whenever(telephonyManager.simCarrierId).thenReturn(1234)
+
+            var latest: Int? = null
+            val job = underTest.carrierId.onEach { latest = it }.launchIn(this)
+
+            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
+                receiver.onReceive(context, carrierIdIntent(carrierId = 4321))
+            }
+
+            assertThat(latest).isEqualTo(4321)
 
             job.cancel()
         }
@@ -795,6 +825,15 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     private inline fun <reified T> getTelephonyCallbackForType(): T {
         return MobileTelephonyHelpers.getTelephonyCallbackForType(telephonyManager)
     }
+
+    private fun carrierIdIntent(
+        subId: Int = SUB_1_ID,
+        carrierId: Int,
+    ): Intent =
+        Intent(TelephonyManager.ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED).apply {
+            putExtra(EXTRA_SUBSCRIPTION_ID, subId)
+            putExtra(EXTRA_CARRIER_ID, carrierId)
+        }
 
     private fun spnIntent(
         subId: Int = SUB_1_ID,

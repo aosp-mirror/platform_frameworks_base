@@ -20,6 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH_NONE
 import com.android.settingslib.mobile.TelephonyIcons.THREE_G
+import com.android.settingslib.mobile.TelephonyIcons.UNKNOWN
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -27,6 +28,7 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.NetworkTypeIconModel
 import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
@@ -76,9 +78,9 @@ class MobileIconViewModelTest : SysuiTestCase() {
             setLevel(1)
             setIsDefaultDataEnabled(true)
             setIsFailedConnection(false)
-            setIconGroup(THREE_G)
             setIsEmergencyOnly(false)
             setNumberOfLevels(4)
+            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
             isDataConnected.value = true
         }
         createAndSetViewModel()
@@ -255,7 +257,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
                     THREE_G.dataType,
                     ContentDescription.Resource(THREE_G.dataContentDescription)
                 )
-            interactor.setIconGroup(THREE_G)
+            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
 
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
@@ -266,10 +268,11 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun networkType_nullWhenDisabled() =
+    fun networkType_null_whenDisabled() =
         testScope.runTest {
-            interactor.setIconGroup(THREE_G)
+            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
             interactor.setIsDataEnabled(false)
+            interactor.mobileIsDefault.value = true
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
 
@@ -279,15 +282,21 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun networkType_nullWhenFailedConnection() =
+    fun networkTypeIcon_notNull_whenEnabled() =
         testScope.runTest {
-            interactor.setIconGroup(THREE_G)
+            val expected =
+                Icon.Resource(
+                    THREE_G.dataType,
+                    ContentDescription.Resource(THREE_G.dataContentDescription)
+                )
+            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
             interactor.setIsDataEnabled(true)
-            interactor.setIsFailedConnection(true)
+            interactor.isDataConnected.value = true
+            interactor.mobileIsDefault.value = true
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
 
-            assertThat(latest).isNull()
+            assertThat(latest).isEqualTo(expected)
 
             job.cancel()
         }
@@ -301,11 +310,11 @@ class MobileIconViewModelTest : SysuiTestCase() {
                     ContentDescription.Resource(THREE_G.dataContentDescription)
                 )
 
-            interactor.setIconGroup(THREE_G)
+            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
 
-            interactor.setIconGroup(THREE_G)
+            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
             assertThat(latest).isEqualTo(initial)
 
             interactor.isDataConnected.value = false
@@ -324,7 +333,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
                     THREE_G.dataType,
                     ContentDescription.Resource(THREE_G.dataContentDescription)
                 )
-            interactor.setIconGroup(THREE_G)
+            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
             interactor.setIsDataEnabled(true)
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
@@ -342,8 +351,8 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun networkType_alwaysShow_shownEvenWhenDisabled() =
         testScope.runTest {
-            interactor.setIconGroup(THREE_G)
-            interactor.setIsDataEnabled(true)
+            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
+            interactor.setIsDataEnabled(false)
             interactor.alwaysShowDataRatIcon.value = true
 
             var latest: Icon? = null
@@ -362,7 +371,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun networkType_alwaysShow_shownEvenWhenDisconnected() =
         testScope.runTest {
-            interactor.setIconGroup(THREE_G)
+            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
             interactor.isDataConnected.value = false
             interactor.alwaysShowDataRatIcon.value = true
 
@@ -382,7 +391,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun networkType_alwaysShow_shownEvenWhenFailedConnection() =
         testScope.runTest {
-            interactor.setIconGroup(THREE_G)
+            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
             interactor.setIsFailedConnection(true)
             interactor.alwaysShowDataRatIcon.value = true
 
@@ -400,9 +409,24 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun networkType_alwaysShow_notShownWhenInvalidDataTypeIcon() =
+        testScope.runTest {
+            // The UNKNOWN icon group doesn't have a valid data type icon ID
+            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(UNKNOWN)
+            interactor.alwaysShowDataRatIcon.value = true
+
+            var latest: Icon? = null
+            val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isNull()
+
+            job.cancel()
+        }
+
+    @Test
     fun `network type - alwaysShow - shown when not default`() =
         testScope.runTest {
-            interactor.setIconGroup(THREE_G)
+            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
             interactor.mobileIsDefault.value = false
             interactor.alwaysShowDataRatIcon.value = true
 
@@ -422,7 +446,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun `network type - not shown when not default`() =
         testScope.runTest {
-            interactor.setIconGroup(THREE_G)
+            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
             interactor.isDataConnected.value = true
             interactor.mobileIsDefault.value = false
 

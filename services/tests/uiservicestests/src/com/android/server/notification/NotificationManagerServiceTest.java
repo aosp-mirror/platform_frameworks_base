@@ -4734,7 +4734,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testBumpFGImportance_noChannelChangePreOApp() throws Exception {
+    public void testBumpFGImportance_channelChangePreOApp() throws Exception {
         String preOPkg = PKG_N_MR1;
         final ApplicationInfo legacy = new ApplicationInfo();
         legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
@@ -4752,7 +4752,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setPriority(Notification.PRIORITY_MIN);
 
         StatusBarNotification sbn = new StatusBarNotification(preOPkg, preOPkg, 9,
-                "testBumpFGImportance_noChannelChangePreOApp",
+                "testBumpFGImportance_channelChangePreOApp",
                 Binder.getCallingUid(), 0, nb.build(),
                 UserHandle.getUserHandleForUid(Binder.getCallingUid()), null, 0);
 
@@ -4772,11 +4772,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setPriority(Notification.PRIORITY_MIN);
 
         sbn = new StatusBarNotification(preOPkg, preOPkg, 9,
-                "testBumpFGImportance_noChannelChangePreOApp", Binder.getCallingUid(),
+                "testBumpFGImportance_channelChangePreOApp", Binder.getCallingUid(),
                 0, nb.build(), UserHandle.getUserHandleForUid(Binder.getCallingUid()), null, 0);
 
         mBinderService.enqueueNotificationWithTag(preOPkg, preOPkg,
-                "testBumpFGImportance_noChannelChangePreOApp",
+                "testBumpFGImportance_channelChangePreOApp",
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         waitForIdle();
         assertEquals(IMPORTANCE_LOW,
@@ -4784,7 +4784,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         NotificationChannel defaultChannel = mBinderService.getNotificationChannel(
                 preOPkg, mContext.getUserId(), preOPkg, NotificationChannel.DEFAULT_CHANNEL_ID);
-        assertEquals(IMPORTANCE_UNSPECIFIED, defaultChannel.getImportance());
+        assertEquals(IMPORTANCE_LOW, defaultChannel.getImportance());
     }
 
     @Test

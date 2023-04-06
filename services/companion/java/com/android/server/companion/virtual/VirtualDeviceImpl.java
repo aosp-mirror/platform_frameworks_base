@@ -126,7 +126,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final VirtualDeviceManagerService mService;
     private final PendingTrampolineCallback mPendingTrampolineCallback;
     private final int mOwnerUid;
-    private final int mDeviceId;
+    private int mDeviceId;
     // Thou shall not hold the mVirtualDeviceLock over the mInputController calls.
     // Holding the lock can lead to lock inversion with GlobalWindowManagerLock.
     // 1. After display is created the window manager calls into VDM during construction
@@ -348,6 +348,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @Override // Binder call
     public void launchPendingIntent(int displayId, PendingIntent pendingIntent,
             ResultReceiver resultReceiver) {
+        Objects.requireNonNull(pendingIntent);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(displayId)) {
                 throw new SecurityException("Display ID " + displayId
@@ -404,6 +405,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         super.close_enforcePermission();
         // Remove about-to-be-closed virtual device from the service before butchering it.
         mService.removeVirtualDevice(mDeviceId);
+        mDeviceId = Context.DEVICE_ID_INVALID;
 
         VirtualDisplayWrapper[] virtualDisplaysToBeReleased;
         synchronized (mVirtualDeviceLock) {
@@ -497,6 +499,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void createVirtualDpad(VirtualDpadConfig config, @NonNull IBinder deviceToken) {
         super.createVirtualDpad_enforcePermission();
+        Objects.requireNonNull(config);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -517,6 +520,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void createVirtualKeyboard(VirtualKeyboardConfig config, @NonNull IBinder deviceToken) {
         super.createVirtualKeyboard_enforcePermission();
+        Objects.requireNonNull(config);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -539,6 +543,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void createVirtualMouse(VirtualMouseConfig config, @NonNull IBinder deviceToken) {
         super.createVirtualMouse_enforcePermission();
+        Objects.requireNonNull(config);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -560,6 +565,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public void createVirtualTouchscreen(VirtualTouchscreenConfig config,
             @NonNull IBinder deviceToken) {
         super.createVirtualTouchscreen_enforcePermission();
+        Objects.requireNonNull(config);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -590,6 +596,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public void createVirtualNavigationTouchpad(VirtualNavigationTouchpadConfig config,
             @NonNull IBinder deviceToken) {
         super.createVirtualNavigationTouchpad_enforcePermission();
+        Objects.requireNonNull(config);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(

@@ -1259,7 +1259,16 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     protected void applyNewPictureInPictureParams(@NonNull PictureInPictureParams params) {
         if (mDeferredTaskInfo != null || PipUtils.aspectRatioChanged(params.getAspectRatioFloat(),
                 mPictureInPictureParams.getAspectRatioFloat())) {
-            mPipParamsChangedForwarder.notifyAspectRatioChanged(params.getAspectRatioFloat());
+            if (mPipBoundsAlgorithm.isValidPictureInPictureAspectRatio(
+                    params.getAspectRatioFloat())) {
+                mPipParamsChangedForwarder.notifyAspectRatioChanged(params.getAspectRatioFloat());
+            } else {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: New aspect ratio is not valid."
+                                + " hasAspectRatio=%b"
+                                + " aspectRatio=%f",
+                        TAG, params.hasSetAspectRatio(), params.getAspectRatioFloat());
+            }
         }
         if (mDeferredTaskInfo != null
                 || PipUtils.remoteActionsChanged(params.getActions(),

@@ -126,7 +126,8 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
             startCandidateMetrics();
-            mRemoteCredentialService.onClearCredentialState(mProviderRequest, this);
+            mProviderCancellationSignal =
+                    mRemoteCredentialService.onClearCredentialState(mProviderRequest, this);
         }
     }
 }

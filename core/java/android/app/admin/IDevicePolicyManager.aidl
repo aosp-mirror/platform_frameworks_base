@@ -119,7 +119,7 @@ interface IDevicePolicyManager {
     void setRequiredStrongAuthTimeout(in ComponentName who, String callerPackageName, long timeMs, boolean parent);
     long getRequiredStrongAuthTimeout(in ComponentName who, int userId, boolean parent);
 
-    void lockNow(int flags, boolean parent);
+    void lockNow(int flags, String callerPackageName, boolean parent);
 
     /**
     * @param factoryReset only applicable when `targetSdk >= U`, either tries to factoryReset/fail or removeUser/fail otherwise

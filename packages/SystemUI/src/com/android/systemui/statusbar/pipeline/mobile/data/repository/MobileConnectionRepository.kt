@@ -40,6 +40,9 @@ interface MobileConnectionRepository {
     /** The subscriptionId that this connection represents */
     val subId: Int
 
+    /** The carrierId for this connection. See [TelephonyManager.getSimCarrierId] */
+    val carrierId: StateFlow<Int>
+
     /**
      * The table log buffer created for this connection. Will have the name "MobileConnectionLog
      * [subId]"
