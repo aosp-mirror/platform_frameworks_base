@@ -128,6 +128,8 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -1185,6 +1187,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private Lazy<ScrimController> mScrimControllerLazy;
     private IActivityTaskManager mActivityTaskManagerService;
 
+    private FeatureFlags mFeatureFlags;
+
     /**
      * Injected constructor. See {@link KeyguardModule}.
      */
@@ -1216,7 +1220,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             Lazy<NotificationShadeWindowController> notificationShadeWindowControllerLazy,
             Lazy<ActivityLaunchAnimator> activityLaunchAnimator,
             Lazy<ScrimController> scrimControllerLazy,
-            IActivityTaskManager activityTaskManagerService) {
+            IActivityTaskManager activityTaskManagerService,
+            FeatureFlags featureFlags) {
         mContext = context;
         mUserTracker = userTracker;
         mFalsingCollector = falsingCollector;
@@ -1272,6 +1277,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
         mDreamOpenAnimationDuration = (int) DREAMING_ANIMATION_DURATION_MS;
         mDreamCloseAnimationDuration = (int) LOCKSCREEN_ANIMATION_DURATION_MS;
+
+        mFeatureFlags = featureFlags;
     }
 
     public void userActivity() {
@@ -1685,14 +1692,17 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     /**
-     * A dream started.  We should lock after the usual screen-off lock timeout but only
-     * if there is a secure lock pattern.
+     * A dream started. We should lock after the usual screen-off lock timeout regardless if
+     * there is a secure lock pattern or not
      */
     public void onDreamingStarted() {
         mUpdateMonitor.dispatchDreamingStarted();
         synchronized (this) {
+            final boolean alwaysShowKeyguard =
+                mFeatureFlags.isEnabled(Flags.LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING);
             if (mDeviceInteractive
-                    && mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())) {
+                && (alwaysShowKeyguard ||
+                mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser()))) {
                 doKeyguardLaterLocked();
             }
         }
