@@ -42,6 +42,8 @@ import android.view.LayoutInflater;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.launcher3.icons.BitmapInfo;
+import com.android.launcher3.icons.BubbleBadgeIconFactory;
+import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
