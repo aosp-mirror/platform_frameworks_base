@@ -197,7 +197,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     @Override
     public void onTransitionMerged(@NonNull IBinder merged, @NonNull IBinder playing) {
-        if (mTransitionPausingRelayout.equals(merged)) {
+        if (merged.equals(mTransitionPausingRelayout)) {
             mTransitionPausingRelayout = playing;
         }
     }
