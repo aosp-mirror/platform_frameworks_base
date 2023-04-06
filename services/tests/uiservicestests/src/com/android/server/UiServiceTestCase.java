@@ -87,6 +87,7 @@ public class UiServiceTestCase {
         Mockito.doReturn(new Intent()).when(mContext).registerReceiverAsUser(
                 any(), any(), any(), any(), any());
         Mockito.doReturn(new Intent()).when(mContext).registerReceiver(any(), any());
+        Mockito.doReturn(new Intent()).when(mContext).registerReceiver(any(), any(), anyInt());
         Mockito.doNothing().when(mContext).unregisterReceiver(any());
     }
 
