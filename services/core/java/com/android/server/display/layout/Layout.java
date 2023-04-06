@@ -234,11 +234,11 @@ public class Layout {
         // {@link DeviceStateToLayoutMap.POSITION_UNKNOWN} is unspecified.
         private final int mPosition;
 
-        // The ID of the brightness throttling map that should be used. This can change e.g. in
-        // concurrent displays mode in which a stricter brightness throttling policy might need to
-        // be used.
+        // The ID of the thermal brightness throttling map that should be used. This can change
+        // e.g. in concurrent displays mode in which a stricter brightness throttling policy might
+        // need to be used.
         @Nullable
-        private final String mBrightnessThrottlingMapId;
+        private final String mThermalBrightnessThrottlingMapId;
 
         // The ID of the lead display that this display will follow in a layout. -1 means no lead.
         private final int mLeadDisplayId;
@@ -248,7 +248,7 @@ public class Layout {
         private final String mRefreshRateZoneId;
 
         @Nullable
-        private final String mRefreshRateThermalThrottlingMapId;
+        private final String mThermalRefreshRateThrottlingMapId;
 
         private Display(@NonNull DisplayAddress address, int logicalDisplayId, boolean isEnabled,
                 @NonNull String displayGroupName, String brightnessThrottlingMapId, int position,
@@ -259,9 +259,9 @@ public class Layout {
             mIsEnabled = isEnabled;
             mDisplayGroupName = displayGroupName;
             mPosition = position;
-            mBrightnessThrottlingMapId = brightnessThrottlingMapId;
+            mThermalBrightnessThrottlingMapId = brightnessThrottlingMapId;
             mRefreshRateZoneId = refreshRateZoneId;
-            mRefreshRateThermalThrottlingMapId = refreshRateThermalThrottlingMapId;
+            mThermalRefreshRateThrottlingMapId = refreshRateThermalThrottlingMapId;
             mLeadDisplayId = leadDisplayId;
         }
 
@@ -273,10 +273,10 @@ public class Layout {
                     + ", displayGroupName: " + mDisplayGroupName
                     + ", addr: " + mAddress
                     +  ((mPosition == POSITION_UNKNOWN) ? "" : ", position: " + mPosition)
-                    + ", brightnessThrottlingMapId: " + mBrightnessThrottlingMapId
+                    + ", mThermalBrightnessThrottlingMapId: " + mThermalBrightnessThrottlingMapId
                     + ", mRefreshRateZoneId: " + mRefreshRateZoneId
                     + ", mLeadDisplayId: " + mLeadDisplayId
-                    + ", mRefreshRateThermalThrottlingMapId: " + mRefreshRateThermalThrottlingMapId
+                    + ", mThermalRefreshRateThrottlingMapId: " + mThermalRefreshRateThrottlingMapId
                     + "}";
         }
 
@@ -293,12 +293,12 @@ public class Layout {
                     && otherDisplay.mLogicalDisplayId == this.mLogicalDisplayId
                     && this.mDisplayGroupName.equals(otherDisplay.mDisplayGroupName)
                     && this.mAddress.equals(otherDisplay.mAddress)
-                    && Objects.equals(mBrightnessThrottlingMapId,
-                    otherDisplay.mBrightnessThrottlingMapId)
+                    && Objects.equals(mThermalBrightnessThrottlingMapId,
+                    otherDisplay.mThermalBrightnessThrottlingMapId)
                     && Objects.equals(otherDisplay.mRefreshRateZoneId, this.mRefreshRateZoneId)
                     && this.mLeadDisplayId == otherDisplay.mLeadDisplayId
-                    && Objects.equals(mRefreshRateThermalThrottlingMapId,
-                    otherDisplay.mRefreshRateThermalThrottlingMapId);
+                    && Objects.equals(mThermalRefreshRateThrottlingMapId,
+                    otherDisplay.mThermalRefreshRateThrottlingMapId);
         }
 
         @Override
@@ -309,10 +309,10 @@ public class Layout {
             result = 31 * result + mLogicalDisplayId;
             result = 31 * result + mDisplayGroupName.hashCode();
             result = 31 * result + mAddress.hashCode();
-            result = 31 * result + mBrightnessThrottlingMapId.hashCode();
+            result = 31 * result + mThermalBrightnessThrottlingMapId.hashCode();
             result = 31 * result + Objects.hashCode(mRefreshRateZoneId);
             result = 31 * result + mLeadDisplayId;
-            result = 31 * result + Objects.hashCode(mRefreshRateThermalThrottlingMapId);
+            result = 31 * result + Objects.hashCode(mThermalRefreshRateThrottlingMapId);
             return result;
         }
 
@@ -338,12 +338,12 @@ public class Layout {
         }
 
         /**
-         * Gets the id of the brightness throttling map that should be used.
-         * @return The ID of the brightness throttling map that this display should use, null if
-         *         unspecified, will fall back to default.
+         * Gets the id of the thermal brightness throttling map that should be used.
+         * @return The ID of the thermal brightness throttling map that this display should use,
+         *         null if unspecified, will fall back to default.
          */
-        public String getBrightnessThrottlingMapId() {
-            return mBrightnessThrottlingMapId;
+        public String getThermalBrightnessThrottlingMapId() {
+            return mThermalBrightnessThrottlingMapId;
         }
 
         /**
@@ -361,7 +361,7 @@ public class Layout {
         }
 
         public String getRefreshRateThermalThrottlingMapId() {
-            return mRefreshRateThermalThrottlingMapId;
+            return mThermalRefreshRateThrottlingMapId;
         }
     }
 }
