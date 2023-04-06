@@ -17,8 +17,6 @@
 package com.android.server.biometrics.sensors.fingerprint;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
-import static android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_STRONG;
-import static android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_WEAK;
 import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
 import static android.hardware.biometrics.SensorProperties.STRENGTH_WEAK;
 
@@ -70,9 +68,7 @@ public class FingerprintServiceRegistryTest {
     @Mock
     private ServiceProvider mProvider2;
     @Captor
-    private ArgumentCaptor<Integer> mIdCaptor;
-    @Captor
-    private ArgumentCaptor<Integer> mStrengthCaptor;
+    private ArgumentCaptor<FingerprintSensorPropertiesInternal> mPropsCaptor;
 
     private FingerprintSensorPropertiesInternal mProvider1Props;
     private FingerprintSensorPropertiesInternal mProvider2Props;
@@ -82,11 +78,11 @@ public class FingerprintServiceRegistryTest {
     public void setup() {
         mProvider1Props = new FingerprintSensorPropertiesInternal(SENSOR_ID_1,
                 STRENGTH_WEAK, 5 /* maxEnrollmentsPerUser */,
-                List.of(), FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
+                List.of() /* componentInfo */, FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
                 false /* resetLockoutRequiresHardwareAuthToken */);
         mProvider2Props = new FingerprintSensorPropertiesInternal(SENSOR_ID_2,
                 STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
-                List.of(), FingerprintSensorProperties.TYPE_UNKNOWN,
+                List.of() /* componentInfo */, FingerprintSensorProperties.TYPE_UNKNOWN,
                 false /* resetLockoutRequiresHardwareAuthToken */);
 
         when(mProvider1.getSensorProperties()).thenReturn(List.of(mProvider1Props));
@@ -103,10 +99,9 @@ public class FingerprintServiceRegistryTest {
         assertThat(mRegistry.getProviders()).containsExactly(mProvider1, mProvider2);
         assertThat(mRegistry.getAllProperties()).containsExactly(mProvider1Props, mProvider2Props);
         verify(mBiometricService, times(2)).registerAuthenticator(
-                mIdCaptor.capture(), eq(TYPE_FINGERPRINT), mStrengthCaptor.capture(), any());
-        assertThat(mIdCaptor.getAllValues()).containsExactly(SENSOR_ID_1, SENSOR_ID_2);
-        assertThat(mStrengthCaptor.getAllValues())
-                .containsExactly(BIOMETRIC_WEAK, BIOMETRIC_STRONG);
+                eq(TYPE_FINGERPRINT), mPropsCaptor.capture(), any());
+        assertThat(mPropsCaptor.getAllValues())
+                .containsExactly(mProvider1Props, mProvider2Props);
     }
 
     @Test

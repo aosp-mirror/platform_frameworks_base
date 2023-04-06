@@ -20,7 +20,6 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
@@ -28,7 +27,6 @@ import android.hardware.face.IFaceService;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.BiometricServiceRegistry;
 
 import java.util.List;
@@ -53,10 +51,8 @@ public class FaceServiceRegistry extends BiometricServiceRegistry<ServiceProvide
     @Override
     protected void registerService(@NonNull IBiometricService service,
             @NonNull FaceSensorPropertiesInternal props) {
-        @BiometricManager.Authenticators.Types final int strength =
-                Utils.propertyStrengthToAuthenticatorStrength(props.sensorStrength);
         try {
-            service.registerAuthenticator(props.sensorId, TYPE_FACE, strength,
+            service.registerAuthenticator(TYPE_FACE, props,
                     new FaceAuthenticator(mService, props.sensorId));
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when registering sensorId: " + props.sensorId);

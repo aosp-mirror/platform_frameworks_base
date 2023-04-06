@@ -17,8 +17,6 @@
 package com.android.server.biometrics.sensors.face;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
-import static android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_STRONG;
-import static android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_WEAK;
 import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
 import static android.hardware.biometrics.SensorProperties.STRENGTH_WEAK;
 
@@ -70,9 +68,7 @@ public class FaceServiceRegistryTest {
     @Mock
     private ServiceProvider mProvider2;
     @Captor
-    private ArgumentCaptor<Integer> mIdCaptor;
-    @Captor
-    private ArgumentCaptor<Integer> mStrengthCaptor;
+    private ArgumentCaptor<FaceSensorPropertiesInternal> mPropsCaptor;
 
     private FaceSensorPropertiesInternal mProvider1Props;
     private FaceSensorPropertiesInternal mProvider2Props;
@@ -82,13 +78,13 @@ public class FaceServiceRegistryTest {
     public void setup() {
         mProvider1Props = new FaceSensorPropertiesInternal(SENSOR_ID_1,
                 STRENGTH_WEAK, 5 /* maxEnrollmentsPerUser */,
-                List.of(), FaceSensorProperties.TYPE_RGB,
+                List.of() /* componentInfo */, FaceSensorProperties.TYPE_RGB,
                 true /* supportsFace Detection */,
                 true /* supportsSelfIllumination */,
                 false /* resetLockoutRequiresHardwareAuthToken */);
         mProvider2Props = new FaceSensorPropertiesInternal(SENSOR_ID_2,
                 STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
-                List.of(), FaceSensorProperties.TYPE_IR,
+                List.of() /* componentInfo */, FaceSensorProperties.TYPE_IR,
                 true /* supportsFace Detection */,
                 true /* supportsSelfIllumination */,
                 false /* resetLockoutRequiresHardwareAuthToken */);
@@ -107,10 +103,9 @@ public class FaceServiceRegistryTest {
         assertThat(mRegistry.getProviders()).containsExactly(mProvider1, mProvider2);
         assertThat(mRegistry.getAllProperties()).containsExactly(mProvider1Props, mProvider2Props);
         verify(mBiometricService, times(2)).registerAuthenticator(
-                mIdCaptor.capture(), eq(TYPE_FACE), mStrengthCaptor.capture(), any());
-        assertThat(mIdCaptor.getAllValues()).containsExactly(SENSOR_ID_1, SENSOR_ID_2);
-        assertThat(mStrengthCaptor.getAllValues())
-                .containsExactly(BIOMETRIC_WEAK, BIOMETRIC_STRONG);
+                eq(TYPE_FACE), mPropsCaptor.capture(), any());
+        assertThat(mPropsCaptor.getAllValues())
+                .containsExactly(mProvider1Props, mProvider2Props);
     }
 
     @Test
