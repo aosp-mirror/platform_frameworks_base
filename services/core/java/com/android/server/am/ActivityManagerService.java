@@ -368,7 +368,6 @@ import android.util.FeatureFlagUtils;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.Log;
-import android.util.LogWriter;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
@@ -7308,7 +7307,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Send broadcast to shell to trigger bugreport using Bugreport API
             // Always start the shell process on the current user to ensure that
             // the foreground user can see all bugreport notifications.
-            mContext.sendBroadcastAsUser(triggerShellBugreport, getCurrentUser().getUserHandle());
+            // In case of BUGREPORT_MODE_REMOTE send the broadcast to SYSTEM user as the device
+            // owner apps are running on the SYSTEM user.
+            if (bugreportType == BugreportParams.BUGREPORT_MODE_REMOTE) {
+                mContext.sendBroadcastAsUser(triggerShellBugreport, UserHandle.SYSTEM);
+            } else {
+                mContext.sendBroadcastAsUser(triggerShellBugreport,
+                        getCurrentUser().getUserHandle());
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
