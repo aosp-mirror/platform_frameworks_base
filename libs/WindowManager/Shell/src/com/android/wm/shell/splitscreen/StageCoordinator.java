@@ -716,6 +716,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (options1 == null) options1 = new Bundle();
         if (taskId2 == INVALID_TASK_ID) {
             // Launching a solo task.
+            // Exit split first if this task under split roots.
+            if (mMainStage.containsTask(taskId1) || mSideStage.containsTask(taskId1)) {
+                exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RECREATE_SPLIT);
+            }
             ActivityOptions activityOptions = ActivityOptions.fromBundle(options1);
             activityOptions.update(ActivityOptions.makeRemoteAnimation(adapter));
             options1 = activityOptions.toBundle();
