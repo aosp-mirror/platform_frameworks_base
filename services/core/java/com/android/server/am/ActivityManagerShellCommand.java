@@ -59,12 +59,12 @@ import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.IProcessObserver;
 import android.app.IStopUserCallback;
-import android.app.IUidObserver;
 import android.app.IUserSwitchObserver;
 import android.app.KeyguardManager;
 import android.app.ProcessStateEnum;
 import android.app.ProfilerInfo;
 import android.app.RemoteServiceException.CrashedByAdbException;
+import android.app.UidObserver;
 import android.app.UserSwitchObserver;
 import android.app.WaitResult;
 import android.app.usage.AppStandbyInfo;
@@ -1858,7 +1858,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    static final class MyUidObserver extends IUidObserver.Stub
+    static final class MyUidObserver extends UidObserver
             implements ActivityManagerService.OomAdjObserver {
         final IActivityManager mInterface;
         final ActivityManagerService mInternal;
@@ -1883,8 +1883,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
-        public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability)
-                throws RemoteException {
+        public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             synchronized (this) {
                 final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
                 try {
@@ -1903,7 +1902,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
-        public void onUidGone(int uid, boolean disabled) throws RemoteException {
+        public void onUidGone(int uid, boolean disabled) {
             synchronized (this) {
                 final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
                 try {
@@ -1921,7 +1920,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
-        public void onUidActive(int uid) throws RemoteException {
+        public void onUidActive(int uid) {
             synchronized (this) {
                 final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
                 try {
@@ -1935,7 +1934,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
-        public void onUidIdle(int uid, boolean disabled) throws RemoteException {
+        public void onUidIdle(int uid, boolean disabled) {
             synchronized (this) {
                 final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
                 try {
@@ -1953,7 +1952,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
-        public void onUidCachedChanged(int uid, boolean cached) throws RemoteException {
+        public void onUidCachedChanged(int uid, boolean cached) {
             synchronized (this) {
                 final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
                 try {
@@ -1964,10 +1963,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     StrictMode.setThreadPolicy(oldPolicy);
                 }
             }
-        }
-
-        @Override
-        public void onUidProcAdjChanged(int uid) throws RemoteException {
         }
 
         @Override
