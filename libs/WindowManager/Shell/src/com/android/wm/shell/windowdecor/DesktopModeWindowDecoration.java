@@ -446,6 +446,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         if (mHandleMenuAppInfoPill.mWindowViewHost.getView().getWidth() == 0) return;
 
         PointF inputPoint = offsetCaptionLocation(ev);
+
+        // If this is called before open_menu_button's onClick, we don't want to close
+        // the menu since it will just reopen in onClick.
+        final boolean pointInOpenMenuButton = pointInView(
+                mResult.mRootView.findViewById(R.id.open_menu_button),
+                inputPoint.x,
+                inputPoint.y);
+
         final boolean pointInAppInfoPill = pointInView(
                 mHandleMenuAppInfoPill.mWindowViewHost.getView(),
                 inputPoint.x - mHandleMenuAppInfoPillPosition.x - mResult.mDecorContainerOffsetX,
@@ -465,7 +473,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                         - mResult.mDecorContainerOffsetX,
                 inputPoint.y - mHandleMenuMoreActionsPillPosition.y
                         - mResult.mDecorContainerOffsetY);
-        if (!pointInAppInfoPill && !pointInWindowingPill && !pointInMoreActionsPill) {
+        if (!pointInAppInfoPill && !pointInWindowingPill
+                && !pointInMoreActionsPill && !pointInOpenMenuButton) {
             closeHandleMenu();
         }
     }

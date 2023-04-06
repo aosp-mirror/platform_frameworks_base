@@ -312,8 +312,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (id == R.id.back_button) {
                 mTaskOperations.injectBackKey();
             } else if (id == R.id.caption_handle || id == R.id.open_menu_button) {
-                moveTaskToFront(mTaskOrganizer.getRunningTaskInfo(mTaskId));
-                decoration.createHandleMenu();
+                if (!decoration.isHandleMenuActive()) {
+                    moveTaskToFront(mTaskOrganizer.getRunningTaskInfo(mTaskId));
+                    decoration.createHandleMenu();
+                } else {
+                    decoration.closeHandleMenu();
+                }
             } else if (id == R.id.desktop_button) {
                 mDesktopModeController.ifPresent(c -> c.setDesktopModeActive(true));
                 mDesktopTasksController.ifPresent(c -> c.moveToDesktop(mTaskId));
