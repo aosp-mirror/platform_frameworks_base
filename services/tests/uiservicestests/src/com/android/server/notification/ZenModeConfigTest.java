@@ -120,12 +120,20 @@ public class ZenModeConfigTest extends UiServiceTestCase {
                 .showLights(false)
                 .showBadges(false)
                 .showInAmbientDisplay(false)
+                .allowCalls(ZenPolicy.PEOPLE_TYPE_CONTACTS)
+                .allowMessages(ZenPolicy.PEOPLE_TYPE_STARRED)
+                .allowConversations(ZenPolicy.CONVERSATION_SENDERS_NONE)
                 .build();
 
         ZenModeConfig config = getMutedAllConfig();
         config.allowAlarms = true;
         config.allowReminders = true;
         config.allowEvents = true;
+        config.allowCalls = true;
+        config.allowCallsFrom = Policy.PRIORITY_SENDERS_CONTACTS;
+        config.allowMessages = true;
+        config.allowMessagesFrom = Policy.PRIORITY_SENDERS_STARRED;
+        config.allowConversations = false;
         config.suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_BADGE;
         config.suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_LIGHTS;
         config.suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_AMBIENT;
@@ -138,6 +146,10 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals(expected.getPriorityCategoryEvents(), actual.getPriorityCategoryEvents());
         assertEquals(expected.getVisualEffectLights(), actual.getVisualEffectLights());
         assertEquals(expected.getVisualEffectAmbient(), actual.getVisualEffectAmbient());
+        assertEquals(expected.getPriorityConversationSenders(),
+                actual.getPriorityConversationSenders());
+        assertEquals(expected.getPriorityCallSenders(), actual.getPriorityCallSenders());
+        assertEquals(expected.getPriorityMessageSenders(), actual.getPriorityMessageSenders());
     }
 
     @Test

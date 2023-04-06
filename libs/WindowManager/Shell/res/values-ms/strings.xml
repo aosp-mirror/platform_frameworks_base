@@ -91,7 +91,8 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Batal"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Mulakan semula"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Jangan tunjukkan lagi"</string>
-    <string name="letterbox_reachability_reposition_text" msgid="4507890186297500893">"Ketik dua kali untuk mengalihkan apl ini"</string>
+    <!-- no translation found for letterbox_reachability_reposition_text (3522042240665748268) -->
+    <skip />
     <string name="maximize_button_text" msgid="1650859196290301963">"Maksimumkan"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimumkan"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Tutup"</string>
