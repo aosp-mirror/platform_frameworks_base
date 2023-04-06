@@ -44,11 +44,11 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.DefaultConnecti
 import com.android.systemui.statusbar.pipeline.shared.data.model.DefaultConnectionModel.Ethernet
 import com.android.systemui.statusbar.pipeline.shared.data.model.DefaultConnectionModel.Mobile
 import com.android.systemui.statusbar.pipeline.shared.data.model.DefaultConnectionModel.Wifi
+import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl.Companion.getMainOrUnderlyingWifiInfo
 import com.android.systemui.tuner.TunerService
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -68,12 +68,12 @@ interface ConnectivityRepository {
     val defaultConnections: StateFlow<DefaultConnectionModel>
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@SuppressLint("MissingPermission")
 @SysUISingleton
 class ConnectivityRepositoryImpl
 @Inject
 constructor(
-    connectivityManager: ConnectivityManager,
+    private val connectivityManager: ConnectivityManager,
     private val connectivitySlots: ConnectivitySlots,
     context: Context,
     dumpManager: DumpManager,
@@ -144,15 +144,14 @@ constructor(
                         ) {
                             logger.logOnDefaultCapabilitiesChanged(network, networkCapabilities)
 
+                            val wifiInfo =
+                                networkCapabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
+
                             val isWifiDefault =
-                                networkCapabilities.hasTransport(TRANSPORT_WIFI) ||
-                                    networkCapabilities.getMainOrUnderlyingWifiInfo() != null
+                                networkCapabilities.hasTransport(TRANSPORT_WIFI) || wifiInfo != null
                             val isMobileDefault =
                                 networkCapabilities.hasTransport(TRANSPORT_CELLULAR)
-                            val isCarrierMergedDefault =
-                                networkCapabilities
-                                    .getMainOrUnderlyingWifiInfo()
-                                    ?.isCarrierMerged == true
+                            val isCarrierMergedDefault = wifiInfo?.isCarrierMerged == true
                             val isEthernetDefault =
                                 networkCapabilities.hasTransport(TRANSPORT_ETHERNET)
 
@@ -209,7 +208,32 @@ constructor(
          * always use [WifiInfo] if it's available, so we need to check the underlying transport
          * info.
          */
-        fun NetworkCapabilities.getMainOrUnderlyingWifiInfo(): WifiInfo? {
+        fun NetworkCapabilities.getMainOrUnderlyingWifiInfo(
+            connectivityManager: ConnectivityManager,
+        ): WifiInfo? {
+            val mainWifiInfo = this.getMainWifiInfo()
+            if (mainWifiInfo != null) {
+                return mainWifiInfo
+            }
+            // Only CELLULAR networks may have underlying wifi information that's relevant to SysUI,
+            // so skip the underlying network check if it's not CELLULAR.
+            if (!this.hasTransport(TRANSPORT_CELLULAR)) {
+                return mainWifiInfo
+            }
+
+            // Some connections, like VPN connections, may have underlying networks that are
+            // eventually traced to a wifi or carrier merged connection. So, check those underlying
+            // networks for possible wifi information as well. See b/225902574.
+            return this.underlyingNetworks?.firstNotNullOfOrNull { underlyingNetwork ->
+                connectivityManager.getNetworkCapabilities(underlyingNetwork)?.getMainWifiInfo()
+            }
+        }
+
+        /**
+         * Checks the network capabilities for wifi info, but does *not* check the underlying
+         * networks. See [getMainOrUnderlyingWifiInfo].
+         */
+        private fun NetworkCapabilities.getMainWifiInfo(): WifiInfo? {
             // Wifi info can either come from a WIFI Transport, or from a CELLULAR transport for
             // virtual networks like VCN.
             val canHaveWifiInfo =

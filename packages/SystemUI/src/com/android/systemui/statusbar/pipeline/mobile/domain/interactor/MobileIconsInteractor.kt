@@ -113,7 +113,22 @@ constructor(
     private val context: Context,
 ) : MobileIconsInteractor {
 
-    override val mobileIsDefault = mobileConnectionsRepo.mobileIsDefault
+    override val mobileIsDefault =
+        combine(
+                mobileConnectionsRepo.mobileIsDefault,
+                mobileConnectionsRepo.hasCarrierMergedConnection,
+            ) { mobileIsDefault, hasCarrierMergedConnection ->
+                // Because carrier merged networks are displayed as mobile networks, they're part of
+                // the `isDefault` calculation. See b/272586234.
+                mobileIsDefault || hasCarrierMergedConnection
+            }
+            .logDiffsForTable(
+                tableLogger,
+                LOGGING_PREFIX,
+                columnName = "mobileIsDefault",
+                initialValue = false,
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val activeDataConnectionHasDataEnabled: StateFlow<Boolean> =
         mobileConnectionsRepo.activeMobileDataRepository
