@@ -239,7 +239,7 @@ public class LogAccessDialogActivity extends Activity implements
             if (view.getId() == R.id.log_access_dialog_allow_button) {
                 mCallback.approveAccessForClient(mUid, mPackageName);
                 finish();
-            } else if (view.getId() == R.id.log_access_dialog_allow_button) {
+            } else if (view.getId() == R.id.log_access_dialog_deny_button) {
                 declineLogAccess();
                 finish();
             }
