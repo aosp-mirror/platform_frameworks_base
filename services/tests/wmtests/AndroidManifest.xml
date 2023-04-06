@@ -87,6 +87,8 @@
                   android:showWhenLocked="true"/>
         <activity android:name="android.view.cts.surfacevalidator.CapturedActivity"/>
 
+        <activity android:name="com.android.server.wm.SurfaceControlViewHostTests$TestActivity" />
+
         <service android:name="android.view.cts.surfacevalidator.LocalMediaProjectionService"
             android:foregroundServiceType="mediaProjection"
             android:enabled="true">
