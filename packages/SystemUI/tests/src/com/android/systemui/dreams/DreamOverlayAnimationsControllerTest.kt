@@ -49,6 +49,7 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
     @Mock private lateinit var stateController: DreamOverlayStateController
     @Mock private lateinit var configController: ConfigurationController
     @Mock private lateinit var transitionViewModel: DreamingToLockscreenTransitionViewModel
+    @Mock private lateinit var logger: DreamLogger
     private lateinit var controller: DreamOverlayAnimationsController
 
     @Before
@@ -67,6 +68,7 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
                 DREAM_IN_COMPLICATIONS_ANIMATION_DURATION,
                 DREAM_IN_TRANSLATION_Y_DISTANCE,
                 DREAM_IN_TRANSLATION_Y_DURATION,
+                logger
             )
 
         val mockView: View = mock()
