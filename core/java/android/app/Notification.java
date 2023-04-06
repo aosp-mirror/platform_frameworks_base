@@ -729,6 +729,7 @@ public class Notification implements Parcelable
      * This flag is for internal use only; applications cannot set this flag directly.
      * @hide
      */
+    @TestApi
     public static final int FLAG_USER_INITIATED_JOB = 0x00008000;
 
     private static final List<Class<? extends Style>> PLATFORM_STYLE_CLASSES = Arrays.asList(
@@ -5737,7 +5738,8 @@ public class Notification implements Parcelable
         }
 
         private void bindSnoozeAction(RemoteViews big, StandardTemplateParams p) {
-            boolean hideSnoozeButton = mN.isForegroundService() || mN.fullScreenIntent != null
+            boolean hideSnoozeButton = mN.isFgsOrUij()
+                    || mN.fullScreenIntent != null
                     || isBackgroundColorized(p)
                     || p.mViewType != StandardTemplateParams.VIEW_TYPE_BIG;
             big.setBoolean(R.id.snooze_button, "setEnabled", !hideSnoozeButton);
@@ -6875,6 +6877,24 @@ public class Notification implements Parcelable
      */
     public boolean isForegroundService() {
         return (flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
+    }
+
+    /**
+     * @return whether this notification is associated with a user initiated job
+     * @hide
+     */
+    @TestApi
+    public boolean isUserInitiatedJob() {
+        return (flags & Notification.FLAG_USER_INITIATED_JOB) != 0;
+    }
+
+    /**
+     * @return whether this notification is associated with either a foreground service or
+     * a user initiated job
+     * @hide
+     */
+    public boolean isFgsOrUij() {
+        return isForegroundService() || isUserInitiatedJob();
     }
 
     /**
