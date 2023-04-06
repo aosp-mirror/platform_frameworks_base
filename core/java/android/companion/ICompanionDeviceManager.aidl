@@ -36,6 +36,8 @@ interface ICompanionDeviceManager {
         in String callingPackage, int userId);
 
     List<AssociationInfo> getAssociations(String callingPackage, int userId);
+
+    @EnforcePermission("MANAGE_COMPANION_DEVICES")
     List<AssociationInfo> getAllAssociationsForUser(int userId);
 
     /** @deprecated */
@@ -48,26 +50,28 @@ interface ICompanionDeviceManager {
 
     PendingIntent requestNotificationAccess(in ComponentName component, int userId);
 
-    /** @deprecated */
     @EnforcePermission("MANAGE_COMPANION_DEVICES")
     boolean isDeviceAssociatedForWifiConnection(in String packageName, in String macAddress,
         int userId);
 
+    @EnforcePermission("REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE")
     void registerDevicePresenceListenerService(in String deviceAddress, in String callingPackage,
         int userId);
 
+    @EnforcePermission("REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE")
     void unregisterDevicePresenceListenerService(in String deviceAddress, in String callingPackage,
         int userId);
 
-    /** @deprecated */
     boolean canPairWithoutPrompt(in String packageName, in String deviceMacAddress, int userId);
 
-    /** @deprecated */
+    @EnforcePermission("ASSOCIATE_COMPANION_DEVICES")
     void createAssociation(in String packageName, in String macAddress, int userId,
         in byte[] certificate);
 
+    @EnforcePermission("MANAGE_COMPANION_DEVICES")
     void addOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);
 
+    @EnforcePermission("MANAGE_COMPANION_DEVICES")
     void removeOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);
 
     void addOnTransportsChangedListener(IOnTransportsChangedListener listener);
@@ -90,8 +94,10 @@ interface ICompanionDeviceManager {
     void startSystemDataTransfer(String packageName, int userId, int associationId,
         in ISystemDataTransferCallback callback);
 
+    @EnforcePermission("DELIVER_COMPANION_MESSAGES")
     void attachSystemDataTransport(String packageName, int userId, int associationId, in ParcelFileDescriptor fd);
 
+    @EnforcePermission("DELIVER_COMPANION_MESSAGES")
     void detachSystemDataTransport(String packageName, int userId, int associationId);
 
     boolean isCompanionApplicationBound(String packageName, int userId);
