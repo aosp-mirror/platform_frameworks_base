@@ -187,6 +187,9 @@ public final class SuspendPackageHelper {
             if (changed) {
                 changedPackagesList.add(packageName);
                 changedUids.add(UserHandle.getUid(userId, packageState.getAppId()));
+            } else {
+                Slog.w(TAG, "No change is needed for package: " + packageName
+                        + ". Skipping suspending/un-suspending.");
             }
         }
 
