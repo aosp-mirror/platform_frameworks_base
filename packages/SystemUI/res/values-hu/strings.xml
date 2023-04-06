@@ -1014,11 +1014,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Legalább egy eszköz rendelkezésre áll"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Tartsa nyomva a parancsikont"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Mégse"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Átfordítás most"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Hajtsa ki a telefont jobb szelfi készítéséhez"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Átfordítja az előlapi kijelzőre a jobb szelfiért?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Használja az előlapi kamerát, hogy nagyobb felbontású, szélesebb fotót készíthessen"</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ A képernyő kikapcsol"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Váltson képernyőt most"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Hajtsa ki a telefont"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Szeretne képernyőt váltani?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"A nagyobb felbontás érdekében használja a hátlapi kamerát."</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"A nagyobb felbontás érdekében fordítsa meg a telefont"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Összehajtható eszköz kihajtása"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Összehajtható eszköz körbeforgatása"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Akkumulátor töltöttségi szintje: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>

@@ -1014,11 +1014,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Dostupan je najmanje jedan uređaj"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Prečac za dodirnuti i zadržati"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Odustani"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Prebaci"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Otvorite telefon da biste snimili bolji selfie"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Prebaciti na prednji zaslon za bolji selfie?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Upotrijebite stražnji fotoaparat za širu fotografiju s višom razlučivošću."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Ovaj će se zaslon isključiti"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Promijenite zaslon odmah"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Otklopite telefon"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Želite li promijeniti zaslon?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Za višu razlučivost upotrijebite stražnju kameru"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Za višu razlučivost okrenite telefon"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Rasklopljen sklopivi uređaj"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Okretanje sklopivog uređaja sa svih strana"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Preostalo je <xliff:g id="PERCENTAGE">%s</xliff:g> baterije"</string>

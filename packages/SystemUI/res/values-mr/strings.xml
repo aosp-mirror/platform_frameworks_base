@@ -1014,11 +1014,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• किमान एक डिव्हाइस उपलब्ध करणे"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"स्पर्श करा आणि धरून ठेवा शॉर्टकट"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"रद्द करा"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"आता फ्लिप करा"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"आणखी चांगल्या सेल्फीसाठी फोनबद्दल अधिक जाणून घ्या"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"आणखी चांगल्या सेल्फीसाठी फ्रंट डिस्प्ले वापरायचा का?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"उच्च रेझोल्यूशन असलेल्या विस्तृत फोटोसाठी रीअर कॅमेरा वापरा."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ही स्क्रीन बंद होईल"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"आता स्क्रीन स्विच करा"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"फोन उघडा"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"स्क्रीन स्विच करायच्या का?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"उच्च रेझोल्यूशनसाठी रीअर कॅमेरा वापरा"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"उच्च रेझोल्यूशनसाठी, फोन फ्लिप करा"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"फोल्ड करता येण्यासारखे डिव्हाइस अनफोल्ड केले जात आहे"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"फोल्ड करता येण्यासारखे डिव्हाइस आजूबाजूला फ्लिप केले जात आहे"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> बॅटरी शिल्लक आहे"</string>

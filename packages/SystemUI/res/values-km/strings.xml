@@ -1017,11 +1017,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ឧបករណ៍យ៉ាងតិចមួយអាចប្រើបាន"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ចុចឱ្យជាប់លើផ្លូវកាត់"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"បោះបង់"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ត្រឡប់ឥឡូវនេះ"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"លាតទូរសព្ទ ដើម្បីសែលហ្វីកាន់តែប្រសើរ"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"ត្រឡប់ទៅផ្ទាំងអេក្រង់ខាងមុខ​ ដើម្បី​ថត​សែលហ្វីកាន់តែបានល្អឬ?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ប្រើកាមេរ៉ាខាងក្រោយ ដើម្បីទទួលបានរូបថតកាន់តែធំជាមួយនឹងកម្រិតគុណភាពកាន់តែខ្ពស់។"</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ អេក្រង់នេះនឹងបិទ"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"ប្ដូរអេក្រង់ឥឡូវនេះ"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"លាតទូរសព្ទ"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"ប្ដូរអេក្រង់ឬ?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"សម្រាប់កម្រិតគុណភាពកាន់តែខ្ពស់ សូមប្រើប្រាស់កាមេរ៉ាខាងក្រោយ"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"សម្រាប់កម្រិតគុណភាពកាន់តែខ្ពស់ សូមត្រឡប់ទូរសព្ទ"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ឧបករណ៍អាច​បត់បានកំពុងត្រូវបានលា"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ឧបករណ៍អាច​បត់បានកំពុងត្រូវបានលា"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"ថ្មនៅសល់ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>

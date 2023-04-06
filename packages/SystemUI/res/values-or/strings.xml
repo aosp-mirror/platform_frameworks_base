@@ -1017,11 +1017,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ଅତିକମରେ ଗୋଟିଏ ଡିଭାଇସ ଉପଲବ୍ଧ ଅଛି"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ସର୍ଟକଟକୁ ସ୍ପର୍ଶ କରି ଧରି ରଖନ୍ତୁ"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ବାତିଲ କରନ୍ତୁ"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ବର୍ତ୍ତମାନ ଫ୍ଲିପ କରନ୍ତୁ"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"ଏକ ଉନ୍ନତ ସେଲ୍ଫି ପାଇଁ ଫୋନକୁ ଅନଫୋଲ୍ଡ କରନ୍ତୁ"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"ଏକ ଉନ୍ନତ ସେଲ୍ଫି ପାଇଁ ସାମ୍ନା ଡିସପ୍ଲେକୁ ଫ୍ଲିପ କରିବେ?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ଉଚ୍ଚ ରିଜୋଲ୍ୟୁସନ ସହ ଅଧିକ ଚଉଡ଼ାର ଏକ ଫଟୋ ନେବା ପାଇଁ ପଛ-ପଟର କେମେରା ବ୍ୟବହାର କରନ୍ତୁ।"</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ଏହି ସ୍କ୍ରିନ ବନ୍ଦ ହୋଇଯିବ"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"ବର୍ତ୍ତମାନ ସ୍କ୍ରିନ ସ୍ୱିଚ କରନ୍ତୁ"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"ଫୋନକୁ ଅନଫୋଲ୍ଡ କରନ୍ତୁ"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"ସ୍କ୍ରିନ ସ୍ୱିଚ କରିବେ?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"ଉଚ୍ଚ ରିଜୋଲ୍ୟୁସନ ପାଇଁ ପଛ କେମେରା ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"ଉଚ୍ଚ ରିଜୋଲ୍ୟୁସନ ପାଇଁ ଫୋନକୁ ଫ୍ଲିପ କରନ୍ତୁ"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ଫୋଲ୍ଡ କରାଯାଇପାରୁଥିବା ଡିଭାଇସକୁ ଅନଫୋଲ୍ଡ କରାଯାଉଛି"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ଫୋଲ୍ଡ କରାଯାଇପାରୁଥିବା ଡିଭାଇସକୁ ଫ୍ଲିପ କରାଯାଉଛି"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> ବେଟେରୀ ଚାର୍ଜ ବାକି ଅଛି"</string>

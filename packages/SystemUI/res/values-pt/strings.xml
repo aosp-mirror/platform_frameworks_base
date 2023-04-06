@@ -1014,11 +1014,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Pelo menos um dispositivo está disponível"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Mantenha o atalho pressionado"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancelar"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Virar agora"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Abra o smartphone para tirar uma selfie melhor"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Usar o display frontal para tirar uma selfie melhor?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Use a câmera traseira para tirar uma foto mais ampla e com maior resolução."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Esta tela vai ser desativada"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Trocar de tela agora"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Abra o smartphone"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Trocar de tela?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Para uma resolução maior, use a câmera traseira"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Para uma resolução maior, vire o smartphone"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositivo dobrável sendo aberto"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositivo dobrável sendo virado"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Bateria restante: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>

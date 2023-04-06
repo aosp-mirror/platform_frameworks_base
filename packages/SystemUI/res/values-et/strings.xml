@@ -1017,11 +1017,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Vähemalt üks seade on saadaval"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pikalt puudutamise otsetee"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Tühista"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Pööra kohe ümber"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Voltige telefon parema selfi jaoks lahti"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Kas kasutada parema selfi jaoks esikaamerat?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Kasutage tagakülje kaamerat, et jäädvustada suurema eraldusvõimega laiem foto."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ See ekraan lülitatakse välja"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Vaheta ekraane kohe"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Telefoni lahtivoltimine"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Kas vahetada ekraane?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Suurema eraldusvõime saavutamiseks kasutage tagakaamerat"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Suurema eraldusvõime saavutamiseks pöörake telefon ümber"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Volditava seadme lahtivoltimine"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Volditava seadme ümberpööramine"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Akutase on <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
