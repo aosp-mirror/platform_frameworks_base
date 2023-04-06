@@ -58,7 +58,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
     public static final int FREEFORM_ANIMATION_DURATION = 336;
 
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
-    private Point mStartPosition;
+    private Point mPosition;
     private Consumer<SurfaceControl.Transaction> mOnAnimationFinishedCallback;
 
     public EnterDesktopTaskTransitionHandler(
@@ -90,15 +90,15 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
     /**
      * Starts Transition of type TRANSIT_CANCEL_ENTERING_DESKTOP_MODE
      * @param wct WindowContainerTransaction for transition
-     * @param startPosition Position of task when transition is triggered
+     * @param position Position of task when transition is triggered
      * @param onAnimationEndCallback to be called after animation
      */
     public void startCancelMoveToDesktopMode(@NonNull WindowContainerTransaction wct,
-            Point startPosition,
+            Point position,
             Consumer<SurfaceControl.Transaction> onAnimationEndCallback) {
-        mStartPosition = startPosition;
+        mPosition = position;
         startTransition(Transitions.TRANSIT_CANCEL_ENTERING_DESKTOP_MODE, wct,
-                mOnAnimationFinishedCallback);
+                onAnimationEndCallback);
     }
 
     @Override
@@ -201,7 +201,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
 
         if (type == Transitions.TRANSIT_CANCEL_ENTERING_DESKTOP_MODE
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                && mStartPosition != null) {
+                && mPosition != null) {
             // This Transition animates a task to fullscreen after being dragged from the status
             // bar and then released back into the status bar area
             final SurfaceControl sc = change.getLeash();
@@ -217,7 +217,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
             final SurfaceControl.Transaction t = mTransactionSupplier.get();
             animator.addUpdateListener(animation -> {
                 final float scale = (float) animation.getAnimatedValue();
-                t.setPosition(sc, mStartPosition.x * (1 - scale), mStartPosition.y * (1 - scale))
+                t.setPosition(sc, mPosition.x * (1 - scale), mPosition.y * (1 - scale))
                         .setScale(sc, scale, scale)
                         .show(sc)
                         .apply();

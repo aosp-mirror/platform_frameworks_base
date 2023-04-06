@@ -33,7 +33,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -41,7 +40,6 @@ import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.Choreographer;
 import android.view.InputChannel;
@@ -63,6 +61,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
@@ -392,10 +391,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
+                    // Position of the task is calculated by subtracting the raw location of the
+                    // motion event (the location of the motion relative to the display) by the
+                    // location of the motion event relative to the task's bounds
+                    final Point position = new Point(
+                            (int) (e.getRawX(dragPointerIdx) - e.getX(dragPointerIdx)),
+                            (int) (e.getRawY(dragPointerIdx) - e.getY(dragPointerIdx)));
                     mDragPositioningCallback.onDragPositioningEnd(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     mDesktopTasksController.ifPresent(c -> c.onDragPositioningEnd(taskInfo,
-                            e.getRawY(dragPointerIdx)));
+                            position));
                     final boolean wasDragging = mIsDragging;
                     mIsDragging = false;
                     return wasDragging;
@@ -560,10 +565,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mDragToDesktopAnimationStarted = false;
                         return;
                     } else if (mDragToDesktopAnimationStarted) {
-                        Point startPosition = new Point((int) ev.getX(), (int) ev.getY());
+                        Point position = new Point((int) ev.getX(), (int) ev.getY());
                         mDesktopTasksController.ifPresent(
                                 c -> c.cancelMoveToFreeform(relevantDecor.mTaskInfo,
-                                        startPosition));
+                                        position));
                         mDragToDesktopAnimationStarted = false;
                         return;
                     }
@@ -615,11 +620,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
      * Gets bounds of a scaled window centered relative to the screen bounds
      * @param scale the amount to scale to relative to the Screen Bounds
      */
-    private Rect calculateFreeformBounds(float scale) {
-        final Resources resources = mContext.getResources();
-        final DisplayMetrics metrics = resources.getDisplayMetrics();
-        final int screenWidth = metrics.widthPixels;
-        final int screenHeight = metrics.heightPixels;
+    private Rect calculateFreeformBounds(int displayId, float scale) {
+        final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(displayId);
+        final int screenWidth = displayLayout.width();
+        final int screenHeight = displayLayout.height();
 
         final float adjustmentPercentage = (1f - scale) / 2;
         final Rect endBounds = new Rect((int) (screenWidth * adjustmentPercentage),
@@ -648,7 +652,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
         animator.setDuration(FREEFORM_ANIMATION_DURATION);
         final SurfaceControl sc = relevantDecor.mTaskSurface;
-        final Rect endBounds = calculateFreeformBounds(DRAG_FREEFORM_SCALE);
+        final Rect endBounds = calculateFreeformBounds(ev.getDisplayId(), DRAG_FREEFORM_SCALE);
         final Transaction t = mTransactionFactory.get();
         final float diffX = endBounds.centerX() - ev.getX();
         final float diffY = endBounds.top - ev.getY();
@@ -665,9 +669,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                mDesktopTasksController.ifPresent(c ->
-                        c.onDragPositioningEndThroughStatusBar(relevantDecor.mTaskInfo,
-                            calculateFreeformBounds(FINAL_FREEFORM_SCALE)));
+                mDesktopTasksController.ifPresent(
+                        c -> c.onDragPositioningEndThroughStatusBar(
+                                relevantDecor.mTaskInfo,
+                                calculateFreeformBounds(ev.getDisplayId(), FINAL_FREEFORM_SCALE)));
             }
         });
         animator.start();
@@ -783,17 +788,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mSyncQueue);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
-        final DragPositioningCallback dragPositioningCallback;
-        if (!DesktopModeStatus.isVeiledResizeEnabled()) {
-            dragPositioningCallback =
-                    new FluidResizeTaskPositioner(mTaskOrganizer, windowDecoration,
-                            mDisplayController, mDragStartListener);
-        } else {
-            windowDecoration.createResizeVeil();
-            dragPositioningCallback =
-                    new VeiledResizeTaskPositioner(mTaskOrganizer, windowDecoration,
-                            mDisplayController, mDragStartListener);
-        }
+        final DragPositioningCallback dragPositioningCallback = createDragPositioningCallback(
+                windowDecoration, taskInfo);
         final DesktopModeTouchEventListener touchEventListener =
                 new DesktopModeTouchEventListener(taskInfo, dragPositioningCallback);
 
@@ -805,7 +801,22 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 false /* applyStartTransactionOnDraw */);
         incrementEventReceiverTasks(taskInfo.displayId);
     }
-
+    private DragPositioningCallback createDragPositioningCallback(
+            @NonNull DesktopModeWindowDecoration windowDecoration,
+            @NonNull RunningTaskInfo taskInfo) {
+        final int screenWidth = mDisplayController.getDisplayLayout(taskInfo.displayId).width();
+        final Rect disallowedAreaForEndBounds = new Rect(0, 0, screenWidth,
+                getStatusBarHeight(taskInfo.displayId));
+        if (!DesktopModeStatus.isVeiledResizeEnabled()) {
+            return new FluidResizeTaskPositioner(mTaskOrganizer, windowDecoration,
+                    mDisplayController, disallowedAreaForEndBounds, mDragStartListener,
+                    mTransactionFactory);
+        } else {
+            windowDecoration.createResizeVeil();
+            return new VeiledResizeTaskPositioner(mTaskOrganizer, windowDecoration,
+                    mDisplayController, disallowedAreaForEndBounds, mDragStartListener);
+        }
+    }
 
     private class DragStartListenerImpl
             implements DragPositioningCallbackUtility.DragStartListener {

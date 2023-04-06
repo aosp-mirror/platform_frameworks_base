@@ -21,12 +21,13 @@ import android.graphics.Rect
 import android.os.IBinder
 import android.testing.AndroidTestingRunner
 import android.view.Display
+import android.view.SurfaceControl
 import android.window.WindowContainerToken
 import androidx.test.filters.SmallTest
-import com.android.wm.shell.common.DisplayController
-import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_TOP
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_UNDEFINED
@@ -34,13 +35,16 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.Mockito.any
 import org.mockito.Mockito.argThat
+import org.mockito.Mockito.eq
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import java.util.function.Supplier
+import org.mockito.Mockito.`when` as whenever
 
 /**
  * Tests for [VeiledResizeTaskPositioner].
@@ -70,6 +74,10 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
     private lateinit var mockDisplayLayout: DisplayLayout
     @Mock
     private lateinit var mockDisplay: Display
+    @Mock
+    private lateinit var mockTransactionFactory: Supplier<SurfaceControl.Transaction>
+    @Mock
+    private lateinit var mockTransaction: SurfaceControl.Transaction
 
     private lateinit var taskPositioner: VeiledResizeTaskPositioner
 
@@ -82,7 +90,9 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
                 mockShellTaskOrganizer,
                 mockDesktopWindowDecoration,
                 mockDisplayController,
-                mockDragStartListener
+                DISALLOWED_AREA_FOR_END_BOUNDS,
+                mockDragStartListener,
+                mockTransactionFactory
             )
 
         whenever(taskToken.asBinder()).thenReturn(taskBinder)
@@ -91,6 +101,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
         whenever(mockDisplayLayout.getStableBounds(any())).thenAnswer { i ->
             (i.arguments.first() as Rect).set(STABLE_BOUNDS)
         }
+        `when`(mockTransactionFactory.get()).thenReturn(mockTransaction)
 
         mockDesktopWindowDecoration.mTaskInfo = ActivityManager.RunningTaskInfo().apply {
             taskId = TASK_ID
@@ -125,36 +136,31 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
     fun testDragResize_movesTask_doesNotShowResizeVeil() {
         taskPositioner.onDragPositioningStart(
             CTRL_TYPE_UNDEFINED,
-            STARTING_BOUNDS.left.toFloat() + 50,
+            STARTING_BOUNDS.left.toFloat(),
             STARTING_BOUNDS.top.toFloat()
         )
 
         taskPositioner.onDragPositioningMove(
             STARTING_BOUNDS.left.toFloat() + 60,
-            STARTING_BOUNDS.top.toFloat() + 10
+            STARTING_BOUNDS.top.toFloat() + 100
         )
         val rectAfterMove = Rect(STARTING_BOUNDS)
-        rectAfterMove.left += 10
-        rectAfterMove.right += 10
-        rectAfterMove.top += 10
-        rectAfterMove.bottom += 10
-        verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
-            return@argThat wct.changes.any { (token, change) ->
-                token == taskBinder &&
-                        (change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0 &&
-                        change.configuration.windowConfiguration.bounds == rectAfterMove
-            }
-        })
+        rectAfterMove.left += 60
+        rectAfterMove.right += 60
+        rectAfterMove.top += 100
+        rectAfterMove.bottom += 100
+        verify(mockTransaction).setPosition(any(), eq(rectAfterMove.left.toFloat()),
+                eq(rectAfterMove.top.toFloat()))
 
         taskPositioner.onDragPositioningEnd(
             STARTING_BOUNDS.left.toFloat() + 70,
             STARTING_BOUNDS.top.toFloat() + 20
         )
-        val rectAfterEnd = Rect(rectAfterMove)
-        rectAfterEnd.left += 10
-        rectAfterEnd.top += 10
-        rectAfterEnd.right += 10
-        rectAfterEnd.bottom += 10
+        val rectAfterEnd = Rect(STARTING_BOUNDS)
+        rectAfterEnd.left += 70
+        rectAfterEnd.right += 70
+        rectAfterEnd.top += 20
+        rectAfterEnd.bottom += 20
 
         verify(mockDesktopWindowDecoration, never()).createResizeVeil()
         verify(mockDesktopWindowDecoration, never()).hideResizeVeil()
@@ -239,6 +245,32 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
         })
     }
 
+
+    @Test
+    fun testDragResize_drag_setBoundsNotRunIfDragEndsInDisallowedEndArea() {
+        taskPositioner.onDragPositioningStart(
+                CTRL_TYPE_UNDEFINED, // drag
+                STARTING_BOUNDS.left.toFloat(),
+                STARTING_BOUNDS.top.toFloat()
+        )
+
+        val newX = STARTING_BOUNDS.left.toFloat() + 5
+        val newY = STARTING_BOUNDS.top.toFloat() + 5
+        taskPositioner.onDragPositioningMove(
+                newX,
+                newY
+        )
+
+        taskPositioner.onDragPositioningEnd(newX, newY)
+
+        verify(mockShellTaskOrganizer, never()).applyTransaction(argThat { wct ->
+            return@argThat wct.changes.any { (token, change) ->
+                token == taskBinder &&
+                        ((change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0)
+            }
+        })
+    }
+
     companion object {
         private const val TASK_ID = 5
         private const val MIN_WIDTH = 10
@@ -249,6 +281,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
         private const val NAVBAR_HEIGHT = 50
         private val DISPLAY_BOUNDS = Rect(0, 0, 2400, 1600)
         private val STARTING_BOUNDS = Rect(0, 0, 100, 100)
+        private val DISALLOWED_AREA_FOR_END_BOUNDS = Rect(0, 0, 50, 50)
         private val STABLE_BOUNDS = Rect(
             DISPLAY_BOUNDS.left,
             DISPLAY_BOUNDS.top,
