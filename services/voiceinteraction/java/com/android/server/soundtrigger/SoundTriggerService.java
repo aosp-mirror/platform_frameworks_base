@@ -35,14 +35,18 @@ import static com.android.server.soundtrigger.SoundTriggerEvent.SessionEvent.Typ
 import static com.android.server.utils.EventLogger.Event.ALOGW;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+import static com.android.server.soundtrigger.DeviceStateHandler.DeviceStateListener;
+import static com.android.server.soundtrigger.DeviceStateHandler.SoundTriggerDeviceState;
 
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.PermissionChecker;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
@@ -85,6 +89,8 @@ import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
@@ -112,6 +118,8 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -131,8 +139,8 @@ public class SoundTriggerService extends SystemService {
     private static final boolean DEBUG = true;
     private static final int SESSION_MAX_EVENT_SIZE = 128;
 
-    final Context mContext;
-    private Object mLock;
+    private final Context mContext;
+    private final Object mLock = new Object();
     private final SoundTriggerServiceStub mServiceStub;
     private final LocalSoundTriggerService mLocalSoundTriggerService;
 
@@ -140,6 +148,7 @@ public class SoundTriggerService extends SystemService {
     private SoundTriggerDbHelper mDbHelper;
 
     private final EventLogger mServiceEventLogger = new EventLogger(256, "Service");
+    private final EventLogger mDeviceEventLogger = new EventLogger(256, "Device Event");
 
     private final Set<EventLogger> mSessionEventLoggers = ConcurrentHashMap.newKeySet(4);
     private final Deque<EventLogger> mDetachedSessionEventLoggers = new LinkedBlockingDeque<>(4);
@@ -223,13 +232,18 @@ public class SoundTriggerService extends SystemService {
     @GuardedBy("mLock")
     private final ArrayMap<String, NumOps> mNumOpsPerPackage = new ArrayMap<>();
 
+    private final DeviceStateHandler mDeviceStateHandler;
+    private final Executor mDeviceStateHandlerExecutor = Executors.newSingleThreadExecutor();
+    private PhoneCallStateHandler mPhoneCallStateHandler;
+
     public SoundTriggerService(Context context) {
         super(context);
         mContext = context;
         mServiceStub = new SoundTriggerServiceStub();
         mLocalSoundTriggerService = new LocalSoundTriggerService(context);
-        mLock = new Object();
         mSoundModelStatTracker = new SoundModelStatTracker();
+        mDeviceStateHandler = new DeviceStateHandler(mDeviceStateHandlerExecutor,
+                mDeviceEventLogger);
     }
 
     @Override
@@ -243,6 +257,29 @@ public class SoundTriggerService extends SystemService {
         Slog.d(TAG, "onBootPhase: " + phase + " : " + isSafeMode());
         if (PHASE_THIRD_PARTY_APPS_CAN_START == phase) {
             mDbHelper = new SoundTriggerDbHelper(mContext);
+            final PowerManager powerManager = mContext.getSystemService(PowerManager.class);
+            // Hook up power state listener
+            mContext.registerReceiver(
+                    new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            if (!PowerManager.ACTION_POWER_SAVE_MODE_CHANGED
+                                    .equals(intent.getAction())) {
+                                return;
+                            }
+                            mDeviceStateHandler.onPowerModeChanged(
+                                    powerManager.getSoundTriggerPowerSaveMode());
+                        }
+                    }, new IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED));
+            // Initialize the initial power state
+            // Do so after registering the listener so we ensure that we don't drop any events
+            mDeviceStateHandler.onPowerModeChanged(powerManager.getSoundTriggerPowerSaveMode());
+
+            // PhoneCallStateHandler initializes the original call state
+            mPhoneCallStateHandler = new PhoneCallStateHandler(
+                      mContext.getSystemService(SubscriptionManager.class),
+                      mContext.getSystemService(TelephonyManager.class),
+                      mDeviceStateHandler);
         }
         mMiddlewareService = ISoundTriggerMiddlewareService.Stub.asInterface(
                 ServiceManager.waitForService(Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE));
@@ -380,6 +417,9 @@ public class SoundTriggerService extends SystemService {
             // Event loggers
             pw.println("##Service-Wide logs:");
             mServiceEventLogger.dump(pw, /* indent = */ "  ");
+            pw.println("\n##Device state logs:");
+            mDeviceStateHandler.dump(pw);
+            mDeviceEventLogger.dump(pw, /* indent = */ "  ");
 
             pw.println("\n##Active Session dumps:\n");
             for (var sessionLogger : mSessionEventLoggers) {
@@ -403,6 +443,7 @@ public class SoundTriggerService extends SystemService {
 
     class SoundTriggerSessionStub extends ISoundTriggerSession.Stub {
         private final SoundTriggerHelper mSoundTriggerHelper;
+        private final DeviceStateListener mListener;
         // Used to detect client death.
         private final IBinder mClient;
         private final Identity mOriginatorIdentity;
@@ -424,6 +465,9 @@ public class SoundTriggerService extends SystemService {
             } catch (RemoteException e) {
                 clientDied();
             }
+            mListener = (SoundTriggerDeviceState state)
+                    -> mSoundTriggerHelper.onDeviceStateChanged(state);
+            mDeviceStateHandler.registerListener(mListener);
         }
 
         @Override
@@ -874,6 +918,7 @@ public class SoundTriggerService extends SystemService {
         }
 
         private void detach() {
+            mDeviceStateHandler.unregisterListener(mListener);
             mSoundTriggerHelper.detach();
             detachSessionLogger(mEventLogger);
         }
@@ -890,7 +935,8 @@ public class SoundTriggerService extends SystemService {
         private void enforceDetectionPermissions(ComponentName detectionService) {
             PackageManager packageManager = mContext.getPackageManager();
             String packageName = detectionService.getPackageName();
-            if (packageManager.checkPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD, packageName)
+            if (packageManager.checkPermission(
+                        Manifest.permission.CAPTURE_AUDIO_HOTWORD, packageName)
                     != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException(detectionService.getPackageName() + " does not have"
                         + " permission " + Manifest.permission.CAPTURE_AUDIO_HOTWORD);
@@ -1576,6 +1622,7 @@ public class SoundTriggerService extends SystemService {
             private final @NonNull IBinder mClient;
             private final EventLogger mEventLogger;
             private final Identity mOriginatorIdentity;
+            private final @NonNull DeviceStateListener mListener;
 
             private final SparseArray<UUID> mModelUuid = new SparseArray<>(1);
 
@@ -1594,6 +1641,9 @@ public class SoundTriggerService extends SystemService {
                 } catch (RemoteException e) {
                     clientDied();
                 }
+                mListener = (SoundTriggerDeviceState state)
+                        -> mSoundTriggerHelper.onDeviceStateChanged(state);
+                mDeviceStateHandler.registerListener(mListener);
             }
 
             @Override
@@ -1662,6 +1712,7 @@ public class SoundTriggerService extends SystemService {
             private void detachInternal() {
                 mEventLogger.enqueue(new SessionEvent(Type.DETACH, null));
                 detachSessionLogger(mEventLogger);
+                mDeviceStateHandler.unregisterListener(mListener);
                 mSoundTriggerHelper.detach();
             }
         }
