@@ -806,7 +806,7 @@ public class OomAdjuster {
      */
     @GuardedBy("mService")
     void enqueueOomAdjTargetLocked(ProcessRecord app) {
-        if (app != null) {
+        if (app != null && app.mState.getMaxAdj() > FOREGROUND_APP_ADJ) {
             mPendingProcessSet.add(app);
         }
     }
