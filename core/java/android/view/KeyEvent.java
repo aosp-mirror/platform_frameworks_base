@@ -2100,6 +2100,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     @Override
     public final int getDisplayId() {
         return mDisplayId;
