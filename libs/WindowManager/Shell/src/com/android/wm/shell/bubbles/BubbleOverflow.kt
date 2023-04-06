@@ -28,6 +28,7 @@ import android.util.PathParser
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import com.android.launcher3.icons.BubbleIconFactory
 import com.android.wm.shell.R
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView
 
@@ -93,7 +94,8 @@ class BubbleOverflow(
         val shapeColor = res.getColor(android.R.color.system_accent1_1000)
         overflowBtn?.iconDrawable?.setTint(shapeColor)
 
-        val iconFactory = BubbleIconFactory(context)
+        val iconFactory = BubbleIconFactory(context,
+                context.getResources().getDimensionPixelSize(R.dimen.bubble_size))
 
         // Update bitmap
         val fg = InsetDrawable(overflowBtn?.iconDrawable, overflowIconInset)
