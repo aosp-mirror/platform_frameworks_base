@@ -133,6 +133,7 @@ import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -221,6 +222,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private NotificationListContainer mNotificationListContainer;
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
+    @Mock private ShadeLogger mShadeLogger;
     @Mock private NotificationPanelView mNotificationPanelView;
     @Mock private QuickSettingsController mQuickSettingsController;
     @Mock private IStatusBarService mBarService;
@@ -469,6 +471,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mKeyguardViewMediator,
                 new DisplayMetrics(),
                 mMetricsLogger,
+                mShadeLogger,
                 mUiBgExecutor,
                 mNotificationMediaManager,
                 mLockscreenUserManager,
