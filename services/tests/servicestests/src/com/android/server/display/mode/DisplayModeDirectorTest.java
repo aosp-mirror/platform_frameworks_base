@@ -2583,7 +2583,7 @@ public class DisplayModeDirectorTest {
                     KEY_REFRESH_RATE_IN_HBM_HDR, String.valueOf(fps));
         }
 
-        public void setBrightnessThrottlingData(String brightnessThrottlingData) {
+        public void setThermalBrightnessThrottlingData(String brightnessThrottlingData) {
             putPropertyAndNotify(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
                     KEY_BRIGHTNESS_THROTTLING_DATA, brightnessThrottlingData);
         }
