@@ -35,7 +35,7 @@ class UnfoldRemoteFilter(
 
     private var inProgress = false
 
-    private var processedProgress: Float = 0.0f
+    private var processedProgress: Float = 1.0f
         set(newProgress) {
             if (inProgress) {
                 logCounter({ "$TAG#filtered_progress" }, newProgress)
