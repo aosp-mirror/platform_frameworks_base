@@ -979,6 +979,8 @@
             </intent-filter>
         </activity>
 
+        <service android:name=".notetask.NoteTaskControllerUpdateService" />
+
         <activity
             android:name=".notetask.shortcut.LaunchNoteTaskActivity"
             android:exported="true"
