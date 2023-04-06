@@ -60,7 +60,7 @@ import javax.inject.Inject;
 import dagger.Lazy;
 
 public class MediaProjectionPermissionActivity extends Activity
-        implements DialogInterface.OnClickListener, DialogInterface.OnCancelListener {
+        implements DialogInterface.OnClickListener {
     private static final String TAG = "MediaProjectionPermissionActivity";
     private static final float MAX_APP_NAME_SIZE_PX = 500f;
     private static final String ELLIPSIS = "\u2026";
@@ -215,7 +215,8 @@ public class MediaProjectionPermissionActivity extends Activity
         SystemUIDialog.applyFlags(dialog);
         SystemUIDialog.setDialogSize(dialog);
 
-        dialog.setOnCancelListener(this);
+        dialog.setOnCancelListener(this::onDialogDismissedOrCancelled);
+        dialog.setOnDismissListener(this::onDialogDismissedOrCancelled);
         dialog.create();
         dialog.getButton(DialogInterface.BUTTON_POSITIVE).setFilterTouchesWhenObscured(true);
 
@@ -283,9 +284,10 @@ public class MediaProjectionPermissionActivity extends Activity
         return intent;
     }
 
-    @Override
-    public void onCancel(DialogInterface dialog) {
-        finish();
+    private void onDialogDismissedOrCancelled(DialogInterface dialogInterface) {
+        if (!isFinishing()) {
+            finish();
+        }
     }
 
     private boolean isPartialScreenSharingEnabled() {
