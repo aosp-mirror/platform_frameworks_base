@@ -630,6 +630,11 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
+        if (notification.isUserInitiatedJob()) {
+            if (log) mLogger.logMaybeHeadsUpDespiteOldWhen(entry, when, age, "user initiated job");
+            return false;
+        }
+
         if (log) mLogger.logNoHeadsUpOldWhen(entry, when, age);
         final int uid = entry.getSbn().getUid();
         final String packageName = entry.getSbn().getPackageName();
