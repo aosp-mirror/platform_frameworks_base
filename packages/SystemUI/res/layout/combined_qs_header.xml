@@ -94,7 +94,7 @@
 
     <include
         android:id="@+id/carrier_group"
-        layout="@layout/qs_carrier_group"
+        layout="@layout/shade_carrier_group"
         app:layout_constraintHeight_min="@dimen/large_screen_shade_header_min_height"
         android:minHeight="@dimen/large_screen_shade_header_min_height"
         app:layout_constraintWidth_min="48dp"
