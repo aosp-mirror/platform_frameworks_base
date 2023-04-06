@@ -178,6 +178,7 @@ public final class CachedAppOptimizer {
     private static final String ATRACE_FREEZER_TRACK = "Freezer";
 
     private static final int FREEZE_BINDER_TIMEOUT_MS = 100;
+    private static final int FREEZE_DEADLOCK_TIMEOUT_MS = 1000;
 
     @VisibleForTesting static final boolean ENABLE_FILE_COMPACT = false;
 
@@ -244,6 +245,7 @@ public final class CachedAppOptimizer {
     static final int REPORT_UNFREEZE_MSG = 4;
     static final int COMPACT_NATIVE_MSG = 5;
     static final int UID_FROZEN_STATE_CHANGED_MSG = 6;
+    static final int DEADLOCK_WATCHDOG_MSG = 7;
 
     // When free swap falls below this percentage threshold any full (file + anon)
     // compactions will be downgraded to file only compactions to reduce pressure
@@ -1947,29 +1949,15 @@ public final class CachedAppOptimizer {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SET_FROZEN_PROCESS_MSG:
-                {
                     ProcessRecord proc = (ProcessRecord) msg.obj;
-                    int pid = proc.getPid();
-                    final String name = proc.processName;
                     synchronized (mAm) {
                         freezeProcess(proc);
                     }
-                    try {
-                        // post-check to prevent deadlock
-                        mProcLocksReader.handleBlockingFileLocks(this);
-                    } catch (Exception e) {
-                        Slog.e(TAG_AM, "Unable to check file locks for "
-                                + name + "(" + pid + "): " + e);
-                        synchronized (mAm) {
-                            synchronized (mProcLock) {
-                                unfreezeAppLSP(proc, UNFREEZE_REASON_FILE_LOCK_CHECK_FAILURE);
-                            }
-                        }
-                    }
                     if (proc.mOptRecord.isFrozen()) {
                         onProcessFrozen(proc);
+                        removeMessages(DEADLOCK_WATCHDOG_MSG);
+                        sendEmptyMessageDelayed(DEADLOCK_WATCHDOG_MSG, FREEZE_DEADLOCK_TIMEOUT_MS);
                     }
-                }
                     break;
                 case REPORT_UNFREEZE_MSG:
                     int pid = msg.arg1;
@@ -1981,8 +1969,18 @@ public final class CachedAppOptimizer {
                     reportUnfreeze(pid, frozenDuration, processName, reason);
                     break;
                 case UID_FROZEN_STATE_CHANGED_MSG:
-                    ProcessRecord proc = (ProcessRecord) msg.obj;
-                    reportOneUidFrozenStateChanged(proc.uid, true);
+                    reportOneUidFrozenStateChanged(((ProcessRecord) msg.obj).uid, true);
+                    break;
+                case DEADLOCK_WATCHDOG_MSG:
+                    try {
+                        // post-check to prevent deadlock
+                        if (DEBUG_FREEZER) {
+                            Slog.d(TAG_AM, "Freezer deadlock watchdog");
+                        }
+                        mProcLocksReader.handleBlockingFileLocks(this);
+                    } catch (IOException e) {
+                        Slog.w(TAG_AM, "Unable to check file locks");
+                    }
                     break;
                 default:
                     return;
