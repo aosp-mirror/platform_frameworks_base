@@ -98,7 +98,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
     private final Binder mOwner = new Binder();
     private final Rect mCaptionInsetsRect = new Rect();
-    private final Rect mTaskSurfaceCrop = new Rect();
     private final float[] mTmpColor = new float[3];
 
     WindowDecoration(
@@ -218,21 +217,14 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         final Rect taskBounds = taskConfig.windowConfiguration.getBounds();
         final Resources resources = mDecorWindowContext.getResources();
-        outResult.mDecorContainerOffsetX = -loadDimensionPixelSize(resources, params.mOutsetLeftId);
-        outResult.mDecorContainerOffsetY = -loadDimensionPixelSize(resources, params.mOutsetTopId);
-        outResult.mWidth = taskBounds.width()
-                + loadDimensionPixelSize(resources, params.mOutsetRightId)
-                - outResult.mDecorContainerOffsetX;
-        outResult.mHeight = taskBounds.height()
-                + loadDimensionPixelSize(resources, params.mOutsetBottomId)
-                - outResult.mDecorContainerOffsetY;
-        startT.setPosition(
-                        mDecorationContainerSurface,
-                        outResult.mDecorContainerOffsetX, outResult.mDecorContainerOffsetY)
-                .setWindowCrop(mDecorationContainerSurface,
-                        outResult.mWidth, outResult.mHeight)
+        outResult.mWidth = taskBounds.width();
+        outResult.mHeight = taskBounds.height();
+        startT.setWindowCrop(mDecorationContainerSurface, outResult.mWidth, outResult.mHeight)
                 .show(mDecorationContainerSurface);
 
+        // TODO(b/270202228): This surface can be removed. Instead, use
+        //  |mDecorationContainerSurface| to set the background now that it no longer has outsets
+        //  and its crop is set to the task bounds.
         // TaskBackgroundSurface
         if (mTaskBackgroundSurface == null) {
             final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
@@ -250,8 +242,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mTmpColor[0] = (float) Color.red(backgroundColorInt) / 255.f;
         mTmpColor[1] = (float) Color.green(backgroundColorInt) / 255.f;
         mTmpColor[2] = (float) Color.blue(backgroundColorInt) / 255.f;
-        startT.setWindowCrop(mTaskBackgroundSurface, taskBounds.width(),
-                        taskBounds.height())
+        startT.setWindowCrop(mTaskBackgroundSurface, taskBounds.width(), taskBounds.height())
                 .setShadowRadius(mTaskBackgroundSurface, shadowRadius)
                 .setColor(mTaskBackgroundSurface, mTmpColor)
                 .show(mTaskBackgroundSurface);
@@ -269,11 +260,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         final int captionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId);
         final int captionWidth = taskBounds.width();
 
-        startT.setPosition(
-                        mCaptionContainerSurface,
-                        -outResult.mDecorContainerOffsetX + params.mCaptionX,
-                        -outResult.mDecorContainerOffsetY + params.mCaptionY)
-                .setWindowCrop(mCaptionContainerSurface, captionWidth, captionHeight)
+        startT.setWindowCrop(mCaptionContainerSurface, captionWidth, captionHeight)
                 .show(mCaptionContainerSurface);
 
         if (mCaptionWindowManager == null) {
@@ -314,14 +301,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         // Task surface itself
         Point taskPosition = mTaskInfo.positionInParent;
-        mTaskSurfaceCrop.set(
-                outResult.mDecorContainerOffsetX,
-                outResult.mDecorContainerOffsetY,
-                outResult.mWidth + outResult.mDecorContainerOffsetX,
-                outResult.mHeight + outResult.mDecorContainerOffsetY);
         startT.show(mTaskSurface);
         finishT.setPosition(mTaskSurface, taskPosition.x, taskPosition.y)
-                .setCrop(mTaskSurface, mTaskSurfaceCrop);
+                .setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
     }
 
     /**
@@ -447,36 +429,14 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mCaptionWidthId;
         int mShadowRadiusId;
 
-        int mOutsetTopId;
-        int mOutsetBottomId;
-        int mOutsetLeftId;
-        int mOutsetRightId;
-
         int mCaptionX;
         int mCaptionY;
-
-        void setOutsets(int leftId, int topId, int rightId, int bottomId) {
-            mOutsetLeftId = leftId;
-            mOutsetTopId = topId;
-            mOutsetRightId = rightId;
-            mOutsetBottomId = bottomId;
-        }
-
-        void setCaptionPosition(int left, int top) {
-            mCaptionX = left;
-            mCaptionY = top;
-        }
 
         void reset() {
             mLayoutResId = Resources.ID_NULL;
             mCaptionHeightId = Resources.ID_NULL;
             mCaptionWidthId = Resources.ID_NULL;
             mShadowRadiusId = Resources.ID_NULL;
-
-            mOutsetTopId = Resources.ID_NULL;
-            mOutsetBottomId = Resources.ID_NULL;
-            mOutsetLeftId = Resources.ID_NULL;
-            mOutsetRightId = Resources.ID_NULL;
 
             mCaptionX = 0;
             mCaptionY = 0;
@@ -487,14 +447,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mWidth;
         int mHeight;
         T mRootView;
-        int mDecorContainerOffsetX;
-        int mDecorContainerOffsetY;
 
         void reset() {
             mWidth = 0;
             mHeight = 0;
-            mDecorContainerOffsetX = 0;
-            mDecorContainerOffsetY = 0;
             mRootView = null;
         }
     }
