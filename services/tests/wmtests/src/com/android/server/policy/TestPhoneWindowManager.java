@@ -82,6 +82,7 @@ import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
@@ -125,6 +126,7 @@ class TestPhoneWindowManager {
     @Mock private PowerManager mPowerManager;
     @Mock private WindowManagerPolicy.WindowManagerFuncs mWindowManagerFuncsImpl;
     @Mock private InputMethodManagerInternal mInputMethodManagerInternal;
+    @Mock private UserManagerInternal mUserManagerInternal;
     @Mock private AudioManagerInternal mAudioManagerInternal;
     @Mock private SearchManager mSearchManager;
 
@@ -199,6 +201,8 @@ class TestPhoneWindowManager {
                 () -> LocalServices.getService(eq(DisplayManagerInternal.class)));
         doReturn(mGestureLauncherService).when(
                 () -> LocalServices.getService(eq(GestureLauncherService.class)));
+        doReturn(mUserManagerInternal).when(
+                () -> LocalServices.getService(eq(UserManagerInternal.class)));
         doReturn(null).when(() -> LocalServices.getService(eq(VrManagerInternal.class)));
         doReturn(null).when(() -> LocalServices.getService(eq(AutofillManagerInternal.class)));
         LocalServices.removeServiceForTest(InputMethodManagerInternal.class);

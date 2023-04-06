@@ -1374,7 +1374,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void startHomeOnEmptyDisplays(String reason) {
         forAllTaskDisplayAreas(taskDisplayArea -> {
             if (taskDisplayArea.topRunningActivity() == null) {
-                startHomeOnTaskDisplayArea(mCurrentUser, reason, taskDisplayArea,
+                int userId = mWmService.getUserAssignedToDisplay(taskDisplayArea.getDisplayId());
+                startHomeOnTaskDisplayArea(userId, reason, taskDisplayArea,
                         false /* allowInstrumenting */, false /* fromHomeKey */);
             }
         });
@@ -1422,7 +1423,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         Intent homeIntent = null;
         ActivityInfo aInfo = null;
-        if (taskDisplayArea == getDefaultTaskDisplayArea()) {
+        if (taskDisplayArea == getDefaultTaskDisplayArea()
+                || mWmService.shouldPlacePrimaryHomeOnDisplay(
+                        taskDisplayArea.getDisplayId(), userId)) {
             homeIntent = mService.getHomeIntent();
             aInfo = resolveHomeActivity(userId, homeIntent);
         } else if (shouldPlaceSecondaryHomeOnDisplayArea(taskDisplayArea)) {
@@ -1589,7 +1592,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             r.moveFocusableActivityToTop(myReason);
             return resumeFocusedTasksTopActivities(r.getRootTask(), prev, null);
         }
-        return startHomeOnTaskDisplayArea(mCurrentUser, myReason, taskDisplayArea,
+        int userId = mWmService.getUserAssignedToDisplay(taskDisplayArea.getDisplayId());
+        return startHomeOnTaskDisplayArea(userId, myReason, taskDisplayArea,
                 false /* allowInstrumenting */, false /* fromHomeKey */);
     }
 
@@ -1667,8 +1671,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final int displayId = taskDisplayArea != null ? taskDisplayArea.getDisplayId()
                 : INVALID_DISPLAY;
         if (displayId == DEFAULT_DISPLAY || (displayId != INVALID_DISPLAY
-                && displayId == mService.mVr2dDisplayId)) {
-            // No restrictions to default display or vr 2d display.
+                && (displayId == mService.mVr2dDisplayId
+                || mWmService.shouldPlacePrimaryHomeOnDisplay(displayId)))) {
+            // No restrictions to default display, vr 2d display or main display for visible users.
             return true;
         }
 
