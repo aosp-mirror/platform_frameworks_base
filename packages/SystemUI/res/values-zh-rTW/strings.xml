@@ -887,7 +887,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"已選取 <xliff:g id="COUNT">%1$d</xliff:g> 部裝置"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(連線中斷)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"無法切換，輕觸即可重試。"</string>
-    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"建立裝置連線"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"連接裝置"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"如要投放這個工作階段，請開啟應用程式。"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"不明的應用程式"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"停止投放"</string>
