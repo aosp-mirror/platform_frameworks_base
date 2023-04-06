@@ -53,7 +53,6 @@ public:
     void onStop() override;
     bool isSurfaceReady() override;
     bool isContextReady() override;
-    bool supportsExtendedRangeHdr() const override { return true; }
     void setTargetSdrHdrRatio(float ratio) override;
     const SkM44& getPixelSnapMatrix() const override;
 
