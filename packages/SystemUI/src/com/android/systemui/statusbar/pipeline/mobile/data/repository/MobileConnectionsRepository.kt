@@ -60,6 +60,13 @@ interface MobileConnectionsRepository {
      */
     val mobileIsDefault: StateFlow<Boolean>
 
+    /**
+     * True if the device currently has a carrier merged connection.
+     *
+     * See [CarrierMergedConnectionRepository] for more info.
+     */
+    val hasCarrierMergedConnection: Flow<Boolean>
+
     /** True if the default network connection is validated and false otherwise. */
     val defaultConnectionIsValidated: StateFlow<Boolean>
 
