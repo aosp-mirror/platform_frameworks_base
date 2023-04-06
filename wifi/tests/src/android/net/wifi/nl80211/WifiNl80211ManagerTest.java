@@ -18,6 +18,7 @@ package android.net.wifi.nl80211;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -26,6 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -37,6 +39,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
+import android.app.test.MockAnswerUtil.AnswerWithArguments;
 import android.app.test.TestAlarmManager;
 import android.content.Context;
 import android.net.MacAddress;
@@ -104,6 +107,9 @@ public class WifiNl80211ManagerTest {
     private WifiNl80211Manager.CountryCodeChangedListener mCountryCodeChangedListener2;
     @Mock
     private Context mContext;
+    @Mock
+    private InstantWifi mMockInstantWifi;
+
     private TestLooper mLooper;
     private TestAlarmManager mTestAlarmManager;
     private AlarmManager mAlarmManager;
@@ -167,6 +173,17 @@ public class WifiNl80211ManagerTest {
             0x00, 0x00
     };
 
+    private class WifiNl80211ManagerSpy extends WifiNl80211Manager {
+        WifiNl80211ManagerSpy(Context context, IWificond wificond) {
+            super(context, wificond);
+        }
+
+        @Override
+        protected InstantWifi getInstantWifiMockable() {
+            return mMockInstantWifi;
+        }
+    }
+
     @Before
     public void setUp() throws Exception {
         // Setup mocks for successful WificondControl operation. Failure case mocks should be
@@ -181,6 +198,8 @@ public class WifiNl80211ManagerTest {
         mLooper = new TestLooper();
         when(mContext.getMainLooper()).thenReturn(mLooper.getLooper());
 
+        doNothing().when(mMockInstantWifi).overrideFreqsForSingleScanSettingsIfNecessary(
+                any(), any());
         when(mWificond.asBinder()).thenReturn(mWifiCondBinder);
         when(mClientInterface.getWifiScannerImpl()).thenReturn(mWifiScannerImpl);
         when(mWificond.createClientInterface(any())).thenReturn(mClientInterface);
@@ -189,7 +208,7 @@ public class WifiNl80211ManagerTest {
         when(mWificond.tearDownApInterface(any())).thenReturn(true);
         when(mClientInterface.getWifiScannerImpl()).thenReturn(mWifiScannerImpl);
         when(mClientInterface.getInterfaceName()).thenReturn(TEST_INTERFACE_NAME);
-        mWificondControl = new WifiNl80211Manager(mContext, mWificond);
+        mWificondControl = new WifiNl80211ManagerSpy(mContext, mWificond);
         mWificondEventHandler = mWificondControl.getWificondEventHandler();
         assertEquals(true,
                 mWificondControl.setupInterfaceForClientMode(TEST_INTERFACE_NAME, Runnable::run,
@@ -1157,6 +1176,40 @@ public class WifiNl80211ManagerTest {
         doThrow(new RemoteException()).when(mWificond).notifyCountryCodeChanged();
         mWificondControl.notifyCountryCodeChanged(TEST_COUNTRY_CODE);
         verify(mWificond).notifyCountryCodeChanged();
+    }
+
+    @Test
+    public void testInstantWifi() throws Exception {
+        doAnswer(new AnswerWithArguments() {
+            public void answer(SingleScanSettings settings, Set<Integer> freqs) {
+                if (settings.channelSettings == null) {
+                    settings.channelSettings = new ArrayList<>();
+                } else {
+                    settings.channelSettings.clear();
+                }
+                for (int freq : freqs) {
+                    if (freq > 0) {
+                        ChannelSettings channel = new ChannelSettings();
+                        channel.frequency = freq;
+                        settings.channelSettings.add(channel);
+                    }
+                }
+            }
+        }).when(mMockInstantWifi).overrideFreqsForSingleScanSettingsIfNecessary(
+                any(), any());
+        Set<Integer> testPredictedChannelsSet = Set.of(2412, 5745);
+        assertNotEquals(testPredictedChannelsSet, SCAN_FREQ_SET);
+        when(mWifiScannerImpl.scan(any(SingleScanSettings.class))).thenReturn(true);
+        when(mMockInstantWifi.getPredictedScanningChannels()).thenReturn(testPredictedChannelsSet);
+
+        // Trigger scan to check scan settings are changed
+        assertTrue(mWificondControl.startScan(
+                TEST_INTERFACE_NAME, WifiScanner.SCAN_TYPE_LOW_POWER,
+                SCAN_FREQ_SET, SCAN_HIDDEN_NETWORK_SSID_LIST));
+        verify(mMockInstantWifi).getPredictedScanningChannels();
+        verify(mWifiScannerImpl).scan(argThat(new ScanMatcher(
+                IWifiScannerImpl.SCAN_TYPE_LOW_POWER,
+                testPredictedChannelsSet, SCAN_HIDDEN_NETWORK_SSID_LIST, false, null)));
     }
 
     // Create a ArgumentMatcher which captures a SingleScanSettings parameter and checks if it
