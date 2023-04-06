@@ -18,7 +18,7 @@ package com.android.systemui.log.table
 
 import android.os.Trace
 import com.android.systemui.Dumpable
-import com.android.systemui.plugins.util.RingBuffer
+import com.android.systemui.common.buffer.RingBuffer
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.text.SimpleDateFormat
