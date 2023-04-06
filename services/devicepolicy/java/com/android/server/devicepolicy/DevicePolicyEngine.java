@@ -1181,7 +1181,8 @@ final class DevicePolicyEngine {
         private static final String DEVICE_POLICIES_XML = "device_policy_state.xml";
         private static final String TAG_LOCAL_POLICY_ENTRY = "local-policy-entry";
         private static final String TAG_GLOBAL_POLICY_ENTRY = "global-policy-entry";
-        private static final String TAG_ADMINS_POLICY_ENTRY = "admins-policy-entry";
+        private static final String TAG_POLICY_STATE_ENTRY = "policy-state-entry";
+        private static final String TAG_POLICY_KEY_ENTRY = "policy-key-entry";
         private static final String TAG_ENFORCING_ADMINS_ENTRY = "enforcing-admins-entry";
         private static final String ATTR_USER_ID = "user-id";
 
@@ -1236,11 +1237,14 @@ final class DevicePolicyEngine {
                         serializer.startTag(/* namespace= */ null, TAG_LOCAL_POLICY_ENTRY);
 
                         serializer.attributeInt(/* namespace= */ null, ATTR_USER_ID, userId);
-                        policy.getKey().saveToXml(serializer);
 
-                        serializer.startTag(/* namespace= */ null, TAG_ADMINS_POLICY_ENTRY);
+                        serializer.startTag(/* namespace= */ null, TAG_POLICY_KEY_ENTRY);
+                        policy.getKey().saveToXml(serializer);
+                        serializer.endTag(/* namespace= */ null, TAG_POLICY_KEY_ENTRY);
+
+                        serializer.startTag(/* namespace= */ null, TAG_POLICY_STATE_ENTRY);
                         policy.getValue().saveToXml(serializer);
-                        serializer.endTag(/* namespace= */ null, TAG_ADMINS_POLICY_ENTRY);
+                        serializer.endTag(/* namespace= */ null, TAG_POLICY_STATE_ENTRY);
 
                         serializer.endTag(/* namespace= */ null, TAG_LOCAL_POLICY_ENTRY);
                     }
@@ -1253,11 +1257,13 @@ final class DevicePolicyEngine {
                 for (Map.Entry<PolicyKey, PolicyState<?>> policy : mGlobalPolicies.entrySet()) {
                     serializer.startTag(/* namespace= */ null, TAG_GLOBAL_POLICY_ENTRY);
 
+                    serializer.startTag(/* namespace= */ null, TAG_POLICY_KEY_ENTRY);
                     policy.getKey().saveToXml(serializer);
+                    serializer.endTag(/* namespace= */ null, TAG_POLICY_KEY_ENTRY);
 
-                    serializer.startTag(/* namespace= */ null, TAG_ADMINS_POLICY_ENTRY);
+                    serializer.startTag(/* namespace= */ null, TAG_POLICY_STATE_ENTRY);
                     policy.getValue().saveToXml(serializer);
-                    serializer.endTag(/* namespace= */ null, TAG_ADMINS_POLICY_ENTRY);
+                    serializer.endTag(/* namespace= */ null, TAG_POLICY_STATE_ENTRY);
 
                     serializer.endTag(/* namespace= */ null, TAG_GLOBAL_POLICY_ENTRY);
                 }
@@ -1323,28 +1329,56 @@ final class DevicePolicyEngine {
         private void readLocalPoliciesInner(TypedXmlPullParser parser)
                 throws XmlPullParserException, IOException {
             int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
-            PolicyKey policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
-            if (!mLocalPolicies.contains(userId)) {
-                mLocalPolicies.put(userId, new HashMap<>());
+            PolicyKey policyKey = null;
+            PolicyState<?> policyState = null;
+            int outerDepth = parser.getDepth();
+            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                String tag = parser.getName();
+                switch (tag) {
+                    case TAG_POLICY_KEY_ENTRY:
+                        policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
+                        break;
+                    case TAG_POLICY_STATE_ENTRY:
+                        policyState = PolicyState.readFromXml(parser);
+                        break;
+                    default:
+                        Log.e(TAG, "Unknown tag for local policy entry" + tag);
+                }
             }
-            PolicyState<?> adminsPolicy = parseAdminsPolicy(parser);
-            if (adminsPolicy != null) {
-                mLocalPolicies.get(userId).put(policyKey, adminsPolicy);
+
+            if (policyKey != null && policyState != null) {
+                if (!mLocalPolicies.contains(userId)) {
+                    mLocalPolicies.put(userId, new HashMap<>());
+                }
+                mLocalPolicies.get(userId).put(policyKey, policyState);
             } else {
-                Log.e(TAG,
-                        "Error parsing file, " + policyKey + "doesn't have an " + "AdminsPolicy.");
+                Log.e(TAG, "Error parsing local policy");
             }
         }
 
         private void readGlobalPoliciesInner(TypedXmlPullParser parser)
                 throws IOException, XmlPullParserException {
-            PolicyKey policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
-            PolicyState<?> adminsPolicy = parseAdminsPolicy(parser);
-            if (adminsPolicy != null) {
-                mGlobalPolicies.put(policyKey, adminsPolicy);
+            PolicyKey policyKey = null;
+            PolicyState<?> policyState = null;
+            int outerDepth = parser.getDepth();
+            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                String tag = parser.getName();
+                switch (tag) {
+                    case TAG_POLICY_KEY_ENTRY:
+                        policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
+                        break;
+                    case TAG_POLICY_STATE_ENTRY:
+                        policyState = PolicyState.readFromXml(parser);
+                        break;
+                    default:
+                        Log.e(TAG, "Unknown tag for local policy entry" + tag);
+                }
+            }
+
+            if (policyKey != null && policyState != null) {
+                mGlobalPolicies.put(policyKey, policyState);
             } else {
-                Log.e(TAG,
-                        "Error parsing file, " + policyKey + "doesn't have an " + "AdminsPolicy.");
+                Log.e(TAG, "Error parsing global policy");
             }
         }
 
@@ -1355,21 +1389,6 @@ final class DevicePolicyEngine {
                 mEnforcingAdmins.put(admin.getUserId(), new HashSet<>());
             }
             mEnforcingAdmins.get(admin.getUserId()).add(admin);
-        }
-
-        @Nullable
-        private PolicyState<?> parseAdminsPolicy(TypedXmlPullParser parser)
-                throws XmlPullParserException, IOException {
-            int outerDepth = parser.getDepth();
-            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
-                String tag = parser.getName();
-                if (tag.equals(TAG_ADMINS_POLICY_ENTRY)) {
-                    return PolicyState.readFromXml(parser);
-                }
-                Log.e(TAG, "Unknown tag " + tag);
-            }
-            Log.e(TAG, "Error parsing file, AdminsPolicy not found");
-            return null;
         }
     }
 }
