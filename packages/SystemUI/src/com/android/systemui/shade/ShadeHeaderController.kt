@@ -43,13 +43,13 @@ import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.qs.ChipVisibilityListener
 import com.android.systemui.qs.HeaderPrivacyIconsController
-import com.android.systemui.qs.carrier.QSCarrierGroup
-import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.shade.ShadeHeaderController.Companion.HEADER_TRANSITION_ID
 import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
 import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_HEADER_TRANSITION_ID
 import com.android.systemui.shade.ShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
 import com.android.systemui.shade.ShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
+import com.android.systemui.shade.carrier.ShadeCarrierGroup
+import com.android.systemui.shade.carrier.ShadeCarrierGroupController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarLocation
@@ -87,7 +87,7 @@ constructor(
     private val variableDateViewControllerFactory: VariableDateViewController.Factory,
     @Named(SHADE_HEADER) private val batteryMeterViewController: BatteryMeterViewController,
     private val dumpManager: DumpManager,
-    private val qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder,
+    private val shadeCarrierGroupControllerBuilder: ShadeCarrierGroupController.Builder,
     private val combinedShadeHeadersConstraintManager: CombinedShadeHeadersConstraintManager,
     private val demoModeController: DemoModeController,
     private val qsBatteryModeController: QsBatteryModeController,
@@ -114,13 +114,13 @@ constructor(
 
     private lateinit var iconManager: StatusBarIconController.TintedIconManager
     private lateinit var carrierIconSlots: List<String>
-    private lateinit var qsCarrierGroupController: QSCarrierGroupController
+    private lateinit var mShadeCarrierGroupController: ShadeCarrierGroupController
 
     private val batteryIcon: BatteryMeterView = header.findViewById(R.id.batteryRemainingIcon)
     private val clock: Clock = header.findViewById(R.id.clock)
     private val date: TextView = header.findViewById(R.id.date)
     private val iconContainer: StatusIconContainer = header.findViewById(R.id.statusIcons)
-    private val qsCarrierGroup: QSCarrierGroup = header.findViewById(R.id.carrier_group)
+    private val mShadeCarrierGroup: ShadeCarrierGroup = header.findViewById(R.id.carrier_group)
 
     private var roundedCorners = 0
     private var cutout: DisplayCutout? = null
@@ -243,7 +243,7 @@ constructor(
             override fun onDensityOrFontScaleChanged() {
                 clock.setTextAppearance(R.style.TextAppearance_QS_Status)
                 date.setTextAppearance(R.style.TextAppearance_QS_Status)
-                qsCarrierGroup.updateTextAppearance(R.style.TextAppearance_QS_Status_Carriers)
+                mShadeCarrierGroup.updateTextAppearance(R.style.TextAppearance_QS_Status_Carriers)
                 loadConstraints()
                 header.minHeight =
                     resources.getDimensionPixelSize(R.dimen.large_screen_shade_header_min_height)
@@ -266,8 +266,8 @@ constructor(
 
         carrierIconSlots =
             listOf(header.context.getString(com.android.internal.R.string.status_bar_mobile))
-        qsCarrierGroupController =
-            qsCarrierGroupControllerBuilder.setQSCarrierGroup(qsCarrierGroup).build()
+        mShadeCarrierGroupController =
+            shadeCarrierGroupControllerBuilder.setShadeCarrierGroup(mShadeCarrierGroup).build()
 
         privacyIconsController.onParentVisible()
     }
@@ -284,7 +284,7 @@ constructor(
             v.pivotX = newPivot
             v.pivotY = v.height.toFloat() / 2
 
-            qsCarrierGroup.setPaddingRelative((v.width * v.scaleX).toInt(), 0, 0, 0)
+            mShadeCarrierGroup.setPaddingRelative((v.width * v.scaleX).toInt(), 0, 0, 0)
         }
 
         dumpManager.registerDumpable(this)
@@ -439,12 +439,14 @@ constructor(
     }
 
     private fun updateListeners() {
-        qsCarrierGroupController.setListening(visible)
+        mShadeCarrierGroupController.setListening(visible)
         if (visible) {
-            updateSingleCarrier(qsCarrierGroupController.isSingleCarrier)
-            qsCarrierGroupController.setOnSingleCarrierChangedListener { updateSingleCarrier(it) }
+            updateSingleCarrier(mShadeCarrierGroupController.isSingleCarrier)
+            mShadeCarrierGroupController.setOnSingleCarrierChangedListener {
+                updateSingleCarrier(it)
+            }
         } else {
-            qsCarrierGroupController.setOnSingleCarrierChangedListener(null)
+            mShadeCarrierGroupController.setOnSingleCarrierChangedListener(null)
         }
     }
 

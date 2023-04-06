@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.carrier;
+package com.android.systemui.shade.carrier;
 
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
 
@@ -52,8 +52,8 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
-public class QSCarrierGroupController {
-    private static final String TAG = "QSCarrierGroup";
+public class ShadeCarrierGroupController {
+    private static final String TAG = "ShadeCarrierGroup";
 
     /**
      * Support up to 3 slots which is what's supported by {@link TelephonyManager#getPhoneCount}
@@ -72,7 +72,7 @@ public class QSCarrierGroupController {
     private final CellSignalState[] mInfos =
             new CellSignalState[SIM_SLOTS];
     private View[] mCarrierDividers = new View[SIM_SLOTS - 1];
-    private QSCarrier[] mCarrierGroups = new QSCarrier[SIM_SLOTS];
+    private ShadeCarrier[] mCarrierGroups = new ShadeCarrier[SIM_SLOTS];
     private int[] mLastSignalLevel = new int[SIM_SLOTS];
     private String[] mLastSignalLevelDescription = new String[SIM_SLOTS];
     private final CarrierConfigTracker mCarrierConfigTracker;
@@ -129,7 +129,7 @@ public class QSCarrierGroupController {
         }
     }
 
-    private QSCarrierGroupController(QSCarrierGroup view, ActivityStarter activityStarter,
+    private ShadeCarrierGroupController(ShadeCarrierGroup view, ActivityStarter activityStarter,
             @Background Handler bgHandler, @Main Looper mainLooper,
             NetworkController networkController,
             CarrierTextManager.Builder carrierTextManagerBuilder, Context context,
@@ -167,7 +167,7 @@ public class QSCarrierGroupController {
         for (int i = 0; i < SIM_SLOTS; i++) {
             mInfos[i] = new CellSignalState(
                     true,
-                    R.drawable.ic_qs_no_calling_sms,
+                    R.drawable.ic_shade_no_calling_sms,
                     context.getText(AccessibilityContentDescriptions.NO_CALLING).toString(),
                     "",
                     false);
@@ -257,7 +257,7 @@ public class QSCarrierGroupController {
         if (singleCarrier) {
             for (int i = 0; i < SIM_SLOTS; i++) {
                 if (mInfos[i].visible
-                        && mInfos[i].mobileSignalIconId == R.drawable.ic_qs_sim_card) {
+                        && mInfos[i].mobileSignalIconId == R.drawable.ic_shade_sim_card) {
                     mInfos[i] = new CellSignalState(true, R.drawable.ic_blank, "", "", false);
                 }
             }
@@ -322,8 +322,8 @@ public class QSCarrierGroupController {
                 Log.e(TAG, "Carrier information arrays not of same length");
             }
         } else {
-            // No sims or airplane mode (but not WFC). Do not show QSCarrierGroup, instead just show
-            // info.carrierText in a different view.
+            // No sims or airplane mode (but not WFC). Do not show ShadeCarrierGroup,
+            // instead just show info.carrierText in a different view.
             for (int i = 0; i < SIM_SLOTS; i++) {
                 mInfos[i] = mInfos[i].changeVisibility(false);
                 mCarrierGroups[i].setCarrierText("");
@@ -368,7 +368,7 @@ public class QSCarrierGroupController {
     }
 
     public static class Builder {
-        private QSCarrierGroup mView;
+        private ShadeCarrierGroup mView;
         private final ActivityStarter mActivityStarter;
         private final Handler mHandler;
         private final Looper mLooper;
@@ -393,13 +393,13 @@ public class QSCarrierGroupController {
             mSlotIndexResolver = slotIndexResolver;
         }
 
-        public Builder setQSCarrierGroup(QSCarrierGroup view) {
+        public Builder setShadeCarrierGroup(ShadeCarrierGroup view) {
             mView = view;
             return this;
         }
 
-        public QSCarrierGroupController build() {
-            return new QSCarrierGroupController(mView, mActivityStarter, mHandler, mLooper,
+        public ShadeCarrierGroupController build() {
+            return new ShadeCarrierGroupController(mView, mActivityStarter, mHandler, mLooper,
                     mNetworkController, mCarrierTextControllerBuilder, mContext,
                     mCarrierConfigTracker, mSlotIndexResolver);
         }
