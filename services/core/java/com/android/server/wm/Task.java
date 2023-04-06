@@ -5634,8 +5634,7 @@ class Task extends TaskFragment {
             if (mWmService.mSyncEngine.hasActiveSync()) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Creating Pending Move-to-back: %s", transition);
-                mWmService.mSyncEngine.queueSyncSet(
-                        () -> mTransitionController.moveToCollecting(transition),
+                mTransitionController.queueCollecting(transition,
                         () -> {
                             // Need to check again since this happens later and the system might
                             // be in a different state.

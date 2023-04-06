@@ -9808,8 +9808,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 scheduleStopForRestartProcess();
             };
             if (mWmService.mSyncEngine.hasActiveSync()) {
-                mWmService.mSyncEngine.queueSyncSet(
-                        () -> mTransitionController.moveToCollecting(transition), executeRestart);
+                mTransitionController.queueCollecting(transition, executeRestart);
             } else {
                 mTransitionController.moveToCollecting(transition);
                 executeRestart.run();

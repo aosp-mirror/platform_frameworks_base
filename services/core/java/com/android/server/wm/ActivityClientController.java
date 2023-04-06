@@ -1147,8 +1147,7 @@ class ActivityClientController extends IActivityClientController.Stub {
         if (mService.mWindowManager.mSyncEngine.hasActiveSync()) {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Creating Pending Multiwindow Fullscreen Request: %s", transition);
-            mService.mWindowManager.mSyncEngine.queueSyncSet(
-                    () -> r.mTransitionController.moveToCollecting(transition),
+            r.mTransitionController.queueCollecting(transition,
                     () -> {
                         executeFullscreenRequestTransition(fullscreenRequest, callback, r,
                                 transition, true /* queued */);

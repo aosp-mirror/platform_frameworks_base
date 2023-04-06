@@ -2335,9 +2335,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     transition.playNow();
                 };
                 if (display.mTransitionController.isCollecting()) {
-                    mWmService.mSyncEngine.queueSyncSet(
-                            () -> display.mTransitionController.moveToCollecting(transition),
-                            sendSleepTransition);
+                    display.mTransitionController.queueCollecting(transition, sendSleepTransition);
                 } else {
                     display.mTransitionController.moveToCollecting(transition);
                     sendSleepTransition.run();
