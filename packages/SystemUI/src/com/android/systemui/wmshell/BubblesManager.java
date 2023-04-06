@@ -235,8 +235,8 @@ public class BubblesManager {
 
         // Store callback in a field so it won't get GC'd
         mStatusBarWindowCallback =
-                (keyguardShowing, keyguardOccluded, bouncerShowing, isDozing, panelExpanded,
-                        isDreaming) ->
+                (keyguardShowing, keyguardOccluded, keyguardGoingAway, bouncerShowing, isDozing,
+                        panelExpanded, isDreaming) ->
                         mBubbles.onNotificationPanelExpandedChanged(panelExpanded);
         notificationShadeWindowController.registerCallback(mStatusBarWindowCallback);
 

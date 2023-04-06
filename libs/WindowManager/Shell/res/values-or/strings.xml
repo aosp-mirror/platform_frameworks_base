@@ -91,8 +91,7 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"ବାତିଲ କରନ୍ତୁ"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>
-    <!-- no translation found for letterbox_reachability_reposition_text (3522042240665748268) -->
-    <skip />
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"ଏହି ଆପକୁ ମୁଭ\nକରିବା ପାଇଁ ଦୁଇଥର-ଟାପ କରନ୍ତୁ"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ବଡ଼ କରନ୍ତୁ"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"ଛୋଟ କରନ୍ତୁ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"ବନ୍ଦ କରନ୍ତୁ"</string>
