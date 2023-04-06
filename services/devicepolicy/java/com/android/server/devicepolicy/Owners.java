@@ -24,6 +24,7 @@ import android.app.AppOpsManagerInternal;
 import android.app.admin.DevicePolicyManager.DeviceOwnerType;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -123,6 +124,7 @@ class Owners {
     private final PackageManagerInternal mPackageManagerInternal;
     private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
     private final ActivityManagerInternal mActivityManagerInternal;
+    private final UsageStatsManagerInternal mUsageStatsManagerInternal;
 
     private boolean mSystemReady;
 
@@ -155,9 +157,11 @@ class Owners {
             UserManagerInternal userManagerInternal,
             PackageManagerInternal packageManagerInternal,
             ActivityTaskManagerInternal activityTaskManagerInternal,
-            ActivityManagerInternal activitykManagerInternal) {
+            ActivityManagerInternal activitykManagerInternal,
+            UsageStatsManagerInternal usageStatsManagerInternal) {
         this(userManager, userManagerInternal, packageManagerInternal,
-                activityTaskManagerInternal, activitykManagerInternal, new Injector());
+                activityTaskManagerInternal, activitykManagerInternal,
+                usageStatsManagerInternal, new Injector());
     }
 
     @VisibleForTesting
@@ -166,12 +170,14 @@ class Owners {
             PackageManagerInternal packageManagerInternal,
             ActivityTaskManagerInternal activityTaskManagerInternal,
             ActivityManagerInternal activityManagerInternal,
+            UsageStatsManagerInternal usageStatsManagerInternal,
             Injector injector) {
         mUserManager = userManager;
         mUserManagerInternal = userManagerInternal;
         mPackageManagerInternal = packageManagerInternal;
         mActivityTaskManagerInternal = activityTaskManagerInternal;
         mActivityManagerInternal = activityManagerInternal;
+        mUsageStatsManagerInternal = usageStatsManagerInternal;
         mInjector = injector;
     }
 
@@ -226,6 +232,8 @@ class Owners {
                     mDeviceOwnerProtectedPackages.entrySet()) {
                 mPackageManagerInternal.setDeviceOwnerProtectedPackages(
                         entry.getKey(), entry.getValue());
+                mUsageStatsManagerInternal.setAdminProtectedPackages(
+                        new ArraySet(entry.getValue()), UserHandle.USER_ALL);
             }
         }
     }
@@ -359,6 +367,8 @@ class Owners {
             if (protectedPackages != null) {
                 mPackageManagerInternal.setDeviceOwnerProtectedPackages(
                         mDeviceOwner.packageName, new ArrayList<>());
+                mUsageStatsManagerInternal.setAdminProtectedPackages(
+                        Collections.emptySet(), UserHandle.USER_ALL);
             }
             mDeviceOwner = null;
             mDeviceOwnerUserId = UserHandle.USER_NULL;
@@ -416,6 +426,8 @@ class Owners {
             if (previousProtectedPackages != null) {
                 mPackageManagerInternal.setDeviceOwnerProtectedPackages(
                         mDeviceOwner.packageName, new ArrayList<>());
+                mUsageStatsManagerInternal.setAdminProtectedPackages(
+                        Collections.emptySet(), UserHandle.USER_ALL);
             }
             // We don't set a name because it's not used anyway.
             // See DevicePolicyManagerService#getDeviceOwnerName
@@ -684,6 +696,8 @@ class Owners {
 
             mDeviceOwnerProtectedPackages.put(packageName, protectedPackages);
             mPackageManagerInternal.setDeviceOwnerProtectedPackages(packageName, protectedPackages);
+            mUsageStatsManagerInternal.setAdminProtectedPackages(
+                        new ArraySet(protectedPackages), UserHandle.USER_ALL);
             writeDeviceOwner();
         }
     }

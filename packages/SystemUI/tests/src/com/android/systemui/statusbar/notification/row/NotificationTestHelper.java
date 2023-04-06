@@ -43,6 +43,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -490,7 +491,8 @@ public class NotificationTestHelper {
                 mPeopleNotificationIdentifier,
                 mock(OnUserInteractionCallback.class),
                 Optional.of(mock(BubblesManager.class)),
-                mock(NotificationGutsManager.class));
+                mock(NotificationGutsManager.class),
+                mock(IStatusBarService.class));
 
         row.setAboveShelfChangedListener(aboveShelf -> { });
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags);
