@@ -3391,6 +3391,7 @@ public class Vpn {
          * consistency of the Ikev2VpnRunner fields.
          */
         public void onDefaultNetworkChanged(@NonNull Network network) {
+            mEventChanges.log("[UnderlyingNW] Default network changed to " + network);
             Log.d(TAG, "onDefaultNetworkChanged: " + network);
 
             // If there is a new default network brought up, cancel the retry task to prevent
@@ -3628,6 +3629,7 @@ public class Vpn {
                 mNetworkCapabilities = new NetworkCapabilities.Builder(mNetworkCapabilities)
                         .setTransportInfo(info)
                         .build();
+                mEventChanges.log("[VPNRunner] Update agent caps " + mNetworkCapabilities);
                 doSendNetworkCapabilities(mNetworkAgent, mNetworkCapabilities);
             }
         }
@@ -3664,6 +3666,7 @@ public class Vpn {
 
         private void startIkeSession(@NonNull Network underlyingNetwork) {
             Log.d(TAG, "Start new IKE session on network " + underlyingNetwork);
+            mEventChanges.log("[IKE] Start IKE session over " + underlyingNetwork);
 
             try {
                 // Clear mInterface to prevent Ikev2VpnRunner being cleared when
@@ -3778,6 +3781,7 @@ public class Vpn {
         }
 
         public void onValidationStatus(int status) {
+            mEventChanges.log("[Validation] validation status " + status);
             if (status == NetworkAgent.VALIDATION_STATUS_VALID) {
                 // No data stall now. Reset it.
                 mExecutor.execute(() -> {
@@ -3818,6 +3822,7 @@ public class Vpn {
          * consistency of the Ikev2VpnRunner fields.
          */
         public void onDefaultNetworkLost(@NonNull Network network) {
+            mEventChanges.log("[UnderlyingNW] Network lost " + network);
             // If the default network is torn down, there is no need to call
             // startOrMigrateIkeSession() since it will always check if there is an active network
             // can be used or not.
@@ -3936,6 +3941,8 @@ public class Vpn {
          * consistency of the Ikev2VpnRunner fields.
          */
         public void onSessionLost(int token, @Nullable Exception exception) {
+            mEventChanges.log("[IKE] Session lost on network " + mActiveNetwork
+                    + (null == exception ? "" : " reason " + exception.getMessage()));
             Log.d(TAG, "onSessionLost() called for token " + token);
 
             if (!isActiveToken(token)) {
@@ -4092,6 +4099,7 @@ public class Vpn {
          * consistency of the Ikev2VpnRunner fields.
          */
         private void disconnectVpnRunner() {
+            mEventChanges.log("[VPNRunner] Disconnect runner, underlying network" + mActiveNetwork);
             mActiveNetwork = null;
             mUnderlyingNetworkCapabilities = null;
             mUnderlyingLinkProperties = null;
