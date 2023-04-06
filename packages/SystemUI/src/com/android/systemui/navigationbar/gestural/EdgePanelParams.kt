@@ -35,7 +35,7 @@ data class EdgePanelParams(private var resources: Resources) {
     data class BackIndicatorDimens(
             val horizontalTranslation: Float? = 0f,
             val scale: Float = 0f,
-            val scalePivotX: Float = 0f,
+            val scalePivotX: Float? = null,
             val arrowDimens: ArrowDimens,
             val backgroundDimens: BackgroundDimens,
             val verticalTranslationSpring: SpringForce? = null,
@@ -203,7 +203,8 @@ data class EdgePanelParams(private var resources: Resources) {
                 horizontalTranslation = getDimen(R.dimen.navigation_edge_active_margin),
                 scale = getDimenFloat(R.dimen.navigation_edge_active_scale),
                 horizontalTranslationSpring = entryActiveHorizontalTranslationSpring,
-                scaleSpring = createSpring(450f, 0.415f),
+                scaleSpring = createSpring(450f, 0.39f),
+                scalePivotX = getDimen(R.dimen.navigation_edge_active_background_width),
                 arrowDimens = ArrowDimens(
                         length = getDimen(R.dimen.navigation_edge_active_arrow_length),
                         height = getDimen(R.dimen.navigation_edge_active_arrow_height),
@@ -258,6 +259,7 @@ data class EdgePanelParams(private var resources: Resources) {
 
         committedIndicator = activeIndicator.copy(
                 horizontalTranslation = null,
+                scalePivotX = null,
                 arrowDimens = activeIndicator.arrowDimens.copy(
                         lengthSpring = activeCommittedArrowLengthSpring,
                         heightSpring = activeCommittedArrowHeightSpring,
