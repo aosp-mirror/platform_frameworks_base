@@ -25,8 +25,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.app.Activity;
 import android.compat.testing.PlatformCompatChangeRule;
 import android.os.Bundle;
-import android.platform.test.annotations.IwTest;
-import android.platform.test.annotations.Postsubmit;
+import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.util.PollingCheck;
 import android.view.View;
@@ -60,7 +59,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @RunWith(AndroidJUnit4.class)
 @LargeTest
-@Postsubmit
+@Presubmit
 public class FontScaleConverterActivityTest {
     @Rule
     public ActivityScenarioRule<TestActivity> rule = new ActivityScenarioRule<>(TestActivity.class);
@@ -85,7 +84,6 @@ public class FontScaleConverterActivityTest {
         }
     }
 
-    @IwTest(focusArea = "accessibility")
     @Test
     public void testFontsScaleNonLinearly() {
         final ActivityScenario<TestActivity> scenario = rule.getScenario();
@@ -116,7 +114,6 @@ public class FontScaleConverterActivityTest {
         )));
     }
 
-    @IwTest(focusArea = "accessibility")
     @Test
     public void testOnConfigurationChanged_doesNotCrash() {
         final ActivityScenario<TestActivity> scenario = rule.getScenario();
@@ -130,7 +127,6 @@ public class FontScaleConverterActivityTest {
         });
     }
 
-    @IwTest(focusArea = "accessibility")
     @Test
     public void testUpdateConfiguration_doesNotCrash() {
         final ActivityScenario<TestActivity> scenario = rule.getScenario();
