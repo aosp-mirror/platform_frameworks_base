@@ -357,12 +357,16 @@ public final class MediaProjectionManagerService extends SystemService
         } catch (NameNotFoundException e) {
             throw new IllegalArgumentException("No package matching :" + packageName);
         }
-
-        projection = new MediaProjection(type, uid, packageName, ai.targetSdkVersion,
-                ai.isPrivilegedApp());
-        if (isPermanentGrant) {
-            mAppOps.setMode(AppOpsManager.OP_PROJECT_MEDIA,
-                    projection.uid, projection.packageName, AppOpsManager.MODE_ALLOWED);
+        final long callingToken = Binder.clearCallingIdentity();
+        try {
+            projection = new MediaProjection(type, uid, packageName, ai.targetSdkVersion,
+                    ai.isPrivilegedApp());
+            if (isPermanentGrant) {
+                mAppOps.setMode(AppOpsManager.OP_PROJECT_MEDIA,
+                        projection.uid, projection.packageName, AppOpsManager.MODE_ALLOWED);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
         }
         return projection;
     }
@@ -418,16 +422,9 @@ public final class MediaProjectionManagerService extends SystemService
             if (packageName == null || packageName.isEmpty()) {
                 throw new IllegalArgumentException("package name must not be empty");
             }
-            MediaProjection projection;
             final UserHandle callingUser = Binder.getCallingUserHandle();
-            final long callingToken = Binder.clearCallingIdentity();
-            try {
-                projection = createProjectionInternal(uid, packageName, type, isPermanentGrant,
-                        callingUser, false);
-            } finally {
-                Binder.restoreCallingIdentity(callingToken);
-            }
-            return projection;
+            return createProjectionInternal(uid, packageName, type, isPermanentGrant,
+                    callingUser, false);
         }
 
         @Override // Binder call
