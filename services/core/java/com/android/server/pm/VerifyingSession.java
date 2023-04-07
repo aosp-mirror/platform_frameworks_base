@@ -361,7 +361,8 @@ final class VerifyingSession {
         }
         final int verifierUserId = verifierUser.getIdentifier();
 
-        List<String> requiredVerifierPackages = Arrays.asList(mPm.mRequiredVerifierPackages);
+        List<String> requiredVerifierPackages = new ArrayList<>(
+                Arrays.asList(mPm.mRequiredVerifierPackages));
         boolean requiredVerifierPackagesOverridden = false;
 
         // Allow verifier override for ADB installations which could already be unverified using
