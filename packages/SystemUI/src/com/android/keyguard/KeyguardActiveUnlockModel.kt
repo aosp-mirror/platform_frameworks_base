@@ -17,9 +17,9 @@
 package com.android.keyguard
 
 import android.annotation.CurrentTimeMillisLong
+import com.android.systemui.common.buffer.RingBuffer
 import com.android.systemui.dump.DumpsysTableLogger
 import com.android.systemui.dump.Row
-import com.android.systemui.plugins.util.RingBuffer
 
 /** Verbose debug information. */
 data class KeyguardActiveUnlockModel(

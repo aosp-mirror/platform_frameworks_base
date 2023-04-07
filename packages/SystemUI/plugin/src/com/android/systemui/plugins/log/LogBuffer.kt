@@ -18,7 +18,7 @@ package com.android.systemui.plugins.log
 
 import android.os.Trace
 import android.util.Log
-import com.android.systemui.plugins.util.RingBuffer
+import com.android.systemui.common.buffer.RingBuffer
 import com.google.errorprone.annotations.CompileTimeConstant
 import java.io.PrintWriter
 import java.util.concurrent.ArrayBlockingQueue
