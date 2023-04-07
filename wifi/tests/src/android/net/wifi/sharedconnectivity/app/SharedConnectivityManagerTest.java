@@ -105,6 +105,13 @@ public class SharedConnectivityManagerTest {
     }
 
     @Test
+    public void resourceStringsAreEmpty_createShouldReturnNull() {
+        when(mResources.getString(anyInt())).thenReturn("");
+
+        assertThat(SharedConnectivityManager.create(mContext)).isNull();
+    }
+
+    @Test
     public void bindingToServiceOnFirstCallbackRegistration() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.registerCallback(mExecutor, mClientCallback);
