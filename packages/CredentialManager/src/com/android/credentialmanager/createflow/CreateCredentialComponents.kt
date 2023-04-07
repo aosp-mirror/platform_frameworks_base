@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.filled.Add
@@ -67,6 +66,7 @@ import com.android.credentialmanager.common.ui.SheetContainerCard
 import com.android.credentialmanager.common.ui.PasskeyBenefitRow
 import com.android.credentialmanager.common.ui.HeadlineText
 import com.android.credentialmanager.logging.CreateCredentialEvent
+import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 import com.android.internal.logging.UiEventLogger.UiEventEnum
 
 @Composable
@@ -559,7 +559,7 @@ fun CreationSelectionCard(
             item {
                 Divider(
                     thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant,
+                    color = LocalAndroidColorScheme.current.colorOutlineVariant,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
             }

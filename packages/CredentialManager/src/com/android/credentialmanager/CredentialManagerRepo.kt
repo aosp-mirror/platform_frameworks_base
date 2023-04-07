@@ -65,8 +65,8 @@ class CredentialManagerRepo(
         )
 
         val originName: String? = when (requestInfo?.type) {
-            RequestInfo.TYPE_CREATE -> requestInfo?.createCredentialRequest?.origin
-            RequestInfo.TYPE_GET -> requestInfo?.getCredentialRequest?.origin
+            RequestInfo.TYPE_CREATE -> requestInfo.createCredentialRequest?.origin
+            RequestInfo.TYPE_GET -> requestInfo.getCredentialRequest?.origin
             else -> null
         }
 
