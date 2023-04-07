@@ -9762,6 +9762,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * directly with keeping its record.
      */
     void restartProcessIfVisible() {
+        if (finishing) return;
         Slog.i(TAG, "Request to restart process of " + this);
 
         // Reset the existing override configuration so it can be updated according to the latest
