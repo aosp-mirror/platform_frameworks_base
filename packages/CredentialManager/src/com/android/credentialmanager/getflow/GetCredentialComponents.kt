@@ -34,11 +34,15 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.CredentialSelectorViewModel
@@ -158,6 +162,7 @@ fun PrimarySelectionCard(
     onMoreOptionSelected: () -> Unit,
     onLog: @Composable (UiEventEnum) -> Unit,
 ) {
+    val showMoreForTruncatedEntry = remember { mutableStateOf(false) }
     val sortedUserNameToCredentialEntryList =
         providerDisplayInfo.sortedUserNameToCredentialEntryList
     val authenticationEntryList = providerDisplayInfo.authenticationEntryList
@@ -209,6 +214,8 @@ fun PrimarySelectionCard(
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     val usernameForCredentialSize = sortedUserNameToCredentialEntryList.size
                     val authenticationEntrySize = authenticationEntryList.size
+                    // If true, render a view more button for the single truncated entry on the
+                    // front page.
                     // Show max 4 entries in this primary page
                     if (usernameForCredentialSize + authenticationEntrySize <= 4) {
                         sortedUserNameToCredentialEntryList.forEach {
@@ -216,6 +223,9 @@ fun PrimarySelectionCard(
                                 credentialEntryInfo = it.sortedCredentialEntryList.first(),
                                 onEntrySelected = onEntrySelected,
                                 enforceOneLine = true,
+                                onTextLayout = {
+                                    showMoreForTruncatedEntry.value = it.hasVisualOverflow
+                                }
                             )
                         }
                         authenticationEntryList.forEach {
@@ -266,6 +276,13 @@ fun PrimarySelectionCard(
                     {
                         ActionButton(
                             stringResource(R.string.get_dialog_title_sign_in_options),
+                            onMoreOptionSelected
+                        )
+                    }
+                } else if (showMoreForTruncatedEntry.value) {
+                    {
+                        ActionButton(
+                            stringResource(R.string.button_label_view_more),
                             onMoreOptionSelected
                         )
                     }
@@ -438,6 +455,7 @@ fun CredentialEntryRow(
     credentialEntryInfo: CredentialEntryInfo,
     onEntrySelected: (BaseEntry) -> Unit,
     enforceOneLine: Boolean = false,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
     Entry(
         onClick = { onEntrySelected(credentialEntryInfo) },
@@ -463,6 +481,7 @@ fun CredentialEntryRow(
             )
         },
         enforceOneLine = enforceOneLine,
+        onTextLayout = onTextLayout,
     )
 }
 
