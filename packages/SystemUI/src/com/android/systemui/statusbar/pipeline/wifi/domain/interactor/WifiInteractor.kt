@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.domain.interactor
 
-import android.net.wifi.WifiManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
@@ -76,7 +75,7 @@ constructor(
                     when {
                         info.isPasspointAccessPoint || info.isOnlineSignUpForPasspointAccessPoint ->
                             info.passpointProviderFriendlyName
-                        info.ssid != WifiManager.UNKNOWN_SSID -> info.ssid
+                        info.hasValidSsid() -> info.ssid
                         else -> null
                     }
             }

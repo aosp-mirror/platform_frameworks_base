@@ -29,6 +29,7 @@ import android.net.vcn.VcnTransportInfo
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.TrafficStateCallback
+import android.net.wifi.WifiManager.UNKNOWN_SSID
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -1086,6 +1087,149 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
             job1.cancel()
             job2.cancel()
+        }
+
+    @Test
+    fun isWifiConnectedWithValidSsid_inactiveNetwork_false() =
+        testScope.runTest {
+            val job = underTest.wifiNetwork.launchIn(this)
+
+            val wifiInfo =
+                mock<WifiInfo>().apply {
+                    whenever(this.ssid).thenReturn(SSID)
+                    // A non-primary network is inactive
+                    whenever(this.isPrimary).thenReturn(false)
+                }
+
+            getNetworkCallback()
+                .onCapabilitiesChanged(NETWORK, createWifiNetworkCapabilities(wifiInfo))
+
+            assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isWifiConnectedWithValidSsid_carrierMergedNetwork_false() =
+        testScope.runTest {
+            val job = underTest.wifiNetwork.launchIn(this)
+
+            val wifiInfo =
+                mock<WifiInfo>().apply {
+                    whenever(this.isPrimary).thenReturn(true)
+                    whenever(this.isCarrierMerged).thenReturn(true)
+                }
+
+            getNetworkCallback()
+                .onCapabilitiesChanged(NETWORK, createWifiNetworkCapabilities(wifiInfo))
+
+            assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isWifiConnectedWithValidSsid_invalidNetwork_false() =
+        testScope.runTest {
+            val job = underTest.wifiNetwork.launchIn(this)
+
+            val wifiInfo =
+                mock<WifiInfo>().apply {
+                    whenever(this.isPrimary).thenReturn(true)
+                    whenever(this.isCarrierMerged).thenReturn(true)
+                    whenever(this.subscriptionId).thenReturn(INVALID_SUBSCRIPTION_ID)
+                }
+
+            getNetworkCallback()
+                .onCapabilitiesChanged(
+                    NETWORK,
+                    createWifiNetworkCapabilities(wifiInfo),
+                )
+
+            assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isWifiConnectedWithValidSsid_activeNetwork_nullSsid_false() =
+        testScope.runTest {
+            val job = underTest.wifiNetwork.launchIn(this)
+
+            val wifiInfo =
+                mock<WifiInfo>().apply {
+                    whenever(this.isPrimary).thenReturn(true)
+                    whenever(this.ssid).thenReturn(null)
+                }
+
+            getNetworkCallback()
+                .onCapabilitiesChanged(NETWORK, createWifiNetworkCapabilities(wifiInfo))
+
+            assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isWifiConnectedWithValidSsid_activeNetwork_unknownSsid_false() =
+        testScope.runTest {
+            val job = underTest.wifiNetwork.launchIn(this)
+
+            val wifiInfo =
+                mock<WifiInfo>().apply {
+                    whenever(this.isPrimary).thenReturn(true)
+                    whenever(this.ssid).thenReturn(UNKNOWN_SSID)
+                }
+
+            getNetworkCallback()
+                .onCapabilitiesChanged(NETWORK, createWifiNetworkCapabilities(wifiInfo))
+
+            assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isWifiConnectedWithValidSsid_activeNetwork_validSsid_true() =
+        testScope.runTest {
+            val job = underTest.wifiNetwork.launchIn(this)
+
+            val wifiInfo =
+                mock<WifiInfo>().apply {
+                    whenever(this.isPrimary).thenReturn(true)
+                    whenever(this.ssid).thenReturn("FakeSsid")
+                }
+
+            getNetworkCallback()
+                .onCapabilitiesChanged(NETWORK, createWifiNetworkCapabilities(wifiInfo))
+
+            assertThat(underTest.isWifiConnectedWithValidSsid()).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isWifiConnectedWithValidSsid_activeToInactive_trueToFalse() =
+        testScope.runTest {
+            val job = underTest.wifiNetwork.launchIn(this)
+
+            // Start with active
+            val wifiInfo =
+                mock<WifiInfo>().apply {
+                    whenever(this.isPrimary).thenReturn(true)
+                    whenever(this.ssid).thenReturn("FakeSsid")
+                }
+            getNetworkCallback()
+                .onCapabilitiesChanged(NETWORK, createWifiNetworkCapabilities(wifiInfo))
+            assertThat(underTest.isWifiConnectedWithValidSsid()).isTrue()
+
+            // WHEN the network is lost
+            getNetworkCallback().onLost(NETWORK)
+
+            // THEN the isWifiConnected updates
+            assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
+
+            job.cancel()
         }
 
     @Test
