@@ -2585,7 +2585,7 @@ public final class Settings {
      * <p>
      * To start an activity with this intent, apps should set the wellbeing package explicitly in
      * the intent together with this action. The wellbeing package is defined in
-     * {@code com.android.internal.R.string.config_defaultWellbeingPackage}.
+     * {@code com.android.internal.R.string.config_systemWellbeing}.
      * <p>
      * Output: Nothing
      *
