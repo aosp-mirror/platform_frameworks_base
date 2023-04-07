@@ -1223,11 +1223,6 @@ public class Build {
          * Upside Down Cake.
          */
         public static final int UPSIDE_DOWN_CAKE = 34;
-
-        /**
-         * Vanilla Ice Cream.
-         */
-        public static final int VANILLA_ICE_CREAM = CUR_DEVELOPMENT;
     }
 
     /** The type of build, like "user" or "eng". */
