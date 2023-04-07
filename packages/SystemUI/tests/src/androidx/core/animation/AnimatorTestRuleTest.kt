@@ -30,7 +30,7 @@ import org.junit.runner.RunWith
 @RunWithLooper(setAsMainLooper = true)
 class AnimatorTestRuleTest : SysuiTestCase() {
 
-    @get:Rule val animatorTestRule = AnimatorTestRule2()
+    @get:Rule val animatorTestRule = AnimatorTestRule()
 
     @Test
     fun testA() {
