@@ -16,6 +16,10 @@
 
 package com.android.settingslib.fuelgauge;
 
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.ACTION_SAVER_MANUAL_ENABLED_REASON;
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.EXTRA_POWER_SAVE_MODE_MANUAL_ENABLED_REASON;
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.SaverManualEnabledReason;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -145,7 +149,8 @@ public class BatterySaverUtils {
                         && Global.getInt(cr, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0) == 0
                         && Secure.getInt(cr,
                         Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION, 0) == 0) {
-                    showAutoBatterySaverSuggestion(context, confirmationExtras);
+                    sendSystemUiBroadcast(context, ACTION_SHOW_AUTO_SAVER_SUGGESTION,
+                            confirmationExtras);
                 }
             }
 
@@ -175,21 +180,23 @@ public class BatterySaverUtils {
             // Already shown.
             return false;
         }
-        context.sendBroadcast(
-                getSystemUiBroadcast(ACTION_SHOW_START_SAVER_CONFIRMATION, extras));
+        sendSystemUiBroadcast(context, ACTION_SHOW_START_SAVER_CONFIRMATION, extras);
         return true;
     }
 
-    private static void showAutoBatterySaverSuggestion(Context context, Bundle extras) {
-        context.sendBroadcast(getSystemUiBroadcast(ACTION_SHOW_AUTO_SAVER_SUGGESTION, extras));
+    private static void recordBatterySaverEnabledReason(Context context,
+            @SaverManualEnabledReason int reason) {
+        final Bundle enabledReasonExtras = new Bundle(1);
+        enabledReasonExtras.putInt(EXTRA_POWER_SAVE_MODE_MANUAL_ENABLED_REASON, reason);
+        sendSystemUiBroadcast(context, ACTION_SAVER_MANUAL_ENABLED_REASON, enabledReasonExtras);
     }
 
-    private static Intent getSystemUiBroadcast(String action, Bundle extras) {
-        final Intent i = new Intent(action);
-        i.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        i.setPackage(SYSUI_PACKAGE);
-        i.putExtras(extras);
-        return i;
+    private static void sendSystemUiBroadcast(Context context, String action, Bundle extras) {
+        final Intent intent = new Intent(action);
+        intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.setPackage(SYSUI_PACKAGE);
+        intent.putExtras(extras);
+        context.sendBroadcast(intent);
     }
 
     private static void setBatterySaverConfirmationAcknowledged(Context context) {
