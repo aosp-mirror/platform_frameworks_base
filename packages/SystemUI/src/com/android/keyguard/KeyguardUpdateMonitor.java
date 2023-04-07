@@ -2867,7 +2867,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         || mGoingToSleep
                         || shouldListenForFingerprintAssistant
                         || (mKeyguardOccluded && mIsDreaming)
-                        || (mKeyguardOccluded && userDoesNotHaveTrust
+                        || (mKeyguardOccluded && userDoesNotHaveTrust && mKeyguardShowing
                             && (mOccludingAppRequestingFp || isUdfps || mAlternateBouncerShowing));
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
