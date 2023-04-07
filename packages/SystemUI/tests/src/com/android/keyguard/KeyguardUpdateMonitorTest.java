@@ -931,6 +931,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isFalse();
         verifyFingerprintAuthenticateNeverCalled();
         // WHEN alternate bouncer is shown
+        mKeyguardUpdateMonitor.setKeyguardShowing(true, true);
         mKeyguardUpdateMonitor.setAlternateBouncerShowing(true);
 
         // THEN make sure FP listening begins
@@ -2662,6 +2663,21 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 KeyguardUpdateMonitor.getCurrentUser())).isTrue();
     }
 
+    @Test
+    public void testFingerprintListeningStateWhenOccluded() {
+        when(mAuthController.isUdfpsSupported()).thenReturn(true);
+
+        mKeyguardUpdateMonitor.setKeyguardShowing(false, false);
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_BIOMETRIC);
+        mKeyguardUpdateMonitor.setKeyguardShowing(false, true);
+
+        verifyFingerprintAuthenticateNeverCalled();
+
+        mKeyguardUpdateMonitor.setKeyguardShowing(true, true);
+        mKeyguardUpdateMonitor.setAlternateBouncerShowing(true);
+
+        verifyFingerprintAuthenticateCall();
+    }
 
     private void verifyFingerprintAuthenticateNeverCalled() {
         verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), any());
