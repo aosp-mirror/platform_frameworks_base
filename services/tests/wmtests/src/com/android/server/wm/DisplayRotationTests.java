@@ -70,6 +70,7 @@ import android.view.IRotationWatcher;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.test.FakeSettingsProvider;
@@ -140,6 +141,8 @@ public class DisplayRotationTests {
 
     private DeviceStateController mDeviceStateController;
     private TestDisplayRotation mTarget;
+    @Nullable
+    private DisplayRotationImmersiveAppCompatPolicy mDisplayRotationImmersiveAppCompatPolicyMock;
 
     @BeforeClass
     public static void setUpOnce() {
@@ -165,7 +168,7 @@ public class DisplayRotationTests {
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
         mMockStatusBarManagerInternal = mock(StatusBarManagerInternal.class);
         LocalServices.addService(StatusBarManagerInternal.class, mMockStatusBarManagerInternal);
-
+        mDisplayRotationImmersiveAppCompatPolicyMock = null;
         mBuilder = new DisplayRotationBuilder();
     }
 
@@ -575,6 +578,38 @@ public class DisplayRotationTests {
         assertTrue(waitForUiHandler());
 
         verify(mMockStatusBarManagerInternal).onProposedRotationChanged(Surface.ROTATION_90, true);
+    }
+
+    @Test
+    public void testNotifiesChoiceWhenSensorUpdates_immersiveApp() throws Exception {
+        mDisplayRotationImmersiveAppCompatPolicyMock = mock(
+                DisplayRotationImmersiveAppCompatPolicy.class);
+        when(mDisplayRotationImmersiveAppCompatPolicyMock.isRotationLockEnforced(
+                Surface.ROTATION_90)).thenReturn(true);
+
+        mBuilder.build();
+        configureDisplayRotation(SCREEN_ORIENTATION_PORTRAIT, false, false);
+
+        thawRotation();
+
+        enableOrientationSensor();
+
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_90));
+        assertTrue(waitForUiHandler());
+
+        verify(mMockStatusBarManagerInternal).onProposedRotationChanged(Surface.ROTATION_90, true);
+
+        // An imaginary ActivityRecord.setRequestedOrientation call disables immersive mode:
+        when(mDisplayRotationImmersiveAppCompatPolicyMock.isRotationLockEnforced(
+                Surface.ROTATION_90)).thenReturn(false);
+
+        // And then ActivityRecord.setRequestedOrientation calls onSetRequestedOrientation.
+        mTarget.onSetRequestedOrientation();
+
+        // onSetRequestedOrientation should lead to a second call to
+        // mOrientationListener.onProposedRotationChanged
+        // but now, instead of notifying mMockStatusBarManagerInternal, it calls updateRotation:
+        verify(sMockWm).updateRotation(false, false);
     }
 
     @Test
@@ -1404,7 +1439,7 @@ public class DisplayRotationTests {
         }
     }
 
-    private static class TestDisplayRotation extends DisplayRotation {
+    private class TestDisplayRotation extends DisplayRotation {
         IntConsumer mProposedRotationCallback;
 
         TestDisplayRotation(DisplayContent dc, DisplayAddress address, DisplayPolicy policy,
@@ -1417,7 +1452,7 @@ public class DisplayRotationTests {
         @Override
         DisplayRotationImmersiveAppCompatPolicy initImmersiveAppCompatPolicy(
                 WindowManagerService service, DisplayContent displayContent) {
-            return null;
+            return mDisplayRotationImmersiveAppCompatPolicyMock;
         }
 
         @Override
