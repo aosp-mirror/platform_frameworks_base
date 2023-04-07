@@ -28,7 +28,6 @@
 #include <SkMultiPictureDocument.h>
 #include <SkOverdrawCanvas.h>
 #include <SkOverdrawColorFilter.h>
-#include <SkPaintFilterCanvas.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
 #include <SkRect.h>
@@ -450,23 +449,6 @@ void SkiaPipeline::endCapture(SkSurface* surface) {
     }
 }
 
-class ForceDitherCanvas : public SkPaintFilterCanvas {
-public:
-    ForceDitherCanvas(SkCanvas* canvas) : SkPaintFilterCanvas(canvas) {}
-
-protected:
-    bool onFilter(SkPaint& paint) const override {
-        paint.setDither(true);
-        return true;
-    }
-
-    void onDrawDrawable(SkDrawable* drawable, const SkMatrix* matrix) override {
-        // We unroll the drawable using "this" canvas, so that draw calls contained inside will
-        // get dithering applied
-        drawable->draw(this, matrix);
-    }
-};
-
 void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,
                                const std::vector<sp<RenderNode>>& nodes, bool opaque,
                                const Rect& contentDrawBounds, sk_sp<SkSurface> surface,
@@ -519,12 +501,6 @@ void SkiaPipeline::renderFrameImpl(const SkRect& clip,
 
     if (!opaque) {
         canvas->clear(SK_ColorTRANSPARENT);
-    }
-
-    std::optional<ForceDitherCanvas> forceDitherCanvas;
-    if (shouldForceDither()) {
-        forceDitherCanvas.emplace(canvas);
-        canvas = &forceDitherCanvas.value();
     }
 
     if (1 == nodes.size()) {
