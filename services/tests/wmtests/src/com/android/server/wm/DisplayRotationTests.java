@@ -112,6 +112,7 @@ public class DisplayRotationTests {
 
     private static WindowManagerService sMockWm;
     private DisplayContent mMockDisplayContent;
+    private DisplayRotationReversionController mMockDisplayRotationReversionController;
     private DisplayPolicy mMockDisplayPolicy;
     private DisplayAddress mMockDisplayAddress;
     private Context mMockContext;
@@ -1367,6 +1368,10 @@ public class DisplayRotationTests {
             when(mMockContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_windowManagerHalfFoldAutoRotateOverride))
                     .thenReturn(mSupportHalfFoldAutoRotateOverride);
+            mMockDisplayRotationReversionController =
+                    mock(DisplayRotationReversionController.class);
+            when(mMockDisplayContent.getRotationReversionController())
+                        .thenReturn(mMockDisplayRotationReversionController);
 
             mMockResolver = mock(ContentResolver.class);
             when(mMockContext.getContentResolver()).thenReturn(mMockResolver);

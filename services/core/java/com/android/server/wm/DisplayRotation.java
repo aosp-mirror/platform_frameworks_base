@@ -34,6 +34,9 @@ import static com.android.server.wm.DisplayRotationProto.IS_FIXED_TO_USER_ROTATI
 import static com.android.server.wm.DisplayRotationProto.LAST_ORIENTATION;
 import static com.android.server.wm.DisplayRotationProto.ROTATION;
 import static com.android.server.wm.DisplayRotationProto.USER_ROTATION;
+import static com.android.server.wm.DisplayRotationReversionController.REVERSION_TYPE_CAMERA_COMPAT;
+import static com.android.server.wm.DisplayRotationReversionController.REVERSION_TYPE_HALF_FOLD;
+import static com.android.server.wm.DisplayRotationReversionController.REVERSION_TYPE_NOSENSOR;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_ACTIVE;
@@ -106,6 +109,9 @@ public class DisplayRotation {
         int mExit;
     }
 
+    @Nullable
+    final FoldController mFoldController;
+
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
     private final DisplayPolicy mDisplayPolicy;
@@ -127,8 +133,6 @@ public class DisplayRotation {
     private OrientationListener mOrientationListener;
     private StatusBarManagerInternal mStatusBarManagerInternal;
     private SettingsObserver mSettingsObserver;
-    @Nullable
-    private FoldController mFoldController;
     @NonNull
     private final DeviceStateController mDeviceStateController;
 
@@ -279,7 +283,11 @@ public class DisplayRotation {
             if (mSupportAutoRotation && mContext.getResources().getBoolean(
                     R.bool.config_windowManagerHalfFoldAutoRotateOverride)) {
                 mFoldController = new FoldController();
+            } else {
+                mFoldController = null;
             }
+        } else {
+            mFoldController = null;
         }
     }
 
@@ -335,6 +343,11 @@ public class DisplayRotation {
             // fall through
         }
         return -1;
+    }
+
+    @VisibleForTesting
+    boolean useDefaultSettingsProvider() {
+        return isDefaultDisplay;
     }
 
     /**
@@ -870,7 +883,7 @@ public class DisplayRotation {
     @VisibleForTesting
     void setUserRotation(int userRotationMode, int userRotation) {
         mRotationChoiceShownToUserForConfirmation = ROTATION_UNDEFINED;
-        if (isDefaultDisplay) {
+        if (useDefaultSettingsProvider()) {
             // We'll be notified via settings listener, so we don't need to update internal values.
             final ContentResolver res = mContext.getContentResolver();
             final int accelerometerRotation =
@@ -1814,7 +1827,7 @@ public class DisplayRotation {
                 return false;
             }
             if (mDeviceState == DeviceStateController.DeviceState.HALF_FOLDED) {
-                return !(isTabletop ^ mTabletopRotations.contains(mRotation));
+                return isTabletop == mTabletopRotations.contains(mRotation);
             }
             return true;
         }
@@ -1838,14 +1851,17 @@ public class DisplayRotation {
             return mDeviceState == DeviceStateController.DeviceState.OPEN
                     && !mShouldIgnoreSensorRotation // Ignore if the hinge angle still moving
                     && mInHalfFoldTransition
-                    && mHalfFoldSavedRotation != -1 // Ignore if we've already reverted.
+                    && mDisplayContent.getRotationReversionController().isOverrideActive(
+                        REVERSION_TYPE_HALF_FOLD)
                     && mUserRotationMode
-                    == WindowManagerPolicy.USER_ROTATION_LOCKED; // Ignore if we're unlocked.
+                        == WindowManagerPolicy.USER_ROTATION_LOCKED; // Ignore if we're unlocked.
         }
 
         int revertOverriddenRotation() {
             int savedRotation = mHalfFoldSavedRotation;
             mHalfFoldSavedRotation = -1;
+            mDisplayContent.getRotationReversionController()
+                    .revertOverride(REVERSION_TYPE_HALF_FOLD);
             mInHalfFoldTransition = false;
             return savedRotation;
         }
@@ -1865,6 +1881,8 @@ public class DisplayRotation {
                     && mDeviceState != DeviceStateController.DeviceState.HALF_FOLDED) {
                 // The device has transitioned to HALF_FOLDED state: save the current rotation and
                 // update the device rotation.
+                mDisplayContent.getRotationReversionController().beforeOverrideApplied(
+                        REVERSION_TYPE_HALF_FOLD);
                 mHalfFoldSavedRotation = mRotation;
                 mDeviceState = newState;
                 // Now mFoldState is set to HALF_FOLDED, the overrideFrozenRotation function will
@@ -2069,6 +2087,8 @@ public class DisplayRotation {
             final int mHalfFoldSavedRotation;
             final boolean mInHalfFoldTransition;
             final DeviceStateController.DeviceState mDeviceState;
+            @Nullable final boolean[] mRotationReversionSlots;
+
             @Nullable final String mDisplayRotationCompatPolicySummary;
 
             Record(DisplayRotation dr, int fromRotation, int toRotation) {
@@ -2109,6 +2129,8 @@ public class DisplayRotation {
                         ? null
                         : dc.mDisplayRotationCompatPolicy
                                 .getSummaryForDisplayRotationHistoryRecord();
+                mRotationReversionSlots =
+                        dr.mDisplayContent.getRotationReversionController().getSlotsCopy();
             }
 
             void dump(String prefix, PrintWriter pw) {
@@ -2133,6 +2155,12 @@ public class DisplayRotation {
                 }
                 if (mDisplayRotationCompatPolicySummary != null) {
                     pw.println(prefix + mDisplayRotationCompatPolicySummary);
+                }
+                if (mRotationReversionSlots != null) {
+                    pw.println(prefix + " reversionSlots= NOSENSOR "
+                            + mRotationReversionSlots[REVERSION_TYPE_NOSENSOR] + ", CAMERA "
+                            + mRotationReversionSlots[REVERSION_TYPE_CAMERA_COMPAT] + " HALF_FOLD "
+                            + mRotationReversionSlots[REVERSION_TYPE_HALF_FOLD]);
                 }
             }
         }
