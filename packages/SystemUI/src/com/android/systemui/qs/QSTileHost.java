@@ -37,8 +37,9 @@ import com.android.systemui.ProtoDumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.nano.SystemUIProtoDump;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.qs.QSFactory;
@@ -48,9 +49,10 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.external.CustomTileStatePersister;
 import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServiceKey;
-import com.android.systemui.qs.external.TileServiceRequestController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.nano.QsTileState;
+import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.settings.UserFileManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.AutoTileManager;
@@ -85,7 +87,8 @@ import javax.inject.Provider;
  * This class also provides the interface for adding/removing/changing tiles.
  */
 @SysUISingleton
-public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, ProtoDumpable {
+public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, ProtoDumpable,
+        PanelInteractor, CustomTileAddedRepository {
     private static final String TAG = "QSTileHost";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final int MAX_QS_INSTANCE_ID = 1 << 20;
@@ -99,7 +102,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
     private final ArrayList<String> mTileSpecs = new ArrayList<>();
     private final TunerService mTunerService;
     private final PluginManager mPluginManager;
-    private final DumpManager mDumpManager;
     private final QSLogger mQSLogger;
     private final UiEventLogger mUiEventLogger;
     private final InstanceIdSequence mInstanceIdSequence;
@@ -122,8 +124,9 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
     // This is enforced by only cleaning the flag at the end of a successful run of #onTuningChanged
     private boolean mTilesListDirty = true;
 
-    private final TileServiceRequestController mTileServiceRequestController;
     private TileLifecycleManager.Factory mTileLifeCycleManagerFactory;
+
+    private final FeatureFlags mFeatureFlags;
 
     @Inject
     public QSTileHost(Context context,
@@ -132,35 +135,32 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             PluginManager pluginManager,
             TunerService tunerService,
             Provider<AutoTileManager> autoTiles,
-            DumpManager dumpManager,
             Optional<CentralSurfaces> centralSurfacesOptional,
             QSLogger qsLogger,
             UiEventLogger uiEventLogger,
             UserTracker userTracker,
             SecureSettings secureSettings,
             CustomTileStatePersister customTileStatePersister,
-            TileServiceRequestController.Builder tileServiceRequestControllerBuilder,
             TileLifecycleManager.Factory tileLifecycleManagerFactory,
-            UserFileManager userFileManager
+            UserFileManager userFileManager,
+            FeatureFlags featureFlags
     ) {
         mContext = context;
         mUserContext = context;
         mTunerService = tunerService;
         mPluginManager = pluginManager;
-        mDumpManager = dumpManager;
         mQSLogger = qsLogger;
         mUiEventLogger = uiEventLogger;
         mMainExecutor = mainExecutor;
-        mTileServiceRequestController = tileServiceRequestControllerBuilder.create(this);
         mTileLifeCycleManagerFactory = tileLifecycleManagerFactory;
         mUserFileManager = userFileManager;
+        mFeatureFlags = featureFlags;
 
         mInstanceIdSequence = new InstanceIdSequence(MAX_QS_INSTANCE_ID);
         mCentralSurfacesOptional = centralSurfacesOptional;
 
         mQsFactories.add(defaultFactory);
         pluginManager.addPluginListener(this, QSFactory.class, true);
-        mDumpManager.registerDumpable(TAG, this);
         mUserTracker = userTracker;
         mSecureSettings = secureSettings;
         mCustomTileStatePersister = customTileStatePersister;
@@ -172,7 +172,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             tunerService.addTunable(this, TILES_SETTING);
             // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
             mAutoTiles = autoTiles.get();
-            mTileServiceRequestController.init();
         });
     }
 
@@ -186,8 +185,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         mAutoTiles.destroy();
         mTunerService.removeTunable(this);
         mPluginManager.removePluginListener(this);
-        mDumpManager.unregisterDumpable(TAG);
-        mTileServiceRequestController.destroy();
     }
 
     @Override
@@ -298,6 +295,10 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
     @Override
     public void onTuningChanged(String key, String newValue) {
         if (!TILES_SETTING.equals(key)) {
+            return;
+        }
+        // Do not process tiles if the flag is enabled.
+        if (mFeatureFlags.isEnabled(Flags.QS_PIPELINE_NEW_HOST)) {
             return;
         }
         if (newValue == null && UserManager.isDeviceInDemoMode(mContext)) {
