@@ -648,9 +648,6 @@ object Flags {
     val APP_PANELS_REMOVE_APPS_ALLOWED =
         unreleasedFlag(2003, "app_panels_remove_apps_allowed", teamfood = true)
 
-    // 2100 - Falsing Manager
-    @JvmField val FALSING_FOR_LONG_TAPS = releasedFlag(2100, "falsing_for_long_taps")
-
     // 2200 - udfps
     // TODO(b/259264861): Tracking Bug
     @JvmField val UDFPS_NEW_TOUCH_DETECTION = releasedFlag(2200, "udfps_new_touch_detection")
