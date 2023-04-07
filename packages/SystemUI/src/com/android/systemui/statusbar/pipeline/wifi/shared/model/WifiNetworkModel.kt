@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.shared.model
 
+import android.net.wifi.WifiManager.UNKNOWN_SSID
 import android.telephony.SubscriptionManager
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.log.table.Diffable
@@ -221,6 +222,11 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             require(level in MIN_VALID_LEVEL..MAX_VALID_LEVEL) {
                 "0 <= wifi level <= 4 required; level was $level"
             }
+        }
+
+        /** Returns true if this network has a valid SSID and false otherwise. */
+        fun hasValidSsid(): Boolean {
+            return ssid != null && ssid != UNKNOWN_SSID
         }
 
         override fun logDiffs(prevVal: WifiNetworkModel, row: TableRowLogger) {
