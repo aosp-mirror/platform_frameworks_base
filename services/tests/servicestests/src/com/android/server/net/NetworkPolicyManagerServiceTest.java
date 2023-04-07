@@ -148,6 +148,7 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionPlan;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.text.TextUtils;
@@ -236,6 +237,7 @@ public class NetworkPolicyManagerServiceTest {
     private static final String TEST_WIFI_NETWORK_KEY = "TestWifiNetworkKey";
     private static final String TEST_IMSI = "310210";
     private static final int TEST_SUB_ID = 42;
+    private static final int TEST_SUB_ID2 = 24;
     private static final Network TEST_NETWORK = mock(Network.class, CALLS_REAL_METHODS);
 
     private static NetworkTemplate sTemplateWifi = new NetworkTemplate.Builder(MATCH_WIFI)
@@ -276,6 +278,8 @@ public class NetworkPolicyManagerServiceTest {
 
     private ArgumentCaptor<ConnectivityManager.NetworkCallback> mNetworkCallbackCaptor =
             ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
+
+    private TelephonyCallback.ActiveDataSubscriptionIdListener mActiveDataSubIdListener;
 
     private ActivityManagerInternal mActivityManagerInternal;
     private PackageManagerInternal mPackageManagerInternal;
@@ -350,6 +354,8 @@ public class NetworkPolicyManagerServiceTest {
 
     private class TestDependencies extends NetworkPolicyManagerService.Dependencies {
         private final SparseArray<NetworkStats.Bucket> mMockedStats = new SparseArray<>();
+        private int mMockDefaultDataSubId;
+        private int mMockedActiveDataSubId;
 
         TestDependencies(Context context) {
             super(context);
@@ -386,6 +392,21 @@ public class NetworkPolicyManagerServiceTest {
         private void increaseMockedTotalBytes(int uid, long rxBytes, long txBytes) {
             final NetworkStats.Bucket bucket = mMockedStats.get(uid);
             setMockedTotalBytes(uid, bucket.getRxBytes() + rxBytes, bucket.getTxBytes() + txBytes);
+        }
+
+        void setDefaultAndActiveDataSubId(int defaultDataSubId, int activeDataSubId) {
+            mMockDefaultDataSubId = defaultDataSubId;
+            mMockedActiveDataSubId = activeDataSubId;
+        }
+
+        @Override
+        int getDefaultDataSubId() {
+            return mMockDefaultDataSubId;
+        }
+
+        @Override
+        int getActivateDataSubId() {
+            return mMockedActiveDataSubId;
         }
     }
 
@@ -529,6 +550,14 @@ public class NetworkPolicyManagerServiceTest {
         NetworkPolicy defaultPolicy = mService.buildDefaultCarrierPolicy(0, "");
         mDefaultWarningBytes = defaultPolicy.warningBytes;
         mDefaultLimitBytes = defaultPolicy.limitBytes;
+
+        // Catch TelephonyCallback during systemReady().
+        ArgumentCaptor<TelephonyCallback> telephonyCallbackArgumentCaptor =
+                ArgumentCaptor.forClass(TelephonyCallback.class);
+        verify(mTelephonyManager).registerTelephonyCallback(any(),
+                telephonyCallbackArgumentCaptor.capture());
+        mActiveDataSubIdListener = (TelephonyCallback.ActiveDataSubscriptionIdListener)
+                telephonyCallbackArgumentCaptor.getValue();
     }
 
     @After
@@ -1214,6 +1243,7 @@ public class NetworkPolicyManagerServiceTest {
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
+            clearInvocations(mNotifManager);
 
             mService.updateNetworks();
 
@@ -1229,6 +1259,7 @@ public class NetworkPolicyManagerServiceTest {
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
+            clearInvocations(mNotifManager);
 
             mService.updateNetworks();
 
@@ -1246,6 +1277,7 @@ public class NetworkPolicyManagerServiceTest {
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
             expectDefaultCarrierConfig();
+            clearInvocations(mNotifManager);
 
             mService.updateNetworks();
 
@@ -1262,6 +1294,7 @@ public class NetworkPolicyManagerServiceTest {
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
+            clearInvocations(mNotifManager);
 
             mService.updateNetworks();
 
@@ -1275,6 +1308,7 @@ public class NetworkPolicyManagerServiceTest {
         {
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
+            clearInvocations(mNotifManager);
 
             mService.snoozeLimit(sTemplateCarrierMetered);
             mService.updateNetworks();
@@ -1282,6 +1316,31 @@ public class NetworkPolicyManagerServiceTest {
             verify(tmSub, atLeastOnce()).setPolicyDataEnabled(true);
             verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(TEST_IFACE,
                     Long.MAX_VALUE);
+            verify(mNotifManager, atLeastOnce()).notifyAsUser(any(), eq(TYPE_LIMIT_SNOOZED),
+                    isA(Notification.class), eq(UserHandle.ALL));
+        }
+        // The sub is no longer used for data(e.g. user uses another sub), hide the notifications.
+        {
+            reset(mTelephonyManager, mNetworkManager, mNotifManager);
+
+            notifyDefaultAndActiveDataSubIdChange(TEST_SUB_ID2, TEST_SUB_ID2);
+            verify(mNotifManager, atLeastOnce()).cancel(any(), eq(TYPE_LIMIT_SNOOZED));
+        }
+        // The sub is not active for data(e.g. due to auto data switch), but still default for data,
+        // show notification.
+        {
+            reset(mTelephonyManager, mNetworkManager, mNotifManager);
+
+            notifyDefaultAndActiveDataSubIdChange(TEST_SUB_ID, TEST_SUB_ID2);
+            verify(mNotifManager, atLeastOnce()).notifyAsUser(any(), eq(TYPE_LIMIT_SNOOZED),
+                    isA(Notification.class), eq(UserHandle.ALL));
+        }
+        // The sub is active for data, but not the default(e.g. due to auto data switch),
+        // show notification.
+        {
+            reset(mTelephonyManager, mNetworkManager, mNotifManager);
+
+            notifyDefaultAndActiveDataSubIdChange(TEST_SUB_ID2, TEST_SUB_ID);
             verify(mNotifManager, atLeastOnce()).notifyAsUser(any(), eq(TYPE_LIMIT_SNOOZED),
                     isA(Notification.class), eq(UserHandle.ALL));
         }
@@ -2348,6 +2407,7 @@ public class NetworkPolicyManagerServiceTest {
             String subscriberId) {
         when(mSubscriptionManager.getActiveSubscriptionInfoList()).thenReturn(
                 createSubscriptionInfoList(subscriptionId));
+        notifyDefaultAndActiveDataSubIdChange(subscriptionId, subscriptionId);
 
         TelephonyManager subTelephonyManager;
         subTelephonyManager = mock(TelephonyManager.class);
@@ -2356,6 +2416,16 @@ public class NetworkPolicyManagerServiceTest {
         when(mTelephonyManager.createForSubscriptionId(subscriptionId))
                 .thenReturn(subTelephonyManager);
         return subTelephonyManager;
+    }
+
+    /**
+     * Telephony Manager callback notifies data sub Id changes.
+     * @param defaultDataSubId The mock default data sub Id.
+     * @param activeDataSubId The mock active data sub Id.
+     */
+    private void notifyDefaultAndActiveDataSubIdChange(int defaultDataSubId, int activeDataSubId) {
+        mDeps.setDefaultAndActiveDataSubId(defaultDataSubId, activeDataSubId);
+        mActiveDataSubIdListener.onActiveDataSubscriptionIdChanged(activeDataSubId);
     }
 
     /**
