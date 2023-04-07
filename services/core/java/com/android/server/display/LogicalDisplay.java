@@ -175,11 +175,11 @@ final class LogicalDisplay {
     private boolean mDirty = false;
 
     /**
-     * The ID of the brightness throttling data that should be used. This can change e.g. in
-     * concurrent displays mode in which a stricter brightness throttling policy might need to be
-     * used.
+     * The ID of the thermal brightness throttling data that should be used. This can change e.g.
+     * in concurrent displays mode in which a stricter brightness throttling policy might need to
+     * be used.
      */
-    private String mBrightnessThrottlingDataId;
+    private String mThermalBrightnessThrottlingDataId;
 
     public LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
         mDisplayId = displayId;
@@ -189,7 +189,7 @@ final class LogicalDisplay {
         mTempFrameRateOverride = new SparseArray<>();
         mIsEnabled = true;
         mIsInTransition = false;
-        mBrightnessThrottlingDataId = DisplayDeviceConfig.DEFAULT_ID;
+        mThermalBrightnessThrottlingDataId = DisplayDeviceConfig.DEFAULT_ID;
     }
 
     public void setDevicePositionLocked(int position) {
@@ -349,7 +349,7 @@ final class LogicalDisplay {
      *
      * @param refreshRanges new refreshRateThermalThrottling ranges limited by layout or default
      */
-    public void updateRefreshRateThermalThrottling(
+    public void updateThermalRefreshRateThrottling(
             @Nullable SparseArray<SurfaceControl.RefreshRateRange> refreshRanges) {
         if (refreshRanges == null) {
             refreshRanges = new SparseArray<>();
@@ -872,16 +872,16 @@ final class LogicalDisplay {
     /**
      * @return The ID of the brightness throttling data that this display should use.
      */
-    public String getBrightnessThrottlingDataIdLocked() {
-        return mBrightnessThrottlingDataId;
+    public String getThermalBrightnessThrottlingDataIdLocked() {
+        return mThermalBrightnessThrottlingDataId;
     }
 
     /**
      * @param brightnessThrottlingDataId The ID of the brightness throttling data that this
      *                                  display should use.
      */
-    public void setBrightnessThrottlingDataIdLocked(String brightnessThrottlingDataId) {
-        mBrightnessThrottlingDataId =
+    public void setThermalBrightnessThrottlingDataIdLocked(String brightnessThrottlingDataId) {
+        mThermalBrightnessThrottlingDataId =
                 brightnessThrottlingDataId;
     }
 
@@ -950,7 +950,7 @@ final class LogicalDisplay {
         pw.println("mFrameRateOverrides=" + Arrays.toString(mFrameRateOverrides));
         pw.println("mPendingFrameRateOverrideUids=" + mPendingFrameRateOverrideUids);
         pw.println("mDisplayGroupName=" + mDisplayGroupName);
-        pw.println("mBrightnessThrottlingDataId=" + mBrightnessThrottlingDataId);
+        pw.println("mThermalBrightnessThrottlingDataId=" + mThermalBrightnessThrottlingDataId);
         pw.println("mLeadDisplayId=" + mLeadDisplayId);
     }
 

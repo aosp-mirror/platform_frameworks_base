@@ -383,6 +383,7 @@ public class NotificationUsageStats {
         public int numWithBigText;
         public int numWithBigPicture;
         public int numForegroundService;
+        public int numUserInitiatedJob;
         public int numOngoing;
         public int numAutoCancel;
         public int numWithLargeIcon;
@@ -431,6 +432,10 @@ public class NotificationUsageStats {
 
             if ((n.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
                 numForegroundService++;
+            }
+
+            if ((n.flags & Notification.FLAG_USER_INITIATED_JOB) != 0) {
+                numUserInitiatedJob++;
             }
 
             if ((n.flags & Notification.FLAG_ONGOING_EVENT) != 0) {
@@ -516,6 +521,7 @@ public class NotificationUsageStats {
             maybeCount("note_big_text", (numWithBigText - previous.numWithBigText));
             maybeCount("note_big_pic", (numWithBigPicture - previous.numWithBigPicture));
             maybeCount("note_fg", (numForegroundService - previous.numForegroundService));
+            maybeCount("note_uij", (numUserInitiatedJob - previous.numUserInitiatedJob));
             maybeCount("note_ongoing", (numOngoing - previous.numOngoing));
             maybeCount("note_auto", (numAutoCancel - previous.numAutoCancel));
             maybeCount("note_large_icon", (numWithLargeIcon - previous.numWithLargeIcon));
@@ -550,6 +556,7 @@ public class NotificationUsageStats {
             previous.numWithBigText = numWithBigText;
             previous.numWithBigPicture = numWithBigPicture;
             previous.numForegroundService = numForegroundService;
+            previous.numUserInitiatedJob = numUserInitiatedJob;
             previous.numOngoing = numOngoing;
             previous.numAutoCancel = numAutoCancel;
             previous.numWithLargeIcon = numWithLargeIcon;
@@ -645,6 +652,8 @@ public class NotificationUsageStats {
             output.append(indentPlusTwo);
             output.append("numForegroundService=").append(numForegroundService).append("\n");
             output.append(indentPlusTwo);
+            output.append("numUserInitiatedJob=").append(numUserInitiatedJob).append("\n");
+            output.append(indentPlusTwo);
             output.append("numOngoing=").append(numOngoing).append("\n");
             output.append(indentPlusTwo);
             output.append("numAutoCancel=").append(numAutoCancel).append("\n");
@@ -701,6 +710,7 @@ public class NotificationUsageStats {
             maybePut(dump, "numWithBigText", numWithBigText);
             maybePut(dump, "numWithBigPicture", numWithBigPicture);
             maybePut(dump, "numForegroundService", numForegroundService);
+            maybePut(dump, "numUserInitiatedJob", numUserInitiatedJob);
             maybePut(dump, "numOngoing", numOngoing);
             maybePut(dump, "numAutoCancel", numAutoCancel);
             maybePut(dump, "numWithLargeIcon", numWithLargeIcon);

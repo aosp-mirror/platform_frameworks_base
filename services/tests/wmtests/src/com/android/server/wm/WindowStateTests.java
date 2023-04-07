@@ -691,6 +691,7 @@ public class WindowStateTests extends WindowTestsBase {
         // Child window without scale (e.g. different app) should apply inverse scale of parent.
         doReturn(1f).when(cmp).getCompatScale(anyString(), anyInt());
         final WindowState child2 = createWindow(w, TYPE_APPLICATION_SUB_PANEL, "child2");
+        makeWindowVisible(w, child2);
         clearInvocations(t);
         child2.prepareSurfaces();
         verify(t).setMatrix(child2.mSurfaceControl, w.mInvGlobalScale, 0, 0, w.mInvGlobalScale);

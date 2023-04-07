@@ -18,8 +18,8 @@ package com.android.systemui.dreams.complication;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -29,23 +29,45 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Collection;
 import java.util.HashSet;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class ComplicationCollectionLiveDataTest extends SysuiTestCase {
+
+    private FakeExecutor mExecutor;
+    private DreamOverlayStateController mStateController;
+    private ComplicationCollectionLiveData mLiveData;
+    private FakeFeatureFlags mFeatureFlags;
+    @Mock
+    private Observer mObserver;
+
     @Before
-    public void setUp() throws Exception {
-        allowTestableLooperAsMainThread();
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        mFeatureFlags = new FakeFeatureFlags();
+        mExecutor = new FakeExecutor(new FakeSystemClock());
+        mFeatureFlags.set(Flags.ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS, true);
+        mStateController = new DreamOverlayStateController(
+                mExecutor,
+                /* overlayEnabled= */ true,
+                mFeatureFlags);
+        mLiveData = new ComplicationCollectionLiveData(mStateController);
     }
 
     @Test
@@ -53,45 +75,41 @@ public class ComplicationCollectionLiveDataTest extends SysuiTestCase {
      * Ensures registration and callback lifecycles are respected.
      */
     public void testLifecycle() {
-        getContext().getMainExecutor().execute(() -> {
-            final DreamOverlayStateController stateController =
-                    Mockito.mock(DreamOverlayStateController.class);
-            final ComplicationCollectionLiveData liveData =
-                    new ComplicationCollectionLiveData(stateController);
-            final HashSet<Complication> complications = new HashSet<>();
-            final Observer<Collection<Complication>> observer = Mockito.mock(Observer.class);
-            complications.add(Mockito.mock(Complication.class));
+        final HashSet<Complication> complications = new HashSet<>();
+        mLiveData.observeForever(mObserver);
+        mExecutor.runAllReady();
+        // Verify observer called with empty complications
+        assertObserverCalledWith(complications);
 
-            when(stateController.getComplications()).thenReturn(complications);
+        addComplication(mock(Complication.class), complications);
+        assertObserverCalledWith(complications);
 
-            liveData.observeForever(observer);
-            ArgumentCaptor<DreamOverlayStateController.Callback> callbackCaptor =
-                    ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
+        addComplication(mock(Complication.class), complications);
+        assertObserverCalledWith(complications);
 
-            verify(stateController).addCallback(callbackCaptor.capture());
-            verifyUpdate(observer, complications);
-
-            complications.add(Mockito.mock(Complication.class));
-            callbackCaptor.getValue().onComplicationsChanged();
-
-            verifyUpdate(observer, complications);
-
-            callbackCaptor.getValue().onAvailableComplicationTypesChanged();
-
-            verifyUpdate(observer, complications);
-        });
+        mStateController.setAvailableComplicationTypes(0);
+        mExecutor.runAllReady();
+        assertObserverCalledWith(complications);
+        mLiveData.removeObserver(mObserver);
     }
 
-    void verifyUpdate(Observer<Collection<Complication>> observer,
-            Collection<Complication> targetCollection) {
+    private void assertObserverCalledWith(Collection<Complication> targetCollection) {
         ArgumentCaptor<Collection<Complication>> collectionCaptor =
                 ArgumentCaptor.forClass(Collection.class);
 
-        verify(observer).onChanged(collectionCaptor.capture());
+        verify(mObserver).onChanged(collectionCaptor.capture());
 
-        final Collection collection =  collectionCaptor.getValue();
+        final Collection<Complication> collection = collectionCaptor.getValue();
+
         assertThat(collection.containsAll(targetCollection)
                 && targetCollection.containsAll(collection)).isTrue();
-        Mockito.clearInvocations(observer);
+        Mockito.clearInvocations(mObserver);
+    }
+
+    private void addComplication(Complication complication,
+            Collection<Complication> complications) {
+        complications.add(complication);
+        mStateController.addComplication(complication);
+        mExecutor.runAllReady();
     }
 }

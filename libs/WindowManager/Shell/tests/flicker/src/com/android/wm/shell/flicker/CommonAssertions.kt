@@ -137,7 +137,7 @@ fun FlickerTest.splitAppLayerBoundsBecomesVisible(
     portraitPosTop: Boolean
 ) {
     assertLayers {
-        this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
+        this.notContains(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component), isOptional = true)
             .then()
             .isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT.or(component))
             .then()

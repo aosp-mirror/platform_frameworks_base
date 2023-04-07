@@ -303,10 +303,6 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
                 }
 
                 flingToExpansion(verticalVelocity, expansion);
-
-                if (expansion == KeyguardBouncerConstants.EXPANSION_HIDDEN) {
-                    mCurrentScrimController.reset();
-                }
                 break;
             default:
                 mVelocityTracker.addMovement(motionEvent);

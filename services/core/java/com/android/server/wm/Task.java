@@ -481,8 +481,6 @@ class Task extends TaskFragment {
     // to layout without loading all the task snapshots
     final PersistedTaskSnapshotData mLastTaskSnapshotData;
 
-    private final Rect mTmpDimBoundsRect = new Rect();
-
     /** @see #setCanAffectSystemUiFlags */
     private boolean mCanAffectSystemUiFlags = true;
 
@@ -3254,22 +3252,24 @@ class Task extends TaskFragment {
 
     @Override
     void prepareSurfaces() {
-        mDimmer.resetDimStates();
+        final Rect dimBounds = mDimmer.resetDimStates();
         super.prepareSurfaces();
-        getDimBounds(mTmpDimBoundsRect);
 
-        // Bounds need to be relative, as the dim layer is a child.
-        if (inFreeformWindowingMode()) {
-            getBounds(mTmpRect);
-            mTmpDimBoundsRect.offsetTo(mTmpDimBoundsRect.left - mTmpRect.left,
-                    mTmpDimBoundsRect.top - mTmpRect.top);
-        } else {
-            mTmpDimBoundsRect.offsetTo(0, 0);
+        if (dimBounds != null) {
+            getDimBounds(dimBounds);
+
+            // Bounds need to be relative, as the dim layer is a child.
+            if (inFreeformWindowingMode()) {
+                getBounds(mTmpRect);
+                dimBounds.offsetTo(dimBounds.left - mTmpRect.left, dimBounds.top - mTmpRect.top);
+            } else {
+                dimBounds.offsetTo(0, 0);
+            }
         }
 
         final SurfaceControl.Transaction t = getSyncTransaction();
 
-        if (mDimmer.updateDims(t, mTmpDimBoundsRect)) {
+        if (dimBounds != null && mDimmer.updateDims(t)) {
             scheduleAnimation();
         }
 

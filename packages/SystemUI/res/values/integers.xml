@@ -36,7 +36,7 @@
          fade_out_complete_frame -->
     <dimen name="percent_displacement_at_fade_out" format="float">0.1066</dimen>
 
-    <integer name="qs_carrier_max_em">7</integer>
+    <integer name="shade_carrier_max_em">7</integer>
 
     <!-- Maximum number of notification icons shown on the Always on Display
         (excluding overflow dot) -->

@@ -4865,6 +4865,8 @@
 
   <java-symbol type="string" name="config_wearSysUiPackage"/>
   <java-symbol type="string" name="config_wearSysUiMainActivity"/>
+  <java-symbol type="string" name="config_wearMediaControlsPackage"/>
+  <java-symbol type="string" name="config_wearMediaSessionsPackage"/>
   <java-symbol type="string" name="config_defaultQrCodeComponent"/>
 
   <java-symbol type="dimen" name="secondary_rounded_corner_radius" />

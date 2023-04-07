@@ -96,8 +96,6 @@ public class RoleObserverTest extends UiServiceTestCase {
     private TestableNotificationManagerService mService;
     private NotificationManagerService.RoleObserver mRoleObserver;
 
-    private TestableContext mContext = spy(getContext());
-
     @Mock
     private PreferencesHelper mPreferencesHelper;
     @Mock

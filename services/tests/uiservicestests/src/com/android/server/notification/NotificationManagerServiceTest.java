@@ -28,6 +28,7 @@ import static android.app.Notification.FLAG_CAN_COLORIZE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
+import static android.app.Notification.FLAG_USER_INITIATED_JOB;
 import static android.app.NotificationChannel.USER_LOCKED_ALLOW_BUBBLE;
 import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
@@ -227,6 +228,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemService.TargetUser;
 import com.android.server.UiServiceTestCase;
+import com.android.server.job.JobSchedulerInternal;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
@@ -334,6 +336,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     RankingHandler mRankingHandler;
     @Mock
     ActivityManagerInternal mAmi;
+    @Mock
+    JobSchedulerInternal mJsi;
     @Mock
     private Looper mMainLooper;
     @Mock
@@ -443,6 +447,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         LocalServices.addService(DeviceIdleInternal.class, deviceIdleInternal);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
         LocalServices.addService(ActivityManagerInternal.class, mAmi);
+        LocalServices.removeServiceForTest(JobSchedulerInternal.class);
+        LocalServices.addService(JobSchedulerInternal.class, mJsi);
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
         LocalServices.removeServiceForTest(PermissionPolicyInternal.class);
@@ -1251,7 +1257,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
 
         update = new NotificationChannel("blockedbyuser", "name", IMPORTANCE_NONE);
-        update.setFgServiceShown(true);
+        update.setUserVisibleTaskShown(true);
         mBinderService.updateNotificationChannelForPackage(PKG, mUid, update);
         waitForIdle();
         assertEquals(IMPORTANCE_NONE, mBinderService.getNotificationChannel(
@@ -8609,7 +8615,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertNotNull(n.publicVersion.bigContentView);
         assertNotNull(n.publicVersion.headsUpContentView);
 
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
         assertNull(n.contentView);
         assertNull(n.bigContentView);
@@ -10439,7 +10445,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setFullScreenIntent(mock(PendingIntent.class), true)
                 .build();
 
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
         final int stickyFlag = n.flags & Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
 
@@ -10524,7 +10530,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setFlag(FLAG_CAN_COLORIZE, true)
                 .build();
 
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
         assertFalse(n.isForegroundService());
         assertFalse(n.hasColorizedPermission());
@@ -10552,7 +10558,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .build();
 
         // When: fix the notification with NotificationManagerService
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
         // Then: the notification's flag FLAG_NO_DISMISS should not be set
         assertSame(0, n.flags & Notification.FLAG_NO_DISMISS);
@@ -10571,7 +10577,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .build();
 
         // When: fix the notification with NotificationManagerService
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
         // Then: the notification's flag FLAG_NO_DISMISS should be set
         assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
@@ -10595,7 +10601,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .build();
 
         // When: fix the notification with NotificationManagerService
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
         // Then: the notification's flag FLAG_NO_DISMISS should be set
         assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
@@ -10612,7 +10618,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .build();
 
         // When: fix the notification with NotificationManagerService
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
         // Then: the notification's flag FLAG_NO_DISMISS should not be set
         assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
@@ -10630,7 +10636,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         n.flags |= Notification.FLAG_NO_DISMISS;
 
         // When: fix the notification with NotificationManagerService
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
         // Then: the notification's flag FLAG_NO_DISMISS should be cleared
         assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
@@ -10648,7 +10654,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .build();
 
         // When: fix the notification with NotificationManagerService
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
         // Then: the notification's flag FLAG_NO_DISMISS should not be set
         assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
@@ -10669,7 +10675,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         n.flags |= Notification.FLAG_NO_DISMISS;
 
         // When: fix the notification with NotificationManagerService
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
         // Then: the notification's flag FLAG_NO_DISMISS should be cleared
         assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
@@ -10686,7 +10692,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .build();
 
         // When: fix the notification with NotificationManagerService
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
         // Then: the notification's flag FLAG_NO_DISMISS should not be set
         assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
@@ -10705,7 +10711,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .build();
 
         // When: fix the notification with NotificationManagerService
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
         // Then: the notification's flag FLAG_NO_DISMISS should be set
         assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
@@ -10733,7 +10739,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .build();
 
         // When: fix the notification with NotificationManagerService
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
         // Then: the notification's flag FLAG_NO_DISMISS should be cleared
         assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
@@ -10754,10 +10760,587 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .build();
 
         // When: fix the notification with NotificationManagerService
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
         // Then: the notification's flag FLAG_NO_DISMISS should not be set
         assertSame(0, n.flags & Notification.FLAG_NO_DISMISS);
+    }
+
+    @Test
+    public void testCancelAllNotifications_IgnoreUserInitiatedJob() throws Exception {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
+        sbn.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testCancelAllNotifications_IgnoreUserInitiatedJob",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        mBinderService.cancelAllNotifications(PKG, sbn.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(sbn.getPackageName());
+        assertEquals(1, notifs.length);
+        assertEquals(1, mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testCancelAllNotifications_UijFlag_NoUij_Allowed() throws Exception {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(false);
+        final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
+        sbn.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testCancelAllNotifications_UijFlag_NoUij_Allowed",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        mBinderService.cancelAllNotifications(PKG, sbn.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(sbn.getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testCancelAllNotificationsOtherPackage_IgnoresUijNotification() throws Exception {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
+        sbn.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testCancelAllNotifications_IgnoreOtherPackages",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        mBinderService.cancelAllNotifications("other_pkg_name", sbn.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(sbn.getPackageName());
+        assertEquals(1, notifs.length);
+        assertEquals(1, mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testRemoveUserInitiatedJobFlag_ImmediatelyAfterEnqueue() throws Exception {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .build();
+        StatusBarNotification sbn = new StatusBarNotification("a", "a", 0, null, mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+        sbn.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, null,
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        mInternalService.removeUserInitiatedJobFlagFromNotification(PKG, sbn.getId(),
+                sbn.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(sbn.getPackageName());
+        assertFalse(notifs[0].getNotification().isUserInitiatedJob());
+    }
+
+    @Test
+    public void testCancelAfterSecondEnqueueDoesNotSpecifyUserInitiatedJobFlag() throws Exception {
+        final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
+        sbn.getNotification().flags = Notification.FLAG_ONGOING_EVENT | FLAG_USER_INITIATED_JOB;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        sbn.getNotification().flags = Notification.FLAG_ONGOING_EVENT;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        mBinderService.cancelNotificationWithTag(PKG, PKG, sbn.getTag(), sbn.getId(),
+                sbn.getUserId());
+        waitForIdle();
+        assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
+        assertEquals(0, mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testCancelNotificationWithTag_fromApp_cannotCancelUijChild() throws Exception {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        mService.isSystemUid = false;
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.getBinderService().cancelNotificationWithTag(
+                parent.getSbn().getPackageName(), parent.getSbn().getPackageName(),
+                parent.getSbn().getTag(), parent.getSbn().getId(), parent.getSbn().getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.getSbn().getPackageName());
+        assertEquals(1, notifs.length);
+    }
+
+    @Test
+    public void testCancelNotificationWithTag_fromApp_cannotCancelUijParent() throws Exception {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        mService.isSystemUid = false;
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        parent.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.getBinderService().cancelNotificationWithTag(
+                parent.getSbn().getPackageName(), parent.getSbn().getPackageName(),
+                parent.getSbn().getTag(), parent.getSbn().getId(), parent.getSbn().getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.getSbn().getPackageName());
+        assertEquals(3, notifs.length);
+    }
+
+    @Test
+    public void testCancelAllNotificationsFromApp_cannotCancelUijChild() throws Exception {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        mService.isSystemUid = false;
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        mService.getBinderService().cancelAllNotifications(
+                parent.getSbn().getPackageName(), parent.getSbn().getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.getSbn().getPackageName());
+        assertEquals(1, notifs.length);
+    }
+
+    @Test
+    public void testCancelAllNotifications_fromApp_cannotCancelUijParent() throws Exception {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        mService.isSystemUid = false;
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        parent.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        mService.getBinderService().cancelAllNotifications(
+                parent.getSbn().getPackageName(), parent.getSbn().getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.getSbn().getPackageName());
+        assertEquals(1, notifs.length);
+    }
+
+    @Test
+    public void testCancelNotificationsFromListener_clearAll_GroupWithUijParent() throws Exception {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        parent.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        mService.getBinderService().cancelNotificationsFromListener(null, null);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.getSbn().getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testCancelNotificationsFromListener_clearAll_GroupWithUijChild() throws Exception {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        mService.getBinderService().cancelNotificationsFromListener(null, null);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.getSbn().getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testCancelNotificationsFromListener_clearAll_Uij() throws Exception {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, null, false);
+        child2.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        mService.addNotification(child2);
+        mService.getBinderService().cancelNotificationsFromListener(null, null);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(child2.getSbn().getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testCancelNotificationsFromListener_byKey_GroupWithUijParent() throws Exception {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        parent.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        String[] keys = {parent.getSbn().getKey(), child.getSbn().getKey(),
+                child2.getSbn().getKey(), newGroup.getSbn().getKey()};
+        mService.getBinderService().cancelNotificationsFromListener(null, keys);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.getSbn().getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testCancelNotificationsFromListener_byKey_GroupWithUijChild() throws Exception {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        String[] keys = {parent.getSbn().getKey(), child.getSbn().getKey(),
+                child2.getSbn().getKey(), newGroup.getSbn().getKey()};
+        mService.getBinderService().cancelNotificationsFromListener(null, keys);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.getSbn().getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testCancelNotificationsFromListener_byKey_Uij() throws Exception {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 3, null, false);
+        child.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        mService.addNotification(child);
+        String[] keys = {child.getSbn().getKey()};
+        mService.getBinderService().cancelNotificationsFromListener(null, keys);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(child.getSbn().getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testUserInitiatedCancelAllWithGroup_UserInitiatedFlag() throws Exception {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        mService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(), parent.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.getSbn().getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testDeleteChannelGroupChecksForUijs() throws Exception {
+        when(mCompanionMgr.getAssociations(PKG, UserHandle.getUserId(mUid)))
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
+        CountDownLatch latch = new CountDownLatch(2);
+        mService.createNotificationChannelGroup(PKG, mUid,
+                new NotificationChannelGroup("group", "group"), true, false);
+        new Thread(() -> {
+            NotificationChannel notificationChannel = new NotificationChannel("id", "id",
+                    NotificationManager.IMPORTANCE_HIGH);
+            notificationChannel.setGroup("group");
+            ParceledListSlice<NotificationChannel> pls =
+                    new ParceledListSlice(ImmutableList.of(notificationChannel));
+            try {
+                mBinderService.createNotificationChannelsForPackage(PKG, mUid, pls);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+            latch.countDown();
+        }).start();
+        new Thread(() -> {
+            try {
+                synchronized (this) {
+                    wait(5000);
+                }
+                mService.createNotificationChannelGroup(PKG, mUid,
+                        new NotificationChannelGroup("new", "new group"), true, false);
+                NotificationChannel notificationChannel =
+                        new NotificationChannel("id", "id", NotificationManager.IMPORTANCE_HIGH);
+                notificationChannel.setGroup("new");
+                ParceledListSlice<NotificationChannel> pls =
+                        new ParceledListSlice(ImmutableList.of(notificationChannel));
+                try {
+                    mBinderService.createNotificationChannelsForPackage(PKG, mUid, pls);
+                    mBinderService.deleteNotificationChannelGroup(PKG, "group");
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            latch.countDown();
+        }).start();
+
+        latch.await();
+        verify(mJsi).isNotificationChannelAssociatedWithAnyUserInitiatedJobs(
+                anyString(), anyInt(), anyString());
+    }
+
+    @Test
+    public void testRemoveUserInitiatedJobFlagFromNotification_enqueued() {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        Notification n = new Notification.Builder(mContext, "").build();
+        n.flags |= FLAG_USER_INITIATED_JOB;
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 9, null, mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.addEnqueuedNotification(r);
+
+        mInternalService.removeUserInitiatedJobFlagFromNotification(
+                PKG, r.getSbn().getId(), r.getSbn().getUserId());
+
+        waitForIdle();
+
+        verify(mListeners, timeout(200).times(0)).notifyPostedLocked(any(), any());
+    }
+
+    @Test
+    public void testRemoveUserInitiatedJobFlagFromNotification_posted() {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        Notification n = new Notification.Builder(mContext, "").build();
+        n.flags |= FLAG_USER_INITIATED_JOB;
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 9, null, mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.addNotification(r);
+
+        mInternalService.removeUserInitiatedJobFlagFromNotification(
+                PKG, r.getSbn().getId(), r.getSbn().getUserId());
+
+        waitForIdle();
+
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).notifyPostedLocked(captor.capture(), any());
+
+        assertEquals(0, captor.getValue().getNotification().flags);
+    }
+
+    @Test
+    public void testCannotRemoveUserInitiatedJobFlagWhenOverLimit_enqueued() {
+        for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS; i++) {
+            Notification n = new Notification.Builder(mContext, "").build();
+            StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, i, null, mUid, 0,
+                    n, UserHandle.getUserHandleForUid(mUid), null, 0);
+            NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+            mService.addEnqueuedNotification(r);
+        }
+        Notification n = new Notification.Builder(mContext, "").build();
+        n.flags |= FLAG_USER_INITIATED_JOB;
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG,
+                NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS, null, mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.addEnqueuedNotification(r);
+
+        mInternalService.removeUserInitiatedJobFlagFromNotification(
+                PKG, r.getSbn().getId(), r.getSbn().getUserId());
+
+        waitForIdle();
+
+        assertEquals(NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS,
+                mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testCannotRemoveUserInitiatedJobFlagWhenOverLimit_posted() {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS; i++) {
+            Notification n = new Notification.Builder(mContext, "").build();
+            StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, i, null, mUid, 0,
+                    n, UserHandle.getUserHandleForUid(mUid), null, 0);
+            NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+            mService.addNotification(r);
+        }
+        Notification n = new Notification.Builder(mContext, "").build();
+        n.flags |= FLAG_USER_INITIATED_JOB;
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG,
+                NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS, null, mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.addNotification(r);
+
+        mInternalService.removeUserInitiatedJobFlagFromNotification(
+                PKG, r.getSbn().getId(), r.getSbn().getUserId());
+
+        waitForIdle();
+
+        assertEquals(NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS,
+                mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testCanPostUijWhenOverLimit() throws RemoteException {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS; i++) {
+            StatusBarNotification sbn = generateNotificationRecord(mTestNotificationChannel,
+                    i, null, false).getSbn();
+            mBinderService.enqueueNotificationWithTag(PKG, PKG, "testCanPostUijWhenOverLimit",
+                    sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        }
+
+        final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
+        sbn.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testCanPostUijWhenOverLimit - uij over limit!",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+
+        waitForIdle();
+
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(sbn.getPackageName());
+        assertEquals(NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS + 1, notifs.length);
+        assertEquals(NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS + 1,
+                mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void testCannotPostNonUijWhenOverLimit() throws RemoteException {
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(true);
+        for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS; i++) {
+            StatusBarNotification sbn = generateNotificationRecord(mTestNotificationChannel,
+                    i, null, false).getSbn();
+            mBinderService.enqueueNotificationWithTag(PKG, PKG, "testCannotPostNonUijWhenOverLimit",
+                    sbn.getId(), sbn.getNotification(), sbn.getUserId());
+            waitForIdle();
+        }
+
+        final StatusBarNotification sbn = generateNotificationRecord(mTestNotificationChannel,
+                100, null, false).getSbn();
+        sbn.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testCannotPostNonUijWhenOverLimit - uij over limit!",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+
+        final StatusBarNotification sbn2 = generateNotificationRecord(mTestNotificationChannel,
+                101, null, false).getSbn();
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testCannotPostNonUijWhenOverLimit - non uij over limit!",
+                sbn2.getId(), sbn2.getNotification(), sbn2.getUserId());
+
+        when(mJsi.isNotificationAssociatedWithAnyUserInitiatedJobs(anyInt(), anyInt(), anyString()))
+                .thenReturn(false);
+        final StatusBarNotification sbn3 = generateNotificationRecord(mTestNotificationChannel,
+                101, null, false).getSbn();
+        sbn3.getNotification().flags |= FLAG_USER_INITIATED_JOB;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testCannotPostNonUijWhenOverLimit - fake uij over limit!",
+                sbn3.getId(), sbn3.getNotification(), sbn3.getUserId());
+
+        waitForIdle();
+
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(sbn.getPackageName());
+        assertEquals(NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS + 1, notifs.length);
+        assertEquals(NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS + 1,
+                mService.getNotificationRecordCount());
+    }
+
+    @Test
+    public void fixNotification_withUijFlag_butIsNotUij() throws Exception {
+        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        when(mPackageManagerClient.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(applicationInfo);
+
+        Notification n = new Notification.Builder(mContext, "test")
+                .setFlag(FLAG_USER_INITIATED_JOB, true)
+                .build();
+
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
+        assertFalse(n.isUserInitiatedJob());
     }
 
     private void setDpmAppOppsExemptFromDismissal(boolean isOn) {

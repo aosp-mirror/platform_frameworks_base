@@ -20,7 +20,6 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ServiceInfo;
 import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.ui.DisabledProviderData;
@@ -38,34 +37,32 @@ import android.util.Log;
 import android.util.Slog;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /** Initiates the Credential Manager UI and receives results. */
 public class CredentialManagerUi {
     private static final String TAG = "CredentialManagerUi";
     @NonNull
     private final CredentialManagerUiCallback mCallbacks;
-    @NonNull private final Context mContext;
+    @NonNull
+    private final Context mContext;
     // TODO : Use for starting the activity for this user
     private final int mUserId;
 
     private UiStatus mStatus;
 
-    /** Creates intent that is ot be invoked to cancel an in-progress UI session. */
-    public Intent createCancelIntent(IBinder requestId, String packageName) {
-        return IntentFactory.createCancelUiIntent(requestId, /*shouldShowCancellationUi=*/ true,
-                packageName);
-    }
+    private final Set<ComponentName> mEnabledProviders;
 
     enum UiStatus {
         IN_PROGRESS,
         USER_INTERACTION,
         NOT_STARTED, TERMINATED
     }
-    @NonNull private final ResultReceiver mResultReceiver = new ResultReceiver(
+
+    @NonNull
+    private final ResultReceiver mResultReceiver = new ResultReceiver(
             new Handler(Looper.getMainLooper())) {
         @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
@@ -105,24 +102,33 @@ public class CredentialManagerUi {
         }
     }
 
+    /** Creates intent that is ot be invoked to cancel an in-progress UI session. */
+    public Intent createCancelIntent(IBinder requestId, String packageName) {
+        return IntentFactory.createCancelUiIntent(requestId, /*shouldShowCancellationUi=*/ true,
+                packageName);
+    }
+
     /**
      * Interface to be implemented by any class that wishes to get callbacks from the UI.
      */
     public interface CredentialManagerUiCallback {
         /** Called when the user makes a selection. */
         void onUiSelection(UserSelectionDialogResult selection);
+
         /** Called when the UI is canceled without a successful provider result. */
         void onUiCancellation(boolean isUserCancellation);
 
         /** Called when the selector UI fails to come up (mostly due to parsing issue today). */
         void onUiSelectorInvocationFailure();
     }
+
     public CredentialManagerUi(Context context, int userId,
-            CredentialManagerUiCallback callbacks) {
+            CredentialManagerUiCallback callbacks, Set<ComponentName> enabledProviders) {
         Log.i(TAG, "In CredentialManagerUi constructor");
         mContext = context;
         mUserId = userId;
         mCallbacks = callbacks;
+        mEnabledProviders = enabledProviders;
         mStatus = UiStatus.IN_PROGRESS;
     }
 
@@ -139,37 +145,28 @@ public class CredentialManagerUi {
     /**
      * Creates a {@link PendingIntent} to be used to invoke the credential manager selector UI,
      * by the calling app process.
-     * @param requestInfo the information about the request
+     *
+     * @param requestInfo      the information about the request
      * @param providerDataList the list of provider data from remote providers
      */
     public PendingIntent createPendingIntent(
             RequestInfo requestInfo, ArrayList<ProviderData> providerDataList) {
         Log.i(TAG, "In createPendingIntent");
 
-        ArrayList<DisabledProviderData> disabledProviderDataList = new ArrayList<>();
-        Set<String> enabledProviders = providerDataList.stream()
-                .map(ProviderData::getProviderFlattenedComponentName)
-                .collect(Collectors.toUnmodifiableSet());
-        Set<String> allProviders =
+        List<CredentialProviderInfo> allProviders =
                 CredentialProviderInfoFactory.getCredentialProviderServices(
-                                mContext,
-                                mUserId,
-                                CredentialManager.PROVIDER_FILTER_USER_PROVIDERS_ONLY,
-                                new HashSet<>())
-                        .stream()
-                        .map(CredentialProviderInfo::getServiceInfo)
-                        .map(ServiceInfo::getComponentName)
-                        .map(ComponentName::flattenToString)
-                        .collect(Collectors.toUnmodifiableSet());
+                        mContext,
+                        mUserId,
+                        CredentialManager.PROVIDER_FILTER_USER_PROVIDERS_ONLY,
+                        mEnabledProviders);
 
-        for (String provider: allProviders) {
-            if (!enabledProviders.contains(provider)) {
-                disabledProviderDataList.add(new DisabledProviderData(provider));
-            }
-        }
+        List<DisabledProviderData> disabledProviderDataList = allProviders.stream()
+                .filter(provider -> !provider.isEnabled())
+                .map(disabledProvider -> new DisabledProviderData(
+                        disabledProvider.getComponentName().flattenToString())).toList();
 
         Intent intent = IntentFactory.createCredentialSelectorIntent(requestInfo, providerDataList,
-                        disabledProviderDataList, mResultReceiver)
+                        new ArrayList<>(disabledProviderDataList), mResultReceiver)
                 .setAction(UUID.randomUUID().toString());
         //TODO: Create unique pending intent using request code and cancel any pre-existing pending
         // intents

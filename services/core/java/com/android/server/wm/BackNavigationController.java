@@ -585,14 +585,14 @@ class BackNavigationController {
      * The closing target should only exist in close list, but the opening target can be either in
      * open or close list.
      */
-    void onTransactionReady(Transition transition) {
+    void onTransactionReady(Transition transition, ArrayList<Transition.ChangeInfo> targets) {
         if (!isMonitoringTransition()) {
             return;
         }
-        final ArraySet<WindowContainer> targets = transition.mParticipants;
         for (int i = targets.size() - 1; i >= 0; --i) {
-            final WindowContainer wc = targets.valueAt(i);
-            if (wc.asActivityRecord() == null && wc.asTask() == null) {
+            final WindowContainer wc = targets.get(i).mContainer;
+            if (wc.asActivityRecord() == null && wc.asTask() == null
+                    && wc.asTaskFragment() == null) {
                 continue;
             }
             // WC can be visible due to setLaunchBehind
@@ -605,6 +605,9 @@ class BackNavigationController {
         final boolean matchAnimationTargets = isWaitBackTransition()
                 && (transition.mType == TRANSIT_CLOSE || transition.mType == TRANSIT_TO_BACK)
                 && mAnimationHandler.containsBackAnimationTargets(mTmpOpenApps, mTmpCloseApps);
+        ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
+                "onTransactionReady, opening: %s, closing: %s, animating: %s, match: %b",
+                mTmpOpenApps, mTmpCloseApps, mAnimationHandler, matchAnimationTargets);
         if (!matchAnimationTargets) {
             mNavigationMonitor.onTransitionReadyWhileNavigate(mTmpOpenApps, mTmpCloseApps);
         } else {
@@ -829,10 +832,16 @@ class BackNavigationController {
             if (!mComposed) {
                 return false;
             }
+
+            // WC must be ActivityRecord in legacy transition, but it also can be Task or
+            // TaskFragment when using Shell transition.
+            // Open target: Can be Task or ActivityRecord or TaskFragment
+            // Close target: Limit to the top activity for now, to reduce the chance of misjudgment.
             final WindowContainer target = open ? mOpenAdaptor.mTarget : mCloseAdaptor.mTarget;
             if (mSwitchType == TASK_SWITCH) {
                 return  wc == target
-                        || (wc.asTask() != null && wc.hasChild(target));
+                        || (wc.asTask() != null && wc.hasChild(target))
+                        || (wc.asActivityRecord() != null && target.hasChild(wc));
             } else if (mSwitchType == ACTIVITY_SWITCH) {
                 return wc == target || (wc.asTaskFragment() != null && wc.hasChild(target));
             }

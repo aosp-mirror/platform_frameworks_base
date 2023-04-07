@@ -14,7 +14,7 @@
   ~ limitations under the License
   -->
 
-<com.android.systemui.qs.carrier.QSCarrier
+<com.android.systemui.shade.carrier.ShadeCarrier
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/linear_carrier"
     android:layout_width="wrap_content"
@@ -29,7 +29,7 @@
     android:focusable="true" >
 
     <com.android.systemui.util.AutoMarqueeTextView
-        android:id="@+id/qs_carrier_text"
+        android:id="@+id/shade_carrier_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -53,4 +53,4 @@
         android:layout_marginStart="@dimen/qs_carrier_margin_width"
         android:visibility="gone" />
 
-</com.android.systemui.qs.carrier.QSCarrier>
+</com.android.systemui.shade.carrier.ShadeCarrier>

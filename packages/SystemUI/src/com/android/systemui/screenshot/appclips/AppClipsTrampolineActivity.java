@@ -40,6 +40,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.ResultReceiver;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -79,13 +81,10 @@ public class AppClipsTrampolineActivity extends Activity {
 
     private static final String TAG = AppClipsTrampolineActivity.class.getSimpleName();
     static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
-    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-    public static final String EXTRA_SCREENSHOT_URI = TAG + "SCREENSHOT_URI";
+    static final String EXTRA_SCREENSHOT_URI = TAG + "SCREENSHOT_URI";
     static final String ACTION_FINISH_FROM_TRAMPOLINE = TAG + "FINISH_FROM_TRAMPOLINE";
-    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-    public static final String EXTRA_RESULT_RECEIVER = TAG + "RESULT_RECEIVER";
-    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-    public static final String EXTRA_CALLING_PACKAGE_NAME = TAG + "CALLING_PACKAGE_NAME";
+    static final String EXTRA_RESULT_RECEIVER = TAG + "RESULT_RECEIVER";
+    static final String EXTRA_CALLING_PACKAGE_NAME = TAG + "CALLING_PACKAGE_NAME";
     private static final ApplicationInfoFlags APPLICATION_INFO_FLAGS = ApplicationInfoFlags.of(0);
 
     private final DevicePolicyManager mDevicePolicyManager;
@@ -95,6 +94,7 @@ public class AppClipsTrampolineActivity extends Activity {
     private final PackageManager mPackageManager;
     private final UserTracker mUserTracker;
     private final UiEventLogger mUiEventLogger;
+    private final UserManager mUserManager;
     private final ResultReceiver mResultReceiver;
 
     private Intent mKillAppClipsBroadcastIntent;
@@ -103,7 +103,7 @@ public class AppClipsTrampolineActivity extends Activity {
     public AppClipsTrampolineActivity(DevicePolicyManager devicePolicyManager, FeatureFlags flags,
             Optional<Bubbles> optionalBubbles, NoteTaskController noteTaskController,
             PackageManager packageManager, UserTracker userTracker, UiEventLogger uiEventLogger,
-            @Main Handler mainHandler) {
+            UserManager userManager, @Main Handler mainHandler) {
         mDevicePolicyManager = devicePolicyManager;
         mFeatureFlags = flags;
         mOptionalBubbles = optionalBubbles;
@@ -111,6 +111,7 @@ public class AppClipsTrampolineActivity extends Activity {
         mPackageManager = packageManager;
         mUserTracker = userTracker;
         mUiEventLogger = uiEventLogger;
+        mUserManager = userManager;
 
         mResultReceiver = createResultReceiver(mainHandler);
     }
@@ -120,6 +121,12 @@ public class AppClipsTrampolineActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
+            return;
+        }
+
+        if (mUserManager.isManagedProfile()) {
+            maybeStartActivityForWPUser();
+            finish();
             return;
         }
 
@@ -189,6 +196,19 @@ public class AppClipsTrampolineActivity extends Activity {
         if (isFinishing() && mKillAppClipsBroadcastIntent != null) {
             sendBroadcast(mKillAppClipsBroadcastIntent, PERMISSION_SELF);
         }
+    }
+
+    private void maybeStartActivityForWPUser() {
+        UserHandle mainUser = mUserManager.getMainUser();
+        if (mainUser == null) {
+            setErrorResultAndFinish(CAPTURE_CONTENT_FOR_NOTE_FAILED);
+            return;
+        }
+
+        // Start the activity as the main user with activity result forwarding.
+        startActivityAsUser(
+                new Intent(this, AppClipsTrampolineActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT), mainUser);
     }
 
     private void setErrorResultAndFinish(int errorCode) {

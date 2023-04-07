@@ -5177,13 +5177,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     void prepareSurfaces() {
         mIsDimming = false;
-        applyDims();
-        updateSurfacePositionNonOrganized();
-        // Send information to SurfaceFlinger about the priority of the current window.
-        updateFrameRateSelectionPriorityIfNeeded();
-        updateScaleIfNeeded();
-
-        mWinAnimator.prepareSurfaceLocked(getSyncTransaction());
+        if (mHasSurface) {
+            applyDims();
+            updateSurfacePositionNonOrganized();
+            // Send information to SurfaceFlinger about the priority of the current window.
+            updateFrameRateSelectionPriorityIfNeeded();
+            updateScaleIfNeeded();
+            mWinAnimator.prepareSurfaceLocked(getSyncTransaction());
+        }
         super.prepareSurfaces();
     }
 

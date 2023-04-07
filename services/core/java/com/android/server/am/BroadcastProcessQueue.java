@@ -441,17 +441,17 @@ class BroadcastProcessQueue {
     }
 
     public int getPreferredSchedulingGroupLocked() {
-        if (mCountForeground > mCountForegroundDeferred) {
+        if (!isActive()) {
+            return ProcessList.SCHED_GROUP_UNDEFINED;
+        } else if (mCountForeground > mCountForegroundDeferred) {
             // We have a foreground broadcast somewhere down the queue, so
             // boost priority until we drain them all
             return ProcessList.SCHED_GROUP_DEFAULT;
         } else if ((mActive != null) && mActive.isForeground()) {
             // We have a foreground broadcast right now, so boost priority
             return ProcessList.SCHED_GROUP_DEFAULT;
-        } else if (!isIdle()) {
-            return ProcessList.SCHED_GROUP_BACKGROUND;
         } else {
-            return ProcessList.SCHED_GROUP_UNDEFINED;
+            return ProcessList.SCHED_GROUP_BACKGROUND;
         }
     }
 

@@ -1456,7 +1456,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             @NonNull IOnChecksumsReadyListener onChecksumsReadyListener) {
         assertCallerIsOwnerRootOrVerifier();
         final File file = new File(stageDir, name);
-        final String installerPackageName = getInstallSource().mInitiatingPackageName;
+        final String installerPackageName = PackageManagerServiceUtils.isInstalledByAdb(
+                getInstallSource().mInitiatingPackageName)
+                ? getInstallSource().mInstallerPackageName
+                : getInstallSource().mInitiatingPackageName;
         try {
             mPm.requestFileChecksums(file, installerPackageName, optional, required,
                     trustedInstallers, onChecksumsReadyListener);

@@ -32,21 +32,25 @@ import java.util.Objects;
 
 final class IntegerPolicySerializer extends PolicySerializer<Integer> {
 
+    private static final String TAG = "IntegerPolicySerializer";
+
+    private static final String ATTR_VALUE = "value";
+
     @Override
-    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer, String attributeName,
+    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer,
             @NonNull Integer value) throws IOException {
         Objects.requireNonNull(value);
-        serializer.attributeInt(/* namespace= */ null, attributeName, value);
+        serializer.attributeInt(/* namespace= */ null, ATTR_VALUE, value);
     }
 
     @Nullable
     @Override
-    IntegerPolicyValue readFromXml(TypedXmlPullParser parser, String attributeName) {
+    IntegerPolicyValue readFromXml(TypedXmlPullParser parser) {
         try {
             return new IntegerPolicyValue(
-                    parser.getAttributeInt(/* namespace= */ null, attributeName));
+                    parser.getAttributeInt(/* namespace= */ null, ATTR_VALUE));
         } catch (XmlPullParserException e) {
-            Log.e(DevicePolicyEngine.TAG, "Error parsing Integer policy value", e);
+            Log.e(TAG, "Error parsing Integer policy value", e);
             return null;
         }
     }

@@ -18,7 +18,6 @@ package com.android.wm.shell.pip.phone;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -76,7 +75,7 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
     @Mock private Resources mResources;
 
     private PipDisplayLayoutState mPipDisplayLayoutState;
-    private PipSizeSpecHandler mPipSizeSpecHandler;
+    private TestPipSizeSpecHandler mPipSizeSpecHandler;
 
     /**
      * Sets up static Mockito session for SystemProperties and mocks necessary static methods.
@@ -84,8 +83,6 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
     private static void setUpStaticSystemPropertiesSession() {
         sStaticMockitoSession = mockitoSession()
                 .mockStatic(SystemProperties.class).startMocking();
-        // make sure the feature flag is on
-        when(SystemProperties.getBoolean(anyString(), anyBoolean())).thenReturn(true);
         when(SystemProperties.get(anyString(), anyString())).thenAnswer(invocation -> {
             String property = invocation.getArgument(0);
             if (property.equals("com.android.wm.shell.pip.phone.def_percentage")) {
@@ -161,7 +158,7 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
         mPipDisplayLayoutState.setDisplayLayout(displayLayout);
 
         setUpStaticSystemPropertiesSession();
-        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext, mPipDisplayLayoutState);
+        mPipSizeSpecHandler = new TestPipSizeSpecHandler(mContext, mPipDisplayLayoutState);
 
         // no overridden min edge size by default
         mPipSizeSpecHandler.setOverrideMinSize(null);
@@ -213,5 +210,17 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
         Size actualSize = mPipSizeSpecHandler.getSizeForAspectRatio(initSize, 9f / 16);
 
         Assert.assertEquals(expectedSize, actualSize);
+    }
+
+    static class TestPipSizeSpecHandler extends PipSizeSpecHandler {
+
+        TestPipSizeSpecHandler(Context context, PipDisplayLayoutState displayLayoutState) {
+            super(context, displayLayoutState);
+        }
+
+        @Override
+        boolean supportsPipSizeLargeScreen() {
+            return true;
+        }
     }
 }

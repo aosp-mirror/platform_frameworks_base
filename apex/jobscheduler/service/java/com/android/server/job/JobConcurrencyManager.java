@@ -1925,6 +1925,20 @@ class JobConcurrencyManager {
         return null;
     }
 
+    @GuardedBy("mLock")
+    boolean isNotificationAssociatedWithAnyUserInitiatedJobs(int notificationId, int userId,
+            String packageName) {
+        return mNotificationCoordinator.isNotificationAssociatedWithAnyUserInitiatedJobs(
+                notificationId, userId, packageName);
+    }
+
+    @GuardedBy("mLock")
+    boolean isNotificationChannelAssociatedWithAnyUserInitiatedJobs(String notificationChannel,
+            int userId, String packageName) {
+        return mNotificationCoordinator.isNotificationChannelAssociatedWithAnyUserInitiatedJobs(
+                notificationChannel, userId, packageName);
+    }
+
     @NonNull
     private JobServiceContext createNewJobServiceContext() {
         return mInjector.createJobServiceContext(mService, this, mNotificationCoordinator,

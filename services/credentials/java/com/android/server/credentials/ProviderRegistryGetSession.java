@@ -29,6 +29,7 @@ import android.credentials.ui.Entry;
 import android.credentials.ui.GetCredentialProviderData;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
+import android.os.ICancellationSignal;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialEntry;
 import android.service.credentials.CredentialProviderService;
@@ -115,7 +116,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
             @NonNull String servicePackageName,
             @NonNull CredentialOption requestOption) {
         super(context, requestOption, session,
-                new ComponentName(servicePackageName, servicePackageName) ,
+                new ComponentName(servicePackageName, servicePackageName),
                 userId, null);
         mCredentialDescriptionRegistry = CredentialDescriptionRegistry.forUser(userId);
         mCallingAppInfo = callingAppInfo;
@@ -132,7 +133,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
             @NonNull String servicePackageName,
             @NonNull CredentialOption requestOption) {
         super(context, requestOption, session,
-                new ComponentName(servicePackageName, servicePackageName) ,
+                new ComponentName(servicePackageName, servicePackageName),
                 userId, null);
         mCredentialDescriptionRegistry = CredentialDescriptionRegistry.forUser(userId);
         mCallingAppInfo = callingAppInfo;
@@ -255,13 +256,18 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
     }
 
     @Override
+    public void onProviderCancellable(ICancellationSignal cancellation) {
+        // No need to do anything since this class does not rely on a remote service.
+    }
+
+    @Override
     protected void invokeSession() {
         mProviderResponse = mCredentialDescriptionRegistry
                 .getFilteredResultForProvider(mCredentialProviderPackageName,
                         mElementKeys);
         mCredentialEntries = mProviderResponse.stream().flatMap(
-                        (Function<CredentialDescriptionRegistry.FilterResult,
-                                Stream<CredentialEntry>>) filterResult
+                (Function<CredentialDescriptionRegistry.FilterResult,
+                        Stream<CredentialEntry>>) filterResult
                         -> filterResult.mCredentialEntries.stream())
                 .collect(Collectors.toList());
         updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED,
