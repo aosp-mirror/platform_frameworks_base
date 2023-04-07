@@ -577,12 +577,16 @@ class TransitionController {
         return transition;
     }
 
-    /** Requests transition for a window container which will be removed or invisible. */
-    void requestCloseTransitionIfNeeded(@NonNull WindowContainer<?> wc) {
-        if (mTransitionPlayer == null) return;
+    /**
+     * Requests transition for a window container which will be removed or invisible.
+     * @return the new transition if it was created for this request, `null` otherwise.
+     */
+    Transition requestCloseTransitionIfNeeded(@NonNull WindowContainer<?> wc) {
+        if (mTransitionPlayer == null) return null;
+        Transition out = null;
         if (wc.isVisibleRequested()) {
             if (!isCollecting()) {
-                requestStartTransition(createTransition(TRANSIT_CLOSE, 0 /* flags */),
+                out = requestStartTransition(createTransition(TRANSIT_CLOSE, 0 /* flags */),
                         wc.asTask(), null /* remoteTransition */, null /* displayChange */);
             }
             collectExistenceChange(wc);
@@ -591,6 +595,7 @@ class TransitionController {
             // collecting, this should be a member just in case.
             collect(wc);
         }
+        return out;
     }
 
     /** @see Transition#collect */
