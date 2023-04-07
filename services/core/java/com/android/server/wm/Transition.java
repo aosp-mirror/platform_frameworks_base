@@ -907,6 +907,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final WindowContainer<?> participant = mParticipants.valueAt(i);
             final ActivityRecord ar = participant.asActivityRecord();
             if (ar != null) {
+                final Task task = ar.getTask();
+                if (task == null) continue;
                 boolean visibleAtTransitionEnd = mVisibleAtTransitionEndTokens.contains(ar);
                 // We need both the expected visibility AND current requested-visibility to be
                 // false. If it is expected-visible but not currently visible, it means that
@@ -925,9 +927,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     if (commitVisibility) {
                         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                                 "  Commit activity becoming invisible: %s", ar);
-                        final Task task = ar.getTask();
-                        if (task != null && !task.isVisibleRequested()
-                                && mTransientLaunches != null) {
+                        if (mTransientLaunches != null && !task.isVisibleRequested()) {
                             // If transition is transient, then snapshots are taken at end of
                             // transition.
                             mController.mSnapshotController.mTaskSnapshotController
@@ -952,8 +952,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
                     // Since transient launches don't automatically take focus, make sure we
                     // synchronize focus since we committed to the launch.
-                    if (ar.isTopRunningActivity()) {
-                        ar.moveFocusableActivityToTop("transitionFinished");
+                    if (!task.isFocused() && ar.isTopRunningActivity()) {
+                        mController.mAtm.setLastResumedActivityUncheckLocked(ar,
+                                "transitionFinished");
                     }
                 }
                 continue;
