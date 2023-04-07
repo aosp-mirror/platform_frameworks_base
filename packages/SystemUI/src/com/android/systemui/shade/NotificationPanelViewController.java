@@ -4936,6 +4936,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             }
 
             handled |= handleTouch(event);
+            mShadeLog.logOnTouchEventLastReturn(event, !mDozing, handled);
             return !mDozing || handled;
         }
 
@@ -5118,6 +5119,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     }
                     break;
             }
+            mShadeLog.logHandleTouchLastReturn(event, !mGestureWaitForTouchSlop, mTracking);
             return !mGestureWaitForTouchSlop || mTracking;
         }
 
