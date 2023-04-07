@@ -97,6 +97,8 @@ public class DisplayRotation {
     // config changes and unexpected jumps while folding the device to closed state.
     private static final int FOLDING_RECOMPUTE_CONFIG_DELAY_MS = 800;
 
+    private static final int ROTATION_UNDEFINED = -1;
+
     private static class RotationAnimationPair {
         @AnimRes
         int mEnter;
@@ -183,6 +185,12 @@ public class DisplayRotation {
      * @see Settings.Secure#SHOW_ROTATION_SUGGESTIONS
      */
     private int mShowRotationSuggestions;
+
+    /**
+     * The most recent {@link Surface.Rotation} choice shown to the user for confirmation, or
+     * {@link #ROTATION_UNDEFINED}
+     */
+    private int mRotationChoiceShownToUserForConfirmation = ROTATION_UNDEFINED;
 
     private static final int ALLOW_ALL_ROTATIONS_UNDEFINED = -1;
     private static final int ALLOW_ALL_ROTATIONS_DISABLED = 0;
@@ -861,6 +869,7 @@ public class DisplayRotation {
 
     @VisibleForTesting
     void setUserRotation(int userRotationMode, int userRotation) {
+        mRotationChoiceShownToUserForConfirmation = ROTATION_UNDEFINED;
         if (isDefaultDisplay) {
             // We'll be notified via settings listener, so we don't need to update internal values.
             final ContentResolver res = mContext.getContentResolver();
@@ -1568,6 +1577,17 @@ public class DisplayRotation {
         return shouldUpdateRotation;
     }
 
+    /**
+     * Called from {@link ActivityRecord#setRequestedOrientation(int)}
+     */
+    void onSetRequestedOrientation() {
+        if (mCompatPolicyForImmersiveApps == null
+                || mRotationChoiceShownToUserForConfirmation == ROTATION_UNDEFINED) {
+            return;
+        }
+        mOrientationListener.onProposedRotationChanged(mRotationChoiceShownToUserForConfirmation);
+    }
+
     void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "DisplayRotation");
         pw.println(prefix + "  mCurrentAppOrientation="
@@ -1966,9 +1986,11 @@ public class DisplayRotation {
             // Send interaction power boost to improve redraw performance.
             mService.mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, 0);
             if (isRotationChoiceAllowed(rotation)) {
+                mRotationChoiceShownToUserForConfirmation = rotation;
                 final boolean isValid = isValidRotationChoice(rotation);
                 sendProposedRotationChangeToStatusBarInternal(rotation, isValid);
             } else {
+                mRotationChoiceShownToUserForConfirmation = ROTATION_UNDEFINED;
                 mService.updateRotation(false /* alwaysSendConfiguration */,
                         false /* forceRelayout */);
             }
