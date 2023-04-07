@@ -24,6 +24,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationHistory;
 import android.app.NotificationManager;
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
@@ -228,6 +229,7 @@ interface INotificationManager
     void setNotificationDelegate(String callingPkg, String delegate);
     String getNotificationDelegate(String callingPkg);
     boolean canNotifyAsPackage(String callingPkg, String targetPkg, int userId);
+    boolean canUseFullScreenIntent(in AttributionSource attributionSource);
 
     void setPrivateNotificationsAllowed(boolean allow);
     boolean getPrivateNotificationsAllowed();
