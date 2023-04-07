@@ -42,6 +42,8 @@ import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.testutils.TestHandler;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -369,6 +371,49 @@ public class SyncEngineTests extends WindowTestsBase {
         assertFalse(mAppWindow.shouldSyncWithBuffers());
 
         mAppWindow.removeImmediately();
+    }
+
+    @Test
+    public void testQueueSyncSet() {
+        final TestHandler testHandler = new TestHandler(null);
+        TestWindowContainer mockWC = new TestWindowContainer(mWm, true /* waiter */);
+        TestWindowContainer mockWC2 = new TestWindowContainer(mWm, true /* waiter */);
+
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine(testHandler);
+
+        BLASTSyncEngine.TransactionReadyListener listener = mock(
+                BLASTSyncEngine.TransactionReadyListener.class);
+
+        int id = startSyncSet(bse, listener);
+        bse.addToSyncSet(id, mockWC);
+        bse.setReady(id);
+        bse.onSurfacePlacement();
+        verify(listener, times(0)).onTransactionReady(eq(id), notNull());
+
+        final int[] nextId = new int[]{-1};
+        bse.queueSyncSet(
+                () -> nextId[0] = startSyncSet(bse, listener),
+                () -> {
+                    bse.setReady(nextId[0]);
+                    bse.addToSyncSet(nextId[0], mockWC2);
+                });
+
+        // Make sure it is queued
+        assertEquals(-1, nextId[0]);
+
+        // Finish the original sync and see that we've started a new sync-set immediately but
+        // that the readiness was posted.
+        mockWC.onSyncFinishedDrawing();
+        verify(mWm.mWindowPlacerLocked).requestTraversal();
+        bse.onSurfacePlacement();
+        verify(listener, times(1)).onTransactionReady(eq(id), notNull());
+
+        assertTrue(nextId[0] != -1);
+        assertFalse(bse.isReady(nextId[0]));
+
+        // now make sure the applySync callback was posted.
+        testHandler.flush();
+        assertTrue(bse.isReady(nextId[0]));
     }
 
     static int startSyncSet(BLASTSyncEngine engine,
