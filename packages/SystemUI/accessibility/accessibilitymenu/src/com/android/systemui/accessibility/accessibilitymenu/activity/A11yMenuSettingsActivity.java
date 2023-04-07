@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility.accessibilitymenu.activity;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,6 +25,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Browser;
 import android.provider.Settings;
+import android.widget.TextView;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -46,6 +48,13 @@ public class A11yMenuSettingsActivity extends FragmentActivity {
                 .beginTransaction()
                 .replace(android.R.id.content, new A11yMenuPreferenceFragment())
                 .commit();
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayShowCustomEnabled(true);
+        actionBar.setCustomView(R.layout.preferences_action_bar);
+        ((TextView) findViewById(R.id.action_bar_title)).setText(
+                getResources().getString(R.string.accessibility_menu_settings_name)
+        );
     }
 
     /**
