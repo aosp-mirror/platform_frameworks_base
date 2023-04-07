@@ -2924,11 +2924,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
             Rect cropBounds = new Rect(bounds);
             cropBounds.offsetTo(0, 0);
+            final boolean isDisplayRotation = wc.asDisplayContent() != null
+                    && wc.asDisplayContent().isRotationChanging();
             ScreenCapture.LayerCaptureArgs captureArgs =
                     new ScreenCapture.LayerCaptureArgs.Builder(wc.getSurfaceControl())
                             .setSourceCrop(cropBounds)
                             .setCaptureSecureLayers(true)
                             .setAllowProtected(true)
+                            .setHintForSeamlessTransition(isDisplayRotation)
                             .build();
             ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
                     ScreenCapture.captureLayers(captureArgs);
@@ -2939,8 +2942,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 Slog.w(TAG, "Failed to capture screenshot for " + wc);
                 return false;
             }
-            final boolean isDisplayRotation = wc.asDisplayContent() != null
-                    && wc.asDisplayContent().isRotationChanging();
             // Some tests may check the name "RotationLayer" to detect display rotation.
             final String name = isDisplayRotation ? "RotationLayer" : "transition snapshot: " + wc;
             SurfaceControl snapshotSurface = wc.makeAnimationLeash()
