@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -80,6 +81,7 @@ fun Entry(
     /** If true, draws a trailing lock icon. */
     isLockedAuthEntry: Boolean = false,
     enforceOneLine: Boolean = false,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
     val iconPadding = Modifier.wrapContentSize().padding(
         // Horizontal padding should be 16dp, but the suggestion chip itself
@@ -104,7 +106,11 @@ fun Entry(
             ) {
                 // Apply weight so that the trailing icon can always show.
                 Column(modifier = Modifier.wrapContentHeight().fillMaxWidth().weight(1f)) {
-                    SmallTitleText(text = entryHeadlineText, enforceOneLine = enforceOneLine)
+                    SmallTitleText(
+                        text = entryHeadlineText,
+                        enforceOneLine = enforceOneLine,
+                        onTextLayout = onTextLayout,
+                    )
                     if (passwordValue != null) {
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
@@ -142,10 +148,18 @@ fun Entry(
                             )
                         }
                     } else if (entrySecondLineText != null) {
-                        BodySmallText(text = entrySecondLineText, enforceOneLine = enforceOneLine)
+                        BodySmallText(
+                            text = entrySecondLineText,
+                            enforceOneLine = enforceOneLine,
+                            onTextLayout = onTextLayout,
+                        )
                     }
                     if (entryThirdLineText != null) {
-                        BodySmallText(text = entryThirdLineText, enforceOneLine = enforceOneLine)
+                        BodySmallText(
+                            text = entryThirdLineText,
+                            enforceOneLine = enforceOneLine,
+                            onTextLayout = onTextLayout,
+                        )
                     }
                 }
                 if (isLockedAuthEntry) {

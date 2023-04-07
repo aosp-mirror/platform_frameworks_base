@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 
@@ -58,14 +59,20 @@ fun BodyMediumText(text: String, modifier: Modifier = Modifier) {
  * Body-small typography; on-surface-variant color.
  */
 @Composable
-fun BodySmallText(text: String, modifier: Modifier = Modifier, enforceOneLine: Boolean = false) {
+fun BodySmallText(
+    text: String,
+    modifier: Modifier = Modifier,
+    enforceOneLine: Boolean = false,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.bodySmall,
         overflow = TextOverflow.Ellipsis,
-        maxLines = if (enforceOneLine) 1 else Int.MAX_VALUE
+        maxLines = if (enforceOneLine) 1 else Int.MAX_VALUE,
+        onTextLayout = onTextLayout,
     )
 }
 
@@ -86,14 +93,20 @@ fun LargeTitleText(text: String, modifier: Modifier = Modifier) {
  * Title-small typography; on-surface color.
  */
 @Composable
-fun SmallTitleText(text: String, modifier: Modifier = Modifier, enforceOneLine: Boolean = false) {
+fun SmallTitleText(
+    text: String,
+    modifier: Modifier = Modifier,
+    enforceOneLine: Boolean = false,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
         color = MaterialTheme.colorScheme.onSurface,
         style = MaterialTheme.typography.titleSmall,
         overflow = TextOverflow.Ellipsis,
-        maxLines = if (enforceOneLine) 1 else Int.MAX_VALUE
+        maxLines = if (enforceOneLine) 1 else Int.MAX_VALUE,
+        onTextLayout = onTextLayout,
     )
 }
 
