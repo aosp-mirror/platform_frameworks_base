@@ -21,7 +21,6 @@ import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.view.View
 import android.view.animation.Interpolator
-import androidx.core.animation.doOnCancel
 import androidx.core.animation.doOnEnd
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -66,11 +65,7 @@ constructor(
     private val mDreamInTranslationYDistance: Int,
     @Named(DreamOverlayModule.DREAM_IN_TRANSLATION_Y_DURATION)
     private val mDreamInTranslationYDurationMs: Long,
-    private val mLogger: DreamLogger,
 ) {
-    companion object {
-        private const val TAG = "DreamOverlayAnimationsController"
-    }
 
     private var mAnimator: Animator? = null
     private lateinit var view: View
@@ -174,11 +169,8 @@ constructor(
                 doOnEnd {
                     mAnimator = null
                     mOverlayStateController.setEntryAnimationsFinished(true)
-                    mLogger.d(TAG, "Dream overlay entry animations finished.")
                 }
-                doOnCancel { mLogger.d(TAG, "Dream overlay entry animations canceled.") }
                 start()
-                mLogger.d(TAG, "Dream overlay entry animations started.")
             }
     }
 
@@ -240,11 +232,8 @@ constructor(
                 doOnEnd {
                     mAnimator = null
                     mOverlayStateController.setExitAnimationsRunning(false)
-                    mLogger.d(TAG, "Dream overlay exit animations finished.")
                 }
-                doOnCancel { mLogger.d(TAG, "Dream overlay exit animations canceled.") }
                 start()
-                mLogger.d(TAG, "Dream overlay exit animations started.")
             }
         mOverlayStateController.setExitAnimationsRunning(true)
         return mAnimator as AnimatorSet
