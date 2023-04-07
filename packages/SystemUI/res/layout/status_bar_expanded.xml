@@ -120,10 +120,6 @@
         />
     </com.android.systemui.shade.NotificationsQuickSettingsContainer>
 
-    <include
-        layout="@layout/keyguard_bottom_area"
-        android:visibility="gone" />
-
     <ViewStub
         android:id="@+id/keyguard_user_switcher_stub"
         android:layout="@layout/keyguard_user_switcher"
@@ -152,6 +148,10 @@
             android:scaleType="centerCrop"/>
 
     </com.android.keyguard.LockIconView>
+
+    <include
+        layout="@layout/keyguard_bottom_area"
+        android:visibility="gone" />
 
     <FrameLayout
         android:id="@+id/preview_container"

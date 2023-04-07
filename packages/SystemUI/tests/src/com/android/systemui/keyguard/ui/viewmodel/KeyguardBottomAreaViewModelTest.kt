@@ -20,10 +20,12 @@ import android.app.admin.DevicePolicyManager
 import android.content.Intent
 import android.os.UserHandle
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.Expandable
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
@@ -38,10 +40,13 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardLongPressInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
@@ -51,6 +56,7 @@ import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
@@ -91,6 +97,8 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
+    @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
+    @Mock private lateinit var accessibilityManager: AccessibilityManagerWrapper
 
     private lateinit var underTest: KeyguardBottomAreaViewModel
 
@@ -134,6 +142,8 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             FakeFeatureFlags().apply {
                 set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, false)
                 set(Flags.FACE_AUTH_REFACTOR, true)
+                set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false)
+                set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, false)
             }
 
         val keyguardInteractor =
@@ -196,6 +206,19 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 dumpManager = mock(),
                 userHandle = UserHandle.SYSTEM,
             )
+        val keyguardLongPressInteractor =
+            KeyguardLongPressInteractor(
+                scope = testScope.backgroundScope,
+                transitionInteractor =
+                    KeyguardTransitionInteractor(
+                        repository = FakeKeyguardTransitionRepository(),
+                    ),
+                repository = repository,
+                logger = UiEventLoggerFake(),
+                featureFlags = featureFlags,
+                broadcastDispatcher = broadcastDispatcher,
+                accessibilityManager = accessibilityManager,
+            )
         underTest =
             KeyguardBottomAreaViewModel(
                 keyguardInteractor = keyguardInteractor,
@@ -216,6 +239,14 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                     ),
                 bottomAreaInteractor = KeyguardBottomAreaInteractor(repository = repository),
                 burnInHelperWrapper = burnInHelperWrapper,
+                longPressViewModel =
+                    KeyguardLongPressViewModel(
+                        interactor = keyguardLongPressInteractor,
+                    ),
+                settingsMenuViewModel =
+                    KeyguardSettingsMenuViewModel(
+                        interactor = keyguardLongPressInteractor,
+                    ),
             )
     }
 
