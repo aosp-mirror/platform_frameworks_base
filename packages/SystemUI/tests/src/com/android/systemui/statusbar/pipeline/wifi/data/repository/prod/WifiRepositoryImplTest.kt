@@ -49,16 +49,14 @@ import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Executor
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
-import org.junit.After
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyInt
@@ -80,8 +78,9 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var wifiManager: WifiManager
     private lateinit var executor: Executor
-    private lateinit var scope: CoroutineScope
     private lateinit var connectivityRepository: ConnectivityRepository
+
+    private val testScope = TestScope(UnconfinedTestDispatcher())
 
     @Before
     fun setUp() {
@@ -96,7 +95,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             )
             .thenReturn(flowOf(Unit))
         executor = FakeExecutor(FakeSystemClock())
-        scope = CoroutineScope(IMMEDIATE)
 
         connectivityRepository =
             ConnectivityRepositoryImpl(
@@ -105,21 +103,16 @@ class WifiRepositoryImplTest : SysuiTestCase() {
                 context,
                 mock(),
                 mock(),
-                scope,
+                testScope.backgroundScope,
                 mock(),
             )
 
         underTest = createRepo()
     }
 
-    @After
-    fun tearDown() {
-        scope.cancel()
-    }
-
     @Test
     fun isWifiEnabled_initiallyGetsWifiManagerValue() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             whenever(wifiManager.isWifiEnabled).thenReturn(true)
 
             underTest = createRepo()
@@ -129,7 +122,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiEnabled_networkCapabilitiesChanged_valueUpdated() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             // We need to call launch on the flows so that they start updating
             val networkJob = underTest.wifiNetwork.launchIn(this)
             val enabledJob = underTest.isWifiEnabled.launchIn(this)
@@ -152,7 +145,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiEnabled_networkLost_valueUpdated() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             // We need to call launch on the flows so that they start updating
             val networkJob = underTest.wifiNetwork.launchIn(this)
             val enabledJob = underTest.isWifiEnabled.launchIn(this)
@@ -173,7 +166,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiEnabled_intentsReceived_valueUpdated() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val intentFlow = MutableSharedFlow<Unit>()
             whenever(
                     broadcastDispatcher.broadcastFlow(
@@ -203,7 +196,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiEnabled_bothIntentAndNetworkUpdates_valueAlwaysUpdated() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val intentFlow = MutableSharedFlow<Unit>()
             whenever(
                     broadcastDispatcher.broadcastFlow(
@@ -242,7 +235,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiDefault_initiallyGetsDefault() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val job = underTest.isWifiDefault.launchIn(this)
 
             assertThat(underTest.isWifiDefault.value).isFalse()
@@ -252,7 +245,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiDefault_wifiNetwork_isTrue() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val job = underTest.isWifiDefault.launchIn(this)
 
             val wifiInfo = mock<WifiInfo>().apply { whenever(this.ssid).thenReturn(SSID) }
@@ -268,7 +261,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     /** Regression test for b/266628069. */
     @Test
     fun isWifiDefault_transportInfoIsNotWifi_andNoWifiTransport_false() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val job = underTest.isWifiDefault.launchIn(this)
 
             val transportInfo =
@@ -294,7 +287,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     /** Regression test for b/266628069. */
     @Test
     fun isWifiDefault_transportInfoIsNotWifi_butHasWifiTransport_true() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val job = underTest.isWifiDefault.launchIn(this)
 
             val transportInfo =
@@ -319,7 +312,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiDefault_carrierMergedViaCellular_isTrue() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val job = underTest.isWifiDefault.launchIn(this)
 
             val carrierMergedInfo =
@@ -341,7 +334,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiDefault_carrierMergedViaCellular_withVcnTransport_isTrue() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val job = underTest.isWifiDefault.launchIn(this)
 
             val capabilities =
@@ -360,7 +353,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiDefault_carrierMergedViaWifi_isTrue() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val job = underTest.isWifiDefault.launchIn(this)
 
             val carrierMergedInfo =
@@ -382,7 +375,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiDefault_carrierMergedViaWifi_withVcnTransport_isTrue() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val job = underTest.isWifiDefault.launchIn(this)
 
             val capabilities =
@@ -401,7 +394,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiDefault_cellularAndWifiTransports_usesCellular_isTrue() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val job = underTest.isWifiDefault.launchIn(this)
 
             val capabilities =
@@ -420,7 +413,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiDefault_cellularNotVcnNetwork_isFalse() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val job = underTest.isWifiDefault.launchIn(this)
 
             val capabilities =
@@ -438,7 +431,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiDefault_isCarrierMergedViaUnderlyingWifi_isTrue() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val job = underTest.isWifiDefault.launchIn(this)
 
             val underlyingNetwork = mock<Network>()
@@ -473,7 +466,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiDefault_isCarrierMergedViaUnderlyingCellular_isTrue() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val job = underTest.isWifiDefault.launchIn(this)
 
             val underlyingCarrierMergedNetwork = mock<Network>()
@@ -507,7 +500,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun isWifiDefault_wifiNetworkLost_isFalse() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val job = underTest.isWifiDefault.launchIn(this)
 
             // First, add a network
@@ -526,7 +519,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_initiallyGetsDefault() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -537,7 +530,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_primaryWifiNetworkAdded_flowHasNetwork() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -561,7 +554,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_isCarrierMerged_flowHasCarrierMerged() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -581,7 +574,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_isCarrierMergedViaUnderlyingWifi_flowHasCarrierMerged() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -618,7 +611,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_isCarrierMergedViaUnderlyingCellular_flowHasCarrierMerged() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -656,7 +649,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_carrierMergedButInvalidSubId_flowHasInvalid() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -680,7 +673,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_isCarrierMerged_getsCorrectValues() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -715,7 +708,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_notValidated_networkNotValidated() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -732,7 +725,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_validated_networkValidated() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -749,7 +742,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_nonPrimaryWifiNetworkAdded_flowHasNoNetwork() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -770,7 +763,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     /** Regression test for b/266628069. */
     @Test
     fun wifiNetwork_transportInfoIsNotWifi_flowHasNoNetwork() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -789,7 +782,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_cellularVcnNetworkAdded_flowHasNetwork() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -811,7 +804,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_nonPrimaryCellularVcnNetworkAdded_flowHasNoNetwork() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -835,7 +828,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_cellularNotVcnNetworkAdded_flowHasNoNetwork() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -854,7 +847,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_cellularAndWifiTransports_usesCellular() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -877,7 +870,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_newPrimaryWifiNetwork_flowHasNewNetwork() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -910,7 +903,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_newNonPrimaryWifiNetwork_flowHasOldNetwork() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -943,7 +936,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_newNetworkCapabilities_flowHasNewData() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -986,7 +979,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_noCurrentNetwork_networkLost_flowHasNoNetwork() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -1001,7 +994,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_currentNetworkLost_flowHasNoNetwork() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -1020,7 +1013,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_unknownNetworkLost_flowHasPreviousNetwork() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -1043,7 +1036,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_notCurrentNetworkLost_flowHasCurrentNetwork() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
 
@@ -1069,7 +1062,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     /** Regression test for b/244173280. */
     @Test
     fun wifiNetwork_multipleSubscribers_newSubscribersGetCurrentValue() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest1: WifiNetworkModel? = null
             val job1 = underTest.wifiNetwork.onEach { latest1 = it }.launchIn(this)
 
@@ -1097,7 +1090,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiActivity_callbackGivesNone_activityFlowHasNone() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: DataActivityModel? = null
             val job = underTest.wifiActivity.onEach { latest = it }.launchIn(this)
 
@@ -1111,7 +1104,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiActivity_callbackGivesIn_activityFlowHasIn() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: DataActivityModel? = null
             val job = underTest.wifiActivity.onEach { latest = it }.launchIn(this)
 
@@ -1125,7 +1118,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiActivity_callbackGivesOut_activityFlowHasOut() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: DataActivityModel? = null
             val job = underTest.wifiActivity.onEach { latest = it }.launchIn(this)
 
@@ -1139,7 +1132,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
     @Test
     fun wifiActivity_callbackGivesInout_activityFlowHasInAndOut() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: DataActivityModel? = null
             val job = underTest.wifiActivity.onEach { latest = it }.launchIn(this)
 
@@ -1159,7 +1152,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             logger,
             tableLogger,
             executor,
-            scope,
+            testScope.backgroundScope,
             wifiManager,
         )
     }
@@ -1204,5 +1197,3 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             }
     }
 }
-
-private val IMMEDIATE = Dispatchers.Main.immediate
