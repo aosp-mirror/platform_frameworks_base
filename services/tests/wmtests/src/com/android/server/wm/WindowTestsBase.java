@@ -77,6 +77,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -886,7 +887,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
     }
 
     BLASTSyncEngine createTestBLASTSyncEngine() {
-        return new BLASTSyncEngine(mWm) {
+        return createTestBLASTSyncEngine(mWm.mH);
+    }
+
+    BLASTSyncEngine createTestBLASTSyncEngine(Handler handler) {
+        return new BLASTSyncEngine(mWm, handler) {
             @Override
             void scheduleTimeout(SyncGroup s, long timeoutMs) {
                 // Disable timeout.
