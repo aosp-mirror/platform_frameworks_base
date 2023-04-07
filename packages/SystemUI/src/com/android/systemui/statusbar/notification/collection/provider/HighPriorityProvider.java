@@ -16,10 +16,13 @@
 
 package com.android.systemui.statusbar.notification.collection.provider;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationManager;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
@@ -63,7 +66,7 @@ public class HighPriorityProvider {
      * A GroupEntry is considered high priority if its representativeEntry (summary) or children are
      * high priority
      */
-    public boolean isHighPriority(ListEntry entry) {
+    public boolean isHighPriority(@Nullable ListEntry entry) {
         if (entry == null) {
             return false;
         }
@@ -78,6 +81,36 @@ public class HighPriorityProvider {
                 || hasHighPriorityChild(entry);
     }
 
+    /**
+     * @return true if the ListEntry is high priority conversation, else false
+     */
+    public boolean isHighPriorityConversation(@NonNull ListEntry entry) {
+        final NotificationEntry notifEntry = entry.getRepresentativeEntry();
+        if (notifEntry == null) {
+            return  false;
+        }
+
+        if (!isPeopleNotification(notifEntry)) {
+            return false;
+        }
+
+        if (notifEntry.getRanking().getImportance() >= NotificationManager.IMPORTANCE_DEFAULT) {
+            return true;
+        }
+
+        return isNotificationEntryWithAtLeastOneImportantChild(entry);
+    }
+
+    private boolean isNotificationEntryWithAtLeastOneImportantChild(@NonNull ListEntry entry) {
+        if (!(entry instanceof GroupEntry)) {
+            return false;
+        }
+        final GroupEntry groupEntry = (GroupEntry) entry;
+        return groupEntry.getChildren().stream().anyMatch(
+                childEntry ->
+                        childEntry.getRanking().getImportance()
+                                >= NotificationManager.IMPORTANCE_DEFAULT);
+    }
 
     private boolean hasHighPriorityChild(ListEntry entry) {
         if (entry instanceof NotificationEntry
@@ -93,7 +126,6 @@ public class HighPriorityProvider {
                 }
             }
         }
-
         return false;
     }
 
