@@ -605,6 +605,12 @@ class TransitionController {
         mCollectingTransition.collectExistenceChange(wc);
     }
 
+    /** @see Transition#recordTaskOrder */
+    void recordTaskOrder(@NonNull WindowContainer wc) {
+        if (mCollectingTransition == null) return;
+        mCollectingTransition.recordTaskOrder(wc);
+    }
+
     /**
      * Collects the window containers which need to be synced with the changing display area into
      * the current collecting transition.
