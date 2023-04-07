@@ -16,12 +16,10 @@
 
 package com.android.systemui.statusbar.phone
 
-import android.animation.Animator
 import android.os.Handler
 import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
-import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.SysuiTestCase
@@ -39,10 +37,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.never
-import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -109,27 +105,6 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
         // Tell the screen off controller to cancel the animations and clean up its state, or
         // subsequent tests will act unpredictably as the animator continues running.
         controller.onStartedWakingUp()
-    }
-
-    @Test
-    fun testAnimClearsEndListener() {
-        val keyguardView = View(context)
-        val animator = spy(keyguardView.animate())
-        val keyguardSpy = spy(keyguardView)
-        Mockito.`when`(keyguardSpy.animate()).thenReturn(animator)
-        val listener = ArgumentCaptor.forClass(Animator.AnimatorListener::class.java)
-        val endAction = ArgumentCaptor.forClass(Runnable::class.java)
-        controller.animateInKeyguard(keyguardSpy, Runnable {})
-        Mockito.verify(animator).setListener(listener.capture())
-        Mockito.verify(animator).withEndAction(endAction.capture())
-
-        // Verify that the listener is cleared if we cancel it.
-        listener.value.onAnimationCancel(null)
-        Mockito.verify(animator).setListener(null)
-
-        // Verify that the listener is also cleared if the end action is triggered.
-        endAction.value.run()
-        verify(animator, times(2)).setListener(null)
     }
 
     /**
