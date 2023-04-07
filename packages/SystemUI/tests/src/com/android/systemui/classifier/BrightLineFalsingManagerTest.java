@@ -94,7 +94,6 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
                 mMetricsLogger, mClassifiers, mSingleTapClassifier, mLongTapClassifier,
                 mDoubleTapClassifier, mHistoryTracker, mKeyguardStateController,
                 mAccessibilityManager, false, mFakeFeatureFlags);
-        mFakeFeatureFlags.set(Flags.FALSING_FOR_LONG_TAPS, true);
         mFakeFeatureFlags.set(Flags.FALSING_OFF_FOR_UNFOLDED, true);
     }
 
