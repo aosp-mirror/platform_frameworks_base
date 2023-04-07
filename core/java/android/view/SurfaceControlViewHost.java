@@ -99,9 +99,16 @@ public class SurfaceControlViewHost {
         @Override
         public ISurfaceSyncGroup getSurfaceSyncGroup() {
             CompletableFuture<ISurfaceSyncGroup> surfaceSyncGroup = new CompletableFuture<>();
-            mViewRoot.mHandler.post(
-                    () -> surfaceSyncGroup.complete(
-                            mViewRoot.getOrCreateSurfaceSyncGroup().mISurfaceSyncGroup));
+            // If the call came from in process and it's already running on the UI thread, return
+            // results immediately instead of posting to the main thread. If we post to the main
+            // thread, it will block itself and the return value will always be null.
+            if (Thread.currentThread() == mViewRoot.mThread) {
+                return mViewRoot.getOrCreateSurfaceSyncGroup().mISurfaceSyncGroup;
+            } else {
+                mViewRoot.mHandler.post(
+                        () -> surfaceSyncGroup.complete(
+                                mViewRoot.getOrCreateSurfaceSyncGroup().mISurfaceSyncGroup));
+            }
             try {
                 return surfaceSyncGroup.get(1, TimeUnit.SECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
