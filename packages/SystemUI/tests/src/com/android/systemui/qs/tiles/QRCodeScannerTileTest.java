@@ -79,6 +79,7 @@ public class QRCodeScannerTileTest extends SysuiTestCase {
 
         mTile = new QRCodeScannerTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

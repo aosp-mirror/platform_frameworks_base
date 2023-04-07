@@ -30,6 +30,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -48,7 +49,9 @@ public class MicrophoneToggleTile extends SensorPrivacyToggleTile {
     public static final String TILE_SPEC = "mictoggle";
 
     @Inject
-    protected MicrophoneToggleTile(QSHost host,
+    protected MicrophoneToggleTile(
+            QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             MetricsLogger metricsLogger,
@@ -58,7 +61,7 @@ public class MicrophoneToggleTile extends SensorPrivacyToggleTile {
             QSLogger qsLogger,
             IndividualSensorPrivacyController sensorPrivacyController,
             KeyguardStateController keyguardStateController) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger, sensorPrivacyController,
                 keyguardStateController);
     }

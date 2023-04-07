@@ -30,6 +30,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R.drawable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -59,6 +60,7 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
             @Named(RBC_AVAILABLE) boolean isAvailable,
             ReduceBrightColorsController reduceBrightColorsController,
             QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -67,7 +69,7 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
             ActivityStarter activityStarter,
             QSLogger qsLogger
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mReduceBrightColorsController = reduceBrightColorsController;
         mReduceBrightColorsController.observe(getLifecycle(), this);

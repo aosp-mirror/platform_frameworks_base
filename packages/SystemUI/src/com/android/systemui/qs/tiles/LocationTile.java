@@ -28,6 +28,7 @@ import android.widget.Switch;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -59,6 +60,7 @@ public class LocationTile extends QSTileImpl<BooleanState> {
     @Inject
     public LocationTile(
             QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -70,7 +72,7 @@ public class LocationTile extends QSTileImpl<BooleanState> {
             KeyguardStateController keyguardStateController,
             PanelInteractor panelInteractor
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = locationController;
         mKeyguard = keyguardStateController;

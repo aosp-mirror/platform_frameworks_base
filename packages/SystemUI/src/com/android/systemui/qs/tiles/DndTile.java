@@ -41,6 +41,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.notification.EnableZenModeDialog;
 import com.android.systemui.Prefs;
@@ -88,6 +89,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
     @Inject
     public DndTile(
             QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -100,7 +102,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
             SecureSettings secureSettings,
             DialogLaunchAnimator dialogLaunchAnimator
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = zenModeController;
         mSharedPreferences = sharedPreferences;

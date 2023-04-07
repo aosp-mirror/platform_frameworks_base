@@ -28,6 +28,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -57,6 +58,7 @@ public class OneHandedModeTile extends QSTileImpl<BooleanState> {
     @Inject
     public OneHandedModeTile(
             QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -66,7 +68,7 @@ public class OneHandedModeTile extends QSTileImpl<BooleanState> {
             QSLogger qsLogger,
             UserTracker userTracker,
             SecureSettings secureSettings) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mSetting = new SettingObserver(secureSettings, mHandler,
                 Settings.Secure.ONE_HANDED_MODE_ENABLED, userTracker.getUserId()) {

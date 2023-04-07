@@ -9,6 +9,7 @@ import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
+import com.android.internal.logging.UiEventLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.settingslib.Utils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
@@ -60,11 +61,11 @@ class BluetoothTileTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
 
         whenever(qsHost.context).thenReturn(mContext)
-        whenever(qsHost.uiEventLogger).thenReturn(uiEventLogger)
 
         tile =
             FakeBluetoothTile(
                 qsHost,
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 falsingManager,
@@ -211,6 +212,7 @@ class BluetoothTileTest : SysuiTestCase() {
 
     private class FakeBluetoothTile(
         qsHost: QSHost,
+        uiEventLogger: UiEventLogger,
         backgroundLooper: Looper,
         mainHandler: Handler,
         falsingManager: FalsingManager,
@@ -222,6 +224,7 @@ class BluetoothTileTest : SysuiTestCase() {
     ) :
         BluetoothTile(
             qsHost,
+            uiEventLogger,
             backgroundLooper,
             mainHandler,
             falsingManager,

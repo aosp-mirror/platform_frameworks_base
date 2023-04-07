@@ -29,6 +29,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -63,6 +64,8 @@ public class InternetTileTest extends SysuiTestCase {
     private AccessPointController mAccessPointController;
     @Mock
     private InternetDialogFactory mInternetDialogFactory;
+    @Mock
+    private UiEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private InternetTile mTile;
@@ -76,6 +79,7 @@ public class InternetTileTest extends SysuiTestCase {
 
         mTile = new InternetTile(
             mHost,
+            mUiEventLogger,
             mTestableLooper.getLooper(),
             new Handler(mTestableLooper.getLooper()),
             new FalsingManagerFake(),

@@ -78,10 +78,11 @@ class AirplaneModeTileTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         mTestableLooper = TestableLooper.get(this)
         Mockito.`when`(mHost.context).thenReturn(mContext)
-        Mockito.`when`(mHost.uiEventLogger).thenReturn(mUiEventLogger)
         Mockito.`when`(mHost.userContext).thenReturn(mContext)
 
-        mTile = AirplaneModeTile(mHost,
+        mTile = AirplaneModeTile(
+            mHost,
+            mUiEventLogger,
             mTestableLooper.looper,
             Handler(mTestableLooper.looper),
             FalsingManagerFake(),

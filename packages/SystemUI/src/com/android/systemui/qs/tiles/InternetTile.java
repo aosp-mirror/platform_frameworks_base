@@ -37,6 +37,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.mobile.TelephonyIcons;
@@ -90,6 +91,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
     @Inject
     public InternetTile(
             QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -101,7 +103,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
             AccessPointController accessPointController,
             InternetDialogFactory internetDialogFactory
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mInternetDialogFactory = internetDialogFactory;
         mHandler = mainHandler;

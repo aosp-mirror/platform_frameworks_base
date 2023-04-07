@@ -37,6 +37,7 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -94,6 +95,8 @@ public class CastTileTest extends SysuiTestCase {
     private QSLogger mQSLogger;
     @Mock
     private DialogLaunchAnimator mDialogLaunchAnimator;
+    @Mock
+    private UiEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private CastTile mCastTile;
@@ -107,6 +110,7 @@ public class CastTileTest extends SysuiTestCase {
 
         mCastTile = new CastTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

@@ -118,7 +118,6 @@ class DeviceControlsTileTest : SysuiTestCase() {
         spiedContext = spy(mContext)
         doNothing().`when`(spiedContext).startActivity(any(Intent::class.java))
         `when`(qsHost.context).thenReturn(spiedContext)
-        `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
         `when`(controlsComponent.isEnabled()).thenReturn(true)
         `when`(controlsController.getPreferredSelection())
                 .thenReturn(SelectedItem.StructureItem(
@@ -399,6 +398,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
     private fun createTile(): DeviceControlsTile {
         return DeviceControlsTile(
                 qsHost,
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 FalsingManagerFake(),

@@ -68,11 +68,11 @@ class DataSaverTileTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
 
         Mockito.`when`(mHost.context).thenReturn(mContext)
-        Mockito.`when`(mHost.uiEventLogger).thenReturn(uiEventLogger)
 
         tile =
             DataSaverTile(
                 mHost,
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 falsingManager,

@@ -103,7 +103,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
     private final TunerService mTunerService;
     private final PluginManager mPluginManager;
     private final QSLogger mQSLogger;
-    private final UiEventLogger mUiEventLogger;
     private final InstanceIdSequence mInstanceIdSequence;
     private final CustomTileStatePersister mCustomTileStatePersister;
     private final Executor mMainExecutor;
@@ -137,7 +136,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             Provider<AutoTileManager> autoTiles,
             Optional<CentralSurfaces> centralSurfacesOptional,
             QSLogger qsLogger,
-            UiEventLogger uiEventLogger,
             UserTracker userTracker,
             SecureSettings secureSettings,
             CustomTileStatePersister customTileStatePersister,
@@ -150,7 +148,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         mTunerService = tunerService;
         mPluginManager = pluginManager;
         mQSLogger = qsLogger;
-        mUiEventLogger = uiEventLogger;
         mMainExecutor = mainExecutor;
         mTileLifeCycleManagerFactory = tileLifecycleManagerFactory;
         mUserFileManager = userFileManager;
@@ -204,11 +201,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         String value = mTunerService.getValue(TILES_SETTING);
         onTuningChanged(TILES_SETTING, "");
         onTuningChanged(TILES_SETTING, value);
-    }
-
-    @Override
-    public UiEventLogger getUiEventLogger() {
-        return mUiEventLogger;
     }
 
     @Override

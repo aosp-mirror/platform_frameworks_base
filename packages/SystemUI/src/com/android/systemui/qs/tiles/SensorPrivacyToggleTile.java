@@ -31,6 +31,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -68,7 +69,9 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
      */
     public abstract String getRestriction();
 
-    protected SensorPrivacyToggleTile(QSHost host,
+    protected SensorPrivacyToggleTile(
+            QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -78,7 +81,7 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
             QSLogger qsLogger,
             IndividualSensorPrivacyController sensorPrivacyController,
             KeyguardStateController keyguardStateController) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mSensorPrivacyController = sensorPrivacyController;
         mKeyguard = keyguardStateController;

@@ -25,6 +25,7 @@ import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.controls.ControlsServiceInfo
@@ -47,6 +48,7 @@ import javax.inject.Inject
 
 class DeviceControlsTile @Inject constructor(
     host: QSHost,
+    uiEventLogger: UiEventLogger,
     @Background backgroundLooper: Looper,
     @Main mainHandler: Handler,
     falsingManager: FalsingManager,
@@ -56,14 +58,15 @@ class DeviceControlsTile @Inject constructor(
     qsLogger: QSLogger,
     private val controlsComponent: ControlsComponent
 ) : QSTileImpl<QSTile.State>(
-        host,
-        backgroundLooper,
-        mainHandler,
-        falsingManager,
-        metricsLogger,
-        statusBarStateController,
-        activityStarter,
-        qsLogger
+    host,
+    uiEventLogger,
+    backgroundLooper,
+    mainHandler,
+    falsingManager,
+    metricsLogger,
+    statusBarStateController,
+    activityStarter,
+    qsLogger
 ) {
 
     private var hasControlsApps = AtomicBoolean(false)

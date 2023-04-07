@@ -88,10 +88,10 @@ public class ColorInversionTileTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
 
         when(mHost.getContext()).thenReturn(mContext);
-        when(mHost.getUiEventLogger()).thenReturn(mUiEventLogger);
 
         mTile = new ColorInversionTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

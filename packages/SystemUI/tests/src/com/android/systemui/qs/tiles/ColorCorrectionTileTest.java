@@ -83,10 +83,10 @@ public class ColorCorrectionTileTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
 
         when(mHost.getContext()).thenReturn(mContext);
-        when(mHost.getUiEventLogger()).thenReturn(mUiEventLogger);
 
         mTile = new ColorCorrectionTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

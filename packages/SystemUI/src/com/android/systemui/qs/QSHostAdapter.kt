@@ -20,7 +20,6 @@ import android.content.ComponentName
 import android.content.Context
 import androidx.annotation.GuardedBy
 import com.android.internal.logging.InstanceId
-import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
@@ -39,7 +38,6 @@ import kotlinx.coroutines.launch
 
 /**
  * Adapter to determine what real class to use for classes that depend on [QSHost].
- *
  * * When [Flags.QS_PIPELINE_NEW_HOST] is off, all calls will be routed to [QSTileHost].
  * * When [Flags.QS_PIPELINE_NEW_HOST] is on, calls regarding the current set of tiles will be
  *   routed to [CurrentTilesInteractor]. Other calls (like [warn]) will still be routed to
@@ -71,10 +69,7 @@ constructor(
     init {
         scope.launch { tileServiceRequestControllerBuilder.create(this@QSHostAdapter).init() }
         // Redirect dump to the correct host (needed for CTS tests)
-        dumpManager.registerCriticalDumpable(
-            TAG,
-            if (useNewHost) interactor else qsTileHost
-        )
+        dumpManager.registerCriticalDumpable(TAG, if (useNewHost) interactor else qsTileHost)
     }
 
     override fun getTiles(): Collection<QSTile> {
@@ -103,10 +98,7 @@ constructor(
 
     override fun addCallback(callback: QSHost.Callback) {
         if (useNewHost) {
-            val job =
-                scope.launch {
-                    interactor.currentTiles.collect { callback.onTilesChanged() }
-                }
+            val job = scope.launch { interactor.currentTiles.collect { callback.onTilesChanged() } }
             synchronized(callbacksMap) { callbacksMap.put(callback, job) }
         } else {
             qsTileHost.addCallback(callback)
@@ -147,10 +139,7 @@ constructor(
 
     override fun addTile(component: ComponentName, end: Boolean) {
         if (useNewHost) {
-            interactor.addTile(
-                TileSpec.create(component),
-                if (end) POSITION_AT_END else 0
-            )
+            interactor.addTile(TileSpec.create(component), if (end) POSITION_AT_END else 0)
         } else {
             qsTileHost.addTile(component, end)
         }
@@ -190,10 +179,6 @@ constructor(
         } else {
             qsTileHost.userId
         }
-    }
-
-    override fun getUiEventLogger(): UiEventLogger {
-        return qsTileHost.uiEventLogger
     }
 
     override fun createTileView(

@@ -109,7 +109,6 @@ class DndTileTest : SysuiTestCase() {
         secureSettings = FakeSettings()
 
         whenever(qsHost.userId).thenReturn(DEFAULT_USER)
-        whenever(qsHost.uiEventLogger).thenReturn(uiEventLogger)
 
         val wrappedContext = object : ContextWrapper(context) {
             override fun getSharedPreferences(file: File?, mode: Int): SharedPreferences {
@@ -120,6 +119,7 @@ class DndTileTest : SysuiTestCase() {
 
         tile = DndTile(
             qsHost,
+            uiEventLogger,
             testableLooper.looper,
             Handler(testableLooper.looper),
             FalsingManagerFake(),

@@ -30,6 +30,7 @@ import android.widget.Switch;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -69,6 +70,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
     @Inject
     public UiModeNightTile(
             QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -80,7 +82,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
             BatteryController batteryController,
             LocationController locationController
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mBatteryController = batteryController;
         mUiModeManager = host.getUserContext().getSystemService(UiModeManager.class);

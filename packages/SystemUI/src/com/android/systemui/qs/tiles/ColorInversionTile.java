@@ -28,6 +28,7 @@ import android.widget.Switch;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.R.drawable;
@@ -55,6 +56,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
     @Inject
     public ColorInversionTile(
             QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -65,7 +67,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
             UserTracker userTracker,
             SecureSettings secureSettings
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
 
         mSetting = new SettingObserver(secureSettings, mHandler,

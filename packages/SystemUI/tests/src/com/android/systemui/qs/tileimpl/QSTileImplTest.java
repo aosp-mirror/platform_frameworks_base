@@ -118,13 +118,21 @@ public class QSTileImplTest extends SysuiTestCase {
         mUiEventLoggerFake = new UiEventLoggerFake();
         when(mHost.indexOf(SPEC)).thenReturn(POSITION);
         when(mHost.getContext()).thenReturn(mContext);
-        when(mHost.getUiEventLogger()).thenReturn(mUiEventLoggerFake);
         when(mHost.getNewInstanceId()).thenReturn(mInstanceId);
 
         Handler mainHandler = new Handler(mTestableLooper.getLooper());
 
-        mTile = new TileImpl(mHost, mTestableLooper.getLooper(), mainHandler, mFalsingManager,
-                mMetricsLogger, mStatusBarStateController, mActivityStarter, mQsLogger);
+        mTile = new TileImpl(
+                mHost,
+                mUiEventLoggerFake,
+                mTestableLooper.getLooper(),
+                mainHandler,
+                mFalsingManager,
+                mMetricsLogger,
+                mStatusBarStateController,
+                mActivityStarter,
+                mQsLogger
+        );
         mTile.initialize();
         mTestableLooper.processAllMessages();
 
@@ -507,6 +515,7 @@ public class QSTileImplTest extends SysuiTestCase {
 
         protected TileImpl(
                 QSHost host,
+                UiEventLogger uiEventLogger,
                 Looper backgroundLooper,
                 Handler mainHandler,
                 FalsingManager falsingManager,
@@ -515,7 +524,7 @@ public class QSTileImplTest extends SysuiTestCase {
                 ActivityStarter activityStarter,
                 QSLogger qsLogger
         ) {
-            super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+            super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                     statusBarStateController, activityStarter, qsLogger);
             getState().state = Tile.STATE_ACTIVE;
         }

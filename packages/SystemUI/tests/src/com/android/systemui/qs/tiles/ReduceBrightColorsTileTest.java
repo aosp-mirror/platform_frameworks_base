@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R.drawable;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -69,6 +70,8 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
     private UserTracker mUserTracker;
     @Mock
     private ReduceBrightColorsController mReduceBrightColorsController;
+    @Mock
+    private UiEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private ReduceBrightColorsTile mTile;
@@ -85,6 +88,7 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
                 true,
                 mReduceBrightColorsController,
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

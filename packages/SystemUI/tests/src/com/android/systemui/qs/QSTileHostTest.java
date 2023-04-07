@@ -117,8 +117,6 @@ public class QSTileHostTest extends SysuiTestCase {
     @Mock
     private CustomTile mCustomTile;
     @Mock
-    private UiEventLogger mUiEventLogger;
-    @Mock
     private UserTracker mUserTracker;
     private SecureSettings mSecureSettings;
     @Mock
@@ -164,7 +162,7 @@ public class QSTileHostTest extends SysuiTestCase {
         saveSetting("");
         mQSTileHost = new TestQSTileHost(mContext, mDefaultFactory, mMainExecutor,
                 mPluginManager, mTunerService, mAutoTiles, mCentralSurfaces,
-                mQSLogger, mUiEventLogger, mUserTracker, mSecureSettings, mCustomTileStatePersister,
+                mQSLogger, mUserTracker, mSecureSettings, mCustomTileStatePersister,
                 mTileLifecycleManagerFactory, mUserFileManager, mFeatureFlags);
 
         mSecureSettings.registerContentObserverForUser(SETTING, new ContentObserver(null) {
@@ -684,14 +682,14 @@ public class QSTileHostTest extends SysuiTestCase {
                 QSFactory defaultFactory, Executor mainExecutor,
                 PluginManager pluginManager, TunerService tunerService,
                 Provider<AutoTileManager> autoTiles,
-                CentralSurfaces centralSurfaces, QSLogger qsLogger, UiEventLogger uiEventLogger,
+                CentralSurfaces centralSurfaces, QSLogger qsLogger,
                 UserTracker userTracker, SecureSettings secureSettings,
                 CustomTileStatePersister customTileStatePersister,
                 TileLifecycleManager.Factory tileLifecycleManagerFactory,
                 UserFileManager userFileManager, FeatureFlags featureFlags) {
             super(context, defaultFactory, mainExecutor, pluginManager,
                     tunerService, autoTiles,  Optional.of(centralSurfaces), qsLogger,
-                    uiEventLogger, userTracker, secureSettings, customTileStatePersister,
+                    userTracker, secureSettings, customTileStatePersister,
                     tileLifecycleManagerFactory, userFileManager, featureFlags);
         }
 
@@ -710,6 +708,7 @@ public class QSTileHostTest extends SysuiTestCase {
         protected TestTile(QSHost host) {
             super(
                     host,
+                    mock(UiEventLogger.class),
                     mock(Looper.class),
                     mock(Handler.class),
                     new FalsingManagerFake(),

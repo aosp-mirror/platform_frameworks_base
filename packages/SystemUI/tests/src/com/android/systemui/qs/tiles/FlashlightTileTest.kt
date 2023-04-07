@@ -56,11 +56,11 @@ class FlashlightTileTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
 
         Mockito.`when`(qsHost.context).thenReturn(mockContext)
-        Mockito.`when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
 
         tile =
             FlashlightTile(
                 qsHost,
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 falsingManager,

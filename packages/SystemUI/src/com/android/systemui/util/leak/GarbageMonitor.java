@@ -46,6 +46,7 @@ import android.util.LongSparseArray;
 import android.view.View;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
@@ -418,6 +419,7 @@ public class GarbageMonitor implements Dumpable {
         @Inject
         public MemoryTile(
                 QSHost host,
+                UiEventLogger uiEventLogger,
                 @Background Looper backgroundLooper,
                 @Main Handler mainHandler,
                 FalsingManager falsingManager,
@@ -428,7 +430,7 @@ public class GarbageMonitor implements Dumpable {
                 GarbageMonitor monitor,
                 PanelInteractor panelInteractor
         ) {
-            super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+            super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                     statusBarStateController, activityStarter, qsLogger);
             gm = monitor;
             mPanelInteractor = panelInteractor;

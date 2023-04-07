@@ -40,6 +40,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -83,6 +84,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     @Inject
     public QuickAccessWalletTile(
             QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -94,7 +96,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
             PackageManager packageManager,
             SecureSettings secureSettings,
             QuickAccessWalletController quickAccessWalletController) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = quickAccessWalletController;
         mKeyguardStateController = keyguardStateController;

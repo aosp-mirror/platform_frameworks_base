@@ -35,6 +35,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.dagger.NightDisplayListenerModule;
@@ -80,6 +81,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
     @Inject
     public NightDisplayTile(
             QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -91,7 +93,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState> implements
             ColorDisplayManager colorDisplayManager,
             NightDisplayListenerModule.Builder nightDisplayListenerBuilder
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mLocationController = locationController;
         mManager = colorDisplayManager;

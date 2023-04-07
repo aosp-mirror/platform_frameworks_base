@@ -21,7 +21,6 @@ import android.os.Build;
 import android.provider.Settings;
 
 import com.android.internal.logging.InstanceId;
-import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
@@ -59,7 +58,6 @@ public interface QSHost {
     Context getContext();
     Context getUserContext();
     int getUserId();
-    UiEventLogger getUiEventLogger();
     Collection<QSTile> getTiles();
     void addCallback(Callback callback);
     void removeCallback(Callback callback);

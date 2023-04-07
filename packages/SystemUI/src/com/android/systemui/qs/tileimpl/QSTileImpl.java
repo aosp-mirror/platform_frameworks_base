@@ -179,6 +179,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     protected QSTileImpl(
             QSHost host,
+            UiEventLogger uiEventLogger,
             Looper backgroundLooper,
             Handler mainHandler,
             FalsingManager falsingManager,
@@ -190,7 +191,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mHost = host;
         mContext = host.getContext();
         mInstanceId = host.getNewInstanceId();
-        mUiEventLogger = host.getUiEventLogger();
+        mUiEventLogger = uiEventLogger;
 
         mUiHandler = mainHandler;
         mHandler = new H(backgroundLooper);

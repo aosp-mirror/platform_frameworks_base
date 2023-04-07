@@ -30,6 +30,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -66,6 +67,8 @@ public class HotspotTileTest extends SysuiTestCase {
     private HotspotController mHotspotController;
     @Mock
     private DataSaverController mDataSaverController;
+    @Mock
+    private UiEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private HotspotTile mTile;
@@ -80,6 +83,7 @@ public class HotspotTileTest extends SysuiTestCase {
 
         mTile = new HotspotTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

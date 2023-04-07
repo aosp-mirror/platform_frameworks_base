@@ -24,6 +24,7 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
@@ -63,6 +64,8 @@ class BatterySaverTileTest : SysuiTestCase() {
     @Mock
     private lateinit var qsHost: QSHost
     @Mock
+    private lateinit var uiEventLogger: UiEventLogger
+    @Mock
     private lateinit var metricsLogger: MetricsLogger
     @Mock
     private lateinit var statusBarStateController: StatusBarStateController
@@ -90,6 +93,7 @@ class BatterySaverTileTest : SysuiTestCase() {
 
         tile = BatterySaverTile(
                 qsHost,
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 FalsingManagerFake(),

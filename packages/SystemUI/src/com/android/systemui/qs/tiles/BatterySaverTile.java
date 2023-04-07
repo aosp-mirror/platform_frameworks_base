@@ -28,6 +28,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -62,6 +63,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     @Inject
     public BatterySaverTile(
             QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -72,7 +74,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
             BatteryController batteryController,
             SecureSettings secureSettings
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mBatteryController = batteryController;
         mBatteryController.observe(getLifecycle(), this);

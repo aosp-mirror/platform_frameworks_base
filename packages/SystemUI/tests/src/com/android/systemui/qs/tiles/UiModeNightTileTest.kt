@@ -81,11 +81,11 @@ class UiModeNightTileTest : SysuiTestCase() {
         `when`(qsHost.userContext).thenReturn(mContext)
         `when`(mockContext.resources).thenReturn(resources)
         `when`(resources.configuration).thenReturn(configuration)
-        `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
 
         tile =
             UiModeNightTile(
                 qsHost,
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 falsingManager,

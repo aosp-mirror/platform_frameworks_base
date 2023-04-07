@@ -67,10 +67,10 @@ class AlarmTileTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
 
         `when`(qsHost.context).thenReturn(mContext)
-        `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
 
         tile = AlarmTile(
             qsHost,
+            uiEventLogger,
             testableLooper.looper,
             Handler(testableLooper.looper),
             FalsingManagerFake(),

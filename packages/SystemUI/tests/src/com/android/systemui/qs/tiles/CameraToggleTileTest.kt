@@ -77,9 +77,10 @@ class CameraToggleTileTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         whenever(host.context).thenReturn(mContext)
-        whenever(host.uiEventLogger).thenReturn(uiEventLogger)
 
-        tile = CameraToggleTile(host,
+        tile = CameraToggleTile(
+                host,
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 metricsLogger,

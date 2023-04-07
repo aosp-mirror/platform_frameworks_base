@@ -80,10 +80,11 @@ class LocationTileTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
-        `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
         `when`(qsHost.context).thenReturn(mockContext)
 
-        tile = LocationTile(qsHost,
+        tile = LocationTile(
+            qsHost,
+            uiEventLogger,
             testableLooper.looper,
             Handler(testableLooper.looper),
             falsingManager,

@@ -35,6 +35,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
@@ -86,6 +87,8 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     private DialogLaunchAnimator mDialogLaunchAnimator;
     @Mock
     private PanelInteractor mPanelInteractor;
+    @Mock
+    private UiEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private ScreenRecordTile mTile;
@@ -100,6 +103,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile = new ScreenRecordTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

@@ -31,6 +31,7 @@ import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -59,6 +60,7 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
     @Inject
     public WorkModeTile(
             QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -68,7 +70,7 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
             QSLogger qsLogger,
             ManagedProfileController managedProfileController
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mProfileController = managedProfileController;
         mProfileController.observe(getLifecycle(), this);

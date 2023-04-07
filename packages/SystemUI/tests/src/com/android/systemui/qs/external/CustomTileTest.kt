@@ -33,6 +33,7 @@ import android.testing.TestableLooper
 import android.view.IWindowManager
 import android.view.View
 import com.android.internal.logging.MetricsLogger
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.LaunchableFrameLayout
@@ -89,6 +90,7 @@ class CustomTileTest : SysuiTestCase() {
     @Mock private lateinit var applicationInfo: ApplicationInfo
     @Mock private lateinit var serviceInfo: ServiceInfo
     @Mock private lateinit var customTileStatePersister: CustomTileStatePersister
+    @Mock private lateinit var uiEventLogger: UiEventLogger
 
     private var displayTracker = FakeDisplayTracker(mContext)
     private lateinit var customTile: CustomTile
@@ -115,6 +117,7 @@ class CustomTileTest : SysuiTestCase() {
 
         customTileBuilder = CustomTile.Builder(
                 { tileHost },
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 FalsingManagerFake(),

@@ -31,7 +31,7 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.qs.QSTileHost
+import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -52,7 +52,7 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class FontScalingTileTest : SysuiTestCase() {
-    @Mock private lateinit var qsHost: QSTileHost
+    @Mock private lateinit var qsHost: QSHost
     @Mock private lateinit var metricsLogger: MetricsLogger
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var activityStarter: ActivityStarter
@@ -70,11 +70,11 @@ class FontScalingTileTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         `when`(qsHost.getContext()).thenReturn(mContext)
-        `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
 
         fontScalingTile =
             FontScalingTile(
                 qsHost,
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 FalsingManagerFake(),

@@ -30,6 +30,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
@@ -74,6 +75,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
     @Inject
     public ScreenRecordTile(
             QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -88,7 +90,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             DialogLaunchAnimator dialogLaunchAnimator,
             PanelInteractor panelInteractor
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = controller;
         mController.observe(this, mCallback);

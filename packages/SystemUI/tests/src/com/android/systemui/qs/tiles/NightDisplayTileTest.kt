@@ -78,7 +78,6 @@ class NightDisplayTileTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         mTestableLooper = TestableLooper.get(this)
         whenever(mHost.context).thenReturn(mContext)
-        whenever(mHost.uiEventLogger).thenReturn(mUiEventLogger)
         whenever(mHost.userContext).thenReturn(mContext)
         whenever(mNightDisplayListenerBuilder.setUser(anyInt()))
             .thenReturn(mNightDisplayListenerBuilder)
@@ -87,6 +86,7 @@ class NightDisplayTileTest : SysuiTestCase() {
         mTile =
             NightDisplayTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.looper,
                 Handler(mTestableLooper.looper),
                 FalsingManagerFake(),

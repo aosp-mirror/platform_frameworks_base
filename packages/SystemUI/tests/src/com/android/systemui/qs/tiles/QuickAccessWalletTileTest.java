@@ -136,7 +136,6 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
 
         doNothing().when(mSpiedContext).startActivity(any(Intent.class));
         when(mHost.getContext()).thenReturn(mSpiedContext);
-        when(mHost.getUiEventLogger()).thenReturn(mUiEventLogger);
         when(mQuickAccessWalletClient.getServiceLabel()).thenReturn(LABEL);
         when(mQuickAccessWalletClient.getTileIcon()).thenReturn(mTileIcon);
         when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(true);
@@ -146,6 +145,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
 
         mTile = new QuickAccessWalletTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

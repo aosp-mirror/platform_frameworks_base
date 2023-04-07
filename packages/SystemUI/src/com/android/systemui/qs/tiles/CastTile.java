@@ -35,6 +35,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.app.MediaRouteDialogPresenter;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -84,6 +85,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
     @Inject
     public CastTile(
             QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -97,7 +99,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
             HotspotController hotspotController,
             DialogLaunchAnimator dialogLaunchAnimator
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = castController;
         mKeyguard = keyguardStateController;

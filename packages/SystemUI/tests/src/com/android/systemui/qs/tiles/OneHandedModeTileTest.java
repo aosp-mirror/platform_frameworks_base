@@ -28,6 +28,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
@@ -65,6 +66,8 @@ public class OneHandedModeTileTest extends SysuiTestCase {
     private UserTracker mUserTracker;
     @Mock
     private SecureSettings mSecureSettings;
+    @Mock
+    private UiEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private OneHandedModeTile mTile;
@@ -78,6 +81,7 @@ public class OneHandedModeTileTest extends SysuiTestCase {
 
         mTile = spy(new OneHandedModeTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

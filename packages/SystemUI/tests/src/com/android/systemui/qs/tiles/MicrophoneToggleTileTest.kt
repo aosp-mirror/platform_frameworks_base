@@ -77,9 +77,10 @@ class MicrophoneToggleTileTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         whenever(host.context).thenReturn(mContext)
-        whenever(host.uiEventLogger).thenReturn(uiEventLogger)
 
-        tile = MicrophoneToggleTile(host,
+        tile = MicrophoneToggleTile(
+                host,
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 metricsLogger,

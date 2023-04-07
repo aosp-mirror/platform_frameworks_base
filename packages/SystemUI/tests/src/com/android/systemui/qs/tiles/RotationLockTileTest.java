@@ -32,6 +32,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -87,6 +88,8 @@ public class RotationLockTileTest extends SysuiTestCase {
     DeviceStateRotationLockSettingController mDeviceStateRotationLockSettingController;
     @Mock
     RotationPolicyWrapper mRotationPolicyWrapper;
+    @Mock
+    UiEventLogger mUiEventLogger;
 
     private RotationLockController mController;
     private TestableLooper mTestableLooper;
@@ -105,6 +108,7 @@ public class RotationLockTileTest extends SysuiTestCase {
 
         mLockTile = new RotationLockTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

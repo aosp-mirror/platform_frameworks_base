@@ -38,6 +38,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -90,6 +91,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
     @Inject
     public DreamTile(
             QSHost host,
+            UiEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -105,7 +107,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
             @Named(DreamModule.DREAM_ONLY_ENABLED_FOR_DOCK_USER)
                     boolean dreamOnlyEnabledForDockUser
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mDreamManager = dreamManager;
         mBroadcastDispatcher = broadcastDispatcher;
