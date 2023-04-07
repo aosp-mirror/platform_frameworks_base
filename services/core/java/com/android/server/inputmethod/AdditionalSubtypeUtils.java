@@ -286,7 +286,6 @@ final class AdditionalSubtypeUtils {
                     final InputMethodSubtype.InputMethodSubtypeBuilder
                             builder = new InputMethodSubtype.InputMethodSubtypeBuilder()
                             .setSubtypeNameResId(label)
-                            .setSubtypeNameOverride(untranslatableName)
                             .setPhysicalKeyboardHint(
                                     pkLanguageTag == null ? null : new ULocale(pkLanguageTag),
                                     pkLayoutType == null ? "" : pkLayoutType)
@@ -301,6 +300,9 @@ final class AdditionalSubtypeUtils {
                             InputMethodSubtype.SUBTYPE_ID_NONE);
                     if (subtypeId != InputMethodSubtype.SUBTYPE_ID_NONE) {
                         builder.setSubtypeId(subtypeId);
+                    }
+                    if (untranslatableName != null) {
+                        builder.setSubtypeNameOverride(untranslatableName);
                     }
                     tempSubtypesArray.add(builder.build());
                 }
