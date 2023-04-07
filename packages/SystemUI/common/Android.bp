@@ -1,4 +1,4 @@
-// Copyright (C) 2016 The Android Open Source Project
+// Copyright (C) 2023 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,38 +21,19 @@ package {
     default_applicable_licenses: ["frameworks_base_packages_SystemUI_license"],
 }
 
-java_library {
+android_library {
 
-    name: "SystemUIPluginLib",
+    name: "SystemUICommon",
 
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
-        "bcsmartspace/src/**/*.java",
-        "bcsmartspace/src/**/*.kt",
     ],
 
     static_libs: [
-        "androidx.annotation_annotation",
-        "error_prone_annotations",
-        "PluginCoreLib",
-        "SystemUIAnimationLib",
-        "SystemUICommon",
+        "androidx.core_core-ktx",
     ],
 
-}
-
-android_app {
-
-    // Dummy to generate .toc files.
-    name: "PluginDummyLib",
-    platform_apis: true,
-    srcs: ["src/**/*.java"],
-
-    libs: ["SystemUIPluginLib"],
-
-    optimize: {
-        enabled: false,
-    },
-
+    manifest: "AndroidManifest.xml",
+    kotlincflags: ["-Xjvm-default=all"],
 }
