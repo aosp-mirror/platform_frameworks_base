@@ -475,6 +475,18 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RecentTasks.java"
     },
+    "-1643780158": {
+      "message": "Saving original orientation before camera compat, last orientation is %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
+    },
+    "-1639406696": {
+      "message": "NOSENSOR override detected",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotationReversionController.java"
+    },
     "-1638958146": {
       "message": "Removing activity %s from task=%s adding to task=%s Callers=%s",
       "level": "INFO",
@@ -750,6 +762,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
+    },
+    "-1397175017": {
+      "message": "Other orientation overrides are in place: not reverting",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotationReversionController.java"
     },
     "-1394745488": {
       "message": "ControlAdapter onAnimationCancelled mSource: %s mControlTarget: %s",
@@ -1711,6 +1729,12 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
     },
+    "-529187878": {
+      "message": "Reverting orientation after camera compat force rotation",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
+    },
     "-521613870": {
       "message": "App died during pause, not stopping: %s",
       "level": "VERBOSE",
@@ -2382,6 +2406,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "138097009": {
+      "message": "NOSENSOR override is absent: reverting",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotationReversionController.java"
     },
     "140319294": {
       "message": "IME target changed within ActivityRecord",
