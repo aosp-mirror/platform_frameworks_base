@@ -215,6 +215,7 @@ public final class InputWindowHandle {
                 .append(", scaleFactor=").append(scaleFactor)
                 .append(", transform=").append(transform)
                 .append(", windowToken=").append(windowToken)
+                .append(", displayId=").append(displayId)
                 .append(", isClone=").append((inputConfig & InputConfig.CLONE) != 0)
                 .toString();
 
