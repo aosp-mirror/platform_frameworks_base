@@ -453,9 +453,15 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
     VulkanSurface::NativeBufferInfo* bufferInfo = &mNativeBuffers[idx];
 
     if (bufferInfo->skSurface.get() == nullptr) {
+        SkSurfaceProps surfaceProps;
+        if (mWindowInfo.colorMode != ColorMode::Default) {
+            surfaceProps = SkSurfaceProps(SkSurfaceProps::kAlwaysDither_Flag | surfaceProps.flags(),
+                                          surfaceProps.pixelGeometry());
+        }
         bufferInfo->skSurface = SkSurface::MakeFromAHardwareBuffer(
                 mGrContext, ANativeWindowBuffer_getHardwareBuffer(bufferInfo->buffer.get()),
-                kTopLeft_GrSurfaceOrigin, mWindowInfo.colorspace, nullptr, /*from_window=*/true);
+                kTopLeft_GrSurfaceOrigin, mWindowInfo.colorspace, &surfaceProps,
+                /*from_window=*/true);
         if (bufferInfo->skSurface.get() == nullptr) {
             ALOGE("SkSurface::MakeFromAHardwareBuffer failed");
             mNativeWindow->cancelBuffer(mNativeWindow.get(), buffer,
@@ -542,16 +548,6 @@ void VulkanSurface::setColorSpace(sk_sp<SkColorSpace> colorSpace) {
                   "failed: %s (%d)",
                   mWindowInfo.dataspace, strerror(-err), err);
         }
-    }
-}
-
-bool VulkanSurface::isBeyond8Bit() const {
-    switch (mWindowInfo.bufferFormat) {
-        case AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM:
-        case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
-            return true;
-        default:
-            return false;
     }
 }
 

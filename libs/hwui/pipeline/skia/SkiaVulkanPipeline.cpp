@@ -203,11 +203,6 @@ sk_sp<Bitmap> SkiaVulkanPipeline::allocateHardwareBitmap(renderthread::RenderThr
     return nullptr;
 }
 
-bool SkiaVulkanPipeline::shouldForceDither() const {
-    if (mVkSurface && mVkSurface->isBeyond8Bit()) return false;
-    return SkiaPipeline::shouldForceDither();
-}
-
 void SkiaVulkanPipeline::onContextDestroyed() {
     if (mVkSurface) {
         vulkanManager().destroySurface(mVkSurface);
