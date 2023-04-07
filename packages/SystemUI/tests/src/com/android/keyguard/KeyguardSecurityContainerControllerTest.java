@@ -350,7 +350,9 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 eq(mFalsingA11yDelegate));
         captor.getValue().showUnlockToContinueMessage();
         verify(mKeyguardPasswordViewControllerMock).showMessage(
-                getContext().getString(R.string.keyguard_unlock_to_continue), null);
+                /* message= */ getContext().getString(R.string.keyguard_unlock_to_continue),
+                /* colorState= */ null,
+                /* animated= */ true);
     }
 
     @Test
@@ -483,7 +485,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
         registeredSwipeListener.onSwipeUp();
 
-        verify(mKeyguardPasswordViewControllerMock).showMessage(null, null);
+        verify(mKeyguardPasswordViewControllerMock).showMessage(/* message= */
+                null, /* colorState= */ null, /* animated= */ true);
     }
 
     @Test
@@ -496,7 +499,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
         registeredSwipeListener.onSwipeUp();
 
-        verify(mKeyguardPasswordViewControllerMock, never()).showMessage(null, null);
+        verify(mKeyguardPasswordViewControllerMock, never()).showMessage(/* message= */
+                null, /* colorState= */ null, /* animated= */ true);
     }
 
     @Test

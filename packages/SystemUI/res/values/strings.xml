@@ -3069,6 +3069,9 @@
     -->
     <string name="lock_screen_settings">Customize lock screen</string>
 
+    <!-- Title of security view when we want to authenticate before customizing the lockscreen. [CHAR LIMIT=NONE] -->
+    <string name="keyguard_unlock_to_customize_ls">Unlock to customize lock screen</string>
+
     <!-- Content description for Wi-Fi not available icon on dream [CHAR LIMIT=NONE]-->
     <string name="wifi_unavailable_dream_overlay_content_description">Wi-Fi not available</string>
 

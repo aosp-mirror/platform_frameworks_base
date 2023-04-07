@@ -1278,12 +1278,13 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 new Intent(),
                 /* onlyProvisioned = */false,
                 /* dismissShade = */false);
-        verify(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any(Runnable.class));
         ArgumentCaptor<OnDismissAction> onDismissActionCaptor =
                 ArgumentCaptor.forClass(OnDismissAction.class);
         verify(mStatusBarKeyguardViewManager)
-                .dismissWithAction(onDismissActionCaptor.capture(), any(Runnable.class), eq(true));
+                .dismissWithAction(onDismissActionCaptor.capture(), any(Runnable.class), eq(true),
+                        eq(null));
         assertThat(onDismissActionCaptor.getValue().onDismiss()).isFalse();
+        verify(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any(Runnable.class));
     }
 
     @Test

@@ -65,7 +65,6 @@ import com.android.keyguard.KeyguardSecurityContainer.BouncerUiEvent;
 import com.android.keyguard.KeyguardSecurityContainer.SwipeListener;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
-import com.android.settingslib.Utils;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
@@ -304,7 +303,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                         FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER);
                 mKeyguardSecurityCallback.userActivity();
                 if (didFaceAuthRun) {
-                    showMessage(null, null);
+                    showMessage(/* message= */ null, /* colorState= */ null, /* animated= */ true);
                 }
             }
             if (mUpdateMonitor.isFaceEnrolled()) {
@@ -512,9 +511,10 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
     }
 
-    public void showMessage(CharSequence message, ColorStateList colorState) {
+    /** Set message of bouncer title. */
+    public void showMessage(CharSequence message, ColorStateList colorState, boolean animated) {
         if (mCurrentSecurityMode != SecurityMode.None) {
-            getCurrentSecurityController().showMessage(message, colorState);
+            getCurrentSecurityController().showMessage(message, colorState, animated);
         }
     }
 
@@ -640,7 +640,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     public void setInitialMessage() {
         CharSequence customMessage = mViewMediatorCallback.consumeCustomMessage();
         if (!TextUtils.isEmpty(customMessage)) {
-            showMessage(customMessage, Utils.getColorError(getContext()));
+            showMessage(customMessage, /* colorState= */ null, /* animated= */ false);
             return;
         }
         showPromptReason(mViewMediatorCallback.getBouncerPromptReason());
@@ -981,7 +981,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
         mView.initMode(mode, mGlobalSettings, mFalsingManager, mUserSwitcherController,
                 () -> showMessage(getContext().getString(R.string.keyguard_unlock_to_continue),
-                        null), mFalsingA11yDelegate);
+                        /* colorState= */ null, /* animated= */ true), mFalsingA11yDelegate);
     }
 
     public void reportFailedUnlockAttempt(int userId, int timeoutMs) {
