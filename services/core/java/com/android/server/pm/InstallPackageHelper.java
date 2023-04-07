@@ -3604,6 +3604,11 @@ final class InstallPackageHelper {
                 // remove the package from the system and re-scan it without any
                 // special privileges
                 mRemovePackageHelper.removePackage(pkg, true);
+                PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
+                if (ps != null) {
+                    ps.getPkgState().setUpdatedSystemApp(false);
+                }
+
                 try {
                     final File codePath = new File(pkg.getPath());
                     synchronized (mPm.mInstallLock) {
