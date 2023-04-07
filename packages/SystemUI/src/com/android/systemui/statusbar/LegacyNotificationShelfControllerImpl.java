@@ -34,7 +34,7 @@ import javax.inject.Inject;
  * Controller class for {@link NotificationShelf}.
  */
 @NotificationRowScope
-public class NotificationShelfController {
+public class LegacyNotificationShelfControllerImpl implements NotificationShelfController {
     private final NotificationShelf mView;
     private final ActivatableNotificationViewController mActivatableNotificationViewController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -43,7 +43,7 @@ public class NotificationShelfController {
     private AmbientState mAmbientState;
 
     @Inject
-    public NotificationShelfController(
+    public LegacyNotificationShelfControllerImpl(
             NotificationShelf notificationShelf,
             ActivatableNotificationViewController activatableNotificationViewController,
             KeyguardBypassController keyguardBypassController,
@@ -78,33 +78,40 @@ public class NotificationShelfController {
         }
     }
 
+    @Override
     public NotificationShelf getView() {
         return mView;
     }
 
+    @Override
     public boolean canModifyColorOfNotifications() {
         return mAmbientState.isShadeExpanded()
                 && !(mAmbientState.isOnKeyguard() && mKeyguardBypassController.getBypassEnabled());
     }
 
+    @Override
     public NotificationIconContainer getShelfIcons() {
         return mView.getShelfIcons();
     }
 
+    @Override
     public void bind(AmbientState ambientState,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController) {
         mView.bind(ambientState, notificationStackScrollLayoutController);
         mAmbientState = ambientState;
     }
 
+    @Override
     public int getIntrinsicHeight() {
         return mView.getIntrinsicHeight();
     }
 
+    @Override
     public void setOnActivatedListener(ActivatableNotificationView.OnActivatedListener listener) {
         mView.setOnActivatedListener(listener);
     }
 
+    @Override
     public void setOnClickListener(View.OnClickListener onClickListener) {
         mView.setOnClickListener(onClickListener);
     }

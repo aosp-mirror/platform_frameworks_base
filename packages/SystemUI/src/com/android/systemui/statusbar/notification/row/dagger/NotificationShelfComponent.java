@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row.dagger;
 
+import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl;
 import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 
 import dagger.Binds;
@@ -46,7 +46,8 @@ public interface NotificationShelfComponent {
      * Creates a NotificationShelfController.
      */
     @NotificationRowScope
-    NotificationShelfController getNotificationShelfController();
+    LegacyNotificationShelfControllerImpl getNotificationShelfController();
+
     /**
      * Dagger Module that extracts interesting properties from a NotificationShelf.
      */
