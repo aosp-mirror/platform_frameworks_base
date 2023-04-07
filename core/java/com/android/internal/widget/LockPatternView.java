@@ -80,6 +80,7 @@ public class LockPatternView extends View {
     private static final int DOT_ACTIVATION_DURATION_MILLIS = 50;
     private static final int DOT_RADIUS_INCREASE_DURATION_MILLIS = 96;
     private static final int DOT_RADIUS_DECREASE_DURATION_MILLIS = 192;
+    private static final int ALPHA_MAX_VALUE = 255;
     private static final float MIN_DOT_HIT_FACTOR = 0.2f;
     private final CellState[][] mCellStates;
 
@@ -92,6 +93,8 @@ public class LockPatternView extends View {
     private final int mPathWidth;
     private final int mLineFadeOutAnimationDurationMs;
     private final int mLineFadeOutAnimationDelayMs;
+    private final int mFadePatternAnimationDurationMs;
+    private final int mFadePatternAnimationDelayMs;
 
     private boolean mDrawingProfilingStarted = false;
 
@@ -148,6 +151,10 @@ public class LockPatternView extends View {
     private boolean mPatternInProgress = false;
     private boolean mFadePattern = true;
 
+    private boolean mFadeClear = false;
+    private int mFadeAnimationAlpha = ALPHA_MAX_VALUE;
+    private final Path mPatternPath = new Path();
+
     @UnsupportedAppUsage
     private float mSquareWidth;
     @UnsupportedAppUsage
@@ -169,6 +176,7 @@ public class LockPatternView extends View {
 
     private final Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mLinearOutSlowInInterpolator;
+    private final Interpolator mStandardAccelerateInterpolator;
     private final PatternExploreByTouchHelper mExploreByTouchHelper;
 
     private Drawable mSelectedDrawable;
@@ -356,6 +364,11 @@ public class LockPatternView extends View {
         mLineFadeOutAnimationDelayMs =
             getResources().getInteger(R.integer.lock_pattern_line_fade_out_delay);
 
+        mFadePatternAnimationDurationMs =
+                getResources().getInteger(R.integer.lock_pattern_fade_pattern_duration);
+        mFadePatternAnimationDelayMs =
+                getResources().getInteger(R.integer.lock_pattern_fade_pattern_delay);
+
         mDotSize = getResources().getDimensionPixelSize(R.dimen.lock_pattern_dot_size);
         mDotSizeActivated = getResources().getDimensionPixelSize(
                 R.dimen.lock_pattern_dot_size_activated);
@@ -386,6 +399,8 @@ public class LockPatternView extends View {
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
         mLinearOutSlowInInterpolator =
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
+        mStandardAccelerateInterpolator =
+                AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_linear_in);
         mExploreByTouchHelper = new PatternExploreByTouchHelper(this);
         setAccessibilityDelegate(mExploreByTouchHelper);
 
@@ -626,6 +641,15 @@ public class LockPatternView extends View {
         resetPattern();
     }
 
+    /**
+     * Clear the pattern by fading it out.
+     */
+    @UnsupportedAppUsage
+    public void fadeClearPattern() {
+        mFadeClear = true;
+        startFadePatternAnimation();
+    }
+
     @Override
     protected boolean dispatchHoverEvent(MotionEvent event) {
         // Dispatch to onHoverEvent first so mPatternInProgress is up to date when the
@@ -643,6 +667,7 @@ public class LockPatternView extends View {
             resetLastActivatedCellProgress();
         }
         mPattern.clear();
+        mPatternPath.reset();
         clearPatternDrawLookup();
         mPatternDisplayMode = DisplayMode.Correct;
         invalidate();
@@ -813,6 +838,33 @@ public class LockPatternView extends View {
             startCellActivatedAnimation(newCell);
         }
         notifyCellAdded();
+    }
+
+    private void startFadePatternAnimation() {
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.play(createFadePatternAnimation());
+        animatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mFadeAnimationAlpha = ALPHA_MAX_VALUE;
+                mFadeClear = false;
+                resetPattern();
+            }
+        });
+        animatorSet.start();
+
+    }
+
+    private Animator createFadePatternAnimation() {
+        ValueAnimator valueAnimator = ValueAnimator.ofInt(ALPHA_MAX_VALUE, 0);
+        valueAnimator.addUpdateListener(animation -> {
+            mFadeAnimationAlpha = (int) animation.getAnimatedValue();
+            invalidate();
+        });
+        valueAnimator.setInterpolator(mStandardAccelerateInterpolator);
+        valueAnimator.setStartDelay(mFadePatternAnimationDelayMs);
+        valueAnimator.setDuration(mFadePatternAnimationDurationMs);
+        return valueAnimator;
     }
 
     private void startCellActivatedAnimation(Cell cell) {
@@ -1247,14 +1299,14 @@ public class LockPatternView extends View {
         // draw the path of the pattern (unless we are in stealth mode)
         final boolean drawPath = !mInStealthMode;
 
-        if (drawPath) {
+        if (drawPath && !mFadeClear) {
             mPathPaint.setColor(getCurrentColor(true /* partOfPattern */));
 
             boolean anyCircles = false;
             float lastX = 0f;
             float lastY = 0f;
             long elapsedRealtime = SystemClock.elapsedRealtime();
-           for (int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++) {
                 Cell cell = pattern.get(i);
 
                 // only draw the part of the pattern stored in
@@ -1285,6 +1337,11 @@ public class LockPatternView extends View {
                     }
                     drawLineSegment(canvas, /* startX = */ lastX, /* startY = */ lastY, endX, endY,
                             mLineFadeStart[i], elapsedRealtime);
+
+                    Path tempPath = new Path();
+                    tempPath.moveTo(lastX, lastY);
+                    tempPath.lineTo(centerX, centerY);
+                    mPatternPath.addPath(tempPath);
                 }
                 lastX = centerX;
                 lastY = centerY;
@@ -1301,6 +1358,11 @@ public class LockPatternView extends View {
                         mInProgressX, mInProgressY, lastX, lastY) * 255f));
                 canvas.drawPath(currentPath, mPathPaint);
             }
+        }
+
+        if (mFadeClear) {
+            mPathPaint.setAlpha(mFadeAnimationAlpha);
+            canvas.drawPath(mPatternPath, mPathPaint);
         }
 
         // draw the circles
