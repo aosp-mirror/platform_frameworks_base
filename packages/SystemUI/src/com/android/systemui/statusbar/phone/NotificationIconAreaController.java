@@ -193,7 +193,6 @@ public class NotificationIconAreaController implements
 
     public void setupShelf(NotificationShelfController notificationShelfController) {
         mShelfIcons = notificationShelfController.getShelfIcons();
-        notificationShelfController.setCollapsedIcons(mNotificationIcons);
     }
 
     public void onDensityOrFontScaleChanged(Context context) {

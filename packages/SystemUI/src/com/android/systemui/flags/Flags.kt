@@ -103,6 +103,11 @@ object Flags {
     val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
         releasedFlag(254647461, "filter_unseen_notifs_on_keyguard")
 
+    // TODO(b/277338665): Tracking Bug
+    @JvmField
+    val NOTIFICATION_SHELF_REFACTOR =
+        unreleasedFlag(271161129, "notification_shelf_refactor")
+
     // TODO(b/263414400): Tracking Bug
     @JvmField
     val NOTIFICATION_ANIMATE_BIG_PICTURE =
