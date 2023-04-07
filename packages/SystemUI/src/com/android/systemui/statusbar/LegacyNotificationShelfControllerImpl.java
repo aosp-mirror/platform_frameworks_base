@@ -25,7 +25,6 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowScope;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 
@@ -35,7 +34,7 @@ import javax.inject.Inject;
  * Controller class for {@link NotificationShelf}.
  */
 @NotificationRowScope
-public class NotificationShelfController {
+public class LegacyNotificationShelfControllerImpl implements NotificationShelfController {
     private final NotificationShelf mView;
     private final ActivatableNotificationViewController mActivatableNotificationViewController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -44,7 +43,7 @@ public class NotificationShelfController {
     private AmbientState mAmbientState;
 
     @Inject
-    public NotificationShelfController(
+    public LegacyNotificationShelfControllerImpl(
             NotificationShelf notificationShelf,
             ActivatableNotificationViewController activatableNotificationViewController,
             KeyguardBypassController keyguardBypassController,
@@ -79,56 +78,42 @@ public class NotificationShelfController {
         }
     }
 
+    @Override
     public NotificationShelf getView() {
         return mView;
     }
 
+    @Override
     public boolean canModifyColorOfNotifications() {
         return mAmbientState.isShadeExpanded()
                 && !(mAmbientState.isOnKeyguard() && mKeyguardBypassController.getBypassEnabled());
     }
 
+    @Override
     public NotificationIconContainer getShelfIcons() {
         return mView.getShelfIcons();
     }
 
-    public @View.Visibility int getVisibility() {
-        return mView.getVisibility();
-    }
-
-    public void setCollapsedIcons(NotificationIconContainer notificationIcons) {
-        mView.setCollapsedIcons(notificationIcons);
-    }
-
+    @Override
     public void bind(AmbientState ambientState,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController) {
         mView.bind(ambientState, notificationStackScrollLayoutController);
         mAmbientState = ambientState;
     }
 
-    public int getHeight() {
-        return mView.getHeight();
-    }
-
-    public void updateState(StackScrollAlgorithm.StackScrollAlgorithmState algorithmState,
-            AmbientState ambientState) {
-        mAmbientState = ambientState;
-        mView.updateState(algorithmState, ambientState);
-    }
-
+    @Override
     public int getIntrinsicHeight() {
         return mView.getIntrinsicHeight();
     }
 
+    @Override
     public void setOnActivatedListener(ActivatableNotificationView.OnActivatedListener listener) {
         mView.setOnActivatedListener(listener);
     }
 
+    @Override
     public void setOnClickListener(View.OnClickListener onClickListener) {
         mView.setOnClickListener(onClickListener);
     }
 
-    public int getNotGoneIndex() {
-        return mView.getNotGoneIndex();
-    }
 }

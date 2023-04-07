@@ -64,8 +64,7 @@ import java.io.PrintWriter;
  * A notification shelf view that is placed inside the notification scroller. It manages the
  * overflow icons that don't fit into the regular list anymore.
  */
-public class NotificationShelf extends ActivatableNotificationView implements
-        View.OnLayoutChangeListener, StateListener {
+public class NotificationShelf extends ActivatableNotificationView implements StateListener {
 
     private static final int TAG_CONTINUOUS_CLIPPING = R.id.continuous_clipping_tag;
     private static final String TAG = "NotificationShelf";
@@ -78,7 +77,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private static final SourceType SHELF_SCROLL = SourceType.from("ShelfScroll");
 
     private NotificationIconContainer mShelfIcons;
-    private int[] mTmp = new int[2];
     private boolean mHideBackground;
     private int mStatusBarHeight;
     private boolean mEnableNotificationClipping;
@@ -87,7 +85,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private int mPaddingBetweenElements;
     private int mNotGoneIndex;
     private boolean mHasItemsInStableShelf;
-    private NotificationIconContainer mCollapsedIcons;
     private int mScrollFastThreshold;
     private int mStatusBarState;
     private boolean mInteractive;
@@ -868,10 +865,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
         return mShelfIcons.getIconState(icon);
     }
 
-    private float getFullyClosedTranslation() {
-        return -(getIntrinsicHeight() - mStatusBarHeight) / 2;
-    }
-
     @Override
     public boolean hasNoContentHeight() {
         return true;
@@ -893,7 +886,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        updateRelativeOffset();
 
         // we always want to clip to our sides, such that nothing can draw outside of these bounds
         int height = getResources().getDisplayMetrics().heightPixels;
@@ -901,13 +893,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
         if (mShelfIcons != null) {
             mShelfIcons.setClipBounds(mClipRect);
         }
-    }
-
-    private void updateRelativeOffset() {
-        if (mCollapsedIcons != null) {
-            mCollapsedIcons.getLocationOnScreen(mTmp);
-        }
-        getLocationOnScreen(mTmp);
     }
 
     /**
@@ -922,19 +907,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
             mHasItemsInStableShelf = hasItemsInStableShelf;
             updateInteractiveness();
         }
-    }
-
-    /**
-     * @return whether the shelf has any icons in it when a potential animation has finished, i.e
-     * if the current state would be applied right now
-     */
-    public boolean hasItemsInStableShelf() {
-        return mHasItemsInStableShelf;
-    }
-
-    public void setCollapsedIcons(NotificationIconContainer collapsedIcons) {
-        mCollapsedIcons = collapsedIcons;
-        mCollapsedIcons.addOnLayoutChangeListener(this);
     }
 
     @Override
@@ -980,12 +952,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
                     getContext().getString(R.string.accessibility_overflow_action));
             info.addAction(unlock);
         }
-    }
-
-    @Override
-    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
-                               int oldTop, int oldRight, int oldBottom) {
-        updateRelativeOffset();
     }
 
     @Override
