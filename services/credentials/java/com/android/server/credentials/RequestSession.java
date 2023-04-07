@@ -43,6 +43,7 @@ import com.android.server.credentials.metrics.RequestSessionMetric;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -88,6 +89,8 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
 
     protected final SessionLifetime mSessionCallback;
 
+    private final Set<ComponentName> mEnabledProviders;
+
     @NonNull
     protected RequestSessionStatus mRequestSessionStatus =
             RequestSessionStatus.IN_PROGRESS;
@@ -108,6 +111,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
             @NonNull T clientRequest, U clientCallback,
             @NonNull String requestType,
             CallingAppInfo callingAppInfo,
+            Set<ComponentName> enabledProviders,
             CancellationSignal cancellationSignal, long timestampStarted) {
         mContext = context;
         mLock = lock;
@@ -118,11 +122,12 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         mClientCallback = clientCallback;
         mRequestType = requestType;
         mClientAppInfo = callingAppInfo;
+        mEnabledProviders = enabledProviders;
         mCancellationSignal = cancellationSignal;
         mHandler = new Handler(Looper.getMainLooper(), null, true);
         mRequestId = new Binder();
         mCredentialManagerUi = new CredentialManagerUi(mContext,
-                mUserId, this);
+                mUserId, this, mEnabledProviders);
         mHybridService = context.getResources().getString(
                 R.string.config_defaultCredentialManagerHybridService);
         mRequestSessionMetric.collectInitialPhaseMetricInfo(timestampStarted, mRequestId,
@@ -306,7 +311,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
      * Allows subclasses to directly finalize the call and set closing metrics on error completion.
      *
      * @param errorType the type of error given back in the flow
-     * @param errorMsg the error message given back in the flow
+     * @param errorMsg  the error message given back in the flow
      */
     protected void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
         mRequestSessionMetric.collectFinalPhaseProviderMetricStatus(

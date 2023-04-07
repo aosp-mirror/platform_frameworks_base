@@ -89,6 +89,9 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.launcher3.icons.BubbleBadgeIconFactory;
+import com.android.launcher3.icons.BubbleIconFactory;
+import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
@@ -317,8 +320,13 @@ public class BubbleController implements ConfigurationChangeListener,
         mBubblePositioner = positioner;
         mBubbleData = data;
         mSavedUserBubbleData = new SparseArray<>();
-        mBubbleIconFactory = new BubbleIconFactory(context);
-        mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(context);
+        mBubbleIconFactory = new BubbleIconFactory(context,
+                context.getResources().getDimensionPixelSize(R.dimen.bubble_size));
+        mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(context,
+                context.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
+                context.getResources().getColor(R.color.important_conversation),
+                context.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.importance_ring_stroke_width));
         mDisplayController = displayController;
         mTaskViewTransitions = taskViewTransitions;
         mOneHandedOptional = oneHandedOptional;
@@ -927,8 +935,13 @@ public class BubbleController implements ConfigurationChangeListener,
         if (mStackView != null) {
             mStackView.onThemeChanged();
         }
-        mBubbleIconFactory = new BubbleIconFactory(mContext);
-        mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext);
+        mBubbleIconFactory = new BubbleIconFactory(mContext,
+                mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size));
+        mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext,
+                mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
+                mContext.getResources().getColor(R.color.important_conversation),
+                mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.importance_ring_stroke_width));
 
         // Reload each bubble
         for (Bubble b : mBubbleData.getBubbles()) {
@@ -964,8 +977,13 @@ public class BubbleController implements ConfigurationChangeListener,
                 mDensityDpi = newConfig.densityDpi;
                 mScreenBounds.set(newConfig.windowConfiguration.getBounds());
                 mBubbleData.onMaxBubblesChanged();
-                mBubbleIconFactory = new BubbleIconFactory(mContext);
-                mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext);
+                mBubbleIconFactory = new BubbleIconFactory(mContext,
+                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size));
+                mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext,
+                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
+                        mContext.getResources().getColor(R.color.important_conversation),
+                        mContext.getResources().getDimensionPixelSize(
+                                com.android.internal.R.dimen.importance_ring_stroke_width));
                 mStackView.onDisplaySizeChanged();
             }
             if (newConfig.fontScale != mFontScale) {
@@ -1052,7 +1070,27 @@ public class BubbleController implements ConfigurationChangeListener,
      * Expands and selects the provided bubble as long as it already exists in the stack or the
      * overflow.
      *
-     * This is currently only used when opening a bubble via clicking on a conversation widget.
+     * This is used by external callers (launcher).
+     */
+    public void expandStackAndSelectBubbleFromLauncher(String key) {
+        Bubble b = mBubbleData.getAnyBubbleWithkey(key);
+        if (b == null) {
+            return;
+        }
+        if (mBubbleData.hasBubbleInStackWithKey(b.getKey())) {
+            // already in the stack
+            mBubbleData.setSelectedBubbleFromLauncher(b);
+            mLayerView.showExpandedView(b);
+        } else if (mBubbleData.hasOverflowBubbleWithKey(b.getKey())) {
+            // TODO: (b/271468319) handle overflow
+        } else {
+            Log.w(TAG, "didn't add bubble from launcher: " + key);
+        }
+    }
+
+    /**
+     * Expands and selects the provided bubble as long as it already exists in the stack or the
+     * overflow. This is currently used when opening a bubble via clicking on a conversation widget.
      */
     public void expandStackAndSelectBubble(Bubble b) {
         if (b == null) {
@@ -1703,6 +1741,14 @@ public class BubbleController implements ConfigurationChangeListener,
 
             // Update the cached state for queries from SysUI
             mImpl.mCachedState.update(update);
+
+            if (isShowingAsBubbleBar() && mBubbleStateListener != null) {
+                BubbleBarUpdate bubbleBarUpdate = update.toBubbleBarUpdate();
+                // Some updates aren't relevant to the bubble bar so check first.
+                if (bubbleBarUpdate.anythingChanged()) {
+                    mBubbleStateListener.onBubbleStateChange(bubbleBarUpdate);
+                }
+            }
         }
     };
 
@@ -1972,17 +2018,20 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public void showBubble(String key, boolean onLauncherHome) {
-            // TODO
+            mMainExecutor.execute(() -> {
+                mBubblePositioner.setShowingInBubbleBar(onLauncherHome);
+                mController.expandStackAndSelectBubbleFromLauncher(key);
+            });
         }
 
         @Override
         public void removeBubble(String key, int reason) {
-            // TODO
+            // TODO (b/271466616) allow removals from launcher
         }
 
         @Override
         public void collapseBubbles() {
-            // TODO
+            mMainExecutor.execute(() -> mController.collapseStack());
         }
 
         @Override

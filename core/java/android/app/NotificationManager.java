@@ -726,8 +726,9 @@ public class NotificationManager {
      * Cancels a previously posted notification.
      *
      *  <p>If the notification does not currently represent a
-     *  {@link Service#startForeground(int, Notification) foreground service}, it will be
-     *  removed from the UI and live
+     *  {@link Service#startForeground(int, Notification) foreground service} or a
+     *  {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job},
+     *  it will be removed from the UI and live
      *  {@link android.service.notification.NotificationListenerService notification listeners}
      *  will be informed so they can remove the notification from their UIs.</p>
      */
@@ -740,8 +741,9 @@ public class NotificationManager {
      * Cancels a previously posted notification.
      *
      *  <p>If the notification does not currently represent a
-     *  {@link Service#startForeground(int, Notification) foreground service}, it will be
-     *  removed from the UI and live
+     *  {@link Service#startForeground(int, Notification) foreground service} or a
+     *  {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job},
+     *  it will be removed from the UI and live
      *  {@link android.service.notification.NotificationListenerService notification listeners}
      *  will be informed so they can remove the notification from their UIs.</p>
      */
@@ -754,8 +756,9 @@ public class NotificationManager {
      * Cancels a previously posted notification.
      *
      * <p>If the notification does not currently represent a
-     * {@link Service#startForeground(int, Notification) foreground service}, it will be
-     * removed from the UI and live
+     *  {@link Service#startForeground(int, Notification) foreground service} or a
+     *  {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job},
+     *  it will be removed from the UI and live
      * {@link android.service.notification.NotificationListenerService notification listeners}
      * will be informed so they can remove the notification from their UIs.</p>
      *

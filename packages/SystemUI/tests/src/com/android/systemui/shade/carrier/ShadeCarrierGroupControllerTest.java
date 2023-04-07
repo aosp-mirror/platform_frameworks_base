@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.carrier;
+package com.android.systemui.shade.carrier;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -63,13 +63,13 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
-public class QSCarrierGroupControllerTest extends LeakCheckedTest {
+public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
 
-    private QSCarrierGroupController mQSCarrierGroupController;
+    private ShadeCarrierGroupController mShadeCarrierGroupController;
     private SignalCallback mSignalCallback;
     private CarrierTextManager.CarrierTextCallback mCallback;
     @Mock
-    private QSCarrierGroup mQSCarrierGroup;
+    private ShadeCarrierGroup mShadeCarrierGroup;
     @Mock
     private ActivityStarter mActivityStarter;
     @Mock
@@ -81,14 +81,14 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
     @Mock
     private CarrierConfigTracker mCarrierConfigTracker;
     @Mock
-    private QSCarrier mQSCarrier1;
+    private ShadeCarrier mShadeCarrier1;
     @Mock
-    private QSCarrier mQSCarrier2;
+    private ShadeCarrier mShadeCarrier2;
     @Mock
-    private QSCarrier mQSCarrier3;
+    private ShadeCarrier mShadeCarrier3;
     private TestableLooper mTestableLooper;
     @Mock
-    private QSCarrierGroupController.OnSingleCarrierChangedListener mOnSingleCarrierChangedListener;
+    private ShadeCarrierGroupController.OnSingleCarrierChangedListener mOnSingleCarrierChangedListener;
 
     private FakeSlotIndexResolver mSlotIndexResolver;
     private ClickListenerTextView mNoCarrierTextView;
@@ -116,28 +116,28 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
                 .setListening(any(CarrierTextManager.CarrierTextCallback.class));
 
         mNoCarrierTextView = new ClickListenerTextView(mContext);
-        when(mQSCarrierGroup.getNoSimTextView()).thenReturn(mNoCarrierTextView);
-        when(mQSCarrierGroup.getCarrier1View()).thenReturn(mQSCarrier1);
-        when(mQSCarrierGroup.getCarrier2View()).thenReturn(mQSCarrier2);
-        when(mQSCarrierGroup.getCarrier3View()).thenReturn(mQSCarrier3);
-        when(mQSCarrierGroup.getCarrierDivider1()).thenReturn(new View(mContext));
-        when(mQSCarrierGroup.getCarrierDivider2()).thenReturn(new View(mContext));
+        when(mShadeCarrierGroup.getNoSimTextView()).thenReturn(mNoCarrierTextView);
+        when(mShadeCarrierGroup.getCarrier1View()).thenReturn(mShadeCarrier1);
+        when(mShadeCarrierGroup.getCarrier2View()).thenReturn(mShadeCarrier2);
+        when(mShadeCarrierGroup.getCarrier3View()).thenReturn(mShadeCarrier3);
+        when(mShadeCarrierGroup.getCarrierDivider1()).thenReturn(new View(mContext));
+        when(mShadeCarrierGroup.getCarrierDivider2()).thenReturn(new View(mContext));
 
         mSlotIndexResolver = new FakeSlotIndexResolver();
 
-        mQSCarrierGroupController = new QSCarrierGroupController.Builder(
+        mShadeCarrierGroupController = new ShadeCarrierGroupController.Builder(
                 mActivityStarter, handler, TestableLooper.get(this).getLooper(),
                 mNetworkController, mCarrierTextControllerBuilder, mContext, mCarrierConfigTracker,
                 mSlotIndexResolver)
-                .setQSCarrierGroup(mQSCarrierGroup)
+                .setShadeCarrierGroup(mShadeCarrierGroup)
                 .build();
 
-        mQSCarrierGroupController.setListening(true);
+        mShadeCarrierGroupController.setListening(true);
     }
 
     @Test
     public void testInitiallyMultiCarrier() {
-        assertFalse(mQSCarrierGroupController.isSingleCarrier());
+        assertFalse(mShadeCarrierGroupController.isSingleCarrier());
     }
 
     @Test // throws no Exception
@@ -257,12 +257,12 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
                 true /* airplaneMode */);
         mCallback.updateCarrierInfo(info);
         mTestableLooper.processAllMessages();
-        assertEquals(View.GONE, mQSCarrierGroup.getNoSimTextView().getVisibility());
+        assertEquals(View.GONE, mShadeCarrierGroup.getNoSimTextView().getVisibility());
     }
 
     @Test
     public void testListenerNotCalledOnRegistreation() {
-        mQSCarrierGroupController
+        mShadeCarrierGroupController
                 .setOnSingleCarrierChangedListener(mOnSingleCarrierChangedListener);
 
         verify(mOnSingleCarrierChangedListener, never()).onSingleCarrierChanged(anyBoolean());
@@ -282,9 +282,9 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         mCallback.updateCarrierInfo(info);
         mTestableLooper.processAllMessages();
 
-        verify(mQSCarrier1).updateState(any(), eq(true));
-        verify(mQSCarrier2).updateState(any(), eq(true));
-        verify(mQSCarrier3).updateState(any(), eq(true));
+        verify(mShadeCarrier1).updateState(any(), eq(true));
+        verify(mShadeCarrier2).updateState(any(), eq(true));
+        verify(mShadeCarrier3).updateState(any(), eq(true));
     }
 
     @Test
@@ -301,9 +301,9 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         mCallback.updateCarrierInfo(info);
         mTestableLooper.processAllMessages();
 
-        verify(mQSCarrier1).updateState(any(), eq(false));
-        verify(mQSCarrier2).updateState(any(), eq(false));
-        verify(mQSCarrier3).updateState(any(), eq(false));
+        verify(mShadeCarrier1).updateState(any(), eq(false));
+        verify(mShadeCarrier2).updateState(any(), eq(false));
+        verify(mShadeCarrier3).updateState(any(), eq(false));
     }
 
     @Test
@@ -327,7 +327,7 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         mCallback.updateCarrierInfo(singleCarrierInfo);
         mTestableLooper.processAllMessages();
 
-        mQSCarrierGroupController
+        mShadeCarrierGroupController
                 .setOnSingleCarrierChangedListener(mOnSingleCarrierChangedListener);
         reset(mOnSingleCarrierChangedListener);
 
@@ -353,7 +353,7 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         mCallback.updateCarrierInfo(singleCarrierInfo);
         mTestableLooper.processAllMessages();
 
-        mQSCarrierGroupController
+        mShadeCarrierGroupController
                 .setOnSingleCarrierChangedListener(mOnSingleCarrierChangedListener);
 
         mCallback.updateCarrierInfo(singleCarrierInfo);
@@ -375,7 +375,7 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         mCallback.updateCarrierInfo(multiCarrierInfo);
         mTestableLooper.processAllMessages();
 
-        mQSCarrierGroupController
+        mShadeCarrierGroupController
                 .setOnSingleCarrierChangedListener(mOnSingleCarrierChangedListener);
 
         mCallback.updateCarrierInfo(multiCarrierInfo);
@@ -389,12 +389,12 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         ArgumentCaptor<View.OnClickListener> captor =
                 ArgumentCaptor.forClass(View.OnClickListener.class);
 
-        verify(mQSCarrier1).setOnClickListener(captor.capture());
-        verify(mQSCarrier2).setOnClickListener(captor.getValue());
-        verify(mQSCarrier3).setOnClickListener(captor.getValue());
+        verify(mShadeCarrier1).setOnClickListener(captor.capture());
+        verify(mShadeCarrier2).setOnClickListener(captor.getValue());
+        verify(mShadeCarrier3).setOnClickListener(captor.getValue());
 
         assertThat(mNoCarrierTextView.getOnClickListener()).isSameInstanceAs(captor.getValue());
-        verify(mQSCarrierGroup, never()).setOnClickListener(any());
+        verify(mShadeCarrierGroup, never()).setOnClickListener(any());
     }
 
     @Test
@@ -402,10 +402,10 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         ArgumentCaptor<View.OnClickListener> captor =
                 ArgumentCaptor.forClass(View.OnClickListener.class);
 
-        verify(mQSCarrier1).setOnClickListener(captor.capture());
-        when(mQSCarrier1.isVisibleToUser()).thenReturn(false);
+        verify(mShadeCarrier1).setOnClickListener(captor.capture());
+        when(mShadeCarrier1.isVisibleToUser()).thenReturn(false);
 
-        captor.getValue().onClick(mQSCarrier1);
+        captor.getValue().onClick(mShadeCarrier1);
         verifyZeroInteractions(mActivityStarter);
     }
 
@@ -415,17 +415,17 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
                 ArgumentCaptor.forClass(View.OnClickListener.class);
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
 
-        verify(mQSCarrier1).setOnClickListener(listenerCaptor.capture());
-        when(mQSCarrier1.isVisibleToUser()).thenReturn(true);
+        verify(mShadeCarrier1).setOnClickListener(listenerCaptor.capture());
+        when(mShadeCarrier1.isVisibleToUser()).thenReturn(true);
 
-        listenerCaptor.getValue().onClick(mQSCarrier1);
+        listenerCaptor.getValue().onClick(mShadeCarrier1);
         verify(mActivityStarter)
                 .postStartActivityDismissingKeyguard(intentCaptor.capture(), anyInt());
         assertThat(intentCaptor.getValue().getAction())
                 .isEqualTo(Settings.ACTION_WIRELESS_SETTINGS);
     }
 
-    private class FakeSlotIndexResolver implements QSCarrierGroupController.SlotIndexResolver {
+    private class FakeSlotIndexResolver implements ShadeCarrierGroupController.SlotIndexResolver {
         public boolean overrideInvalid;
 
         @Override

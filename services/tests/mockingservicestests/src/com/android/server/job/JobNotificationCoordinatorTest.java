@@ -23,6 +23,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -39,6 +41,7 @@ import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 
 import com.android.server.LocalServices;
+import com.android.server.job.controllers.JobStatus;
 import com.android.server.notification.NotificationManagerInternal;
 
 import org.junit.After;
@@ -491,6 +494,44 @@ public class JobNotificationCoordinatorTest {
         inOrder.verify(mNotificationManagerInternal)
                 .cancelNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid), eq(pid), any(),
                         eq(notificationId), eq(UserHandle.getUserId(uid)));
+    }
+
+    @Test
+    public void testUserInitiatedJob_hasNotificationFlag() {
+        final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
+        final JobServiceContext jsc = mock(JobServiceContext.class);
+        final JobStatus js = mock(JobStatus.class);
+        js.startedAsUserInitiatedJob = true;
+        doReturn(js).when(jsc).getRunningJobLocked();
+        final Notification notification = createValidNotification();
+        final int uid = 10123;
+        final int pid = 42;
+        final int notificationId = 23;
+
+        coordinator.enqueueNotification(jsc, TEST_PACKAGE, pid, uid, notificationId, notification,
+                JobService.JOB_END_NOTIFICATION_POLICY_REMOVE);
+        verify(mNotificationManagerInternal)
+                .enqueueNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid), eq(pid), any(),
+                        eq(notificationId), eq(notification), eq(UserHandle.getUserId(uid)));
+        assertNotEquals(notification.flags & Notification.FLAG_USER_INITIATED_JOB, 0);
+    }
+
+    @Test
+    public void testNonUserInitiatedJob_doesNotHaveNotificationFlag() {
+        final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
+        final JobServiceContext jsc = mock(JobServiceContext.class);
+        doReturn(mock(JobStatus.class)).when(jsc).getRunningJobLocked();
+        final Notification notification = createValidNotification();
+        final int uid = 10123;
+        final int pid = 42;
+        final int notificationId = 23;
+
+        coordinator.enqueueNotification(jsc, TEST_PACKAGE, pid, uid, notificationId, notification,
+                JobService.JOB_END_NOTIFICATION_POLICY_REMOVE);
+        verify(mNotificationManagerInternal)
+                .enqueueNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid), eq(pid), any(),
+                        eq(notificationId), eq(notification), eq(UserHandle.getUserId(uid)));
+        assertEquals(notification.flags & Notification.FLAG_USER_INITIATED_JOB, 0);
     }
 
     private Notification createValidNotification() {

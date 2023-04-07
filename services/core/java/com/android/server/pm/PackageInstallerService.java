@@ -677,7 +677,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 ? params.installerPackageName : installerPackageName;
 
         if (PackageManagerServiceUtils.isRootOrShell(callingUid)
-                || PackageInstallerSession.isSystemDataLoaderInstallation(params)) {
+                || PackageInstallerSession.isSystemDataLoaderInstallation(params)
+                || PackageManagerServiceUtils.isAdoptedShell(callingUid, mContext)) {
             params.installFlags |= PackageManager.INSTALL_FROM_ADB;
             // adb installs can override the installingPackageName, but not the
             // initiatingPackageName

@@ -1199,13 +1199,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (primaryDisplay.isKeyguardLocked()) {
             mFlags |= TRANSIT_FLAG_KEYGUARD_LOCKED;
         }
-        // Check whether the participants were animated from back navigation.
-        mController.mAtm.mBackNavigationController.onTransactionReady(this);
-
         collectOrderChanges();
 
         // Resolve the animating targets from the participants.
         mTargets = calculateTargets(mParticipants, mChanges);
+        // Check whether the participants were animated from back navigation.
+        mController.mAtm.mBackNavigationController.onTransactionReady(this, mTargets);
         final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, transaction);
         info.setDebugId(mSyncId);
 

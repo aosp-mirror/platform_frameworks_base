@@ -406,7 +406,7 @@ public final class BroadcastQueueModernImplTest {
         assertThat(cachedRunnableAt).isGreaterThan(notCachedRunnableAt);
         assertTrue(queue.isRunnable());
         assertEquals(BroadcastProcessQueue.REASON_CACHED, queue.getRunnableAtReason());
-        assertEquals(ProcessList.SCHED_GROUP_BACKGROUND, queue.getPreferredSchedulingGroupLocked());
+        assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
     }
 
     /**
@@ -434,13 +434,13 @@ public final class BroadcastQueueModernImplTest {
         queue.setProcessAndUidCached(null, false);
         assertTrue(queue.isRunnable());
         assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueClockTime);
-        assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
+        assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
         assertEquals(queue.peekNextBroadcastRecord(), airplaneRecord);
 
         queue.setProcessAndUidCached(null, true);
         assertTrue(queue.isRunnable());
         assertThat(queue.getRunnableAt()).isAtMost(airplaneRecord.enqueueClockTime);
-        assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
+        assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
         assertEquals(queue.peekNextBroadcastRecord(), airplaneRecord);
     }
 
@@ -1152,6 +1152,41 @@ public final class BroadcastQueueModernImplTest {
                 eq(BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD),
                 anyLong(), anyLong(), anyLong(), anyInt(), nullable(String.class), anyString()),
                 times(1));
+    }
+
+    @Test
+    public void testGetPreferredSchedulingGroup() throws Exception {
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
+
+        assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK)
+                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        queue.enqueueOrReplaceBroadcast(makeBroadcastRecord(timeTick,
+                List.of(makeMockRegisteredReceiver())), 0, false);
+        assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
+
+        // Make the foreground broadcast as active.
+        queue.makeActiveNextPending();
+        assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
+
+        queue.makeActiveIdle();
+        assertEquals(ProcessList.SCHED_GROUP_UNDEFINED, queue.getPreferredSchedulingGroupLocked());
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        queue.enqueueOrReplaceBroadcast(makeBroadcastRecord(airplane,
+                List.of(makeMockRegisteredReceiver())), 0, false);
+
+        // Make the background broadcast as active.
+        queue.makeActiveNextPending();
+        assertEquals(ProcessList.SCHED_GROUP_BACKGROUND, queue.getPreferredSchedulingGroupLocked());
+
+        queue.enqueueOrReplaceBroadcast(makeBroadcastRecord(timeTick,
+                List.of(makeMockRegisteredReceiver())), 0, false);
+        // Even though the active broadcast is not a foreground one, scheduling group will be
+        // DEFAULT since there is a foreground broadcast waiting to be delivered.
+        assertEquals(ProcessList.SCHED_GROUP_DEFAULT, queue.getPreferredSchedulingGroupLocked());
     }
 
     private Intent createPackageChangedIntent(int uid, List<String> componentNameList) {

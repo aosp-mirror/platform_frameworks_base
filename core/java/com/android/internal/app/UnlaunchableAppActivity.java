@@ -16,7 +16,6 @@
 
 package com.android.internal.app;
 
-import static android.app.admin.DevicePolicyResources.Strings.Core.UNLAUNCHABLE_APP_WORK_PAUSED_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.Core.UNLAUNCHABLE_APP_WORK_PAUSED_TITLE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -87,17 +86,13 @@ public class UnlaunchableAppActivity extends Activity
                         mTelecomManager.getDefaultDialerPackage(UserHandle.of(mUserId))));
 
         final AlertDialog.Builder builder;
-        final String dialogMessage;
         if (showEmergencyCallButton) {
             builder = new AlertDialog.Builder(this, R.style.AlertDialogWithEmergencyButton);
-            dialogMessage = getDialogMessage(R.string.work_mode_dialer_off_message);
             builder.setNeutralButton(R.string.work_mode_emergency_call_button, this);
         } else {
             builder = new AlertDialog.Builder(this);
-            dialogMessage = getDialogMessage(R.string.work_mode_off_message);
         }
         builder.setTitle(getDialogTitle())
-                .setMessage(dialogMessage)
                 .setOnDismissListener(this)
                 .setPositiveButton(R.string.work_mode_turn_on, this)
                 .setNegativeButton(R.string.cancel, null);
@@ -118,12 +113,6 @@ public class UnlaunchableAppActivity extends Activity
     private String getDialogTitle() {
         return getSystemService(DevicePolicyManager.class).getResources().getString(
                 UNLAUNCHABLE_APP_WORK_PAUSED_TITLE, () -> getString(R.string.work_mode_off_title));
-    }
-
-    private String getDialogMessage(int dialogMessageString) {
-        return getSystemService(DevicePolicyManager.class).getResources().getString(
-                UNLAUNCHABLE_APP_WORK_PAUSED_MESSAGE,
-                () -> getString(dialogMessageString));
     }
 
     @Override

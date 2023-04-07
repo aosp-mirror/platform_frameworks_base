@@ -42,7 +42,7 @@ internal fun hasContentToDisplay(state: GetCredentialUiState): Boolean {
 }
 
 internal fun isFallbackScreen(state: GetCredentialUiState): Boolean {
-    return false
+    return state.requestDisplayInfo.preferIdentityDocUi
 }
 
 internal fun findAutoSelectEntry(providerDisplayInfo: ProviderDisplayInfo): CredentialEntryInfo? {
@@ -172,6 +172,7 @@ class ActionEntryInfo(
 data class RequestDisplayInfo(
     val appName: String,
     val preferImmediatelyAvailableCredentials: Boolean,
+    val preferIdentityDocUi: Boolean,
 )
 
 /**

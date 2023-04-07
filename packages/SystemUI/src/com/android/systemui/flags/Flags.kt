@@ -224,7 +224,7 @@ object Flags {
     /** Whether to inflate the bouncer view on a background thread. */
     // TODO(b/273341787): Tracking Bug
     @JvmField
-    val PREVENT_BYPASS_KEYGUARD = releasedFlag(230, "prevent_bypass_keyguard")
+    val PREVENT_BYPASS_KEYGUARD = unreleasedFlag(230, "prevent_bypass_keyguard", teamfood = true)
 
     /** Whether to use a new data source for intents to run on keyguard dismissal. */
     @JvmField
@@ -610,8 +610,6 @@ object Flags {
 
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
-    // TODO(b/267162944): Tracking bug
-    @JvmField val CLIPBOARD_MINIMIZED_LAYOUT = releasedFlag(1702, "clipboard_data_model")
 
     // 1800 - shade container
     @JvmField

@@ -152,8 +152,7 @@ public class AuthServiceTest {
 
         verify(mBiometricService, never()).registerAuthenticator(
                 anyInt(),
-                anyInt(),
-                anyInt(),
+                any(),
                 any());
     }
 

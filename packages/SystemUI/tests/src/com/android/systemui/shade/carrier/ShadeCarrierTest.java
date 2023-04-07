@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.carrier;
+package com.android.systemui.shade.carrier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -39,9 +39,9 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
-public class QSCarrierTest extends SysuiTestCase {
+public class ShadeCarrierTest extends SysuiTestCase {
 
-    private QSCarrier mQSCarrier;
+    private ShadeCarrier mShadeCarrier;
     private TestableLooper mTestableLooper;
     private int mSignalIconId;
 
@@ -51,7 +51,7 @@ public class QSCarrierTest extends SysuiTestCase {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mContext.ensureTestableResources();
         mTestableLooper.runWithLooper(() ->
-                mQSCarrier = (QSCarrier) inflater.inflate(R.layout.qs_carrier, null));
+                mShadeCarrier = (ShadeCarrier) inflater.inflate(R.layout.shade_carrier, null));
 
         // In this case, the id is an actual drawable id
         mSignalIconId = TelephonyIcons.MOBILE_CALL_STRENGTH_ICONS[0];
@@ -61,76 +61,76 @@ public class QSCarrierTest extends SysuiTestCase {
     public void testUpdateState_first() {
         CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
 
-        assertTrue(mQSCarrier.updateState(c, false));
+        assertTrue(mShadeCarrier.updateState(c, false));
     }
 
     @Test
     public void testUpdateState_same() {
         CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
 
-        assertTrue(mQSCarrier.updateState(c, false));
-        assertFalse(mQSCarrier.updateState(c, false));
+        assertTrue(mShadeCarrier.updateState(c, false));
+        assertFalse(mShadeCarrier.updateState(c, false));
     }
 
     @Test
     public void testUpdateState_changed() {
         CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
 
-        assertTrue(mQSCarrier.updateState(c, false));
+        assertTrue(mShadeCarrier.updateState(c, false));
 
         CellSignalState other = c.changeVisibility(false);
 
-        assertTrue(mQSCarrier.updateState(other, false));
+        assertTrue(mShadeCarrier.updateState(other, false));
     }
 
     @Test
     public void testUpdateState_singleCarrier_first() {
         CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
 
-        assertTrue(mQSCarrier.updateState(c, true));
+        assertTrue(mShadeCarrier.updateState(c, true));
     }
 
     @Test
     public void testUpdateState_singleCarrier_noShowIcon() {
         CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
 
-        mQSCarrier.updateState(c, true);
+        mShadeCarrier.updateState(c, true);
 
-        assertEquals(View.GONE, mQSCarrier.getRSSIView().getVisibility());
+        assertEquals(View.GONE, mShadeCarrier.getRSSIView().getVisibility());
     }
 
     @Test
     public void testUpdateState_multiCarrier_showIcon() {
         CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
 
-        mQSCarrier.updateState(c, false);
+        mShadeCarrier.updateState(c, false);
 
-        assertEquals(View.VISIBLE, mQSCarrier.getRSSIView().getVisibility());
+        assertEquals(View.VISIBLE, mShadeCarrier.getRSSIView().getVisibility());
     }
 
     @Test
     public void testUpdateState_changeSingleMultiSingle() {
         CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
 
-        mQSCarrier.updateState(c, true);
-        assertEquals(View.GONE, mQSCarrier.getRSSIView().getVisibility());
+        mShadeCarrier.updateState(c, true);
+        assertEquals(View.GONE, mShadeCarrier.getRSSIView().getVisibility());
 
-        mQSCarrier.updateState(c, false);
-        assertEquals(View.VISIBLE, mQSCarrier.getRSSIView().getVisibility());
+        mShadeCarrier.updateState(c, false);
+        assertEquals(View.VISIBLE, mShadeCarrier.getRSSIView().getVisibility());
 
-        mQSCarrier.updateState(c, true);
-        assertEquals(View.GONE, mQSCarrier.getRSSIView().getVisibility());
+        mShadeCarrier.updateState(c, true);
+        assertEquals(View.GONE, mShadeCarrier.getRSSIView().getVisibility());
     }
 
     @Test
     public void testCarrierNameMaxWidth_smallScreen_fromResource() {
         int maxEms = 10;
-        mContext.getOrCreateTestableResources().addOverride(R.integer.qs_carrier_max_em, maxEms);
+        mContext.getOrCreateTestableResources().addOverride(R.integer.shade_carrier_max_em, maxEms);
         mContext.getOrCreateTestableResources()
                 .addOverride(R.bool.config_use_large_screen_shade_header, false);
-        TextView carrierText = mQSCarrier.requireViewById(R.id.qs_carrier_text);
+        TextView carrierText = mShadeCarrier.requireViewById(R.id.shade_carrier_text);
 
-        mQSCarrier.onConfigurationChanged(mContext.getResources().getConfiguration());
+        mShadeCarrier.onConfigurationChanged(mContext.getResources().getConfiguration());
 
         assertEquals(maxEms, carrierText.getMaxEms());
     }
@@ -138,12 +138,12 @@ public class QSCarrierTest extends SysuiTestCase {
     @Test
     public void testCarrierNameMaxWidth_largeScreen_maxInt() {
         int maxEms = 10;
-        mContext.getOrCreateTestableResources().addOverride(R.integer.qs_carrier_max_em, maxEms);
+        mContext.getOrCreateTestableResources().addOverride(R.integer.shade_carrier_max_em, maxEms);
         mContext.getOrCreateTestableResources()
                 .addOverride(R.bool.config_use_large_screen_shade_header, true);
-        TextView carrierText = mQSCarrier.requireViewById(R.id.qs_carrier_text);
+        TextView carrierText = mShadeCarrier.requireViewById(R.id.shade_carrier_text);
 
-        mQSCarrier.onConfigurationChanged(mContext.getResources().getConfiguration());
+        mShadeCarrier.onConfigurationChanged(mContext.getResources().getConfiguration());
 
         assertEquals(Integer.MAX_VALUE, carrierText.getMaxEms());
     }

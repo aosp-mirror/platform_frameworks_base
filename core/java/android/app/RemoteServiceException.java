@@ -102,6 +102,21 @@ public class RemoteServiceException extends AndroidRuntimeException {
     }
 
     /**
+     * Exception used to crash an app process when the system finds an error in a user-initiated job
+     * notification.
+     *
+     * @hide
+     */
+    public static class BadUserInitiatedJobNotificationException extends RemoteServiceException {
+        /** The type ID passed to {@link IApplicationThread#scheduleCrash}. */
+        public static final int TYPE_ID = 6;
+
+        public BadUserInitiatedJobNotificationException(String msg) {
+            super(msg);
+        }
+    }
+
+    /**
      * Exception used to crash an app process when it calls a setting activity that requires
      * the {@code REQUEST_PASSWORD_COMPLEXITY} permission.
      *

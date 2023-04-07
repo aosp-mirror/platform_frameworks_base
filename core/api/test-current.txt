@@ -338,10 +338,12 @@ package android.app {
   }
 
   public class Notification implements android.os.Parcelable {
+    method public boolean isUserInitiatedJob();
     method public boolean shouldShowForegroundImmediately();
     field public static final String EXTRA_MEDIA_REMOTE_DEVICE = "android.mediaRemoteDevice";
     field public static final String EXTRA_MEDIA_REMOTE_ICON = "android.mediaRemoteIcon";
     field public static final String EXTRA_MEDIA_REMOTE_INTENT = "android.mediaRemoteIntent";
+    field public static final int FLAG_USER_INITIATED_JOB = 32768; // 0x8000
   }
 
   public final class NotificationChannel implements android.os.Parcelable {
@@ -351,10 +353,10 @@ package android.app {
     method public void setDeleted(boolean);
     method public void setDeletedTimeMs(long);
     method public void setDemoted(boolean);
-    method public void setFgServiceShown(boolean);
     method public void setImportanceLockedByCriticalDeviceFunction(boolean);
     method public void setImportantConversation(boolean);
     method public void setOriginalImportance(int);
+    method public void setUserVisibleTaskShown(boolean);
   }
 
   public final class NotificationChannelGroup implements android.os.Parcelable {
@@ -2275,12 +2277,12 @@ package android.os {
     method public int getMainDisplayIdAssignedToUser();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public java.util.Set<java.lang.String> getPreInstallableSystemPackages(@NonNull String);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public String getUserType();
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public java.util.List<android.content.pm.UserInfo> getUsers(boolean, boolean, boolean);
+    method @Deprecated @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public java.util.List<android.content.pm.UserInfo> getUsers(boolean, boolean, boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean hasBaseUserRestriction(@NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean isUserTypeEnabled(@NonNull String);
     method public boolean isVisibleBackgroundUsersOnDefaultDisplaySupported();
     method public boolean isVisibleBackgroundUsersSupported();
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.content.pm.UserInfo preCreateUser(@NonNull String) throws android.os.UserManager.UserOperationException;
+    method @Deprecated @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.content.pm.UserInfo preCreateUser(@NonNull String) throws android.os.UserManager.UserOperationException;
   }
 
   public final class VibrationAttributes implements android.os.Parcelable {

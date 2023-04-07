@@ -90,9 +90,9 @@ class KeyboardBacklightDialog(
 
     private fun updateResources() {
         context.resources.apply {
-            filledRectangleColor = getColor(R.color.backlight_indicator_step_filled)
-            emptyRectangleColor = getColor(R.color.backlight_indicator_step_empty)
-            backgroundColor = getColor(R.color.backlight_indicator_background)
+            filledRectangleColor = getColor(R.color.backlight_indicator_step_filled, context.theme)
+            emptyRectangleColor = getColor(R.color.backlight_indicator_step_empty, context.theme)
+            backgroundColor = getColor(R.color.backlight_indicator_background, context.theme)
             rootProperties =
                 RootProperties(
                     cornerRadius =
@@ -224,7 +224,6 @@ class KeyboardBacklightDialog(
 
     private fun setWindowTitle() {
         val attrs = window.attributes
-        // TODO(b/271796169): check if title needs to be a translatable resource.
         attrs.title = "KeyboardBacklightDialog"
         attrs?.y = dialogBottomMargin
         window.attributes = attrs

@@ -22,7 +22,6 @@ import static android.app.Notification.CATEGORY_EVENT;
 import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.CATEGORY_REMINDER;
 import static android.app.Notification.FLAG_BUBBLE;
-import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
@@ -825,8 +824,7 @@ public final class NotificationEntry extends ListEntry {
             return false;
         }
 
-        if ((mSbn.getNotification().flags
-                & FLAG_FOREGROUND_SERVICE) != 0) {
+        if (mSbn.getNotification().isFgsOrUij()) {
             return true;
         }
         if (mSbn.getNotification().isMediaNotification()) {
