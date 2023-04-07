@@ -28,7 +28,6 @@ import android.testing.TestableLooper
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
@@ -37,6 +36,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.ZenModeController
@@ -46,7 +46,6 @@ import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
-import java.io.File
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -55,8 +54,9 @@ import org.mockito.Mock
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import java.io.File
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -84,7 +84,7 @@ class DndTileTest : SysuiTestCase() {
     private lateinit var qsLogger: QSLogger
 
     @Mock
-    private lateinit var uiEventLogger: UiEventLogger
+    private lateinit var uiEventLogger: QsEventLogger
 
     @Mock
     private lateinit var zenModeController: ZenModeController

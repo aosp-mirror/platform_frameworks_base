@@ -66,6 +66,7 @@ import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSEvent;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.SideLabelTileLayout;
 import com.android.systemui.qs.logging.QSLogger;
 
@@ -179,7 +180,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     protected QSTileImpl(
             QSHost host,
-            UiEventLogger uiEventLogger,
+            QsEventLogger uiEventLogger,
             Looper backgroundLooper,
             Handler mainHandler,
             FalsingManager falsingManager,
@@ -190,7 +191,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     ) {
         mHost = host;
         mContext = host.getContext();
-        mInstanceId = host.getNewInstanceId();
+        mInstanceId = uiEventLogger.getNewInstanceId();
         mUiEventLogger = uiEventLogger;
 
         mUiHandler = mainHandler;
@@ -634,7 +635,6 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
             } catch (Throwable t) {
                 final String error = "Error in " + name;
                 Log.w(TAG, error, t);
-                mHost.warn(error, t);
             }
         }
     }

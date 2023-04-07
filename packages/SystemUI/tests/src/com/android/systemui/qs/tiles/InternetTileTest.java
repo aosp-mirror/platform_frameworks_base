@@ -29,13 +29,13 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
@@ -65,7 +65,7 @@ public class InternetTileTest extends SysuiTestCase {
     @Mock
     private InternetDialogFactory mInternetDialogFactory;
     @Mock
-    private UiEventLogger mUiEventLogger;
+    private QsEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private InternetTile mTile;

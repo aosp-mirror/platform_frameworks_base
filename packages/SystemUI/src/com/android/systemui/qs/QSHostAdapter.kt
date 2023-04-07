@@ -19,7 +19,6 @@ package com.android.systemui.qs
 import android.content.ComponentName
 import android.content.Context
 import androidx.annotation.GuardedBy
-import com.android.internal.logging.InstanceId
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
@@ -40,7 +39,7 @@ import kotlinx.coroutines.launch
  * Adapter to determine what real class to use for classes that depend on [QSHost].
  * * When [Flags.QS_PIPELINE_NEW_HOST] is off, all calls will be routed to [QSTileHost].
  * * When [Flags.QS_PIPELINE_NEW_HOST] is on, calls regarding the current set of tiles will be
- *   routed to [CurrentTilesInteractor]. Other calls (like [warn]) will still be routed to
+ *   routed to [CurrentTilesInteractor]. Other calls (like [createTileView]) will still be routed to
  *   [QSTileHost].
  *
  * This routing also includes dumps.
@@ -153,10 +152,6 @@ constructor(
         }
     }
 
-    override fun warn(message: String?, t: Throwable?) {
-        qsTileHost.warn(message, t)
-    }
-
     override fun getContext(): Context {
         return if (useNewHost) {
             context
@@ -203,9 +198,5 @@ constructor(
 
     override fun indexOf(tileSpec: String): Int {
         return specs.indexOf(tileSpec)
-    }
-
-    override fun getNewInstanceId(): InstanceId {
-        return qsTileHost.newInstanceId
     }
 }

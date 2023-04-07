@@ -58,8 +58,6 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.UiEventLogger;
-import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -67,6 +65,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -109,7 +108,8 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     private ActivityStarter mActivityStarter;
     @Mock
     private QSLogger mQSLogger;
-    private UiEventLogger mUiEventLogger = new UiEventLoggerFake();
+    @Mock
+    private QsEventLogger mUiEventLogger;
     @Mock
     private QuickAccessWalletClient mQuickAccessWalletClient;
     @Mock

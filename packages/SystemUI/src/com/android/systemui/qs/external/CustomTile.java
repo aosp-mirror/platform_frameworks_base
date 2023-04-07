@@ -50,7 +50,6 @@ import androidx.annotation.WorkerThread;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -60,6 +59,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -71,6 +71,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
+
 
 
 public class CustomTile extends QSTileImpl<State> implements TileChangeListener {
@@ -113,7 +114,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
     private CustomTile(
             QSHost host,
-            UiEventLogger uiEventLogger,
+            QsEventLogger uiEventLogger,
             Looper backgroundLooper,
             Handler mainHandler,
             FalsingManager falsingManager,
@@ -564,7 +565,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
     public static class Builder {
         final Lazy<QSHost> mQSHostLazy;
-        final UiEventLogger mUiEventLogger;
+        final QsEventLogger mUiEventLogger;
         final Looper mBackgroundLooper;
         final Handler mMainHandler;
         private final FalsingManager mFalsingManager;
@@ -582,7 +583,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         @Inject
         public Builder(
                 Lazy<QSHost> hostLazy,
-                UiEventLogger uiEventLogger,
+                QsEventLogger uiEventLogger,
                 @Background Looper backgroundLooper,
                 @Main Handler mainHandler,
                 FalsingManager falsingManager,

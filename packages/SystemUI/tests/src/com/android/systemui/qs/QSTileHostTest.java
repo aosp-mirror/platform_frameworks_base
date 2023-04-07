@@ -46,7 +46,6 @@ import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.CollectionUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -708,7 +707,7 @@ public class QSTileHostTest extends SysuiTestCase {
         protected TestTile(QSHost host) {
             super(
                     host,
-                    mock(UiEventLogger.class),
+                    mock(QsEventLogger.class),
                     mock(Looper.class),
                     mock(Handler.class),
                     new FalsingManagerFake(),

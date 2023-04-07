@@ -23,8 +23,6 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.internal.logging.UiEventLogger
-import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
@@ -33,6 +31,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.LocationController
@@ -43,8 +42,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -68,10 +67,12 @@ class NightDisplayTileTest : SysuiTestCase() {
 
     @Mock private lateinit var mNightDisplayListener: NightDisplayListener
 
+    @Mock private lateinit var mUiEventLogger: QsEventLogger
+
     private lateinit var mTestableLooper: TestableLooper
     private lateinit var mTile: NightDisplayTile
 
-    private val mUiEventLogger: UiEventLogger = UiEventLoggerFake()
+
 
     @Before
     fun setUp() {

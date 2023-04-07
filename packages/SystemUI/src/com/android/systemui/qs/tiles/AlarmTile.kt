@@ -13,7 +13,6 @@ import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
-import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dagger.qualifiers.Background
@@ -23,6 +22,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.settings.UserTracker
@@ -32,7 +32,7 @@ import javax.inject.Inject
 
 class AlarmTile @Inject constructor(
     host: QSHost,
-    uiEventLogger: UiEventLogger,
+    uiEventLogger: QsEventLogger,
     @Background backgroundLooper: Looper,
     @Main mainHandler: Handler,
     falsingManager: FalsingManager,

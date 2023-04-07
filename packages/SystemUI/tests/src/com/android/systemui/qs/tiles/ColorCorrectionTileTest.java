@@ -32,12 +32,12 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.FakeSettings;
@@ -67,7 +67,7 @@ public class ColorCorrectionTileTest extends SysuiTestCase {
     @Mock
     private QSLogger mQSLogger;
     @Mock
-    private UiEventLogger mUiEventLogger;
+    private QsEventLogger mUiEventLogger;
     @Mock
     private UserTracker mUserTracker;
 

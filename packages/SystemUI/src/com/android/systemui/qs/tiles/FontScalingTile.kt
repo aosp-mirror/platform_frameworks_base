@@ -23,7 +23,6 @@ import android.provider.Settings
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
-import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.accessibility.fontscaling.FontScalingDialog
 import com.android.systemui.animation.DialogCuj
@@ -37,6 +36,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -48,7 +48,7 @@ class FontScalingTile
 @Inject
 constructor(
     host: QSHost,
-    uiEventLogger: UiEventLogger,
+    uiEventLogger: QsEventLogger,
     @Background backgroundLooper: Looper,
     @Main mainHandler: Handler,
     falsingManager: FalsingManager,

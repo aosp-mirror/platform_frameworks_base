@@ -29,9 +29,6 @@ import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.InstanceId;
-import com.android.internal.logging.InstanceIdSequence;
-import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ProtoDumpable;
 import com.android.systemui.R;
@@ -91,7 +88,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         PanelInteractor, CustomTileAddedRepository {
     private static final String TAG = "QSTileHost";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final int MAX_QS_INSTANCE_ID = 1 << 20;
 
     // Shared prefs that hold tile lifecycle info.
     @VisibleForTesting
@@ -103,7 +99,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
     private final TunerService mTunerService;
     private final PluginManager mPluginManager;
     private final QSLogger mQSLogger;
-    private final InstanceIdSequence mInstanceIdSequence;
     private final CustomTileStatePersister mCustomTileStatePersister;
     private final Executor mMainExecutor;
     private final UserFileManager mUserFileManager;
@@ -153,7 +148,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         mUserFileManager = userFileManager;
         mFeatureFlags = featureFlags;
 
-        mInstanceIdSequence = new InstanceIdSequence(MAX_QS_INSTANCE_ID);
         mCentralSurfacesOptional = centralSurfacesOptional;
 
         mQsFactories.add(defaultFactory);
@@ -170,11 +164,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
             mAutoTiles = autoTiles.get();
         });
-    }
-
-    @Override
-    public InstanceId getNewInstanceId() {
-        return mInstanceIdSequence.newInstanceId();
     }
 
     public void destroy() {
@@ -216,11 +205,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
     @Override
     public Collection<QSTile> getTiles() {
         return mTiles.values();
-    }
-
-    @Override
-    public void warn(String message, Throwable t) {
-        // already logged
     }
 
     @Override

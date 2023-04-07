@@ -61,6 +61,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
+import com.android.systemui.InstanceIdSequenceFake;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
@@ -69,6 +70,8 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSEvent;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.QsEventLoggerFake;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.statusbar.StatusBarState;
 
@@ -106,7 +109,8 @@ public class QSTileImplTest extends SysuiTestCase {
     private ActivityStarter mActivityStarter;
 
     private UiEventLoggerFake mUiEventLoggerFake;
-    private InstanceId mInstanceId = InstanceId.fakeInstanceId(5);
+    private QsEventLoggerFake mQsEventLoggerFake;
+    private InstanceId mInstanceId;
 
     @Captor
     private ArgumentCaptor<LogMaker> mLogCaptor;
@@ -115,16 +119,18 @@ public class QSTileImplTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
+
         mUiEventLoggerFake = new UiEventLoggerFake();
+        mQsEventLoggerFake =
+                new QsEventLoggerFake(mUiEventLoggerFake, new InstanceIdSequenceFake(10));
         when(mHost.indexOf(SPEC)).thenReturn(POSITION);
         when(mHost.getContext()).thenReturn(mContext);
-        when(mHost.getNewInstanceId()).thenReturn(mInstanceId);
 
         Handler mainHandler = new Handler(mTestableLooper.getLooper());
 
         mTile = new TileImpl(
                 mHost,
-                mUiEventLoggerFake,
+                mQsEventLoggerFake,
                 mTestableLooper.getLooper(),
                 mainHandler,
                 mFalsingManager,
@@ -135,6 +141,7 @@ public class QSTileImplTest extends SysuiTestCase {
         );
         mTile.initialize();
         mTestableLooper.processAllMessages();
+        mInstanceId = InstanceId.fakeInstanceId(mQsEventLoggerFake.getLastInstanceId());
 
         mTile.setTileSpec(SPEC);
     }
@@ -515,7 +522,7 @@ public class QSTileImplTest extends SysuiTestCase {
 
         protected TileImpl(
                 QSHost host,
-                UiEventLogger uiEventLogger,
+                QsEventLogger uiEventLogger,
                 Looper backgroundLooper,
                 Handler mainHandler,
                 FalsingManager falsingManager,

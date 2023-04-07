@@ -21,6 +21,8 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QSHostAdapter
 import com.android.systemui.qs.QSTileHost
+import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.QsEventLoggerImpl
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedSharedPrefsRepository
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
@@ -34,8 +36,12 @@ interface QSHostModule {
 
     @Binds fun provideQsHost(controllerImpl: QSHostAdapter): QSHost
 
+    @Binds fun provideEventLogger(impl: QsEventLoggerImpl): QsEventLogger
+
     @Module
     companion object {
+        private const val MAX_QS_INSTANCE_ID = 1 shl 20
+
         @Provides
         @JvmStatic
         fun providePanelInteractor(

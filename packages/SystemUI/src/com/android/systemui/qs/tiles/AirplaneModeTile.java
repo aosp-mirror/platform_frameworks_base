@@ -35,7 +35,6 @@ import android.widget.Switch;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -46,6 +45,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -55,6 +55,7 @@ import com.android.systemui.util.settings.GlobalSettings;
 import dagger.Lazy;
 
 import javax.inject.Inject;
+
 
 
 /** Quick settings tile: Airplane mode **/
@@ -71,7 +72,7 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
     @Inject
     public AirplaneModeTile(
             QSHost host,
-            UiEventLogger uiEventLogger,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
