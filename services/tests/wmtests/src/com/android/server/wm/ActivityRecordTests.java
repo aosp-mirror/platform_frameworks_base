@@ -589,12 +589,18 @@ public class ActivityRecordTests extends WindowTestsBase {
                 throw new IllegalStateException("Orientation in new config should be either"
                         + "landscape or portrait.");
         }
+
+        final DisplayRotation displayRotation = activity.mDisplayContent.getDisplayRotation();
+        spyOn(displayRotation);
+
         activity.setRequestedOrientation(requestedOrientation);
 
         final ActivityConfigurationChangeItem expected =
                 ActivityConfigurationChangeItem.obtain(newConfig);
         verify(mAtm.getLifecycleManager()).scheduleTransaction(eq(activity.app.getThread()),
                 eq(activity.token), eq(expected));
+
+        verify(displayRotation).onSetRequestedOrientation();
     }
 
     @Test
