@@ -30,7 +30,7 @@ import android.credentials.ui.RequestInfo;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 
@@ -77,7 +77,8 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
                 .createNewSession(mContext, mUserId, providerInfo,
                         this, remoteCredentialService);
         if (providerGetSession != null) {
-            Log.i(TAG, "In startProviderSession - provider session created and being added");
+            Slog.d(TAG, "In startProviderSession - provider session created and "
+                    + "being added for: " + providerInfo.getComponentName());
             mProviders.put(providerGetSession.getComponentName().flattenToString(),
                     providerGetSession);
         }
@@ -116,7 +117,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     @Override
     public void onFinalResponseReceived(ComponentName componentName,
             @Nullable GetCredentialResponse response) {
-        Log.i(TAG, "onFinalCredentialReceived from: " + componentName.flattenToString());
+        Slog.d(TAG, "onFinalResponseReceived from: " + componentName.flattenToString());
         mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
         mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(
                 mProviders.get(componentName.flattenToString())
@@ -160,7 +161,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     @Override
     public void onProviderStatusChanged(ProviderSession.Status status,
             ComponentName componentName, ProviderSession.CredentialsSource source) {
-        Log.i(TAG, "in onStatusChanged with status: " + status + "and source: " + source);
+        Slog.d(TAG, "in onStatusChanged with status: " + status + ", and source: " + source);
 
         // Auth entry was selected, and it did not have any underlying credentials
         if (status == ProviderSession.Status.NO_CREDENTIALS_FROM_AUTH_ENTRY) {
@@ -173,7 +174,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
             // or we need to respond with error. The only other case is the entry being
             // selected after the UI has been invoked which has a separate code path.
             if (isUiInvocationNeeded()) {
-                Log.i(TAG, "in onProviderStatusChanged - isUiInvocationNeeded");
+                Slog.d(TAG, "in onProviderStatusChanged - isUiInvocationNeeded");
                 getProviderDataAndInitiateUi();
             } else {
                 respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
