@@ -33,7 +33,6 @@ import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.PermissionUtils;
-import android.util.Log;
 import android.util.Slog;
 
 import java.util.ArrayList;
@@ -67,6 +66,9 @@ public class PrepareGetRequestSession extends GetRequestSession {
     @Override
     public void onProviderStatusChanged(ProviderSession.Status status, ComponentName componentName,
             ProviderSession.CredentialsSource source) {
+        Slog.d(TAG, "in onProviderStatusChanged with status: " + status + ", and "
+                + "source: " + source);
+
         switch (source) {
             case REMOTE_PROVIDER:
                 // Remote provider's status changed. We should check if all providers are done, and
@@ -123,7 +125,7 @@ public class PrepareGetRequestSession extends GetRequestSession {
                             hasPermission,
                             credentialTypes, hasAuthenticationResults, hasRemoteResults, uiIntent));
         } catch (RemoteException e) {
-            Log.e(TAG, "EXCEPTION while mPendingCallback.onResponse", e);
+            Slog.e(TAG, "EXCEPTION while mPendingCallback.onResponse", e);
         }
     }
 
@@ -138,7 +140,7 @@ public class PrepareGetRequestSession extends GetRequestSession {
                             /*hasRemoteResults=*/ false,
                             /*pendingIntent=*/ null));
         } catch (RemoteException e) {
-            Log.e(TAG, "EXCEPTION while mPendingCallback.onResponse", e);
+            Slog.e(TAG, "EXCEPTION while mPendingCallback.onResponse", e);
         }
     }
 
@@ -179,10 +181,8 @@ public class PrepareGetRequestSession extends GetRequestSession {
     private PendingIntent getUiIntent() {
         ArrayList<ProviderData> providerDataList = new ArrayList<>();
         for (ProviderSession session : mProviders.values()) {
-            Log.i(TAG, "preparing data for : " + session.getComponentName());
             ProviderData providerData = session.prepareUiData();
             if (providerData != null) {
-                Log.i(TAG, "Provider data is not null");
                 providerDataList.add(providerData);
             }
         }
