@@ -30,6 +30,7 @@ import android.credentials.ui.AuthenticationEntry;
 import android.credentials.ui.Entry;
 import android.credentials.ui.GetCredentialProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
+import android.os.ICancellationSignal;
 import android.service.credentials.Action;
 import android.service.credentials.BeginGetCredentialOption;
 import android.service.credentials.BeginGetCredentialRequest;
@@ -235,6 +236,11 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         }
     }
 
+    @Override
+    public void onProviderCancellable(ICancellationSignal cancellation) {
+        mProviderCancellationSignal = cancellation;
+    }
+
     @Override // Selection call from the request provider
     protected void onUiEntrySelected(String entryType, String entryKey,
             ProviderPendingIntentResponse providerPendingIntentResponse) {
@@ -302,9 +308,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
             startCandidateMetrics();
-            mProviderCancellationSignal =
-                    mRemoteCredentialService.onBeginGetCredential(mProviderRequest, this);
-            boolean foundSig = mProviderCancellationSignal == null;
+            mRemoteCredentialService.onBeginGetCredential(mProviderRequest, this);
         }
     }
 

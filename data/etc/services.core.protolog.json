@@ -883,6 +883,12 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
+    "-1258739769": {
+      "message": "onTransactionReady, opening: %s, closing: %s, animating: %s, match: %b",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "-1257821162": {
       "message": "OUT SURFACE %s: copied",
       "level": "INFO",

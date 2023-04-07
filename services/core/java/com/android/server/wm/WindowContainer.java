@@ -4047,7 +4047,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 final Configuration mergedConfiguration =
                         configurationMerger != null
                                 ? configurationMerger.merge(mergedOverrideConfig,
-                                receiver.getConfiguration())
+                                        receiver.getRequestedOverrideConfiguration())
                                 : supplier.getConfiguration();
                 receiver.onRequestedOverrideConfigurationChanged(mergedConfiguration);
             }

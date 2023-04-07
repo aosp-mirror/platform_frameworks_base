@@ -230,7 +230,7 @@ public class StatusBarSignalPolicy implements SignalCallback,
         if (state == null) {
             return;
         }
-        if (statusIcon.icon == R.drawable.ic_qs_no_calling_sms) {
+        if (statusIcon.icon == R.drawable.ic_shade_no_calling_sms) {
             state.isNoCalling = statusIcon.visible;
             state.noCallingDescription = statusIcon.contentDescription;
         } else {
@@ -422,7 +422,7 @@ public class StatusBarSignalPolicy implements SignalCallback,
 
         private CallIndicatorIconState(int subId) {
             this.subId = subId;
-            this.noCallingResId = R.drawable.ic_qs_no_calling_sms;
+            this.noCallingResId = R.drawable.ic_shade_no_calling_sms;
             this.callStrengthResId = TelephonyIcons.MOBILE_CALL_STRENGTH_ICONS[0];
         }
 

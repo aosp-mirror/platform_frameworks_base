@@ -21,6 +21,7 @@ import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.NOT_
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
 import static android.app.Notification.FLAG_AUTOGROUP_SUMMARY;
+import static android.app.Notification.FLAG_AUTO_CANCEL;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
@@ -29,6 +30,7 @@ import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_NO_DISMISS;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
+import static android.app.Notification.FLAG_USER_INITIATED_JOB;
 import static android.app.NotificationChannel.CONVERSATION_CHANNEL_ID_FORMAT;
 import static android.app.NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED;
@@ -163,6 +165,7 @@ import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
 import android.app.RemoteServiceException.BadForegroundServiceNotificationException;
+import android.app.RemoteServiceException.BadUserInitiatedJobNotificationException;
 import android.app.StatsManager;
 import android.app.StatusBarManager;
 import android.app.UriGrantsManager;
@@ -304,6 +307,7 @@ import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
+import com.android.server.job.JobSchedulerInternal;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 import com.android.server.notification.ManagedServices.ManagedServiceInfo;
@@ -1156,8 +1160,8 @@ public class NotificationManagerService extends SystemService {
                 StatusBarNotification sbn = r.getSbn();
                 cancelNotification(callingUid, callingPid, sbn.getPackageName(), sbn.getTag(),
                         sbn.getId(), Notification.FLAG_AUTO_CANCEL,
-                        FLAG_FOREGROUND_SERVICE | FLAG_BUBBLE, false, r.getUserId(),
-                        REASON_CLICK, nv.rank, nv.count, null);
+                        FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB | FLAG_BUBBLE,
+                        false, r.getUserId(), REASON_CLICK, nv.rank, nv.count, null);
                 nv.recycle();
                 reportUserInteraction(r);
                 mAssistants.notifyAssistantNotificationClicked(r);
@@ -1265,21 +1269,26 @@ public class NotificationManagerService extends SystemService {
         public void onNotificationError(int callingUid, int callingPid, String pkg, String tag,
                 int id, int uid, int initialPid, String message, int userId) {
             final boolean fgService;
+            final boolean uiJob;
             synchronized (mNotificationLock) {
                 NotificationRecord r = findNotificationLocked(pkg, tag, id, userId);
                 fgService = r != null && (r.getNotification().flags & FLAG_FOREGROUND_SERVICE) != 0;
+                uiJob = r != null && (r.getNotification().flags & FLAG_USER_INITIATED_JOB) != 0;
             }
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0, 0, false, userId,
                     REASON_ERROR, null);
-            if (fgService) {
-                // Still crash for foreground services, preventing the not-crash behaviour abused
-                // by apps to give us a garbage notification and silently start a fg service.
+            if (fgService || uiJob) {
+                // Still crash for foreground services or user-initiated jobs, preventing the
+                // not-crash behaviour abused by apps to give us a garbage notification and
+                // silently start a fg service or user-initiated job.
+                final int exceptionTypeId = fgService
+                        ? BadForegroundServiceNotificationException.TYPE_ID
+                        : BadUserInitiatedJobNotificationException.TYPE_ID;
                 Binder.withCleanCallingIdentity(
                         () -> mAm.crashApplicationWithType(uid, initialPid, pkg, -1,
                             "Bad notification(tag=" + tag + ", id=" + id + ") posted from package "
                                 + pkg + ", crashing app(uid=" + uid + ", pid=" + initialPid + "): "
-                                + message, true /* force */,
-                                BadForegroundServiceNotificationException.TYPE_ID));
+                                + message, true /* force */, exceptionTypeId));
             }
         }
 
@@ -1689,8 +1698,8 @@ public class NotificationManagerService extends SystemService {
                     cancelNotification(record.getSbn().getUid(), record.getSbn().getInitialPid(),
                             record.getSbn().getPackageName(), record.getSbn().getTag(),
                             record.getSbn().getId(), 0,
-                            FLAG_FOREGROUND_SERVICE, true, record.getUserId(),
-                            REASON_TIMEOUT, null);
+                            FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB,
+                            true, record.getUserId(), REASON_TIMEOUT, null);
                 }
             }
         }
@@ -3519,10 +3528,10 @@ public class NotificationManagerService extends SystemService {
             userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), userId, true, false, "cancelAllNotifications", pkg);
 
-            // Don't allow the app to cancel active FGS notifications
+            // Don't allow the app to cancel active FGS or UIJ notifications
             cancelAllNotificationsInt(Binder.getCallingUid(), Binder.getCallingPid(),
-                    pkg, null, 0, FLAG_FOREGROUND_SERVICE, true, userId,
-                    REASON_APP_CANCEL_ALL, null);
+                    pkg, null, 0, FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB,
+                    true, userId, REASON_APP_CANCEL_ALL, null);
         }
 
         @Override
@@ -3964,6 +3973,21 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        // Throws a security exception if the given channel has a notification associated
+        // with an active user-initiated job.
+        private void enforceDeletingChannelHasNoUserInitiatedJob(String pkg, int userId,
+                String channelId) {
+            final JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
+            if (js != null && js.isNotificationChannelAssociatedWithAnyUserInitiatedJobs(
+                    channelId, userId, pkg)) {
+                Slog.w(TAG, "Package u" + userId + "/" + pkg
+                        + " may not delete notification channel '"
+                        + channelId + "' with user-initiated job");
+                throw new SecurityException("Not allowed to delete channel " + channelId
+                        + " with a user-initiated job");
+            }
+        }
+
         @Override
         public void deleteNotificationChannel(String pkg, String channelId) {
             checkCallerIsSystemOrSameApp(pkg);
@@ -3973,6 +3997,7 @@ public class NotificationManagerService extends SystemService {
                 throw new IllegalArgumentException("Cannot delete default channel");
             }
             enforceDeletingChannelHasNoFgService(pkg, callingUser, channelId);
+            enforceDeletingChannelHasNoUserInitiatedJob(pkg, callingUser, channelId);
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
                     callingUser, REASON_CHANNEL_REMOVED, null);
             boolean previouslyExisted = mPreferencesHelper.deleteNotificationChannel(
@@ -4017,8 +4042,9 @@ public class NotificationManagerService extends SystemService {
                 final int userId = UserHandle.getUserId(callingUid);
                 List<NotificationChannel> groupChannels = groupToDelete.getChannels();
                 for (int i = 0; i < groupChannels.size(); i++) {
-                    enforceDeletingChannelHasNoFgService(pkg, userId,
-                            groupChannels.get(i).getId());
+                    final String channelId = groupChannels.get(i).getId();
+                    enforceDeletingChannelHasNoFgService(pkg, userId, channelId);
+                    enforceDeletingChannelHasNoUserInitiatedJob(pkg, userId, channelId);
                 }
                 List<NotificationChannel> deletedChannels =
                         mPreferencesHelper.deleteNotificationChannelGroup(pkg, callingUid, groupId);
@@ -6360,61 +6386,73 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystem();
             mHandler.post(() -> {
                 synchronized (mNotificationLock) {
-                    int count = getNotificationCount(pkg, userId);
-                    boolean removeFgsNotification = false;
-                    if (count > MAX_PACKAGE_NOTIFICATIONS) {
-                        mUsageStats.registerOverCountQuota(pkg);
-                        removeFgsNotification = true;
-                    }
-                    if (removeFgsNotification) {
-                        NotificationRecord r = findNotificationLocked(pkg, null, notificationId,
-                                userId);
-                        if (r != null) {
-                            if (DBG) {
-                                Slog.d(TAG, "Remove FGS flag not allow. Cancel FGS notification");
-                            }
-                            removeFromNotificationListsLocked(r);
-                            cancelNotificationLocked(r, false, REASON_APP_CANCEL, true,
-                                    null, SystemClock.elapsedRealtime());
-                        }
-                    } else {
-                        // strip flag from all enqueued notifications. listeners will be informed
-                        // in post runnable.
-                        List<NotificationRecord> enqueued = findNotificationsByListLocked(
-                                mEnqueuedNotifications, pkg, null, notificationId, userId);
-                        for (int i = 0; i < enqueued.size(); i++) {
-                            removeForegroundServiceFlagLocked(enqueued.get(i));
-                        }
-
-                        // if posted notification exists, strip its flag and tell listeners
-                        NotificationRecord r = findNotificationByListLocked(
-                                mNotificationList, pkg, null, notificationId, userId);
-                        if (r != null) {
-                            removeForegroundServiceFlagLocked(r);
-                            mRankingHelper.sort(mNotificationList);
-                            mListeners.notifyPostedLocked(r, r);
-                        }
-                    }
+                    removeFlagFromNotificationLocked(pkg, notificationId, userId,
+                            FLAG_FOREGROUND_SERVICE);
                 }
             });
         }
 
         @Override
-        public void onConversationRemoved(String pkg, int uid, Set<String> shortcuts) {
-            onConversationRemovedInternal(pkg, uid, shortcuts);
+        public void removeUserInitiatedJobFlagFromNotification(String pkg, int notificationId,
+                int userId) {
+            checkCallerIsSystem();
+            mHandler.post(() -> {
+                synchronized (mNotificationLock) {
+                    removeFlagFromNotificationLocked(pkg, notificationId, userId,
+                            FLAG_USER_INITIATED_JOB);
+                }
+            });
         }
 
         @GuardedBy("mNotificationLock")
-        private void removeForegroundServiceFlagLocked(NotificationRecord r) {
-            if (r == null) {
-                return;
+        private void removeFlagFromNotificationLocked(String pkg, int notificationId, int userId,
+                int flag) {
+            int count = getNotificationCount(pkg, userId);
+            boolean removeFlagFromNotification = false;
+            if (count > MAX_PACKAGE_NOTIFICATIONS) {
+                mUsageStats.registerOverCountQuota(pkg);
+                removeFlagFromNotification = true;
             }
-            StatusBarNotification sbn = r.getSbn();
-            // NoMan adds flags FLAG_ONGOING_EVENT when it sees
-            // FLAG_FOREGROUND_SERVICE. Hence it's not enough to remove
-            // FLAG_FOREGROUND_SERVICE, we have to revert to the flags we received
-            // initially *and* force remove FLAG_FOREGROUND_SERVICE.
-            sbn.getNotification().flags = (r.mOriginalFlags & ~FLAG_FOREGROUND_SERVICE);
+            if (removeFlagFromNotification) {
+                NotificationRecord r = findNotificationLocked(pkg, null, notificationId, userId);
+                if (r != null) {
+                    if (DBG) {
+                        final String type = (flag ==  FLAG_FOREGROUND_SERVICE) ? "FGS" : "UIJ";
+                        Slog.d(TAG, "Remove " + type + " flag not allow. "
+                                + "Cancel " + type + " notification");
+                    }
+                    removeFromNotificationListsLocked(r);
+                    cancelNotificationLocked(r, false, REASON_APP_CANCEL, true,
+                            null, SystemClock.elapsedRealtime());
+                }
+            } else {
+                List<NotificationRecord> enqueued = findNotificationsByListLocked(
+                        mEnqueuedNotifications, pkg, null, notificationId, userId);
+                for (int i = 0; i < enqueued.size(); i++) {
+                    final NotificationRecord r = enqueued.get(i);
+                    if (r != null) {
+                        // strip flag from all enqueued notifications. listeners will be informed
+                        // in post runnable.
+                        StatusBarNotification sbn = r.getSbn();
+                        sbn.getNotification().flags = (r.mOriginalFlags & ~flag);
+                    }
+                }
+
+                NotificationRecord r = findNotificationByListLocked(
+                        mNotificationList, pkg, null, notificationId, userId);
+                if (r != null) {
+                    // if posted notification exists, strip its flag and tell listeners
+                    StatusBarNotification sbn = r.getSbn();
+                    sbn.getNotification().flags = (r.mOriginalFlags & ~flag);
+                    mRankingHelper.sort(mNotificationList);
+                    mListeners.notifyPostedLocked(r, r);
+                }
+            }
+        }
+
+        @Override
+        public void onConversationRemoved(String pkg, int uid, Set<String> shortcuts) {
+            onConversationRemovedInternal(pkg, uid, shortcuts);
         }
 
         @Override
@@ -6490,10 +6528,10 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        // Don't allow client applications to cancel foreground service notifs or autobundled
-        // summaries.
+        // Don't allow client applications to cancel foreground service notifs, user-initiated job
+        // notifs or autobundled summaries.
         final int mustNotHaveFlags = isCallingUidSystem() ? 0 :
-                (FLAG_FOREGROUND_SERVICE | FLAG_AUTOGROUP_SUMMARY);
+                (FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB | FLAG_AUTOGROUP_SUMMARY);
         cancelNotification(uid, callingPid, pkg, tag, id, 0,
                 mustNotHaveFlags, false, userId, REASON_APP_CANCEL, null);
     }
@@ -6547,9 +6585,16 @@ public class NotificationManagerService extends SystemService {
         final ServiceNotificationPolicy policy = mAmi.applyForegroundServiceNotification(
                 notification, tag, id, pkg, userId);
 
+        boolean stripUijFlag = true;
+        final JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
+        if (js != null) {
+            stripUijFlag = !js.isNotificationAssociatedWithAnyUserInitiatedJobs(id, userId, pkg);
+        }
+
         // Fix the notification as best we can.
         try {
-            fixNotification(notification, pkg, tag, id, userId, notificationUid, policy);
+            fixNotification(notification, pkg, tag, id, userId, notificationUid,
+                    policy, stripUijFlag);
         } catch (Exception e) {
             if (notification.isForegroundService()) {
                 throw new SecurityException("Invalid FGS notification", e);
@@ -6557,7 +6602,6 @@ public class NotificationManagerService extends SystemService {
             Slog.e(TAG, "Cannot fix notification", e);
             return;
         }
-
 
         if (policy == ServiceNotificationPolicy.UPDATE_ONLY) {
             // Proceed if the notification is already showing/known, otherwise ignore
@@ -6617,26 +6661,25 @@ public class NotificationManagerService extends SystemService {
         boolean isImportanceFixed = mPermissionHelper.isPermissionFixed(pkg, userId);
         r.setImportanceFixed(isImportanceFixed);
 
-        if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
-            final boolean fgServiceShown = channel.isFgServiceShown();
+        if (notification.isFgsOrUij()) {
             if (((channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0
-                        || !fgServiceShown)
+                        || !channel.isUserVisibleTaskShown())
                     && (r.getImportance() == IMPORTANCE_MIN
                             || r.getImportance() == IMPORTANCE_NONE)) {
-                // Increase the importance of foreground service notifications unless the user had
-                // an opinion otherwise (and the channel hasn't yet shown a fg service).
+                // Increase the importance of fgs/uij notifications unless the user had
+                // an opinion otherwise (and the channel hasn't yet shown a fgs/uij).
                 channel.setImportance(IMPORTANCE_LOW);
                 r.setSystemImportance(IMPORTANCE_LOW);
-                if (!fgServiceShown) {
+                if (!channel.isUserVisibleTaskShown()) {
                     channel.unlockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
-                    channel.setFgServiceShown(true);
+                    channel.setUserVisibleTaskShown(true);
                 }
                 mPreferencesHelper.updateNotificationChannel(
                         pkg, notificationUid, channel, false);
                 r.updateNotificationChannel(channel);
-            } else if (!fgServiceShown && !TextUtils.isEmpty(channelId)
+            } else if (!channel.isUserVisibleTaskShown() && !TextUtils.isEmpty(channelId)
                     && !NotificationChannel.DEFAULT_CHANNEL_ID.equals(channelId)) {
-                channel.setFgServiceShown(true);
+                channel.setUserVisibleTaskShown(true);
                 r.updateNotificationChannel(channel);
             }
         }
@@ -6729,7 +6772,8 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     protected void fixNotification(Notification notification, String pkg, String tag, int id,
-            @UserIdInt int userId, int notificationUid, ServiceNotificationPolicy fgsPolicy)
+            @UserIdInt int userId, int notificationUid,
+            ServiceNotificationPolicy fgsPolicy, boolean stripUijFlag)
             throws NameNotFoundException, RemoteException {
         final ApplicationInfo ai = mPackageManagerClient.getApplicationInfoAsUser(
                 pkg, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
@@ -6738,6 +6782,14 @@ public class NotificationManagerService extends SystemService {
 
         if (notification.isForegroundService() && fgsPolicy == NOT_FOREGROUND_SERVICE) {
             notification.flags &= ~FLAG_FOREGROUND_SERVICE;
+        }
+        if (notification.isUserInitiatedJob() && stripUijFlag) {
+            notification.flags &= ~FLAG_USER_INITIATED_JOB;
+        }
+
+        // Remove FLAG_AUTO_CANCEL from notifications that are associated with a FGS or UIJ.
+        if (notification.isFgsOrUij()) {
+            notification.flags &= ~FLAG_AUTO_CANCEL;
         }
 
         // Only notifications that can be non-dismissible can have the flag FLAG_NO_DISMISS
@@ -7083,8 +7135,8 @@ public class NotificationManagerService extends SystemService {
                 }
             }
 
-            // limit the number of non-fgs outstanding notificationrecords an app can have
-            if (!n.isForegroundService()) {
+            // limit the number of non-fgs/uij outstanding notificationrecords an app can have
+            if (!n.isFgsOrUij()) {
                 int count = getNotificationCount(pkg, userId, id, tag);
                 if (count >= MAX_PACKAGE_NOTIFICATIONS) {
                     mUsageStats.registerOverCountQuota(pkg);
@@ -7444,7 +7496,8 @@ public class NotificationManagerService extends SystemService {
                                     return false;
                                 }
                             } else if (mReason == REASON_APP_CANCEL) {
-                                if ((flags & FLAG_FOREGROUND_SERVICE) != 0) {
+                                if ((flags & FLAG_FOREGROUND_SERVICE) != 0
+                                        || (flags & FLAG_USER_INITIATED_JOB) != 0) {
                                     return false;
                                 }
                             }
@@ -7997,7 +8050,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         FlagChecker childrenFlagChecker = (flags) -> {
-            if ((flags & FLAG_FOREGROUND_SERVICE) != 0) {
+            if ((flags & FLAG_FOREGROUND_SERVICE) != 0 || (flags & FLAG_USER_INITIATED_JOB) != 0) {
                 return false;
             }
             return true;

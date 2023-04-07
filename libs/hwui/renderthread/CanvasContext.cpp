@@ -236,7 +236,6 @@ void CanvasContext::setupPipelineSurface() {
 
     if (mNativeSurface && !mNativeSurface->didSetExtraBuffers()) {
         setBufferCount(mNativeSurface->getNativeWindow());
-
     }
 
     mFrameNumber = 0;
@@ -301,10 +300,6 @@ void CanvasContext::setOpaque(bool opaque) {
 
 float CanvasContext::setColorMode(ColorMode mode) {
     if (mode != mColorMode) {
-        const bool isHdr = mode == ColorMode::Hdr || mode == ColorMode::Hdr10;
-        if (isHdr && !mRenderPipeline->supportsExtendedRangeHdr()) {
-            mode = ColorMode::WideColorGamut;
-        }
         mColorMode = mode;
         mRenderPipeline->setSurfaceColorProperties(mode);
         setupPipelineSurface();
@@ -869,6 +864,10 @@ SkISize CanvasContext::getNextFrameSize() const {
     size.fHeight = ANativeWindow_getHeight(anw);
     mRenderThread.cacheManager().notifyNextFrameSize(size.fWidth, size.fHeight);
     return size;
+}
+
+const SkM44& CanvasContext::getPixelSnapMatrix() const {
+    return mRenderPipeline->getPixelSnapMatrix();
 }
 
 void CanvasContext::prepareAndDraw(RenderNode* node) {

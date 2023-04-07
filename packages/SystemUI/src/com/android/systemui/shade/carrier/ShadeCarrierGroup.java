@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.carrier;
+package com.android.systemui.shade.carrier;
 
 import android.annotation.StyleRes;
 import android.content.Context;
@@ -27,10 +27,10 @@ import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 
 /**
- * Displays Carrier name and network status in QS
+ * Displays Carrier name and network status in the shade header
  */
-public class QSCarrierGroup extends LinearLayout {
-    public QSCarrierGroup(Context context, AttributeSet attrs) {
+public class ShadeCarrierGroup extends LinearLayout {
+    public ShadeCarrierGroup(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
@@ -38,24 +38,24 @@ public class QSCarrierGroup extends LinearLayout {
         return findViewById(R.id.no_carrier_text);
     }
 
-    QSCarrier getCarrier1View() {
+    ShadeCarrier getCarrier1View() {
         return findViewById(R.id.carrier1);
     }
 
-    QSCarrier getCarrier2View() {
+    ShadeCarrier getCarrier2View() {
         return findViewById(R.id.carrier2);
     }
 
-    QSCarrier getCarrier3View() {
+    ShadeCarrier getCarrier3View() {
         return findViewById(R.id.carrier3);
     }
 
     View getCarrierDivider1() {
-        return findViewById(R.id.qs_carrier_divider1);
+        return findViewById(R.id.shade_carrier_divider1);
     }
 
     View getCarrierDivider2() {
-        return findViewById(R.id.qs_carrier_divider2);
+        return findViewById(R.id.shade_carrier_divider2);
     }
 
     public void updateTextAppearance(@StyleRes int resId) {

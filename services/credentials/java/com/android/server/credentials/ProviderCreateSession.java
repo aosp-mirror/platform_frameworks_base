@@ -29,6 +29,7 @@ import android.credentials.ui.CreateCredentialProviderData;
 import android.credentials.ui.Entry;
 import android.credentials.ui.ProviderPendingIntentResponse;
 import android.os.Bundle;
+import android.os.ICancellationSignal;
 import android.service.credentials.BeginCreateCredentialRequest;
 import android.service.credentials.BeginCreateCredentialResponse;
 import android.service.credentials.CallingAppInfo;
@@ -173,6 +174,11 @@ public final class ProviderCreateSession extends ProviderSession<
         }
     }
 
+    @Override
+    public void onProviderCancellable(ICancellationSignal cancellation) {
+        mProviderCancellationSignal = cancellation;
+    }
+
     private void onSetInitialRemoteResponse(BeginCreateCredentialResponse response) {
         Log.i(TAG, "onSetInitialRemoteResponse with save entries");
         mProviderResponse = response;
@@ -236,8 +242,7 @@ public final class ProviderCreateSession extends ProviderSession<
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
             startCandidateMetrics();
-            mProviderCancellationSignal =
-                    mRemoteCredentialService.onCreateCredential(mProviderRequest, this);
+            mRemoteCredentialService.onBeginCreateCredential(mProviderRequest, this);
         }
     }
 

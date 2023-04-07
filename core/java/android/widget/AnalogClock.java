@@ -49,15 +49,18 @@ import java.util.Formatter;
 import java.util.Locale;
 
 /**
- * This widget display an analogic clock with two hands for hours and
- * minutes.
+ * This widget displays an analogic clock with two hands for hours and minutes.
  *
  * @attr ref android.R.styleable#AnalogClock_dial
  * @attr ref android.R.styleable#AnalogClock_hand_hour
  * @attr ref android.R.styleable#AnalogClock_hand_minute
  * @attr ref android.R.styleable#AnalogClock_hand_second
  * @attr ref android.R.styleable#AnalogClock_timeZone
- * @deprecated This widget is no longer supported.
+ * @deprecated This widget is no longer supported; except for
+ * {@link android.widget.RemoteViews} use cases like
+ * <a href="https://developer.android.com/develop/ui/views/appwidgets/overview">
+ * app widgets</a>.
+ *
  */
 @RemoteView
 @Deprecated

@@ -456,7 +456,50 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun mobileIsDefault_usesRepoValue() =
+    fun mobileIsDefault_mobileFalseAndCarrierMergedFalse_false() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.mobileIsDefault.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.mobileIsDefault.value = false
+            connectionsRepository.hasCarrierMergedConnection.value = false
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun mobileIsDefault_mobileTrueAndCarrierMergedFalse_true() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.mobileIsDefault.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.mobileIsDefault.value = true
+            connectionsRepository.hasCarrierMergedConnection.value = false
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    /** Regression test for b/272586234. */
+    @Test
+    fun mobileIsDefault_mobileFalseAndCarrierMergedTrue_true() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.mobileIsDefault.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.mobileIsDefault.value = false
+            connectionsRepository.hasCarrierMergedConnection.value = true
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun mobileIsDefault_updatesWhenRepoUpdates() =
         testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.mobileIsDefault.onEach { latest = it }.launchIn(this)
@@ -467,7 +510,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             connectionsRepository.mobileIsDefault.value = false
             assertThat(latest).isFalse()
 
-            connectionsRepository.mobileIsDefault.value = true
+            connectionsRepository.hasCarrierMergedConnection.value = true
             assertThat(latest).isTrue()
 
             job.cancel()

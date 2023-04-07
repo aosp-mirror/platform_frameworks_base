@@ -41,6 +41,7 @@ import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.RemoteServiceException.BadForegroundServiceNotificationException;
+import android.app.RemoteServiceException.BadUserInitiatedJobNotificationException;
 import android.app.RemoteServiceException.CannotPostForegroundServiceNotificationException;
 import android.app.RemoteServiceException.CrashedByAdbException;
 import android.app.RemoteServiceException.ForegroundServiceDidNotStartInTimeException;
@@ -2077,6 +2078,9 @@ public final class ActivityThread extends ClientTransactionHandler
 
             case BadForegroundServiceNotificationException.TYPE_ID:
                 throw new BadForegroundServiceNotificationException(message);
+
+            case BadUserInitiatedJobNotificationException.TYPE_ID:
+                throw new BadUserInitiatedJobNotificationException(message);
 
             case MissingRequestPasswordComplexityPermissionException.TYPE_ID:
                 throw new MissingRequestPasswordComplexityPermissionException(message);

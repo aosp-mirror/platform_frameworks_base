@@ -30,6 +30,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.notetask.NoteTaskController
 import com.android.systemui.notetask.NoteTaskEntryPoint
 import com.android.systemui.settings.FakeUserTracker
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import org.junit.After
@@ -38,6 +39,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -86,13 +88,26 @@ class LaunchNoteTaskActivityTest : SysuiTestCase() {
 
     @Test
     fun startActivityOnWorkProfileUser_shouldLaunchProxyActivity() {
+        val mainUserHandle: UserHandle = mainUser.userHandle
         userTracker.set(listOf(mainUser, workProfileUser), selectedUserIndex = 1)
         whenever(userManager.isManagedProfile).thenReturn(true)
+        whenever(userManager.mainUser).thenReturn(mainUserHandle)
 
         activityRule.launchActivity(/* startIntent= */ null)
 
-        val mainUserHandle: UserHandle = mainUser.userHandle
         verify(noteTaskController).startNoteTaskProxyActivityForUser(eq(mainUserHandle))
+    }
+
+    @Test
+    fun startActivityOnWorkProfileUser_noMainUser_shouldNotLaunch() {
+        userTracker.set(listOf(mainUser, workProfileUser), selectedUserIndex = 1)
+        whenever(userManager.isManagedProfile).thenReturn(true)
+        whenever(userManager.mainUser).thenReturn(null)
+
+        activityRule.launchActivity(/* startIntent= */ null)
+
+        verify(noteTaskController, never()).showNoteTask(any())
+        verify(noteTaskController, never()).startNoteTaskProxyActivityForUser(any())
     }
 
     private companion object {

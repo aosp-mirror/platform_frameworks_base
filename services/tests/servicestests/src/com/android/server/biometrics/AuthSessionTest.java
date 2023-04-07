@@ -44,13 +44,14 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.Context;
 import android.hardware.biometrics.BiometricManager.Authenticators;
-import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorProperties;
+import android.hardware.face.FaceSensorProperties;
+import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Binder;
@@ -458,9 +459,16 @@ public class AuthSessionTest {
         IBiometricAuthenticator fingerprintAuthenticator = mock(IBiometricAuthenticator.class);
         when(fingerprintAuthenticator.isHardwareDetected(any())).thenReturn(true);
         when(fingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-        mSensors.add(new BiometricSensor(mContext, id,
+
+        final FingerprintSensorPropertiesInternal props = new FingerprintSensorPropertiesInternal(
+                id, SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
+                List.of() /* componentInfo */, type,
+                false /* resetLockoutRequiresHardwareAuthToken */);
+        mFingerprintSensorProps.add(props);
+
+        mSensors.add(new BiometricSensor(mContext,
                 TYPE_FINGERPRINT /* modality */,
-                Authenticators.BIOMETRIC_STRONG /* strength */,
+                props,
                 fingerprintAuthenticator) {
             @Override
             boolean confirmationAlwaysRequired(int userId) {
@@ -473,21 +481,6 @@ public class AuthSessionTest {
             }
         });
 
-        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
-        componentInfo.add(new ComponentInfoInternal("faceSensor" /* componentId */,
-                "vendor/model/revision" /* hardwareVersion */, "1.01" /* firmwareVersion */,
-                "00000001" /* serialNumber */, "" /* softwareVersion */));
-        componentInfo.add(new ComponentInfoInternal("matchingAlgorithm" /* componentId */,
-                "" /* hardwareVersion */, "" /* firmwareVersion */, "" /* serialNumber */,
-                "vendor/version/revision" /* softwareVersion */));
-
-        mFingerprintSensorProps.add(new FingerprintSensorPropertiesInternal(id,
-                SensorProperties.STRENGTH_STRONG,
-                5 /* maxEnrollmentsPerUser */,
-                componentInfo,
-                type,
-                false /* resetLockoutRequiresHardwareAuthToken */));
-
         when(mSettingObserver.getEnabledForApps(anyInt())).thenReturn(true);
     }
 
@@ -495,9 +488,13 @@ public class AuthSessionTest {
             IBiometricAuthenticator authenticator) throws RemoteException {
         when(authenticator.isHardwareDetected(any())).thenReturn(true);
         when(authenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-        mSensors.add(new BiometricSensor(mContext, id,
+        mSensors.add(new BiometricSensor(mContext,
                 TYPE_FACE /* modality */,
-                Authenticators.BIOMETRIC_STRONG /* strength */,
+                new FaceSensorPropertiesInternal(id,
+                        SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
+                        List.of() /* componentInfo */, FaceSensorProperties.TYPE_UNKNOWN,
+                        true /* supportsFace Detection */, true /* supportsSelfIllumination */,
+                        false /* resetLockoutRequiresHardwareAuthToken */),
                 authenticator) {
             @Override
             boolean confirmationAlwaysRequired(int userId) {

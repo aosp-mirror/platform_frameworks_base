@@ -561,6 +561,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         for (StatusBarWindowCallback cb : activeCallbacks) {
             cb.onStateChanged(mCurrentState.keyguardShowing,
                     mCurrentState.keyguardOccluded,
+                    mCurrentState.keyguardGoingAway,
                     mCurrentState.bouncerShowing,
                     mCurrentState.dozing,
                     mCurrentState.panelExpanded,

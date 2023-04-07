@@ -20,8 +20,10 @@ import static com.android.systemui.flags.Flags.SCREENSHOT_APP_CLIPS;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManager;
@@ -29,6 +31,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.os.UserManager;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -42,6 +46,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
@@ -58,6 +63,9 @@ public final class AppClipsServiceTest extends SysuiTestCase {
     @Mock private Optional<Bubbles> mOptionalBubbles;
     @Mock private Bubbles mBubbles;
     @Mock private DevicePolicyManager mDevicePolicyManager;
+    @Mock private UserManager mUserManager;
+
+    private AppClipsService mAppClipsService;
 
     @Before
     public void setUp() {
@@ -119,26 +127,53 @@ public final class AppClipsServiceTest extends SysuiTestCase {
 
     @Test
     public void allPrerequisitesSatisfy_shouldReturnTrue() throws RemoteException {
-        when(mFeatureFlags.isEnabled(SCREENSHOT_APP_CLIPS)).thenReturn(true);
-        when(mOptionalBubbles.isEmpty()).thenReturn(false);
-        when(mOptionalBubbles.get()).thenReturn(mBubbles);
-        when(mBubbles.isAppBubbleTaskId(eq((FAKE_TASK_ID)))).thenReturn(true);
-        when(mDevicePolicyManager.getScreenCaptureDisabled(eq(null))).thenReturn(false);
+        mockToSatisfyAllPrerequisites();
 
         assertThat(getInterfaceWithRealContext()
                 .canLaunchCaptureContentActivityForNote(FAKE_TASK_ID)).isTrue();
     }
 
+    @Test
+    public void isManagedProfile_shouldUseProxyConnection() throws RemoteException {
+        when(mUserManager.isManagedProfile()).thenReturn(true);
+        when(mUserManager.getMainUser()).thenReturn(UserHandle.SYSTEM);
+        IAppClipsService service = getInterfaceWithRealContext();
+        mAppClipsService.mProxyConnectorToMainProfile =
+                Mockito.spy(mAppClipsService.mProxyConnectorToMainProfile);
+
+        service.canLaunchCaptureContentActivityForNote(FAKE_TASK_ID);
+
+        verify(mAppClipsService.mProxyConnectorToMainProfile).postForResult(any());
+    }
+
+    @Test
+    public void isManagedProfile_noMainUser_shouldReturnFalse() {
+        when(mUserManager.isManagedProfile()).thenReturn(true);
+        when(mUserManager.getMainUser()).thenReturn(null);
+
+        getInterfaceWithRealContext();
+
+        assertThat(mAppClipsService.mProxyConnectorToMainProfile).isNull();
+    }
+
+    private void mockToSatisfyAllPrerequisites() {
+        when(mFeatureFlags.isEnabled(SCREENSHOT_APP_CLIPS)).thenReturn(true);
+        when(mOptionalBubbles.isEmpty()).thenReturn(false);
+        when(mOptionalBubbles.get()).thenReturn(mBubbles);
+        when(mBubbles.isAppBubbleTaskId(eq((FAKE_TASK_ID)))).thenReturn(true);
+        when(mDevicePolicyManager.getScreenCaptureDisabled(eq(null))).thenReturn(false);
+    }
+
     private IAppClipsService getInterfaceWithRealContext() {
-        AppClipsService appClipsService = new AppClipsService(getContext(), mFeatureFlags,
-                mOptionalBubbles, mDevicePolicyManager);
-        return getInterfaceFromService(appClipsService);
+        mAppClipsService = new AppClipsService(getContext(), mFeatureFlags,
+                mOptionalBubbles, mDevicePolicyManager, mUserManager);
+        return getInterfaceFromService(mAppClipsService);
     }
 
     private IAppClipsService getInterfaceWithMockContext() {
-        AppClipsService appClipsService = new AppClipsService(mMockContext, mFeatureFlags,
-                mOptionalBubbles, mDevicePolicyManager);
-        return getInterfaceFromService(appClipsService);
+        mAppClipsService = new AppClipsService(mMockContext, mFeatureFlags,
+                mOptionalBubbles, mDevicePolicyManager, mUserManager);
+        return getInterfaceFromService(mAppClipsService);
     }
 
     private static IAppClipsService getInterfaceFromService(AppClipsService appClipsService) {

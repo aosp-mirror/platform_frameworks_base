@@ -15,7 +15,7 @@
   -->
 
 <!-- Extends LinearLayout -->
-<com.android.systemui.qs.carrier.QSCarrierGroup
+<com.android.systemui.shade.carrier.ShadeCarrierGroup
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/qs_mobile"
     android:layout_width="0dp"
@@ -39,25 +39,25 @@
         android:visibility="gone"/>
 
     <include
-        layout="@layout/qs_carrier"
+        layout="@layout/shade_carrier"
         android:id="@+id/carrier1"
         android:layout_weight="1"/>
 
     <View
-        android:id="@+id/qs_carrier_divider1"
+        android:id="@+id/shade_carrier_divider1"
         android:layout_width="@dimen/qs_header_carrier_separator_width"
         android:layout_height="match_parent"
         android:visibility="gone"
         android:importantForAccessibility="no"/>
 
     <include
-        layout="@layout/qs_carrier"
+        layout="@layout/shade_carrier"
         android:id="@+id/carrier2"
         android:layout_weight="1"
         android:visibility="gone"/>
 
     <View
-        android:id="@+id/qs_carrier_divider2"
+        android:id="@+id/shade_carrier_divider2"
         android:layout_width="@dimen/qs_header_carrier_separator_width"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -65,9 +65,9 @@
         android:importantForAccessibility="no"/>
 
     <include
-        layout="@layout/qs_carrier"
+        layout="@layout/shade_carrier"
         android:id="@+id/carrier3"
         android:layout_weight="1"
         android:visibility="gone"/>
 
-</com.android.systemui.qs.carrier.QSCarrierGroup>
+</com.android.systemui.shade.carrier.ShadeCarrierGroup>

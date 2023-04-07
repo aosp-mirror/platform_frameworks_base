@@ -36,6 +36,7 @@ import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.STUB_SUFFIX;
 import static com.android.server.pm.PackageManagerService.TAG;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1386,6 +1387,14 @@ public class PackageManagerServiceUtils {
      */
     public static boolean isSystemOrRoot(int uid) {
         return uid == Process.SYSTEM_UID || uid == Process.ROOT_UID;
+    }
+
+    /**
+     * Check if a UID is non-system UID adopted shell permission.
+     */
+    public static boolean isAdoptedShell(int uid, Context context) {
+        return uid != Process.SYSTEM_UID && context.checkCallingOrSelfPermission(
+                Manifest.permission.USE_SYSTEM_DATA_LOADERS) == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
