@@ -324,10 +324,6 @@ public class BrightLineFalsingManager implements FalsingManager {
 
     @Override
     public boolean isFalseLongTap(@Penalty int penalty) {
-        if (!mFeatureFlags.isEnabled(Flags.FALSING_FOR_LONG_TAPS)) {
-            return false;
-        }
-
         checkDestroyed();
 
         if (skipFalsing(GENERIC)) {
