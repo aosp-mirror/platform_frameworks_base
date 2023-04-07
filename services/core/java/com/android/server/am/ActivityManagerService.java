@@ -13715,7 +13715,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (!sdkSandboxManagerLocal.canRegisterBroadcastReceiver(
                         /*IntentFilter=*/ filter, flags, onlyProtectedBroadcasts)) {
                     throw new SecurityException("SDK sandbox not allowed to register receiver"
-                            + " with the given IntentFilter: " + filter.toString());
+                            + " with the given IntentFilter: " + filter.toLongString());
                 }
             }
 
