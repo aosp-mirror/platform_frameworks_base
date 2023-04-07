@@ -30,6 +30,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -90,6 +91,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private AdditionalWindow mHandleMenuAppInfoPill;
     private AdditionalWindow mHandleMenuWindowingPill;
     private AdditionalWindow mHandleMenuMoreActionsPill;
+
+    private ResizeVeil mResizeVeil;
 
     private Drawable mAppIcon;
     private CharSequence mAppName;
@@ -321,6 +324,42 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
         mDragResizeListener.close();
         mDragResizeListener = null;
+    }
+
+    /**
+     * Create the resize veil for this task. Note the veil's visibility is View.GONE by default
+     * until a resize event calls showResizeVeil below.
+     */
+    void createResizeVeil() {
+        mResizeVeil = new ResizeVeil(mContext, mAppIcon, mTaskInfo,
+                mSurfaceControlBuilderSupplier, mDisplay, mSurfaceControlTransactionSupplier);
+    }
+
+    /**
+     * Fade in the resize veil
+     */
+    void showResizeVeil() {
+        mResizeVeil.showVeil(mTaskSurface);
+    }
+
+    /**
+     * Set new bounds for the resize veil
+     */
+    void updateResizeVeil(Rect newBounds) {
+        mResizeVeil.relayout(newBounds);
+    }
+
+    /**
+     * Fade the resize veil out.
+     */
+    void hideResizeVeil() {
+        mResizeVeil.hideVeil();
+    }
+
+    private void disposeResizeVeil() {
+        if (mResizeVeil == null) return;
+        mResizeVeil.dispose();
+        mResizeVeil = null;
     }
 
     /**
@@ -601,6 +640,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         closeDragResizeListener();
         closeHandleMenu();
         mCornersListener.onTaskCornersRemoved(mTaskInfo.taskId);
+        disposeResizeVeil();
         super.close();
     }
 

@@ -16,19 +16,29 @@
 
 package com.android.wm.shell.windowdecor;
 
+import android.annotation.IntDef;
+
 /**
  * Callback called when receiving drag-resize or drag-move related input events.
  */
 public interface DragPositioningCallback {
+    @IntDef({CTRL_TYPE_UNDEFINED, CTRL_TYPE_LEFT, CTRL_TYPE_RIGHT, CTRL_TYPE_TOP, CTRL_TYPE_BOTTOM})
+    @interface CtrlType {}
+
+    int CTRL_TYPE_UNDEFINED = 0;
+    int CTRL_TYPE_LEFT = 1;
+    int CTRL_TYPE_RIGHT = 2;
+    int CTRL_TYPE_TOP = 4;
+    int CTRL_TYPE_BOTTOM = 8;
     /**
      * Called when a drag-resize or drag-move starts.
      *
-     * @param ctrlType {@link TaskPositioner.CtrlType} indicating the direction of resizing, use
+     * @param ctrlType {@link CtrlType} indicating the direction of resizing, use
      *                 {@code 0} to indicate it's a move
      * @param x x coordinate in window decoration coordinate system where the drag starts
      * @param y y coordinate in window decoration coordinate system where the drag starts
      */
-    void onDragPositioningStart(@TaskPositioner.CtrlType int ctrlType, float x, float y);
+    void onDragPositioningStart(@CtrlType int ctrlType, float x, float y);
 
     /**
      * Called when the pointer moves during a drag-resize or drag-move.

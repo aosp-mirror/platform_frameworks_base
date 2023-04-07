@@ -14,10 +14,10 @@ import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
-import com.android.wm.shell.windowdecor.TaskPositioner.CTRL_TYPE_BOTTOM
-import com.android.wm.shell.windowdecor.TaskPositioner.CTRL_TYPE_RIGHT
-import com.android.wm.shell.windowdecor.TaskPositioner.CTRL_TYPE_TOP
-import com.android.wm.shell.windowdecor.TaskPositioner.CTRL_TYPE_UNDEFINED
+import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_BOTTOM
+import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT
+import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_TOP
+import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_UNDEFINED
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,21 +30,21 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 /**
- * Tests for [TaskPositioner].
+ * Tests for [FluidResizeTaskPositioner].
  *
  * Build/Install/Run:
- * atest WMShellUnitTests:TaskPositionerTest
+ * atest WMShellUnitTests:FluidResizeTaskPositionerTest
  */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-class TaskPositionerTest : ShellTestCase() {
+class FluidResizeTaskPositionerTest : ShellTestCase() {
 
     @Mock
     private lateinit var mockShellTaskOrganizer: ShellTaskOrganizer
     @Mock
     private lateinit var mockWindowDecoration: WindowDecoration<*>
     @Mock
-    private lateinit var mockDragStartListener: TaskPositioner.DragStartListener
+    private lateinit var mockDragStartListener: DragPositioningCallbackUtility.DragStartListener
 
     @Mock
     private lateinit var taskToken: WindowContainerToken
@@ -58,18 +58,19 @@ class TaskPositionerTest : ShellTestCase() {
     @Mock
     private lateinit var mockDisplay: Display
 
-    private lateinit var taskPositioner: TaskPositioner
+    private lateinit var taskPositioner: FluidResizeTaskPositioner
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        taskPositioner = TaskPositioner(
+        taskPositioner =
+            FluidResizeTaskPositioner(
                 mockShellTaskOrganizer,
                 mockWindowDecoration,
                 mockDisplayController,
                 mockDragStartListener
-        )
+            )
 
         `when`(taskToken.asBinder()).thenReturn(taskBinder)
         `when`(mockDisplayController.getDisplayLayout(DISPLAY_ID)).thenReturn(mockDisplayLayout)
