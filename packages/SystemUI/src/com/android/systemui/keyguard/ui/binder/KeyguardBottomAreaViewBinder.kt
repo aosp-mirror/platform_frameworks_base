@@ -17,41 +17,42 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.graphics.Rect
 import android.graphics.drawable.Animatable2
-import android.os.VibrationEffect
 import android.util.Size
 import android.util.TypedValue
-import android.view.MotionEvent
 import android.view.View
-import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.animation.CycleInterpolator
-import androidx.core.animation.ObjectAnimator
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.settingslib.Utils
 import com.android.systemui.R
+import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.animation.view.LaunchableLinearLayout
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.binder.IconViewBinder
+import com.android.systemui.common.ui.binder.TextViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
-import kotlin.math.pow
-import kotlin.math.sqrt
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -91,15 +92,20 @@ object KeyguardBottomAreaViewBinder {
          * icon
          */
         fun shouldConstrainToTopOfLockIcon(): Boolean
+
+        /** Destroys this binding, releases resources, and cancels any coroutines. */
+        fun destroy()
     }
 
     /** Binds the view to the view-model, continuing to update the former based on the latter. */
+    @SuppressLint("ClickableViewAccessibility")
     @JvmStatic
     fun bind(
         view: ViewGroup,
         viewModel: KeyguardBottomAreaViewModel,
         falsingManager: FalsingManager?,
         vibratorHelper: VibratorHelper?,
+        activityStarter: ActivityStarter?,
         messageDisplayer: (Int) -> Unit,
     ): Binding {
         val indicationArea: View = view.requireViewById(R.id.keyguard_indication_area)
@@ -110,137 +116,192 @@ object KeyguardBottomAreaViewBinder {
         val indicationText: TextView = view.requireViewById(R.id.keyguard_indication_text)
         val indicationTextBottom: TextView =
             view.requireViewById(R.id.keyguard_indication_text_bottom)
+        val settingsMenu: LaunchableLinearLayout =
+            view.requireViewById(R.id.keyguard_settings_button)
 
         view.clipChildren = false
         view.clipToPadding = false
+        view.setOnTouchListener { _, event ->
+            if (settingsMenu.isVisible) {
+                val hitRect = Rect()
+                settingsMenu.getHitRect(hitRect)
+                if (!hitRect.contains(event.x.toInt(), event.y.toInt())) {
+                    viewModel.onTouchedOutsideLockScreenSettingsMenu()
+                }
+            }
+
+            false
+        }
 
         val configurationBasedDimensions = MutableStateFlow(loadFromResources(view))
 
-        view.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.startButton.collect { buttonModel ->
-                        updateButton(
+        val disposableHandle =
+            view.repeatWhenAttached {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    launch {
+                        viewModel.startButton.collect { buttonModel ->
+                            updateButton(
+                                view = startButton,
+                                viewModel = buttonModel,
+                                falsingManager = falsingManager,
+                                messageDisplayer = messageDisplayer,
+                                vibratorHelper = vibratorHelper,
+                            )
+                        }
+                    }
+
+                    launch {
+                        viewModel.endButton.collect { buttonModel ->
+                            updateButton(
+                                view = endButton,
+                                viewModel = buttonModel,
+                                falsingManager = falsingManager,
+                                messageDisplayer = messageDisplayer,
+                                vibratorHelper = vibratorHelper,
+                            )
+                        }
+                    }
+
+                    launch {
+                        viewModel.isOverlayContainerVisible.collect { isVisible ->
+                            overlayContainer.visibility =
+                                if (isVisible) {
+                                    View.VISIBLE
+                                } else {
+                                    View.INVISIBLE
+                                }
+                        }
+                    }
+
+                    launch {
+                        viewModel.alpha.collect { alpha ->
+                            view.importantForAccessibility =
+                                if (alpha == 0f) {
+                                    View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                                } else {
+                                    View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                                }
+
+                            ambientIndicationArea?.alpha = alpha
+                            indicationArea.alpha = alpha
+                        }
+                    }
+
+                    launch {
+                        updateButtonAlpha(
                             view = startButton,
-                            viewModel = buttonModel,
-                            falsingManager = falsingManager,
-                            messageDisplayer = messageDisplayer,
-                            vibratorHelper = vibratorHelper,
+                            viewModel = viewModel.startButton,
+                            alphaFlow = viewModel.alpha,
                         )
                     }
-                }
 
-                launch {
-                    viewModel.endButton.collect { buttonModel ->
-                        updateButton(
+                    launch {
+                        updateButtonAlpha(
                             view = endButton,
-                            viewModel = buttonModel,
-                            falsingManager = falsingManager,
-                            messageDisplayer = messageDisplayer,
-                            vibratorHelper = vibratorHelper,
+                            viewModel = viewModel.endButton,
+                            alphaFlow = viewModel.alpha,
                         )
                     }
-                }
 
-                launch {
-                    viewModel.isOverlayContainerVisible.collect { isVisible ->
-                        overlayContainer.visibility =
+                    launch {
+                        viewModel.indicationAreaTranslationX.collect { translationX ->
+                            indicationArea.translationX = translationX
+                            ambientIndicationArea?.translationX = translationX
+                        }
+                    }
+
+                    launch {
+                        combine(
+                                viewModel.isIndicationAreaPadded,
+                                configurationBasedDimensions.map { it.indicationAreaPaddingPx },
+                            ) { isPadded, paddingIfPaddedPx ->
+                                if (isPadded) {
+                                    paddingIfPaddedPx
+                                } else {
+                                    0
+                                }
+                            }
+                            .collect { paddingPx ->
+                                indicationArea.setPadding(paddingPx, 0, paddingPx, 0)
+                            }
+                    }
+
+                    launch {
+                        configurationBasedDimensions
+                            .map { it.defaultBurnInPreventionYOffsetPx }
+                            .flatMapLatest { defaultBurnInOffsetY ->
+                                viewModel.indicationAreaTranslationY(defaultBurnInOffsetY)
+                            }
+                            .collect { translationY ->
+                                indicationArea.translationY = translationY
+                                ambientIndicationArea?.translationY = translationY
+                            }
+                    }
+
+                    launch {
+                        configurationBasedDimensions.collect { dimensions ->
+                            indicationText.setTextSize(
+                                TypedValue.COMPLEX_UNIT_PX,
+                                dimensions.indicationTextSizePx.toFloat(),
+                            )
+                            indicationTextBottom.setTextSize(
+                                TypedValue.COMPLEX_UNIT_PX,
+                                dimensions.indicationTextSizePx.toFloat(),
+                            )
+
+                            startButton.updateLayoutParams<ViewGroup.LayoutParams> {
+                                width = dimensions.buttonSizePx.width
+                                height = dimensions.buttonSizePx.height
+                            }
+                            endButton.updateLayoutParams<ViewGroup.LayoutParams> {
+                                width = dimensions.buttonSizePx.width
+                                height = dimensions.buttonSizePx.height
+                            }
+                        }
+                    }
+
+                    launch {
+                        viewModel.settingsMenuViewModel.isVisible.distinctUntilChanged().collect {
+                            isVisible ->
+                            settingsMenu.animateVisibility(visible = isVisible)
                             if (isVisible) {
-                                View.VISIBLE
-                            } else {
-                                View.INVISIBLE
-                            }
-                    }
-                }
-
-                launch {
-                    viewModel.alpha.collect { alpha ->
-                        view.importantForAccessibility =
-                            if (alpha == 0f) {
-                                View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                            } else {
-                                View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                            }
-
-                        ambientIndicationArea?.alpha = alpha
-                        indicationArea.alpha = alpha
-                    }
-                }
-
-                launch {
-                    updateButtonAlpha(
-                        view = startButton,
-                        viewModel = viewModel.startButton,
-                        alphaFlow = viewModel.alpha,
-                    )
-                }
-
-                launch {
-                    updateButtonAlpha(
-                        view = endButton,
-                        viewModel = viewModel.endButton,
-                        alphaFlow = viewModel.alpha,
-                    )
-                }
-
-                launch {
-                    viewModel.indicationAreaTranslationX.collect { translationX ->
-                        indicationArea.translationX = translationX
-                        ambientIndicationArea?.translationX = translationX
-                    }
-                }
-
-                launch {
-                    combine(
-                            viewModel.isIndicationAreaPadded,
-                            configurationBasedDimensions.map { it.indicationAreaPaddingPx },
-                        ) { isPadded, paddingIfPaddedPx ->
-                            if (isPadded) {
-                                paddingIfPaddedPx
-                            } else {
-                                0
+                                vibratorHelper?.vibrate(KeyguardBottomAreaVibrations.Activated)
+                                settingsMenu.setOnTouchListener(
+                                    KeyguardSettingsButtonOnTouchListener(
+                                        view = settingsMenu,
+                                        viewModel = viewModel.settingsMenuViewModel,
+                                    )
+                                )
+                                IconViewBinder.bind(
+                                    icon = viewModel.settingsMenuViewModel.icon,
+                                    view = settingsMenu.requireViewById(R.id.icon),
+                                )
+                                TextViewBinder.bind(
+                                    view = settingsMenu.requireViewById(R.id.text),
+                                    viewModel = viewModel.settingsMenuViewModel.text,
+                                )
                             }
                         }
-                        .collect { paddingPx ->
-                            indicationArea.setPadding(paddingPx, 0, paddingPx, 0)
-                        }
-                }
+                    }
 
-                launch {
-                    configurationBasedDimensions
-                        .map { it.defaultBurnInPreventionYOffsetPx }
-                        .flatMapLatest { defaultBurnInOffsetY ->
-                            viewModel.indicationAreaTranslationY(defaultBurnInOffsetY)
-                        }
-                        .collect { translationY ->
-                            indicationArea.translationY = translationY
-                            ambientIndicationArea?.translationY = translationY
-                        }
-                }
-
-                launch {
-                    configurationBasedDimensions.collect { dimensions ->
-                        indicationText.setTextSize(
-                            TypedValue.COMPLEX_UNIT_PX,
-                            dimensions.indicationTextSizePx.toFloat(),
-                        )
-                        indicationTextBottom.setTextSize(
-                            TypedValue.COMPLEX_UNIT_PX,
-                            dimensions.indicationTextSizePx.toFloat(),
-                        )
-
-                        startButton.updateLayoutParams<ViewGroup.LayoutParams> {
-                            width = dimensions.buttonSizePx.width
-                            height = dimensions.buttonSizePx.height
-                        }
-                        endButton.updateLayoutParams<ViewGroup.LayoutParams> {
-                            width = dimensions.buttonSizePx.width
-                            height = dimensions.buttonSizePx.height
+                    // activityStarter will only be null when rendering the preview that
+                    // shows up in the Wallpaper Picker app. If we do that, then the
+                    // settings menu should never be visible.
+                    if (activityStarter != null) {
+                        launch {
+                            viewModel.settingsMenuViewModel.shouldOpenSettings
+                                .filter { it }
+                                .collect {
+                                    navigateToLockScreenSettings(
+                                        activityStarter = activityStarter,
+                                        view = settingsMenu,
+                                    )
+                                    viewModel.settingsMenuViewModel.onSettingsShown()
+                                }
                         }
                     }
                 }
             }
-        }
 
         return object : Binding {
             override fun getIndicationAreaAnimators(): List<ViewPropertyAnimator> {
@@ -253,6 +314,10 @@ object KeyguardBottomAreaViewBinder {
 
             override fun shouldConstrainToTopOfLockIcon(): Boolean =
                 viewModel.shouldConstrainToTopOfLockIcon()
+
+            override fun destroy() {
+                disposableHandle.dispose()
+            }
         }
     }
 
@@ -265,7 +330,7 @@ object KeyguardBottomAreaViewBinder {
         vibratorHelper: VibratorHelper?,
     ) {
         if (!viewModel.isVisible) {
-            view.isVisible = false
+            view.isInvisible = true
             return
         }
 
@@ -342,7 +407,7 @@ object KeyguardBottomAreaViewBinder {
         if (viewModel.isClickable) {
             if (viewModel.useLongPress) {
                 view.setOnTouchListener(
-                    OnTouchListener(
+                    KeyguardQuickAffordanceOnTouchListener(
                         view,
                         viewModel,
                         messageDisplayer,
@@ -372,187 +437,21 @@ object KeyguardBottomAreaViewBinder {
             .collect { view.alpha = it }
     }
 
-    private class OnTouchListener(
-        private val view: View,
-        private val viewModel: KeyguardQuickAffordanceViewModel,
-        private val messageDisplayer: (Int) -> Unit,
-        private val vibratorHelper: VibratorHelper?,
-        private val falsingManager: FalsingManager?,
-    ) : View.OnTouchListener {
-
-        private val longPressDurationMs = ViewConfiguration.getLongPressTimeout().toLong()
-        private var longPressAnimator: ViewPropertyAnimator? = null
-
-        @SuppressLint("ClickableViewAccessibility")
-        override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-            return when (event?.actionMasked) {
-                MotionEvent.ACTION_DOWN ->
-                    if (viewModel.configKey != null) {
-                        if (isUsingAccurateTool(event)) {
-                            // For accurate tool types (stylus, mouse, etc.), we don't require a
-                            // long-press.
-                        } else {
-                            // When not using a stylus, we require a long-press to activate the
-                            // quick affordance, mostly to do "falsing" (e.g. protect from false
-                            // clicks in the pocket/bag).
-                            longPressAnimator =
-                                view
-                                    .animate()
-                                    .scaleX(PRESSED_SCALE)
-                                    .scaleY(PRESSED_SCALE)
-                                    .setDuration(longPressDurationMs)
-                                    .withEndAction {
-                                        if (
-                                            falsingManager
-                                                ?.isFalseLongTap(
-                                                    FalsingManager.MODERATE_PENALTY
-                                                ) == false
-                                        ) {
-                                            dispatchClick(viewModel.configKey)
-                                        }
-                                        cancel()
-                                    }
-                        }
-                        true
-                    } else {
-                        false
-                    }
-                MotionEvent.ACTION_MOVE -> {
-                    if (!isUsingAccurateTool(event)) {
-                        // Moving too far while performing a long-press gesture cancels that
-                        // gesture.
-                        val distanceMoved = distanceMoved(event)
-                        if (distanceMoved > ViewConfiguration.getTouchSlop()) {
-                            cancel()
-                        }
-                    }
-                    true
-                }
-                MotionEvent.ACTION_UP -> {
-                    if (isUsingAccurateTool(event)) {
-                        // When using an accurate tool type (stylus, mouse, etc.), we don't require
-                        // a long-press gesture to activate the quick affordance. Therefore, lifting
-                        // the pointer performs a click.
-                        if (
-                            viewModel.configKey != null &&
-                                distanceMoved(event) <= ViewConfiguration.getTouchSlop() &&
-                                falsingManager?.isFalseTap(FalsingManager.NO_PENALTY) == false
-                        ) {
-                            dispatchClick(viewModel.configKey)
-                        }
-                    } else {
-                        // When not using a stylus, lifting the finger/pointer will actually cancel
-                        // the long-press gesture. Calling cancel after the quick affordance was
-                        // already long-press activated is a no-op, so it's safe to call from here.
-                        cancel(
-                            onAnimationEnd =
-                                if (event.eventTime - event.downTime < longPressDurationMs) {
-                                    Runnable {
-                                        messageDisplayer.invoke(
-                                            R.string.keyguard_affordance_press_too_short
-                                        )
-                                        val amplitude =
-                                            view.context.resources
-                                                .getDimensionPixelSize(
-                                                    R.dimen.keyguard_affordance_shake_amplitude
-                                                )
-                                                .toFloat()
-                                        val shakeAnimator =
-                                            ObjectAnimator.ofFloat(
-                                                view,
-                                                "translationX",
-                                                -amplitude / 2,
-                                                amplitude / 2,
-                                            )
-                                        shakeAnimator.duration =
-                                            ShakeAnimationDuration.inWholeMilliseconds
-                                        shakeAnimator.interpolator =
-                                            CycleInterpolator(ShakeAnimationCycles)
-                                        shakeAnimator.start()
-
-                                        vibratorHelper?.vibrate(Vibrations.Shake)
-                                    }
-                                } else {
-                                    null
-                                }
-                        )
-                    }
-                    true
-                }
-                MotionEvent.ACTION_CANCEL -> {
-                    cancel()
-                    true
-                }
-                else -> false
-            }
-        }
-
-        private fun dispatchClick(
-            configKey: String,
-        ) {
-            view.setOnClickListener {
-                vibratorHelper?.vibrate(
-                    if (viewModel.isActivated) {
-                        Vibrations.Activated
-                    } else {
-                        Vibrations.Deactivated
-                    }
-                )
-                viewModel.onClicked(
-                    KeyguardQuickAffordanceViewModel.OnClickedParameters(
-                        configKey = configKey,
-                        expandable = Expandable.fromView(view),
-                        slotId = viewModel.slotId,
-                    )
-                )
-            }
-            view.performClick()
-            view.setOnClickListener(null)
-        }
-
-        private fun cancel(onAnimationEnd: Runnable? = null) {
-            longPressAnimator?.cancel()
-            longPressAnimator = null
-            view.animate().scaleX(1f).scaleY(1f).withEndAction(onAnimationEnd)
-        }
-
-        companion object {
-            private const val PRESSED_SCALE = 1.5f
-
-            /**
-             * Returns `true` if the tool type at the given pointer index is an accurate tool (like
-             * stylus or mouse), which means we can trust it to not be a false click; `false`
-             * otherwise.
-             */
-            private fun isUsingAccurateTool(
-                event: MotionEvent,
-                pointerIndex: Int = 0,
-            ): Boolean {
-                return when (event.getToolType(pointerIndex)) {
-                    MotionEvent.TOOL_TYPE_STYLUS -> true
-                    MotionEvent.TOOL_TYPE_MOUSE -> true
-                    else -> false
+    private fun View.animateVisibility(visible: Boolean) {
+        animate()
+            .withStartAction {
+                if (visible) {
+                    alpha = 0f
+                    isVisible = true
                 }
             }
-
-            /**
-             * Returns the amount of distance the pointer moved since the historical record at the
-             * [since] index.
-             */
-            private fun distanceMoved(
-                event: MotionEvent,
-                since: Int = 0,
-            ): Float {
-                return if (event.historySize > 0) {
-                    sqrt(
-                        (event.y - event.getHistoricalY(since)).pow(2) +
-                            (event.x - event.getHistoricalX(since)).pow(2)
-                    )
-                } else {
-                    0f
+            .alpha(if (visible) 1f else 0f)
+            .withEndAction {
+                if (!visible) {
+                    isVisible = false
                 }
             }
-        }
+            .start()
     }
 
     private class OnClickListener(
@@ -594,64 +493,28 @@ object KeyguardBottomAreaViewBinder {
         )
     }
 
+    /** Opens the wallpaper picker screen after the device is unlocked by the user. */
+    private fun navigateToLockScreenSettings(
+        activityStarter: ActivityStarter,
+        view: View,
+    ) {
+        activityStarter.startActivity(
+            Intent(Intent.ACTION_SET_WALLPAPER).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                view.context
+                    .getString(R.string.config_wallpaperPickerPackage)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { packageName -> setPackage(packageName) }
+            },
+            /* dismissShade= */ true,
+            ActivityLaunchAnimator.Controller.fromView(view),
+        )
+    }
+
     private data class ConfigurationBasedDimensions(
         val defaultBurnInPreventionYOffsetPx: Int,
         val indicationAreaPaddingPx: Int,
         val indicationTextSizePx: Int,
         val buttonSizePx: Size,
     )
-
-    private val ShakeAnimationDuration = 300.milliseconds
-    private val ShakeAnimationCycles = 5f
-
-    object Vibrations {
-
-        private const val SmallVibrationScale = 0.3f
-        private const val BigVibrationScale = 0.6f
-
-        val Shake =
-            VibrationEffect.startComposition()
-                .apply {
-                    val vibrationDelayMs =
-                        (ShakeAnimationDuration.inWholeMilliseconds / (ShakeAnimationCycles * 2))
-                            .toInt()
-                    val vibrationCount = ShakeAnimationCycles.toInt() * 2
-                    repeat(vibrationCount) {
-                        addPrimitive(
-                            VibrationEffect.Composition.PRIMITIVE_TICK,
-                            SmallVibrationScale,
-                            vibrationDelayMs,
-                        )
-                    }
-                }
-                .compose()
-
-        val Activated =
-            VibrationEffect.startComposition()
-                .addPrimitive(
-                    VibrationEffect.Composition.PRIMITIVE_TICK,
-                    BigVibrationScale,
-                    0,
-                )
-                .addPrimitive(
-                    VibrationEffect.Composition.PRIMITIVE_QUICK_RISE,
-                    0.1f,
-                    0,
-                )
-                .compose()
-
-        val Deactivated =
-            VibrationEffect.startComposition()
-                .addPrimitive(
-                    VibrationEffect.Composition.PRIMITIVE_TICK,
-                    BigVibrationScale,
-                    0,
-                )
-                .addPrimitive(
-                    VibrationEffect.Composition.PRIMITIVE_QUICK_FALL,
-                    0.1f,
-                    0,
-                )
-                .compose()
-    }
 }

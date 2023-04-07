@@ -29,6 +29,7 @@ import com.android.systemui.R
 import com.android.systemui.keyguard.ui.binder.KeyguardBottomAreaViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardBottomAreaViewBinder.bind
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
 
@@ -57,7 +58,7 @@ constructor(
     }
 
     private var ambientIndicationArea: View? = null
-    private lateinit var binding: KeyguardBottomAreaViewBinder.Binding
+    private var binding: KeyguardBottomAreaViewBinder.Binding? = null
     private var lockIconViewController: LockIconViewController? = null
 
     /** Initializes the view. */
@@ -67,13 +68,16 @@ constructor(
         lockIconViewController: LockIconViewController? = null,
         messageDisplayer: MessageDisplayer? = null,
         vibratorHelper: VibratorHelper? = null,
+        activityStarter: ActivityStarter? = null,
     ) {
+        binding?.destroy()
         binding =
             bind(
                 this,
                 viewModel,
                 falsingManager,
                 vibratorHelper,
+                activityStarter,
             ) {
                 messageDisplayer?.display(it)
             }
@@ -114,12 +118,12 @@ constructor(
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        binding.onConfigurationChanged()
+        binding?.onConfigurationChanged()
     }
 
     /** Returns a list of animators to use to animate the indication areas. */
     val indicationAreaAnimators: List<ViewPropertyAnimator>
-        get() = binding.getIndicationAreaAnimators()
+        get() = checkNotNull(binding).getIndicationAreaAnimators()
 
     override fun hasOverlappingRendering(): Boolean {
         return false
@@ -139,7 +143,7 @@ constructor(
         super.onLayout(changed, left, top, right, bottom)
         findViewById<View>(R.id.ambient_indication_container)?.let {
             val (ambientLeft, ambientTop) = it.locationOnScreen
-            if (binding.shouldConstrainToTopOfLockIcon()) {
+            if (binding?.shouldConstrainToTopOfLockIcon() == true) {
                 // make top of ambient indication view the bottom of the lock icon
                 it.layout(
                     ambientLeft,
