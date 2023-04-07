@@ -17,32 +17,44 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.R
+import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.common.shared.model.Text
 import com.android.systemui.keyguard.domain.interactor.KeyguardLongPressInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
-/** Models UI state to support the lock screen long-press feature. */
-@SysUISingleton
-class KeyguardLongPressViewModel
+/** Models the UI state of a keyguard settings popup menu. */
+class KeyguardSettingsMenuViewModel
 @Inject
 constructor(
     private val interactor: KeyguardLongPressInteractor,
 ) {
+    val isVisible: Flow<Boolean> = interactor.isMenuVisible
+    val shouldOpenSettings: Flow<Boolean> = interactor.shouldOpenSettings
 
-    /** Whether the long-press handling feature should be enabled. */
-    val isLongPressHandlingEnabled: Flow<Boolean> = interactor.isLongPressHandlingEnabled
+    val icon: Icon =
+        Icon.Resource(
+            res = R.drawable.ic_palette,
+            contentDescription = null,
+        )
 
-    /** Notifies that the user has long-pressed on the lock screen. */
-    fun onLongPress() {
-        interactor.onLongPress()
+    val text: Text =
+        Text.Resource(
+            res = R.string.lock_screen_settings,
+        )
+
+    fun onTouchGestureStarted() {
+        interactor.onMenuTouchGestureStarted()
     }
 
-    /**
-     * Notifies that some input gesture has started somewhere outside of the lock screen settings
-     * menu item pop-up.
-     */
-    fun onTouchedOutside() {
-        interactor.onTouchedOutside()
+    fun onTouchGestureEnded(isClick: Boolean) {
+        interactor.onMenuTouchGestureEnded(
+            isClick = isClick,
+        )
+    }
+
+    fun onSettingsShown() {
+        interactor.onSettingsShown()
     }
 }

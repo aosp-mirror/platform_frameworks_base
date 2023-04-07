@@ -162,6 +162,8 @@ import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.FalsingManager.FalsingTapListener;
@@ -694,23 +696,29 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     mInteractionJankMonitor.end(CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION);
                 }
             };
+    private final ActivityStarter mActivityStarter;
 
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
             @Main Handler handler,
             LayoutInflater layoutInflater,
             FeatureFlags featureFlags,
-            NotificationWakeUpCoordinator coordinator, PulseExpansionHandler pulseExpansionHandler,
+            NotificationWakeUpCoordinator coordinator,
+            PulseExpansionHandler pulseExpansionHandler,
             DynamicPrivacyController dynamicPrivacyController,
-            KeyguardBypassController bypassController, FalsingManager falsingManager,
+            KeyguardBypassController bypassController,
+            FalsingManager falsingManager,
             FalsingCollector falsingCollector,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
             StatusBarWindowStateController statusBarWindowStateController,
             NotificationShadeWindowController notificationShadeWindowController,
             DozeLog dozeLog,
-            DozeParameters dozeParameters, CommandQueue commandQueue, VibratorHelper vibratorHelper,
-            LatencyTracker latencyTracker, PowerManager powerManager,
+            DozeParameters dozeParameters,
+            CommandQueue commandQueue,
+            VibratorHelper vibratorHelper,
+            LatencyTracker latencyTracker,
+            PowerManager powerManager,
             AccessibilityManager accessibilityManager, @DisplayId int displayId,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             MetricsLogger metricsLogger,
@@ -771,7 +779,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             Provider<MultiShadeInteractor> multiShadeInteractorProvider,
             DumpManager dumpManager,
             KeyguardLongPressViewModel keyguardLongPressViewModel,
-            KeyguardInteractor keyguardInteractor) {
+            KeyguardInteractor keyguardInteractor,
+            ActivityStarter activityStarter) {
         mInteractionJankMonitor = interactionJankMonitor;
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
@@ -952,6 +961,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     return Unit.INSTANCE;
                 },
                 mFalsingManager);
+        mActivityStarter = activityStarter;
         onFinishInflate();
         keyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
                 new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
@@ -1394,7 +1404,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 mLockIconViewController,
                 stringResourceId ->
                         mKeyguardIndicationController.showTransientIndication(stringResourceId),
-                mVibratorHelper);
+                mVibratorHelper,
+                mActivityStarter);
     }
 
     @VisibleForTesting
