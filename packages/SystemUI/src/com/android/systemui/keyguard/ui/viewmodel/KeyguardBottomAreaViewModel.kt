@@ -44,6 +44,8 @@ constructor(
     private val quickAffordanceInteractor: KeyguardQuickAffordanceInteractor,
     private val bottomAreaInteractor: KeyguardBottomAreaInteractor,
     private val burnInHelperWrapper: BurnInHelperWrapper,
+    private val longPressViewModel: KeyguardLongPressViewModel,
+    val settingsMenuViewModel: KeyguardSettingsMenuViewModel,
 ) {
     data class PreviewMode(
         val isInPreviewMode: Boolean = false,
@@ -161,6 +163,14 @@ constructor(
         selectedPreviewSlotId.value = slotId
     }
 
+    /**
+     * Notifies that some input gesture has started somewhere in the bottom area that's outside of
+     * the lock screen settings menu item pop-up.
+     */
+    fun onTouchedOutsideLockScreenSettingsMenu() {
+        longPressViewModel.onTouchedOutside()
+    }
+
     private fun button(
         position: KeyguardQuickAffordancePosition
     ): Flow<KeyguardQuickAffordanceViewModel> {
@@ -225,9 +235,10 @@ constructor(
                     isDimmed = isDimmed,
                     slotId = slotId,
                 )
-            is KeyguardQuickAffordanceModel.Hidden -> KeyguardQuickAffordanceViewModel(
-                slotId = slotId,
-            )
+            is KeyguardQuickAffordanceModel.Hidden ->
+                KeyguardQuickAffordanceViewModel(
+                    slotId = slotId,
+                )
         }
     }
 
