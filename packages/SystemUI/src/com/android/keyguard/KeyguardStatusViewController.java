@@ -16,12 +16,37 @@
 
 package com.android.keyguard;
 
+import static androidx.constraintlayout.widget.ConstraintSet.END;
+import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
+
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION;
+
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.graphics.Rect;
+import android.transition.ChangeBounds;
+import android.transition.Transition;
+import android.transition.TransitionListenerAdapter;
+import android.transition.TransitionManager;
+import android.transition.TransitionSet;
+import android.transition.TransitionValues;
 import android.util.Slog;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
+import androidx.annotation.VisibleForTesting;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.keyguard.KeyguardClockSwitch.ClockSize;
 import com.android.keyguard.logging.KeyguardLogger;
+import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -42,6 +67,12 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardStatusViewController";
 
+    /**
+     * Duration to use for the animator when the keyguard status view alignment changes, and a
+     * custom clock animation is in use.
+     */
+    private static final int KEYGUARD_STATUS_VIEW_CUSTOM_CLOCK_MOVE_DURATION = 1000;
+
     private static final AnimationProperties CLOCK_ANIMATION_PROPERTIES =
             new AnimationProperties().setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
 
@@ -50,7 +81,24 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ConfigurationController mConfigurationController;
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
+    private final FeatureFlags mFeatureFlags;
+    private final InteractionJankMonitor mInteractionJankMonitor;
     private final Rect mClipBounds = new Rect();
+
+    private Boolean mStatusViewCentered = true;
+
+    private final TransitionListenerAdapter mKeyguardStatusAlignmentTransitionListener =
+            new TransitionListenerAdapter() {
+                @Override
+                public void onTransitionCancel(Transition transition) {
+                    mInteractionJankMonitor.cancel(CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION);
+                }
+
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    mInteractionJankMonitor.end(CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION);
+                }
+            };
 
     @Inject
     public KeyguardStatusViewController(
@@ -62,7 +110,9 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             ConfigurationController configurationController,
             DozeParameters dozeParameters,
             ScreenOffAnimationController screenOffAnimationController,
-            KeyguardLogger logger) {
+            KeyguardLogger logger,
+            FeatureFlags featureFlags,
+            InteractionJankMonitor interactionJankMonitor) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
         mKeyguardClockSwitchController = keyguardClockSwitchController;
@@ -71,6 +121,8 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, keyguardStateController,
                 dozeParameters, screenOffAnimationController, /* animateYPos= */ true,
                 logger.getBuffer());
+        mInteractionJankMonitor = interactionJankMonitor;
+        mFeatureFlags = featureFlags;
     }
 
     @Override
@@ -242,9 +294,141 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         }
     }
 
-    /** Gets the current clock controller. */
-    @Nullable
-    public ClockController getClockController() {
-        return mKeyguardClockSwitchController.getClock();
+    /**
+     * Updates the alignment of the KeyguardStatusView and animates the transition if requested.
+     */
+    public void updateAlignment(
+            ConstraintLayout notifContainerParent,
+            boolean splitShadeEnabled,
+            boolean shouldBeCentered,
+            boolean animate) {
+        if (mStatusViewCentered == shouldBeCentered) {
+            return;
+        }
+
+        mStatusViewCentered = shouldBeCentered;
+        if (notifContainerParent == null) {
+            return;
+        }
+
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(notifContainerParent);
+        int statusConstraint = shouldBeCentered ? PARENT_ID : R.id.qs_edge_guideline;
+        constraintSet.connect(R.id.keyguard_status_view, END, statusConstraint, END);
+        if (!animate) {
+            constraintSet.applyTo(notifContainerParent);
+            return;
+        }
+
+        mInteractionJankMonitor.begin(mView, CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION);
+        ChangeBounds transition = new ChangeBounds();
+        if (splitShadeEnabled) {
+            // Excluding media from the transition on split-shade, as it doesn't transition
+            // horizontally properly.
+            transition.excludeTarget(R.id.status_view_media_container, true);
+        }
+
+        transition.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        transition.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+
+        ClockController clock = mKeyguardClockSwitchController.getClock();
+        boolean customClockAnimation = clock != null
+                && clock.getConfig().getHasCustomPositionUpdatedAnimation();
+
+        if (mFeatureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION) && customClockAnimation) {
+            // Find the clock, so we can exclude it from this transition.
+            FrameLayout clockContainerView = mView.findViewById(R.id.lockscreen_clock_view_large);
+
+            // The clock container can sometimes be null. If it is, just fall back to the
+            // old animation rather than setting up the custom animations.
+            if (clockContainerView == null || clockContainerView.getChildCount() == 0) {
+                transition.addListener(mKeyguardStatusAlignmentTransitionListener);
+                TransitionManager.beginDelayedTransition(notifContainerParent, transition);
+            } else {
+                View clockView = clockContainerView.getChildAt(0);
+
+                transition.excludeTarget(clockView, /* exclude= */ true);
+
+                TransitionSet set = new TransitionSet();
+                set.addTransition(transition);
+
+                SplitShadeTransitionAdapter adapter =
+                        new SplitShadeTransitionAdapter(mKeyguardClockSwitchController);
+
+                // Use linear here, so the actual clock can pick its own interpolator.
+                adapter.setInterpolator(Interpolators.LINEAR);
+                adapter.setDuration(KEYGUARD_STATUS_VIEW_CUSTOM_CLOCK_MOVE_DURATION);
+                adapter.addTarget(clockView);
+                set.addTransition(adapter);
+                set.addListener(mKeyguardStatusAlignmentTransitionListener);
+                TransitionManager.beginDelayedTransition(notifContainerParent, set);
+            }
+        } else {
+            transition.addListener(mKeyguardStatusAlignmentTransitionListener);
+            TransitionManager.beginDelayedTransition(notifContainerParent, transition);
+        }
+
+        constraintSet.applyTo(notifContainerParent);
+    }
+
+    @VisibleForTesting
+    static class SplitShadeTransitionAdapter extends Transition {
+        private static final String PROP_BOUNDS = "splitShadeTransitionAdapter:bounds";
+        private static final String[] TRANSITION_PROPERTIES = { PROP_BOUNDS };
+
+        private final KeyguardClockSwitchController mController;
+
+        @VisibleForTesting
+        SplitShadeTransitionAdapter(KeyguardClockSwitchController controller) {
+            mController = controller;
+        }
+
+        private void captureValues(TransitionValues transitionValues) {
+            Rect boundsRect = new Rect();
+            boundsRect.left = transitionValues.view.getLeft();
+            boundsRect.top = transitionValues.view.getTop();
+            boundsRect.right = transitionValues.view.getRight();
+            boundsRect.bottom = transitionValues.view.getBottom();
+            transitionValues.values.put(PROP_BOUNDS, boundsRect);
+        }
+
+        @Override
+        public void captureEndValues(TransitionValues transitionValues) {
+            captureValues(transitionValues);
+        }
+
+        @Override
+        public void captureStartValues(TransitionValues transitionValues) {
+            captureValues(transitionValues);
+        }
+
+        @Nullable
+        @Override
+        public Animator createAnimator(ViewGroup sceneRoot, @Nullable TransitionValues startValues,
+                @Nullable TransitionValues endValues) {
+            if (startValues == null || endValues == null) {
+                return null;
+            }
+            ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+
+            Rect from = (Rect) startValues.values.get(PROP_BOUNDS);
+            Rect to = (Rect) endValues.values.get(PROP_BOUNDS);
+
+            anim.addUpdateListener(animation -> {
+                ClockController clock = mController.getClock();
+                if (clock == null) {
+                    return;
+                }
+
+                clock.getAnimations().onPositionUpdated(from, to, animation.getAnimatedFraction());
+            });
+
+            return anim;
+        }
+
+        @Override
+        public String[] getTransitionProperties() {
+            return TRANSITION_PROPERTIES;
+        }
     }
 }
