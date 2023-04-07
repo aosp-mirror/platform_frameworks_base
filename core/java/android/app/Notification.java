@@ -7016,6 +7016,22 @@ public class Notification implements Parcelable
     }
 
     /**
+     * @return true for custom notifications, including notifications
+     * with DecoratedCustomViewStyle or DecoratedMediaCustomViewStyle,
+     * and other notifications with user-provided custom views.
+     *
+     * @hide
+     */
+    public Boolean isCustomNotification() {
+        if (contentView == null
+                && bigContentView == null
+                && headsUpContentView == null) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * @return true if this notification is showing as a bubble
      *
      * @hide
