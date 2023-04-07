@@ -39,6 +39,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -119,7 +120,8 @@ public class KeyguardModule {
             Lazy<ShadeController> shadeController,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             Lazy<ActivityLaunchAnimator> activityLaunchAnimator,
-            Lazy<ScrimController> scrimControllerLazy) {
+            Lazy<ScrimController> scrimControllerLazy,
+            FeatureFlags featureFlags) {
         return new KeyguardViewMediator(
                 context,
                 userTracker,
@@ -149,7 +151,8 @@ public class KeyguardModule {
                 shadeController,
                 notificationShadeWindowController,
                 activityLaunchAnimator,
-                scrimControllerLazy);
+                scrimControllerLazy,
+                featureFlags);
     }
 
     /** */
