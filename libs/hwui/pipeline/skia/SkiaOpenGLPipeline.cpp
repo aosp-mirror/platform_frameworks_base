@@ -104,7 +104,8 @@ IRenderPipeline::DrawResult SkiaOpenGLPipeline::draw(
 
     GrBackendRenderTarget backendRT(frame.width(), frame.height(), 0, STENCIL_BUFFER_SIZE, fboInfo);
 
-    SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
+    SkSurfaceProps props(mColorMode == ColorMode::Default ? 0 : SkSurfaceProps::kAlwaysDither_Flag,
+                         kUnknown_SkPixelGeometry);
 
     SkASSERT(mRenderThread.getGrContext() != nullptr);
     sk_sp<SkSurface> surface;

@@ -98,8 +98,6 @@ protected:
 
     bool isCapturingSkp() const { return mCaptureMode != CaptureMode::None; }
 
-    virtual bool shouldForceDither() const { return mColorMode != ColorMode::Default; }
-
 private:
     void renderFrameImpl(const SkRect& clip,
                          const std::vector<sp<RenderNode>>& nodes, bool opaque,

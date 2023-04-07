@@ -49,8 +49,6 @@ public:
     void setColorSpace(sk_sp<SkColorSpace> colorSpace);
     const SkM44& getPixelSnapMatrix() const { return mWindowInfo.pixelSnapMatrix; }
 
-    bool isBeyond8Bit() const;
-
 private:
     /*
      * All structs/methods in this private section are specifically for use by the VulkanManager
