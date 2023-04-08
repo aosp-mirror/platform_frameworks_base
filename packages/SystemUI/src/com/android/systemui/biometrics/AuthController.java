@@ -1005,9 +1005,11 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
      * not enrolled sfps. This may be false if called before onAllAuthenticatorsRegistered.
      */
     public boolean isRearFpsSupported() {
-        for (FingerprintSensorPropertiesInternal prop: mFpProps) {
-            if (prop.sensorType == TYPE_REAR) {
-                return true;
+        if (mFpProps != null) {
+            for (FingerprintSensorPropertiesInternal prop: mFpProps) {
+                if (prop.sensorType == TYPE_REAR) {
+                    return true;
+                }
             }
         }
         return false;
