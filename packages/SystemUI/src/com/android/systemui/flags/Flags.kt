@@ -68,7 +68,7 @@ object Flags {
     @JvmField val DISABLE_FSI = unreleasedFlag(265804648, "disable_fsi")
 
     // TODO(b/254512538): Tracking Bug
-    val INSTANT_VOICE_REPLY = releasedFlag(111, "instant_voice_reply")
+    val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply")
 
     // TODO(b/254512425): Tracking Bug
     val NOTIFICATION_MEMORY_MONITOR_ENABLED =
