@@ -21,7 +21,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import com.android.systemui.animation.view.LaunchableLinearLayout
-import com.android.systemui.common.ui.view.distanceFrom
+import com.android.systemui.common.ui.view.rawDistanceFrom
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSettingsMenuViewModel
 
 class KeyguardSettingsButtonOnTouchListener(
@@ -29,18 +29,20 @@ class KeyguardSettingsButtonOnTouchListener(
     private val viewModel: KeyguardSettingsMenuViewModel,
 ) : View.OnTouchListener {
 
-    private val downPosition = PointF()
+    private val downPositionDisplayCoords = PointF()
 
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
         when (motionEvent.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 view.isPressed = true
-                downPosition.set(motionEvent.x, motionEvent.y)
+                downPositionDisplayCoords.set(motionEvent.rawX, motionEvent.rawY)
                 viewModel.onTouchGestureStarted()
             }
             MotionEvent.ACTION_UP -> {
                 view.isPressed = false
-                val distanceMoved = motionEvent.distanceFrom(downPosition.x, downPosition.y)
+                val distanceMoved =
+                    motionEvent
+                        .rawDistanceFrom(downPositionDisplayCoords.x, downPositionDisplayCoords.y)
                 val isClick = distanceMoved < ViewConfiguration.getTouchSlop()
                 viewModel.onTouchGestureEnded(isClick)
                 if (isClick) {
