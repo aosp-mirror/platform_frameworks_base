@@ -4171,6 +4171,43 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         assertFalse(posted.getNotification().extras
                 .containsKey(Notification.EXTRA_MEDIA_REMOTE_DEVICE));
+        assertFalse(posted.getNotification().extras
+                .containsKey(Notification.EXTRA_MEDIA_REMOTE_ICON));
+        assertFalse(posted.getNotification().extras
+                .containsKey(Notification.EXTRA_MEDIA_REMOTE_INTENT));
+    }
+
+    @Test
+    public void testCustomMediaStyleRemote_noPermission() throws RemoteException {
+        String deviceName = "device";
+        when(mPackageManager.checkPermission(
+                eq(android.Manifest.permission.MEDIA_CONTENT_CONTROL), any(), anyInt()))
+                .thenReturn(PERMISSION_DENIED);
+        Notification.DecoratedMediaCustomViewStyle style =
+                new Notification.DecoratedMediaCustomViewStyle();
+        style.setRemotePlaybackInfo(deviceName, 0, null);
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setStyle(style);
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "testCustomMediaStyleRemoteNoPermission", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        NotificationRecord posted = mService.findNotificationLocked(
+                PKG, nr.getSbn().getTag(), nr.getSbn().getId(), nr.getSbn().getUserId());
+
+        assertFalse(posted.getNotification().extras
+                .containsKey(Notification.EXTRA_MEDIA_REMOTE_DEVICE));
+        assertFalse(posted.getNotification().extras
+                .containsKey(Notification.EXTRA_MEDIA_REMOTE_ICON));
+        assertFalse(posted.getNotification().extras
+                .containsKey(Notification.EXTRA_MEDIA_REMOTE_INTENT));
     }
 
     @Test
