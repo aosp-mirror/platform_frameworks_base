@@ -28,7 +28,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
-import com.android.systemui.statusbar.phone.AnimatorHandle;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -48,7 +47,6 @@ public class KeyguardVisibilityHelper {
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private boolean mAnimateYPos;
     private boolean mKeyguardViewVisibilityAnimating;
-    private AnimatorHandle mKeyguardAnimatorHandle;
     private boolean mLastOccludedState = false;
     private final AnimationProperties mAnimationProperties = new AnimationProperties();
     private final LogBuffer mLogBuffer;
@@ -85,10 +83,6 @@ public class KeyguardVisibilityHelper {
             boolean keyguardFadingAway,
             boolean goingToFullShade,
             int oldStatusBarState) {
-        if (mKeyguardAnimatorHandle != null) {
-            mKeyguardAnimatorHandle.cancel();
-            mKeyguardAnimatorHandle = null;
-        }
         mView.animate().cancel();
         boolean isOccluded = mKeyguardStateController.isOccluded();
         mKeyguardViewVisibilityAnimating = false;
@@ -122,7 +116,7 @@ public class KeyguardVisibilityHelper {
                     .setDuration(320)
                     .setInterpolator(Interpolators.ALPHA_IN)
                     .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable);
-            log("keyguardFadingAway transition w/ Y Animation");
+            log("keyguardFadingAway transition w/ Y Aniamtion");
         } else if (statusBarState == KEYGUARD) {
             if (keyguardFadingAway) {
                 mKeyguardViewVisibilityAnimating = true;
@@ -154,7 +148,7 @@ public class KeyguardVisibilityHelper {
 
                 // Ask the screen off animation controller to animate the keyguard visibility for us
                 // since it may need to be cancelled due to keyguard lifecycle events.
-                mKeyguardAnimatorHandle = mScreenOffAnimationController.animateInKeyguard(
+                mScreenOffAnimationController.animateInKeyguard(
                         mView, mAnimateKeyguardStatusViewVisibleEndRunnable);
             } else {
                 log("Direct set Visibility to VISIBLE");

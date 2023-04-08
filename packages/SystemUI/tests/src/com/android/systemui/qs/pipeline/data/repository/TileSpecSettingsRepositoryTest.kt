@@ -170,6 +170,21 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun addTileAtPosition_tooLarge_addedAtEnd() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tilesSpecs(0))
+
+            val specs = "a,custom(b/c)"
+            storeTilesForUser(specs, 0)
+
+            underTest.addTile(userId = 0, TileSpec.create("d"), position = 100)
+
+            val expected = "a,custom(b/c),d"
+            assertThat(loadTilesForUser(0)).isEqualTo(expected)
+            assertThat(tiles).isEqualTo(expected.toTileSpecs())
+        }
+
+    @Test
     fun addTileForOtherUser_addedInThatUser() =
         testScope.runTest {
             val tilesUser0 by collectLastValue(underTest.tilesSpecs(0))
@@ -187,27 +202,27 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun removeTile() =
+    fun removeTiles() =
         testScope.runTest {
             val tiles by collectLastValue(underTest.tilesSpecs(0))
 
             storeTilesForUser("a,b", 0)
 
-            underTest.removeTile(userId = 0, TileSpec.create("a"))
+            underTest.removeTiles(userId = 0, listOf(TileSpec.create("a")))
 
             assertThat(loadTilesForUser(0)).isEqualTo("b")
             assertThat(tiles).isEqualTo("b".toTileSpecs())
         }
 
     @Test
-    fun removeTileNotThere_noop() =
+    fun removeTilesNotThere_noop() =
         testScope.runTest {
             val tiles by collectLastValue(underTest.tilesSpecs(0))
 
             val specs = "a,b"
             storeTilesForUser(specs, 0)
 
-            underTest.removeTile(userId = 0, TileSpec.create("c"))
+            underTest.removeTiles(userId = 0, listOf(TileSpec.create("c")))
 
             assertThat(loadTilesForUser(0)).isEqualTo(specs)
             assertThat(tiles).isEqualTo(specs.toTileSpecs())
@@ -221,7 +236,7 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
             val specs = "a,b"
             storeTilesForUser(specs, 0)
 
-            underTest.removeTile(userId = 0, TileSpec.Invalid)
+            underTest.removeTiles(userId = 0, listOf(TileSpec.Invalid))
 
             assertThat(loadTilesForUser(0)).isEqualTo(specs)
             assertThat(tiles).isEqualTo(specs.toTileSpecs())
@@ -237,12 +252,25 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
             storeTilesForUser(specs, 0)
             storeTilesForUser(specs, 1)
 
-            underTest.removeTile(userId = 1, TileSpec.create("a"))
+            underTest.removeTiles(userId = 1, listOf(TileSpec.create("a")))
 
             assertThat(loadTilesForUser(0)).isEqualTo(specs)
             assertThat(user0Tiles).isEqualTo(specs.toTileSpecs())
             assertThat(loadTilesForUser(1)).isEqualTo("b")
             assertThat(user1Tiles).isEqualTo("b".toTileSpecs())
+        }
+
+    @Test
+    fun removeMultipleTiles() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tilesSpecs(0))
+
+            storeTilesForUser("a,b,c,d", 0)
+
+            underTest.removeTiles(userId = 0, listOf(TileSpec.create("a"), TileSpec.create("c")))
+
+            assertThat(loadTilesForUser(0)).isEqualTo("b,d")
+            assertThat(tiles).isEqualTo("b,d".toTileSpecs())
         }
 
     @Test
@@ -310,8 +338,8 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
             storeTilesForUser(specs, 0)
 
             coroutineScope {
-                underTest.removeTile(userId = 0, TileSpec.create("c"))
-                underTest.removeTile(userId = 0, TileSpec.create("a"))
+                underTest.removeTiles(userId = 0, listOf(TileSpec.create("c")))
+                underTest.removeTiles(userId = 0, listOf(TileSpec.create("a")))
             }
 
             assertThat(loadTilesForUser(0)).isEqualTo("b")

@@ -32,7 +32,6 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.TopAppBar
@@ -52,6 +51,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -80,6 +80,7 @@ fun Entry(
     /** If true, draws a trailing lock icon. */
     isLockedAuthEntry: Boolean = false,
     enforceOneLine: Boolean = false,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
     val iconPadding = Modifier.wrapContentSize().padding(
         // Horizontal padding should be 16dp, but the suggestion chip itself
@@ -104,7 +105,11 @@ fun Entry(
             ) {
                 // Apply weight so that the trailing icon can always show.
                 Column(modifier = Modifier.wrapContentHeight().fillMaxWidth().weight(1f)) {
-                    SmallTitleText(text = entryHeadlineText, enforceOneLine = enforceOneLine)
+                    SmallTitleText(
+                        text = entryHeadlineText,
+                        enforceOneLine = enforceOneLine,
+                        onTextLayout = onTextLayout,
+                    )
                     if (passwordValue != null) {
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
@@ -142,10 +147,18 @@ fun Entry(
                             )
                         }
                     } else if (entrySecondLineText != null) {
-                        BodySmallText(text = entrySecondLineText, enforceOneLine = enforceOneLine)
+                        BodySmallText(
+                            text = entrySecondLineText,
+                            enforceOneLine = enforceOneLine,
+                            onTextLayout = onTextLayout,
+                        )
                     }
                     if (entryThirdLineText != null) {
-                        BodySmallText(text = entryThirdLineText, enforceOneLine = enforceOneLine)
+                        BodySmallText(
+                            text = entryThirdLineText,
+                            enforceOneLine = enforceOneLine,
+                            onTextLayout = onTextLayout,
+                        )
                     }
                 }
                 if (isLockedAuthEntry) {
@@ -155,7 +168,7 @@ fun Entry(
                             // Decorative purpose only.
                             contentDescription = null,
                             modifier = Modifier.size(24.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
                         )
                     }
                 }
@@ -169,7 +182,7 @@ fun Entry(
                         Icon(
                             modifier = iconSize,
                             bitmap = iconImageBitmap,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
                             // Decorative purpose only.
                             contentDescription = null,
                         )
@@ -193,7 +206,7 @@ fun Entry(
                     Icon(
                         modifier = iconSize,
                         imageVector = iconImageVector,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
                         // Decorative purpose only.
                         contentDescription = null,
                     )
@@ -205,7 +218,7 @@ fun Entry(
                     Icon(
                         modifier = iconSize,
                         painter = iconPainter,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
                         // Decorative purpose only.
                         contentDescription = null,
                     )
@@ -217,9 +230,8 @@ fun Entry(
         border = null,
         colors = SuggestionChipDefaults.suggestionChipColors(
             containerColor = LocalAndroidColorScheme.current.colorSurfaceContainerHigh,
-            // TODO: remove?
-            labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            iconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            labelColor = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
+            iconContentColor = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
         ),
     )
 }
@@ -282,7 +294,7 @@ fun PasskeyBenefitRow(
         Icon(
             modifier = Modifier.size(24.dp),
             painter = leadingIconPainter,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
             // Decorative purpose only.
             contentDescription = null,
         )
@@ -341,7 +353,7 @@ fun MoreOptionTopAppBar(
                             R.string.accessibility_back_arrow_button
                         ),
                         modifier = Modifier.size(24.dp).autoMirrored(),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
                     )
                 }
             }

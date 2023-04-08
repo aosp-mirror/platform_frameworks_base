@@ -32,7 +32,6 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.credentials.CallingAppInfo;
-import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -179,7 +178,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
     @Override // from CredentialManagerUiCallbacks
     public void onUiSelection(UserSelectionDialogResult selection) {
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
-            Log.i(TAG, "Request has already been completed. This is strange.");
+            Slog.w(TAG, "Request has already been completed. This is strange.");
             return;
         }
         if (isSessionCancelled()) {
@@ -187,13 +186,11 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
             return;
         }
         String providerId = selection.getProviderId();
-        Log.i(TAG, "onUiSelection, providerId: " + providerId);
         ProviderSession providerSession = mProviders.get(providerId);
         if (providerSession == null) {
-            Log.i(TAG, "providerSession not found in onUiSelection");
+            Slog.w(TAG, "providerSession not found in onUiSelection. This is strange.");
             return;
         }
-        Log.i(TAG, "Provider session found");
         mRequestSessionMetric.collectMetricPerBrowsingSelect(selection,
                 providerSession.mProviderSessionMetric.getCandidatePhasePerProviderMetric());
         providerSession.onUiEntrySelected(selection.getEntryKey(),
@@ -247,15 +244,13 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
     void getProviderDataAndInitiateUi() {
         ArrayList<ProviderData> providerDataList = getProviderDataForUi();
         if (!providerDataList.isEmpty()) {
-            Log.i(TAG, "provider list not empty about to initiate ui");
             launchUiWithProviderData(providerDataList);
         }
     }
 
     @NonNull
     protected ArrayList<ProviderData> getProviderDataForUi() {
-        Log.i(TAG, "In getProviderDataAndInitiateUi");
-        Log.i(TAG, "In getProviderDataAndInitiateUi providers size: " + mProviders.size());
+        Slog.d(TAG, "In getProviderDataAndInitiateUi providers size: " + mProviders.size());
         ArrayList<ProviderData> providerDataList = new ArrayList<>();
         mRequestSessionMetric.logCandidatePhaseMetrics(mProviders);
 
@@ -265,10 +260,8 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         }
 
         for (ProviderSession session : mProviders.values()) {
-            Log.i(TAG, "preparing data for : " + session.getComponentName());
             ProviderData providerData = session.prepareUiData();
             if (providerData != null) {
-                Log.i(TAG, "Provider data is not null");
                 providerDataList.add(providerData);
             }
         }
@@ -284,7 +277,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         mRequestSessionMetric.collectFinalPhaseProviderMetricStatus(/*has_exception=*/ false,
                 ProviderStatusForMetrics.FINAL_SUCCESS);
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
-            Log.i(TAG, "Request has already been completed. This is strange.");
+            Slog.w(TAG, "Request has already been completed. This is strange.");
             return;
         }
         if (isSessionCancelled()) {
@@ -300,7 +293,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         } catch (RemoteException e) {
             mRequestSessionMetric.collectFinalPhaseProviderMetricStatus(
                     /*has_exception=*/ true, ProviderStatusForMetrics.FINAL_FAILURE);
-            Log.i(TAG, "Issue while responding to client with a response : " + e.getMessage());
+            Slog.e(TAG, "Issue while responding to client with a response : " + e);
             mRequestSessionMetric.logApiCalledAtFinish(
                     /*apiStatus=*/ ApiStatus.FAILURE.getMetricCode());
         }
@@ -317,7 +310,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         mRequestSessionMetric.collectFinalPhaseProviderMetricStatus(
                 /*has_exception=*/ true, ProviderStatusForMetrics.FINAL_FAILURE);
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
-            Log.i(TAG, "Request has already been completed. This is strange.");
+            Slog.w(TAG, "Request has already been completed. This is strange.");
             return;
         }
         if (isSessionCancelled()) {
@@ -330,7 +323,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         try {
             invokeClientCallbackError(errorType, errorMsg);
         } catch (RemoteException e) {
-            Log.i(TAG, "Issue while responding to client with error : " + e.getMessage());
+            Slog.e(TAG, "Issue while responding to client with error : " + e);
         }
         boolean isUserCanceled = errorType.contains(MetricUtilities.USER_CANCELED_SUBSTRING);
         mRequestSessionMetric.logFailureOrUserCancel(isUserCanceled);

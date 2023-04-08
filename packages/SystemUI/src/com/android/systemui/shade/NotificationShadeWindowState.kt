@@ -16,9 +16,9 @@
 
 package com.android.systemui.shade
 
+import com.android.systemui.common.buffer.RingBuffer
 import com.android.systemui.dump.DumpsysTableLogger
 import com.android.systemui.dump.Row
-import com.android.systemui.plugins.util.RingBuffer
 import com.android.systemui.shade.NotificationShadeWindowState.Buffer
 import com.android.systemui.statusbar.StatusBarState
 

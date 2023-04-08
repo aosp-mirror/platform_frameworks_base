@@ -103,6 +103,11 @@ object Flags {
     val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
         releasedFlag(254647461, "filter_unseen_notifs_on_keyguard")
 
+    // TODO(b/277338665): Tracking Bug
+    @JvmField
+    val NOTIFICATION_SHELF_REFACTOR =
+        unreleasedFlag(271161129, "notification_shelf_refactor")
+
     // TODO(b/263414400): Tracking Bug
     @JvmField
     val NOTIFICATION_ANIMATE_BIG_PICTURE =
@@ -131,6 +136,11 @@ object Flags {
 
     // TODO(b/254512676): Tracking Bug
     @JvmField val LOCKSCREEN_CUSTOM_CLOCKS = releasedFlag(207, "lockscreen_custom_clocks")
+
+    // TODO(b/275694445): Tracking Bug
+    @JvmField
+    val LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING = unreleasedFlag(208,
+        "lockscreen_without_secure_lock_when_dreaming")
 
     /**
      * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
@@ -229,6 +239,12 @@ object Flags {
     /** Whether to use a new data source for intents to run on keyguard dismissal. */
     @JvmField
     val REFACTOR_KEYGUARD_DISMISS_INTENT = unreleasedFlag(231, "refactor_keyguard_dismiss_intent")
+
+    /** Whether to allow long-press on the lock screen to directly open wallpaper picker. */
+    // TODO(b/277220285): Tracking bug.
+    @JvmField
+    val LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP =
+        unreleasedFlag(232, "lock_screen_long_press_directly_opens_wallpaper_picker")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -395,7 +411,7 @@ object Flags {
     val MEDIA_RETAIN_RECOMMENDATIONS = releasedFlag(916, "media_retain_recommendations")
 
     // TODO(b/270437894): Tracking Bug
-    val MEDIA_REMOTE_RESUME = unreleasedFlag(917, "media_remote_resume")
+    val MEDIA_REMOTE_RESUME = unreleasedFlag(917, "media_remote_resume", teamfood = true)
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
@@ -605,9 +621,6 @@ object Flags {
     val SHARESHEET_SCROLLABLE_IMAGE_PREVIEW =
         releasedFlag(1504, "sharesheet_scrollable_image_preview")
 
-    // TODO(b/274137694) Tracking Bug
-    val CHOOSER_MIGRATION_ENABLED = unreleasedFlag(1505, "chooser_migration_enabled")
-
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
 
@@ -636,9 +649,6 @@ object Flags {
     @JvmField
     val APP_PANELS_REMOVE_APPS_ALLOWED =
         unreleasedFlag(2003, "app_panels_remove_apps_allowed", teamfood = true)
-
-    // 2100 - Falsing Manager
-    @JvmField val FALSING_FOR_LONG_TAPS = releasedFlag(2100, "falsing_for_long_taps")
 
     // 2200 - udfps
     // TODO(b/259264861): Tracking Bug

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.plugins.util
+package com.android.systemui.common.buffer
 
 import kotlin.math.max
 

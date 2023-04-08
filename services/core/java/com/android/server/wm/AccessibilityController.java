@@ -44,6 +44,8 @@ import static com.android.server.accessibility.AccessibilityTraceProto.WHERE;
 import static com.android.server.accessibility.AccessibilityTraceProto.WINDOW_MANAGER_SERVICE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.dumpSparseArray;
+import static com.android.server.wm.WindowManagerService.dumpSparseArrayValues;
 import static com.android.server.wm.WindowTracing.WINSCOPE_EXT;
 
 import android.accessibilityservice.AccessibilityTrace;
@@ -542,15 +544,12 @@ final class AccessibilityController {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        for (int i = 0; i < mDisplayMagnifiers.size(); i++) {
-            final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.valueAt(i);
-            if (displayMagnifier != null) {
-                displayMagnifier.dump(pw, prefix
-                        + "Magnification display# " + mDisplayMagnifiers.keyAt(i));
-            }
-        }
-        pw.println(prefix
-                + "mWindowsForAccessibilityObserver=" + mWindowsForAccessibilityObserver);
+        dumpSparseArray(pw, prefix, mDisplayMagnifiers, "magnification display",
+                (index, key) -> pw.printf("%sDisplay #%d:", prefix + "  ", key),
+                dm -> dm.dump(pw, ""));
+        dumpSparseArrayValues(pw, prefix, mWindowsForAccessibilityObserver,
+                "windows for accessibility observer");
+        mAccessibilityWindowsPopulator.dump(pw, prefix);
     }
 
     void onFocusChanged(InputTarget lastTarget, InputTarget newTarget) {

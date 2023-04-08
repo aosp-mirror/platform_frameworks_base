@@ -41,6 +41,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
+import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -67,6 +68,7 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        context.resources.configuration.setLayoutDirection(Locale.US)
         config1 = FakeKeyguardQuickAffordanceConfig(FakeCustomizationProviderClient.AFFORDANCE_1)
         config2 = FakeKeyguardQuickAffordanceConfig(FakeCustomizationProviderClient.AFFORDANCE_2)
         val testDispatcher = StandardTestDispatcher()
@@ -216,6 +218,40 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                     KeyguardSlotPickerRepresentation(
                         id = slot3,
                         maxSelectedAffordances = 5,
+                    ),
+                )
+            )
+    }
+
+    @Test
+    fun getSlotPickerRepresentations_rightToLeft_slotsReversed() {
+        context.resources.configuration.setLayoutDirection(Locale("he", "IL"))
+        val slot1 = "slot1"
+        val slot2 = "slot2"
+        val slot3 = "slot3"
+        context.orCreateTestableResources.addOverride(
+            R.array.config_keyguardQuickAffordanceSlots,
+            arrayOf(
+                "$slot1:2",
+                "$slot2:4",
+                "$slot3:5",
+            ),
+        )
+
+        assertThat(underTest.getSlotPickerRepresentations())
+            .isEqualTo(
+                listOf(
+                    KeyguardSlotPickerRepresentation(
+                        id = slot3,
+                        maxSelectedAffordances = 5,
+                    ),
+                    KeyguardSlotPickerRepresentation(
+                        id = slot2,
+                        maxSelectedAffordances = 4,
+                    ),
+                    KeyguardSlotPickerRepresentation(
+                        id = slot1,
+                        maxSelectedAffordances = 2,
                     ),
                 )
             )

@@ -117,6 +117,8 @@
   <string name="get_dialog_sign_in_type_username_separator" translatable="false">" • "</string>
   <!-- This text is followed by a list of one or more options. [CHAR LIMIT=80] -->
   <string name="get_dialog_title_sign_in_options">Sign-in options</string>
+  <!-- Button label for viewing the full information about an account. [CHAR LIMIT=80] -->
+  <string name="button_label_view_more">View more</string>
   <!-- Column heading for displaying sign-ins for a specific username. [CHAR LIMIT=80] -->
   <string name="get_dialog_heading_for_username">For <xliff:g id="username" example="becket@gmail.com">%1$s</xliff:g></string>
   <!-- Column heading for displaying locked (that is, the user needs to first authenticate via pin, fingerprint, faceId, etc.) sign-ins. [CHAR LIMIT=80] -->

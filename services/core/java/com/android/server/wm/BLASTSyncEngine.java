@@ -23,6 +23,7 @@ import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Handler;
 import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -172,7 +173,7 @@ class BLASTSyncEngine {
                         if (ran) {
                             return;
                         }
-                        mWm.mH.removeCallbacks(this);
+                        mHandler.removeCallbacks(this);
                         ran = true;
                         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
                         for (WindowContainer wc : wcAwaitingCommit) {
@@ -199,13 +200,13 @@ class BLASTSyncEngine {
             };
             CommitCallback callback = new CommitCallback();
             merged.addTransactionCommittedListener((r) -> { r.run(); }, callback::onCommitted);
-            mWm.mH.postDelayed(callback, BLAST_TIMEOUT_DURATION);
+            mHandler.postDelayed(callback, BLAST_TIMEOUT_DURATION);
 
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionReady");
             mListener.onTransactionReady(mSyncId, merged);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             mActiveSyncs.remove(mSyncId);
-            mWm.mH.removeCallbacks(mOnTimeout);
+            mHandler.removeCallbacks(mOnTimeout);
 
             // Immediately start the next pending sync-transaction if there is one.
             if (mActiveSyncs.size() == 0 && !mPendingSyncSets.isEmpty()) {
@@ -216,7 +217,7 @@ class BLASTSyncEngine {
                     throw new IllegalStateException("Pending Sync Set didn't start a sync.");
                 }
                 // Post this so that the now-playing transition setup isn't interrupted.
-                mWm.mH.post(() -> {
+                mHandler.post(() -> {
                     synchronized (mWm.mGlobalLock) {
                         pt.mApplySync.run();
                     }
@@ -228,7 +229,7 @@ class BLASTSyncEngine {
             if (mReady == ready) {
                 return;
             }
-            ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Set ready", mSyncId);
+            ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Set ready %b", mSyncId, ready);
             mReady = ready;
             if (!ready) return;
             mWm.mWindowPlacerLocked.requestTraversal();
@@ -269,6 +270,7 @@ class BLASTSyncEngine {
     }
 
     private final WindowManagerService mWm;
+    private final Handler mHandler;
     private int mNextSyncId = 0;
     private final SparseArray<SyncGroup> mActiveSyncs = new SparseArray<>();
 
@@ -280,7 +282,13 @@ class BLASTSyncEngine {
     private final ArrayList<PendingSyncSet> mPendingSyncSets = new ArrayList<>();
 
     BLASTSyncEngine(WindowManagerService wms) {
+        this(wms, wms.mH);
+    }
+
+    @VisibleForTesting
+    BLASTSyncEngine(WindowManagerService wms, Handler mainHandler) {
         mWm = wms;
+        mHandler = mainHandler;
     }
 
     /**
@@ -305,8 +313,8 @@ class BLASTSyncEngine {
         if (mActiveSyncs.size() != 0) {
             // We currently only support one sync at a time, so start a new SyncGroup when there is
             // another may cause issue.
-            ProtoLog.w(WM_DEBUG_SYNC_ENGINE,
-                    "SyncGroup %d: Started when there is other active SyncGroup", s.mSyncId);
+            Slog.e(TAG, "SyncGroup " + s.mSyncId
+                    + ": Started when there is other active SyncGroup");
         }
         mActiveSyncs.put(s.mSyncId, s);
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Started for listener: %s",
@@ -325,7 +333,7 @@ class BLASTSyncEngine {
 
     @VisibleForTesting
     void scheduleTimeout(SyncGroup s, long timeoutMs) {
-        mWm.mH.postDelayed(s.mOnTimeout, timeoutMs);
+        mHandler.postDelayed(s.mOnTimeout, timeoutMs);
     }
 
     void addToSyncSet(int id, WindowContainer wc) {

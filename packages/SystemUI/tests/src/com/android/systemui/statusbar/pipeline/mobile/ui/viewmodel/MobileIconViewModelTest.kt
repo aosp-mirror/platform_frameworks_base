@@ -179,15 +179,71 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun iconId_cutout_whenDefaultDataDisabled() =
+    fun icon_usesLevelFromInteractor() =
+        testScope.runTest {
+            var latest: SignalIconModel? = null
+            val job = underTest.icon.onEach { latest = it }.launchIn(this)
+
+            interactor.level.value = 3
+            assertThat(latest!!.level).isEqualTo(3)
+
+            interactor.level.value = 1
+            assertThat(latest!!.level).isEqualTo(1)
+
+            job.cancel()
+        }
+
+    @Test
+    fun icon_usesNumberOfLevelsFromInteractor() =
+        testScope.runTest {
+            var latest: SignalIconModel? = null
+            val job = underTest.icon.onEach { latest = it }.launchIn(this)
+
+            interactor.numberOfLevels.value = 5
+            assertThat(latest!!.numberOfLevels).isEqualTo(5)
+
+            interactor.numberOfLevels.value = 2
+            assertThat(latest!!.numberOfLevels).isEqualTo(2)
+
+            job.cancel()
+        }
+
+    @Test
+    fun icon_defaultDataDisabled_showExclamationTrue() =
         testScope.runTest {
             interactor.setIsDefaultDataEnabled(false)
 
             var latest: SignalIconModel? = null
             val job = underTest.icon.onEach { latest = it }.launchIn(this)
-            val expected = defaultSignal(level = 1, connected = false)
 
-            assertThat(latest).isEqualTo(expected)
+            assertThat(latest!!.showExclamationMark).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun icon_defaultConnectionFailed_showExclamationTrue() =
+        testScope.runTest {
+            interactor.isDefaultConnectionFailed.value = true
+
+            var latest: SignalIconModel? = null
+            val job = underTest.icon.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest!!.showExclamationMark).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun icon_enabledAndNotFailed_showExclamationFalse() =
+        testScope.runTest {
+            interactor.setIsDefaultDataEnabled(true)
+            interactor.isDefaultConnectionFailed.value = false
+
+            var latest: SignalIconModel? = null
+            val job = underTest.icon.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest!!.showExclamationMark).isFalse()
 
             job.cancel()
         }
@@ -572,16 +628,14 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
     companion object {
         private const val SUB_1_ID = 1
+        private const val NUM_LEVELS = 4
 
         /** Convenience constructor for these tests */
-        fun defaultSignal(
-            level: Int = 1,
-            connected: Boolean = true,
-        ): SignalIconModel {
-            return SignalIconModel(level, numberOfLevels = 4, showExclamationMark = !connected)
+        fun defaultSignal(level: Int = 1): SignalIconModel {
+            return SignalIconModel(level, NUM_LEVELS, showExclamationMark = false)
         }
 
         fun emptySignal(): SignalIconModel =
-            SignalIconModel(level = 0, numberOfLevels = 4, showExclamationMark = true)
+            SignalIconModel(level = 0, numberOfLevels = NUM_LEVELS, showExclamationMark = true)
     }
 }

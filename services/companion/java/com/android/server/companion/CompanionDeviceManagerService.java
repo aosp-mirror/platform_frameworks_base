@@ -19,6 +19,7 @@ package com.android.server.companion;
 
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
@@ -1064,6 +1065,10 @@ public class CompanionDeviceManagerService extends SystemService {
         final String deviceProfile = association.getDeviceProfile();
         if (deviceProfile == null) {
             // No role was granted to for this association, there is nothing else we need to here.
+            return true;
+        }
+        // Do not need to remove the system role since it was pre-granted by the system.
+        if (deviceProfile.equals(DEVICE_PROFILE_AUTOMOTIVE_PROJECTION)) {
             return true;
         }
 
