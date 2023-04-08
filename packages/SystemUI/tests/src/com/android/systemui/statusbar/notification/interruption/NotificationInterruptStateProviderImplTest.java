@@ -482,7 +482,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
                 .isFalse();
         verify(mLogger, never()).logNoFullscreen(any(), any());
-        verify(mLogger).logNoFullscreenWarning(entry, "GroupAlertBehavior will prevent HUN");
+        verify(mLogger).logNoFullscreenWarning(entry, "BubbleMetadata may prevent HUN");
         verify(mLogger, never()).logFullscreen(any(), any());
     }
 

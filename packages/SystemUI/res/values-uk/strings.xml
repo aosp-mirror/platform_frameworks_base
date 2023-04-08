@@ -112,7 +112,7 @@
     <string name="accessibility_back" msgid="6530104400086152611">"Назад"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Головна"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Меню"</string>
-    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Спеціальні можливості"</string>
+    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Доступність"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Обернути екран"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"Огляд"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Камера"</string>
@@ -446,7 +446,7 @@
     <string name="stream_notification" msgid="7930294049046243939">"Сповіщення"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Двотональний багаточастотний аналоговий сигнал"</string>
-    <string name="stream_accessibility" msgid="3873610336741987152">"Спеціальні можливості"</string>
+    <string name="stream_accessibility" msgid="3873610336741987152">"Доступність"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Дзвінок"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Вібросигнал"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"без звуку"</string>
@@ -764,7 +764,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Збільшення всього екрана"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Збільшити частину екрана"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Перемкнути"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Кнопка спеціальних можливостей. Змініть або замініть її в Налаштуваннях.\n\n"<annotation id="link">"Переглянути налаштування"</annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Торкніться, щоб відкрити функції доступності. Змінити або замінити цю кнопку можна в Налаштуваннях.\n\n"<annotation id="link">"Налаштування"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Щоб тимчасово сховати кнопку, перемістіть її на край екрана"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Перемістити ліворуч угору"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Перемістити праворуч угору"</string>

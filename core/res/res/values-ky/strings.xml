@@ -2110,7 +2110,7 @@
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Артка"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Акыркы колдонмолор"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Билдирмелер"</string>
-    <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Ыкчам жөндөөлөр"</string>
+    <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Ыкчам параметрлер"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Кубат диалогу"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Кулпуланган экран"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Скриншот"</string>

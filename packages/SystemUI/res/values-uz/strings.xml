@@ -112,7 +112,7 @@
     <string name="accessibility_back" msgid="6530104400086152611">"Orqaga"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Uyga"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Menyu"</string>
-    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Maxsus imkoniyatlar"</string>
+    <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Qulayliklar"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Ekranni burish"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"Umumiy nazar"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Kamera"</string>
@@ -167,7 +167,7 @@
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Bunga ulangan: <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Ulanmagan."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Rouming"</string>
-    <string name="cell_data_off" msgid="4886198950247099526">"Yoqilmagan"</string>
+    <string name="cell_data_off" msgid="4886198950247099526">"Oʻchiq"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Parvoz rejimi"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN yoniq."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Batareya <xliff:g id="NUMBER">%d</xliff:g> foiz."</string>
@@ -440,13 +440,13 @@
     <string name="stream_notification" msgid="7930294049046243939">"Bildirishnoma"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Ikkitali ko‘pchastotali ovoz"</string>
-    <string name="stream_accessibility" msgid="3873610336741987152">"Maxsus imkoniyatlar"</string>
+    <string name="stream_accessibility" msgid="3873610336741987152">"Qulayliklar"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Jiringlatish"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Tebranish"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Ovozsiz"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Ovozini yoqish uchun ustiga bosing."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tebranishni yoqish uchun ustiga bosing. Maxsus imkoniyatlar ishlamasligi mumkin."</string>
-    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Ovozini o‘chirish uchun ustiga bosing. Maxsus imkoniyatlar ishlamasligi mumkin."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tebranishni yoqish uchun ustiga bosing. Qulayliklar ishlamasligi mumkin."</string>
+    <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Ovozini o‘chirish uchun ustiga bosing. Qulayliklar ishlamasligi mumkin."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Tebranishni yoqish uchun ustiga bosing."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Ovozsiz qilish uchun ustiga bosing."</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Jiringlagich rejimini oʻzgartirish uchun bosing"</string>
@@ -596,7 +596,7 @@
     <string name="data_saver" msgid="3484013368530820763">"Trafik tejash"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Trafik tejash yoniq"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Yoniq"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Yoqilmagan"</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Oʻchiq"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Mavjud emas"</string>
     <string name="tile_disabled" msgid="373212051546573069">"Faolsizlantirilgan"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Navigatsiya paneli"</string>
