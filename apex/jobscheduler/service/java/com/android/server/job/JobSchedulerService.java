@@ -1560,7 +1560,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     jobStatus.getJob().getMinLatencyMillis(),
                     jobStatus.getEstimatedNetworkDownloadBytes(),
                     jobStatus.getEstimatedNetworkUploadBytes(),
-                    jobStatus.getWorkCount());
+                    jobStatus.getWorkCount(),
+                    getProcState(jobStatus.getSourcePackageName()));
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
@@ -1988,7 +1989,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     cancelled.getJob().getMinLatencyMillis(),
                     cancelled.getEstimatedNetworkDownloadBytes(),
                     cancelled.getEstimatedNetworkUploadBytes(),
-                    cancelled.getWorkCount());
+                    cancelled.getWorkCount(),
+                    getProcState(cancelled.getSourcePackageName()));
         }
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
@@ -5331,5 +5333,18 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         proto.flush();
+    }
+
+    /**
+     * Returns OOM score for package name, to be used with
+     * logging only.
+     */
+    int getProcState(String packageName) {
+        try {
+            return ActivityManager.getService().getPackageProcessState(
+                    packageName, "system");
+        } catch (RemoteException e) {
+            return -1;
+        }
     }
 }

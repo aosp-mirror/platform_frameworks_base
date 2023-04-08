@@ -439,6 +439,7 @@ public final class JobServiceContext implements ServiceConnection {
                 removeOpTimeOutLocked();
                 return false;
             }
+            final String sourcePackage = job.getSourcePackageName();
             mJobPackageTracker.noteActive(job);
             FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                     job.getSourceUid(), null, job.getBatteryName(),
@@ -476,8 +477,8 @@ public final class JobServiceContext implements ServiceConnection {
                     job.getJob().getMinLatencyMillis(),
                     job.getEstimatedNetworkDownloadBytes(),
                     job.getEstimatedNetworkUploadBytes(),
-                    job.getWorkCount());
-            final String sourcePackage = job.getSourcePackageName();
+                    job.getWorkCount(),
+                    mService.getProcState(sourcePackage));
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
                 final String componentPackage = job.getServiceComponent().getPackageName();
                 String traceTag = "*job*<" + job.getSourceUid() + ">" + sourcePackage;
@@ -1447,7 +1448,8 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.getJob().getMinLatencyMillis(),
                 completedJob.getEstimatedNetworkDownloadBytes(),
                 completedJob.getEstimatedNetworkUploadBytes(),
-                completedJob.getWorkCount());
+                completedJob.getWorkCount(),
+                mService.getProcState(completedJob.getSourcePackageName()));
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
                     getId());
