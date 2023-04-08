@@ -26,7 +26,7 @@ import androidx.core.animation.CycleInterpolator
 import androidx.core.animation.ObjectAnimator
 import com.android.systemui.R
 import com.android.systemui.animation.Expandable
-import com.android.systemui.common.ui.view.distanceFrom
+import com.android.systemui.common.ui.view.rawDistanceFrom
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
@@ -41,14 +41,14 @@ class KeyguardQuickAffordanceOnTouchListener(
 
     private val longPressDurationMs = ViewConfiguration.getLongPressTimeout().toLong()
     private var longPressAnimator: ViewPropertyAnimator? = null
-    private val down: PointF by lazy { PointF() }
+    private val downDisplayCoords: PointF by lazy { PointF() }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouch(v: View, event: MotionEvent): Boolean {
         return when (event.actionMasked) {
             MotionEvent.ACTION_DOWN ->
                 if (viewModel.configKey != null) {
-                    down.set(event.x, event.y)
+                    downDisplayCoords.set(event.rawX, event.rawY)
                     if (isUsingAccurateTool(event)) {
                         // For accurate tool types (stylus, mouse, etc.), we don't require a
                         // long-press.
@@ -81,7 +81,13 @@ class KeyguardQuickAffordanceOnTouchListener(
                 if (!isUsingAccurateTool(event)) {
                     // Moving too far while performing a long-press gesture cancels that
                     // gesture.
-                    if (event.distanceFrom(down.x, down.y) > ViewConfiguration.getTouchSlop()) {
+                    if (
+                        event
+                            .rawDistanceFrom(
+                                downDisplayCoords.x,
+                                downDisplayCoords.y,
+                            ) > ViewConfiguration.getTouchSlop()
+                    ) {
                         cancel()
                     }
                 }
@@ -94,7 +100,7 @@ class KeyguardQuickAffordanceOnTouchListener(
                     // the pointer performs a click.
                     if (
                         viewModel.configKey != null &&
-                            event.distanceFrom(down.x, down.y) <=
+                            event.rawDistanceFrom(downDisplayCoords.x, downDisplayCoords.y) <=
                                 ViewConfiguration.getTouchSlop() &&
                             falsingManager?.isFalseTap(FalsingManager.NO_PENALTY) == false
                     ) {
