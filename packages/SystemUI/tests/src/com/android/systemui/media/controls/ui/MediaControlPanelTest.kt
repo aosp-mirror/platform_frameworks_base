@@ -24,6 +24,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -42,6 +43,7 @@ import android.os.Bundle
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Interpolator
@@ -101,7 +103,6 @@ import dagger.Lazy
 import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -2200,8 +2201,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/276920368")
-    fun bindRecommendation_carouselNotFitThreeRecs() {
+    fun bindRecommendation_carouselNotFitThreeRecs_OrientationPortrait() {
         useRealConstraintSets()
         setupUpdatedRecommendationViewHolder()
         val albumArt = getColorIcon(Color.RED)
@@ -2229,16 +2229,84 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         // set the screen width less than the width of media controls.
         player.context.resources.configuration.screenWidthDp = 350
+        player.context.resources.configuration.orientation = Configuration.ORIENTATION_PORTRAIT
         player.attachRecommendation(recommendationViewHolder)
         player.bindRecommendation(data)
 
-        assertThat(player.numberOfFittedRecommendations).isEqualTo(2)
-        assertThat(expandedSet.getVisibility(coverContainer1.id)).isEqualTo(ConstraintSet.VISIBLE)
-        assertThat(collapsedSet.getVisibility(coverContainer1.id)).isEqualTo(ConstraintSet.VISIBLE)
-        assertThat(expandedSet.getVisibility(coverContainer2.id)).isEqualTo(ConstraintSet.VISIBLE)
-        assertThat(collapsedSet.getVisibility(coverContainer2.id)).isEqualTo(ConstraintSet.VISIBLE)
-        assertThat(expandedSet.getVisibility(coverContainer3.id)).isEqualTo(ConstraintSet.GONE)
-        assertThat(collapsedSet.getVisibility(coverContainer3.id)).isEqualTo(ConstraintSet.GONE)
+        val res = player.context.resources
+        val displayAvailableWidth =
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 350f, res.displayMetrics).toInt()
+        val recCoverWidth: Int =
+            (res.getDimensionPixelSize(R.dimen.qs_media_rec_album_width) +
+                res.getDimensionPixelSize(R.dimen.qs_media_info_spacing) * 2)
+        val numOfRecs = displayAvailableWidth / recCoverWidth
+
+        assertThat(player.numberOfFittedRecommendations).isEqualTo(numOfRecs)
+        recommendationViewHolder.mediaCoverContainers.forEachIndexed { index, container ->
+            if (index < numOfRecs) {
+                assertThat(expandedSet.getVisibility(container.id)).isEqualTo(ConstraintSet.VISIBLE)
+                assertThat(collapsedSet.getVisibility(container.id))
+                    .isEqualTo(ConstraintSet.VISIBLE)
+            } else {
+                assertThat(expandedSet.getVisibility(container.id)).isEqualTo(ConstraintSet.GONE)
+                assertThat(collapsedSet.getVisibility(container.id)).isEqualTo(ConstraintSet.GONE)
+            }
+        }
+    }
+
+    @Test
+    fun bindRecommendation_carouselNotFitThreeRecs_OrientationLandscape() {
+        useRealConstraintSets()
+        setupUpdatedRecommendationViewHolder()
+        val albumArt = getColorIcon(Color.RED)
+        val data =
+            smartspaceData.copy(
+                recommendations =
+                    listOf(
+                        SmartspaceAction.Builder("id1", "title1")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id2", "title2")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id3", "title3")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build()
+                    )
+            )
+
+        // set the screen width less than the width of media controls.
+        // We should have dp width less than 378 to test. In landscape we should have 2x.
+        player.context.resources.configuration.screenWidthDp = 700
+        player.context.resources.configuration.orientation = Configuration.ORIENTATION_LANDSCAPE
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(data)
+
+        val res = player.context.resources
+        val displayAvailableWidth =
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 350f, res.displayMetrics).toInt()
+        val recCoverWidth: Int =
+            (res.getDimensionPixelSize(R.dimen.qs_media_rec_album_width) +
+                res.getDimensionPixelSize(R.dimen.qs_media_info_spacing) * 2)
+        val numOfRecs = displayAvailableWidth / recCoverWidth
+
+        assertThat(player.numberOfFittedRecommendations).isEqualTo(numOfRecs)
+        recommendationViewHolder.mediaCoverContainers.forEachIndexed { index, container ->
+            if (index < numOfRecs) {
+                assertThat(expandedSet.getVisibility(container.id)).isEqualTo(ConstraintSet.VISIBLE)
+                assertThat(collapsedSet.getVisibility(container.id))
+                    .isEqualTo(ConstraintSet.VISIBLE)
+            } else {
+                assertThat(expandedSet.getVisibility(container.id)).isEqualTo(ConstraintSet.GONE)
+                assertThat(collapsedSet.getVisibility(container.id)).isEqualTo(ConstraintSet.GONE)
+            }
+        }
     }
 
     @Test
