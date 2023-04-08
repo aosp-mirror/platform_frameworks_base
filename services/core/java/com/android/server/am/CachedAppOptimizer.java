@@ -1329,7 +1329,7 @@ public final class CachedAppOptimizer {
         }
 
         try {
-            traceAppFreeze(app.processName, pid, false);
+            traceAppFreeze(app.processName, pid, reason);
             Process.setProcessFrozen(pid, app.uid, false);
 
             opt.setFreezeUnfreezeTime(SystemClock.uptimeMillis());
@@ -1341,7 +1341,7 @@ public final class CachedAppOptimizer {
         }
 
         if (!opt.isFrozen()) {
-            Slog.d(TAG_AM, "sync unfroze " + pid + " " + app.processName);
+            Slog.d(TAG_AM, "sync unfroze " + pid + " " + app.processName + " for " + reason);
 
             mFreezeHandler.sendMessage(
                     mFreezeHandler.obtainMessage(REPORT_UNFREEZE_MSG,
@@ -1371,7 +1371,7 @@ public final class CachedAppOptimizer {
             if (app == null) {
                 return;
             }
-            Slog.d(TAG_AM, "quick sync unfreeze " + pid);
+            Slog.d(TAG_AM, "quick sync unfreeze " + pid + " for " +  reason);
             try {
                 freezeBinder(pid, false, FREEZE_BINDER_TIMEOUT_MS);
             } catch (RuntimeException e) {
@@ -1380,7 +1380,7 @@ public final class CachedAppOptimizer {
             }
 
             try {
-                traceAppFreeze(app.processName, pid, false);
+                traceAppFreeze(app.processName, pid, reason);
                 Process.setProcessFrozen(pid, app.uid, false);
             } catch (Exception e) {
                 Slog.e(TAG_AM, "Unable to quick unfreeze " + pid);
@@ -1388,9 +1388,15 @@ public final class CachedAppOptimizer {
         }
     }
 
-    private static void traceAppFreeze(String processName, int pid, boolean freeze) {
+    /**
+     * Trace app freeze status
+     * @param processName The name of the target process
+     * @param pid The pid of the target process
+     * @param reason UNFREEZE_REASON_XXX (>=0) for unfreezing and -1 for freezing
+     */
+    private static void traceAppFreeze(String processName, int pid, int reason) {
         Trace.instantForTrack(Trace.TRACE_TAG_ACTIVITY_MANAGER, ATRACE_FREEZER_TRACK,
-                (freeze ? "Freeze " : "Unfreeze ") + processName + ":" + pid);
+                (reason < 0 ? "Freeze " : "Unfreeze ") + processName + ":" + pid + " " + reason);
     }
 
     /**
@@ -2063,7 +2069,7 @@ public final class CachedAppOptimizer {
                 long unfreezeTime = opt.getFreezeUnfreezeTime();
 
                 try {
-                    traceAppFreeze(proc.processName, pid, true);
+                    traceAppFreeze(proc.processName, pid, -1);
                     Process.setProcessFrozen(pid, proc.uid, true);
 
                     opt.setFreezeUnfreezeTime(SystemClock.uptimeMillis());
@@ -2127,7 +2133,7 @@ public final class CachedAppOptimizer {
         private void reportUnfreeze(int pid, int frozenDuration, String processName,
                 @UnfreezeReason int reason) {
 
-            EventLog.writeEvent(EventLogTags.AM_UNFREEZE, pid, processName);
+            EventLog.writeEvent(EventLogTags.AM_UNFREEZE, pid, processName, reason);
 
             // See above for why we're not taking mPhenotypeFlagLock here
             if (mRandom.nextFloat() < mFreezerStatsdSampleRate) {
