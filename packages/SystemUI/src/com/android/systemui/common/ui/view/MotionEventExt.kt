@@ -19,10 +19,18 @@ package com.android.systemui.common.ui.view
 import android.util.MathUtils
 import android.view.MotionEvent
 
-/** Returns the distance from the position of this [MotionEvent] and the given coordinates. */
-fun MotionEvent.distanceFrom(
-    x: Float,
-    y: Float,
+/**
+ * Returns the distance from the raw position of this [MotionEvent] and the given coordinates.
+ * Because this is all expected to be in the coordinate space of the display and not the view,
+ * applying mutations to the view (such as scaling animations) does not affect the distance
+ * measured.
+ * @param xOnDisplay the x coordinate relative to the display
+ * @param yOnDisplay the y coordinate relative to the display
+ * @return distance from the raw position of this [MotionEvent] and the given coordinates
+ */
+fun MotionEvent.rawDistanceFrom(
+    xOnDisplay: Float,
+    yOnDisplay: Float,
 ): Float {
-    return MathUtils.dist(this.x, this.y, x, y)
+    return MathUtils.dist(this.rawX, this.rawY, xOnDisplay, yOnDisplay)
 }
