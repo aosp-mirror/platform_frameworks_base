@@ -365,6 +365,23 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     }
 
     @Test
+    public void testCameraDisconnected_revertRotationAndRefresh() throws Exception {
+        configureActivityAndDisplay(SCREEN_ORIENTATION_PORTRAIT, ORIENTATION_LANDSCAPE);
+        // Open camera and test for compat treatment
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ true);
+        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
+                SCREEN_ORIENTATION_LANDSCAPE);
+        assertActivityRefreshRequested(/* refreshRequested */ true);
+        // Close camera and test for revert
+        mCameraAvailabilityCallback.onCameraClosed(CAMERA_ID_1);
+        callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ true);
+        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
+                SCREEN_ORIENTATION_UNSPECIFIED);
+        assertActivityRefreshRequested(/* refreshRequested */ true);
+    }
+
+    @Test
     public void testGetOrientation_cameraConnectionClosed_returnUnspecified() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 

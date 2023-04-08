@@ -68,6 +68,7 @@ import android.view.DisplayAddress;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.test.FakeSettingsProvider;
@@ -111,6 +112,7 @@ public class DisplayRotationTests {
 
     private static WindowManagerService sMockWm;
     private DisplayContent mMockDisplayContent;
+    private DisplayRotationReversionController mMockDisplayRotationReversionController;
     private DisplayPolicy mMockDisplayPolicy;
     private DisplayAddress mMockDisplayAddress;
     private Context mMockContext;
@@ -137,6 +139,8 @@ public class DisplayRotationTests {
 
     private DeviceStateController mDeviceStateController;
     private DisplayRotation mTarget;
+    @Nullable
+    private DisplayRotationImmersiveAppCompatPolicy mDisplayRotationImmersiveAppCompatPolicyMock;
 
     @BeforeClass
     public static void setUpOnce() {
@@ -161,7 +165,7 @@ public class DisplayRotationTests {
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
         mMockStatusBarManagerInternal = mock(StatusBarManagerInternal.class);
         LocalServices.addService(StatusBarManagerInternal.class, mMockStatusBarManagerInternal);
-
+        mDisplayRotationImmersiveAppCompatPolicyMock = null;
         mBuilder = new DisplayRotationBuilder();
     }
 
@@ -571,6 +575,38 @@ public class DisplayRotationTests {
         assertTrue(waitForUiHandler());
 
         verify(mMockStatusBarManagerInternal).onProposedRotationChanged(Surface.ROTATION_90, true);
+    }
+
+    @Test
+    public void testNotifiesChoiceWhenSensorUpdates_immersiveApp() throws Exception {
+        mDisplayRotationImmersiveAppCompatPolicyMock = mock(
+                DisplayRotationImmersiveAppCompatPolicy.class);
+        when(mDisplayRotationImmersiveAppCompatPolicyMock.isRotationLockEnforced(
+                Surface.ROTATION_90)).thenReturn(true);
+
+        mBuilder.build();
+        configureDisplayRotation(SCREEN_ORIENTATION_PORTRAIT, false, false);
+
+        thawRotation();
+
+        enableOrientationSensor();
+
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_90));
+        assertTrue(waitForUiHandler());
+
+        verify(mMockStatusBarManagerInternal).onProposedRotationChanged(Surface.ROTATION_90, true);
+
+        // An imaginary ActivityRecord.setRequestedOrientation call disables immersive mode:
+        when(mDisplayRotationImmersiveAppCompatPolicyMock.isRotationLockEnforced(
+                Surface.ROTATION_90)).thenReturn(false);
+
+        // And then ActivityRecord.setRequestedOrientation calls onSetRequestedOrientation.
+        mTarget.onSetRequestedOrientation();
+
+        // onSetRequestedOrientation should lead to a second call to
+        // mOrientationListener.onProposedRotationChanged
+        // but now, instead of notifying mMockStatusBarManagerInternal, it calls updateRotation:
+        verify(sMockWm).updateRotation(false, false);
     }
 
     @Test
@@ -1332,6 +1368,10 @@ public class DisplayRotationTests {
             when(mMockContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_windowManagerHalfFoldAutoRotateOverride))
                     .thenReturn(mSupportHalfFoldAutoRotateOverride);
+            mMockDisplayRotationReversionController =
+                    mock(DisplayRotationReversionController.class);
+            when(mMockDisplayContent.getRotationReversionController())
+                        .thenReturn(mMockDisplayRotationReversionController);
 
             mMockResolver = mock(ContentResolver.class);
             when(mMockContext.getContentResolver()).thenReturn(mMockResolver);
@@ -1354,7 +1394,7 @@ public class DisplayRotationTests {
                 @Override
                 DisplayRotationImmersiveAppCompatPolicy initImmersiveAppCompatPolicy(
                         WindowManagerService service, DisplayContent displayContent) {
-                    return null;
+                    return mDisplayRotationImmersiveAppCompatPolicyMock;
                 }
 
                 @Override
