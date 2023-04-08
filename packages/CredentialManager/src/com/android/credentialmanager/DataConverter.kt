@@ -245,7 +245,7 @@ class GetFlowUtils {
                             userName = credentialEntry.username.toString(),
                             displayName = credentialEntry.displayName?.toString(),
                             icon = credentialEntry.icon.loadDrawable(context),
-                            shouldTintIcon = credentialEntry.isDefaultIcon ?: false,
+                            shouldTintIcon = credentialEntry.isDefaultIcon,
                             lastUsedTimeMillis = credentialEntry.lastUsedTime,
                             isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                                 credentialEntry.autoSelectAllowedFromOption,

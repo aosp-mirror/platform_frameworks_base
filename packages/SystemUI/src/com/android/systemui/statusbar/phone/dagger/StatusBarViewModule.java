@@ -33,6 +33,7 @@ import com.android.systemui.biometrics.AuthRippleView;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.settings.UserTracker;
@@ -44,12 +45,15 @@ import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationsQuickSettingsContainer;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewInitializedListener;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
+import com.android.systemui.statusbar.notification.shelf.view.NotificationShelfViewBinderModule;
+import com.android.systemui.statusbar.notification.shelf.view.NotificationShelfViewBinderWrapperControllerImpl;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.LetterboxAppearanceCalculator;
@@ -76,13 +80,15 @@ import com.android.systemui.util.settings.SecureSettings;
 import java.util.concurrent.Executor;
 
 import javax.inject.Named;
+import javax.inject.Provider;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
 
-@Module(subcomponents = StatusBarFragmentComponent.class)
+@Module(subcomponents = StatusBarFragmentComponent.class,
+        includes = { NotificationShelfViewBinderModule.class })
 public abstract class StatusBarViewModule {
 
     public static final String SHADE_HEADER = "large_screen_shade_header";
@@ -130,16 +136,24 @@ public abstract class StatusBarViewModule {
     @Provides
     @CentralSurfacesComponent.CentralSurfacesScope
     public static NotificationShelfController providesStatusBarWindowView(
+            FeatureFlags featureFlags,
+            Provider<NotificationShelfViewBinderWrapperControllerImpl> newImpl,
             NotificationShelfComponent.Builder notificationShelfComponentBuilder,
             NotificationShelf notificationShelf) {
-        NotificationShelfComponent component = notificationShelfComponentBuilder
-                .notificationShelf(notificationShelf)
-                .build();
-        NotificationShelfController notificationShelfController =
-                component.getNotificationShelfController();
-        notificationShelfController.init();
+        if (featureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
+            NotificationShelfViewBinderWrapperControllerImpl impl = newImpl.get();
+            impl.init();
+            return impl;
+        } else {
+            NotificationShelfComponent component = notificationShelfComponentBuilder
+                    .notificationShelf(notificationShelf)
+                    .build();
+            LegacyNotificationShelfControllerImpl notificationShelfController =
+                    component.getNotificationShelfController();
+            notificationShelfController.init();
 
-        return notificationShelfController;
+            return notificationShelfController;
+        }
     }
 
     /** */

@@ -1921,6 +1921,7 @@ public final class Bitmap implements Parcelable {
      */
     public void setGainmap(@Nullable Gainmap gainmap) {
         checkRecycled("Bitmap is recycled");
+        mGainmap = null;
         nativeSetGainmap(mNativePtr, gainmap == null ? 0 : gainmap.mNativePtr);
     }
 

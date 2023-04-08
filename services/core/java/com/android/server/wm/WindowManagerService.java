@@ -235,6 +235,7 @@ import android.util.EventLog;
 import android.util.MergedConfiguration;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
@@ -6697,9 +6698,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mInputManagerCallback.dump(pw, "  ");
         mSnapshotController.dump(pw, " ");
-        if (mAccessibilityController.hasCallbacks()) {
-            mAccessibilityController.dump(pw, "  ");
-        }
+
+        dumpAccessibilityController(pw, /* force= */ false);
 
         if (dumpAll) {
             final WindowState imeWindow = mRoot.getCurrentInputMethodWindow();
@@ -6734,6 +6734,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 mRecentsAnimationController.dump(pw, "    ");
             }
         }
+    }
+
+    private void dumpAccessibilityController(PrintWriter pw, boolean force) {
+        boolean hasCallbacks = mAccessibilityController.hasCallbacks();
+        if (!hasCallbacks && !force) {
+            return;
+        }
+        if (!hasCallbacks) {
+            pw.println("AccessibilityController doesn't have callbacks, but printing it anways:");
+        } else {
+            pw.println("AccessibilityController:");
+        }
+        mAccessibilityController.dump(pw, "  ");
+    }
+
+    private void dumpAccessibilityLocked(PrintWriter pw) {
+        dumpAccessibilityController(pw, /* force= */ true);
     }
 
     private boolean dumpWindows(PrintWriter pw, String name, boolean dumpAll) {
@@ -6855,6 +6872,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("    d[isplays]: active display contents");
                 pw.println("    t[okens]: token list");
                 pw.println("    w[indows]: window list");
+                pw.println("    a11y[accessibility]: accessibility-related state");
                 pw.println("    package-config: installed packages having app-specific config");
                 pw.println("    trace: print trace status and write Winscope trace to file");
                 pw.println("  cmd may also be a NAME to dump windows.  NAME may");
@@ -6916,6 +6934,11 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if ("windows".equals(cmd) || "w".equals(cmd)) {
                 synchronized (mGlobalLock) {
                     dumpWindowsLocked(pw, true, null);
+                }
+                return;
+            } else if ("accessibility".equals(cmd) || "a11y".equals(cmd)) {
+                synchronized (mGlobalLock) {
+                    dumpAccessibilityLocked(pw);
                 }
                 return;
             } else if ("all".equals(cmd)) {
@@ -9435,6 +9458,55 @@ public class WindowManagerService extends IWindowManager.Stub
                     },
                     true /* traverseTopToBottom */);
             return List.copyOf(notifiedApps);
+        }
+    }
+
+    // TODO(b/271188189): move dump stuff below to common code / add unit tests
+
+    interface ValueDumper<T> {
+        void dump(T value);
+    }
+
+    interface KeyDumper{
+        void dump(int index, int key);
+    }
+
+    static void dumpSparseArray(PrintWriter pw, String prefix, SparseArray<?> array, String name) {
+        dumpSparseArray(pw, prefix, array, name, /* keyDumper= */ null, /* valuedumper= */ null);
+    }
+
+    static <T> void dumpSparseArrayValues(PrintWriter pw, String prefix, SparseArray<T> array,
+            String name) {
+        dumpSparseArray(pw, prefix, array, name, (i, k) -> {}, /* valueDumper= */ null);
+    }
+
+    static <T> void dumpSparseArray(PrintWriter pw, String prefix, SparseArray<T> array,
+            String name, @Nullable KeyDumper keyDumper, @Nullable ValueDumper<T> valueDumper) {
+        int size = array.size();
+        if (size == 0) {
+            pw.print(prefix); pw.print("No "); pw.print(name); pw.println("s");
+            return;
+        }
+        pw.print(prefix); pw.print(size); pw.print(' ');
+        pw.print(name); pw.print(size > 1 ? "s" : ""); pw.println(':');
+
+        String prefix2 = prefix + "  ";
+        for (int i = 0; i < size; i++) {
+            int key = array.keyAt(i);
+            T value = array.valueAt(i);
+            if (keyDumper != null) {
+                keyDumper.dump(i, key);
+            } else {
+                pw.print(prefix2); pw.print(i); pw.print(": "); pw.print(key); pw.print("->");
+            }
+            if (value == null) {
+                pw.print("(null)");
+            } else if (valueDumper != null) {
+                valueDumper.dump(value);
+            } else {
+                pw.print(value);
+            }
+            pw.println();
         }
     }
 }

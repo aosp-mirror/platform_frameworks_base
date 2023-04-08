@@ -286,8 +286,8 @@ class BackNavigationController {
                                 currentActivity.getCustomAnimation(false/* open */);
                         if (customAppTransition != null) {
                             infoBuilder.setCustomAnimation(currentActivity.packageName,
-                                    customAppTransition.mExitAnim,
                                     customAppTransition.mEnterAnim,
+                                    customAppTransition.mExitAnim,
                                     customAppTransition.mBackgroundColor);
                         }
                     }

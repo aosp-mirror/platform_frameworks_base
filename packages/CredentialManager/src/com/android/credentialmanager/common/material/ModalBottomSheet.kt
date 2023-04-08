@@ -316,7 +316,7 @@ fun ModalBottomSheetLayout(
         rememberModalBottomSheetState(Hidden),
     sheetShape: Shape = MaterialTheme.shapes.large,
     sheetElevation: Dp = ModalBottomSheetDefaults.Elevation,
-    sheetBackgroundColor: Color = MaterialTheme.colorScheme.surface,
+    sheetBackgroundColor: Color,
     sheetContentColor: Color = contentColorFor(sheetBackgroundColor),
     content: @Composable () -> Unit
 ) {
