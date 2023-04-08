@@ -8095,12 +8095,14 @@ public class Editor {
         private boolean mIsInsertModeActive;
         private InsertModeTransformationMethod mInsertModeTransformationMethod;
         private final Paint mHighlightPaint;
+        private final Path mHighlightPath;
 
         InsertModeController(@NonNull TextView textView) {
             mTextView = Objects.requireNonNull(textView);
             mIsInsertModeActive = false;
             mInsertModeTransformationMethod = null;
             mHighlightPaint = new Paint();
+            mHighlightPath = new Path();
 
             // The highlight color is supposed to be 12% of the color primary40. We can't
             // directly access Material 3 theme. But because Material 3 sets the colorPrimary to
@@ -8168,10 +8170,8 @@ public class Editor {
                         ((InsertModeTransformationMethod.TransformedText) transformedText);
                 final int highlightStart = insertModeTransformedText.getHighlightStart();
                 final int highlightEnd = insertModeTransformedText.getHighlightEnd();
-                final Layout.SelectionRectangleConsumer consumer =
-                        (left, top, right, bottom, textSelectionLayout) ->
-                                canvas.drawRect(left, top, right, bottom, mHighlightPaint);
-                layout.getSelection(highlightStart, highlightEnd, consumer);
+                layout.getSelectionPath(highlightStart, highlightEnd, mHighlightPath);
+                canvas.drawPath(mHighlightPath, mHighlightPaint);
             }
         }
 
