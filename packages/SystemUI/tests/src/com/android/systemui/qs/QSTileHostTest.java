@@ -51,8 +51,10 @@ import com.android.internal.util.CollectionUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.nano.SystemUIProtoDump;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.qs.QSFactory;
@@ -62,7 +64,6 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.external.CustomTileStatePersister;
 import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServiceKey;
-import com.android.systemui.qs.external.TileServiceRequestController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserFileManager;
@@ -110,8 +111,6 @@ public class QSTileHostTest extends SysuiTestCase {
     @Mock
     private Provider<AutoTileManager> mAutoTiles;
     @Mock
-    private DumpManager mDumpManager;
-    @Mock
     private CentralSurfaces mCentralSurfaces;
     @Mock
     private QSLogger mQSLogger;
@@ -125,10 +124,6 @@ public class QSTileHostTest extends SysuiTestCase {
     @Mock
     private CustomTileStatePersister mCustomTileStatePersister;
     @Mock
-    private TileServiceRequestController.Builder mTileServiceRequestControllerBuilder;
-    @Mock
-    private TileServiceRequestController mTileServiceRequestController;
-    @Mock
     private TileLifecycleManager.Factory mTileLifecycleManagerFactory;
     @Mock
     private TileLifecycleManager mTileLifecycleManager;
@@ -137,6 +132,8 @@ public class QSTileHostTest extends SysuiTestCase {
 
     private SparseArray<SharedPreferences> mSharedPreferencesByUser;
 
+    private FakeFeatureFlags mFeatureFlags;
+
     private FakeExecutor mMainExecutor;
 
     private QSTileHost mQSTileHost;
@@ -144,12 +141,13 @@ public class QSTileHostTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mFeatureFlags = new FakeFeatureFlags();
+
+        mFeatureFlags.set(Flags.QS_PIPELINE_NEW_HOST, false);
+
         mMainExecutor = new FakeExecutor(new FakeSystemClock());
 
         mSharedPreferencesByUser = new SparseArray<>();
-
-        when(mTileServiceRequestControllerBuilder.create(any()))
-                .thenReturn(mTileServiceRequestController);
         when(mTileLifecycleManagerFactory.create(any(Intent.class), any(UserHandle.class)))
                 .thenReturn(mTileLifecycleManager);
         when(mUserFileManager.getSharedPreferences(anyString(), anyInt(), anyInt()))
@@ -165,10 +163,9 @@ public class QSTileHostTest extends SysuiTestCase {
         mSecureSettings = new FakeSettings();
         saveSetting("");
         mQSTileHost = new TestQSTileHost(mContext, mDefaultFactory, mMainExecutor,
-                mPluginManager, mTunerService, mAutoTiles, mDumpManager, mCentralSurfaces,
+                mPluginManager, mTunerService, mAutoTiles, mCentralSurfaces,
                 mQSLogger, mUiEventLogger, mUserTracker, mSecureSettings, mCustomTileStatePersister,
-                mTileServiceRequestControllerBuilder, mTileLifecycleManagerFactory,
-                mUserFileManager);
+                mTileLifecycleManagerFactory, mUserFileManager, mFeatureFlags);
 
         mSecureSettings.registerContentObserverForUser(SETTING, new ContentObserver(null) {
             @Override
@@ -686,18 +683,16 @@ public class QSTileHostTest extends SysuiTestCase {
         TestQSTileHost(Context context,
                 QSFactory defaultFactory, Executor mainExecutor,
                 PluginManager pluginManager, TunerService tunerService,
-                Provider<AutoTileManager> autoTiles, DumpManager dumpManager,
+                Provider<AutoTileManager> autoTiles,
                 CentralSurfaces centralSurfaces, QSLogger qsLogger, UiEventLogger uiEventLogger,
                 UserTracker userTracker, SecureSettings secureSettings,
                 CustomTileStatePersister customTileStatePersister,
-                TileServiceRequestController.Builder tileServiceRequestControllerBuilder,
                 TileLifecycleManager.Factory tileLifecycleManagerFactory,
-                UserFileManager userFileManager) {
+                UserFileManager userFileManager, FeatureFlags featureFlags) {
             super(context, defaultFactory, mainExecutor, pluginManager,
-                    tunerService, autoTiles, dumpManager, Optional.of(centralSurfaces), qsLogger,
+                    tunerService, autoTiles,  Optional.of(centralSurfaces), qsLogger,
                     uiEventLogger, userTracker, secureSettings, customTileStatePersister,
-                    tileServiceRequestControllerBuilder, tileLifecycleManagerFactory,
-                    userFileManager);
+                    tileLifecycleManagerFactory, userFileManager, featureFlags);
         }
 
         @Override

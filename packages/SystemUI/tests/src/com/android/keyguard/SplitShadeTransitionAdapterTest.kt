@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.shade
+package com.android.keyguard
 
 import android.animation.Animator
 import android.testing.AndroidTestingRunner
 import android.transition.TransitionValues
 import androidx.test.filters.SmallTest
-import com.android.keyguard.KeyguardStatusViewController
+import com.android.keyguard.KeyguardStatusViewController.SplitShadeTransitionAdapter
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.shade.NotificationPanelViewController.SplitShadeTransitionAdapter
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -33,14 +32,14 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 class SplitShadeTransitionAdapterTest : SysuiTestCase() {
 
-    @Mock private lateinit var keyguardStatusViewController: KeyguardStatusViewController
+    @Mock private lateinit var KeyguardClockSwitchController: KeyguardClockSwitchController
 
     private lateinit var adapter: SplitShadeTransitionAdapter
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        adapter = SplitShadeTransitionAdapter(keyguardStatusViewController)
+        adapter = SplitShadeTransitionAdapter(KeyguardClockSwitchController)
     }
 
     @Test
