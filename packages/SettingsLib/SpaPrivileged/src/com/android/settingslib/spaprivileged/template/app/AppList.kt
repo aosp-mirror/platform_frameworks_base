@@ -62,6 +62,7 @@ private const val CONTENT_TYPE_HEADER = "header"
 data class AppListConfig(
     val userIds: List<Int>,
     val showInstantApps: Boolean,
+    val matchAnyUserForAdmin: Boolean,
 )
 
 data class AppListState(
