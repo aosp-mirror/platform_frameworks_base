@@ -65,7 +65,7 @@ object Flags {
     val FSI_ON_DND_UPDATE = releasedFlag(259130119, "fsi_on_dnd_update")
 
     // TODO(b/254512538): Tracking Bug
-    val INSTANT_VOICE_REPLY = releasedFlag(111, "instant_voice_reply")
+    val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply")
 
     // TODO(b/254512425): Tracking Bug
     val NOTIFICATION_MEMORY_MONITOR_ENABLED =
