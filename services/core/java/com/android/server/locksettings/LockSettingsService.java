@@ -116,6 +116,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -1225,6 +1226,26 @@ public class LockSettingsService extends ILockSettings.Stub {
                 return PIN_LENGTH_UNAVAILABLE;
             }
             return mSpManager.getPinLength(protectorId, userId);
+        }
+    }
+
+    /**
+     * {@link LockPatternUtils#refreshStoredPinLength(int)}
+     * @param userId user id of the user whose pin length we want to save
+     * @return true/false depending on whether PIN length has been saved or not
+     */
+    @Override
+    public boolean refreshStoredPinLength(int userId) {
+        checkPasswordHavePermission();
+        synchronized (mSpManager) {
+            PasswordMetrics passwordMetrics = getUserPasswordMetrics(userId);
+            if (passwordMetrics != null) {
+                final long protectorId = getCurrentLskfBasedProtectorId(userId);
+                return mSpManager.refreshPinLengthOnDisk(passwordMetrics, protectorId, userId);
+            } else {
+                Log.w(TAG, "PasswordMetrics is not available");
+                return false;
+            }
         }
     }
 
