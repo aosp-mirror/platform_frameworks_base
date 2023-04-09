@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.annotation.VisibleForTesting
 
 class WeatherData
-private constructor(
+constructor(
     val description: String,
     val state: WeatherStateIcon,
     val useCelsius: Boolean,
