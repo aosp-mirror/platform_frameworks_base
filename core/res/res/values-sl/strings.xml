@@ -290,7 +290,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplikacija se izvaja"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacije, ki porabljajo energijo baterije"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Povečava"</string>
-    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Uporaba funkcij za ljudi s posebnimi potrebami"</string>
+    <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Uporaba funkcij za dostopnost"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> porablja energijo baterije"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"Toliko aplikacij porablja energijo baterije: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Dotaknite se za prikaz podrobnosti porabe baterije in prenosa podatkov"</string>
@@ -1478,7 +1478,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"To aplikacijo uporabljate v delovnem profilu"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Način vnosa"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Sinhronizacija"</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"Pripomočki za osebe s posebnimi potrebami"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"Dostopnost"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Ozadje"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Spreminjanje ozadja"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Poslušalec obvestil"</string>
@@ -1671,19 +1671,19 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Odstrani"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ali želite povečati glasnost nad priporočeno raven?\n\nDolgotrajno poslušanje pri veliki glasnosti lahko poškoduje sluh."</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Želite uporabljati bližnjico funkcij za ljudi s posebnimi potrebami?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Ko je bližnjica vklopljena, pritisnite gumba za glasnost in ju pridržite tri sekunde, če želite zagnati funkcijo za ljudi s posebnimi potrebami."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Želite vklopiti bližnjico za funkcije za ljudi s posebnimi potrebami?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Če za nekaj sekund pridržite obe tipki za glasnost, boste vklopili funkcije za ljudi s posebnimi potrebami. To lahko spremeni način delovanja naprave.\n\nTrenutne funkcije:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nIzbrane funkcije lahko spremenite v meniju »Nastavitve« &gt; »Funkcije za ljudi s posebnimi potrebami«."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Želite uporabljati bližnjico za dostopnost?"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Ko je bližnjica vklopljena, pritisnite gumba za glasnost in ju pridržite tri sekunde, če želite zagnati funkcijo dostopnosti."</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Želite vklopiti bližnjico za funkcije za dostopnost?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Če za nekaj sekund pridržite obe tipki za glasnost, boste vklopili funkcije za dostopnost. To lahko spremeni način delovanja naprave.\n\nTrenutne funkcije:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nIzbrane funkcije lahko spremenite v meniju »Nastavitve« &gt; »Funkcije dostopnosti«."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Želite vklopiti bližnjico za <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
-    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Če za nekaj sekund pridržite obe tipki za glasnost, boste vklopili storitev <xliff:g id="SERVICE">%1$s</xliff:g>, ki je funkcija za ljudi s posebnimi potrebami. To lahko spremeni način delovanja naprave.\n\nTo bližnjico lahko v meniju »Nastavitve« &gt; »Funkcije za ljudi s posebnimi potrebami« spremenite, da bo uporabljena za drugo funkcijo."</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Če za nekaj sekund pridržite obe tipki za glasnost, boste vklopili storitev <xliff:g id="SERVICE">%1$s</xliff:g>, ki je funkcija dostopnosti. To lahko spremeni način delovanja naprave.\n\nTo bližnjico lahko v meniju »Nastavitve« &gt; »Funkcije dostopnosti« spremenite, da bo uporabljena za drugo funkcijo."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Vklopi"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Ne vklopi"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"VKLOPLJENO"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"IZKLOPLJ."</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Ali storitvi <xliff:g id="SERVICE">%1$s</xliff:g> dovolite popoln nadzor nad svojo napravo?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Popoln nadzor je ustrezen za aplikacije, ki vam pomagajo pri funkcijah za ljudi s posebnimi potrebami, vendar ne za večino aplikacij."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Popoln nadzor je ustrezen za aplikacije, ki vam pomagajo pri dostopnosti, vendar ne za večino aplikacij."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ogledovanje in upravljanje zaslona"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Bere lahko vso vsebino na zaslonu ter prikaže vsebino prek drugih aplikacij."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Ogledovanje in izvajanje dejanj"</string>
@@ -1691,7 +1691,7 @@
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Dovoli"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Zavrni"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Če želite začeti uporabljati funkcijo, se je dotaknite:"</string>
-    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Izberite funkcije, ki jih želite uporabljati z gumbom za funkcije za ljudi s posebnimi potrebami"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Izberite funkcije, ki jih želite uporabljati z gumbom za dostopnost"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Izberite funkcije, ki jih želite uporabljati z bližnjico na tipki za glasnost"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Storitev <xliff:g id="SERVICE_NAME">%s</xliff:g> je izklopljena"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Uredi bližnjice"</string>
@@ -1705,10 +1705,10 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vklopljena."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je izklopljena."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Za uporabo storitve <xliff:g id="SERVICE_NAME">%1$s</xliff:g> pritisnite obe tipki za glasnost in ju pridržite tri sekunde"</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Izberite funkcijo, ki jo želite uporabljati, ko se dotaknete gumba za funkcije za ljudi s posebnimi potrebami:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Izberite funkcijo, ki jo želite zagnati s potezo za ljudi s posebnimi potrebami (vlečenje z dvema prstoma z dna zaslona navzgor):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Izberite funkcijo, ki jo želite zagnati s potezo za ljudi s posebnimi potrebami (vlečenje s tremi prsti z dna zaslona navzgor):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Če želite preklopiti med funkcijami, pridržite gumb za funkcije za ljudi s posebnimi potrebami."</string>
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Izberite funkcijo, ki jo želite uporabljati, ko se dotaknete gumba za dostopnost:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Izberite funkcijo, ki jo želite zagnati s potezo za dostopnost (vlečenje z dvema prstoma z dna zaslona navzgor):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Izberite funkcijo, ki jo želite zagnati s potezo za dostopnost (vlečenje s tremi prsti z dna zaslona navzgor):"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Če želite preklopiti med funkcijami, pridržite gumb za dostopnost."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Če želite preklopiti med funkcijami, z dvema prstoma povlecite navzgor in pridržite."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Če želite preklopiti med funkcijami, s tremi prsti povlecite navzgor in pridržite."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Povečava"</string>
@@ -1980,7 +1980,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Novice in revije"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Zemljevidi in navigacija"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Storilnost"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"Funkc. za ljudi s poseb. potreb."</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Dostopnost"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Shramba naprave"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Odpravljanje težav prek povezave USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"ura"</string>
@@ -2117,9 +2117,9 @@
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Zaklenjen zaslon"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Posnetek zaslona"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Kavelj za slušalke z mikrofonom"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Zaslonska bližnjica funkcij za ljudi s posebnimi potrebami"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Izbirnik zaslonske bližnjice funkcij za ljudi s posebnimi potrebami"</string>
-    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Bližnjica funkcij za ljudi s posebnimi potrebami"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Zaslonska bližnjica za dostopnost"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Izbirnik zaslonske bližnjice za dostopnost"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Bližnjica za dostopnost"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Opusti zaslon z obvestili"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Smerni gumb gor"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Smerni gumb dol"</string>
