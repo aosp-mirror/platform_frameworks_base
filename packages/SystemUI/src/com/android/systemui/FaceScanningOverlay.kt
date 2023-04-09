@@ -35,6 +35,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.Utils
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.biometrics.AuthController
 import com.android.systemui.log.ScreenDecorationsLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.util.asIndenting
@@ -52,6 +53,7 @@ class FaceScanningOverlay(
     val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     val mainExecutor: Executor,
     val logger: ScreenDecorationsLogger,
+    val authController: AuthController,
 ) : ScreenDecorations.DisplayCutoutView(context, pos) {
     private var showScanningAnim = false
     private val rimPaint = Paint()
@@ -102,7 +104,9 @@ class FaceScanningOverlay(
     }
 
     override fun enableShowProtection(show: Boolean) {
-        val showScanningAnimNow = keyguardUpdateMonitor.isFaceDetectionRunning && show
+        val animationRequired =
+                keyguardUpdateMonitor.isFaceDetectionRunning || authController.isShowing
+        val showScanningAnimNow = animationRequired && show
         if (showScanningAnimNow == showScanningAnim) {
             return
         }
