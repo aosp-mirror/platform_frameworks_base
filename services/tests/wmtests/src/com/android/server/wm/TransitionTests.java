@@ -1404,8 +1404,6 @@ public class TransitionTests extends WindowTestsBase {
         // We are now going to simulate closing task1 to return back to (open) task2.
         final Transition closeTransition = controller.createTransition(TRANSIT_CLOSE);
 
-        closeTransition.collectExistenceChange(task1);
-        closeTransition.collectExistenceChange(activity1);
         closeTransition.collectExistenceChange(task2);
         closeTransition.collectExistenceChange(activity2);
         closeTransition.setTransientLaunch(activity2, task1);
@@ -1416,7 +1414,7 @@ public class TransitionTests extends WindowTestsBase {
         assertNotNull(activity1ChangeInfo);
         assertTrue(activity1ChangeInfo.hasChanged());
         // No need to wait for the activity in transient hide task.
-        assertTrue(activity1.isSyncFinished());
+        assertEquals(WindowContainer.SYNC_STATE_NONE, activity1.mSyncState);
 
         activity1.setVisibleRequested(false);
         activity2.setVisibleRequested(true);
