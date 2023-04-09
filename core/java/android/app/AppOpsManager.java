@@ -1450,9 +1450,8 @@ public class AppOpsManager {
     public static final int OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD =
             AppProtoEnums.APP_OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD;
 
-    /** @hide Access to wrist temperature sensors. */
-    public static final int OP_BODY_SENSORS_WRIST_TEMPERATURE =
-            AppProtoEnums.APP_OP_BODY_SENSORS_WRIST_TEMPERATURE;
+    // App op deprecated/removed.
+    private static final int OP_DEPRECATED_2 = AppProtoEnums.APP_OP_BODY_SENSORS_WRIST_TEMPERATURE;
 
     /**
      * Send an intent to launch instead of posting the notification to the status bar.
@@ -1603,7 +1602,6 @@ public class AppOpsManager {
             OPSTR_SYSTEM_EXEMPT_FROM_HIBERNATION,
             OPSTR_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
             OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
-            OPSTR_BODY_SENSORS_WRIST_TEMPERATURE,
             OPSTR_USE_FULL_SCREEN_INTENT,
     })
     public @interface AppOpString {}
@@ -2189,11 +2187,10 @@ public class AppOpsManager {
             "android:capture_consentless_bugreport_on_userdebug_build";
 
     /**
-     * Access to wrist temperature body sensors.
+     * App op deprecated/removed.
      * @hide
      */
-    public static final String OPSTR_BODY_SENSORS_WRIST_TEMPERATURE =
-            "android:body_sensors_wrist_temperature";
+    public static final String OPSTR_DEPRECATED_2 = "android:deprecated_2";
 
     /**
      * Send an intent to launch instead of posting the notification to the status bar.
@@ -2311,7 +2308,6 @@ public class AppOpsManager {
             OP_READ_MEDIA_VISUAL_USER_SELECTED,
             OP_FOREGROUND_SERVICE_SPECIAL_USE,
             OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
-            OP_BODY_SENSORS_WRIST_TEMPERATURE,
             OP_USE_FULL_SCREEN_INTENT
     };
 
@@ -2731,11 +2727,8 @@ public class AppOpsManager {
                 "CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD")
                 .setPermission(Manifest.permission.CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD)
                 .build(),
-        new AppOpInfo.Builder(OP_BODY_SENSORS_WRIST_TEMPERATURE,
-                OPSTR_BODY_SENSORS_WRIST_TEMPERATURE,
-                "BODY_SENSORS_WRIST_TEMPERATURE")
-                .setPermission(Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE)
-                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_DEPRECATED_2, OPSTR_DEPRECATED_2, "DEPRECATED_2")
+                .setDefaultMode(AppOpsManager.MODE_IGNORED).build(),
         new AppOpInfo.Builder(OP_USE_FULL_SCREEN_INTENT, OPSTR_USE_FULL_SCREEN_INTENT,
                 "USE_FULL_SCREEN_INTENT").setPermission(Manifest.permission.USE_FULL_SCREEN_INTENT)
                 .build()

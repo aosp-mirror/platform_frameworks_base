@@ -8,8 +8,6 @@ package android {
     field public static final String APPROVE_INCIDENT_REPORTS = "android.permission.APPROVE_INCIDENT_REPORTS";
     field public static final String BACKGROUND_CAMERA = "android.permission.BACKGROUND_CAMERA";
     field public static final String BIND_CELL_BROADCAST_SERVICE = "android.permission.BIND_CELL_BROADCAST_SERVICE";
-    field public static final String BODY_SENSORS_WRIST_TEMPERATURE = "android.permission.BODY_SENSORS_WRIST_TEMPERATURE";
-    field public static final String BODY_SENSORS_WRIST_TEMPERATURE_BACKGROUND = "android.permission.BODY_SENSORS_WRIST_TEMPERATURE_BACKGROUND";
     field public static final String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
     field public static final String BROADCAST_CLOSE_SYSTEM_DIALOGS = "android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS";
     field public static final String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
