@@ -69,6 +69,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
@@ -460,6 +461,9 @@ private fun TopAppBarLayout(
                 ProvideTextStyle(value = titleTextStyle) {
                     CompositionLocalProvider(
                         LocalContentColor provides titleContentColor,
+                        // Disable the title font scaling by only passing the density but not the
+                        // font scale.
+                        LocalDensity provides Density(density = LocalDensity.current.density),
                         content = title
                     )
                 }
