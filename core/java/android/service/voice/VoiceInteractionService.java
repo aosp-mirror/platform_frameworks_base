@@ -1070,21 +1070,6 @@ public class VoiceInteractionService extends Service {
                 mActiveVisualQueryDetector = null;
             }
             mActiveDetectors.remove(detector);
-            shutdownHotwordDetectionServiceIfRequiredLocked();
-        }
-    }
-
-    private void shutdownHotwordDetectionServiceIfRequiredLocked() {
-        for (HotwordDetector detector : mActiveDetectors) {
-            if (detector.isUsingSandboxedDetectionService()) {
-                return;
-            }
-        }
-
-        try {
-            mSystemService.shutdownHotwordDetectionService();
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
         }
     }
 
