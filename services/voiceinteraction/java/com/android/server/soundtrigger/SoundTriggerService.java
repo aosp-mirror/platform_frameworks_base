@@ -88,6 +88,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.ISoundTriggerService;
 import com.android.internal.app.ISoundTriggerSession;
+import com.android.server.SoundTriggerInternal;
 import com.android.server.SystemService;
 import com.android.server.utils.EventLogger;
 
