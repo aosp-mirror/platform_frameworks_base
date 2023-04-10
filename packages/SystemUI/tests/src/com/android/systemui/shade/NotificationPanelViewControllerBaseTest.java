@@ -93,6 +93,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerReposito
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
@@ -665,7 +666,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mMetricsLogger,
                 mFeatureFlags,
                 mInteractionJankMonitor,
-                mShadeLog
+                mShadeLog,
+                mock(KeyguardFaceAuthInteractor.class)
         );
     }
 
