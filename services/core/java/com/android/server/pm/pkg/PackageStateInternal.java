@@ -105,4 +105,10 @@ public interface PackageStateInternal extends PackageState {
      */
     @Nullable
     String getSecondaryCpuAbiLegacy();
+
+    /**
+     * @return the app metadata file path.
+     */
+    @Nullable
+    String getAppMetadataFilePath();
 }

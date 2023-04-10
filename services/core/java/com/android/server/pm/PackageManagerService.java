@@ -2364,6 +2364,32 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         SystemClock.uptimeMillis() - startTime);
             }
 
+            // If this is first boot or first boot after OTA then set the file path to the app
+            // metadata files for preloaded packages.
+            if (mFirstBoot || isDeviceUpgrading()) {
+                ArrayMap<String, String> paths = systemConfig.getAppMetadataFilePaths();
+                for (Map.Entry<String, String> entry : paths.entrySet()) {
+                    String pkgName = entry.getKey();
+                    String path = entry.getValue();
+                    File file = new File(path);
+                    if (!file.exists()) {
+                        path = null;
+                    }
+                    PackageSetting disabledPkgSetting = mSettings.getDisabledSystemPkgLPr(pkgName);
+                    if (disabledPkgSetting == null) {
+                        PackageSetting pkgSetting = mSettings.getPackageLPr(pkgName);
+                        if (pkgSetting != null) {
+                            pkgSetting.setAppMetadataFilePath(path);
+                        } else {
+                            Slog.w(TAG, "Cannot set app metadata file for nonexistent package "
+                                    + pkgName);
+                        }
+                    } else {
+                        disabledPkgSetting.setAppMetadataFilePath(path);
+                    }
+                }
+            }
+
             // Rebuild the live computer since some attributes have been rebuilt.
             mLiveComputer = createLiveComputer();
 
@@ -5164,12 +5190,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 throw new ParcelableException(
                         new PackageManager.NameNotFoundException(packageName));
             }
-            try {
-                File file = new File(ps.getPath(), APP_METADATA_FILE_NAME);
-                return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-            } catch (FileNotFoundException e) {
-                return null;
+            String filePath = ps.getAppMetadataFilePath();
+            if (filePath != null) {
+                File file = new File(filePath);
+                try {
+                    return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+                } catch (FileNotFoundException e) {
+                    return null;
+                }
             }
+            return null;
         }
 
         @Override
