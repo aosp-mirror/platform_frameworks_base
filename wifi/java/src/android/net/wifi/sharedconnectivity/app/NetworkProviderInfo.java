@@ -163,11 +163,11 @@ public final class NetworkProviderInfo implements Parcelable {
         /**
          * Sets the displayed connection strength of the remote device to the internet.
          *
-         * @param connectionStrength Connection strength in range 0 to 3.
+         * @param connectionStrength Connection strength in range 0 to 4.
          * @return Returns the Builder object.
          */
         @NonNull
-        public Builder setConnectionStrength(@IntRange(from = 0, to = 3) int connectionStrength) {
+        public Builder setConnectionStrength(@IntRange(from = 0, to = 4) int connectionStrength) {
             mConnectionStrength = connectionStrength;
             return this;
         }
@@ -205,8 +205,8 @@ public final class NetworkProviderInfo implements Parcelable {
         if (batteryPercentage < 0 || batteryPercentage > 100) {
             throw new IllegalArgumentException("BatteryPercentage must be in range 0-100");
         }
-        if (connectionStrength < 0 || connectionStrength > 3) {
-            throw new IllegalArgumentException("ConnectionStrength must be in range 0-3");
+        if (connectionStrength < 0 || connectionStrength > 4) {
+            throw new IllegalArgumentException("ConnectionStrength must be in range 0-4");
         }
     }
 
@@ -265,9 +265,9 @@ public final class NetworkProviderInfo implements Parcelable {
     /**
      * Gets the displayed connection strength of the remote device to the internet.
      *
-     * @return Returns the connection strength in range 0 to 3.
+     * @return Returns the connection strength in range 0 to 4.
      */
-    @IntRange(from = 0, to = 3)
+    @IntRange(from = 0, to = 4)
     public int getConnectionStrength() {
         return mConnectionStrength;
     }
