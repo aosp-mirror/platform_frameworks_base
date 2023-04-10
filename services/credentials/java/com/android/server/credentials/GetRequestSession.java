@@ -161,7 +161,8 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     @Override
     public void onProviderStatusChanged(ProviderSession.Status status,
             ComponentName componentName, ProviderSession.CredentialsSource source) {
-        Slog.d(TAG, "in onStatusChanged with status: " + status + ", and source: " + source);
+        Slog.d(TAG, "in onStatusChanged for: " + componentName + ", with status: "
+                + status + ", and source: " + source);
 
         // Auth entry was selected, and it did not have any underlying credentials
         if (status == ProviderSession.Status.NO_CREDENTIALS_FROM_AUTH_ENTRY) {
