@@ -23,6 +23,8 @@ import com.android.server.SystemConfig
 import com.android.server.permission.access.appop.AppIdAppOpPolicy
 import com.android.server.permission.access.appop.PackageAppOpPolicy
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.immutable.IndexedMap
 import com.android.server.permission.access.permission.AppIdPermissionPolicy
 import com.android.server.permission.access.util.attributeInt
 import com.android.server.permission.access.util.attributeInterned
@@ -37,14 +39,16 @@ import com.android.server.pm.pkg.PackageState
 class AccessPolicy private constructor(
     private val schemePolicies: IndexedMap<String, IndexedMap<String, SchemePolicy>>
 ) {
+    @Suppress("UNCHECKED_CAST")
     constructor() : this(
-        IndexedMap<String, IndexedMap<String, SchemePolicy>>().apply {
-            fun addPolicy(policy: SchemePolicy) =
-                getOrPut(policy.subjectScheme) { IndexedMap() }.put(policy.objectScheme, policy)
+        MutableIndexedMap<String, MutableIndexedMap<String, SchemePolicy>>().apply {
+            fun addPolicy(policy: SchemePolicy) {
+                getOrPut(policy.subjectScheme) { MutableIndexedMap() }[policy.objectScheme] = policy
+            }
             addPolicy(AppIdPermissionPolicy())
             addPolicy(AppIdAppOpPolicy())
             addPolicy(PackageAppOpPolicy())
-        }
+        } as IndexedMap<String, IndexedMap<String, SchemePolicy>>
     )
 
     fun getSchemePolicy(subjectScheme: String, objectScheme: String): SchemePolicy =
@@ -60,7 +64,7 @@ class AccessPolicy private constructor(
     }
 
     fun initialize(
-        state: AccessState,
+        state: MutableAccessState,
         userIds: IntSet,
         packageStates: Map<String, PackageState>,
         disabledSystemPackageStates: Map<String, PackageState>,
@@ -71,25 +75,23 @@ class AccessPolicy private constructor(
         permissionAllowlist: PermissionAllowlist,
         implicitToSourcePermissions: IndexedMap<String, IndexedListSet<String>>
     ) {
-        state.systemState.apply {
-            this.userIds += userIds
-            this.packageStates = packageStates
-            this.disabledSystemPackageStates = disabledSystemPackageStates
+        state.mutateSystemState(WriteMode.NONE).apply {
+            mutateUserIds() += userIds
+            setPackageStates(packageStates)
+            setDisabledSystemPackageStates(disabledSystemPackageStates)
             packageStates.forEach { (_, packageState) ->
-                appIds.getOrPut(packageState.appId) { IndexedListSet() }
+                mutateAppIds().mutateOrPut(packageState.appId) { MutableIndexedListSet() }
                     .add(packageState.packageName)
             }
-            this.knownPackages = knownPackages
-            this.isLeanback = isLeanback
-            this.configPermissions = configPermissions
-            this.privilegedPermissionAllowlistPackages = privilegedPermissionAllowlistPackages
-            this.permissionAllowlist = permissionAllowlist
-            this.implicitToSourcePermissions = implicitToSourcePermissions
+            setKnownPackages(knownPackages)
+            setLeanback(isLeanback)
+            setConfigPermissions(configPermissions)
+            setPrivilegedPermissionAllowlistPackages(privilegedPermissionAllowlistPackages)
+            setPermissionAllowlist(permissionAllowlist)
+            setImplicitToSourcePermissions(implicitToSourcePermissions)
         }
-        state.userStates.apply {
-            userIds.forEachIndexed { _, userId ->
-                this[userId] = UserState()
-            }
+        state.mutateUserStatesNoWrite().apply {
+            userIds.forEachIndexed { _, userId -> this[userId] = MutableUserState() }
         }
     }
 
@@ -106,8 +108,8 @@ class AccessPolicy private constructor(
     }
 
     fun MutateStateScope.onUserAdded(userId: Int) {
-        newState.systemState.userIds += userId
-        newState.userStates[userId] = UserState()
+        newState.mutateSystemState(WriteMode.NONE).mutateUserIds() += userId
+        newState.mutateUserStatesNoWrite()[userId] = MutableUserState()
         forEachSchemePolicy {
             with(it) { onUserAdded(userId) }
         }
@@ -117,8 +119,8 @@ class AccessPolicy private constructor(
     }
 
     fun MutateStateScope.onUserRemoved(userId: Int) {
-        newState.systemState.userIds -= userId
-        newState.userStates -= userId
+        newState.mutateSystemState(WriteMode.NONE).mutateUserIds() -= userId
+        newState.mutateUserStatesNoWrite() -= userId
         forEachSchemePolicy {
             with(it) { onUserRemoved(userId) }
         }
@@ -131,20 +133,20 @@ class AccessPolicy private constructor(
         volumeUuid: String?,
         isSystemUpdated: Boolean
     ) {
-        val addedAppIds = IntSet()
-        newState.systemState.apply {
-            this.packageStates = packageStates
-            this.disabledSystemPackageStates = disabledSystemPackageStates
+        val addedAppIds = MutableIntSet()
+        newState.mutateSystemState(WriteMode.NONE).apply {
+            setPackageStates(packageStates)
+            setDisabledSystemPackageStates(disabledSystemPackageStates)
             packageStates.forEach { (packageName, packageState) ->
                 if (packageState.volumeUuid == volumeUuid) {
                     val appId = packageState.appId
-                    appIds.getOrPut(appId) {
+                    mutateAppIds().mutateOrPut(appId) {
                         addedAppIds += appId
-                        IndexedListSet()
+                        MutableIndexedListSet()
                     } += packageName
                 }
             }
-            this.knownPackages = knownPackages
+            setKnownPackages(knownPackages)
         }
         addedAppIds.forEachIndexed { _, appId ->
             forEachSchemePolicy {
@@ -176,14 +178,14 @@ class AccessPolicy private constructor(
         }
         val appId = packageState.appId
         var isAppIdAdded = false
-        newState.systemState.apply {
-            this.packageStates = packageStates
-            this.disabledSystemPackageStates = disabledSystemPackageStates
-            appIds.getOrPut(appId) {
+        newState.mutateSystemState(WriteMode.NONE).apply {
+            setPackageStates(packageStates)
+            setDisabledSystemPackageStates(disabledSystemPackageStates)
+            mutateAppIds().mutateOrPut(appId) {
                 isAppIdAdded = true
-                IndexedListSet()
+                MutableIndexedListSet()
             } += packageName
-            this.knownPackages = knownPackages
+            setKnownPackages(knownPackages)
         }
         if (isAppIdAdded) {
             forEachSchemePolicy {
@@ -210,17 +212,17 @@ class AccessPolicy private constructor(
             "Removed package $packageName is still in packageStates in onPackageRemoved()"
         }
         var isAppIdRemoved = false
-        newState.systemState.apply {
-            this.packageStates = packageStates
-            this.disabledSystemPackageStates = disabledSystemPackageStates
-            appIds[appId]?.apply {
+        newState.mutateSystemState(WriteMode.NONE).apply {
+            setPackageStates(packageStates)
+            setDisabledSystemPackageStates(disabledSystemPackageStates)
+            mutateAppIds().mutate(appId)?.apply {
                 this -= packageName
                 if (isEmpty()) {
-                    appIds -= appId
+                    mutateAppIds() -= appId
                     isAppIdRemoved = true
                 }
             }
-            this.knownPackages = knownPackages
+            setKnownPackages(knownPackages)
         }
         forEachSchemePolicy {
             with(it) { onPackageRemoved(packageName, appId) }
@@ -230,9 +232,10 @@ class AccessPolicy private constructor(
                 with(it) { onAppIdRemoved(appId) }
             }
         }
-        newState.userStates.forEachIndexed { _, _, userState ->
-            userState.packageVersions -= packageName
-            userState.requestWrite()
+        newState.userStates.forEachIndexed { userStateIndex, _, userState ->
+            if (packageName in userState.packageVersions) {
+                newState.mutateUserStateAt(userStateIndex).mutatePackageVersions() -= packageName
+            }
         }
     }
 
@@ -243,10 +246,10 @@ class AccessPolicy private constructor(
         packageName: String,
         userId: Int
     ) {
-        newState.systemState.apply {
-            this.packageStates = packageStates
-            this.disabledSystemPackageStates = disabledSystemPackageStates
-            this.knownPackages = knownPackages
+        newState.mutateSystemState(WriteMode.NONE).apply {
+            setPackageStates(packageStates)
+            setDisabledSystemPackageStates(disabledSystemPackageStates)
+            setKnownPackages(knownPackages)
         }
         val packageState = packageStates[packageName]
         // TODO(zhanghai): STOPSHIP: Remove check before feature enable.
@@ -266,10 +269,10 @@ class AccessPolicy private constructor(
         appId: Int,
         userId: Int
     ) {
-        newState.systemState.apply {
-            this.packageStates = packageStates
-            this.disabledSystemPackageStates = disabledSystemPackageStates
-            this.knownPackages = knownPackages
+        newState.mutateSystemState(WriteMode.NONE).apply {
+            setPackageStates(packageStates)
+            setDisabledSystemPackageStates(disabledSystemPackageStates)
+            setKnownPackages(knownPackages)
         }
         forEachSchemePolicy {
             with(it) { onPackageUninstalled(packageName, appId, userId) }
@@ -277,19 +280,19 @@ class AccessPolicy private constructor(
     }
 
     fun MutateStateScope.onSystemReady() {
-        newState.systemState.isSystemReady = true
+        newState.mutateSystemState(WriteMode.NONE).setSystemReady(true)
         forEachSchemePolicy {
             with(it) { onSystemReady() }
         }
     }
 
-    fun migrateSystemState(state: AccessState) {
+    fun migrateSystemState(state: MutableAccessState) {
         forEachSchemePolicy {
             with(it) { migrateSystemState(state) }
         }
     }
 
-    fun migrateUserState(state: AccessState, userId: Int) {
+    fun migrateUserState(state: MutableAccessState, userId: Int) {
         forEachSchemePolicy {
             with(it) { migrateUserState(state, userId) }
         }
@@ -303,22 +306,17 @@ class AccessPolicy private constructor(
         val packageName = packageState.packageName
         // The version would be latest when the package is new to the system, e.g. newly
         // installed, first boot, or system apps added via OTA.
-        val version = newState.userStates[userId].packageVersions[packageName]
+        val version = newState.userStates[userId]!!.packageVersions[packageName]
         when {
-            version == null -> {
-                newState.userStates[userId].apply {
-                    packageVersions[packageName] = VERSION_LATEST
-                    requestWrite()
-                }
-            }
+            version == null ->
+                newState.mutateUserState(userId)!!.mutatePackageVersions()[packageName] =
+                    VERSION_LATEST
             version < VERSION_LATEST -> {
                 forEachSchemePolicy {
                     with(it) { upgradePackageState(packageState, userId, version) }
                 }
-                newState.userStates[userId].apply {
-                    packageVersions[packageName] = VERSION_LATEST
-                    requestWrite()
-                }
+                newState.mutateUserState(userId)!!.mutatePackageVersions()[packageName] =
+                    VERSION_LATEST
             }
             version == VERSION_LATEST -> {}
             else -> Log.w(
@@ -328,7 +326,7 @@ class AccessPolicy private constructor(
         }
     }
 
-    fun BinaryXmlPullParser.parseSystemState(state: AccessState) {
+    fun BinaryXmlPullParser.parseSystemState(state: MutableAccessState) {
         forEachTag {
             when (tagName) {
                 TAG_ACCESS -> {
@@ -351,7 +349,7 @@ class AccessPolicy private constructor(
         }
     }
 
-    fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int) {
+    fun BinaryXmlPullParser.parseUserState(state: MutableAccessState, userId: Int) {
         forEachTag {
             when (tagName) {
                 TAG_ACCESS -> {
@@ -376,33 +374,30 @@ class AccessPolicy private constructor(
         }
     }
 
-    private fun BinaryXmlPullParser.parsePackageVersions(state: AccessState, userId: Int) {
-        val userState = state.userStates[userId]
+    private fun BinaryXmlPullParser.parsePackageVersions(state: MutableAccessState, userId: Int) {
+        val userState = state.mutateUserState(userId, WriteMode.NONE)!!
+        val packageVersions = userState.mutatePackageVersions()
         forEachTag {
             when (tagName) {
-                TAG_PACKAGE -> parsePackageVersion(userState)
-                else -> Log.w(
-                    LOG_TAG,
-                    "Ignoring unknown tag $name when parsing package versions for user $userId"
-                )
+                TAG_PACKAGE -> parsePackageVersion(packageVersions)
+                else -> Log.w(LOG_TAG, "Ignoring unknown tag $name when parsing package versions")
             }
         }
-        userState.packageVersions.retainAllIndexed { _, packageName, _ ->
-            val hasPackage = packageName in state.systemState.packageStates
-            if (!hasPackage) {
-                Log.w(
-                    LOG_TAG,
-                    "Dropping unknown $packageName when parsing package versions for user $userId"
-                )
+        packageVersions.forEachReversedIndexed { packageVersionIndex, packageName, _ ->
+            if (packageName !in state.systemState.packageStates) {
+                Log.w(LOG_TAG, "Dropping unknown $packageName when parsing package versions")
+                packageVersions.removeAt(packageVersionIndex)
+                userState.requestWriteMode(WriteMode.ASYNCHRONOUS)
             }
-            hasPackage
         }
     }
 
-    private fun BinaryXmlPullParser.parsePackageVersion(userState: UserState) {
+    private fun BinaryXmlPullParser.parsePackageVersion(
+        packageVersions: MutableIndexedMap<String, Int>
+    ) {
         val packageName = getAttributeValueOrThrow(ATTR_NAME).intern()
         val version = getAttributeIntOrThrow(ATTR_VERSION)
-        userState.packageVersions[packageName] = version
+        packageVersions[packageName] = version
     }
 
     fun BinaryXmlSerializer.serializeUserState(state: AccessState, userId: Int) {
@@ -410,14 +405,15 @@ class AccessPolicy private constructor(
             forEachSchemePolicy {
                 with(it) { serializeUserState(state, userId) }
             }
-
-            serializeVersions(state.userStates[userId])
+            serializePackageVersions(state.userStates[userId]!!.packageVersions)
         }
     }
 
-    private fun BinaryXmlSerializer.serializeVersions(userState: UserState) {
+    private fun BinaryXmlSerializer.serializePackageVersions(
+        packageVersions: IndexedMap<String, Int>
+    ) {
         tag(TAG_PACKAGE_VERSIONS) {
-            userState.packageVersions.forEachIndexed { _, packageName, version ->
+            packageVersions.forEachIndexed { _, packageName, version ->
                 tag(TAG_PACKAGE) {
                     attributeInterned(ATTR_NAME, packageName)
                     attributeInt(ATTR_VERSION, version)
@@ -430,8 +426,8 @@ class AccessPolicy private constructor(
         getSchemePolicy(subject.scheme, `object`.scheme)
 
     private inline fun forEachSchemePolicy(action: (SchemePolicy) -> Unit) {
-        schemePolicies.forEachValueIndexed { _, objectSchemePolicies ->
-            objectSchemePolicies.forEachValueIndexed { _, schemePolicy ->
+        schemePolicies.forEachIndexed { _, _, objectSchemePolicies ->
+            objectSchemePolicies.forEachIndexed { _, _, schemePolicy ->
                 action(schemePolicy)
             }
         }
@@ -491,9 +487,9 @@ abstract class SchemePolicy {
 
     open fun MutateStateScope.onSystemReady() {}
 
-    open fun migrateSystemState(state: AccessState) {}
+    open fun migrateSystemState(state: MutableAccessState) {}
 
-    open fun migrateUserState(state: AccessState, userId: Int) {}
+    open fun migrateUserState(state: MutableAccessState, userId: Int) {}
 
     open fun MutateStateScope.upgradePackageState(
         packageState: PackageState,
@@ -501,11 +497,11 @@ abstract class SchemePolicy {
         version: Int
     ) {}
 
-    open fun BinaryXmlPullParser.parseSystemState(state: AccessState) {}
+    open fun BinaryXmlPullParser.parseSystemState(state: MutableAccessState) {}
 
     open fun BinaryXmlSerializer.serializeSystemState(state: AccessState) {}
 
-    open fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int) {}
+    open fun BinaryXmlPullParser.parseUserState(state: MutableAccessState, userId: Int) {}
 
     open fun BinaryXmlSerializer.serializeUserState(state: AccessState, userId: Int) {}
 }

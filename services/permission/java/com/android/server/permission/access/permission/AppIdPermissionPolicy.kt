@@ -30,11 +30,14 @@ import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.permission.access.AccessState
 import com.android.server.permission.access.AccessUri
 import com.android.server.permission.access.GetStateScope
+import com.android.server.permission.access.MutableAccessState
 import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.PermissionUri
 import com.android.server.permission.access.SchemePolicy
 import com.android.server.permission.access.UidUri
+import com.android.server.permission.access.WriteMode
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.andInv
 import com.android.server.permission.access.util.hasAnyBit
 import com.android.server.permission.access.util.hasBits
@@ -53,11 +56,11 @@ class AppIdPermissionPolicy : SchemePolicy() {
     private val upgrade = AppIdPermissionUpgrade(this)
 
     @Volatile
-    private var onPermissionFlagsChangedListeners =
-        IndexedListSet<OnPermissionFlagsChangedListener>()
+    private var onPermissionFlagsChangedListeners:
+        IndexedListSet<OnPermissionFlagsChangedListener> = MutableIndexedListSet()
     private val onPermissionFlagsChangedListenersLock = Any()
 
-    private val privilegedPermissionAllowlistViolations = IndexedSet<String>()
+    private val privilegedPermissionAllowlistViolations = MutableIndexedSet<String>()
 
     override val subjectScheme: String
         get() = UidUri.SCHEME
@@ -87,8 +90,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
 
     override fun MutateStateScope.onInitialized() {
         newState.systemState.configPermissions.forEach { (permissionName, permissionEntry) ->
-            val permissions = newState.systemState.permissions
-            val oldPermission = permissions[permissionName]
+            val oldPermission = newState.systemState.permissions[permissionName]
             val newPermission = if (oldPermission != null) {
                 if (permissionEntry.gids != null) {
                     oldPermission.copy(
@@ -113,7 +115,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     Permission(permissionInfo, false, Permission.TYPE_CONFIG, 0)
                 }
             }
-            permissions[permissionName] = newPermission
+            newState.mutateSystemState().mutatePermissions()[permissionName] = newPermission
         }
     }
 
@@ -121,16 +123,17 @@ class AppIdPermissionPolicy : SchemePolicy() {
         newState.systemState.packageStates.forEach { (_, packageState) ->
             evaluateAllPermissionStatesForPackageAndUser(packageState, userId, null)
         }
-        newState.systemState.appIds.forEachKeyIndexed { _, appId ->
+        newState.systemState.appIds.forEachIndexed { _, appId, _ ->
             inheritImplicitPermissionStates(appId, userId)
         }
     }
 
     override fun MutateStateScope.onAppIdRemoved(appId: Int) {
-        newState.userStates.forEachValueIndexed { _, userState ->
-            userState.appIdPermissionFlags -= appId
-            userState.requestWrite()
-            // Skip notifying the change listeners since the app ID no longer exists.
+        newState.userStates.forEachIndexed { userStateIndex, _, userState ->
+            if (appId in userState.appIdPermissionFlags) {
+                newState.mutateUserStateAt(userStateIndex).mutateAppIdPermissionFlags() -= appId
+                // Skip notifying the change listeners since the app ID no longer exists.
+            }
         }
     }
 
@@ -138,7 +141,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         volumeUuid: String?,
         isSystemUpdated: Boolean
     ) {
-        val changedPermissionNames = IndexedSet<String>()
+        val changedPermissionNames = MutableIndexedSet<String>()
         newState.systemState.packageStates.forEach { (_, packageState) ->
             val androidPackage = packageState.androidPackage
             if (androidPackage == null || androidPackage.volumeUuid != volumeUuid) {
@@ -175,7 +178,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
     }
 
     override fun MutateStateScope.onPackageAdded(packageState: PackageState) {
-        val changedPermissionNames = IndexedSet<String>()
+        val changedPermissionNames = MutableIndexedSet<String>()
         adoptPermissions(packageState, changedPermissionNames)
         addPermissionGroups(packageState)
         addPermissions(packageState, changedPermissionNames)
@@ -198,7 +201,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
             "Package $packageName reported as removed before disabled system package is enabled"
         }
 
-        val changedPermissionNames = IndexedSet<String>()
+        val changedPermissionNames = MutableIndexedSet<String>()
         trimPermissions(packageName, changedPermissionNames)
         if (appId in newState.systemState.appIds) {
             trimPermissionStates(appId)
@@ -256,7 +259,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
 
     private fun MutateStateScope.adoptPermissions(
         packageState: PackageState,
-        changedPermissionNames: IndexedSet<String>
+        changedPermissionNames: MutableIndexedSet<String>
     ) {
         val `package` = packageState.androidPackage!!
         `package`.adoptPermissions.forEachIndexed { _, originalPackageName ->
@@ -264,9 +267,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
             if (!canAdoptPermissions(packageName, originalPackageName)) {
                 return@forEachIndexed
             }
-            val systemState = newState.systemState
-            val permissions = systemState.permissions
-            permissions.forEachIndexed permissions@ {
+            newState.systemState.permissions.forEachIndexed permissions@ {
                 permissionIndex, permissionName, oldPermission ->
                 if (oldPermission.packageName != originalPackageName) {
                     return@permissions
@@ -283,8 +284,8 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 val newPermission = oldPermission.copy(
                     permissionInfo = newPermissionInfo, isReconciled = false, appId = 0
                 )
-                permissions.setValueAt(permissionIndex, newPermission)
-                systemState.requestWrite()
+                newState.mutateSystemState().mutatePermissions()
+                    .putAt(permissionIndex, newPermission)
                 changedPermissionNames += permissionName
             }
         }
@@ -362,13 +363,14 @@ class AppIdPermissionPolicy : SchemePolicy() {
                         " declared in another package $oldPackageName"
                 )
             }
-            newState.systemState.permissionGroups[permissionGroupName] = newPermissionGroup
+            newState.mutateSystemState().mutatePermissionGroups()[permissionGroupName] =
+                newPermissionGroup
         }
     }
 
     private fun MutateStateScope.addPermissions(
         packageState: PackageState,
-        changedPermissionNames: IndexedSet<String>
+        changedPermissionNames: MutableIndexedSet<String>
     ) {
         packageState.androidPackage!!.permissions.forEachIndexed { _, parsedPermission ->
             // TODO:
@@ -383,12 +385,11 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 parsedPermission, PackageManager.GET_META_DATA.toLong()
             )!!
             // TODO: newPermissionInfo.flags |= PermissionInfo.FLAG_INSTALLED
-            val systemState = newState.systemState
             val permissionName = newPermissionInfo.name
             val oldPermission = if (parsedPermission.isTree) {
-                systemState.permissionTrees[permissionName]
+                newState.systemState.permissionTrees[permissionName]
             } else {
-                systemState.permissions[permissionName]
+                newState.systemState.permissions[permissionName]
             }
             // Different from the old implementation, which may add an (incomplete) signature
             // permission inside another package's permission tree, we now consistently ignore such
@@ -421,15 +422,15 @@ class AppIdPermissionPolicy : SchemePolicy() {
                         permissionInfo = newPermissionInfo, isReconciled = true,
                         appId = packageState.appId
                     )
-                } else if (systemState.packageStates[oldPackageName]?.isSystem != true) {
+                } else if (newState.systemState.packageStates[oldPackageName]?.isSystem != true) {
                     Log.w(
                         LOG_TAG, "Overriding permission $permissionName with new declaration in" +
                             " system package $newPackageName: originally declared in another" +
                             " package $oldPackageName"
                     )
                     // Remove permission state on owner change.
-                    systemState.userIds.forEachIndexed { _, userId ->
-                        systemState.appIds.forEachKeyIndexed { _, appId ->
+                    newState.systemState.userIds.forEachIndexed { _, userId ->
+                        newState.systemState.appIds.forEachIndexed { _, appId, _ ->
                             setPermissionFlags(appId, userId, permissionName, 0)
                         }
                     }
@@ -458,8 +459,8 @@ class AppIdPermissionPolicy : SchemePolicy() {
                             (newPermissionInfo.isInternal && !oldPermission.isInternal)
                     )
                     if (isPermissionGroupChanged || isPermissionTypeChanged) {
-                        systemState.userIds.forEachIndexed { _, userId ->
-                            systemState.appIds.forEachKeyIndexed { _, appId ->
+                        newState.systemState.userIds.forEachIndexed { _, userId ->
+                            newState.systemState.appIds.forEachIndexed { _, appId, _ ->
                                 if (isPermissionGroupChanged) {
                                     // We might auto-grant permissions if any permission of
                                     // the group is already granted. Hence if the group of
@@ -502,32 +503,30 @@ class AppIdPermissionPolicy : SchemePolicy() {
             }
 
             if (parsedPermission.isTree) {
-                systemState.permissionTrees[permissionName] = newPermission
+                newState.mutateSystemState().mutatePermissionTrees()[permissionName] = newPermission
             } else {
-                systemState.permissions[permissionName] = newPermission
+                newState.mutateSystemState().mutatePermissions()[permissionName] = newPermission
             }
-            systemState.requestWrite()
             changedPermissionNames += permissionName
         }
     }
 
     private fun MutateStateScope.trimPermissions(
         packageName: String,
-        changedPermissionNames: IndexedSet<String>
+        changedPermissionNames: MutableIndexedSet<String>
     ) {
-        val systemState = newState.systemState
-        val packageState = systemState.packageStates[packageName]
+        val packageState = newState.systemState.packageStates[packageName]
         val androidPackage = packageState?.androidPackage
         if (packageState != null && androidPackage == null) {
             return
         }
-        val disabledSystemPackage = systemState.disabledSystemPackageStates[packageName]
+        val disabledSystemPackage = newState.systemState.disabledSystemPackageStates[packageName]
             ?.androidPackage
         // Unlike in the previous implementation, we now also retain permission trees defined by
         // disabled system packages for consistency with permissions.
-        val isPermissionTreeRemoved = systemState.permissionTrees.removeAllIndexed {
-            _, permissionTreeName, permissionTree ->
-            permissionTree.packageName == packageName && (
+        newState.systemState.permissionTrees.forEachReversedIndexed {
+            permissionTreeIndex, permissionTreeName, permissionTree ->
+            if (permissionTree.packageName == packageName && (
                 packageState == null || androidPackage!!.permissions.noneIndexed { _, it ->
                     it.isTree && it.name == permissionTreeName
                 }
@@ -535,15 +534,16 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 disabledSystemPackage?.permissions?.anyIndexed { _, it ->
                     it.isTree && it.name == permissionTreeName
                 } != true
-            )
-        }
-        if (isPermissionTreeRemoved) {
-            systemState.requestWrite()
+            )) {
+                newState.mutateSystemState().mutatePermissionTrees().removeAt(permissionTreeIndex)
+            }
         }
 
-        systemState.permissions.removeAllIndexed { permissionIndex, permissionName, permission ->
+        newState.systemState.permissions.forEachReversedIndexed {
+            permissionIndex, permissionName, permission ->
             val updatedPermission = updatePermissionIfDynamic(permission)
-            newState.systemState.permissions.setValueAt(permissionIndex, updatedPermission)
+            newState.mutateSystemState().mutatePermissions()
+                .putAt(permissionIndex, updatedPermission)
             if (updatedPermission.packageName == packageName && (
                 packageState == null || androidPackage!!.permissions.noneIndexed { _, it ->
                     !it.isTree && it.name == permissionName
@@ -558,16 +558,13 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 // shouldn't be notified when the updated system package is removed but the disabled
                 // system package isn't re-enabled yet, so we don't need to maintain that brittle
                 // special case either.
-                systemState.userIds.forEachIndexed { _, userId ->
-                    systemState.appIds.forEachKeyIndexed { _, appId ->
+                newState.systemState.userIds.forEachIndexed { _, userId ->
+                    newState.systemState.appIds.forEachIndexed { _, appId, _ ->
                         setPermissionFlags(appId, userId, permissionName, 0)
                     }
                 }
+                newState.mutateSystemState().mutatePermissions().removeAt(permissionIndex)
                 changedPermissionNames += permissionName
-                systemState.requestWrite()
-                true
-            } else {
-                false
             }
         }
     }
@@ -586,7 +583,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
     }
 
     private fun MutateStateScope.trimPermissionStates(appId: Int) {
-        val requestedPermissions = IndexedSet<String>()
+        val requestedPermissions = MutableIndexedSet<String>()
         forEachPackageInAppId(appId) {
             // Note that we still trim the permission states requested by disabled system packages.
             // Because in the previous implementation:
@@ -648,7 +645,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
     ) {
         val systemState = newState.systemState
         systemState.userIds.forEachIndexed { _, userId ->
-            systemState.appIds.forEachKeyIndexed { _, appId ->
+            systemState.appIds.forEachIndexed { _, appId, _ ->
                 val isPermissionRequested =
                     anyRequestingPackageInAppId(appId, permissionName) { true }
                 if (isPermissionRequested) {
@@ -687,7 +684,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         permissionName: String,
         installedPackageState: PackageState?
     ) {
-        val packageNames = newState.systemState.appIds[appId]
+        val packageNames = newState.systemState.appIds[appId]!!
         val hasMissingPackage = packageNames.anyIndexed { _, packageName ->
             newState.systemState.packageStates[packageName]!!.androidPackage == null
         }
@@ -803,10 +800,11 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 }
                 val sourcePermissions = newState.systemState
                     .implicitToSourcePermissions[permissionName]
-                val isAnySourcePermissionNonRuntime = sourcePermissions?.any {
-                    val sourcePermission = newState.systemState.permissions[it]
+                val isAnySourcePermissionNonRuntime = sourcePermissions?.anyIndexed {
+                    _, sourcePermissionName ->
+                    val sourcePermission = newState.systemState.permissions[sourcePermissionName]
                     checkNotNull(sourcePermission) {
-                        "Unknown source permission $it in split permissions"
+                        "Unknown source permission $sourcePermissionName in split permissions"
                     }
                     !sourcePermission.isRuntime
                 } ?: false
@@ -894,7 +892,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
     }
 
     private fun MutateStateScope.inheritImplicitPermissionStates(appId: Int, userId: Int) {
-        val implicitPermissions = IndexedSet<String>()
+        val implicitPermissions = MutableIndexedSet<String>()
         forEachPackageInAppId(appId) {
             implicitPermissions += it.androidPackage!!.implicitPermissions
         }
@@ -1086,7 +1084,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         state: AccessState = newState,
         predicate: (PackageState) -> Boolean
     ): Boolean {
-        val packageNames = state.systemState.appIds[appId]
+        val packageNames = state.systemState.appIds[appId]!!
         return packageNames.anyIndexed { _, packageName ->
             val packageState = state.systemState.packageStates[packageName]!!
             val androidPackage = packageState.androidPackage
@@ -1115,7 +1113,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         state: AccessState = newState,
         action: (PackageState) -> Unit
     ) {
-        val packageNames = state.systemState.appIds[appId]
+        val packageNames = state.systemState.appIds[appId]!!
         packageNames.forEachIndexed { _, packageName ->
             val packageState = state.systemState.packageStates[packageName]!!
             val androidPackage = packageState.androidPackage
@@ -1156,15 +1154,15 @@ class AppIdPermissionPolicy : SchemePolicy() {
             return true
         }
         if (permission.isInstaller && (
-            packageName in knownPackages[KnownPackages.PACKAGE_INSTALLER] ||
-                packageName in knownPackages[KnownPackages.PACKAGE_PERMISSION_CONTROLLER]
+            packageName in knownPackages[KnownPackages.PACKAGE_INSTALLER]!! ||
+                packageName in knownPackages[KnownPackages.PACKAGE_PERMISSION_CONTROLLER]!!
         )) {
             // If this permission is to be granted to the system installer and
             // this app is an installer or permission controller, then it gets the permission.
             return true
         }
         if (permission.isVerifier &&
-            packageName in knownPackages[KnownPackages.PACKAGE_VERIFIER]) {
+            packageName in knownPackages[KnownPackages.PACKAGE_VERIFIER]!!) {
             // If this permission is to be granted to the system verifier and
             // this app is a verifier, then it gets the permission.
             return true
@@ -1180,39 +1178,39 @@ class AppIdPermissionPolicy : SchemePolicy() {
             return true
         }
         if (permission.isSetup &&
-            packageName in knownPackages[KnownPackages.PACKAGE_SETUP_WIZARD]) {
+            packageName in knownPackages[KnownPackages.PACKAGE_SETUP_WIZARD]!!) {
             // If this permission is to be granted to the system setup wizard and
             // this app is a setup wizard, then it gets the permission.
             return true
         }
         if (permission.isSystemTextClassifier &&
-            packageName in knownPackages[KnownPackages.PACKAGE_SYSTEM_TEXT_CLASSIFIER]) {
+            packageName in knownPackages[KnownPackages.PACKAGE_SYSTEM_TEXT_CLASSIFIER]!!) {
             // Special permissions for the system default text classifier.
             return true
         }
         if (permission.isConfigurator &&
-            packageName in knownPackages[KnownPackages.PACKAGE_CONFIGURATOR]) {
+            packageName in knownPackages[KnownPackages.PACKAGE_CONFIGURATOR]!!) {
             // Special permissions for the device configurator.
             return true
         }
         if (permission.isIncidentReportApprover &&
-            packageName in knownPackages[KnownPackages.PACKAGE_INCIDENT_REPORT_APPROVER]) {
+            packageName in knownPackages[KnownPackages.PACKAGE_INCIDENT_REPORT_APPROVER]!!) {
             // If this permission is to be granted to the incident report approver and
             // this app is the incident report approver, then it gets the permission.
             return true
         }
         if (permission.isAppPredictor &&
-            packageName in knownPackages[KnownPackages.PACKAGE_APP_PREDICTOR]) {
+            packageName in knownPackages[KnownPackages.PACKAGE_APP_PREDICTOR]!!) {
             // Special permissions for the system app predictor.
             return true
         }
         if (permission.isCompanion &&
-            packageName in knownPackages[KnownPackages.PACKAGE_COMPANION]) {
+            packageName in knownPackages[KnownPackages.PACKAGE_COMPANION]!!) {
             // Special permissions for the system companion device manager.
             return true
         }
         if (permission.isRetailDemo &&
-            packageName in knownPackages[KnownPackages.PACKAGE_RETAIL_DEMO] &&
+            packageName in knownPackages[KnownPackages.PACKAGE_RETAIL_DEMO]!! &&
             isDeviceOrProfileOwnerUid(packageState.appId)) {
             // Special permission granted only to the OEM specified retail demo app.
             // Note that the original code was passing app ID as UID, so this behavior is kept
@@ -1220,7 +1218,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
             return true
         }
         if (permission.isRecents &&
-            packageName in knownPackages[KnownPackages.PACKAGE_RECENTS]) {
+            packageName in knownPackages[KnownPackages.PACKAGE_RECENTS]!!) {
             // Special permission for the recents app.
             return true
         }
@@ -1284,7 +1282,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         }
     }
 
-    override fun BinaryXmlPullParser.parseSystemState(state: AccessState) {
+    override fun BinaryXmlPullParser.parseSystemState(state: MutableAccessState) {
         with(persistence) { this@parseSystemState.parseSystemState(state) }
     }
 
@@ -1292,7 +1290,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         with(persistence) { this@serializeSystemState.serializeSystemState(state) }
     }
 
-    override fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int) {
+    override fun BinaryXmlPullParser.parseUserState(state: MutableAccessState, userId: Int) {
         with(persistence) { this@parseUserState.parseUserState(state, userId) }
     }
 
@@ -1316,8 +1314,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         }
 
     fun MutateStateScope.addPermissionTree(permission: Permission) {
-        newState.systemState.permissionTrees[permission.name] = permission
-        newState.systemState.requestWrite()
+        newState.mutateSystemState().mutatePermissionTrees()[permission.name] = permission
     }
 
     /**
@@ -1332,14 +1329,16 @@ class AppIdPermissionPolicy : SchemePolicy() {
     fun GetStateScope.getPermissions(): IndexedMap<String, Permission> =
         state.systemState.permissions
 
-    fun MutateStateScope.addPermission(permission: Permission, sync: Boolean = false) {
-        newState.systemState.permissions[permission.name] = permission
-        newState.systemState.requestWrite(sync)
+    fun MutateStateScope.addPermission(
+        permission: Permission,
+        isSynchronousWrite: Boolean = false
+    ) {
+        val writeMode = if (isSynchronousWrite) WriteMode.SYNCHRONOUS else WriteMode.ASYNCHRONOUS
+        newState.mutateSystemState(writeMode).mutatePermissions()[permission.name] = permission
     }
 
     fun MutateStateScope.removePermission(permission: Permission) {
-        newState.systemState.permissions -= permission.name
-        newState.systemState.requestWrite()
+        newState.mutateSystemState().mutatePermissions() -= permission.name
     }
 
     fun GetStateScope.getUidPermissionFlags(appId: Int, userId: Int): IndexedMap<String, Int>? =
@@ -1380,23 +1379,18 @@ class AppIdPermissionPolicy : SchemePolicy() {
         flagMask: Int,
         flagValues: Int
     ): Boolean {
-        val userState = newState.userStates[userId]
-        val appIdPermissionFlags = userState.appIdPermissionFlags
-        var permissionFlags = appIdPermissionFlags[appId]
-        val oldFlags = permissionFlags.getWithDefault(permissionName, 0)
+        val oldFlags = newState.userStates[userId]!!.appIdPermissionFlags[appId]
+            .getWithDefault(permissionName, 0)
         val newFlags = (oldFlags andInv flagMask) or (flagValues and flagMask)
         if (oldFlags == newFlags) {
             return false
         }
-        if (permissionFlags == null) {
-            permissionFlags = IndexedMap()
-            appIdPermissionFlags[appId] = permissionFlags
-        }
+        val appIdPermissionFlags = newState.mutateUserState(userId)!!.mutateAppIdPermissionFlags()
+        val permissionFlags = appIdPermissionFlags.mutateOrPut(appId) { MutableIndexedMap() }
         permissionFlags.putWithDefault(permissionName, newFlags, 0)
         if (permissionFlags.isEmpty()) {
             appIdPermissionFlags -= appId
         }
-        userState.requestWrite()
         onPermissionFlagsChangedListeners.forEachIndexed { _, it ->
             it.onPermissionFlagsChanged(appId, userId, permissionName, oldFlags, newFlags)
         }
@@ -1415,11 +1409,11 @@ class AppIdPermissionPolicy : SchemePolicy() {
         }
     }
 
-    override fun migrateSystemState(state: AccessState) {
+    override fun migrateSystemState(state: MutableAccessState) {
         migration.migrateSystemState(state)
     }
 
-    override fun migrateUserState(state: AccessState, userId: Int) {
+    override fun migrateUserState(state: MutableAccessState, userId: Int) {
         migration.migrateUserState(state, userId)
     }
 
@@ -1428,7 +1422,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         userId: Int,
         version: Int
     ) {
-        with(upgrade) { upgradePermissions(packageState, userId, version) }
+        with(upgrade) { upgradePackageState(packageState, userId, version) }
     }
 
     companion object {
