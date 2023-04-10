@@ -25,6 +25,10 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.advanceTimeBy
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
@@ -69,6 +73,7 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
     private val headsUpManager: HeadsUpManager = mock()
     private val keyguardNotifVisibilityProvider: KeyguardNotificationVisibilityProvider = mock()
     private val keyguardRepository = FakeKeyguardRepository()
+    private val keyguardTransitionRepository = FakeKeyguardTransitionRepository()
     private val notifPipelineFlags: NotifPipelineFlags = mock()
     private val notifPipeline: NotifPipeline = mock()
     private val sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider = mock()
@@ -113,6 +118,33 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
             testScheduler.runCurrent()
 
             // THEN: The notification is shown regardless
+            assertThat(unseenFilter.shouldFilterOut(fakeEntry, 0L)).isFalse()
+        }
+    }
+
+    @Test
+    fun unseenFilterStopsMarkingSeenNotifWhenTransitionToAod() {
+        whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
+
+        // GIVEN: Keyguard is not showing, shade is not expanded, and a notification is present
+        keyguardRepository.setKeyguardShowing(false)
+        whenever(statusBarStateController.isExpanded).thenReturn(false)
+        runKeyguardCoordinatorTest {
+            val fakeEntry = NotificationEntryBuilder().build()
+            collectionListener.onEntryAdded(fakeEntry)
+
+            // WHEN: The device transitions to AOD
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(to = KeyguardState.AOD, transitionState = TransitionState.STARTED),
+            )
+            testScheduler.runCurrent()
+
+            // WHEN: The shade is expanded
+            whenever(statusBarStateController.isExpanded).thenReturn(true)
+            statusBarStateListener.onExpandedChanged(true)
+            testScheduler.runCurrent()
+
+            // THEN: The notification is still treated as "unseen" and is not filtered out.
             assertThat(unseenFilter.shouldFilterOut(fakeEntry, 0L)).isFalse()
         }
     }
@@ -373,6 +405,7 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
                 headsUpManager,
                 keyguardNotifVisibilityProvider,
                 keyguardRepository,
+                keyguardTransitionRepository,
                 notifPipelineFlags,
                 testScope.backgroundScope,
                 sectionHeaderVisibilityProvider,
