@@ -39,12 +39,13 @@ import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.PermissionChecker;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.hardware.soundtrigger.ConversionUtil;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.ModelParams;
-import android.hardware.soundtrigger.ConversionUtil;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
@@ -64,6 +65,7 @@ import android.media.permission.SafeCloseable;
 import android.media.soundtrigger.ISoundTriggerDetectionService;
 import android.media.soundtrigger.ISoundTriggerDetectionServiceClient;
 import android.media.soundtrigger.SoundTriggerDetectionService;
+import android.media.soundtrigger_middleware.ISoundTriggerInjection;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.os.Binder;
 import android.os.Bundle;
@@ -74,8 +76,8 @@ import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.ServiceSpecificException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -98,8 +100,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * A single SystemService to manage all sound/voice-based sound models on the DSP.
@@ -294,6 +296,23 @@ public class SoundTriggerService extends SystemService {
             try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
                     originatorIdentity)) {
                 return listUnderlyingModuleProperties(originatorIdentity);
+            }
+        }
+
+        @Override
+        public void attachInjection(@NonNull ISoundTriggerInjection injection) {
+            if (PermissionChecker.checkCallingPermissionForPreflight(mContext,
+                    android.Manifest.permission.MANAGE_SOUND_TRIGGER, null)
+                        != PermissionChecker.PERMISSION_GRANTED) {
+                throw new SecurityException();
+            }
+            try {
+                ISoundTriggerMiddlewareService.Stub
+                        .asInterface(ServiceManager
+                                .waitForService(Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE))
+                        .attachFakeHalInjection(injection);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
         }
     }

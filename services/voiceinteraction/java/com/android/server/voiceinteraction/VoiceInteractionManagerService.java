@@ -125,7 +125,9 @@ public class VoiceInteractionManagerService extends SystemService {
 
     final Context mContext;
     final ContentResolver mResolver;
-    final DatabaseHelper mDbHelper;
+    // Can be overridden for testing purposes
+    private IEnrolledModelDb mDbHelper;
+    private final IEnrolledModelDb mRealDbHelper;
     final ActivityManagerInternal mAmInternal;
     final ActivityTaskManagerInternal mAtmInternal;
     final UserManagerInternal mUserManagerInternal;
@@ -143,7 +145,7 @@ public class VoiceInteractionManagerService extends SystemService {
         mResolver = context.getContentResolver();
         mUserManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(UserManagerInternal.class));
-        mDbHelper = new DatabaseHelper(context);
+        mDbHelper = mRealDbHelper = new DatabaseHelper(context);
         mServiceStub = new VoiceInteractionManagerServiceStub();
         mAmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityManagerInternal.class));
@@ -1605,6 +1607,42 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        @Override
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_VOICE_KEYPHRASES)
+        public void setModelDatabaseForTestEnabled(boolean enabled, IBinder token) {
+            super.setModelDatabaseForTestEnabled_enforcePermission();
+            enforceCallerAllowedToEnrollVoiceModel();
+            synchronized (this) {
+                if (enabled) {
+                    // Replace the dbhelper with a new test db
+                    final var db = new TestModelEnrollmentDatabase();
+                    try {
+                        // Listen to our caller death, and make sure we revert to the real
+                        // db if they left the model in a test state.
+                        token.linkToDeath(() -> {
+                            synchronized (this) {
+                                if (mDbHelper == db) {
+                                    mDbHelper = mRealDbHelper;
+                                    mImpl.notifySoundModelsChangedLocked();
+                                }
+                            }
+                        }, 0);
+                    } catch (RemoteException e) {
+                        // If the caller is already dead, nothing to do.
+                        return;
+                    }
+                    mDbHelper = db;
+                    mImpl.notifySoundModelsChangedLocked();
+                } else {
+                    // Nothing to do if the db is already set to the real impl.
+                    if (mDbHelper != mRealDbHelper) {
+                        mDbHelper = mRealDbHelper;
+                        mImpl.notifySoundModelsChangedLocked();
+                    }
+                }
+            }
+        }
+
         //----------------- SoundTrigger APIs --------------------------------//
         @Override
         public boolean isEnrolledForKeyphrase(int keyphraseId, String bcp47Locale) {
@@ -1712,28 +1750,27 @@ public class VoiceInteractionManagerService extends SystemService {
                 final long caller = Binder.clearCallingIdentity();
                 try {
                     KeyphraseSoundModel soundModel =
-                            mDbHelper.getKeyphraseSoundModel(keyphraseId, callingUserId, bcp47Locale);
+                            mDbHelper.getKeyphraseSoundModel(keyphraseId,
+                                    callingUserId, bcp47Locale);
                     if (soundModel == null
                             || soundModel.getUuid() == null
                             || soundModel.getKeyphrases() == null) {
                         Slog.w(TAG, "No matching sound model found in startRecognition");
                         return SoundTriggerInternal.STATUS_ERROR;
-                    } else {
-                        // Regardless of the status of the start recognition, we need to make sure
-                        // that we unload this model if needed later.
-                        synchronized (VoiceInteractionManagerServiceStub.this) {
-                            mLoadedKeyphraseIds.put(keyphraseId, this);
-                            if (mSessionExternalCallback == null
-                                    || mSessionInternalCallback == null
-                                    || callback.asBinder() != mSessionExternalCallback.asBinder()) {
-                                mSessionInternalCallback = createSoundTriggerCallbackLocked(
-                                        callback);
-                                mSessionExternalCallback = callback;
-                            }
-                        }
-                        return mSession.startRecognition(keyphraseId, soundModel,
-                                mSessionInternalCallback, recognitionConfig, runInBatterySaverMode);
                     }
+                    // Regardless of the status of the start recognition, we need to make sure
+                    // that we unload this model if needed later.
+                    synchronized (VoiceInteractionManagerServiceStub.this) {
+                        mLoadedKeyphraseIds.put(keyphraseId, this);
+                        if (mSessionExternalCallback == null
+                                || mSessionInternalCallback == null
+                                || callback.asBinder() != mSessionExternalCallback.asBinder()) {
+                            mSessionInternalCallback = createSoundTriggerCallbackLocked(callback);
+                            mSessionExternalCallback = callback;
+                        }
+                    }
+                    return mSession.startRecognition(keyphraseId, soundModel,
+                            mSessionInternalCallback, recognitionConfig, runInBatterySaverMode);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
