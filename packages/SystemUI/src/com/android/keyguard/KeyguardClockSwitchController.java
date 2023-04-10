@@ -109,7 +109,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final ContentObserver mShowWeatherObserver = new ContentObserver(null) {
         @Override
         public void onChange(boolean change) {
-            setDateWeatherVisibility();
+            setWeatherVisibility();
         }
     };
 
@@ -236,6 +236,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         updateDoubleLineClock();
         setDateWeatherVisibility();
+        setWeatherVisibility();
 
         mKeyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
                 mKeyguardUnlockAnimationListener);
@@ -266,6 +267,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                     mStatusArea.removeView(mDateWeatherView);
                     addDateWeatherView(index);
                 }
+                setDateWeatherVisibility();
+                setWeatherVisibility();
             }
             int index = mStatusArea.indexOfChild(mSmartspaceView);
             if (index >= 0) {
@@ -487,16 +490,19 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void setDateWeatherVisibility() {
-        if (mDateWeatherView != null || mWeatherView != null) {
+        if (mDateWeatherView != null) {
             mUiExecutor.execute(() -> {
-                if (mDateWeatherView != null) {
-                    mDateWeatherView.setVisibility(
-                            clockHasCustomWeatherDataDisplay() ? View.GONE : View.VISIBLE);
-                }
-                if (mWeatherView != null) {
-                    mWeatherView.setVisibility(
-                            mSmartspaceController.isWeatherEnabled() ? View.VISIBLE : View.GONE);
-                }
+                mDateWeatherView.setVisibility(
+                        clockHasCustomWeatherDataDisplay() ? View.GONE : View.VISIBLE);
+            });
+        }
+    }
+
+    private void setWeatherVisibility() {
+        if (mWeatherView != null) {
+            mUiExecutor.execute(() -> {
+                mWeatherView.setVisibility(
+                        mSmartspaceController.isWeatherEnabled() ? View.VISIBLE : View.GONE);
             });
         }
     }
