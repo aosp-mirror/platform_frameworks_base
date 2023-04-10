@@ -29,7 +29,6 @@ import android.credentials.ui.ProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
-import android.util.Log;
 import android.util.Slog;
 
 import com.android.server.credentials.metrics.ProviderSessionMetric;
@@ -253,7 +252,7 @@ public abstract class ProviderSession<T, R>
             @Nullable ComponentName expectedRemoteEntryProviderService) {
         // Check if the service is the one set by the OEM. If not silently reject this entry
         if (!mComponentName.equals(expectedRemoteEntryProviderService)) {
-            Log.i(TAG, "Remote entry being dropped as it is not from the service "
+            Slog.w(TAG, "Remote entry being dropped as it is not from the service "
                     + "configured by the OEM.");
             return false;
         }
@@ -270,15 +269,12 @@ public abstract class ProviderSession<T, R>
                 return true;
             }
         } catch (SecurityException e) {
-            Log.i(TAG, "Error getting info for "
-                    + mComponentName.flattenToString() + ": " + e.getMessage());
+            Slog.e(TAG, "Error getting info for " + mComponentName.flattenToString(), e);
             return false;
         } catch (PackageManager.NameNotFoundException e) {
-            Log.i(TAG, "Error getting info for "
-                    + mComponentName.flattenToString() + ": " + e.getMessage());
+            Slog.i(TAG, "Error getting info for " + mComponentName.flattenToString(), e);
             return false;
         }
-        Log.i(TAG, "In enforceRemoteEntryRestrictions - remote entry checks fail");
         return false;
     }
 
