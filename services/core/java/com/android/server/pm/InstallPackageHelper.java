@@ -2930,7 +2930,7 @@ final class InstallPackageHelper {
                 }
                 // Send to PermissionController for all update users, even if it may not be running
                 // for some users
-                if (BroadcastHelper.isPrivacySafetyLabelChangeNotificationsEnabled()) {
+                if (BroadcastHelper.isPrivacySafetyLabelChangeNotificationsEnabled(mContext)) {
                     mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                             extras, 0 /*flags*/,
                             mPm.mRequiredPermissionControllerPackage, null /*finishedReceiver*/,
