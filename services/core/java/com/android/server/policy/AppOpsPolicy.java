@@ -316,6 +316,7 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     private int resolveDatasourceOp(int code, int uid, @NonNull String packageName,
             @Nullable String attributionTag) {
         code = resolveRecordAudioOp(code, uid);
+        code = resolveSandboxedServiceOp(code, uid);
         if (attributionTag == null) {
             return code;
         }
@@ -438,6 +439,28 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
         }
         return code;
     }
+
+    private int resolveSandboxedServiceOp(int code, int uid) {
+        if (!Process.isIsolated(uid) // simple check which fails-fast for the common case
+                 || !(code == AppOpsManager.OP_RECORD_AUDIO || code == AppOpsManager.OP_CAMERA)) {
+            return code;
+        }
+        final HotwordDetectionServiceIdentity hotwordDetectionServiceIdentity =
+                mVoiceInteractionManagerInternal.getHotwordDetectionServiceIdentity();
+        if (hotwordDetectionServiceIdentity != null
+                && uid == hotwordDetectionServiceIdentity.getIsolatedUid()) {
+            // Upgrade the op such that no indicators is shown for camera or audio service. This
+            // will bypass the permission checking for the original OP_RECORD_AUDIO and OP_CAMERA.
+            switch (code) {
+                case AppOpsManager.OP_RECORD_AUDIO:
+                    return AppOpsManager.OP_RECORD_AUDIO_SANDBOXED;
+                case AppOpsManager.OP_CAMERA:
+                    return AppOpsManager.OP_CAMERA_SANDBOXED;
+            }
+        }
+        return code;
+    }
+
 
     private int resolveUid(int code, int uid) {
         // The HotwordDetectionService is an isolated service, which ordinarily cannot hold
