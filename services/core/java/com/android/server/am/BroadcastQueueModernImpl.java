@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_START_RECEIVER;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
 
@@ -38,7 +39,6 @@ import static com.android.server.am.BroadcastRecord.getReceiverPackageName;
 import static com.android.server.am.BroadcastRecord.getReceiverProcessName;
 import static com.android.server.am.BroadcastRecord.getReceiverUid;
 import static com.android.server.am.BroadcastRecord.isDeliveryStateTerminal;
-import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_START_RECEIVER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;

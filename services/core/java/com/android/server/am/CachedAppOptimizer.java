@@ -18,6 +18,28 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_FROZEN;
 import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_UNFROZEN;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_ACTIVITY;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_ALLOWLIST;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_BACKUP;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_BIND_SERVICE;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_COMPONENT_DISABLED;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_EXECUTING_SERVICE;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_FINISH_RECEIVER;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_GET_PROVIDER;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_BEGIN;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_END;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_REMOVE_PROVIDER;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_REMOVE_TASK;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_RESTRICTION_CHANGE;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_SHELL;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_SHORT_FGS_TIMEOUT;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_START_RECEIVER;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_START_SERVICE;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_STOP_SERVICE;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_SYSTEM_INIT;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_UID_IDLE;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_UI_VISIBILITY;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_UNBIND_SERVICE;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_COMPACTION;
@@ -26,6 +48,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
 import android.annotation.IntDef;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal.OomAdjReason;
 import android.app.ActivityThread;
 import android.app.ApplicationExitInfo;
 import android.app.IApplicationThread;
@@ -139,6 +162,26 @@ public final class CachedAppOptimizer {
             FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_BINDER_TXNS;
     static final int UNFREEZE_REASON_FEATURE_FLAGS =
             FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_FEATURE_FLAGS;
+    static final int UNFREEZE_REASON_SHORT_FGS_TIMEOUT =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_SHORT_FGS_TIMEOUT;
+    static final int UNFREEZE_REASON_SYSTEM_INIT =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_SYSTEM_INIT;
+    static final int UNFREEZE_REASON_BACKUP =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_BACKUP;
+    static final int UNFREEZE_REASON_SHELL =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_SHELL;
+    static final int UNFREEZE_REASON_REMOVE_TASK =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_REMOVE_TASK;
+    static final int UNFREEZE_REASON_UID_IDLE =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_UID_IDLE;
+    static final int UNFREEZE_REASON_STOP_SERVICE =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_STOP_SERVICE;
+    static final int UNFREEZE_REASON_EXECUTING_SERVICE =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_EXECUTING_SERVICE;
+    static final int UNFREEZE_REASON_RESTRICTION_CHANGE =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_RESTRICTION_CHANGE;
+    static final int UNFREEZE_REASON_COMPONENT_DISABLED =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_COMPONENT_DISABLED;
 
     @IntDef(prefix = {"UNFREEZE_REASON_"}, value = {
         UNFREEZE_REASON_NONE,
@@ -160,6 +203,16 @@ public final class CachedAppOptimizer {
         UNFREEZE_REASON_FILE_LOCK_CHECK_FAILURE,
         UNFREEZE_REASON_BINDER_TXNS,
         UNFREEZE_REASON_FEATURE_FLAGS,
+        UNFREEZE_REASON_SHORT_FGS_TIMEOUT,
+        UNFREEZE_REASON_SYSTEM_INIT,
+        UNFREEZE_REASON_BACKUP,
+        UNFREEZE_REASON_SHELL,
+        UNFREEZE_REASON_REMOVE_TASK,
+        UNFREEZE_REASON_UID_IDLE,
+        UNFREEZE_REASON_STOP_SERVICE,
+        UNFREEZE_REASON_EXECUTING_SERVICE,
+        UNFREEZE_REASON_RESTRICTION_CHANGE,
+        UNFREEZE_REASON_COMPONENT_DISABLED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UnfreezeReason {}
@@ -1365,7 +1418,7 @@ public final class CachedAppOptimizer {
      * The caller of this function should still trigger updateOomAdj for AMS to unfreeze the app.
      * @param pid pid of the process to be unfrozen
      */
-    void unfreezeProcess(int pid, @OomAdjuster.OomAdjReason int reason) {
+    void unfreezeProcess(int pid, @OomAdjReason int reason) {
         synchronized (mFreezerLock) {
             ProcessRecord app = mFrozenProcesses.get(pid);
             if (app == null) {
@@ -1546,12 +1599,12 @@ public final class CachedAppOptimizer {
         public long mOrigAnonRss;
         public int mProcState;
         public int mOomAdj;
-        public @OomAdjuster.OomAdjReason int mOomAdjReason;
+        public @OomAdjReason int mOomAdjReason;
 
         SingleCompactionStats(long[] rss, CompactSource source, String processName,
                 long deltaAnonRss, long zramConsumed, long anonMemFreed, long origAnonRss,
                 long cpuTimeMillis, int procState, int oomAdj,
-                @OomAdjuster.OomAdjReason int oomAdjReason, int uid) {
+                @OomAdjReason int oomAdjReason, int uid) {
             mRssAfterCompaction = rss;
             mSourceType = source;
             mProcessName = processName;
@@ -2207,32 +2260,52 @@ public final class CachedAppOptimizer {
         }
     }
 
-    static int getUnfreezeReasonCodeFromOomAdjReason(@OomAdjuster.OomAdjReason int oomAdjReason) {
+    static int getUnfreezeReasonCodeFromOomAdjReason(@OomAdjReason int oomAdjReason) {
         switch (oomAdjReason) {
-            case OomAdjuster.OOM_ADJ_REASON_ACTIVITY:
+            case OOM_ADJ_REASON_ACTIVITY:
                 return UNFREEZE_REASON_ACTIVITY;
-            case OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER:
+            case OOM_ADJ_REASON_FINISH_RECEIVER:
                 return UNFREEZE_REASON_FINISH_RECEIVER;
-            case OomAdjuster.OOM_ADJ_REASON_START_RECEIVER:
+            case OOM_ADJ_REASON_START_RECEIVER:
                 return UNFREEZE_REASON_START_RECEIVER;
-            case OomAdjuster.OOM_ADJ_REASON_BIND_SERVICE:
+            case OOM_ADJ_REASON_BIND_SERVICE:
                 return UNFREEZE_REASON_BIND_SERVICE;
-            case OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE:
+            case OOM_ADJ_REASON_UNBIND_SERVICE:
                 return UNFREEZE_REASON_UNBIND_SERVICE;
-            case OomAdjuster.OOM_ADJ_REASON_START_SERVICE:
+            case OOM_ADJ_REASON_START_SERVICE:
                 return UNFREEZE_REASON_START_SERVICE;
-            case OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER:
+            case OOM_ADJ_REASON_GET_PROVIDER:
                 return UNFREEZE_REASON_GET_PROVIDER;
-            case OomAdjuster.OOM_ADJ_REASON_REMOVE_PROVIDER:
+            case OOM_ADJ_REASON_REMOVE_PROVIDER:
                 return UNFREEZE_REASON_REMOVE_PROVIDER;
-            case OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY:
+            case OOM_ADJ_REASON_UI_VISIBILITY:
                 return UNFREEZE_REASON_UI_VISIBILITY;
-            case OomAdjuster.OOM_ADJ_REASON_ALLOWLIST:
+            case OOM_ADJ_REASON_ALLOWLIST:
                 return UNFREEZE_REASON_ALLOWLIST;
-            case OomAdjuster.OOM_ADJ_REASON_PROCESS_BEGIN:
+            case OOM_ADJ_REASON_PROCESS_BEGIN:
                 return UNFREEZE_REASON_PROCESS_BEGIN;
-            case OomAdjuster.OOM_ADJ_REASON_PROCESS_END:
+            case OOM_ADJ_REASON_PROCESS_END:
                 return UNFREEZE_REASON_PROCESS_END;
+            case OOM_ADJ_REASON_SHORT_FGS_TIMEOUT:
+                return UNFREEZE_REASON_SHORT_FGS_TIMEOUT;
+            case OOM_ADJ_REASON_SYSTEM_INIT:
+                return UNFREEZE_REASON_SYSTEM_INIT;
+            case OOM_ADJ_REASON_BACKUP:
+                return UNFREEZE_REASON_BACKUP;
+            case OOM_ADJ_REASON_SHELL:
+                return UNFREEZE_REASON_SHELL;
+            case OOM_ADJ_REASON_REMOVE_TASK:
+                return UNFREEZE_REASON_REMOVE_TASK;
+            case OOM_ADJ_REASON_UID_IDLE:
+                return UNFREEZE_REASON_UID_IDLE;
+            case OOM_ADJ_REASON_STOP_SERVICE:
+                return UNFREEZE_REASON_STOP_SERVICE;
+            case OOM_ADJ_REASON_EXECUTING_SERVICE:
+                return UNFREEZE_REASON_EXECUTING_SERVICE;
+            case OOM_ADJ_REASON_RESTRICTION_CHANGE:
+                return UNFREEZE_REASON_RESTRICTION_CHANGE;
+            case OOM_ADJ_REASON_COMPONENT_DISABLED:
+                return UNFREEZE_REASON_COMPONENT_DISABLED;
             default:
                 return UNFREEZE_REASON_NONE;
         }
