@@ -78,8 +78,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.ParceledListSlice;
-import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
@@ -1645,18 +1643,15 @@ class ActivityClientController extends IActivityClientController.Stub {
                 launchedFromHome = root.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_HOME);
             }
 
-            // If the activity is one of the main entry points for the application, then we should
+            // If the activity was launched directly from the home screen, then we should
             // refrain from finishing the activity and instead move it to the back to keep it in
             // memory. The requirements for this are:
             //   1. The activity is the last running activity in the task.
             //   2. The current activity is the base activity for the task.
-            //   3. a. If the activity was launched by the home process, we trust that its intent
-            //         was resolved, so we check if the it is a main intent for the application.
-            //      b. Otherwise, we query Package Manager to verify whether the activity is a
-            //         launcher activity for the application.
+            //   3. The activity was launched by the home process, and is one of the main entry
+            //      points for the application.
             if (baseActivityIntent != null && isLastRunningActivity
-                    && ((launchedFromHome && ActivityRecord.isMainIntent(baseActivityIntent))
-                        || isLauncherActivity(baseActivityIntent.getComponent()))) {
+                    && launchedFromHome && ActivityRecord.isMainIntent(baseActivityIntent)) {
                 moveActivityTaskToBack(token, true /* nonRoot */);
                 return;
             }
@@ -1666,31 +1661,6 @@ class ActivityClientController extends IActivityClientController.Stub {
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
-    }
-
-    /**
-     * Queries PackageManager to see if the given activity is one of the main entry point for the
-     * application. This should not be called with the WM lock held.
-     */
-    @SuppressWarnings("unchecked")
-    private boolean isLauncherActivity(@NonNull ComponentName activity) {
-        final Intent queryIntent = new Intent(Intent.ACTION_MAIN);
-        queryIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        queryIntent.setPackage(activity.getPackageName());
-        try {
-            final ParceledListSlice<ResolveInfo> resolved =
-                    mService.getPackageManager().queryIntentActivities(
-                            queryIntent, null, 0, mContext.getUserId());
-            if (resolved == null) return false;
-            for (final ResolveInfo ri : resolved.getList()) {
-                if (ri.getComponentInfo().getComponentName().equals(activity)) {
-                    return true;
-                }
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to query intent activities", e);
-        }
-        return false;
     }
 
     @Override
